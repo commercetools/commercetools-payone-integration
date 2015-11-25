@@ -1,7 +1,7 @@
 # commercetools <-> PAYONE Integration Service
 
-This software provides an integration between the (commercetools eCommerce platform)[http://dev.sphere.io] API
-and the (PAYONE)[http://www.payone.de] payment service provider API. 
+This software provides an integration between the [commercetools eCommerce platform](http://dev.sphere.io) API
+and the [PAYONE](http://www.payone.de) payment service provider API. 
 
 It is a standalone Microservice that connects the two cloud platforms and provides own helper APIs to checkout
 implementations. 
