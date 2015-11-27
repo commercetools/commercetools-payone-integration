@@ -16,7 +16,14 @@ fooBar (add types, etc pp).
 
 ### Required Configuration in PAYONE
 
-fooBar
+https://pmi.pay1.de/
+
+ * create a Payment Portal of type "Shop" for the site you are planning (please also maintain separate portal for 
+   automated testing, demo systmes etc.)
+ * set the hashing algorithm to sha2-384  ("advanced" tab in the portal config)
+ * put the notification listener URL of where you will deploy the microservice into "Transaction Status URL" in the 
+   "advanced" tab of the portal
+ * configure the "riskcheck" settins as intended (esp. 3Dsecure)
 
 ### Configuration Options of the Integration itself
 
