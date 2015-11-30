@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <link href="../../concordion.css" rel="stylesheet" type="text/css" />
+        <title>Idempotence</title>
+    </head>
+    <body>
+        <h1>Idempotence</h1>
+        <p>
+            The integration service ensures idempotence.
+        </p>
+        <h2>Examples</h2>
+        <div class="example">
+            <h3>Handle already processed successful transaction</h3>
+            <p>
+                If a <span c:execute="#result = handleSuccessfulPayment()">GET /handle/{id}</span> is requested
+                for a Payment Object whose most recent transaction status is Success
+                then the response is <span c:assertEquals="#result.header">HTTP/1.1 204 No Content</span>
+                and <span c:assertTrue="#result.body.isEmpty()">the body is empty</span>.
+            </p>
+        </div>
+        <div class="example">
+            <h3>Handle already processed failed transaction</h3>
+            <p>
+                If a <span c:execute="#result = handleFailedPayment()">GET /handle/{id}</span> is requested
+                for a Payment Object whose most recent transaction status is Failure
+                then the response is <span c:assertEquals="#result.header">HTTP/1.1 200 OK</span>
+                and <span c:assertTrue="#result.body.isEmpty()">the body is empty</span>.
+            </p>
+        </div>
+    </body>
+</html>
