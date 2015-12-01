@@ -42,6 +42,11 @@ have in mind.  Then fork the project somewhere or in GitHub and create a pull re
 
 fooBar (target group are solution implementors using the integration)
 
+## Development Notes
+
+Please bear in mind that this repository should be free of any IDE specific files, configurations or code. Also, the use
+ of frameworks and libraries should be transparent and reasonable.
+
 ## Create a custom version
 
 Just fork it. The MIT License allows you to do anything with the code, commercially or noncommercial.
