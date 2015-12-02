@@ -41,9 +41,10 @@ project(":functionaltests") {
     }
 
     test {
-        systemProperties['concordion.output.dir'] = "$reporting.baseDir/spec"
-        systemProperties['CT_PROJECT_KEY'] = System.properties['CT_PROJECT_KEY']
-        systemProperties['CT_CLIENT_ID'] = System.properties['CT_CLIENT_ID']
-        systemProperties['CT_CLIENT_SECRET'] = System.properties['CT_CLIENT_SECRET']
+        systemProperty 'concordion.output.dir', "$reporting.baseDir/spec"
+
+        systemProperty 'CT_PROJECT_KEY', project.hasProperty('CT_PROJECT_KEY') ? CT_PROJECT_KEY : System.getenv('CT_PROJECT_KEY')
+        systemProperty 'CT_CLIENT_ID', project.hasProperty('CT_CLIENT_ID') ? CT_CLIENT_ID : System.getenv('CT_CLIENT_ID')
+        systemProperty 'CT_CLIENT_SECRET', project.hasProperty('CT_CLIENT_SECRET') ? CT_CLIENT_SECRET : System.getenv('CT_CLIENT_SECRET')
     }
 }
