@@ -8,7 +8,16 @@ and the [PAYONE](http://www.payone.de) payment service provider API.
 It is a standalone Microservice that connects the two cloud platforms and provides own helper APIs to checkout
 implementations. 
  
-(remove after public:) There is a chat room concerning all things here https://www.hipchat.com/gWjfePSzk 
+(remove after public:) 
+ * There is a chat room concerning all things here https://www.hipchat.com/gWjfePSzk
+ * Same for skype: https://join.skype.com/dc9D8GW9SFnp 
+ 
+## Resources
+ * commercetools API documentation at http://dev.commercetools.com
+ * commercetools JVM SDK Javadoc at http://sphereio.github.io/sphere-jvm-sdk/javadoc/master/index.html
+ * (maybe) commercetools general payment conventions https://github.com/nkuehn/payment-specs
+ * PAYONE API documentation https://pmi.pay1.de/merchants/?navi=downloads 
+ * The PSP integratins requirements and checkout protocol specification document (sent to you individually for now)
  
 ## Using the Integration in a project
 
