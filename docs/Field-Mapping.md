@@ -5,7 +5,7 @@
 See also: [Method keys convention](https://github.com/nkuehn/payment-integration-specifications/blob/master/Method-Keys.md)
  
 | CTP conventional key |  PAYONE `clearingtype` | Additional PAYONE parameter | common name |
-|---|---|---| 
+|---|---|---|---|
 | DIRECT_DEBIT_SEPA | `elv` |  | Lastschrift / Direct Debit |
 | CREDIT_CARD | `cc` |  | Credit Card |
 | BANK_TRANSFER-SOFORTUEBERWEISUNG | `sb` | `onlinebanktransfertype=PNT` |  Sofortbanking / Sofortüberweisung (DE) |
