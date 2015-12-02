@@ -44,6 +44,32 @@ fooBar
 
 fooBar docker and heroku options
 
+## Test environments
+
+SEE PAYONE DOCUMENTATION - ALL TEST DATA THERE, JUST PAYPAL REQUIRES AN OWN ACCOUNT
+
+### Paypal Sandbox Account
+
+TODO NK: call timo and clarify best practice (individual per developer accounts?) 
+
+https://developer.paypal.com/docs/classic/lifecycle/ug_sandbox/
+
+To test, you need to be logged in with the developer account and then use the Sandbox Buyer credentials in the checkout (see below). 
+
+Developer Acccount: create your own or use nikolaus.kuehn@commercetools.de  ( TODO password handling ) 
+
+Sandbox Merchant: nikolaus.kuehn+facilitator-1@commercetools.de
+
+ * Password: CT-test$
+ * API user: nikolaus.kuehn+facilitator-1_api1.commercetools.de 
+ * API password: J6JN4CNFGLGFFDDP
+ * API signature: ADKylXE-6VhPNHJJ24JEiclO9bIyAjsZlJJJbpv6DkQJ15W1XkKa3BqV
+
+Sanbox Buyer: nikolaus.kuehn+buyer-1@commercetools.de  
+ 
+ * Password: CT-test$
+ * (has no API access) 
+
 ## Contribute Improvements
 
 If you want to add a useful functionality or found a bug please open an issue here to announce and discuss what you
@@ -59,4 +85,3 @@ Please bear in mind that this repository should be free of any IDE specific file
 ## Create a custom version
 
 Just fork it. The MIT License allows you to do anything with the code, commercially or noncommercial.
- 
