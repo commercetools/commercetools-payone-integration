@@ -16,6 +16,9 @@ subprojects {
     }
 
     dependencies {
+        compile 'io.sphere.sdk.jvm:sphere-java-client:1.0.0-M22'
+        compile 'io.sphere.sdk.jvm:sphere-models:1.0.0-M22'
+
         testCompile 'junit:junit:4.12'
     }
 
@@ -39,5 +42,8 @@ project(":functionaltests") {
 
     test {
         systemProperties['concordion.output.dir'] = "$reporting.baseDir/spec"
+        systemProperties['ct.project.key'] = System.properties['ct.project.key']
+        systemProperties['ct.client.id'] = System.properties['ct.client.id']
+        systemProperties['ct.client.secret'] = System.properties['ct.client.secret']
     }
 }
