@@ -34,9 +34,9 @@ public class IdempotenceFixture {
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException {
-        String ctProjectKey = System.getProperty("ct.project.key");
-        String ctClientId = System.getProperty( "ct.client.id" );
-        String ctClientSecret = System.getProperty( "ct.client.secret" );
+        String ctProjectKey = System.getProperty("CT_PROJECT_KEY");
+        String ctClientId = System.getProperty( "CT_CLIENT_ID" );
+        String ctClientSecret = System.getProperty( "CT_CLIENT_SECRET" );
 
         SphereClientFactory factory = SphereClientFactory.of();
         client = factory.createClient(ctProjectKey, ctClientId, ctClientSecret);
