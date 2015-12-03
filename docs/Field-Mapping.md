@@ -168,7 +168,7 @@ It could remain in `Pending` for various reasons.
 | `Refund` | `Pending` | `refund` TODO when to use `debit`? |  |
 | `Chargeback` | - | - |  (not applicable, is just triggered from PAYONE to CT)  |
 
-### uppdating the CT Payment given a PAYONE TransactionStatus Notification
+### updating the CT Payment given a PAYONE TransactionStatus Notification
 
 See chapter 4.2.1 "List of events (txaction)" and the sample processes in the PAYONE documentation
 
@@ -176,18 +176,18 @@ See chapter 4.2.1 "List of events (txaction)" and the sample processes in the PA
 
 | PAYONE `txaction` | PAYONE `transaction_status` | PAYONE `notify_version` | CT `TransactionType` | CT `TransactionState` | Notes |
 |---|---|---|---|---|---|
-| `appointed` | `` | `` | `` | `` |  |
-| `capture` | `` | `` | `` | `` |  |
-| `paid` | `` | `` | `` | `` |  |
-| `underpaid` | `` | `` | `` | `` |  |
-| `cancelation` | `` | `` | `` | `` | TODO is that  |
-| `refund` | `` | `` | `` | `` |  |
-| `debit` | `` | `` | `` | `` |  |
-| `transfer` | `` | `` | `` | `` |  |
-| `reminder` | `` | `` | `` | `` |  |
-| `vauthorization` | `` | `` | `` | `` |  |
-| `vsettlement` | `` | `` | `` | `` |  |
-| `invoice` | `` | `` | `` | `` |  |
+| `appointed` |  |  |  |  |  |
+| `capture` |  |  |  |  |  |
+| `paid` |  |  |  |  |  |
+| `underpaid` |  |  |  |  |  |
+| `cancelation` |  |  |  |  | TODO is that  |
+| `refund` |  |  |  |  |  |
+| `debit` |  |  |  |  |  |
+| `transfer` |  |  |  |  |  |
+| `reminder` |  |  |  |  |  |
+| `vauthorization` |  |  |  |  |  |
+| `vsettlement` |  |  |  |  |  |
+| `invoice` |  |  |  |  |  |
 | `failed` | any | any | TODO all? charges? the one with the right sequence_number?  | `Failure` | (not fully implemented at PAYONE yet) |
 
 
