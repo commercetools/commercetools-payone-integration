@@ -1,7 +1,6 @@
 package com.commercetools.pspadapter.payone.domain.ctp;
 
 import com.commercetools.pspadapter.payone.ServiceConfig;
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import io.sphere.sdk.client.SphereClientFactory;
 
 /**
@@ -11,14 +10,11 @@ import io.sphere.sdk.client.SphereClientFactory;
 public class CommercetoolsClientFactory {
 
     public static CommercetoolsClient createClient(final ServiceConfig config) {
-       return createClient(config.getCtProjectKey(), config.getCtClientId(), config.getCtClientSecret());
+        final SphereClientFactory factory = SphereClientFactory.of();
+        return new CommercetoolsClient(factory.createClient(
+                config.getCtProjectKey(),
+                config.getCtClientId(),
+                config.getCtClientSecret()));
     }
 
-    public static CommercetoolsClient createClient(
-            final String projectKey,
-            final String clientId,
-            final String clientSecret) {
-        SphereClientFactory factory = SphereClientFactory.of();
-        return new CommercetoolsClient(factory.createClient(projectKey, clientId, clientSecret));
-    }
 }
