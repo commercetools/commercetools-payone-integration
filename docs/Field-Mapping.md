@@ -32,31 +32,12 @@ BillSAFE has been deprecated by PAYONE and is not supported.
 # API Data mapping
 
 ## TODO: ITEMS TO BE DISCUSSED
- * `reference` : should be the Order Number, but the respective field on the Order is not yet 
-    available during the checkout because the Cart is not yet an Order object.  Additional complexity
-    is that there can be multiple payment objects per order in CT. The issue at hand is that the 
-   * to stay generic, a serially increasing number should be generated and set on the payment object. 
-     The checkout implementation can then choose to take this as the Order Number or not. 
-   * same issue on the `invoiceid` passed to Klarna. Custom Field?  Can it be set later on? 
-   * solution 1: let CT add the `key` property to the Payment Object (which is planned anyways).
-   * solution 2: let CT add the `key` or a preliminary Order ID property to the Cart and Order
-   * solution 3: Use the truncated UUID of the payment object (if nothing else is configured) and store that in a 
-     custom field "reference"
-   * solution 4: generate a new Order Number and store that in a custom field "preliminaryOrderNumber"
- 
- * `userid` on the PAYONE side
- * `language`. Country is not enough. mapping? defaults per cart country?  It's a mandatory field for Klarna payments.
-   * same problem on the line item names. how to pick the right locale? 
- * `customermessage` of an error -> was discussed at CT to add to PaymentStatus and was discarded until needed.
- * `birthdate` and `vatid` : these fields are only available on the CT Customer and not on the Cart.
- * `gender`: there is no built-in equivalent on the CT customer, but it is required for Klarna etc.
-  * Generally concerning person data:  Fall back from the Cart data to the data stored in the customer account?  
-   May depend on the field. For Risk management stuff like Klarna every information is crucial, but the behavior
-   can also lead to errors (e.g. extra address lines).  Probably better do not do fallback. 
-  * to the checkout this means that Klarna etc. can not be used on guest checkouts? Not nice... 
-   * solution 1: allow to configure a custom field name.  On Cart or Customer? Or both with fallback? 
+
+With PAYONE:
+
+ *  same issue as with `reference` on the `invoiceid` passed to Klarna. Invoice ID is known only very late in the process.  
+ * `userid` on the PAYONE side.  Clarify role and meaning
  * `personalid` ->  What is the meaning of that field?  we won't store passport numbers or such. 
- * `ip` -> the IP address of the user is not stored in CT. -> will need a custom field? (required for Klarna)
  * `pr[n]` (line item unit price) is that a net or a gross price?
  * the CT discounted line item price can have rounding errors because it is actually calculated per individual 
    quantity. i.e. the total sum calculated by PAYONE can deviate from the amount passed for the payment.
@@ -72,24 +53,57 @@ BillSAFE has been deprecated by PAYONE and is not supported.
  * `xid`, `cavv`, `eci`  for 3dsecure???  what is this stuff?
   * `protect_result_avs`  TODO read what this is. 
 
-## TODO NK: FIELDS THAT NEED A STANDARD CUSTOM FIELD (in the payment-integration-specificatios repository)
- *  `narrative_text` :  this is the text on the account statements.  -> TODO custom field in the methods where it matters
- *  `redirecturl` : where to send the guy (should be multiple fields: method, URI, body)
- *  `invoiceappendix` (comment for all?) 
+With CT Product Management:
+
+ * `customermessage` of an error -> was discussed at CT to add to PaymentStatus and was discarded until needed. Is needed now. 
+
+## PAYONE fields that map to custom Payment fields
+
+ * All:
+   * _Required_ `reference` : should conventionally be the Order Number (assuming just one payment per Order). 
+     The OrderNumber is only available on the CT Order, but not the CT Cart.
+     Issue at hand: Checkout Implementations vary in respect to whether the Cart is converted into an Order before or after the Order is placed. 
+     Proposed behavior:     
+     1. check if the Order is there and has an Order Number. Take that as reference.
+     1. If note: Create an Order Number and store it into a custom field `reserved_order_number` in the Payment object. 
+        An Integration Configuration determines the Custom _Object_ container and ID from which to get the next Order ID. 
+        The Checkout implementation that creates Payment before Order then needs to assure that the Order ID
+        is taken from the Payment Object if the Order is created after the Payment. 
+   *  `narrative_text` :  this is the text on the account statements.  -> TODO custom field in the methods where it matters
+   *  `language` / locale
+   *  `redirecturl` : where to send the guy (should be multiple fields: method, URI, body) -> 
+   *  `invoiceappendix` (comment for all?)  -> 
  *  SEPA:
-  * `bankaccountholder`
-  * `iban`
-  * `mandate_identification`
-  * `mandate_dateofsignature`
+  * `bankaccountholder` -> 
+  * `iban` -> 
+  * `mandate_identification` -> 
+  * `mandate_dateofsignature` -> 
  * online transfer:
-  * `bankgrouptype` (eps & ideal)
+  * `bankgrouptype` (eps & ideal) -> 
  * Credit Card:
-  * `pseudocardpan`
-  * `ecommercemode` ("internet" or "3dsecure")
+  * `pseudocardpan` -> 
+  * `ecommercemode` ("internet" or "3dsecure") -> 
+   
+## Fields not natively defined in CT, covered by custom Fields on Cart, Customer and Order
+
+ * _Optional_ `customermessage`: Check for a custom Field `description` of type `LocalizedString` on the Cart / Order.
+   Use the `locale` set on the Payment to pick the right value. 
+ 
+The following are required only for Installment-Type Payment Methods (mainly Klarna): 
+ 
+ * `birthdate` and `vatid` : these fields are only available on the CT Customer and not on the Cart. I.e. Guest checkouts
+   cannot do some payment methods.
+   * If the fields `dateOfBirth` (type Date) and `vatId` (type String) respectively are set as custom object on the 
+     Cart / Order and have the right type they are used and take precedence over the Fields on the Customer Object
+ * `gender`: Check the Cart for a custom field `customerGender`, as fallback check the Customer for a custom field 
+    named `gender`. If the first existing is of Type `Enum` and has a value `Male` or `Female` -> use that one as `f` or `m` respectively.  
+ * `ip`: Check for a custom Field `customerIPAddress` of type `String` on the Cart / Order. 
+ 
    
 ## unused PAYONE fields
- *  `clearing_*`  prepaid, cash on delivery etc  -> necessary at all? just in an interaction? 
- *  `creditor_*`  just for debug? 
+
+ * `clearing_*`  prepaid, cash on delivery etc  -> necessary at all? just in an interaction? 
+ * `creditor_*`  just for debug? 
  * `bankcountry`, `bankaccount`, `bankcode`, `bic` (all replaced by the IBAN, which is preferable because it has a checksum)
  
 ## commercetools Payment resource
@@ -147,7 +161,7 @@ It could remain in `Pending` for various reasons.
 `interfaceId`  and `timestamp` of the Transaction can be used to manage idempotency if a persistent field is necessary. 
  
 | CT `TransactionType` | CT `TransactionState` | PAYONE `request` | Notes |
-|---|---|---|
+|---|---|---|---|
 | `Authorization` | `Pending` | `preauthorization` |  |
 | `CancelAuthorization` | `Pending` | TODO how to do that?  |  |
 | `Charge` | `Pending` | if an `Authorization` Transaction exists: `capture`; otherwise: `authorization`  |  |
@@ -161,7 +175,7 @@ See chapter 4.2.1 "List of events (txaction)" and the sample processes in the PA
 * TODO define how to find the right transaction.  `sequence_number`? 
 
 | PAYONE `txaction` | PAYONE `transaction_status` | PAYONE `notify_version` | CT `TransactionType` | CT `TransactionState` | Notes |
-|---|---|---|---|---|
+|---|---|---|---|---|---|
 | `appointed` | `` | `` | `` | `` |  |
 | `capture` | `` | `` | `` | `` |  |
 | `paid` | `` | `` | `` | `` |  |
@@ -177,19 +191,13 @@ See chapter 4.2.1 "List of events (txaction)" and the sample processes in the PA
 | `failed` | any | any | TODO all? charges? the one with the right sequence_number?  | `Failure` | (not fully implemented at PAYONE yet) |
 
 
-OLD STUFF TO BE TRANSFERED:
-
-| CT transaction state | PAYONE equivalent | Notes |
-|---|---|---|
-| Success | notify_version=(7.4|7.5) AND transaction_status=(completed,capture) ; txaction=paid |  |
-| Failure | notify_version=7.5 AND txaction=failed ; txaction=cancelation  |  |
-
-
-
 ## commercetools Cart and Order object (mapping to payment interface on payment creation)
 
 * [CT Order documentation](http://dev.sphere.io/http-api-projects-orders.html#order)
 * [CT Cart documentation](http://dev.sphere.io/http-api-projects-carts.html#cart)
+
+TODO (important!): 
+ * Migrate to new totals and discounted price fields (divide line item total by quantity to get best guess per qty price)
 
 | CT Cart or Order JSON path | PAYONE Server API | who is Master?  | Value transform |
 |---|---|---|---|
@@ -277,7 +285,7 @@ OLD STUFF TO BE TRANSFERED:
 
 ## Payment Method specific fields of the payment object
 
-Please take the commercetools custom payment types (per method) from the [method type specifications](https://github.com/nkuehn/payment-integration-specifications/blob/master/Method-Keys.md) in the payment specifications project. 
+Please use the commercetools custom payment types (per method) from the [method type specifications](https://github.com/nkuehn/payment-integration-specifications/blob/master/Method-Keys.md) in the payment specifications project. 
 
 ### CREDIT_CARD
 
