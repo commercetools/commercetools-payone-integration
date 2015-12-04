@@ -175,19 +175,23 @@ See chapter 4.2.1 "List of events (txaction)" and the sample processes in the PA
 
 * TODO define how to find the right transaction.  `sequence_number`? 
 
+[FH] PAYONE docu says that "you will receive the data and the status for each payment process". So maybe this table should incooperate also the CT PaymentState?
+[FH] transaction_status seems to be only available with txaction "appointed" for now
+
 | PAYONE `txaction` | PAYONE `transaction_status` | PAYONE `notify_version` | CT `TransactionType` | CT `TransactionState` | Notes |
 |---|---|---|---|---|---|
-| `appointed` |  |  |  |  |  |
+| `appointed` | pending |  |  |  |  |
+| `appointed` | completed |  |  |  |  |
 | `capture` |  |  |  |  |  |
 | `paid` |  |  |  |  |  |
 | `underpaid` |  |  |  |  |  |
 | `cancelation` |  |  |  |  | TODO is that  |
 | `refund` |  |  |  |  |  |
 | `debit` |  |  |  |  |  |
-| `transfer` |  |  |  |  |  |
-| `reminder` |  |  |  |  |  |
-| `vauthorization` |  |  |  |  |  |
-| `vsettlement` |  |  |  |  |  |
+| `transfer` |  |  |  |  | Transfer like in "switch"/"move to" another bank account |
+| `reminder` |  |  |  |  | status of dunning procedure, must be activated by PAYONE |
+| `vauthorization` |  |  |  |  | only available with PAYONE Billing module, must be activated |
+| `vsettlement` |  |  |  |  | only available with PAYONE Billing module, must be activated |
 | `invoice` |  |  |  |  |  |
 | `failed` | any | any | TODO all? charges? the one with the right sequence_number?  | `Failure` | (not fully implemented at PAYONE yet) |
 
