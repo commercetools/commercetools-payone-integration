@@ -55,7 +55,6 @@ public class ServiceSchedulingFixture {
         String ctProjectKey = System.getProperty("CT_PROJECT_KEY");
         String ctClientId = System.getProperty( "CT_CLIENT_ID" );
         String ctClientSecret = System.getProperty( "CT_CLIENT_SECRET" );
-        String cronNotation = System.getProperty("CRON_NOTATION");
 
         SphereClientFactory factory = SphereClientFactory.of();
         client = factory.createClient(ctProjectKey, ctClientId, ctClientSecret);
@@ -75,11 +74,6 @@ public class ServiceSchedulingFixture {
         PaymentCreateCommand paymentCreateCommand = PaymentCreateCommand.of(paymentDraft);
         final CompletionStage<Payment> payment = client.execute(paymentCreateCommand);
         p = payment.toCompletableFuture().get();
-
-        scheduler = ScheduledJobFactory.createScheduledJob(
-                CronScheduleBuilder.cronSchedule(cronNotation),
-                IntegrationService.class,
-                SCHEDULED_JOB_KEY);
     }
 
     @After
@@ -89,10 +83,17 @@ public class ServiceSchedulingFixture {
 
     public boolean checkCronConfiguration(String cronNotation) throws SchedulerException {
         assertThat(System.getProperty("CRON_NOTATION"), is(cronNotation));
+
+        scheduler = ScheduledJobFactory.createScheduledJob(
+                CronScheduleBuilder.cronSchedule(cronNotation),
+                IntegrationService.class,
+                SCHEDULED_JOB_KEY);
         TriggerKey triggerKey = new TriggerKey(SCHEDULED_JOB_KEY);
         assertThat(scheduler.getTriggerState(triggerKey), is(Trigger.TriggerState.NORMAL));
 
         assertThat(((CronTrigger)scheduler.getTrigger(triggerKey)).getCronExpression(), is(cronNotation));
+
+        scheduler.shutdown();
         return true;
     }
 
