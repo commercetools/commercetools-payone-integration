@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link href="../../concordion.css" rel="stylesheet" type="text/css" />
+    <title>Service Scheduling</title>
+</head>
+<body>
+<h1>Service Scheduling</h1>
+<p>
+    The integration service is able to poll the commercetools api for specific messages in a certain interval. This
+    ensures that pending transactions are processed without explicitly triggering it by HTTP API call.
+</p>
+<h2>Examples</h2>
+    <div class="example">
+        <h3>Scheduled poll for messages followed by API call</h3>
+        <p>
+            If the service configuration contains the following cron notation
+            <span c:set="#cronNotation">0/5 * * * * ?</span>
+            the integration service will setup a scheduled job to run
+            <span c:assertTrue="checkCronConfiguration(#cronNotation)">every 5 seconds</span>, querying for pending transactions and
+            processing them.
+            After the scheduled job ran once, a request to
+            <span c:execute="#result = sendHandleRequest()">GET /handle/{id}</span> gives a response with
+            <span c:assertEquals="#result.header">HTTP/1.1 204 No Content</span>
+            and <span c:assertTrue="#result.hasEmptyBody()">an empty body</span>, meaning all pending
+            transactions were already processed for this payment.
+        </p>
+    </div>
+
+    <div class="example">
+        <h3>Scheduled poll for messages intercepted by API call</h3>
+        <p>
+            If the service configuration contains the following cron notation
+            <span c:set="#cronNotation">0/5 * * * * ?</span>
+            the integration service will setup a scheduled job to run
+            <span c:assertTrue="checkCronConfiguration(#cronNotation)">every 5 seconds</span>, querying for pending transactions and
+            processing them. If a request to
+            <span c:execute="#result = sendHandleRequest()">GET /handle/{id}</span> is sent during job execution,
+            the response is
+            <span c:assertEquals="#result.header">HTTP/1.1 204 No Content</span>
+            with <span c:assertTrue="#result.hasEmptyBody()">an empty body</span>, meaning the processing of the payment is ongoing.
+        </p>
+    </div>
+</body>
+</html>

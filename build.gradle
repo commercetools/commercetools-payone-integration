@@ -32,6 +32,7 @@ task wrapper(type: Wrapper) {
 project(":service") {
     dependencies {
         compile 'com.sparkjava:spark-core:2.3'
+        compile 'org.quartz-scheduler:quartz:2.2.2'
 
         testCompile 'org.mockito:mockito-core:1.10.19'
         testCompile 'org.hamcrest:hamcrest-core:1.3'
@@ -43,6 +44,9 @@ project(":functionaltests") {
     dependencies {
         compile project(":service")
         testCompile 'org.concordion:concordion:1.5.1'
+
+        testCompile 'org.hamcrest:hamcrest-core:1.3'
+        testCompile 'org.hamcrest:hamcrest-library:1.3'
     }
 
     test {
@@ -51,5 +55,6 @@ project(":functionaltests") {
         systemProperty 'CT_PROJECT_KEY', project.hasProperty('CT_PROJECT_KEY') ? CT_PROJECT_KEY : System.getenv('CT_PROJECT_KEY')
         systemProperty 'CT_CLIENT_ID', project.hasProperty('CT_CLIENT_ID') ? CT_CLIENT_ID : System.getenv('CT_CLIENT_ID')
         systemProperty 'CT_CLIENT_SECRET', project.hasProperty('CT_CLIENT_SECRET') ? CT_CLIENT_SECRET : System.getenv('CT_CLIENT_SECRET')
+        systemProperty 'CRON_NOTATION', project.hasProperty('CRON_NOTATION') ? CRON_NOTATION : System.getenv('CRON_NOTATION')
     }
 }

@@ -2,6 +2,7 @@ package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import io.sphere.sdk.client.SphereClientFactory;
+import org.quartz.SchedulerException;
 
 /**
  * @author fhaertig
@@ -9,8 +10,7 @@ import io.sphere.sdk.client.SphereClientFactory;
  */
 public class ServiceFactory {
 
-    public static void main(String [] args) {
-
+    public static void main(String [] args) throws SchedulerException {
     }
 
     public static IntegrationService createService(final ServiceConfig config) {
