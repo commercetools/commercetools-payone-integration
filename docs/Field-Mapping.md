@@ -38,7 +38,8 @@ With PAYONE:
  *  same issue as with `reference` on the `invoiceid` passed to Klarna. Invoice ID is known only very late in the process.  
  * `userid` on the PAYONE side.  Clarify role and meaning
  * `personalid` ->  What is the meaning of that field?  we won't store passport numbers or such. 
- * `pr[n]` (line item unit price) is that a net or a gross price?
+ * `ip` -> the IP address of the user is not stored in CT. -> will need a custom field? (required for Klarna)
+ * `pr[n]` (line item unit price) is that a net or a gross price? -> [FH] since payone will only print this on the invoice, it seems indifferent.
  * the CT discounted line item price can have rounding errors because it is actually calculated per individual 
    quantity. i.e. the total sum calculated by PAYONE can deviate from the amount passed for the payment.
  *`sd[n]` "delivery date"  and `ed[n]` delivery end date fields: What is their meaning? 
@@ -49,7 +50,7 @@ With PAYONE:
  * How to set `capturemode` -> NK discuss internally how to find out that a capture is the last delivery.
    * e.g. IF the sum of Charge transaction amounts incl. the now to do Charge equals amountPlanned, THEN it's the last? 
    * (allowed values: completed / notcompleted ). Mandatory just with Billsafe & Klarna. 
- * What is the `bankbranchcode` and the ` bankcheckdigit` ?
+ * What is the `bankbranchcode` and the ` bankcheckdigit` ? -> [FH] branch code is part of the bank identifier code, differs in length e.g. in France, Greece...
  * `xid`, `cavv`, `eci`  for 3dsecure???  what is this stuff?
   * `protect_result_avs`  TODO read what this is. 
 
