@@ -82,7 +82,7 @@ public class ServiceSchedulingFixture {
         client.execute(PaymentDeleteCommand.of(p));
     }
 
-    public JobResult checkJobScheduling(String cronNotation) throws SchedulerException {
+    public JobResult checkJobScheduling(String cronNotation) throws SchedulerException, InterruptedException {
         scheduler = ScheduledJobFactory.createScheduledJob(
                 CronScheduleBuilder.cronSchedule(cronNotation),
                 integrationService,
@@ -91,6 +91,7 @@ public class ServiceSchedulingFixture {
 
         JobResult result = new JobResult(scheduler.getTriggerState(triggerKey).name(),
                             ((CronTrigger)scheduler.getTrigger(triggerKey)).getCronExpression());
+        Thread.sleep(2000);
         scheduler.shutdown();
         return result;
     }

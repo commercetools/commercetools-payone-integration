@@ -1,13 +1,14 @@
 package com.commercetools.pspadapter.payone;
 
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsApiException;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
+import io.sphere.sdk.orders.Order;
+import io.sphere.sdk.orders.queries.OrderByIdGet;
 import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.queries.QueryPredicate;
 
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
@@ -24,8 +25,8 @@ public class PaymentQueryExecutor {
         this.client = client;
     }
 
-    public Collection<Payment> getPaymentsSince(ZonedDateTime sinceDate) {
-        QueryPredicate<Payment> predicateFunction = QueryPredicate.of("createdAt >= \"" + sinceDate.toString() + "\"");
+    public Collection<Payment> getPaymentsWithTransactionState(TransactionState transactionState) {
+        QueryPredicate<Payment> predicateFunction = QueryPredicate.of("transactions(state = \"" + transactionState.toSphereName() +"\")");
         PaymentQuery query = PaymentQuery.of().withPredicates(Arrays.asList(predicateFunction));
 
         try {
@@ -33,7 +34,17 @@ public class PaymentQueryExecutor {
             return queryResult.getResults();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
-        } catch (CommercetoolsApiException e) {
+        }
+        return null;
+    }
+
+    public Order getOrderById(String id) {
+        OrderByIdGet query = OrderByIdGet.of(id);
+
+        try {
+            Order queryResult = client.execute(query).toCompletableFuture().get();
+            return queryResult;
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         return null;

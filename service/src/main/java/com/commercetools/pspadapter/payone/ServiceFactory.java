@@ -14,11 +14,12 @@ public class ServiceFactory {
     }
 
     public static IntegrationService createService(final ServiceConfig config) {
-        final SphereClientFactory factory = SphereClientFactory.of();
-        CommercetoolsClient client = new CommercetoolsClient(factory.createClient(
-                config.getCtProjectKey(),
-                config.getCtClientId(),
-                config.getCtClientSecret()));
+        final SphereClientFactory sphereClientFactory = SphereClientFactory.of();
+        CommercetoolsClient client = new CommercetoolsClient(
+                sphereClientFactory.createClient(
+                    config.getCtProjectKey(),
+                    config.getCtClientId(),
+                    config.getCtClientSecret()));
         return new IntegrationService(new PaymentQueryExecutor(client));
     }
 }

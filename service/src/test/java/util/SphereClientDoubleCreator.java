@@ -24,4 +24,17 @@ public class SphereClientDoubleCreator {
             return result;
         });
     }
+
+    public static SphereClient getSphereClientWithOrderRoute(final Function<HttpRequestIntent, Object> responseFunction) {
+        return SphereClientFactory.createObjectTestDouble(httpRequest -> {
+            final Object result;
+            if (httpRequest.getPath().startsWith("/orders")) {
+                result = responseFunction.apply(httpRequest);
+            } else {
+                //here you can put if else blocks for further preconfigured responses
+                throw new UnsupportedOperationException("I'm not prepared for this request: " + httpRequest);
+            }
+            return result;
+        });
+    }
 }

@@ -1,11 +1,10 @@
 package com.commercetools.pspadapter.payone;
 
+import io.sphere.sdk.payments.TransactionState;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
-import java.time.ZonedDateTime;
 
 /**
  * @author fhaertig
@@ -20,6 +19,6 @@ public class ScheduledJob implements Job {
         JobDataMap dataMap = context.getMergedJobDataMap();
         IntegrationService service = (IntegrationService) dataMap.get(SERVICE_KEY);
 
-        service.getPaymentQueryExecutor().getPaymentsSince(ZonedDateTime.now());
+        service.getPaymentQueryExecutor().getPaymentsWithTransactionState(TransactionState.PENDING);
     }
 }

@@ -17,12 +17,8 @@ public class CommercetoolsClient {
         this.sphereClient = client;
     }
 
-    public <T> CompletionStage<T> execute(SphereRequest<T> sphereRequest) throws CommercetoolsApiException {
-        try {
-            return sphereClient.execute(sphereRequest);
-        } catch (Exception ex) {
-            throw new CommercetoolsApiException(ex);
-        }
+    public <T> CompletionStage<T> execute(SphereRequest<T> sphereRequest) {
+        return sphereClient.execute(sphereRequest);
     }
 
 }
