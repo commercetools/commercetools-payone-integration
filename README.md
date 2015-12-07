@@ -36,6 +36,8 @@ https://pmi.pay1.de/
    "advanced" tab of the portal
  * configure the "riskcheck" settins as intended (esp. 3Dsecure)
 
+-> DO NOT USE A MERCHANT ACCOUNT ACROSS commercetools projects, you may end up mixing customer accounts (debitorenkonten). 
+
 ### Configuration Options of the Integration itself
 
 fooBar
