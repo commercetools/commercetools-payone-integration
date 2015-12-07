@@ -1,8 +1,8 @@
 package com.commercetools.pspadapter.payone;
 
 import org.quartz.CronScheduleBuilder;
-import org.quartz.Job;
 import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
@@ -17,17 +17,23 @@ public class ScheduledJobFactory {
 
     public static Scheduler createScheduledJob(
             final CronScheduleBuilder cronScheduleBuilder,
-            final Class<? extends Job> job,
+            final IntegrationService integrationService,
             final String jobKey) throws SchedulerException {
+
+        JobDataMap dataMap = new JobDataMap();
+        dataMap.put(ScheduledJob.SERVICE_KEY, integrationService);
+        Scheduler scheduler = new StdSchedulerFactory().getScheduler();
         Trigger trigger = TriggerBuilder
                 .newTrigger()
                 .withIdentity(jobKey)
                 .withSchedule(cronScheduleBuilder)
+                .forJob(JobBuilder.newJob(ScheduledJob.class).build())
+                .usingJobData(dataMap)
                 .build();
 
-        Scheduler scheduler = new StdSchedulerFactory().getScheduler();
+
         scheduler.start();
-        scheduler.scheduleJob(JobBuilder.newJob(job).build(), trigger);
+        scheduler.scheduleJob(trigger);
         return scheduler;
     }
 }

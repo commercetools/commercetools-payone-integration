@@ -6,8 +6,8 @@ import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.queries.QueryPredicate;
-import org.joda.time.DateTime;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
@@ -24,7 +24,7 @@ public class PaymentQueryExecutor {
         this.client = client;
     }
 
-    public Collection<Payment> getPaymentsSince(DateTime sinceDate) {
+    public Collection<Payment> getPaymentsSince(ZonedDateTime sinceDate) {
         QueryPredicate<Payment> predicateFunction = QueryPredicate.of("createdAt >= \"" + sinceDate.toString() + "\"");
         PaymentQuery query = PaymentQuery.of().withPredicates(Arrays.asList(predicateFunction));
 
