@@ -35,43 +35,29 @@ BillSAFE has been deprecated by PAYONE and is not supported.
 
 With PAYONE:
 
- *  same issue as with `reference` on the `invoiceid` passed to Klarna. Invoice ID is known only very late in the process.  
- * `userid` on the PAYONE side.  Clarify role and meaning
- * `personalid` ->  What is the meaning of that field?  we won't store passport numbers or such. -> mandatory for 
-     credit rating in klarna in the nordics.  -> optional custom field.   
-  * `ip` -> the IP address of the user is not stored in CT. -> will need a custom field? (required for Klarna)
- * `pr[n]` (line item unit price) is that a net or a gross price? -> IT IS GROSS. 
- * the CT discounted line item price can have rounding errors because it is actually calculated per individual 
-   quantity. i.e. the total sum calculated by PAYONE can deviate from the amount passed for the payment.
-   PROBLEM: the request will be completely denied if the totals don't sum up.  
-      -> we should check before sending the request?  TODO NK specify best solution. 
-      -> required in Klarna & Billsafe. And if the merchant uses the invoicing feature.  -> make configurable? 
+ * if a difference between the payment total and the line item totals occurs, Is it OK to just not set the price of the 
+   line items or will that lead to a rejection from PAYONE? Background can be partial payments (e.g. a part paid with 
+   a voucher) or the infamous absolute discount rounding issue. 
  *`sd[n]` "delivery date"  and `ed[n]` delivery end date fields: What is their meaning? 
- * How to determine the `sequence_number` -> just the index of our transactions? all transactions or
-    just specific ones? (authorize = 0, charges and refunds counting 1+ , TODO chargeback?  TODO what happens if the sequence has a gap?
-   * is the `sequence_number` 1:1 our `transaction.interfaceId`? 
-   * Required only from the second capture on!  -> just count Charges in the transactions array? 
-   * Authorization (preauth) : ist immer der erste, daher sequence_number = transaction.interfaceId = 0
-   * alle folgenden sind die sequence_number von PAYONE, TODO schon vor notification "raten"? 
-   * -> sequence_number bekommen wir erst mit dem notification call. 
+ * sequencenumber` / idempotenz von transaktionen. 
+   * ist die sequencenumber bei direkter authorization (CT charge) 0 oder 1? 
    * bei capture kann man die sequence_number übergeben, das ist dann implizit indempotenz. 
-   * TODO was bei authorization / direktem charge. 
+ * Wie übersetzen wir price, receivable, balance in  amountPlanned, amountAuthorized, amountPaid
  * How to set `capturemode` -> NK discuss internally how to find out that a capture is the last delivery.
    * e.g. IF the sum of Charge transaction amounts incl. the now to do Charge equals amountPlanned, THEN it's the last? 
    * (allowed values: completed / notcompleted ). Mandatory just with Billsafe & Klarna.  -> 
- * What is the `bankbranchcode` and the ` bankcheckdigit` ? -> [FH] branch code is part of the bank identifier code, differs in length e.g. in France, Greece...
- * `xid`, `cavv`, `eci`  for 3dsecure???  what is this stuff? -->  brauchen wir nicht.  3dsecure abwicklung läuft über redirect. 
-  * `protect_result_avs`  TODO read what this is. 
-
-clarified TODO integrate:
- * `clearing_*`  prepaid, cash on delivery etc  -> necessary at all? just in an interaction? 
-   * this is the bank data the buyer has to be shown in prepayment and invoice methods. it can be a payone or the
-      merchant's acount. 
+ * What is the `bankbranchcode` and the ` bankcheckdigit` ? 
+   * -> [FH] branch code is part of the bank identifier code, differs in length e.g. in France, Greece...
+ * `protect_result_avs`  TODO read what this is. 
 
 
 With CT Product Management:
 
- * `customermessage` of an error -> was discussed at CT to add to PaymentStatus and was discarded until needed. Is needed now. 
+ * `customermessage` of an error -> was discussed at CT to add to PaymentStatus and was discarded until needed. Is needed now.
+ * How to represent due amounts that are higher (or lower) than the initial amountPlanned?  (due to dunning and chargeback fees). 
+ * The definiton of the amountAuthorized field is unclear: Is it the amount that is remaining (not yet charged) from the auth
+   or is it just the sum of all successful authorizations? 
+ * Give a precise reasoning why payment changes should be processed through messages instead of querying for the transactionState. 
 
 ## PAYONE fields that map to custom CT Payment fields
 
@@ -113,7 +99,12 @@ All payment methods:
   * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment  
  
  `INVOICE`*:
-   * invoice ID (master in PAYONE). Not passed from CT to PAYONE. 
+   * `invoiceid`  invoice ID (master in PAYONE).  PAYONE is master if invoice created by them.  For Klarna etc. CT data are master. 
+   * `clearing_*` stuff -> written back from PAYONE.  Field names should be analogous to DIREC_DEBIT Bank data. 
+
+ `INVOICE_KLARNA` (lots of mandatory risk management fields)
+   * `personalid` -> Personal ID Nr.  Mandatory for Klarna if customers billing address is in certain nordics countries.     
+   * `ip` -> the IP address of the user is not stored in CT. -> will need a custom field? (required for Klarna)
 
  Wallets:
   * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment     
@@ -122,8 +113,8 @@ All payment methods:
 
  * _Optional_ `customermessage`: Check for a custom Field `description` of type `LocalizedString` on the Cart / Order.
    Use the `locale` set on the Payment to pick the right value. 
- * _Optional_ `userid`: passed back from PAYONE as identification of the debtor account Nr.  If the CT Customer Object has a custome
-    field named `payoneDebtorId` of type String, write the `userid` value into that field. 
+ * _Optional_ `userid`: passed back from PAYONE as identification of the debtor account Nr.  If the CT Customer Object has a custom
+    field named `payoneUserId` of type String, write the `userid` value into that field. 
   
 The following are required only for Installment-Type Payment Methods (mainly Klarna): 
  
@@ -140,6 +131,8 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
 
  * `creditor_*`  just for debug? 
  * `bankcountry`, `bankaccount`, `bankcode`, `bic` (all replaced by the IBAN, which is preferable because it has a checksum)
+ * `xid`, `cavv`, `eci` (3Dsecure is done via redirect only)   
+
  
 ## commercetools Payment resource
 
@@ -155,24 +148,25 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
 | customer.obj.dateOfBirth | `birthday` | CT | transform from ISO 8601 format (`YYYY-MM-DD`) to `YYYYMMDD`, i.e. remove the dashes |
 | externalId | (unused, is intended for merchant-internal systems like ERP) | CT |  |
 | interfaceId | `txid` | PAYONE |  |
-| amountPlanned.centAmount | amount | CT | none |
-| amountPlanned.currency | currency | CT | none |
-| amountAuthorized |  |  |  |
-| authorizedUntil |  |  |  |
-| amountPaid |  |  |  |
-| amountRefunded |  |  |  |
-| paymentMethodInfo.paymentInterface |  |  |  |
-| paymentMethodInfo.method |  |  |  |
-| paymentMethodInfo.name.{locale} |  |  |  |
-| paymentStatus.interfaceCode | `errorcode` OR XXX |  |  |
-| paymentStatus.interfaceText | `errormessage` |  |  |
-| paymentStatus.state |  |  |  |
-| transactions\[\*\].id |  |  |  |
-| transactions\[\*\].timestamp |  |  |  |
-| transactions\[\*\].type |  |  | (see below for transaction types)  |
-| transactions\[\*\].amount |  |  |  |
-| transactions\[\*\].interactionId |  |  |  |
-| transactions\[\*\].state |  |  | (see below for transaction states) |
+| amountPlanned.centAmount | `price` | CT / PAYONE | Initially set by checkout, `price` from PAYONE notification must not deviate on Notifications. PAYONE value has to be multiplied by 100.  |
+| amountPlanned.currency | - | CT |  |
+| amountAuthorized.centAmount | TODO | PAYONE | TODO ask PAYONE  |
+| authorizedUntil | TODO | PAYONE |  |
+| amountPaid.centAmount | `receivable` minus `balance` | PAYONE | TODO verify with PAYONE |
+| amountRefunded.centAmount | (from transactions) | PAYONE | (Sum of successful Refund Transactions) |
+| paymentMethodInfo.paymentInterface | - | CT | Must be "PAYONE" in CT, otherwise do not handle the Payment at all |
+| paymentMethodInfo.method | - | CT | (see the method mapping table above) |
+| paymentMethodInfo.name.{locale} | - | - | (not passed, project specific content) |
+| paymentStatus.interfaceCode | `errorcode` OR TODO | PAYONE | none |
+| paymentStatus.interfaceText | `errormessage` | PAYONE | none |
+| paymentStatus.state | - | - | (mapping from interfaceCode and transaction states to the Payment State Machine is project specific) |
+| transactions\[\*\].id | - | CT (cannot be changed) |  |
+| transactions\[\*\].timestamp | `txtime` | PAYONE | (from status notification) |
+| transactions\[\*\].type |  |  | (see below for transaction types) |
+| transactions\[\*\].amount.centAmount | `amount` | CT | none |
+| transactions\[\*\].amount.currency | `currency` | CT | none, but must not deviate from amountPlanned.centAmount |
+| transactions\[\*\].interactionId | `sequencenumber` | CT / PAYONE (must be in sync)  | There can be only one CT Authorization transaction. This must be the first and gets the sequencenumber 0. All following Charge, CancelAuthorization and Refund transactions count up from 1. TODO clarify Chargeback. TODO define Role in idempotency. TODO direct authorization is 0 or 1?  |
+| transactions\[\*\].state | - | - | (see below for transaction states) |
 
 See below for the custom fields. 
 
@@ -263,13 +257,11 @@ TODO (important!):
 | lineItems\[\*\].quantity | `no[n]` | CT | fail hard if 3 chars length is exceeded |
 | lineItems\[\*\].variant.id |  |  |  |
 | lineItems\[\*\].variant.sku | `id[n]` | CT | truncate at 32 chars and warn |
-| lineItems\[\*\].price.value.currencyCode |  |  |  |
-| lineItems\[\*\].price.value.centAmount | `pr[n]` | CT | overridden by .discountedPrice if that is set. Add VAT if .taxRate.includedInPrice=false . Fail hard if 8 chars length is exceeded. |
-| lineItems\[\*\].price.discountedPrice.value.currencyCode |  |  |  |
-| lineItems\[\*\].price.discountedPrice.value.centAmount | `pr[n]` | CT | if set, overrides .price.value.centAmount. Add VAT if .taxRate.includedInPrice=false |
+| lineItems\[\*\].totalPrice.value.currencyCode |  |  |  |
+| lineItems\[\*\].totalPrice.value.centAmount | `pr[n]` | CT | a) Divide this by .quantity to get the effective price per Line Item quantity. b) Round commercially to full cents. c) Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. e) Do not set `pr[n]` at all if the overall sum of `pr[n]` times `no[n]` does not equal the total of the payment. |
 | lineItems\[\*\].taxRate.name |  |  |  |
 | lineItems\[\*\].taxRate.amount | `va[n]` | CT | .amount is a float between zero and one. It has to be multiplied with 1000 and rounded to full integer to get base % points.|
-| lineItems\[\*\].taxRate.includedInPrice |  |  | (required for price field, see above)  |
+| lineItems\[\*\].taxRate.includedInPrice |  |  | (required for calculating the price, see above)  |
 | customLineItems\[\*\].id |  |  |  |
 | customLineItems\[\*\].name.{locale} |  |  |  |
 | customLineItems\[\*\].quantity |  |  |  |
