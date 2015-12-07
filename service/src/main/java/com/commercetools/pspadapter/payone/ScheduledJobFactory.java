@@ -27,13 +27,12 @@ public class ScheduledJobFactory {
                 .newTrigger()
                 .withIdentity(jobKey)
                 .withSchedule(cronScheduleBuilder)
-                .forJob(JobBuilder.newJob(ScheduledJob.class).build())
                 .usingJobData(dataMap)
                 .build();
 
 
         scheduler.start();
-        scheduler.scheduleJob(trigger);
+        scheduler.scheduleJob(JobBuilder.newJob(ScheduledJob.class).build(), trigger);
         return scheduler;
     }
 }
