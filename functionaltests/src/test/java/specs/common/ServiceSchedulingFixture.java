@@ -28,6 +28,7 @@ import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
 
 import javax.money.MonetaryAmount;
+import java.net.MalformedURLException;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +51,7 @@ public class ServiceSchedulingFixture {
     private IntegrationService integrationService;
 
     @Before
-    public void setUp() throws ExecutionException, InterruptedException, SchedulerException {
+    public void setUp() throws ExecutionException, InterruptedException, SchedulerException, MalformedURLException {
         String ctProjectKey = System.getProperty("CT_PROJECT_KEY");
         String ctClientId = System.getProperty( "CT_CLIENT_ID" );
         String ctClientSecret = System.getProperty( "CT_CLIENT_SECRET" );

@@ -11,22 +11,64 @@
             The integration service ensures idempotence.
         </p>
         <h2>Examples</h2>
+        <h3>Common Setup</h3>
+        <p>
+                <span c:set="#payoneApiUrl">https://api.pay1.de/post-gateway/</span> is used as
+                <span c:execute="initializeService(#payoneApiUrl)">PAYONE API URL</span>.
+        </p>
         <div class="example">
             <h3>Handle already processed successful transaction</h3>
             <p>
-                If a <span c:execute="#result = handleSuccessfulPayment()">GET /handle/{id}</span> is requested
-                for a Payment Object whose most recent transaction status is Success
-                then the response is <span c:assertEquals="#result.header">HTTP/1.1 204 No Content</span>
-                and <span c:assertTrue="#result.hasEmptyBody()">the body is empty</span>.
+                Given a payment <span c:set="#paymentName">p1</span> with transaction status
+                <span c:set="#transactionState">Success</span>
+                <span c:execute="createPayment(#paymentName, #transactionState)"></span>.
+            </p>
+            <p>
+                When I send <span c:set="#requestMethod">GET</span> <span c:set="#paymentUri">/commercetools/handle/payment/p1</span>
+                <span c:execute="#paymentResult = handlePayment(#requestMethod, #paymentUri)"></span>.
+            </p>
+            <p>
+                Then
+            <ul>
+                <li>
+                    I should receive <span c:assertEquals="#paymentResult.header">HTTP/1.1 200 OK</span>
+                </li>
+                <li>
+                    with response containing <span c:assertEquals="#paymentResult.body">{"statusCode": 200, "newPaymentVersion": 1}</span> and
+                </li>
+                <li>
+                    the number of requests sent to the PAYONE API URL is
+                    <span c:assertEquals="getNumberOfRequestsToPayone()">0</span>.
+                </li>
+            </ul>
             </p>
         </div>
+
         <div class="example">
             <h3>Handle already processed failed transaction</h3>
             <p>
-                If a <span c:execute="#result = handleFailedPayment()">GET /handle/{id}</span> is requested
-                for a Payment Object whose most recent transaction status is Failure
-                then the response is <span c:assertEquals="#result.header">HTTP/1.1 200 OK</span>
-                and <span c:assertTrue="#result.hasEmptyBody()">the body is empty</span>.
+                Given a payment <span c:set="#paymentName">p2</span> with transaction status
+                <span c:set="#transactionState">Failure</span>
+                <span c:execute="createPayment(#paymentName, #transactionState)"></span>.
+            </p>
+            <p>
+                When I send <span c:set="#requestMethod">GET</span> <span c:set="#paymentUri">/commercetools/handle/payment/p2</span>
+                <span c:execute="#paymentResult = handlePayment(#requestMethod, #paymentUri)"></span>.
+            </p>
+            <p>
+                Then
+                <ul>
+                    <li>
+                        I should receive <span c:assertEquals="#paymentResult.header">HTTP/1.1 200 OK</span>
+                    </li>
+                    <li>
+                        with response containing <span c:assertEquals="#paymentResult.body">{"statusCode": 200, "newPaymentVersion": 1}</span> and
+                    </li>
+                    <li>
+                        the number of requests sent to the PAYONE API URL is
+                        <span c:assertEquals="getNumberOfRequestsToPayone()">0</span>.
+                    </li>
+                </ul>
             </p>
         </div>
     </body>
