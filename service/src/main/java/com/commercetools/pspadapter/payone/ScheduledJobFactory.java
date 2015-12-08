@@ -30,7 +30,6 @@ public class ScheduledJobFactory {
                 .usingJobData(dataMap)
                 .build();
 
-
         scheduler.start();
         scheduler.scheduleJob(JobBuilder.newJob(ScheduledJob.class).build(), trigger);
         return scheduler;
