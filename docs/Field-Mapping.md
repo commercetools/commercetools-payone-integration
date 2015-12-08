@@ -38,8 +38,8 @@ With PAYONE:
  * if a difference between the payment total and the line item totals occurs, Is it OK to just not set the price of the 
    line items or will that lead to a rejection from PAYONE? Background can be partial payments (e.g. a part paid with 
    a voucher) or the infamous absolute discount rounding issue. 
- *`sd[n]` "delivery date"  and `ed[n]` delivery end date fields: What is their meaning? 
- * sequencenumber` / idempotenz von transaktionen. 
+ * `sd[n]` "delivery date"  and `ed[n]` delivery end date fields: What is their meaning? 
+ * `sequencenumber` / idempotenz von transaktionen. 
    * ist die sequencenumber bei direkter authorization (CT charge) 0 oder 1? 
    * bei capture kann man die sequence_number übergeben, das ist dann implizit indempotenz. 
  * Wie übersetzen wir price, receivable, balance in  amountPlanned, amountAuthorized, amountPaid
@@ -47,8 +47,9 @@ With PAYONE:
    * e.g. IF the sum of Charge transaction amounts incl. the now to do Charge equals amountPlanned, THEN it's the last? 
    * (allowed values: completed / notcompleted ). Mandatory just with Billsafe & Klarna.  -> 
  * What is the `bankbranchcode` and the ` bankcheckdigit` ? 
-   * -> [FH] branch code is part of the bank identifier code, differs in length e.g. in France, Greece...
- * `protect_result_avs`  TODO read what this is. 
+   * branch code is part of the bank identifier code, differs in length e.g. in France, Greece...
+ * `protect_result_avs`  TODO when does this matter?
+ * what does the bankcode have to do with sorting? 
 
 
 With CT Product Management:
@@ -57,36 +58,67 @@ With CT Product Management:
  * How to represent due amounts that are higher (or lower) than the initial amountPlanned?  (due to dunning and chargeback fees). 
  * The definiton of the amountAuthorized field is unclear: Is it the amount that is remaining (not yet charged) from the auth
    or is it just the sum of all successful authorizations? 
- * Give a precise reasoning why payment changes should be processed through messages instead of querying for the transactionState. 
+ * Give precise reasoning why payment changes should be processed through messages instead of querying for the transactionState.
+ * do we have a working and robust Message endpoint listener implementation for Java? 
+ * Stuff that should be built in (NKs Impression);
+  * redirect / cancel / error / success URLs (redirectInfo Object)
+  * reference Nr. (use key?)
+  * Customer oriented status LText
 
 ## PAYONE fields that map to custom CT Payment fields
 
 All payment methods:
-   * _Required_ `reference` : should conventionally be the Order Number (assuming just one payment per Order). 
+   * _Required_ `reference`: should conventionally be the Order Number (assuming just one payment per Order). 
      The OrderNumber is only available on the CT Order, but not the CT Cart.
      Issue at hand: Checkout Implementations vary in respect to whether the Cart is converted into an Order before or after the Order is placed. 
      Proposed behavior:
      1. check if the Order is alredy created and has an Order Number. Take that as reference.
-     1. If note: Create an Order Number and store it into a custom field `reserved_order_number` in the Payment object. 
+     1. If not: Create an Order Number and store it into a custom field `reference` in the Payment object. 
         An Integration Configuration determines the Custom _Object_ container and ID from which to get the next Order ID. 
         The Checkout implementation that creates Payment before Order then needs to assure that the Order ID
         is taken from the Payment Object if the Order is created after the Payment. 
-   *  _Required_ `language` -> custom field of type `messageLocale` on the CT Payment
-   *  TODO `redirecturl` : where to send the guy  (TODO URI or URL ?) 
-    * TODO successurl, cancelurl, cancelurl
-   *  `invoiceappendix` -> if a custom Field named `description` of Type String is set on the Cart / Order use that.  
+   *  _Required_ `language` -> custom field `messageLocale` of Type String on the CT Payment
+   * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
+   * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
+   * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
+   * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
+   * `invoiceappendix` -> if a custom Field named `description` of Type String is set on the Cart / Order use that.  
  
  `DIRECT_DEBIT`*:
-  * `bankaccountholder` -> `accountHolderName` of type String
-  * `iban` -> `IBAN` of type String
-  * `mandate_identification` -> `sepaMandateId` of type String
-  * `mandate_dateofsignature` ->  `sepaMandateDate` of type Date
-  * TODO "klassische" deutsche auch abbilden. 
-  * `narrative_text` -> `referenceText` of type String on the Payment  
+  * general:
+    * `bankaccountholder` -> `accountHolderName` of type String
+    * `narrative_text` -> `referenceText` of type String on the Payment
+  * new data:
+    * `iban` -> `IBAN` of type String
+    * `bic`  -> custom `BIC` 
+    * `mandate_identification` -> `sepaMandateId` of type String
+    * `mandate_dateofsignature` ->  `sepaMandateDate` of type Date
+  * traditional identification:
+    * `bankcountry` -> `bankCountry` 
+    * `bankaccount` -> `bankAccount` 
+    * `bankcode` ->  TODO what does this have to do with sorting? 
+    * `bankbranchcode` -> (only for FR, ES, FI, IT)
+    * `bankcheckdigit` -> (only for FR, BE) 
  
  `BANK_TRANSFER`*:
-  * `bankgrouptype` (eps & ideal) -> TODO research values. Is there a standard? 
   * `narrative_text` -> `referenceText` of type String on the Payment  
+  * new data:
+    * `iban` -> `IBAN` of type String
+    * `bic`  -> custom `BIC` 
+  * traditional identification:
+    * `bankcountry` -> `bankCountry` 
+ 
+  `BANK_TRANSFER-IDEAL`:
+  * `bankgrouptype` -> custom field `bankGroupType` on Payment
+  
+  `BANK_TRANSFER-EPS`:
+  * `bankgrouptype` -> custom field `bankGroupType on Payment
+
+  `BANK_TRANSFER-SOFORTUEBERWEISUNG`:
+  * 
+
+  `BANK_TRANSFER-GIROPAY`:
+  * 
  
  `CREDIT_CARD`*:
   * `pseudocardpan` -> `cardDataPlaceholder` of type String
@@ -182,9 +214,6 @@ See below for the custom fields.
   * As data check is not a financial transaction, we don't want to include it in the Transactions. A special Interaction? But interactions
     aren't supposed to be relevant to the checkout and frontend code. 
 * TODO what to write into the CT payment object to trigger an `updatereminder`, i.e. dunning level trigger  
-* TODO when does `vauthorization` happen? What is it? 
-* TODO when do we need the `managemandate` call? 
-* TODO is explicit `3dscheck` (probably rather `check`?) necessary at all or implicit in the preauth/auth? 
 
 Please take care of idempotency. The `TransactionState` alone does not suffice to avoid creating duplicate PAYONE transactions. 
 It could remain in `Pending` for various reasons.
@@ -202,7 +231,11 @@ It could remain in `Pending` for various reasons.
 
 See chapter 4.2.1 "List of events (txaction)" and the sample processes in the PAYONE documentation
 
-* TODO define how to find the right transaction.  `sequence_number`? 
+The matching transaction is found by sequencenumber = interactionId
+
+* TODO when does `vauthorization` happen? What is it? 
+* TODO when do we need the `managemandate` call? 
+* TODO is explicit `3dscheck` (probably rather `check`?) necessary at all or implicit in the preauth/auth? 
 
 [FH] PAYONE docu says that "you will receive the data and the status for each payment process". So maybe this table should incooperate also the CT PaymentState?
 [FH] transaction_status seems to be only available with txaction "appointed" for now
