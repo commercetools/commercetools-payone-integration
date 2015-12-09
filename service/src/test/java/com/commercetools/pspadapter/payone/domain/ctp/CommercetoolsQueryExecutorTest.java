@@ -59,7 +59,7 @@ public class CommercetoolsQueryExecutorTest {
     @Test()
     @Ignore
     public void executePaymentCreatedMessagesQuery() {
-        ZonedDateTime since = ZonedDateTime.of(2014, 12, 3, 10, 0, 0, 0, ZoneId.systemDefault());
+        ZonedDateTime since = ZonedDateTime.of(2015, 12, 3, 10, 0, 0, 0, ZoneId.systemDefault());
         List<PaymentCreatedMessage> paymentCreatedMessageList = new ArrayList<>(commercetoolsQueryExecutor
                 .getPaymentCreatedMessages(since, TransactionState.PENDING));
         assertThat(paymentCreatedMessageList, hasSize(1));
