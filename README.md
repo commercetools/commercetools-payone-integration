@@ -48,6 +48,14 @@ fooBar
 
 fooBar docker and heroku options
 
+### Notes to the checkout implementation
+
+ 1. If the PAYONE invoice generation feature or the Klarna payment methods are to be supported, the checkout has to make
+    sure that 
+    `amountPlanned = Sum over all Line Items ( round ( totalPrice.centAmount / quantity ) * quantity ))` 
+    and handle deviations accordingly.  Deviations can especially occur if absolute discounts are applied and there are
+    Line Items with quantity > 1.  On deviations the Line Item Data will not be transferred to PAYONE. 
+
 ## Test environments
 
 SEE PAYONE DOCUMENTATION - ALL TEST DATA THERE, JUST PAYPAL REQUIRES AN OWN ACCOUNT

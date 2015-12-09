@@ -3,7 +3,7 @@
 > for better readability you might want to use a ["wide github"](https://chrome.google.com/webstore/detail/wide-github/kaalofacklcidaampbokdplbklpeldpj) plugin in your Browser
 
 TODOs:
- * go through remaining open questions with PAYONE and CT product managers
+ * go through remaining open questions with CT product managers
  * go through PAYONE status notification fields and responses (currently only the requests have been documented here) 
 
 ## Payment methods covered by this specification
@@ -35,35 +35,27 @@ BillSAFE has been deprecated by PAYONE and is not supported.
 
 With PAYONE:
 
- * if a difference between the payment total and the line item totals occurs, Is it OK to just not set the price of the 
-   line items or will that lead to a rejection from PAYONE? Background can be partial payments (e.g. a part paid with 
-   a voucher) or the infamous absolute discount rounding issue. 
- * `sd[n]` "delivery date"  and `ed[n]` delivery end date fields: What is their meaning? 
- * `sequencenumber` / idempotenz von transaktionen. 
-   * ist die sequencenumber bei direkter authorization (CT charge) 0 oder 1? 
-   * bei capture kann man die sequence_number übergeben, das ist dann implizit indempotenz. 
- * Wie übersetzen wir price, receivable, balance in  amountPlanned, amountAuthorized, amountPaid
- * How to set `capturemode` -> NK discuss internally how to find out that a capture is the last delivery.
-   * e.g. IF the sum of Charge transaction amounts incl. the now to do Charge equals amountPlanned, THEN it's the last? 
-   * (allowed values: completed / notcompleted ). Mandatory just with Billsafe & Klarna.  -> 
- * What is the `bankbranchcode` and the ` bankcheckdigit` ? 
-   * branch code is part of the bank identifier code, differs in length e.g. in France, Greece...
- * `protect_result_avs`  TODO when does this matter?
- * what does the bankcode have to do with sorting? 
-
+geklärt:
 
 With CT Product Management:
 
+ * Muss der Interaction Type manuell alle theoretisch vorkomenden Felder haben oder gibt es so etwas wie eine freie String->String Map? 
+ * Wie übersetzen wir price, receivable, balance in  amountPlanned, amountAuthorized, amountPaid
  * `customermessage` of an error -> was discussed at CT to add to PaymentStatus and was discarded until needed. Is needed now.
  * How to represent due amounts that are higher (or lower) than the initial amountPlanned?  (due to dunning and chargeback fees). 
  * The definiton of the amountAuthorized field is unclear: Is it the amount that is remaining (not yet charged) from the auth
    or is it just the sum of all successful authorizations? 
  * Give precise reasoning why payment changes should be processed through messages instead of querying for the transactionState.
- * do we have a working and robust Message endpoint listener implementation for Java? 
- * Stuff that should be built in (NKs Impression);
+ * do we have a working and robust Message endpoint listener implementation for Java?
+ * How to set `capturemode` -> NK discuss internally how to find out that a capture is the last delivery.
+   * e.g. IF the sum of Charge transaction amounts incl. the now to do Charge equals amountPlanned, THEN it's the last? 
+   * (allowed values: completed / notcompleted ). Mandatory just with Billsafe & Klarna.  -> 
+  
+Stuff that should be built in (NKs Impression);
   * redirect / cancel / error / success URLs (redirectInfo Object)
-  * reference Nr. (use key?)
+  * reference Nr. (a use case for the `key` feature? )
   * Customer oriented status LText
+  * maybe something that makes the difference between originally planned amount and current receivable transparent (dunning fees etc)
 
 ## PAYONE fields that map to custom CT Payment fields
 
@@ -82,12 +74,13 @@ All payment methods:
    * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
    * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
    * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
-   * `invoiceappendix` -> if a custom Field named `description` of Type String is set on the Cart / Order use that.  
+   * `invoiceappendix` -> if a custom Field named `description` of Type String is set on the Cart / Order use that. 
  
  `DIRECT_DEBIT`*:
   * general:
     * `bankaccountholder` -> `accountHolderName` of type String
     * `narrative_text` -> `referenceText` of type String on the Payment
+    * `due_time` -> `executionTime`  of type DateTime on the Payment. CT master. convert to Unix timestamp. 
   * new data:
     * `iban` -> `IBAN` of type String
     * `bic`  -> custom `BIC` 
@@ -96,8 +89,8 @@ All payment methods:
   * traditional identification:
     * `bankcountry` -> `bankCountry` 
     * `bankaccount` -> `bankAccount` 
-    * `bankcode` ->  TODO what does this have to do with sorting? 
-    * `bankbranchcode` -> (only for FR, ES, FI, IT)
+    * `bankcode` ->  `bankCode` 
+    * `bankbranchcode` -> `bankBrachCode` (only for FR, ES, FI, IT)
     * `bankcheckdigit` -> (only for FR, BE) 
  
  `BANK_TRANSFER`*:
@@ -131,8 +124,10 @@ All payment methods:
   * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment  
  
  `INVOICE`*:
-   * `invoiceid`  invoice ID (master in PAYONE).  PAYONE is master if invoice created by them.  For Klarna etc. CT data are master. 
-   * `clearing_*` stuff -> written back from PAYONE.  Field names should be analogous to DIREC_DEBIT Bank data. 
+   * `invoiceid` invoice ID (master in PAYONE).  PAYONE is master if invoice created by them.  For Klarna etc. CT data are master.
+   * `due_time` -> custom Field `dueTime` type DateTime on Payment, CT master.  Convert to Unix timestamp.  
+   * TODO do individual fields: `clearing_*` stuff -> written back from PAYONE.  Field names should be analogous to DIREC_DEBIT Bank data but with a prefix 
+   
 
  `INVOICE_KLARNA` (lots of mandatory risk management fields)
    * `personalid` -> Personal ID Nr.  Mandatory for Klarna if customers billing address is in certain nordics countries.     
@@ -163,7 +158,9 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
 
  * `creditor_*`  just for debug? 
  * `bankcountry`, `bankaccount`, `bankcode`, `bic` (all replaced by the IBAN, which is preferable because it has a checksum)
- * `xid`, `cavv`, `eci` (3Dsecure is done via redirect only)   
+ * `xid`, `cavv`, `eci` (3Dsecure is done via redirect only) 
+ * `sd[n]` "delivery date"  and `ed[n]` delivery end date (there is no matching equivalent on the CT Cart Line Item) 
+ * `protect_result_avs` konfiguriert nur im backend von PAYONE. Wird quasi nicht genutzt und ist AMEX-Spezifisch. 
 
  
 ## commercetools Payment resource
@@ -197,7 +194,7 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
 | transactions\[\*\].type |  |  | (see below for transaction types) |
 | transactions\[\*\].amount.centAmount | `amount` | CT | none |
 | transactions\[\*\].amount.currency | `currency` | CT | none, but must not deviate from amountPlanned.centAmount |
-| transactions\[\*\].interactionId | `sequencenumber` | CT / PAYONE (must be in sync)  | There can be only one CT Authorization transaction. This must be the first and gets the sequencenumber 0. All following Charge, CancelAuthorization and Refund transactions count up from 1. TODO clarify Chargeback. TODO define Role in idempotency. TODO direct authorization is 0 or 1?  |
+| transactions\[\*\].interactionId | `sequencenumber` | CT / PAYONE | There can be only one CT Authorization transaction. This must be the first and gets the sequencenumber 0. All following Charge, CancelAuthorization and Refund transactions count up from the last sequence number received in the last TransactionStatus Notification call from PAYONE (stored in the Interactions Array). *To be set when doing the PAYONE call, not already when creating the Transaction*.  |
 | transactions\[\*\].state | - | - | (see below for transaction states) |
 
 See below for the custom fields. 
@@ -227,7 +224,20 @@ It could remain in `Pending` for various reasons.
 | `Refund` | `Pending` |  `debit` with negative amount of refund. `refund` is a subset of the functionality and does not need to be used.  |  |
 | `Chargeback` | - | - |  (not applicable, is just triggered from PAYONE to CT)  |
 
-### updating the CT Payment given a PAYONE TransactionStatus Notification
+
+### receiving the PAYONE TransactionStatus Notifications and storing them in an Interaction
+
+ 1. Find Payment with PAYONE `TXID` in the Payment.interfaceId field AND paymentMethodInfo.paymentInterface = "PAYONE"
+ 2. In none matches, *create one* (checkout error situation).  
+   * If an *Order* with CT orderNumber = PAYONE `reference` is found, reference the payment from that
+   * If a *Customer*  with CT customerNumber = PAYONE `customerid` is found, reference that customer from the payment. 
+ 3. Add the raw TransactionStatus information as a new Interaction Object to the Payment (and persist)
+ 
+The Logic defined in the following section can happen either asynchroniously on the "new Interaction added" Message or directly. 
+In any case, the "TSOK" response should be sent back to PAYONE as soon as the Interaction has successfully been stored in 
+commerceotols (200 on the update request), but not earlier. 
+
+### updating the CT Payment given a PAYONE TransactionStatus Notification (Stored in an Interaction)
 
 See chapter 4.2.1 "List of events (txaction)" and the sample processes in the PAYONE documentation
 
@@ -260,11 +270,17 @@ The matching transaction is found by sequencenumber = interactionId
 
 ## commercetools Cart and Order object (mapping to payment interface on payment creation)
 
-* [CT Order documentation](http://dev.sphere.io/http-api-projects-orders.html#order)
-* [CT Cart documentation](http://dev.sphere.io/http-api-projects-carts.html#cart)
+Related Documentation:
+ * [CT Order documentation](http://dev.sphere.io/http-api-projects-orders.html#order)
+ * [CT Cart documentation](http://dev.sphere.io/http-api-projects-carts.html#cart)
 
-TODO (important!): 
- * Migrate to new totals and discounted price fields (divide line item total by quantity to get best guess per qty price)
+Implementation Notes:
+ * If the sum of sum of `pr[n]` times `no[n]` does not equal the total `amount` of the payment, do not pass the line item
+   data at all. If the amount needs to be "fixed" to support PAYONE Invoicing or Klarna payment, this is up to the checkout
+   implementation. 
+
+TODO 
+ * map custom line items and shipping fees
 
 | CT Cart or Order JSON path | PAYONE Server API | who is Master?  | Value transform |
 |---|---|---|---|
@@ -291,7 +307,7 @@ TODO (important!):
 | lineItems\[\*\].variant.id |  |  |  |
 | lineItems\[\*\].variant.sku | `id[n]` | CT | truncate at 32 chars and warn |
 | lineItems\[\*\].totalPrice.value.currencyCode |  |  |  |
-| lineItems\[\*\].totalPrice.value.centAmount | `pr[n]` | CT | a) Divide this by .quantity to get the effective price per Line Item quantity. b) Round commercially to full cents. c) Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. e) Do not set `pr[n]` at all if the overall sum of `pr[n]` times `no[n]` does not equal the total of the payment. |
+| lineItems\[\*\].totalPrice.value.centAmount | `pr[n]` | CT | a) Divide this by .quantity to get the effective price per Line Item quantity. b) Round commercially to full cents. c) Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. |
 | lineItems\[\*\].taxRate.name |  |  |  |
 | lineItems\[\*\].taxRate.amount | `va[n]` | CT | .amount is a float between zero and one. It has to be multiplied with 1000 and rounded to full integer to get base % points.|
 | lineItems\[\*\].taxRate.includedInPrice |  |  | (required for calculating the price, see above)  |
