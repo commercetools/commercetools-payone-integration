@@ -1,3 +1,7 @@
+plugins {
+    id 'org.ajoberstar.github-pages' version '1.3.2'
+}
+
 allprojects {
     group = 'com.commercetools'
     version = '0.1'
@@ -59,6 +63,9 @@ project(":functionaltests") {
     }
 
     test {
+        filter {
+            includeTestsMatching 'specs.PayoneIntegrationFixture'
+        }
         systemProperty 'concordion.output.dir', "$reporting.baseDir/spec"
         systemProperty 'concordion.extensions', 'org.concordion.ext.inputstyle.InputStyleExtension'
 
@@ -66,5 +73,24 @@ project(":functionaltests") {
         systemProperty 'CT_CLIENT_ID', project.hasProperty('CT_CLIENT_ID') ? CT_CLIENT_ID : System.getenv('CT_CLIENT_ID')
         systemProperty 'CT_CLIENT_SECRET', project.hasProperty('CT_CLIENT_SECRET') ? CT_CLIENT_SECRET : System.getenv('CT_CLIENT_SECRET')
         systemProperty 'CRON_NOTATION', project.hasProperty('CRON_NOTATION') ? CRON_NOTATION : System.getenv('CRON_NOTATION')
+    }
+}
+
+githubPages {
+    repoUri = 'git@github.com:sphereio/commercetools-payone-integration.git'
+
+    credentials {
+        username = System.getenv('GH_TOKEN')
+        password = ''
+    }
+
+    pages {
+        from 'ghpages'
+
+        into ('latest') {
+            from ("$project.buildDir/reports/spec/specs") {
+                into 'spec'
+            }
+        }
     }
 }
