@@ -12,10 +12,28 @@ import java.util.function.Function;
  */
 public class SphereClientDoubleCreator {
 
-    public static SphereClient getSphereClientWithResponseFunction(final Function<HttpRequestIntent, Object> responseFunction) {
+    public static SphereClient getSphereClientWithPaymentRoute(final Function<HttpRequestIntent, Object> responseFunction) {
         return SphereClientFactory.createObjectTestDouble(httpRequest -> {
-            Object result = null;
-            result = responseFunction.apply(httpRequest);
+            final Object result;
+            if (httpRequest.getPath().startsWith("/payments?where=")) {
+                result = responseFunction.apply(httpRequest);
+            } else {
+                //here you can put if else blocks for further preconfigured responses
+                throw new UnsupportedOperationException("I'm not prepared for this request: " + httpRequest);
+            }
+            return result;
+        });
+    }
+
+    public static SphereClient getSphereClientWithOrderRoute(final Function<HttpRequestIntent, Object> responseFunction) {
+        return SphereClientFactory.createObjectTestDouble(httpRequest -> {
+            final Object result;
+            if (httpRequest.getPath().startsWith("/orders")) {
+                result = responseFunction.apply(httpRequest);
+            } else {
+                //here you can put if else blocks for further preconfigured responses
+                throw new UnsupportedOperationException("I'm not prepared for this request: " + httpRequest);
+            }
             return result;
         });
     }

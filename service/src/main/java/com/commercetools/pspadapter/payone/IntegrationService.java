@@ -1,8 +1,8 @@
 package com.commercetools.pspadapter.payone;
 
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
-import com.google.common.base.Joiner;
 import spark.Spark;
+
+import com.google.common.base.Joiner;
 
 /**
  * @author fhaertig
@@ -12,10 +12,10 @@ public class IntegrationService {
 
     final Joiner joiner = Joiner.on('\n');
 
-    private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
+    private final PaymentQueryExecutor paymentQueryExecutor;
 
-    IntegrationService(final CommercetoolsQueryExecutor commercetoolsQueryExecutor) {
-        this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
+    IntegrationService(final PaymentQueryExecutor paymentQueryExecutor) {
+        this.paymentQueryExecutor = paymentQueryExecutor;
     }
 
     public void start() {
@@ -43,7 +43,7 @@ public class IntegrationService {
         return 8080;
     }
 
-    public CommercetoolsQueryExecutor getCommercetoolsQueryExecutor() {
-        return commercetoolsQueryExecutor;
+    public PaymentQueryExecutor getPaymentQueryExecutor() {
+        return paymentQueryExecutor;
     }
 }

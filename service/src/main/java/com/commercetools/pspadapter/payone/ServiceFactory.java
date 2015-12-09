@@ -1,7 +1,6 @@
 package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import io.sphere.sdk.client.SphereClientFactory;
 import org.quartz.SchedulerException;
 
@@ -21,6 +20,6 @@ public class ServiceFactory {
                     config.getCtProjectKey(),
                     config.getCtClientId(),
                     config.getCtClientSecret()));
-        return new IntegrationService(new CommercetoolsQueryExecutor(client));
+        return new IntegrationService(new PaymentQueryExecutor(client));
     }
 }

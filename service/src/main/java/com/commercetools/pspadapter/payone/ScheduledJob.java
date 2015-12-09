@@ -6,8 +6,6 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import java.time.ZonedDateTime;
-
 /**
  * @author fhaertig
  * @date 07.12.15
@@ -21,8 +19,6 @@ public class ScheduledJob implements Job {
         JobDataMap dataMap = context.getMergedJobDataMap();
         IntegrationService service = (IntegrationService) dataMap.get(SERVICE_KEY);
 
-        service
-            .getCommercetoolsQueryExecutor()
-            .getPaymentCreatedMessages(ZonedDateTime.now(), TransactionState.PENDING);
+        service.getPaymentQueryExecutor().getPaymentsWithTransactionState(TransactionState.PENDING);
     }
 }

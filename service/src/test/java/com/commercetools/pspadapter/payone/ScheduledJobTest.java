@@ -3,7 +3,6 @@ package com.commercetools.pspadapter.payone;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -23,7 +22,7 @@ public class ScheduledJobTest {
     private IntegrationService integrationService;
 
     @Mock
-    private CommercetoolsQueryExecutor commercetoolsQueryExecutor;
+    private PaymentQueryExecutor paymentQueryExecutor;
 
     @Mock
     private JobExecutionContext jobExecutionContext;
@@ -34,9 +33,9 @@ public class ScheduledJobTest {
         JobDataMap dataMap = new JobDataMap();
         dataMap.put(ScheduledJob.SERVICE_KEY, integrationService);
         when(jobExecutionContext.getMergedJobDataMap()).thenReturn(dataMap);
-        when(integrationService.getCommercetoolsQueryExecutor()).thenReturn(commercetoolsQueryExecutor);
+        when(integrationService.getPaymentQueryExecutor()).thenReturn(paymentQueryExecutor);
 
         job.execute(jobExecutionContext);
-        verify(integrationService).getCommercetoolsQueryExecutor();
+        verify(integrationService).getPaymentQueryExecutor();
     }
 }
