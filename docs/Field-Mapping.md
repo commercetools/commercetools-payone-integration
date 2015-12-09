@@ -60,6 +60,7 @@ Stuff that should be built in (NKs Impression);
 ## PAYONE fields that map to custom CT Payment fields
 
 All payment methods:
+
    * _Required_ `reference`: should conventionally be the Order Number (assuming just one payment per Order). 
      The OrderNumber is only available on the CT Order, but not the CT Cart.
      Issue at hand: Checkout Implementations vary in respect to whether the Cart is converted into an Order before or after the Order is placed. 
@@ -70,14 +71,8 @@ All payment methods:
         The Checkout implementation that creates Payment before Order then needs to assure that the Order ID
         is taken from the Payment Object if the Order is created after the Payment. 
    *  _Required_ `language` -> custom field `messageLocale` of Type String on the CT Payment
-   * `invoiceappendix` -> if a custom Field named `description` of Type String is set on the Cart / Order use that. 
  
- `CASH_ADVANCE`
-  * `iban` ->  `refundIBAN` of type String
-  * `bic` ->  `refundBIC`  of type String
-  * TODO clearing data!
- 
- `DIRECT_DEBIT`*:
+`DIRECT_DEBIT`*:
   * general:
     * `bankaccountholder` -> `accountHolderName` of type String
     * `narrative_text` -> `referenceText` of type String on the Payment
@@ -94,40 +89,28 @@ All payment methods:
     * `bankbranchcode` -> `bankBranchCode` (only for FR, ES, FI, IT) (CT master) 
     * `bankcheckdigit` -> (only for FR, BE) (CT master)
  
- `BANK_TRANSFER`*:
+`BANK_TRANSFER`*:
   * general:
     * `bankaccountholder` -> `accountHolderName` of type String
     * `narrative_text` -> `referenceText` of type String on the Payment
   * new data:
-    * `iban` -> `IBAN` of type String (CT master, but written back from PAYONE)
-    * `bic`  -> custom `BIC` (CT maste
+    * `iban` -> `IBAN` of type String (CT initial, but overridden by PAYONE)
+    * `bic`  -> custom `BIC` (CT initial, but overridden by PAYONE)
   * traditional identification:
     * `bankcountry` -> `bankCountry`
     * `bankaccount` -> `bankAccount` 
     * `bankcode` ->  `bankCode` 
     * `bankbranchcode` -> `bankBrachCode` (only for FR, ES, FI, IT)
     * `bankcheckdigit` -> (only for FR, BE) 
+    * `bankgrouptype` -> custom field `bankGroupType` on Payment  (only necessary for IDEAL in NL)
+    * `bankgrouptype` -> custom field `bankGroupType on Payment (only for EPS in AT)
   * redirect flow support:
     * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
     * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
     * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
     * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
- 
-TODO: drop type differentiation between online bank transfer variants? 
- ,
-  `BANK_TRANSFER-IDEAL` (additional fields):
-  * `bankgrouptype` -> custom field `bankGroupType` on Payment
   
-  `BANK_TRANSFER-EPS` (additional fields):
-  * `bankgrouptype` -> custom field `bankGroupType on Payment
-
-  `BANK_TRANSFER-SOFORTUEBERWEISUNG` (additional fields):
-  * 
-
-  `BANK_TRANSFER-GIROPAY` (additional fields):
-  * 
- 
- `CREDIT_CARD`*:
+`CREDIT_CARD`*:
   * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment
   * card data:
     * `pseudocardpan` -> `cardDataPlaceholder` of type String (CT initial, PAYONE overrides)
@@ -142,24 +125,27 @@ TODO: drop type differentiation between online bank transfer variants?
     * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
     * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
  
- `INVOICE`*:
+`CASH_ADVANCE`:
+  * refund data
+   * `iban` ->  `refundIBAN` of type String
+   * `bic` ->  `refundBIC`  of type String
+  * Clearing data (where the invoice was paid from): 
+   * `clearing_bankaccountholder` ->  `paidFromAccountHolder` 
+   * `clearing_bankiban`  -> `paidFromIBAN` 
+   * `clearing_bankbic` ->  `paidFromBIC` 
+ 
+`INVOICE`*:
    * `invoiceid` invoice ID (master in PAYONE).  PAYONE is master if invoice created by them.  For Klarna etc. CT data are master.
    * `due_time` -> custom Field `dueTime` type DateTime on Payment, CT master.  Convert to Unix timestamp.  
    * `iban` ->  `refundIBAN` of type String
    * `bic` ->  `refundBIC`  of type String
-   * Clearing data (where the invoice was paid from): (TODO also for prepayment) (TODO IBAN / BIC only)
-    * TODO decide whether to use the 
-    * `clearing_bankaccountholder` 
-    * `clearing_bankcountry` 
-    * `clearing_bankaccount` 
-    * `clearing_bankcode` 
-    * `clearing_bankiban` 
-    * `clearing_bankbic` 
-    * `clearing_bankcity` 
-    * `clearing_bankname` 
-    * `clearing_instructionnote` 
+   * Clearing data (where the invoice was paid from): 
+    * `clearing_bankaccountholder` ->  `paidFromAccountHolder` 
+    * `clearing_bankiban`  -> `paidFromIBAN` 
+    * `clearing_bankbic` ->  `paidFromBIC` 
    
- `INVOICE_KLARNA`:
+`INVOICE_KLARNA`:
+  * `clearing_instructionnote` ->  `invoiceUrl` field of type String, PAYONE master
   * mandatory risk management fields:
    * `personalid` -> Personal ID Nr.  Mandatory for Klarna if customers billing address is in certain nordics countries.     
    * `ip` -> the IP address of the user is not stored in CT. -> will need a custom field? (required for Klarna)
@@ -169,12 +155,12 @@ TODO: drop type differentiation between online bank transfer variants?
    * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
    * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
   
- `WALLET`*:
+`WALLET`*:
   * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment     
    
 ## Fields not natively defined in CT, covered by custom Fields on Cart, Customer and Order
 
- * _Optional_ `customermessage`: Check for a custom Field `description` of type `LocalizedString` on the Cart / Order.
+ * _Optional_ `customermessage` and `invoiceappendix`: Check for a custom Field `description` of type `LocalizedString` on the Cart / Order. Set both PAYONE fields.
    Use the `locale` set on the Payment to pick the right value. 
  * _Optional_ `userid`: passed back from PAYONE as identification of the debtor account Nr.  If the CT Customer Object has a custom
     field named `payoneUserId` of type String, write the `userid` value into that field. 
@@ -189,7 +175,6 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
     named `gender`. If the first existing is of Type `Enum` and has a value `Male` or `Female` -> use that one as `f` or `m` respectively.  
  * `ip`: Check for a custom Field `customerIPAddress` of type `String` on the CT Cart / Order. 
  
-   
 ## unused PAYONE fields
 
  * `creditor_*`  just for debug? 
