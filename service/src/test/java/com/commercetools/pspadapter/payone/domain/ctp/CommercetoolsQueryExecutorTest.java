@@ -15,6 +15,7 @@ import io.sphere.sdk.payments.messages.PaymentCreatedMessage;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -64,6 +65,7 @@ public class CommercetoolsQueryExecutorTest {
     }
 
     @Test()
+    @Ignore
     public void executePaymentCreatedMessagesQuery() {
         ZonedDateTime since = ZonedDateTime.of(2015, 12, 3, 10, 0, 0, 0, ZoneId.systemDefault());
         List<PaymentCreatedMessage> paymentCreatedMessageList = new ArrayList<>(commercetoolsQueryExecutor
