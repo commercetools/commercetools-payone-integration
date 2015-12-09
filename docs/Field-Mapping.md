@@ -34,34 +34,32 @@ BillSAFE has been deprecated by PAYONE and is not supported.
 ## TODO: ITEMS TO BE DISCUSSED
 
 With PAYONE:
- * (ur aus neugier) is the card expiry date of a CC at the end or the beginning of the given Month? 
+ * Is the card expiry date of a CC at the end or the beginning of the given Month? 
 
-geklärt:
+With CT Product Management / CT internal:
 
-With CT Product Management:
-
- * Muss der Interaction Type manuell alle theoretisch vorkomenden Felder haben oder gibt es so etwas wie eine freie String->String Map? 
  * Wie übersetzen wir price, receivable, balance in  amountPlanned, amountAuthorized, amountPaid
- * `customermessage` of an error -> was discussed at CT to add to PaymentStatus and was discarded until needed. Is needed now.
  * How to represent due amounts that are higher (or lower) than the initial amountPlanned?  (due to dunning and chargeback fees). 
  * The definiton of the amountAuthorized field is unclear: Is it the amount that is remaining (not yet charged) from the auth
    or is it just the sum of all successful authorizations? 
- * Give precise reasoning why payment changes should be processed through messages instead of querying for the transactionState.
- * do we have a working and robust Message endpoint listener implementation for Java?
- * How to set `capturemode` -> NK discuss internally how to find out that a capture is the last delivery.
+ * How to set `capturemode` -> NK define logic how to find out that a capture is the last delivery.
    * e.g. IF the sum of Charge transaction amounts incl. the now to do Charge equals amountPlanned, THEN it's the last? 
    * (allowed values: completed / notcompleted ). Mandatory just with Billsafe & Klarna.  -> 
   
-Stuff that should be built in (NKs Impression);
-  * reference Nr. (a use case for the `key` feature? )
-  * Customer oriented status LText
-  * maybe something that makes the difference between originally planned amount and current receivable transparent (dunning fees etc)
+Fields that CT could consider making a built-in:
 
-## PAYONE fields that map to custom CT Payment fields
+  * Reference Nr. ( a use case for the `key` feature )
+  * Customer oriented status LText (`customermessage` at PAYONE)
+  * something that makes the difference between originally planned amount and current receivable transparent (dunning fees etc)
+  * language assignment. That's a general issue with the architecture that delegates as much as possible to a detached microservice 
+    (how does the service know which of the various LText fields in CTP to take?) 
+
+## PAYONE fields that map to custom CT Payment fields (by method)
 
 All payment methods:
 
-   * _Required_ `reference`: should conventionally be the Order Number (assuming just one payment per Order). 
+  * _Required_ `language` -> custom field `languageTag` of Type String on the CT Payment
+  * _Required_ `reference`: should conventionally be the Order Number (assuming just one payment per Order). 
      The OrderNumber is only available on the CT Order, but not the CT Cart.
      Issue at hand: Checkout Implementations vary in respect to whether the Cart is converted into an Order before or after the Order is placed. 
      Proposed behavior:
@@ -69,8 +67,7 @@ All payment methods:
      1. If not: Create an Order Number and store it into a custom field `reference` in the Payment object. 
         An Integration Configuration determines the Custom _Object_ container and ID from which to get the next Order ID. 
         The Checkout implementation that creates Payment before Order then needs to assure that the Order ID
-        is taken from the Payment Object if the Order is created after the Payment. 
-   *  _Required_ `language` -> custom field `messageLocale` of Type String on the CT Payment
+        is taken from the Payment Object if the Order is created after the Payment.   
  
 `DIRECT_DEBIT`*:
   * general:
@@ -80,13 +77,14 @@ All payment methods:
   * new data:
     * `iban` -> `IBAN` of type String (CT master)
     * `bic`  -> custom `BIC` (CT master)
+  * SEPA specifics:
     * `mandate_identification` -> `sepaMandateId` of type String (CT master)
     * `mandate_dateofsignature` ->  `sepaMandateDate` of type Date  (PAYONE master)
   * traditional identification:
     * `bankcountry` -> `bankCountry`  (CT master)
-    * `bankaccount` -> `bankAccount`  (CT master)
     * `bankcode` ->  `bankCode`  (CT master)
     * `bankbranchcode` -> `bankBranchCode` (only for FR, ES, FI, IT) (CT master) 
+    * `bankaccount` -> `bankAccount`  (CT master)
     * `bankcheckdigit` -> (only for FR, BE) (CT master)
  
 `BANK_TRANSFER`*:
@@ -158,10 +156,10 @@ All payment methods:
 `WALLET`*:
   * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment     
    
-## Fields not natively defined in CT, covered by custom Fields on Cart, Customer and Order
+## PAYONE fields that map to custom Fields on CT Cart, CT Customer or CT Order
 
  * _Optional_ `customermessage` and `invoiceappendix`: Check for a custom Field `description` of type `LocalizedString` on the Cart / Order. Set both PAYONE fields.
-   Use the `locale` set on the Payment to pick the right value. 
+   Use the `languageTag` set on the Payment to pick the right value. 
  * _Optional_ `userid`: passed back from PAYONE as identification of the debtor account Nr.  If the CT Customer Object has a custom
     field named `payoneUserId` of type String, write the `userid` value into that field. 
   
