@@ -34,6 +34,7 @@ BillSAFE has been deprecated by PAYONE and is not supported.
 ## TODO: ITEMS TO BE DISCUSSED
 
 With PAYONE:
+ * (ur aus neugier) is the card expiry date of a CC at the end or the beginning of the given Month? 
 
 geklärt:
 
@@ -52,7 +53,6 @@ With CT Product Management:
    * (allowed values: completed / notcompleted ). Mandatory just with Billsafe & Klarna.  -> 
   
 Stuff that should be built in (NKs Impression);
-  * redirect / cancel / error / success URLs (redirectInfo Object)
   * reference Nr. (a use case for the `key` feature? )
   * Customer oriented status LText
   * maybe something that makes the difference between originally planned amount and current receivable transparent (dunning fees etc)
@@ -70,11 +70,12 @@ All payment methods:
         The Checkout implementation that creates Payment before Order then needs to assure that the Order ID
         is taken from the Payment Object if the Order is created after the Payment. 
    *  _Required_ `language` -> custom field `messageLocale` of Type String on the CT Payment
-   * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
-   * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
-   * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
-   * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
    * `invoiceappendix` -> if a custom Field named `description` of Type String is set on the Cart / Order use that. 
+ 
+ `CASH_ADVANCE`
+  * `iban` ->  `refundIBAN` of type String
+  * `bic` ->  `refundBIC`  of type String
+  * TODO clearing data!
  
  `DIRECT_DEBIT`*:
   * general:
@@ -82,58 +83,93 @@ All payment methods:
     * `narrative_text` -> `referenceText` of type String on the Payment
     * `due_time` -> `executionTime`  of type DateTime on the Payment. CT master. convert to Unix timestamp. 
   * new data:
-    * `iban` -> `IBAN` of type String
-    * `bic`  -> custom `BIC` 
-    * `mandate_identification` -> `sepaMandateId` of type String
-    * `mandate_dateofsignature` ->  `sepaMandateDate` of type Date
+    * `iban` -> `IBAN` of type String (CT master)
+    * `bic`  -> custom `BIC` (CT master)
+    * `mandate_identification` -> `sepaMandateId` of type String (CT master)
+    * `mandate_dateofsignature` ->  `sepaMandateDate` of type Date  (PAYONE master)
   * traditional identification:
-    * `bankcountry` -> `bankCountry` 
+    * `bankcountry` -> `bankCountry`  (CT master)
+    * `bankaccount` -> `bankAccount`  (CT master)
+    * `bankcode` ->  `bankCode`  (CT master)
+    * `bankbranchcode` -> `bankBranchCode` (only for FR, ES, FI, IT) (CT master) 
+    * `bankcheckdigit` -> (only for FR, BE) (CT master)
+ 
+ `BANK_TRANSFER`*:
+  * general:
+    * `bankaccountholder` -> `accountHolderName` of type String
+    * `narrative_text` -> `referenceText` of type String on the Payment
+  * new data:
+    * `iban` -> `IBAN` of type String (CT master, but written back from PAYONE)
+    * `bic`  -> custom `BIC` (CT maste
+  * traditional identification:
+    * `bankcountry` -> `bankCountry`
     * `bankaccount` -> `bankAccount` 
     * `bankcode` ->  `bankCode` 
     * `bankbranchcode` -> `bankBrachCode` (only for FR, ES, FI, IT)
     * `bankcheckdigit` -> (only for FR, BE) 
+  * redirect flow support:
+    * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
+    * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
+    * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
+    * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
  
- `BANK_TRANSFER`*:
-  * `narrative_text` -> `referenceText` of type String on the Payment  
-  * new data:
-    * `iban` -> `IBAN` of type String
-    * `bic`  -> custom `BIC` 
-  * traditional identification:
-    * `bankcountry` -> `bankCountry` 
- 
-  `BANK_TRANSFER-IDEAL`:
+TODO: drop type differentiation between online bank transfer variants? 
+ ,
+  `BANK_TRANSFER-IDEAL` (additional fields):
   * `bankgrouptype` -> custom field `bankGroupType` on Payment
   
-  `BANK_TRANSFER-EPS`:
+  `BANK_TRANSFER-EPS` (additional fields):
   * `bankgrouptype` -> custom field `bankGroupType on Payment
 
-  `BANK_TRANSFER-SOFORTUEBERWEISUNG`:
+  `BANK_TRANSFER-SOFORTUEBERWEISUNG` (additional fields):
   * 
 
-  `BANK_TRANSFER-GIROPAY`:
+  `BANK_TRANSFER-GIROPAY` (additional fields):
   * 
  
  `CREDIT_CARD`*:
-  * `pseudocardpan` -> `cardDataPlaceholder` of type String
-  * `ecommercemode` ("internet" or "3dsecure") -> `force3DSecure` of type Boolean
-  * TODO also allowed to save:  
-    * Type / CC network
-    * expiry date
-    * truncated card number (passed back from PAYONE)
-    * card holder name
-  * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment  
+  * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment
+  * card data:
+    * `pseudocardpan` -> `cardDataPlaceholder` of type String (CT initial, PAYONE overrides)
+    * `ecommercemode` ("internet" or "3dsecure") -> `force3DSecure` of type Boolean (CT master, PAYONE can force a redirect anyways)
+    * `truncatedcardpan` -> `truncatedCardNumber` of type String (PAYONE master)
+    * `cardholder`  ->  `cardHolderName`  of type String (CT master, PAYONE overrides)
+    * `cardexpirydate` -> `cardExpiryDate`  of type Date (TODO last or first day of the month given?)
+    * `cardtype` -> `cardNetwork` of type Enum.  key mapping self-explanatory.  
+  * redirect flow support for 3Dsecure 
+    * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
+    * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
+    * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
+    * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
  
  `INVOICE`*:
    * `invoiceid` invoice ID (master in PAYONE).  PAYONE is master if invoice created by them.  For Klarna etc. CT data are master.
    * `due_time` -> custom Field `dueTime` type DateTime on Payment, CT master.  Convert to Unix timestamp.  
-   * TODO do individual fields: `clearing_*` stuff -> written back from PAYONE.  Field names should be analogous to DIREC_DEBIT Bank data but with a prefix 
+   * `iban` ->  `refundIBAN` of type String
+   * `bic` ->  `refundBIC`  of type String
+   * Clearing data (where the invoice was paid from): (TODO also for prepayment) (TODO IBAN / BIC only)
+    * TODO decide whether to use the 
+    * `clearing_bankaccountholder` 
+    * `clearing_bankcountry` 
+    * `clearing_bankaccount` 
+    * `clearing_bankcode` 
+    * `clearing_bankiban` 
+    * `clearing_bankbic` 
+    * `clearing_bankcity` 
+    * `clearing_bankname` 
+    * `clearing_instructionnote` 
    
-
- `INVOICE_KLARNA` (lots of mandatory risk management fields)
+ `INVOICE_KLARNA`:
+  * mandatory risk management fields:
    * `personalid` -> Personal ID Nr.  Mandatory for Klarna if customers billing address is in certain nordics countries.     
    * `ip` -> the IP address of the user is not stored in CT. -> will need a custom field? (required for Klarna)
-
- Wallets:
+  * redirect support:
+   * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
+   * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
+   * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
+   * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
+  
+ `WALLET`*:
   * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment     
    
 ## Fields not natively defined in CT, covered by custom Fields on Cart, Customer and Order
@@ -161,7 +197,8 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
  * `xid`, `cavv`, `eci` (3Dsecure is done via redirect only) 
  * `sd[n]` "delivery date"  and `ed[n]` delivery end date (there is no matching equivalent on the CT Cart Line Item) 
  * `protect_result_avs` konfiguriert nur im backend von PAYONE. Wird quasi nicht genutzt und ist AMEX-Spezifisch. 
-
+ *  All "traditional" bank account data fields (i.e. not IBAN and BIC) are omitted for Refund and Clearing Data Cases as 
+    in these cases the Data is not put in manually by the end user. 
  
 ## commercetools Payment resource
 
