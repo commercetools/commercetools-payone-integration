@@ -13,12 +13,9 @@ import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.messages.PaymentCreatedMessage;
 import io.sphere.sdk.payments.queries.PaymentQuery;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.utils.IOUtils;
@@ -36,7 +33,6 @@ import java.util.List;
  * @author fhaertig
  * @date 03.12.15
  */
-@RunWith(MockitoJUnitRunner.class)
 public class CommercetoolsQueryExecutorTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommercetoolsQueryExecutorTest.class);
@@ -51,10 +47,6 @@ public class CommercetoolsQueryExecutorTest {
         commercetoolsQueryExecutor = new CommercetoolsQueryExecutor(client);
     }
 
-    @After
-    public void tearDown() throws Exception {
-    }
-
     @Test()
     public void executePaymentQueryByTransactionState() {
         List<Payment> paymentList = new ArrayList<>(commercetoolsQueryExecutor
@@ -67,7 +59,7 @@ public class CommercetoolsQueryExecutorTest {
     @Test()
     @Ignore
     public void executePaymentCreatedMessagesQuery() {
-        ZonedDateTime since = ZonedDateTime.of(2015, 12, 3, 10, 0, 0, 0, ZoneId.systemDefault());
+        ZonedDateTime since = ZonedDateTime.of(2014, 12, 3, 10, 0, 0, 0, ZoneId.systemDefault());
         List<PaymentCreatedMessage> paymentCreatedMessageList = new ArrayList<>(commercetoolsQueryExecutor
                 .getPaymentCreatedMessages(since, TransactionState.PENDING));
         assertThat(paymentCreatedMessageList, hasSize(1));
