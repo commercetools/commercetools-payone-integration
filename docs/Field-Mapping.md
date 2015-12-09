@@ -108,7 +108,7 @@ All payment methods:
     * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
     * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
     * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
-    * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
+    * `backurl`  -> custom field `cancelUrl` Type String on Payment, CT master
   
 `CREDIT_CARD`*:
   * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment
@@ -123,7 +123,7 @@ All payment methods:
     * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
     * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
     * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
-    * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
+    * `backurl`  -> custom field `cancelUrl` Type String on Payment, CT master
  
 `CASH_ADVANCE`:
   * refund data
