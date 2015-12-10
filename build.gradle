@@ -71,8 +71,14 @@ project(":functionaltests") {
         systemProperty 'concordion.extensions', 'org.concordion.ext.inputstyle.InputStyleExtension,org.concordion.ext.runtotals.RunTotalsExtension'
 
         systemProperty 'CT_PROJECT_KEY', project.hasProperty('CT_PROJECT_KEY') ? CT_PROJECT_KEY : System.getenv('CT_PROJECT_KEY')
+        assertPropertyIsNotNullOrEmpty('CT_PROJECT_KEY', getSystemProperties())
+        
         systemProperty 'CT_CLIENT_ID', project.hasProperty('CT_CLIENT_ID') ? CT_CLIENT_ID : System.getenv('CT_CLIENT_ID')
+        assertPropertyIsNotNullOrEmpty('CT_CLIENT_ID', getSystemProperties())
+        
         systemProperty 'CT_CLIENT_SECRET', project.hasProperty('CT_CLIENT_SECRET') ? CT_CLIENT_SECRET : System.getenv('CT_CLIENT_SECRET')
+        assertPropertyIsNotNullOrEmpty('CT_CLIENT_SECRET', getSystemProperties())
+        
         systemProperty 'CRON_NOTATION', project.hasProperty('CRON_NOTATION') ? CRON_NOTATION : System.getenv('CRON_NOTATION')
     }
 }
@@ -95,3 +101,11 @@ githubPages {
         }
     }
 }
+
+void assertPropertyIsNotNullOrEmpty(String name, Map<String, Object> properties) {
+    def property = properties.get(name)
+    if ((property == null) || property.isEmpty()) {
+        throw new GradleException('Property or environment variable ' + name + ' must not be null or empty.')
+    }
+}
+
