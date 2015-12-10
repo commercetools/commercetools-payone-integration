@@ -33,13 +33,7 @@ public class CommercetoolsQueryExecutor {
         QueryPredicate<Payment> predicateFunction = QueryPredicate.of("transactions(state = \"" + transactionState.toSphereName() +"\")");
         PaymentQuery query = PaymentQuery.of().withPredicates(Arrays.asList(predicateFunction));
 
-        try {
-            PagedQueryResult<Payment> queryResult = client.execute(query).toCompletableFuture().get();
-            return queryResult.getResults();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return client.complete(query).getResults();
     }
 
     public Collection<PaymentCreatedMessage> getPaymentCreatedMessages(ZonedDateTime sinceDate, TransactionState transactionState) {
@@ -48,24 +42,11 @@ public class CommercetoolsQueryExecutor {
         Query<PaymentCreatedMessage> query = MessageQuery.of()
                 .withPredicates(Arrays.asList(predCreatedAt, predTransactionState))
                 .forMessageType(PaymentCreatedMessage.MESSAGE_HINT);
-        try {
-            PagedQueryResult<PaymentCreatedMessage> queryResult = client.execute(query).toCompletableFuture().get();
-            return queryResult.getResults();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        return null;
+
+        return client.complete(query).getResults();
     }
 
     public Order getOrderById(String id) {
-        OrderByIdGet query = OrderByIdGet.of(id);
-
-        try {
-            Order queryResult = client.execute(query).toCompletableFuture().get();
-            return queryResult;
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return client.complete(OrderByIdGet.of(id));
     }
 }
