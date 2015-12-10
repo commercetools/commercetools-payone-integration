@@ -12,24 +12,45 @@
         </p>
         <p>
             <i>
-                Note: it is necessary to do a creditcardcheck via PAYONE client API to avoid complying to PCI-DSS standard.
+                Note: it is necessary to do a creditcardcheck first via PAYONE client API to avoid complying to PCI-DSS standard.
             </i>
         </p>
         <h2>Examples</h2>
+        <h3>Common Setup</h3>
+        <ul>
+            <li>payment.paymentMethodInfo.method: <span c:set="#paymentMethod">CREDITCARD</span></li>
+            <li>payment.transactions[0].type: <span c:set="#transactionType">AUTHORIZATION</span></li>
+            <li>payment.amountPlanned.centAmount: <span c:set="#centAmount">2000</span></li>
+            <li>payment.amountPlanned.currencyCode: <span c:set="#currencyCode">EUR</span></li>
+        </ul>
         <div class="example">
             <h3>Successful Authorization</h3>
             <p>
-                If an authorization for a credit card is issued, an interfaceInteraction is added to the payment:
-                After that, an "preauthorization" request to PAYONE will be sent.
-                The PAYONE response will lead to changes in the interfaceInteraction:
+                <span c:execute="#paymentId = createPayment(#paymentMethod, #transactionType, #centAmount, #currencyCode)"></span>
+                If an authorization for a payment <span c:assertTrue="handlePayment(#paymentId)">is successfully requested</span>,
+                then
+                <ul>
+                    <li>
+                        only <span c:assertEquals="getInterfaceInteractionsCount(#paymentId)">1</span>
+                        interfaceInteraction was added
+                    </li>
+                    <li>
+                        for a PAYONE <span c:assertEquals="getInterfaceInteractionMethod(#paymentId)">preauthorization</span> request
+                    </li>
+                    <li>
+                        and a final state of<span c:assertEquals="getInterfaceInteractionState(#paymentId)">SUCCESSFUL</span>
+                    </li>
+                </ul>
             </p>
         </div>
+
         <div class="example">
             <h3>Successful Authorization with redirect (3-D Secure)</h3>
             <p>
-                If an authorization for a credit card is issued, an interfaceInteraction is added to the payment:
-                After that, an "preauthorization" request to PAYONE will be sent.
-                The PAYONE response will lead to changes in the interfaceInteraction:
+                Clarify: Is 3D-Secure always client driven or can PAYONE send a response with REDIRECT
+                and the client needs to be notified about that (reason: amount > settings in PAYONE portal)?
+
+                If client driven, this is not a use case.
             </p>
         </div>
         <div class="example">

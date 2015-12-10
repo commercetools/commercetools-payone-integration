@@ -3,6 +3,7 @@ package specs.paymentmethods.creditcard;
 import org.concordion.api.Unimplemented;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
+import specs.BaseFixture;
 
 /**
  * @author fhaertig
@@ -10,5 +11,6 @@ import org.junit.runner.RunWith;
  */
 @Unimplemented
 @RunWith(ConcordionRunner.class)
-public class ChargePreauthorizedFixture {
+public class ChargePreauthorizedFixture extends BaseFixture {
+
 }
