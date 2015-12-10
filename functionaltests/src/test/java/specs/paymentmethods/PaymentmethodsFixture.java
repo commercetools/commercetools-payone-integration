@@ -1,4 +1,4 @@
-package specs.paymentmethods.creditcard;
+package specs.paymentmethods;
 
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
@@ -7,5 +7,5 @@ import org.junit.runner.RunWith;
  * @author Jan Wolter
  */
 @RunWith(ConcordionRunner.class)
-public class CreditCardFixture {
+public class PaymentmethodsFixture {
 }
