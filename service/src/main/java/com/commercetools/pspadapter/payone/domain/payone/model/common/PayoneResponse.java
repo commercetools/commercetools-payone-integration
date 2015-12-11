@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.domain.payone.model;
+package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 /**
  * @author fhaertig

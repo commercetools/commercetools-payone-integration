@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.domain.payone.model;
+package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import java.util.EnumSet;
 import java.util.HashMap;

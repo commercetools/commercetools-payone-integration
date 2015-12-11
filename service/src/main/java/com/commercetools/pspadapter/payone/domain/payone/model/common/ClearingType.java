@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.domain.payone.model;
+package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -10,7 +10,7 @@ import java.util.Map;
  * @author fhaertig
  * @date 11.12.15
  */
-public enum PaymentType {
+public enum ClearingType {
     PAYONE_ELV("PayoneELV", "elv", ""),
     PAYONE_CC("PayoneCC", "cc", ""),
     PAYONE_VOR("PayoneVOR", "vor", ""),
@@ -37,7 +37,7 @@ public enum PaymentType {
      * fnc: Financing
      * </code>
      * **/
-    private final String code;
+    private final String payoneCode;
 
     /**
      * <code>
@@ -50,55 +50,55 @@ public enum PaymentType {
      * </code>
      * **/
     private final String subType;
-    private static final Map<String, PaymentType> LOOKUP_TYPE = new HashMap<String, PaymentType>();
-    private static final Map<String, PaymentType> LOOKUP_CODE = new HashMap<String, PaymentType>();
+    private static final Map<String, ClearingType> LOOKUP_TYPE = new HashMap<String, ClearingType>();
+    private static final Map<String, ClearingType> LOOKUP_CODE = new HashMap<String, ClearingType>();
 
     static {
-        for (PaymentType p : EnumSet.allOf(PaymentType.class)) {
+        for (ClearingType p : EnumSet.allOf(ClearingType.class)) {
             LOOKUP_TYPE.put(p.getKey(), p);
-            LOOKUP_CODE.put(p.getCode(), p);
+            LOOKUP_CODE.put(p.getPayoneCode(), p);
         }
     }
 
-    private PaymentType(final String key, final String code, final String subType) {
+    private ClearingType(final String key, final String payoneCode, final String subType) {
         this.key = key;
-        this.code = code;
+        this.payoneCode = payoneCode;
         this.subType = subType;
     }
 
-    public static PaymentType getPaymentTypeByKey(final String key) {
-        PaymentType paymentType = null;
+    public static ClearingType getClearingTypeByKey(final String key) {
+        ClearingType clearingType = null;
         // Same paymentmodes could have different codes, when they have for example different paymentcosts. Because
         // of that only the prefix of each paymentmode is checked
         for (String lookupPaymentType : LOOKUP_TYPE.keySet()) {
             if (StringUtils.containsIgnoreCase(key, lookupPaymentType)) {
-                paymentType = LOOKUP_TYPE.get(lookupPaymentType);
+                clearingType = LOOKUP_TYPE.get(lookupPaymentType);
                 break;
             }
         }
-        return paymentType;
+        return clearingType;
     }
 
-    public static PaymentType getPaymentTypeByCode(final String code) {
-        PaymentType paymentType = null;
+    public static ClearingType getClearingTypeByCode(final String payoneCode) {
+        ClearingType clearingType = null;
         // Same paymentmodes could have different Codes, when they have for example different paymentcosts. Because
         // of that only the prefix of each paymentmode is checked
         for (String lookupPaymentCode : LOOKUP_CODE.keySet()) {
-            if (StringUtils.containsIgnoreCase(code, lookupPaymentCode)) {
-                paymentType = LOOKUP_CODE.get(lookupPaymentCode);
+            if (StringUtils.containsIgnoreCase(payoneCode, lookupPaymentCode)) {
+                clearingType = LOOKUP_CODE.get(lookupPaymentCode);
                 break;
             }
         }
 
-        return paymentType;
+        return clearingType;
     }
 
     public String getKey() {
         return key;
     }
 
-    public String getCode() {
-        return code;
+    public String getPayoneCode() {
+        return payoneCode;
     }
 
     public String getSubType() {
