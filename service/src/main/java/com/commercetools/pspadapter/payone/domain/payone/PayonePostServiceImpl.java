@@ -36,9 +36,21 @@ public class PayonePostServiceImpl implements PayonePostService {
     private int readTimeOut = 10000;
     private int connectionTimeout = 3000;
 
-    public PayonePostServiceImpl(final String serverAPIURL) {
-        Preconditions.checkArgument(serverAPIURL != null && !serverAPIURL.isEmpty(), "The server api url must not be null on init.");
+    private PayonePostServiceImpl(final String serverAPIURL) {
+        Preconditions.checkArgument(
+                serverAPIURL != null && !serverAPIURL.isEmpty(),
+                "The server api url must not be null or empty.");
         this.serverAPIURL = serverAPIURL;
+    }
+
+    /**
+     * Initialize new service with url.
+     * @param payoneServerApiUrl - the payone server api url, must not be null or empty
+     * @return new instance of PayonePostServiceImpl.class
+     * @throws IllegalArgumentException if the provided {@code payoneServerApiUrl} is invalid
+     */
+    public static PayonePostServiceImpl of(final String payoneServerApiUrl) throws IllegalArgumentException {
+        return new PayonePostServiceImpl(payoneServerApiUrl);
     }
 
     @Override
