@@ -92,12 +92,12 @@ public class ServiceConfigTest {
     public void getPoApiUrl() throws MalformedURLException {
         ServiceConfig config = new ServiceConfig();
 
-        assertThat(config.getPoApiUrl(), is(PO_API_URL_DEFAULT));
+        assertThat(config.getPayoneConfig().getPoApiUrl(), is(PO_API_URL_DEFAULT));
 
         System.setProperty("PO_API_URL", URL_SYSTEM_PROPERTY);
 
-        assertThat(new ServiceConfig().getPoApiUrl(), is(URL_SYSTEM_PROPERTY));
-        assertThat("after system property was set", config.getPoApiUrl(), is(PO_API_URL_DEFAULT));
+        assertThat(new ServiceConfig().getPayoneConfig().getPoApiUrl(), is(URL_SYSTEM_PROPERTY));
+        assertThat("after system property was set", config.getPayoneConfig().getPoApiUrl(), is(PO_API_URL_DEFAULT));
     }
 
     @Test
@@ -106,12 +106,12 @@ public class ServiceConfigTest {
 
         final ServiceConfig config = new ServiceConfig(testUrl);
 
-        assertThat(config.getPoApiUrl(), is(testUrl.toExternalForm()));
+        assertThat(config.getPayoneConfig().getPoApiUrl(), is(testUrl.toExternalForm()));
 
         System.setProperty("PO_API_URL", URL_SYSTEM_PROPERTY);
 
-        assertThat(new ServiceConfig(testUrl).getPoApiUrl(), is(testUrl.toExternalForm()));
-        assertThat("after system property was set", config.getPoApiUrl(), is(testUrl.toExternalForm()));
+        assertThat(new ServiceConfig(testUrl).getPayoneConfig().getPoApiUrl(), is(testUrl.toExternalForm()));
+        assertThat("after system property was set", config.getPayoneConfig().getPoApiUrl(), is(testUrl.toExternalForm()));
     }
 
     private static void assertAbsenceOfProperty(final String propertyKey) {
