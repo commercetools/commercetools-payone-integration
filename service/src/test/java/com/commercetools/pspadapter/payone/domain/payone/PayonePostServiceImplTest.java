@@ -1,13 +1,13 @@
 package com.commercetools.pspadapter.payone.domain.payone;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
@@ -19,9 +19,6 @@ public class PayonePostServiceImplTest {
 
     public static final String PAYONE_SERVER_API_URL = "http://some.url.org/payone";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     private PayonePostServiceImpl payonePostService;
 
     @Before
@@ -31,16 +28,20 @@ public class PayonePostServiceImplTest {
 
     @Test
     public void shouldThrowConfigurationExceptionIfUrlIsEmptyOnInitialization() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("The server api url must not be null or empty.");
-        PayonePostServiceImpl.of("");
+        final Throwable throwable = catchThrowable(() -> PayonePostServiceImpl.of(""));
+
+        assertThat(throwable)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The server api url must not be null or empty.");
     }
 
     @Test
     public void shouldThrowConfigurationExceptionIfUrlIsNullOnInitialization() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("The server api url must not be null or empty.");
-        PayonePostServiceImpl.of(null);
+        final Throwable throwable = catchThrowable(() -> PayonePostServiceImpl.of(null));
+
+        assertThat(throwable)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The server api url must not be null or empty.");
     }
 
     @Test
@@ -74,16 +75,14 @@ public class PayonePostServiceImplTest {
         Map<String, String> result = payonePostService.buildMapFromResultParams(serverResponse);
         assertThat(result.isEmpty()).isFalse();
         assertThat(result.size()).isEqualTo(2);
-        assertThat(result.containsKey("paramA"));
-        assertThat(result.containsValue("a"));
+        assertThat(result).containsKey("paramA");
+        assertThat(result).containsValue("a");
         assertThat(result.get("redirecturl")).isEqualTo("https://www.redirect.de/xxx");
     }
 
     @Test
     public void shouldReturnEmptyMap() throws UnsupportedEncodingException {
-        List<String> serverResponse = Lists.newArrayList();
-        serverResponse.add("=");
-        serverResponse.add("x=");
+        List<String> serverResponse = ImmutableList.of("=", "x=");
         Map<String, String> result = payonePostService.buildMapFromResultParams(serverResponse);
         assertThat(result.isEmpty()).isTrue();
     }
