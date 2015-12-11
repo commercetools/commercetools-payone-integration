@@ -2,8 +2,11 @@ package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
+import com.commercetools.pspadapter.payone.paymentmethods.sepa.SepaDispatcher;
 import io.sphere.sdk.client.SphereClientFactory;
 import org.quartz.SchedulerException;
+
+import java.util.HashMap;
 
 /**
  * @author fhaertig
@@ -21,6 +24,11 @@ public class ServiceFactory {
                     config.getCtProjectKey(),
                     config.getCtClientId(),
                     config.getCtClientSecret()));
-        return new IntegrationService(new CommercetoolsQueryExecutor(client));
+        return new IntegrationService(new CommercetoolsQueryExecutor(client), createPaymentDispatcher());
+    }
+
+    public static PaymentDispatcher createPaymentDispatcher() {
+        return new PaymentDispatcher(
+            new SepaDispatcher((payment, transaction) -> payment, new HashMap<>()));
     }
 }

@@ -1,9 +1,8 @@
 package specs.common;
 
-import com.commercetools.pspadapter.payone.IntegrationService;
-import com.commercetools.pspadapter.payone.ScheduledJobFactory;
-import com.commercetools.pspadapter.payone.ServiceConfig;
-import com.commercetools.pspadapter.payone.ServiceFactory;
+import com.commercetools.pspadapter.payone.*;
+import com.commercetools.pspadapter.payone.paymentmethods.TransactionExecutor;
+import com.commercetools.pspadapter.payone.paymentmethods.sepa.SepaDispatcher;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
@@ -25,13 +24,7 @@ import io.sphere.sdk.orders.OrderFromCartDraft;
 import io.sphere.sdk.orders.commands.OrderDeleteCommand;
 import io.sphere.sdk.orders.commands.OrderFromCartCreateCommand;
 import io.sphere.sdk.orders.queries.OrderQuery;
-import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.PaymentDraft;
-import io.sphere.sdk.payments.PaymentDraftBuilder;
-import io.sphere.sdk.payments.TransactionDraft;
-import io.sphere.sdk.payments.TransactionDraftBuilder;
-import io.sphere.sdk.payments.TransactionState;
-import io.sphere.sdk.payments.TransactionType;
+import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.products.Product;
@@ -52,10 +45,7 @@ import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import java.net.MalformedURLException;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
@@ -140,7 +130,8 @@ public class ServiceSchedulingFixture {
         Scheduler scheduler = ScheduledJobFactory.createScheduledJob(
                 CronScheduleBuilder.cronSchedule(cronNotation),
                 integrationService,
-                SCHEDULED_JOB_KEY);
+                SCHEDULED_JOB_KEY,
+                ServiceFactory.createPaymentDispatcher());
         TriggerKey triggerKey = new TriggerKey(SCHEDULED_JOB_KEY);
 
         JobResult result = new JobResult(scheduler.getTriggerState(triggerKey).name(),

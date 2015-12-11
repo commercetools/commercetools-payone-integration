@@ -18,10 +18,12 @@ public class ScheduledJobFactory {
     public static Scheduler createScheduledJob(
             final CronScheduleBuilder cronScheduleBuilder,
             final IntegrationService integrationService,
-            final String jobKey) throws SchedulerException {
+            final String jobKey,
+            final PaymentDispatcher paymentDispatcher) throws SchedulerException {
 
         JobDataMap dataMap = new JobDataMap();
         dataMap.put(ScheduledJob.SERVICE_KEY, integrationService);
+        dataMap.put(ScheduledJob.DISPATCHER_KEY, paymentDispatcher);
         Scheduler scheduler = new StdSchedulerFactory().getScheduler();
         Trigger trigger = TriggerBuilder
                 .newTrigger()
