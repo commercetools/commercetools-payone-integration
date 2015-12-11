@@ -2,7 +2,8 @@ package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
-import com.commercetools.pspadapter.payone.paymentmethods.sepa.SepaDispatcher;
+import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa.SepaDispatcher;
 import io.sphere.sdk.client.SphereClientFactory;
 import org.quartz.SchedulerException;
 
@@ -24,7 +25,11 @@ public class ServiceFactory {
                     config.getCtProjectKey(),
                     config.getCtClientId(),
                     config.getCtClientSecret()));
-        return new IntegrationService(new CommercetoolsQueryExecutor(client), createPaymentDispatcher());
+
+        return new IntegrationService(
+                new CommercetoolsQueryExecutor(client),
+                createPaymentDispatcher(),
+                new CustomTypeBuilder(client));
     }
 
     public static PaymentDispatcher createPaymentDispatcher() {

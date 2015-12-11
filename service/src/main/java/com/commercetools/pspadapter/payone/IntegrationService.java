@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
+import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.google.common.base.Joiner;
 import io.sphere.sdk.payments.Payment;
 import spark.Spark;
@@ -15,13 +16,17 @@ public class IntegrationService {
 
     private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
     private final PaymentDispatcher dispatcher;
+    private final CustomTypeBuilder typeBuilder;
 
-    IntegrationService(final CommercetoolsQueryExecutor commercetoolsQueryExecutor, final PaymentDispatcher dispatcher) {
+    IntegrationService(final CommercetoolsQueryExecutor commercetoolsQueryExecutor, final PaymentDispatcher dispatcher, final CustomTypeBuilder typeBuilder) {
         this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
         this.dispatcher = dispatcher;
+        this.typeBuilder = typeBuilder;
     }
 
     public void start() {
+        createCustomTypes();
+
         Spark.port(port());
 
         Spark.get("/commercetools/handle/payment/:id", (req, res) -> {
@@ -49,6 +54,10 @@ public class IntegrationService {
         });
 
         Spark.awaitInitialization();
+    }
+
+    private void createCustomTypes() {
+        typeBuilder.run();
     }
 
     public void stop() {

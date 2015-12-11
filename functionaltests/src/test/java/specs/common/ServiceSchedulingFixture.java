@@ -1,8 +1,7 @@
 package specs.common;
 
 import com.commercetools.pspadapter.payone.*;
-import com.commercetools.pspadapter.payone.paymentmethods.TransactionExecutor;
-import com.commercetools.pspadapter.payone.paymentmethods.sepa.SepaDispatcher;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;

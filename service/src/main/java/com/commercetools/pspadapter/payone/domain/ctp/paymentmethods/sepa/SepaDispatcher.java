@@ -1,6 +1,6 @@
-package com.commercetools.pspadapter.payone.paymentmethods.sepa;
+package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa;
 
-import com.commercetools.pspadapter.payone.paymentmethods.TransactionExecutor;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;

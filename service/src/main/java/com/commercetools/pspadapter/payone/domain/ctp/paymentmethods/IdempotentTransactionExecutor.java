@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.paymentmethods;
+package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
 
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
