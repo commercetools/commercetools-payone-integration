@@ -16,7 +16,7 @@ public class ServiceConfig {
     private final String ctProjectKey;
     private final String ctClientId;
     private final String ctClientSecret;
-    private final String poApiUrl;
+    private final PayoneConfig payoneConfig;
 
     public ServiceConfig() throws MalformedURLException {
         this(new URL(Optional.ofNullable(getProperty("PO_API_URL")).orElse(DEFAULT_PAYONE_POST_GATEWAY)));
@@ -26,7 +26,7 @@ public class ServiceConfig {
         ctProjectKey = getProperty("CT_PROJECT_KEY");
         ctClientId  = getProperty("CT_CLIENT_ID");
         ctClientSecret = getProperty("CT_CLIENT_SECRET");
-        poApiUrl = payoneApiUrl.toExternalForm();
+        payoneConfig = new PayoneConfig(payoneApiUrl.toExternalForm());
     }
 
     public String getCtProjectKey() {
@@ -41,8 +41,8 @@ public class ServiceConfig {
         return ctClientSecret != null ? ctClientSecret : "";
     }
 
-    public String getPoApiUrl() {
-        return poApiUrl;
+    public PayoneConfig getPayoneConfig() {
+        return payoneConfig;
     }
 
     private static String getProperty(final String key) {
