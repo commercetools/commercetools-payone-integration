@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PayonePostServiceImpl implements PayonePostService {
+
     private static Logger logger = LoggerFactory.getLogger(PayonePostServiceImpl.class);
     private static final String ENCODING_UTF8 = "UTF-8";
     private static final String CONTENT_TYPE = "application/x-www-form-urlencoded;charset=UTF-8";
@@ -115,7 +116,7 @@ public class PayonePostServiceImpl implements PayonePostService {
                 // Attention: the Redirect-param should not be decoded, otherwise the redirect will not work
                 resultMap.put(
                         param[0],
-                        StringUtils.equalsIgnoreCase(PayoneConstants.Parameter.REDIRECT_URL, param[0]) ? param[1] : URLDecoder.decode(param[1],
+                        StringUtils.equalsIgnoreCase("redirecturl", param[0]) ? param[1] : URLDecoder.decode(param[1],
                                 ENCODING_UTF8));
             }
         }
