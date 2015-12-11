@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.domain.payone;
+package com.commercetools.pspadapter.payone.domain.payone.model;
 
 import org.apache.commons.lang3.StringUtils;
 

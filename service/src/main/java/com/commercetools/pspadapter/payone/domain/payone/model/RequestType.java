@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.domain.payone;
+package com.commercetools.pspadapter.payone.domain.payone.model;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -9,23 +9,17 @@ import java.util.Map;
  * @date 11.12.15
  */
 public enum RequestType {
-    preauthorization("preauthorization"), 
-    authorization("authorization"),
-    capture("capture"),
-    refund("refund"),
-    debit("debit"),
-    createaccess("createaccess"), 
-    vauthorization("vauthorization"),
-    getinvoice("getinvoice"),
-    updateuser("updateuser"),
-    updateaccess("updateaccess"), 
-    updatereminder("(updatereminder"),
-    creditcardcheck("creditcardcheck"),
-    bankaccountcheck("bankaccountcheck"),
-    _3dscheck("3dscheck"), 
-    addresscheck("addresscheck"),
-    consumerscore("consumerscore"),
-    callback("callback");
+    PREAUTHORIZATION("preauthorization"),
+    AUTHORIZATION("authorization"),
+    CAPTURE("capture"),
+    REFUND("refund"),
+    DEBIT("debit"),
+    GETINVOICE("getinvoice"),
+    UPDATEREMINDER("(updatereminder"),
+    BANKACCOUNTCHECK("bankaccountcheck"),
+    _3DSCHECK("3dscheck"),
+    ADDRESSCHECK("addresscheck"),
+    CONSUMERSCORE("consumerscore");
 
     private final String type;
 
