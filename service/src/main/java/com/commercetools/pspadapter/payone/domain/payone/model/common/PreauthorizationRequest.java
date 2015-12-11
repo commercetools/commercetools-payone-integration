@@ -1,10 +1,6 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.commercetools.pspadapter.payone.PayoneConfig;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.Map;
 
 /**
  * @author fhaertig
@@ -73,12 +69,6 @@ public class PreauthorizationRequest extends PayoneBaseRequest {
         super(config, RequestType.PREAUTHORIZATION.getType());
 
         this.aid = config.getSubAccountId();
-    }
-
-    public Map<String, Object> toStringMap() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        return mapper.convertValue(this, Map.class);
     }
 
     //**************************************************************

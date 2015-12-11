@@ -1,9 +1,12 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.commercetools.pspadapter.payone.PayoneConfig;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class PayoneBaseRequest implements Serializable {
 
@@ -46,6 +49,12 @@ public class PayoneBaseRequest implements Serializable {
                 return "TypeReference<" + PayoneBaseRequest.class.getSimpleName() + ">";
             }
         };
+    }
+
+    public Map<String, Object> toStringMap() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        return mapper.convertValue(this, Map.class);
     }
 
     PayoneBaseRequest(final PayoneConfig config, final String requestType) {
