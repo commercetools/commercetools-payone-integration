@@ -9,6 +9,8 @@ import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.queries.OrderByIdGet;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.TransactionState;
+import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
+import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 import io.sphere.sdk.payments.messages.PaymentCreatedMessage;
 import io.sphere.sdk.payments.messages.PaymentTransactionAddedMessage;
 import io.sphere.sdk.payments.queries.PaymentByIdGet;
