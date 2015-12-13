@@ -14,7 +14,7 @@ import java.util.concurrent.CompletionException;
 
 import static org.junit.Assert.*;
 
-public class SepaDispatcherTest extends PaymentTestHelper {
+public class PaymentMethodDispatcherTest extends PaymentTestHelper {
     private interface CountingTransactionExecutor extends TransactionExecutor {
         int getCount();
     }
@@ -41,7 +41,7 @@ public class SepaDispatcherTest extends PaymentTestHelper {
             public Payment executeTransaction(Payment payment, Transaction transaction) {
                 count += 1;
                 if (count > afterExecutions) try {
-                    return dummyPayment2();
+                    return dummyPaymentTwoTransactionsSuccessPending();
                 } catch (Exception e) {
                     throw new CompletionException(e);
                 }
@@ -57,8 +57,8 @@ public class SepaDispatcherTest extends PaymentTestHelper {
     @Test
     public void usesDefaultExecutor() throws Exception {
         CountingTransactionExecutor countingTransactionExecutor = countingTransactionExecutor();
-        SepaDispatcher dispatcher = new SepaDispatcher(countingTransactionExecutor, new HashMap<>());
-        dispatcher.dispatchPayment(dummyPayment1());
+        PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(countingTransactionExecutor, new HashMap<>());
+        dispatcher.dispatchPayment(dummyPaymentTwoTransactionsPending());
         assertThat(countingTransactionExecutor.getCount(), is(1));
     }
 
@@ -70,8 +70,8 @@ public class SepaDispatcherTest extends PaymentTestHelper {
         final HashMap<TransactionType, TransactionExecutor> executorMap = new HashMap<>();
         executorMap.put(TransactionType.CHARGE, chargeExecutor);
         executorMap.put(TransactionType.REFUND, refundExecutor);
-        SepaDispatcher dispatcher = new SepaDispatcher(defaultExecutor, executorMap);
-        dispatcher.dispatchPayment(dummyPayment1());
+        PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(defaultExecutor, executorMap);
+        dispatcher.dispatchPayment(dummyPaymentTwoTransactionsPending());
         assertThat(defaultExecutor.getCount(), is(0));
         assertThat(chargeExecutor.getCount(), is(1));
         assertThat(refundExecutor.getCount(), is(0));
@@ -85,8 +85,8 @@ public class SepaDispatcherTest extends PaymentTestHelper {
         final HashMap<TransactionType, TransactionExecutor> executorMap = new HashMap<>();
         executorMap.put(TransactionType.CHARGE, chargeExecutor);
         executorMap.put(TransactionType.REFUND, refundExecutor);
-        SepaDispatcher dispatcher = new SepaDispatcher(defaultExecutor, executorMap);
-        dispatcher.dispatchPayment(dispatcher.dispatchPayment(dispatcher.dispatchPayment(dummyPayment1())));
+        PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(defaultExecutor, executorMap);
+        dispatcher.dispatchPayment(dispatcher.dispatchPayment(dispatcher.dispatchPayment(dummyPaymentTwoTransactionsPending())));
         assertThat(defaultExecutor.getCount(), is(0));
         assertThat(chargeExecutor.getCount(), is(3));
         assertThat(refundExecutor.getCount(), is(1));

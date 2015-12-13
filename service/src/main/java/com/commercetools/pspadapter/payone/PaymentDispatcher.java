@@ -1,17 +1,20 @@
 package com.commercetools.pspadapter.payone;
 
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa.SepaDispatcher;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa.PaymentMethodDispatcher;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentMethodInfo;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class PaymentDispatcher implements Consumer<Payment> {
 
-    private final SepaDispatcher sepaDispatcher;
+    private final Map<String, PaymentMethodDispatcher> methodDispatcherMap;
 
-    public PaymentDispatcher(SepaDispatcher sepaDispatcher) {
-        this.sepaDispatcher = sepaDispatcher;
+    public PaymentDispatcher(Map<String, PaymentMethodDispatcher> methodDispatcherMap) {
+        this.methodDispatcherMap = methodDispatcherMap;
     }
 
     @Override
@@ -29,11 +32,11 @@ public class PaymentDispatcher implements Consumer<Payment> {
         if (paymentMethodInfo.getPaymentInterface() == null || !paymentMethodInfo.getPaymentInterface().equals("PAYONE"))
             throw new IllegalArgumentException("Unsupported Payment Interface");
 
-        if (paymentMethodInfo.getMethod().equals("DIRECT_DEBIT-SEPA"))
-            return sepaDispatcher.dispatchPayment(payment);
+        if (paymentMethodInfo.getMethod() == null)
+            throw new IllegalArgumentException("No Payment Method provided");
 
-        // TODO: Other payment methods
-
-        throw new IllegalArgumentException("Unsupported Payment Method");
+        return Optional.ofNullable(methodDispatcherMap.get(paymentMethodInfo.getMethod()))
+            .map(md -> md.dispatchPayment(payment))
+            .orElseThrow(() -> new IllegalArgumentException("Unsupported Payment Method"));
     }
 }

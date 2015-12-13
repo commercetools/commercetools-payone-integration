@@ -12,18 +12,28 @@ public class PaymentTestHelper {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream(filePath);
     }
 
-    protected Payment dummyPayment1() throws Exception {
-        InputStream dummyPaymentJson = getJsonFromFile("dummyPaymentTwoTransactionsPending.json");
+    private Payment getPaymentFromFile(String filePath) throws IOException {
+        InputStream dummyPaymentJson = getJsonFromFile(filePath);
         return SphereJsonUtils.readObject(IOUtils.toString(dummyPaymentJson), Payment.typeReference());
     }
 
-    protected Payment dummyPayment2() throws Exception {
-        InputStream dummyPaymentJson = getJsonFromFile("dummyPaymentTwoTransactionsSuccessPending.json");
-        return SphereJsonUtils.readObject(IOUtils.toString(dummyPaymentJson), Payment.typeReference());
+    protected Payment dummyPaymentTwoTransactionsPending() throws Exception {
+        return getPaymentFromFile("dummyPaymentTwoTransactionsPending.json");
+    }
+
+    protected Payment dummyPaymentTwoTransactionsSuccessPending() throws Exception {
+        return getPaymentFromFile("dummyPaymentTwoTransactionsSuccessPending.json");
+    }
+
+    protected Payment dummyPaymentNoInterface() throws Exception {
+        return getPaymentFromFile("dummyPaymentNoInterface.json");
     }
 
     protected Payment dummyPaymentWrongInterface() throws Exception {
-        InputStream dummyPaymentJson = getJsonFromFile("dummyPaymentWrongInterface.json");
-        return SphereJsonUtils.readObject(IOUtils.toString(dummyPaymentJson), Payment.typeReference());
+        return getPaymentFromFile("dummyPaymentWrongInterface.json");
+    }
+
+    protected Payment dummyPaymentUnknownMethod() throws Exception {
+        return getPaymentFromFile("dummyPaymentUnknownMethod.json");
     }
 }

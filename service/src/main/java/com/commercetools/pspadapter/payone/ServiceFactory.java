@@ -3,7 +3,8 @@ package com.commercetools.pspadapter.payone;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa.SepaDispatcher;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa.PaymentMethodDispatcher;
 import io.sphere.sdk.client.SphereClientFactory;
 import org.quartz.SchedulerException;
 
@@ -33,7 +34,17 @@ public class ServiceFactory {
     }
 
     public static PaymentDispatcher createPaymentDispatcher() {
-        return new PaymentDispatcher(
-            new SepaDispatcher((payment, transaction) -> payment, new HashMap<>()));
+        final PaymentMethodDispatcher creditCardDispatcher = createPaymentMethodDispatcher();
+        final PaymentMethodDispatcher sepaDispatcher = createPaymentMethodDispatcher();
+
+        final HashMap<String, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
+        methodDispatcherMap.put(MethodKeys.CREDIT_CARD, creditCardDispatcher);
+        methodDispatcherMap.put(MethodKeys.DIRECT_DEBIT_SEPA, sepaDispatcher);
+
+        return new PaymentDispatcher(methodDispatcherMap);
+    }
+
+    public static PaymentMethodDispatcher createPaymentMethodDispatcher() {
+        return new PaymentMethodDispatcher((payment, transaction) -> payment, new HashMap<>());
     }
 }

@@ -8,11 +8,11 @@ import io.sphere.sdk.payments.TransactionType;
 
 import java.util.Map;
 
-public class SepaDispatcher {
+public class PaymentMethodDispatcher {
     private final TransactionExecutor defaultExecutor;
     private final Map<TransactionType, TransactionExecutor> executorMap;
 
-    public SepaDispatcher(TransactionExecutor defaultExecutor, Map<TransactionType, TransactionExecutor> executorMap) {
+    public PaymentMethodDispatcher(TransactionExecutor defaultExecutor, Map<TransactionType, TransactionExecutor> executorMap) {
         this.defaultExecutor = defaultExecutor;
         this.executorMap = executorMap;
     }
