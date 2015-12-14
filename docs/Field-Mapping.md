@@ -56,6 +56,8 @@ Fields that CT could consider making a built-in:
 
 ## PAYONE fields that map to custom CT Payment fields (by method)
 
+Please use the commercetools custom payment types (per method) from the [method type specifications](https://github.com/nkuehn/payment-integration-specifications/blob/master/Method-Keys.md) in the payment specifications project. 
+
 All payment methods:
 
   * _Required_ `language` -> custom field `languageTag` of Type String on the CT Payment
@@ -99,9 +101,8 @@ All payment methods:
     * `bankaccount` -> `bankAccount` 
     * `bankcode` ->  `bankCode` 
     * `bankbranchcode` -> `bankBrachCode` (only for FR, ES, FI, IT)
-    * `bankcheckdigit` -> (only for FR, BE) 
-    * `bankgrouptype` -> custom field `bankGroupType` on Payment  (only necessary for IDEAL in NL)
-    * `bankgrouptype` -> custom field `bankGroupType on Payment (only for EPS in AT)
+    * `bankcheckdigit` -> `bankDataCheckDigit` (only for FR, BE)  
+    * `bankgrouptype` -> custom field `bankGroupType` on Payment  (only necessary for IDEAL in NL and EPS in AT)
   * redirect flow support:
     * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
     * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
@@ -119,7 +120,7 @@ All payment methods:
     * `cardtype` -> `cardNetwork` of type Enum.  key mapping self-explanatory.  
   * redirect flow support for 3Dsecure 
     * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
-    * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
+    * `successurl` ->  custom field `successUrl` of Type String on the CT Payment (CT master)
     * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
     * `backurl`  -> custom field `cancelUrl` Type String on Payment, CT master
  
@@ -133,7 +134,7 @@ All payment methods:
    * `clearing_bankbic` ->  `paidFromBIC` 
  
 `INVOICE`*:
-   * `invoiceid` invoice ID (master in PAYONE).  PAYONE is master if invoice created by them.  For Klarna etc. CT data are master.
+   * `invoiceid` invoice ID (master in PAYONE). -> `interfaceInvoiceId` custom field of type String.  PAYONE is master if invoice created by them.  For Klarna etc. CT data are master.
    * `due_time` -> custom Field `dueTime` type DateTime on Payment, CT master.  Convert to Unix timestamp.  
    * `iban` ->  `refundIBAN` of type String
    * `bic` ->  `refundBIC`  of type String
@@ -142,11 +143,11 @@ All payment methods:
     * `clearing_bankiban`  -> `paidFromIBAN` 
     * `clearing_bankbic` ->  `paidFromBIC` 
    
-`INVOICE_KLARNA`:
+`INVOICE-KLARNA`:
   * `clearing_instructionnote` ->  `invoiceUrl` field of type String, PAYONE master
   * mandatory risk management fields:
-   * `personalid` -> Personal ID Nr.  Mandatory for Klarna if customers billing address is in certain nordics countries.     
-   * `ip` -> the IP address of the user is not stored in CT. -> will need a custom field? (required for Klarna)
+   * `personalid` -> Personal ID Nr.  Mandatory for Klarna if customers billing address is in certain nordics countries. -> `personalId` custom field of type String. 
+   * `ip` -> `ipAddress` the IP address of the user is not stored in CT.  (required for Klarna)
   * redirect support:
    * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
    * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
@@ -199,7 +200,7 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
 | interfaceId | `txid` | PAYONE |  |
 | amountPlanned.centAmount | `price` | CT / PAYONE | Initially set by checkout, `price` from PAYONE notification must not deviate on Notifications. PAYONE value has to be multiplied by 100.  |
 | amountPlanned.currency | - | CT |  |
-| amountAuthorized.centAmount | TODO | PAYONE | TODO ask PAYONE  |
+| amountAuthorized.centAmount | TODO | PAYONE | TODO see TODO list |
 | authorizedUntil | TODO | PAYONE |  |
 | amountPaid.centAmount | `receivable` minus `balance` | PAYONE | TODO verify with PAYONE |
 | amountRefunded.centAmount | (from transactions) | PAYONE | (Sum of successful Refund Transactions) |
@@ -382,26 +383,6 @@ TODO
 | shippingInfo.taxRate.centAmount |  |  |  |
 | shippingInfo.discountedPrice.price.currencyCode |  |  |  |
 | shippingInfo.discountedPrice.price.centAmount |  |  |  |
-
-
-## Payment Method specific fields of the payment object
-
-Please use the commercetools custom payment types (per method) from the [method type specifications](https://github.com/nkuehn/payment-integration-specifications/blob/master/Method-Keys.md) in the payment specifications project. 
-
-### CREDIT_CARD
-
-#### commercetools payment object custom fields
-
-`custom.fields.` has to be prefixed when actually accessing these fields.  
-
-| CT Payment custom property | PAYONE Server API | Who is Master? | Value transform |
-|---|---|---|---|
-| foo |  |  |  |
-| foo |  |  |  |
-
-### DIRECTDEBIT_SEPA
-
-XXXX ... analogous to the Credit Card sample above ... 
 
 # Constraint Rules to be implemented by the Integration
 
