@@ -1,8 +1,10 @@
 package com.commercetools.pspadapter.payone;
 
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa.PaymentMethodDispatcher;
+import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
@@ -20,14 +22,14 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
         public CountingPaymentMethodDispatcher() {
             super(new TransactionExecutor() {
                 @Override
-                public Payment executeTransaction(Payment payment, Transaction transaction) {
+                public PaymentWithCartLike executeTransaction(PaymentWithCartLike payment, Transaction transaction) {
                     return payment;
                 }
             }, new HashMap<>());
         }
 
         @Override
-        public Payment dispatchPayment(Payment payment) {
+        public PaymentWithCartLike dispatchPayment(PaymentWithCartLike payment) {
             count += 1;
             return super.dispatchPayment(payment);
         }
@@ -37,10 +39,10 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
     public void testRefusingWrongPaymentInterface() throws Exception {
         PaymentDispatcher dispatcher = new PaymentDispatcher(null);
 
-        final Throwable noInterface = catchThrowable(() -> dispatcher.dispatchPayment(dummyPaymentNoInterface()));
+        final Throwable noInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentNoInterface(), (Cart)null)));
         assertThat(noInterface).isInstanceOf(IllegalArgumentException.class);
 
-        final Throwable wrongInterface = catchThrowable(() -> dispatcher.dispatchPayment(dummyPaymentWrongInterface()));
+        final Throwable wrongInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentWrongInterface(), (Cart)null)));
         assertThat(wrongInterface).isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -48,7 +50,7 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
     public void testRefusingUnknownPaymentMethod() throws Exception {
         PaymentDispatcher dispatcher = new PaymentDispatcher(new HashMap<>());
 
-        final Throwable noInterface = catchThrowable(() -> dispatcher.dispatchPayment(dummyPaymentUnknownMethod()));
+        final Throwable noInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentUnknownMethod(), (Cart)null)));
         assertThat(noInterface).isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -62,8 +64,8 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
         methodDispatcherMap.put(MethodKeys.DIRECT_DEBIT_SEPA, sepaDispatcher);
 
         PaymentDispatcher dispatcher = new PaymentDispatcher(methodDispatcherMap);
-        dispatcher.dispatchPayment(dummyPaymentTwoTransactionsPending());
-        dispatcher.dispatchPayment(dummyPaymentTwoTransactionsSuccessPending());
+        dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsPending(), (Cart)null));
+        dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsSuccessPending(), (Cart)null));
 
         assertThat(creditCardDispatcher.count).isEqualTo(2);
         assertThat(sepaDispatcher.count).isEqualTo(0);

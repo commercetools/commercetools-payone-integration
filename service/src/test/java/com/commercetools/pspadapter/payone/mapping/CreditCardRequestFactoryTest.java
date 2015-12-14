@@ -6,6 +6,7 @@ import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import com.commercetools.pspadapter.payone.PaymentTestHelper;
 import com.commercetools.pspadapter.payone.PayoneConfig;
 import com.commercetools.pspadapter.payone.ServiceConfig;
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CCPreauthorizationRequest;
@@ -32,7 +33,7 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         Order order = dummyOrderMapToPayoneRequest();
         PayoneConfig config = new ServiceConfig().getPayoneConfig();
 
-        final Throwable throwable = catchThrowable(() -> factory.createPreauthorizationRequest(payment, order, config));
+        final Throwable throwable = catchThrowable(() -> factory.createPreauthorizationRequest(new PaymentWithCartLike(payment, order), config));
 
         Assertions.assertThat(throwable)
                 .isInstanceOf(IllegalArgumentException.class)
@@ -45,7 +46,7 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         Payment payment = dummyPaymentMapToPayoneRequest();
         Order order = dummyOrderMapToPayoneRequest();
         PayoneConfig config = new ServiceConfig().getPayoneConfig();
-        CCPreauthorizationRequest result = factory.createPreauthorizationRequest(payment, order, config);
+        CCPreauthorizationRequest result = factory.createPreauthorizationRequest(new PaymentWithCartLike(payment, order), config);
 
         assertThat(result.getRequest()).isEqualTo(RequestType.PREAUTHORIZATION.getType());
         assertThat(result.getAid()).isEqualTo(config.getSubAccountId());

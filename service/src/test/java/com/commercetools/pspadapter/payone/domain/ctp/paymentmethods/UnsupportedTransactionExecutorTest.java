@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 
 import com.commercetools.pspadapter.payone.PaymentTestHelper;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
@@ -42,7 +44,7 @@ public class UnsupportedTransactionExecutorTest extends PaymentTestHelper {
         // TODO jw: use more specific matchers
         when(client.complete(argThat(instanceOf(PaymentUpdateCommand.class)))).thenReturn(outputPayment);
 
-        assertThat(testee.executeTransaction(inputPayment, transaction)).isSameAs(outputPayment);
+        assertThat(testee.executeTransaction(new PaymentWithCartLike(inputPayment, (Cart)null), transaction).getPayment()).isSameAs(outputPayment);
     }
 
     @Test
@@ -55,7 +57,7 @@ public class UnsupportedTransactionExecutorTest extends PaymentTestHelper {
         when(client.complete(argThat(instanceOf(PaymentUpdateCommand.class))))
                 .thenThrow(completionException);
 
-        final Throwable throwable = catchThrowable(() -> testee.executeTransaction(inputPayment, transaction));
+        final Throwable throwable = catchThrowable(() -> testee.executeTransaction(new PaymentWithCartLike(inputPayment, (Cart)null), transaction));
 
         assertThat(throwable).isSameAs(completionException);
     }

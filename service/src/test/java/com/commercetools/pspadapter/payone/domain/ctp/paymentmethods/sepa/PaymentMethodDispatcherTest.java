@@ -3,7 +3,9 @@ package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa;
 import static org.hamcrest.CoreMatchers.is;
 
 import com.commercetools.pspadapter.payone.PaymentTestHelper;
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
+import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
@@ -23,7 +25,7 @@ public class PaymentMethodDispatcherTest extends PaymentTestHelper {
         return new CountingTransactionExecutor() {
             int count = 0;
             @Override
-            public Payment executeTransaction(Payment payment, Transaction transaction) {
+            public PaymentWithCartLike executeTransaction(PaymentWithCartLike payment, Transaction transaction) {
                 count += 1;
                 return payment;
             }
@@ -38,10 +40,10 @@ public class PaymentMethodDispatcherTest extends PaymentTestHelper {
         return new CountingTransactionExecutor() {
             int count = 0;
             @Override
-            public Payment executeTransaction(Payment payment, Transaction transaction) {
+            public PaymentWithCartLike executeTransaction(PaymentWithCartLike payment, Transaction transaction) {
                 count += 1;
                 if (count > afterExecutions) try {
-                    return dummyPaymentTwoTransactionsSuccessPending();
+                    return payment.withPayment(dummyPaymentTwoTransactionsSuccessPending());
                 } catch (Exception e) {
                     throw new CompletionException(e);
                 }
@@ -58,7 +60,7 @@ public class PaymentMethodDispatcherTest extends PaymentTestHelper {
     public void usesDefaultExecutor() throws Exception {
         CountingTransactionExecutor countingTransactionExecutor = countingTransactionExecutor();
         PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(countingTransactionExecutor, new HashMap<>());
-        dispatcher.dispatchPayment(dummyPaymentTwoTransactionsPending());
+        dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsPending(), (Cart)null));
         assertThat(countingTransactionExecutor.getCount(), is(1));
     }
 
@@ -71,7 +73,7 @@ public class PaymentMethodDispatcherTest extends PaymentTestHelper {
         executorMap.put(TransactionType.CHARGE, chargeExecutor);
         executorMap.put(TransactionType.REFUND, refundExecutor);
         PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(defaultExecutor, executorMap);
-        dispatcher.dispatchPayment(dummyPaymentTwoTransactionsPending());
+        dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsPending(), (Cart)null));
         assertThat(defaultExecutor.getCount(), is(0));
         assertThat(chargeExecutor.getCount(), is(1));
         assertThat(refundExecutor.getCount(), is(0));
@@ -86,7 +88,7 @@ public class PaymentMethodDispatcherTest extends PaymentTestHelper {
         executorMap.put(TransactionType.CHARGE, chargeExecutor);
         executorMap.put(TransactionType.REFUND, refundExecutor);
         PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(defaultExecutor, executorMap);
-        dispatcher.dispatchPayment(dispatcher.dispatchPayment(dispatcher.dispatchPayment(dummyPaymentTwoTransactionsPending())));
+        dispatcher.dispatchPayment(dispatcher.dispatchPayment(dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsPending(), (Cart)null))));
         assertThat(defaultExecutor.getCount(), is(0));
         assertThat(chargeExecutor.getCount(), is(3));
         assertThat(refundExecutor.getCount(), is(1));
