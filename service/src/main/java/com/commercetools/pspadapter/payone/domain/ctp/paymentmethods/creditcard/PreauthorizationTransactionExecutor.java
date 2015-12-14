@@ -5,9 +5,9 @@ import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.IdempotentTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
+import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CCPreauthorizationRequest;
 import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
-import com.google.common.cache.Cache;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -54,7 +54,7 @@ public class PreauthorizationTransactionExecutor implements IdempotentTransactio
 
     @Override
     public PaymentWithCartLike attemptFirstExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        final CCPreauthorizationRequest request = requestFactory.createPreauthorizationRequest(paymentWithCartLike, null);
+        final CCPreauthorizationRequest request = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
 
         final Payment updatedPayment = client.complete(
             PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
@@ -63,52 +63,53 @@ public class PreauthorizationTransactionExecutor implements IdempotentTransactio
                         CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
                         CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */))));
 
-        final Map<String, String> response = payonePostService.executePost(request.toStringMap());
+        try {
+            final Map<String, String> response = payonePostService.executePost(request);
 
 
-        final String status = response.get("status");
-        if (status.equals("REDIRECT")) {
-            return paymentWithCartLike.withPayment(client.complete(
-                PaymentUpdateCommand.of(updatedPayment,
-                    AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT,
-                        ImmutableMap.of(CustomTypeBuilder.REDIRECT_URL, response.get("redirecturl"),
-                            CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
-                            CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */)))));
-        }
-        else {
-            // TODO: Check for error response
-            final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                ImmutableMap.of(CustomTypeBuilder.RESPONSE_FIELD, response.toString() /* TODO */,
-                    CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
-                    CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
-            if (status.equals("APPROVED")) {
+            final String status = response.get("status");
+            if (status.equals("REDIRECT")) {
                 return paymentWithCartLike.withPayment(client.complete(
                         PaymentUpdateCommand.of(updatedPayment,
-                            ImmutableList.of(
-                                interfaceInteraction,
-                                ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
-                                ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
-                            )))
-                );
+                                AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT,
+                                        ImmutableMap.of(CustomTypeBuilder.REDIRECT_URL, response.get("redirecturl"),
+                                                CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
+                                                CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */)))));
+            } else {
+                // TODO: Check for error response
+                final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
+                        ImmutableMap.of(CustomTypeBuilder.RESPONSE_FIELD, response.toString() /* TODO */,
+                                CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
+                                CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
+                if (status.equals("APPROVED")) {
+                    return paymentWithCartLike.withPayment(client.complete(
+                                    PaymentUpdateCommand.of(updatedPayment,
+                                            ImmutableList.of(
+                                                    interfaceInteraction,
+                                                    ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
+                                                    ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
+                                            )))
+                    );
+                } else if (status.equals("ERROR")) {
+                    return paymentWithCartLike.withPayment(client.complete(
+                                    PaymentUpdateCommand.of(updatedPayment,
+                                            ImmutableList.of(
+                                                    interfaceInteraction,
+                                                    ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
+                                                    ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
+                                            )))
+                    );
+                } else if (status.equals("PENDING")) {
+                    return paymentWithCartLike.withPayment(client.complete(
+                                    PaymentUpdateCommand.of(updatedPayment,
+                                            ImmutableList.of(
+                                                    interfaceInteraction
+                                            )))
+                    );
+                }
             }
-            else if (status.equals("ERROR")) {
-                return paymentWithCartLike.withPayment(client.complete(
-                        PaymentUpdateCommand.of(updatedPayment,
-                            ImmutableList.of(
-                                interfaceInteraction,
-                                ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
-                                ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
-                            )))
-                );
-            }
-            else if (status.equals("PENDING")) {
-                return paymentWithCartLike.withPayment(client.complete(
-                        PaymentUpdateCommand.of(updatedPayment,
-                            ImmutableList.of(
-                                interfaceInteraction
-                            )))
-                );
-            }
+        } catch (PayoneException ex) {
+            throw new IllegalStateException("Payone request failed.", ex);
         }
 
         throw new IllegalStateException("Unknown PayOne status");

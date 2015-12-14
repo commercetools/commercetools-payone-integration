@@ -1,25 +1,17 @@
 package com.commercetools.pspadapter.payone.domain.payone;
 
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneBaseRequest;
 import com.google.common.base.Preconditions;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -54,12 +46,9 @@ public class PayonePostServiceImpl implements PayonePostService {
     }
 
     @Override
-    public Map<String, String> executePost(final Map<String, String> requestParams) throws PayoneException {
+    public Map<String, String> executePost(final PayoneBaseRequest requestParams) throws PayoneException {
 
-        Map<String, String> resultMap = Collections.emptyMap();
-
-        StringBuffer params = buildRequestParamsString(requestParams);
-
+        logger.info("Payone POST request parameters: " + requestParams.toStringMap().toString());
         // Now after all parameters are prepared then send those parameters into
         // the target URL using HTTPS protocol and analyze the response. Please
         // be aware that you have configured your web server to locate
@@ -70,54 +59,17 @@ public class PayonePostServiceImpl implements PayonePostService {
         // System.setProperty("javax.net.ssl.trustStorePassword", "mypassword");
         //
 
-        InputStream inStream = null;
-        OutputStream outStream = null;
         try {
-            // Get the connection to the server
-            URL locator = new URL(this.serverAPIURL);
-            HttpsURLConnection conn = (HttpsURLConnection) locator.openConnection();
-            conn.setConnectTimeout(this.connectionTimeout);
-            conn.setReadTimeout(this.readTimeOut);
-            conn.setRequestProperty("Content-type", CONTENT_TYPE);
-            conn.setRequestProperty("Content-length", String.valueOf(params.length()));
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
+            String serverResponse = Unirest.post(this.serverAPIURL)
+                    .fields(requestParams.toStringMap())
+                    .asString().getBody();
 
-            // Write the input parameters
-            outStream = conn.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outStream, ENCODING_UTF8));
-            writer.write(params.toString());
-            writer.flush();
-
-            // Get the response from the server
-            inStream = conn.getInputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(inStream, ENCODING_UTF8));
-            String tempLine;
-            List<String> serverResponse = new ArrayList<String>();
-            while (StringUtils.isNotBlank(tempLine = br.readLine())) {
-                serverResponse.add(tempLine);
-            }
             logger.info("Payone POST response: " + serverResponse);
-
-            // Transform the response from the server into a map so it's
-            // easier to lookup necessary value.
-            resultMap = buildMapFromResultParams(serverResponse);
-        } catch (Exception e) {
+        } catch (UnirestException e) {
             throw new PayoneException("Payone POST request failed.", e);
-        } finally {
-            // Close the input and output stream if it's open
-            try {
-                if (inStream != null) {
-                    inStream.close();
-                }
-                if (outStream != null) {
-                    outStream.close();
-                }
-            } catch (IOException e) {
-                throw new PayoneException("Payone close connection streams failed.", e);
-            }
         }
-        return resultMap;
+
+        return null;
     }
 
     Map<String, String> buildMapFromResultParams(final List<String> serverResponse) throws UnsupportedEncodingException {
@@ -153,7 +105,7 @@ public class PayonePostServiceImpl implements PayonePostService {
             }
         }
 
-        logger.info("Payone POST request parameters: " + params.toString());
+
         return params;
     }
 

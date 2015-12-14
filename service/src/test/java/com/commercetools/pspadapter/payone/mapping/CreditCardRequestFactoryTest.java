@@ -7,7 +7,6 @@ import com.commercetools.pspadapter.payone.PaymentTestHelper;
 import com.commercetools.pspadapter.payone.PayoneConfig;
 import com.commercetools.pspadapter.payone.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CCPreauthorizationRequest;
@@ -15,6 +14,7 @@ import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 import org.assertj.core.api.Assertions;
+import org.javamoney.moneta.function.MonetaryUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -62,14 +62,14 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         assertThat(result.getAid()).isEqualTo(config.getSubAccountId());
         assertThat(result.getMid()).isEqualTo(config.getMerchantId());
         assertThat(result.getPortalid()).isEqualTo(config.getPortalId());
-        //assertThat(result.getKey()).isEqualTo(config.getKey());
+        //assertThat(result.getKeyAsMD5Hash()).isEqualTo(config.getKeyAsMD5Hash());
         assertThat(result.getMode()).isEqualTo(config.getMode());
         assertThat(result.getApi_version()).isEqualTo(config.getApiVersion());
 
         String clearingType = ClearingType.getClearingTypeByKey(payment.getPaymentMethodInfo().getMethod()).getPayoneCode();
         assertThat(result.getClearingtype()).isEqualTo(clearingType);
 
-        assertThat(result.getAmount()).isEqualTo(payment.getAmountPlanned().getNumber().intValueExact());
+        assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
         assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
         assertThat(result.getEcommercemode()).isEqualTo(payment.getCustom().getFieldAsBoolean(CustomFieldKeys.FORCE3DSECURE_KEY));
@@ -85,15 +85,13 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         assertThat(result.getAddressaddition()).isEqualTo(billingAddress.getAdditionalStreetInfo());
         assertThat(result.getCity()).isEqualTo(billingAddress.getCity());
         assertThat(result.getZip()).isEqualTo(order.getBillingAddress().getPostalCode());
-        assertThat(result.getCountry()).isEqualTo(order.getBillingAddress().getCountry().getName());
+        assertThat(result.getCountry()).isEqualTo(order.getBillingAddress().getCountry().toLocale().getCountry());
         assertThat(result.getEmail()).isEqualTo(order.getBillingAddress().getEmail());
         assertThat(result.getTelephonenumber()).isEqualTo(Optional
                 .ofNullable(billingAddress.getPhone())
                 .orElse(billingAddress.getMobile()));
 
         assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
-
-        PayonePostServiceImpl.of(config.getPoApiUrl()).executePost(result.toStringMap());
 
         //TODO: need to check also
         //reference
