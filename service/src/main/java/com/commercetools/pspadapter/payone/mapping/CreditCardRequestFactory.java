@@ -13,17 +13,20 @@ import io.sphere.sdk.payments.Payment;
  */
 public class CreditCardRequestFactory extends PayoneRequestFactory {
 
+    public CreditCardRequestFactory(final PayoneConfig config) {
+        super(config);
+    }
+
     @Override
     public CCPreauthorizationRequest createPreauthorizationRequest(
-            final PaymentWithCartLike paymentWithCartLike,
-            final PayoneConfig config) {
+            final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.PSEUDOCARDPAN_KEY);
-        CCPreauthorizationRequest request = new CCPreauthorizationRequest(config, pseudocardpan);
+        CCPreauthorizationRequest request = new CCPreauthorizationRequest(getConfig(), pseudocardpan);
 
         if (paymentWithCartLike.getOrderNumber().isPresent()) {
             request.setReference(paymentWithCartLike.getOrderNumber().get());
@@ -39,6 +42,5 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         request = (CCPreauthorizationRequest) MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
         return request;
     }
-
 
 }
