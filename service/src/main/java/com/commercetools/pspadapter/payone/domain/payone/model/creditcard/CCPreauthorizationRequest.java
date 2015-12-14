@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.creditcard;
 
 import com.commercetools.pspadapter.payone.PayoneConfig;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.PreauthorizationRequest;
 
 /**
@@ -14,8 +15,12 @@ public class CCPreauthorizationRequest extends PreauthorizationRequest {
      */
     private String pseudocardpan;
 
-    public CCPreauthorizationRequest(final PayoneConfig config) {
-        super(config);
+    private String ecommercemode;
+
+    public CCPreauthorizationRequest(final PayoneConfig config, final String pseudocardpan) {
+        super(config, ClearingType.PAYONE_CC.getPayoneCode());
+
+        this.pseudocardpan = pseudocardpan;
     }
 
     //**************************************************************
@@ -27,7 +32,11 @@ public class CCPreauthorizationRequest extends PreauthorizationRequest {
         return pseudocardpan;
     }
 
-    public void setPseudocardpan(final String pseudocardpan) {
-        this.pseudocardpan = pseudocardpan;
+    public String getEcommercemode() {
+        return ecommercemode;
+    }
+
+    public void setEcommercemode(final String ecommercemode) {
+        this.ecommercemode = ecommercemode;
     }
 }

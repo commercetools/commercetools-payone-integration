@@ -47,6 +47,8 @@ public class PreauthorizationRequest extends PayoneBaseRequest {
 
     private String city;
 
+    private String addressaddition;
+
     private String state;
 
     private String email;
@@ -65,10 +67,11 @@ public class PreauthorizationRequest extends PayoneBaseRequest {
 
     private String ip;
 
-    public PreauthorizationRequest(final PayoneConfig config) {
+    public PreauthorizationRequest(final PayoneConfig config, final String clearingtype) {
         super(config, RequestType.PREAUTHORIZATION.getType());
 
         this.aid = config.getSubAccountId();
+        this.clearingtype = clearingtype;
     }
 
     //**************************************************************
@@ -80,16 +83,8 @@ public class PreauthorizationRequest extends PayoneBaseRequest {
         return aid;
     }
 
-    public void setAid(final String aid) {
-        this.aid = aid;
-    }
-
     public String getClearingtype() {
         return clearingtype;
-    }
-
-    public void setClearingtype(final String clearingtype) {
-        this.clearingtype = clearingtype;
     }
 
     public String getReference() {
@@ -226,6 +221,14 @@ public class PreauthorizationRequest extends PayoneBaseRequest {
 
     public void setState(final String state) {
         this.state = state;
+    }
+
+    public String getAddressaddition() {
+        return addressaddition;
+    }
+
+    public void setAddressaddition(final String addressaddition) {
+        this.addressaddition = addressaddition;
     }
 
     public String getEmail() {

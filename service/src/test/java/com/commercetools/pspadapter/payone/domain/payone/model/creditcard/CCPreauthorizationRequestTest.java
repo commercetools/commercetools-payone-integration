@@ -28,15 +28,14 @@ public class CCPreauthorizationRequestTest {
     @Test
     public void serializeCreditCardPreAuthRequestToStringMap() {
         //create with required properties
-        CCPreauthorizationRequest request = new CCPreauthorizationRequest(payoneConfig);
+        CCPreauthorizationRequest request = new CCPreauthorizationRequest(payoneConfig, PSEUDOCARDPAN);
 
-        request.setClearingtype(ClearingType.PAYONE_CC.getPayoneCode());
         request.setReference(REFERENCE);
         request.setAmount(AMOUNT);
         request.setCurrency(Currency.getInstance("EUR").getCurrencyCode());
         request.setLastname(LASTNAME);
         request.setCountry(COUNTRY);
-        request.setPseudocardpan(PSEUDOCARDPAN);
+        request.setEcommercemode("internet");
 
         Map<String, Object> resultMap = request.toStringMap();
 
@@ -54,8 +53,9 @@ public class CCPreauthorizationRequestTest {
         assertThat(resultMap).containsEntry("lastname", LASTNAME);
         assertThat(resultMap).containsEntry("country", COUNTRY);
         assertThat(resultMap).containsEntry("pseudocardpan", PSEUDOCARDPAN);
+        assertThat(resultMap).containsEntry("ecommercemode", "internet");
 
         //assure that no other properties are contained
-        assertThat(resultMap).hasSize(14);
+        assertThat(resultMap).hasSize(15);
     }
 }

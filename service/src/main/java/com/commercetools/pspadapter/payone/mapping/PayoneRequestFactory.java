@@ -2,9 +2,7 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.PreauthorizationRequest;
-import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartLike;
-import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 
 /**

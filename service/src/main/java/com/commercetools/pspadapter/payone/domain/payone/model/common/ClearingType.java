@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public enum ClearingType {
     PAYONE_ELV("PayoneELV", "elv", ""),
-    PAYONE_CC("PayoneCC", "cc", ""),
+    PAYONE_CC("CREDIT_CARD", "cc", ""),
     PAYONE_VOR("PayoneVOR", "vor", ""),
     PAYONE_REC("PayoneREC", "rec", ""),
     PAYONE_COD("PayoneCOD", "cod", ""),
