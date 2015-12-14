@@ -41,8 +41,6 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
     public void throwExceptionWhenPaymentIncomplete() throws Exception {
         Payment payment = dummyPaymentNoCustomFields();
         Order order = dummyOrderMapToPayoneRequest();
-
-
         final Throwable throwable = catchThrowable(() -> factory.createPreauthorizationRequest(new PaymentWithCartLike(payment, order)));
 
         Assertions.assertThat(throwable)
@@ -55,25 +53,35 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
 
         Payment payment = dummyPaymentMapToPayoneRequest();
         Order order = dummyOrderMapToPayoneRequest();
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         PayoneConfig config = new ServiceConfig().getPayoneConfig();
-        CCPreauthorizationRequest result = factory.createPreauthorizationRequest(new PaymentWithCartLike(payment, order));
+        CCPreauthorizationRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
 
+        //base values
         assertThat(result.getRequest()).isEqualTo(RequestType.PREAUTHORIZATION.getType());
         assertThat(result.getAid()).isEqualTo(config.getSubAccountId());
         assertThat(result.getMid()).isEqualTo(config.getMerchantId());
         assertThat(result.getPortalid()).isEqualTo(config.getPortalId());
-        //assertThat(result.getKeyAsMD5Hash()).isEqualTo(config.getKeyAsMD5Hash());
+        assertThat(result.getKey()).isEqualTo(config.getKeyAsMD5Hash());
         assertThat(result.getMode()).isEqualTo(config.getMode());
         assertThat(result.getApi_version()).isEqualTo(config.getApiVersion());
 
+        //clearing type
         String clearingType = ClearingType.getClearingTypeByKey(payment.getPaymentMethodInfo().getMethod()).getPayoneCode();
         assertThat(result.getClearingtype()).isEqualTo(clearingType);
 
+        //references
+        assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber().get());
+        assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
+
+        //monetary
         assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
         assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
+        //3d secure
         assertThat(result.getEcommercemode()).isEqualTo(payment.getCustom().getFieldAsBoolean(CustomFieldKeys.FORCE3DSECURE_KEY));
 
+        //address data
         Address billingAddress = order.getBillingAddress();
         assertThat(result.getTitle()).isEqualTo(billingAddress.getTitle());
         assertThat(result.getSalutation()).isEqualTo(billingAddress.getSalutation());
@@ -91,10 +99,7 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
                 .ofNullable(billingAddress.getPhone())
                 .orElse(billingAddress.getMobile()));
 
-        assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
-
         //TODO: need to check also
-        //reference
         //gender
         //billingAddress.state
 

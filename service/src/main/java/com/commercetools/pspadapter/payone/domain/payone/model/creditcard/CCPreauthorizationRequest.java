@@ -11,7 +11,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Preauthori
 public class CCPreauthorizationRequest extends PreauthorizationRequest {
 
     /**
-     * truncated card number
+     * pseudo card number
      */
     private String pseudocardpan;
 

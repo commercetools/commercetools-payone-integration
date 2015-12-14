@@ -21,7 +21,7 @@ public class CCPreauthorizationRequestTest {
     private static final int AMOUNT = 2000;
     private static final String LASTNAME = "Mustermann";
     private static final String COUNTRY = "DE";
-    private static final String PSEUDOCARDPAN = "XXX001";
+    private static final String PSEUDOCARDPAN = "0000123";
 
     private final PayoneConfig payoneConfig = new PayoneConfig(PAYONE_SERVER_API_URL);
 
