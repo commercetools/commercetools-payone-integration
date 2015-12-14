@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.PayoneConfig;
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CCPreauthorizationRequest;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
@@ -14,16 +15,20 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
 
     @Override
     public CCPreauthorizationRequest createPreauthorizationRequest(
-            final Payment ctPayment,
-            final CartLike<?> ctCartLike,
+            final PaymentWithCartLike paymentWithCartLike,
             final PayoneConfig config) {
 
+        final Payment ctPayment = paymentWithCartLike.getPayment();
+        final CartLike ctCartLike = paymentWithCartLike.getCartLike();
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.PSEUDOCARDPAN_KEY);
         CCPreauthorizationRequest request = new CCPreauthorizationRequest(config, pseudocardpan);
 
-        //TODO: request.setReference(ctCartLike.getOrderNumber());
+        if (paymentWithCartLike.getOrderNumber().isPresent()) {
+            request.setReference(paymentWithCartLike.getOrderNumber().get());
+        }
+
         request.setAmount(ctPayment.getAmountPlanned().getNumber().intValueExact());
         request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
         request.setNarrative_text(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.NARRATIVETEXT_KEY));
