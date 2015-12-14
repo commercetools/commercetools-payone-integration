@@ -29,7 +29,7 @@ public class PaymentDispatcher implements Consumer<Payment> {
     public Payment dispatchPayment(Payment payment) {
         final PaymentMethodInfo paymentMethodInfo = payment.getPaymentMethodInfo();
 
-        if (paymentMethodInfo.getPaymentInterface() == null || !paymentMethodInfo.getPaymentInterface().equals("PAYONE"))
+        if (!"PAYONE".equals(paymentMethodInfo.getPaymentInterface()))
             throw new IllegalArgumentException("Unsupported Payment Interface");
 
         if (paymentMethodInfo.getMethod() == null)
