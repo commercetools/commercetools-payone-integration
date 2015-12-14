@@ -54,20 +54,35 @@ public class CustomTypeBuilder {
                     TextInputHint.SINGLE_LINE);
 
             // TODO jw: add other fields and types
-//            final FieldDefinition transactionIdField = FieldDefinition.of(
-//                    StringType.of(),
-//                    TRANSACTION_ID_FIELD,
-//                    LocalizedString.ofEnglishLocale(TRANSACTION_ID_FIELD),
-//                    REQUIRED,
-//                    TextInputHint.SINGLE_LINE);
 
             // TODO jw: cache id <-> name
-            final Type complete = client.complete(TypeCreateCommand.of(TypeDraftBuilder.of(
-                    PAYONE_INTERACTION_REQUEST,
-                    LocalizedString.ofEnglishLocale(PAYONE_INTERACTION_REQUEST),
-                    ImmutableSet.of(AddInterfaceInteraction.resourceTypeId()))
-                    .fieldDefinitions(ImmutableList.of(timestampField, transactionIdField))
-                    .build()));
+            final Type payoneInteractionRequestType = createPayoneInteractionRequestType(timestampField, transactionIdField);
+            final Type payoneInteractionUnsupportedTransactionType = createPayoneUnsupportedTransactionType(timestampField, transactionIdField);
         }
+    }
+
+    private Type createPayoneInteractionRequestType(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
+        return client.complete(TypeCreateCommand.of(TypeDraftBuilder.of(
+                PAYONE_INTERACTION_REQUEST,
+                LocalizedString.ofEnglishLocale(PAYONE_INTERACTION_REQUEST),
+                ImmutableSet.of(AddInterfaceInteraction.resourceTypeId()))
+                .fieldDefinitions(ImmutableList.of(timestampField, transactionIdField))
+                .build()));
+    }
+
+    private Type createPayoneUnsupportedTransactionType(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
+        final FieldDefinition messageField = FieldDefinition.of(
+                StringType.of(),
+                MESSAGE_FIELD,
+                LocalizedString.ofEnglishLocale(MESSAGE_FIELD),
+                REQUIRED,
+                TextInputHint.SINGLE_LINE);
+
+        return client.complete(TypeCreateCommand.of(TypeDraftBuilder.of(
+                PAYONE_UNSUPPORTED_TRANSACTION,
+                LocalizedString.ofEnglishLocale(PAYONE_UNSUPPORTED_TRANSACTION),
+                ImmutableSet.of(AddInterfaceInteraction.resourceTypeId()))
+                .fieldDefinitions(ImmutableList.of(timestampField, transactionIdField, messageField))
+                .build()));
     }
 }
