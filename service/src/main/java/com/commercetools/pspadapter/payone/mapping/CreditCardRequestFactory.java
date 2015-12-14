@@ -6,6 +6,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CCPrea
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
+import org.javamoney.moneta.function.MonetaryUtil;
 
 /**
  * @author fhaertig
@@ -32,7 +33,9 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
             request.setReference(paymentWithCartLike.getOrderNumber().get());
         }
 
-        request.setAmount(ctPayment.getAmountPlanned().getNumber().intValueExact());
+
+
+        request.setAmount(MonetaryUtil.minorUnits().queryFrom(ctPayment.getAmountPlanned()).intValue());
         request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
         request.setNarrative_text(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.NARRATIVETEXT_KEY));
         request.setUserid(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.USERID_KEY));

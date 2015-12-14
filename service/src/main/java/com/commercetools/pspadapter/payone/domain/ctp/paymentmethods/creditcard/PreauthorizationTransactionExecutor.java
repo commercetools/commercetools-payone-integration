@@ -93,9 +93,8 @@ public class PreauthorizationTransactionExecutor implements IdempotentTransactio
                         CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
                         CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */))));
 
-        final Map<String, String> requestMap = request.toStringMap();
         try {
-            final Map<String, String> response = payonePostService.executePost(requestMap);
+            final Map<String, String> response = payonePostService.executePost(request);
 
             final String status = response.get("status");
             if (status.equals("REDIRECT")) {
@@ -104,8 +103,7 @@ public class PreauthorizationTransactionExecutor implements IdempotentTransactio
                         CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
                         CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));
-            }
-            else {
+            } else {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                     ImmutableMap.of(CustomTypeBuilder.RESPONSE_FIELD, response.toString() /* TODO */,
                         CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
@@ -117,15 +115,13 @@ public class PreauthorizationTransactionExecutor implements IdempotentTransactio
                         ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
                         ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                     ));
-                }
-                else if (status.equals("ERROR")) {
+                } else if (status.equals("ERROR")) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
                         ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
                         ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                     ));
-                }
-                else if (status.equals("PENDING")) {
+                } else if (status.equals("PENDING")) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));
                 }
             }

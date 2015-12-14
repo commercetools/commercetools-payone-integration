@@ -1,5 +1,8 @@
 package com.commercetools.pspadapter.payone;
 
+import com.google.common.base.Charsets;
+import com.google.common.hash.Hashing;
+
 /**
  * @author fhaertig
  * @date 11.12.15
@@ -36,8 +39,12 @@ public class PayoneConfig {
         return merchantId != null ? merchantId : "";
     }
 
-    public String getKey() {
-        return key != null ? key : "";
+    public String getKeyAsMD5Hash() {
+        if (this.key == null) {
+            return "";
+        } else {
+            return Hashing.md5().hashString(this.key, Charsets.UTF_8).toString();
+        }
     }
 
     public String getPortalId() {

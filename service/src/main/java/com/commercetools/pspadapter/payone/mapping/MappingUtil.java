@@ -24,7 +24,7 @@ public class MappingUtil {
 
         //required
         request.setLastname(billingAddress.getLastName());
-        request.setCountry(billingAddress.getCountry().getName());
+        request.setCountry(billingAddress.getCountry().toLocale().getCountry());
 
         //optional
         request.setTitle(billingAddress.getTitle());
