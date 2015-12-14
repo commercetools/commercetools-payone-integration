@@ -55,15 +55,15 @@ public class PayonePostServiceImplTest {
         requestParams.put("paramA", "a");
         requestParams.put("paramB", "b");
         StringBuffer result = payonePostService.buildRequestParamsString(requestParams);
-        assertThat(result.length()).isGreaterThan(0);
-        assertThat(result.toString()).isEqualTo("paramA=a&paramB=b");
+        assertThat(result).isNotEmpty();
+        assertThat(result).hasToString("paramA=a&paramB=b");
     }
 
     @Test
     public void shouldReturnEmptyParamsString() throws PayoneException {
         Map<String, String> requestParams = Collections.emptyMap();
         StringBuffer result = payonePostService.buildRequestParamsString(requestParams);
-        assertThat(result.length()).isEqualTo(0);
+        assertThat(result).hasSize(0);
         assertThat(result.toString()).isEqualTo("");
     }
 
@@ -73,17 +73,17 @@ public class PayonePostServiceImplTest {
         serverResponse.add("paramA=a");
         serverResponse.add("redirecturl=https://www.redirect.de/xxx");
         Map<String, String> result = payonePostService.buildMapFromResultParams(serverResponse);
-        assertThat(result.isEmpty()).isFalse();
-        assertThat(result.size()).isEqualTo(2);
+        assertThat(result).isNotEmpty();
+        assertThat(result).hasSize(2);
         assertThat(result).containsKey("paramA");
         assertThat(result).containsValue("a");
-        assertThat(result.get("redirecturl")).isEqualTo("https://www.redirect.de/xxx");
+        assertThat(result).containsEntry("redirecturl", "https://www.redirect.de/xxx");
     }
 
     @Test
     public void shouldReturnEmptyMap() throws UnsupportedEncodingException {
         List<String> serverResponse = ImmutableList.of("=", "x=");
         Map<String, String> result = payonePostService.buildMapFromResultParams(serverResponse);
-        assertThat(result.isEmpty()).isTrue();
+        assertThat(result).isEmpty();
     }
 }
