@@ -1,9 +1,7 @@
 package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa.PaymentMethodDispatcher;
-import io.sphere.sdk.payments.Payment;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
 import io.sphere.sdk.payments.PaymentMethodInfo;
 
 import java.util.Map;

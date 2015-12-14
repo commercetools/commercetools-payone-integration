@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa;
+package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;

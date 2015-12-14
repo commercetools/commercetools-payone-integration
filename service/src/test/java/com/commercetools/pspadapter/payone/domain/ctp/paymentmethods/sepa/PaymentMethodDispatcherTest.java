@@ -4,9 +4,9 @@ import static org.hamcrest.CoreMatchers.is;
 
 import com.commercetools.pspadapter.payone.PaymentTestHelper;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
 import io.sphere.sdk.carts.Cart;
-import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
 import org.junit.Test;

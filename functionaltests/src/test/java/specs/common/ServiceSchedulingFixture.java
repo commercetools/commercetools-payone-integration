@@ -1,7 +1,10 @@
 package specs.common;
 
 import com.commercetools.pspadapter.payone.*;
+import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
+import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
+import com.google.common.cache.CacheBuilder;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
@@ -126,11 +129,12 @@ public class ServiceSchedulingFixture {
     }
 
     public JobResult checkJobScheduling(String cronNotation) throws SchedulerException, InterruptedException {
+        // TODO: Remove duplicate usage
         Scheduler scheduler = ScheduledJobFactory.createScheduledJob(
                 CronScheduleBuilder.cronSchedule(cronNotation),
                 integrationService,
                 SCHEDULED_JOB_KEY,
-                ServiceFactory.createPaymentDispatcher());
+                ServiceFactory.createPaymentDispatcher(CacheBuilder.newBuilder().build(new TypeCacheLoader(new CommercetoolsClient(client)))));
         TriggerKey triggerKey = new TriggerKey(SCHEDULED_JOB_KEY);
 
         JobResult result = new JobResult(scheduler.getTriggerState(triggerKey).name(),

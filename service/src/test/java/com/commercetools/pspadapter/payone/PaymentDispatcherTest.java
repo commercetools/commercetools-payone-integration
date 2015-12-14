@@ -3,15 +3,12 @@ package com.commercetools.pspadapter.payone;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa.PaymentMethodDispatcher;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
 import io.sphere.sdk.carts.Cart;
-import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
-import io.sphere.sdk.payments.TransactionType;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 

@@ -55,12 +55,11 @@ public class CustomTypeBuilder {
                 REQUIRED,
                 TextInputHint.SINGLE_LINE);
 
-        // TODO jw: cache id <-> name
-        final Type interactionRequest = createInteractionRequest(timestampField, transactionIdField);
-        final Type interactionResponse = createInteractionResponse(timestampField, transactionIdField);
-        final Type interactionRedirect = createInteractionRedirect(timestampField, transactionIdField);
-        final Type interactionNotification = createInteractionNotification(timestampField, transactionIdField);
-        final Type interactionTemporaryError = createInteractionTemporaryError(timestampField, transactionIdField);
+        createInteractionRequest(timestampField, transactionIdField);
+        createInteractionResponse(timestampField, transactionIdField);
+        createInteractionRedirect(timestampField, transactionIdField);
+        createInteractionNotification(timestampField, transactionIdField);
+        createInteractionTemporaryError(timestampField, transactionIdField);
     }
 
     private Type createInteractionRequest(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
@@ -96,9 +95,10 @@ public class CustomTypeBuilder {
     }
 
     private Type createType(String typeKey, ImmutableList<FieldDefinition> fieldDefinitions) {
+        // TODO replace with cache
         final PagedQueryResult<Type> result = client.complete(
                 TypeQuery.of()
-                        .withPredicates(m -> m.key().is(PAYONE_INTERACTION_REQUEST))
+                        .withPredicates(m -> m.key().is(typeKey))
                         .withLimit(1));
 
         if (result.getTotal() == 0) {
