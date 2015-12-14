@@ -51,7 +51,7 @@ public class PayoneBaseRequest implements Serializable {
         };
     }
 
-    public Map<String, String> toStringMap() {
+    public Map<String, Object> toStringMap() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return mapper.convertValue(this, Map.class);
