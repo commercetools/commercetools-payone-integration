@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
 
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 
@@ -10,9 +11,9 @@ public interface TransactionExecutor {
 
     /**
      *
-     * @param payment the payment to process a transaction
+     * @param paymentWithCartLike the payment and cartlike to process a transaction
      * @param transaction the transaction to be triggered on the PSP
      * @return the updated version of the payment after triggering the transaction
      */
-    Payment executeTransaction(Payment payment, Transaction transaction);
+    PaymentWithCartLike executeTransaction(PaymentWithCartLike paymentWithCartLike, Transaction transaction);
 }

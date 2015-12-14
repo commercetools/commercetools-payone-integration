@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa;
 
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
@@ -17,20 +18,20 @@ public class PaymentMethodDispatcher {
         this.executorMap = executorMap;
     }
 
-    public Payment dispatchPayment(Payment payment) {
+    public PaymentWithCartLike dispatchPayment(PaymentWithCartLike paymentWithCartLike) {
         // Execute the first Pending Transaction
-        return payment
+        return paymentWithCartLike.getPayment()
             .getTransactions()
             .stream()
             .filter(transaction -> transaction.getState().equals(TransactionState.PENDING))
             .findFirst()
             .map(transaction -> {
-                Payment newPayment = getExecutor(transaction).executeTransaction(payment, transaction);
-                Transaction newTransaction = getUpdatedTransaction(transaction, newPayment);
-                if (newTransaction.getState().equals(TransactionState.PENDING)) return newPayment; // Still Pending, stop
-                else return dispatchPayment(newPayment); // Recursively execute next Pending Transaction
+                PaymentWithCartLike newPaymentWithCartLike = getExecutor(transaction).executeTransaction(paymentWithCartLike, transaction);
+                Transaction newTransaction = getUpdatedTransaction(transaction, newPaymentWithCartLike.getPayment());
+                if (newTransaction.getState().equals(TransactionState.PENDING)) return newPaymentWithCartLike; // Still Pending, stop
+                else return dispatchPayment(newPaymentWithCartLike); // Recursively execute next Pending Transaction
             })
-            .orElse(payment);
+            .orElse(paymentWithCartLike);
     }
 
     private Transaction getUpdatedTransaction(Transaction transaction, Payment newPayment) {

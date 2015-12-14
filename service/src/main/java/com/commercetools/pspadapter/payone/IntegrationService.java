@@ -2,8 +2,10 @@ package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.google.common.base.Joiner;
 import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.queries.PaymentByIdGet;
 import spark.Spark;
 
 /**
@@ -42,7 +44,7 @@ public class IntegrationService {
 
 
         Spark.get("/handle/:id", (req, res) -> {
-            final Payment payment = commercetoolsQueryExecutor.getPaymentById(req.params("id"));
+            final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(req.params("id"));
             // TODO: Properly handle dispatch-result
             try {
                 dispatcher.dispatchPayment(payment);

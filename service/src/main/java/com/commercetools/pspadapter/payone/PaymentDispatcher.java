@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone;
 
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa.PaymentMethodDispatcher;
 import io.sphere.sdk.payments.Payment;
@@ -9,7 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class PaymentDispatcher implements Consumer<Payment> {
+public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
 
     private final Map<String, PaymentMethodDispatcher> methodDispatcherMap;
 
@@ -18,16 +19,16 @@ public class PaymentDispatcher implements Consumer<Payment> {
     }
 
     @Override
-    public void accept(Payment payment) {
+    public void accept(PaymentWithCartLike paymentWithCartLike) {
         try {
-            dispatchPayment(payment);
+            dispatchPayment(paymentWithCartLike);
         } catch (Exception e) {
             // TODO: Log errors
         }
     }
 
-    public Payment dispatchPayment(Payment payment) {
-        final PaymentMethodInfo paymentMethodInfo = payment.getPaymentMethodInfo();
+    public PaymentWithCartLike dispatchPayment(PaymentWithCartLike paymentWithCartLike) {
+        final PaymentMethodInfo paymentMethodInfo = paymentWithCartLike.getPayment().getPaymentMethodInfo();
 
         if (!"PAYONE".equals(paymentMethodInfo.getPaymentInterface()))
             throw new IllegalArgumentException("Unsupported Payment Interface");
@@ -36,7 +37,7 @@ public class PaymentDispatcher implements Consumer<Payment> {
             throw new IllegalArgumentException("No Payment Method provided");
 
         return Optional.ofNullable(methodDispatcherMap.get(paymentMethodInfo.getMethod()))
-            .map(md -> md.dispatchPayment(payment))
+            .map(md -> md.dispatchPayment(paymentWithCartLike))
             .orElseThrow(() -> new IllegalArgumentException("Unsupported Payment Method"));
     }
 }
