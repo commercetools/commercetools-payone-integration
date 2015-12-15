@@ -99,7 +99,7 @@ public class PreauthorizationTransactionExecutor implements IdempotentTransactio
             final String status = response.get("status");
             if (status.equals("REDIRECT")) {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT,
-                    ImmutableMap.of(CustomTypeBuilder.REDIRECT_URL, response.get("redirecturl"),
+                    ImmutableMap.of(CustomTypeBuilder.REDIRECT_URL_FIELD, response.get("redirecturl"),
                         CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
                         CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));

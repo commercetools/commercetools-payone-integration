@@ -51,7 +51,7 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
     @Test
     public void createFullPreauthorizationRequestFromValidPayment() throws Exception {
 
-        Payment payment = dummyPaymentMapToPayoneRequest();
+        Payment payment = dummyPaymentOneAuthPending20Euro();
         Order order = dummyOrderMapToPayoneRequest();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         PayoneConfig config = new ServiceConfig().getPayoneConfig();
@@ -102,6 +102,7 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         //TODO: need to check also
         //gender
         //billingAddress.state
+        //shippingAddress
 
 
     }

@@ -23,8 +23,8 @@ public class PaymentTestHelper {
         return SphereJsonUtils.readObject(IOUtils.toString(dummyPaymentJson), Order.typeReference());
     }
 
-    protected Payment dummyPaymentMapToPayoneRequest() throws Exception {
-        return getPaymentFromFile("dummyPaymentMapToPayoneRequest.json");
+    protected Payment dummyPaymentOneAuthPending20Euro() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneAuthPending20Euro.json");
     }
 
     protected Payment dummyPaymentNoCustomFields() throws Exception {
