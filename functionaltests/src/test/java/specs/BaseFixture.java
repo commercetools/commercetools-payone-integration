@@ -24,7 +24,7 @@ public class BaseFixture {
             return envVariable;
         }
 
-        final String sysProperty = System.getenv(configParameterName);
+        final String sysProperty = System.getProperty(configParameterName);
         if (!Strings.isNullOrEmpty(sysProperty)) {
             return sysProperty;
         }
