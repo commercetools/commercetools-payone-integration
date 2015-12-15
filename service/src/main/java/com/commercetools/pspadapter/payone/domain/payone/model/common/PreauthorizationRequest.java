@@ -6,7 +6,7 @@ import com.commercetools.pspadapter.payone.PayoneConfig;
  * @author fhaertig
  * @date 11.12.15
  */
-public class PreauthorizationRequest extends PayoneBaseRequest {
+public class PreauthorizationRequest extends BaseRequest {
 
     /**
      * ID of the sub account

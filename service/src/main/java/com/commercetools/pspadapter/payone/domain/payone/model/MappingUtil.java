@@ -1,6 +1,7 @@
-package com.commercetools.pspadapter.payone.mapping;
+package com.commercetools.pspadapter.payone.domain.payone.model;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.PreauthorizationRequest;
+import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.models.Reference;
@@ -18,7 +19,7 @@ public class MappingUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(MappingUtil.class);
 
-    public static PreauthorizationRequest mapBillingAddressToRequest(
+    public static void mapBillingAddressToRequest(
             final PreauthorizationRequest request,
             final Address billingAddress) {
 
@@ -42,11 +43,9 @@ public class MappingUtil {
 
         //billingAddress.state write to PAYONE only if country=US, CA, CN, JP, MX, BR, AR, ID, TH, IN)
         // and only if value is an ISO3166-2 subdivision
-
-        return request;
     }
 
-    public static PreauthorizationRequest mapCustomerToRequest(final PreauthorizationRequest request, final Reference<Customer> customer) {
+    public static void mapCustomerToRequest(final PreauthorizationRequest request, final Reference<Customer> customer) {
 
         if (customer != null && customer.getObj() != null) {
             request.setVatid(customer.getObj().getVatId());
@@ -79,13 +78,11 @@ public class MappingUtil {
                 });
 
         }
-        return request;
     }
 
-    public static PreauthorizationRequest mapShippingAddressToRequest(final PreauthorizationRequest request, final Address shippingAddress) {
+    public static void mapShippingAddressToRequest(final PreauthorizationRequest request, final Address shippingAddress) {
 
         //TODO: shipping data in request object
 
-        return request;
     }
 }

@@ -6,8 +6,8 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.IdempotentTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
-import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CCPreauthorizationRequest;
-import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardRequestFactory;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -84,7 +84,7 @@ public class PreauthorizationTransactionExecutor implements IdempotentTransactio
     }
 
     private PaymentWithCartLike attemptExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        final CCPreauthorizationRequest request = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        final CreditCardPreauthorizationRequest request = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
 
         final Payment updatedPayment = client.complete(
             PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),

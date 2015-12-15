@@ -14,7 +14,7 @@ import java.util.Map;
  * @author fhaertig
  * @date 11.12.15
  */
-public class CCPreauthorizationRequestTest {
+public class CreditCardPreauthorizationRequestTest {
 
     private static final String PAYONE_SERVER_API_URL = "http://some.url.org/payone";
     private static final String REFERENCE = "123";
@@ -28,7 +28,7 @@ public class CCPreauthorizationRequestTest {
     @Test
     public void serializeCreditCardPreAuthRequestToStringMap() {
         //create with required properties
-        CCPreauthorizationRequest request = new CCPreauthorizationRequest(payoneConfig, PSEUDOCARDPAN);
+        CreditCardPreauthorizationRequest request = new CreditCardPreauthorizationRequest(payoneConfig, PSEUDOCARDPAN);
 
         request.setReference(REFERENCE);
         request.setAmount(AMOUNT);

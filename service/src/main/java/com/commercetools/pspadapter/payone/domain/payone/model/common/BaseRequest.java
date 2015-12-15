@@ -2,13 +2,12 @@ package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.commercetools.pspadapter.payone.PayoneConfig;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
 import java.util.Map;
 
-public class PayoneBaseRequest implements Serializable {
+public class BaseRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,18 +37,9 @@ public class PayoneBaseRequest implements Serializable {
     private String api_version;
 
     /**
-     * Defines request type (preauthorization, authorization, ...). Default will be 'preauthorization'
+     * Defines request type (preauthorization, authorization, ...)
      */
     private String request;
-
-    public static TypeReference<PayoneBaseRequest> getTypeReference() {
-        return new TypeReference<PayoneBaseRequest>() {
-            @Override
-            public String toString() {
-                return "TypeReference<" + PayoneBaseRequest.class.getSimpleName() + ">";
-            }
-        };
-    }
 
     public Map<String, Object> toStringMap() {
         ObjectMapper mapper = new ObjectMapper();
@@ -57,7 +47,7 @@ public class PayoneBaseRequest implements Serializable {
         return mapper.convertValue(this, Map.class);
     }
 
-    PayoneBaseRequest(final PayoneConfig config, final String requestType) {
+    BaseRequest(final PayoneConfig config, final String requestType) {
         this.mid = config.getMerchantId();
         this.key = config.getKeyAsMD5Hash();
         this.mode = config.getMode();

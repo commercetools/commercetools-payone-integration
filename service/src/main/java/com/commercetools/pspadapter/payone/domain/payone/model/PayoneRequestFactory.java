@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.mapping;
+package com.commercetools.pspadapter.payone.domain.payone.model;
 
 import com.commercetools.pspadapter.payone.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;

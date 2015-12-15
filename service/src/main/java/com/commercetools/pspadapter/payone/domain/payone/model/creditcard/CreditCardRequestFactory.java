@@ -1,8 +1,10 @@
-package com.commercetools.pspadapter.payone.mapping;
+package com.commercetools.pspadapter.payone.domain.payone.model.creditcard;
 
 import com.commercetools.pspadapter.payone.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CCPreauthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.PayoneRequestFactory;
+import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
+import com.commercetools.pspadapter.payone.domain.payone.model.MappingUtil;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
@@ -19,7 +21,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
     }
 
     @Override
-    public CCPreauthorizationRequest createPreauthorizationRequest(
+    public CreditCardPreauthorizationRequest createPreauthorizationRequest(
             final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
@@ -27,22 +29,20 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.PSEUDOCARDPAN_KEY);
-        CCPreauthorizationRequest request = new CCPreauthorizationRequest(getConfig(), pseudocardpan);
+        CreditCardPreauthorizationRequest request = new CreditCardPreauthorizationRequest(getConfig(), pseudocardpan);
 
         if (paymentWithCartLike.getOrderNumber().isPresent()) {
             request.setReference(paymentWithCartLike.getOrderNumber().get());
         }
-
-
 
         request.setAmount(MonetaryUtil.minorUnits().queryFrom(ctPayment.getAmountPlanned()).intValue());
         request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
         request.setNarrative_text(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.NARRATIVETEXT_KEY));
         request.setUserid(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.USERID_KEY));
 
-        request = (CCPreauthorizationRequest) MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
-        request = (CCPreauthorizationRequest) MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
-        request = (CCPreauthorizationRequest) MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
+        MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
+        MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
+        MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
         return request;
     }
 

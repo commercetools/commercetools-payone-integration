@@ -9,7 +9,8 @@ import com.commercetools.pspadapter.payone.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
-import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CCPreauthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardRequestFactory;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
@@ -55,7 +56,7 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         Order order = dummyOrderMapToPayoneRequest();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         PayoneConfig config = new ServiceConfig().getPayoneConfig();
-        CCPreauthorizationRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
+        CreditCardPreauthorizationRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
 
         //base values
         assertThat(result.getRequest()).isEqualTo(RequestType.PREAUTHORIZATION.getType());

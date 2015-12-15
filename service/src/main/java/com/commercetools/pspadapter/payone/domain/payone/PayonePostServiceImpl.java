@@ -1,7 +1,7 @@
 package com.commercetools.pspadapter.payone.domain.payone;
 
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneBaseRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.BaseRequest;
 import com.google.common.base.Preconditions;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -41,13 +41,13 @@ public class PayonePostServiceImpl implements PayonePostService {
     }
 
     @Override
-    public Map<String, String> executePost(final PayoneBaseRequest requestParams) throws PayoneException {
+    public Map<String, String> executePost(final BaseRequest baseRequest) throws PayoneException {
 
-        logger.info("Payone POST request parameters: " + requestParams.toStringMap().toString());
+        logger.info("Payone POST request parameters: " + baseRequest.toStringMap().toString());
 
         try {
             String serverResponse = Unirest.post(this.serverAPIURL)
-                    .fields(requestParams.toStringMap())
+                    .fields(baseRequest.toStringMap())
                     .asString().getBody();
 
             logger.info("Payone POST response: " + serverResponse);
