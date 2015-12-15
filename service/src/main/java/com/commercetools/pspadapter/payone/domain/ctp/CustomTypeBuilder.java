@@ -19,12 +19,17 @@ import io.sphere.sdk.types.queries.TypeQuery;
  * @author Jan Wolter
  */
 public class CustomTypeBuilder {
+    // TODO jw: not that custom, general type for all PSPs, move somewhere else
+    public static final String PAYMENT_CREDIT_CARD = "payment-CREDIT_CARD";
+    public static final String CARD_DATA_PLACEHOLDER_FIELD = "cardDataPlaceholder";
+
     public static final String PAYONE_INTERACTION_REQUEST = "PAYONE_INTERACTION_REQUEST";
     public static final String PAYONE_INTERACTION_RESPONSE = "PAYONE_INTERACTION_RESPONSE";
     public static final String PAYONE_INTERACTION_REDIRECT = "PAYONE_INTERACTION_REDIRECT";
     public static final String PAYONE_INTERACTION_NOTIFICATION = "PAYONE_INTERACTION_NOTIFICATION";
     public static final String PAYONE_INTERACTION_TEMPORARY_ERROR = "PAYONE_INTERACTION_TEMPORARY_ERROR";
     public static final String PAYONE_UNSUPPORTED_TRANSACTION = "PAYONE_UNSUPPORTED_TRANSACTION";
+
     public static final String TIMESTAMP_FIELD = "timestamp";
     public static final String TRANSACTION_ID_FIELD = "transactionId";
     public static final String REQUEST_FIELD = "request";
