@@ -46,6 +46,16 @@ public class CustomTypeBuilder {
     }
 
     public void run() {
+        createPaymentProviderAgnosticTypes();
+
+        createPayoneSpecificTypes();
+    }
+
+    private void createPaymentProviderAgnosticTypes() {
+
+    }
+
+    private void createPayoneSpecificTypes() {
         final FieldDefinition timestampField = FieldDefinition.of(
                 DateTimeType.of(),
                 TIMESTAMP_FIELD,
