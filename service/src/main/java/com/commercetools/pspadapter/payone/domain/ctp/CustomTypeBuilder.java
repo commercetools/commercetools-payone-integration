@@ -74,6 +74,7 @@ public class CustomTypeBuilder {
         createInteractionRedirect(timestampField, transactionIdField);
         createInteractionNotification(timestampField, transactionIdField);
         createInteractionTemporaryError(timestampField, transactionIdField);
+        createPayoneUnsupportedTransaction(timestampField, transactionIdField);
     }
 
     private Type createInteractionRequest(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
