@@ -18,7 +18,7 @@
         <h2>Examples</h2>
         <h3>Common Setup</h3>
         <ul>
-            <li>payment.paymentMethodInfo.method: <span c:set="#paymentMethod">CREDITCARD</span></li>
+            <li>payment.paymentMethodInfo.method: <span c:set="#paymentMethod">CREDIT_CARD</span></li>
             <li>payment.transactions[0].type: <span c:set="#transactionType">AUTHORIZATION</span></li>
             <li>payment.amountPlanned.centAmount: <span c:set="#centAmount">2000</span></li>
             <li>payment.amountPlanned.currencyCode: <span c:set="#currencyCode">EUR</span></li>
@@ -26,19 +26,20 @@
         <div class="example">
             <h3>Successful Authorization</h3>
             <p>
-                <span c:execute="#paymentId = createPayment(#paymentMethod, #transactionType, #centAmount, #currencyCode)"></span>
-                If an authorization for a payment <span c:assertTrue="handlePayment(#paymentId)">is successfully requested</span>,
-                then
+                If the authorization for a
+                <span c:execute="#paymentId = createPayment(#paymentMethod, #transactionType, #centAmount, #currencyCode)">payment</span>
+                is <span c:assertTrue="handlePayment(#paymentId)">successfully</span> requested, then
                 <ul>
                     <li>
-                        only <span c:assertEquals="getInterfaceInteractionsCount(#paymentId)">1</span>
-                        interfaceInteraction was added
+                        the number of <span c:set="#interactionType">PAYONE_INTERACTION_REQUEST</span>
+                        <span c:set="#requestType">preauthorization</span> requests for that
+                        <span c:execute="#transactionId = getIdOfLastTransaction(#paymentId)">transaction</span>
+                        is
+                        <span c:assertEquals="getInterfaceInteractionCount(#paymentId, #transactionId, #interactionType, #requestType)">1</span>,
                     </li>
                     <li>
-                        for a PAYONE <span c:assertEquals="getInterfaceInteractionMethod(#paymentId)">preauthorization</span> request
-                    </li>
-                    <li>
-                        and a final state of<span c:assertEquals="getInterfaceInteractionState(#paymentId)">SUCCESSFUL</span>
+                        the transaction state is
+                        <span c:assertEquals="getTransactionState(#paymentId, #transactionId)">Success</span>.
                     </li>
                 </ul>
             </p>

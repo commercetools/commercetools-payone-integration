@@ -3,14 +3,24 @@ package specs.paymentmethods.creditcard;
 import com.commercetools.pspadapter.payone.IntegrationService;
 import com.commercetools.pspadapter.payone.ServiceConfig;
 import com.commercetools.pspadapter.payone.ServiceFactory;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import io.sphere.sdk.client.SphereClient;
+import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
+import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
+import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
+import com.google.common.collect.Iterables;
+import io.sphere.sdk.carts.Cart;
+import io.sphere.sdk.carts.CartDraft;
+import io.sphere.sdk.carts.CartDraftBuilder;
+import io.sphere.sdk.carts.commands.CartCreateCommand;
+import io.sphere.sdk.carts.commands.CartDeleteCommand;
+import io.sphere.sdk.carts.commands.CartUpdateCommand;
+import io.sphere.sdk.carts.commands.updateactions.AddPayment;
+import io.sphere.sdk.carts.queries.CartQuery;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
 import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
+import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionDraft;
 import io.sphere.sdk.payments.TransactionDraftBuilder;
 import io.sphere.sdk.payments.TransactionState;
@@ -29,6 +39,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import specs.BaseFixture;
 
+import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -36,8 +47,7 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletionStage;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -48,9 +58,8 @@ import java.util.concurrent.ExecutionException;
 @RunWith(ConcordionRunner.class)
 public class AuthorizationFixture extends BaseFixture {
 
-    private SphereClient sphereClient;
+    private BlockingClient ctpClient;
     private IntegrationService integrationService;
-    private Map<String, Payment> payments = Maps.newHashMap();
 
     @Before
     public void initializeService() throws MalformedURLException {
@@ -58,10 +67,10 @@ public class AuthorizationFixture extends BaseFixture {
         final ServiceConfig serviceConfig = new ServiceConfig(new URL(getPayOneApiUrl()));
 
         //only for creation of test data
-        sphereClient = SphereClientFactory.of().createClient(
+        ctpClient = new CommercetoolsClient(SphereClientFactory.of().createClient(
                 serviceConfig.getCtProjectKey(),
                 serviceConfig.getCtClientId(),
-                serviceConfig.getCtClientSecret());
+                serviceConfig.getCtClientSecret()));
 
         integrationService = ServiceFactory.createService(serviceConfig);
         integrationService.start();
@@ -73,21 +82,26 @@ public class AuthorizationFixture extends BaseFixture {
             final String centAmount,
             final String currencyCode) throws ExecutionException, InterruptedException {
 
-        MonetaryAmount monetaryAmount = MoneyImpl.of(centAmount, currencyCode);
+        final MonetaryAmount monetaryAmount = MoneyImpl.of(centAmount, currencyCode);
 
         final List<TransactionDraft> transactions = Collections.singletonList(TransactionDraftBuilder
                 .of(TransactionType.valueOf(transactionType), monetaryAmount, ZonedDateTime.now())
                 .state(TransactionState.PENDING)
                 .build());
 
-        PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
-                .paymentMethodInfo(PaymentMethodInfoBuilder.of().method(paymentMethod).build())
+        final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
+                .paymentMethodInfo(PaymentMethodInfoBuilder.of()
+                        .method(paymentMethod)
+                        .paymentInterface("PAYONE")
+                        .build())
                 .transactions(transactions).build();
 
-        PaymentCreateCommand paymentCreateCommand = PaymentCreateCommand.of(paymentDraft);
-        final CompletionStage<Payment> queryResult = sphereClient.execute(paymentCreateCommand);
-        Payment payment = queryResult.toCompletableFuture().get();
-        payments.put(payment.getId(), payment);
+        final Payment payment = ctpClient.complete(PaymentCreateCommand.of(paymentDraft));
+
+        final CartDraft cardDraft = CartDraftBuilder.of(Monetary.getCurrency("EUR")).build();
+        final Cart cart = ctpClient.complete(CartCreateCommand.of(cardDraft));
+        ctpClient.complete(CartUpdateCommand.of(cart, AddPayment.of(payment)));
+
         return payment.getId();
     }
 
@@ -98,7 +112,6 @@ public class AuthorizationFixture extends BaseFixture {
                 .execute()
                 .returnResponse();
 
-        payments.put(paymentId, sphereClient.execute(PaymentByIdGet.of(paymentId)).toCompletableFuture().get());
         return response.getStatusLine().getStatusCode() == 200;
     }
 
@@ -106,23 +119,47 @@ public class AuthorizationFixture extends BaseFixture {
     public void tearDown() throws ExecutionException, InterruptedException {
         integrationService.stop();
 
-        //delete all payments
-        List<Payment> paymentList = Lists.newArrayList(sphereClient.execute(PaymentQuery.of()).toCompletableFuture().get().getResults());
-        paymentList.forEach(p -> sphereClient.execute(PaymentDeleteCommand.of(p)));
+        // TODO jw: use futures
+        // delete all carts
+        ctpClient.complete(CartQuery.of()).getResults()
+                .forEach(c -> ctpClient.complete(CartDeleteCommand.of(c)));
+
+        // delete all payments
+        ctpClient.complete(PaymentQuery.of()).getResults()
+                .forEach(p -> ctpClient.complete(PaymentDeleteCommand.of(p)));
     }
 
-    public int getInterfaceInteractionsCount(final String paymentId) throws ExecutionException, InterruptedException {
-        //TODO: specific for authorization
-        return payments.get(paymentId).getInterfaceInteractions().size();
+    public String getIdOfLastTransaction(final String paymentId) {
+        return Iterables.getLast(fetchPayment(paymentId).getTransactions()).getId();
     }
 
-    public String getInterfaceInteractionState(final String paymentId) {
-        //return payments.get(paymentId).getInterfaceInteractions().get(0).getField();
-        return "TODO";
+    public String getInterfaceInteractionCount(
+            final String paymentId,
+            final String transactionId,
+            final String interactionType,
+            final String requestType) {
+        final Payment payment = fetchPayment(paymentId);
+        return Long.toString(payment.getInterfaceInteractions().stream()
+                .filter(i -> i.getType().getTypeId().equals(interactionType))
+                .filter(i -> transactionId.equals(i.getFieldAsString(CustomTypeBuilder.TRANSACTION_ID_FIELD)))
+                .filter(i -> {
+                    final String requestField = i.getFieldAsString(CustomTypeBuilder.REQUEST_FIELD);
+                    return requestField != null && requestField.contains("request=" + requestType);
+                })
+                .count());
     }
 
-    public String getInterfaceInteractionMethod(final String paymentId) {
-        //return payments.get(paymentId).getInterfaceInteractions().get(0).getField();
-        return "TODO";
+    public String getTransactionState(final String paymentId, final String transactionId) {
+        final Optional<Transaction> transaction = fetchPayment(paymentId).getTransactions()
+                .stream()
+                .filter(i -> transactionId.equals(i.getId()))
+                .findFirst();
+
+        final TransactionState transactionState = transaction.isPresent()? transaction.get().getState() : null;
+        return transactionState != null? transactionState.toSphereName() : "<UNKNOWN>";
+    }
+
+    private Payment fetchPayment(final String paymentId) {
+        return ctpClient.complete(PaymentByIdGet.of(paymentId));
     }
 }
