@@ -9,8 +9,8 @@ import com.google.common.hash.Hashing;
  */
 public class PayoneConfig {
 
-    static final String DEFAULT_PAYONE_API_URL = "https://api.pay1.de/post-gateway/";
-    static final String DEFAULT_PAYONE_MODE = "test";
+    public static final String DEFAULT_PAYONE_API_URL = "https://api.pay1.de/post-gateway/";
+    public static final String DEFAULT_PAYONE_MODE = "test";
 
     //assure that properties don't change once service started
     private final String subAccountId;

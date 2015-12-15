@@ -11,6 +11,7 @@ import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardCaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
@@ -118,6 +119,28 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
 
     }
 
+    @Test
+    public void createFullCaptureRequestFromValidPayment() throws Exception {
+
+        Payment payment = dummyPaymentOneAuthPending20Euro();
+        Order order = dummyOrderMapToPayoneRequest();
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
+        CreditCardCaptureRequest result = factory.createCaptureRequest(paymentWithCartLike);
+
+        //base values
+        assertThat(result.getRequest()).isEqualTo(RequestType.CAPTURE.getType());
+        assertThat(result.getMid()).isEqualTo(config.getMerchantId());
+        assertThat(result.getPortalid()).isEqualTo(config.getPortalId());
+        assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
+        assertThat(result.getMode()).isEqualTo(config.getMode());
+        assertThat(result.getApi_version()).isEqualTo(config.getApiVersion());
+
+        //monetary
+        assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
+        assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
+
+        assertThat(result.getTxid()).isEqualTo(payment.getInterfaceId());
+    }
 
 
 

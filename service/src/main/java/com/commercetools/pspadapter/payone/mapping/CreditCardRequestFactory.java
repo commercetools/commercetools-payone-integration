@@ -2,6 +2,7 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardCaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
@@ -44,4 +45,20 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         return request;
     }
 
+    @Override
+    public CreditCardCaptureRequest createCaptureRequest(final PaymentWithCartLike paymentWithCartLike) {
+
+        final Payment ctPayment = paymentWithCartLike.getPayment();
+        final CartLike ctCartLike = paymentWithCartLike.getCartLike();
+        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
+
+        CreditCardCaptureRequest request = new CreditCardCaptureRequest(getConfig());
+
+        request.setTxid(ctPayment.getInterfaceId());
+        request.setSequencenumber(1);
+        request.setAmount(MonetaryUtil.minorUnits().queryFrom(ctPayment.getAmountPlanned()).intValue());
+        request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
+
+        return request;
+    }
 }

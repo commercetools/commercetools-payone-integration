@@ -2,6 +2,7 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.PreauthorizationRequest;
 
 /**
@@ -24,5 +25,8 @@ public abstract class PayoneRequestFactory {
         throw new UnsupportedOperationException("this request type is not supported by this payment method.");
     }
 
-    //further methods e.g. capture,...
+    public CaptureRequest createCaptureRequest(final PaymentWithCartLike paymentWithCartLike) {
+        throw new UnsupportedOperationException("this request type is not supported by this payment method.");
+    }
+
 }
