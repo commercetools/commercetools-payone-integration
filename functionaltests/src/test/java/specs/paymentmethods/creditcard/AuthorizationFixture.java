@@ -6,6 +6,7 @@ import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
@@ -29,6 +30,7 @@ import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.payments.queries.PaymentByIdGet;
 import io.sphere.sdk.payments.queries.PaymentQuery;
+import io.sphere.sdk.types.CustomFieldsDraft;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
@@ -94,7 +96,11 @@ public class AuthorizationFixture extends BaseFixture {
                         .method(paymentMethod)
                         .paymentInterface("PAYONE")
                         .build())
-                .transactions(transactions).build();
+                .transactions(transactions)
+                .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
+                        CustomTypeBuilder.PAYMENT_CREDIT_CARD,
+                        ImmutableMap.of(CustomTypeBuilder.CARD_DATA_PLACEHOLDER_FIELD, System.getenv("PAYONE_VISA_CREDIT_CARD"))))
+                .build();
 
         final Payment payment = ctpClient.complete(PaymentCreateCommand.of(paymentDraft));
 

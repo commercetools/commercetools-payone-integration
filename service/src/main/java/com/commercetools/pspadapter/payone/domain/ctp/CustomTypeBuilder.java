@@ -2,9 +2,9 @@ package com.commercetools.pspadapter.payone.domain.ctp;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-
 import io.sphere.sdk.models.LocalizedString;
 import io.sphere.sdk.models.TextInputHint;
+import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.types.DateTimeType;
@@ -47,12 +47,11 @@ public class CustomTypeBuilder {
 
     public void run() {
         createPaymentProviderAgnosticTypes();
-
         createPayoneSpecificTypes();
     }
 
     private void createPaymentProviderAgnosticTypes() {
-
+        createPaymentCustomType(PAYMENT_CREDIT_CARD, ImmutableList.of(createSingleLineStringFieldDefinition(CARD_DATA_PLACEHOLDER_FIELD)));
     }
 
     private void createPayoneSpecificTypes() {
@@ -78,24 +77,24 @@ public class CustomTypeBuilder {
     }
 
     private Type createInteractionRequest(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createType(PAYONE_INTERACTION_REQUEST, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(REQUEST_FIELD)));
+        return createInterfaceInteractionType(PAYONE_INTERACTION_REQUEST, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(REQUEST_FIELD)));
     }
 
     private Type createInteractionResponse(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createType(PAYONE_INTERACTION_RESPONSE, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(RESPONSE_FIELD)));
+        return createInterfaceInteractionType(PAYONE_INTERACTION_RESPONSE, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(RESPONSE_FIELD)));
     }
 
     private Type createInteractionRedirect(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createType(PAYONE_INTERACTION_REDIRECT,
-            ImmutableList.of(timestampField, transactionIdField, createSingleLineStringFieldDefinition(REDIRECT_URL), createMultiLineStringFieldDefinition(RESPONSE_FIELD)));
+        return createInterfaceInteractionType(PAYONE_INTERACTION_REDIRECT,
+                ImmutableList.of(timestampField, transactionIdField, createSingleLineStringFieldDefinition(REDIRECT_URL), createMultiLineStringFieldDefinition(RESPONSE_FIELD)));
     }
 
     private Type createInteractionTemporaryError(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createType(PAYONE_INTERACTION_TEMPORARY_ERROR, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(RESPONSE_FIELD)));
+        return createInterfaceInteractionType(PAYONE_INTERACTION_TEMPORARY_ERROR, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(RESPONSE_FIELD)));
     }
 
     private Type createInteractionNotification(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createType(PAYONE_INTERACTION_NOTIFICATION, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(NOTIFICATION_FIELD)));
+        return createInterfaceInteractionType(PAYONE_INTERACTION_NOTIFICATION, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(NOTIFICATION_FIELD)));
     }
 
     private Type createPayoneUnsupportedTransaction(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
@@ -106,10 +105,18 @@ public class CustomTypeBuilder {
             REQUIRED,
             TextInputHint.SINGLE_LINE);
 
-        return createType(PAYONE_UNSUPPORTED_TRANSACTION, ImmutableList.of(timestampField, transactionIdField, createSingleLineStringFieldDefinition(MESSAGE_FIELD)));
+        return createInterfaceInteractionType(PAYONE_UNSUPPORTED_TRANSACTION, ImmutableList.of(timestampField, transactionIdField, createSingleLineStringFieldDefinition(MESSAGE_FIELD)));
     }
 
-    private Type createType(String typeKey, ImmutableList<FieldDefinition> fieldDefinitions) {
+    private Type createInterfaceInteractionType(final String typeKey, final ImmutableList<FieldDefinition> fieldDefinitions) {
+        return createType(typeKey, fieldDefinitions, AddInterfaceInteraction.resourceTypeId());
+    }
+
+    private Type createPaymentCustomType(final String typeKey, final ImmutableList<FieldDefinition> fieldDefinitions) {
+        return createType(typeKey, fieldDefinitions, Payment.resourceTypeId());
+    }
+
+    private Type createType(final String typeKey, final ImmutableList<FieldDefinition> fieldDefinitions, final String resourceTypeId) {
         // TODO replace with cache
         final PagedQueryResult<Type> result = client.complete(
                 TypeQuery.of()
@@ -118,12 +125,12 @@ public class CustomTypeBuilder {
 
         if (result.getTotal() == 0) {
             return client.complete(TypeCreateCommand.of(TypeDraftBuilder.of(
-                typeKey,
-                LocalizedString.ofEnglishLocale(typeKey),
-                ImmutableSet.of(AddInterfaceInteraction.resourceTypeId()))
-                .fieldDefinitions(
-                    fieldDefinitions)
-                .build()));
+                    typeKey,
+                    LocalizedString.ofEnglishLocale(typeKey),
+                    ImmutableSet.of(resourceTypeId))
+                    .fieldDefinitions(
+                            fieldDefinitions)
+                    .build()));
         }
         else {
             return result.getResults().get(0);
