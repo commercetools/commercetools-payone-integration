@@ -1,10 +1,8 @@
-package com.commercetools.pspadapter.payone.domain.payone.model.creditcard;
+package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.PayoneRequestFactory;
-import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.commercetools.pspadapter.payone.domain.payone.model.MappingUtil;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;

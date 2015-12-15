@@ -1,7 +1,6 @@
-package com.commercetools.pspadapter.payone.domain.payone.model;
+package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.PreauthorizationRequest;
-import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.models.Reference;

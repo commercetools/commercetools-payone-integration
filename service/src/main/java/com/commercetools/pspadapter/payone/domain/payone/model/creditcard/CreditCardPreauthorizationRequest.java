@@ -17,7 +17,7 @@ public class CreditCardPreauthorizationRequest extends PreauthorizationRequest {
 
     private String ecommercemode;
 
-    CreditCardPreauthorizationRequest(final PayoneConfig config, final String pseudocardpan) {
+    public CreditCardPreauthorizationRequest(final PayoneConfig config, final String pseudocardpan) {
         super(config, ClearingType.PAYONE_CC.getPayoneCode());
 
         this.pseudocardpan = pseudocardpan;

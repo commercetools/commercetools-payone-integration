@@ -7,7 +7,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.IdempotentT
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
-import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardRequestFactory;
+import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
