@@ -7,6 +7,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMeth
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.payments.Transaction;
 import org.junit.Test;
+import util.PaymentTestHelper;
 
 import java.util.HashMap;
 

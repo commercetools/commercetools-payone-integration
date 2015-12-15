@@ -7,7 +7,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
 import com.commercetools.pspadapter.payone.IntegrationService;
-import com.commercetools.pspadapter.payone.ServiceConfig;
+import com.commercetools.pspadapter.payone.config.PropertyProvider;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.github.tomakehurst.wiremock.client.RequestPatternBuilder;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
@@ -90,7 +91,7 @@ public class IdempotenceFixture {
         payoneProxy.stubFor(any(urlPathEqualTo(payoneProxyBaseUrl.getPath()))
                 .willReturn(aResponse().proxiedFrom(payoneProxyBaseUrl.toExternalForm())));
 
-        final ServiceConfig serviceConfig = new ServiceConfig(payoneProxyUrl);
+        final ServiceConfig serviceConfig = new ServiceConfig(new PropertyProvider());
 
         sphereClient = SphereClientFactory.of().createClient(
                 serviceConfig.getCtProjectKey(),

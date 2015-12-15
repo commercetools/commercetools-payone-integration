@@ -2,7 +2,8 @@ package com.commercetools.pspadapter.payone.domain.payone.model.creditcard;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.commercetools.pspadapter.payone.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import org.junit.Test;
@@ -16,14 +17,13 @@ import java.util.Map;
  */
 public class CreditCardPreauthorizationRequestTest {
 
-    private static final String PAYONE_SERVER_API_URL = "http://some.url.org/payone";
     private static final String REFERENCE = "123";
     private static final int AMOUNT = 2000;
     private static final String LASTNAME = "Mustermann";
     private static final String COUNTRY = "DE";
     private static final String PSEUDOCARDPAN = "0000123";
 
-    private final PayoneConfig payoneConfig = new PayoneConfig(PAYONE_SERVER_API_URL);
+    private final PayoneConfig payoneConfig = new PayoneConfig(new PropertyProvider());
 
     @Test
     public void serializeCreditCardPreAuthRequestToStringMap() {

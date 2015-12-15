@@ -3,9 +3,9 @@ package com.commercetools.pspadapter.payone.mapping;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 
-import com.commercetools.pspadapter.payone.PaymentTestHelper;
-import com.commercetools.pspadapter.payone.PayoneConfig;
-import com.commercetools.pspadapter.payone.ServiceConfig;
+import util.PaymentTestHelper;
+import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
@@ -28,12 +28,11 @@ import java.util.Optional;
  */
 public class CreditCardRequestFactoryTest extends PaymentTestHelper {
 
-    private PayoneConfig config;
     private CreditCardRequestFactory factory;
 
     @Before
     public void setUp() throws MalformedURLException {
-        config = new ServiceConfig().getPayoneConfig();
+        PayoneConfig config = new ServiceConfig().getPayoneConfig();
         factory = new CreditCardRequestFactory(config);
     }
 

@@ -1,6 +1,6 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
-import com.commercetools.pspadapter.payone.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.PayoneConfig;
 
 /**
  * @author fhaertig

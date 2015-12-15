@@ -1,9 +1,11 @@
 package specs.common;
 
-import com.commercetools.pspadapter.payone.*;
+import com.commercetools.pspadapter.payone.IntegrationService;
+import com.commercetools.pspadapter.payone.ScheduledJobFactory;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
+import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
 import com.google.common.cache.CacheBuilder;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
@@ -26,12 +28,21 @@ import io.sphere.sdk.orders.OrderFromCartDraft;
 import io.sphere.sdk.orders.commands.OrderDeleteCommand;
 import io.sphere.sdk.orders.commands.OrderFromCartCreateCommand;
 import io.sphere.sdk.orders.queries.OrderQuery;
-import io.sphere.sdk.payments.*;
+import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.PaymentDraft;
+import io.sphere.sdk.payments.PaymentDraftBuilder;
+import io.sphere.sdk.payments.TransactionDraft;
+import io.sphere.sdk.payments.TransactionDraftBuilder;
+import io.sphere.sdk.payments.TransactionState;
+import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.products.Product;
 import io.sphere.sdk.products.queries.ProductQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
+import io.sphere.sdk.types.Type;
+import io.sphere.sdk.types.commands.TypeDeleteCommand;
+import io.sphere.sdk.types.queries.TypeQuery;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.After;
@@ -47,7 +58,10 @@ import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import java.net.MalformedURLException;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
@@ -125,6 +139,11 @@ public class ServiceSchedulingFixture {
         PagedQueryResult<Order> orders = client.execute(OrderQuery.of()).toCompletableFuture().get();
         for (Order order : orders.getResults()) {
             client.execute(OrderDeleteCommand.of(order)).toCompletableFuture().get();
+        }
+
+        PagedQueryResult<Type> types = client.execute(TypeQuery.of()).toCompletableFuture().get();
+        for (Type type : types.getResults()) {
+            client.execute(TypeDeleteCommand.of(type)).toCompletableFuture().get();
         }
     }
 

@@ -1,8 +1,9 @@
 package specs.paymentmethods.creditcard;
 
 import com.commercetools.pspadapter.payone.IntegrationService;
-import com.commercetools.pspadapter.payone.ServiceConfig;
 import com.commercetools.pspadapter.payone.ServiceFactory;
+import com.commercetools.pspadapter.payone.config.PropertyProvider;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
@@ -47,7 +48,6 @@ import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -68,7 +68,7 @@ public class AuthorizationFixture extends BaseFixture {
     @Before
     public void initializeService() throws MalformedURLException {
 
-        final ServiceConfig serviceConfig = new ServiceConfig(new URL(getPayOneApiUrl()));
+        final ServiceConfig serviceConfig = new ServiceConfig(new PropertyProvider());
 
         //only for creation of test data
         ctpClient = new CommercetoolsClient(SphereClientFactory.of().createClient(

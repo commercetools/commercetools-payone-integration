@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone;
+package util;
 
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.orders.Order;

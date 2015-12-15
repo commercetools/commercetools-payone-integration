@@ -2,7 +2,7 @@ package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa;
 
 import static org.hamcrest.CoreMatchers.is;
 
-import com.commercetools.pspadapter.payone.PaymentTestHelper;
+import util.PaymentTestHelper;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
