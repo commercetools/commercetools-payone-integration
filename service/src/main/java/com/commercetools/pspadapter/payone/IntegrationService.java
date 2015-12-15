@@ -1,16 +1,18 @@
 package com.commercetools.pspadapter.payone;
 
-import spark.Spark;
-
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.google.common.base.Strings;
+import spark.Spark;
 
 /**
  * @author fhaertig
  * @date 02.12.15
  */
 public class IntegrationService {
+
+    public static final String HEROKU_ASSIGNED_PORT = "PORT";
 
     private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
     private final PaymentDispatcher dispatcher;
@@ -52,7 +54,13 @@ public class IntegrationService {
     }
 
     public int port() {
-        return 8080;
+        final String environmentVariable = System.getenv(HEROKU_ASSIGNED_PORT);
+        if (!Strings.isNullOrEmpty(environmentVariable)) {
+            return Integer.parseInt(environmentVariable);
+        }
+
+        final String systemProperty = System.getProperty(HEROKU_ASSIGNED_PORT, "8080");
+        return Integer.parseInt(systemProperty);
     }
 
     public CommercetoolsQueryExecutor getCommercetoolsQueryExecutor() {

@@ -44,6 +44,10 @@ public class ServiceConfig {
         return ctClientSecret;
     }
 
+    public String getCronNotation() {
+        return "0/5 * * * * ?";
+    }
+
     public PayoneConfig getPayoneConfig() {
         return payoneConfig;
     }
