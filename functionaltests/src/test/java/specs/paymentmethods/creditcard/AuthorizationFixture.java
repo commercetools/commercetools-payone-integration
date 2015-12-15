@@ -31,6 +31,8 @@ import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.payments.queries.PaymentByIdGet;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.types.CustomFieldsDraft;
+import io.sphere.sdk.types.commands.TypeDeleteCommand;
+import io.sphere.sdk.types.queries.TypeQuery;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
@@ -74,8 +76,16 @@ public class AuthorizationFixture extends BaseFixture {
                 serviceConfig.getCtClientId(),
                 serviceConfig.getCtClientSecret()));
 
+        resetCommercetoolsPlatform();
+
         integrationService = ServiceFactory.createService(serviceConfig);
         integrationService.start();
+    }
+
+    @After
+    public void tearDown() {
+        integrationService.stop();
+        resetCommercetoolsPlatform();
     }
 
     public String createPayment(
@@ -122,20 +132,6 @@ public class AuthorizationFixture extends BaseFixture {
         return response.getStatusLine().getStatusCode() == 200;
     }
 
-    @After
-    public void tearDown() throws ExecutionException, InterruptedException {
-        integrationService.stop();
-
-        // TODO jw: use futures
-        // delete all carts
-        ctpClient.complete(CartQuery.of()).getResults()
-                .forEach(c -> ctpClient.complete(CartDeleteCommand.of(c)));
-
-        // delete all payments
-        ctpClient.complete(PaymentQuery.of()).getResults()
-                .forEach(p -> ctpClient.complete(PaymentDeleteCommand.of(p)));
-    }
-
     public String getIdOfLastTransaction(final String paymentId) {
         return Iterables.getLast(fetchPayment(paymentId).getTransactions()).getId();
     }
@@ -164,6 +160,20 @@ public class AuthorizationFixture extends BaseFixture {
 
         final TransactionState transactionState = transaction.isPresent()? transaction.get().getState() : null;
         return transactionState != null? transactionState.toSphereName() : "<UNKNOWN>";
+    }
+
+    private void resetCommercetoolsPlatform() {
+        // TODO jw: use futures
+        // delete all carts
+        ctpClient.complete(CartQuery.of().withLimit(500)).getResults()
+                .forEach(c -> ctpClient.complete(CartDeleteCommand.of(c)));
+
+        // delete all payments
+        ctpClient.complete(PaymentQuery.of().withLimit(500)).getResults()
+                .forEach(p -> ctpClient.complete(PaymentDeleteCommand.of(p)));
+
+        ctpClient.complete(TypeQuery.of().withLimit(500)).getResults()
+                .forEach(t -> ctpClient.complete(TypeDeleteCommand.of(t)));
     }
 
     private Payment fetchPayment(final String paymentId) {
