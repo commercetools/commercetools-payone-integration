@@ -1,20 +1,29 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.creditcard;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
+import com.google.common.collect.ImmutableMap;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Currency;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author fhaertig
  * @date 11.12.15
  */
+@RunWith(MockitoJUnitRunner.class)
 public class CreditCardPreauthorizationRequestTest {
 
     private static final String REFERENCE = "123";
@@ -23,10 +32,28 @@ public class CreditCardPreauthorizationRequestTest {
     private static final String COUNTRY = "DE";
     private static final String PSEUDOCARDPAN = "0000123";
 
-    private final PayoneConfig payoneConfig = new PayoneConfig(new PropertyProvider());
+    @Mock
+    private PropertyProvider propertyProvider;
+
+    private PayoneConfig payoneConfig;
+
+    @Before
+    public void setUp() {
+        Map<String, String> internalProperties = ImmutableMap.<String, String>builder()
+                .put(PropertyProvider.PAYONE_API_VERSION, "3.9")
+                .build();
+
+        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of("dummyValue"));
+        when(propertyProvider.getInternalProperties()).thenReturn(internalProperties);
+        when(propertyProvider.createIllegalArgumentException(any())).thenCallRealMethod();
+
+        payoneConfig = new PayoneConfig(propertyProvider);
+    }
 
     @Test
     public void serializeCreditCardPreAuthRequestToStringMap() {
+
+
         //create with required properties
         CreditCardPreauthorizationRequest request = new CreditCardPreauthorizationRequest(payoneConfig, PSEUDOCARDPAN);
 

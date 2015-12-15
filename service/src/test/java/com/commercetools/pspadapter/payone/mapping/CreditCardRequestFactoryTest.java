@@ -2,9 +2,11 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
-import util.PaymentTestHelper;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
@@ -17,8 +19,11 @@ import org.assertj.core.api.Assertions;
 import org.javamoney.moneta.function.MonetaryUtil;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import util.PaymentTestHelper;
 
-import java.net.MalformedURLException;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
@@ -26,13 +31,21 @@ import java.util.Optional;
  * @author fhaertig
  * @date 14.12.15
  */
+@RunWith(MockitoJUnitRunner.class)
 public class CreditCardRequestFactoryTest extends PaymentTestHelper {
 
     private CreditCardRequestFactory factory;
 
+    @Mock
+    private PropertyProvider propertyProvider;
+
+    private PayoneConfig config;
+
     @Before
-    public void setUp() throws MalformedURLException {
-        PayoneConfig config = new ServiceConfig().getPayoneConfig();
+    public void setUp() {
+        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of("dummyValue"));
+
+        config = new ServiceConfig(propertyProvider).getPayoneConfig();
         factory = new CreditCardRequestFactory(config);
     }
 
@@ -53,7 +66,6 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         Payment payment = dummyPaymentOneAuthPending20Euro();
         Order order = dummyOrderMapToPayoneRequest();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
-        PayoneConfig config = new ServiceConfig().getPayoneConfig();
         CreditCardPreauthorizationRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
 
         //base values
