@@ -62,7 +62,7 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         assertThat(result.getAid()).isEqualTo(config.getSubAccountId());
         assertThat(result.getMid()).isEqualTo(config.getMerchantId());
         assertThat(result.getPortalid()).isEqualTo(config.getPortalId());
-        assertThat(result.getKey()).isEqualTo(config.getKeyAsMD5Hash());
+        assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
         assertThat(result.getMode()).isEqualTo(config.getMode());
         assertThat(result.getApi_version()).isEqualTo(config.getApiVersion());
 

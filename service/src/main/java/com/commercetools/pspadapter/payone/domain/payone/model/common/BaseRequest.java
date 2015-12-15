@@ -49,7 +49,7 @@ public class BaseRequest implements Serializable {
 
     BaseRequest(final PayoneConfig config, final String requestType) {
         this.mid = config.getMerchantId();
-        this.key = config.getKeyAsMD5Hash();
+        this.key = config.getKeyAsMd5Hash();
         this.mode = config.getMode();
         this.portalid = config.getPortalId();
         this.api_version = config.getApiVersion();

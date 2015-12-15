@@ -43,7 +43,7 @@ public class CreditCardPreauthorizationRequestTest {
         assertThat(resultMap).containsEntry("aid", payoneConfig.getSubAccountId());
         assertThat(resultMap).containsEntry("mid", payoneConfig.getMerchantId());
         assertThat(resultMap).containsEntry("portalid", payoneConfig.getPortalId());
-        assertThat(resultMap).containsEntry("key", payoneConfig.getKeyAsMD5Hash());
+        assertThat(resultMap).containsEntry("key", payoneConfig.getKeyAsMd5Hash());
         assertThat(resultMap).containsEntry("mode", payoneConfig.getMode());
         assertThat(resultMap).containsEntry("api_version", payoneConfig.getApiVersion());
         assertThat(resultMap).containsEntry("clearingtype", ClearingType.PAYONE_CC.getPayoneCode());
