@@ -99,7 +99,8 @@ public class AuthorizationFixture extends BaseFixture {
                 .transactions(transactions)
                 .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
                         CustomTypeBuilder.PAYMENT_CREDIT_CARD,
-                        ImmutableMap.of(CustomTypeBuilder.CARD_DATA_PLACEHOLDER_FIELD, System.getenv("PAYONE_VISA_CREDIT_CARD"))))
+                        ImmutableMap.of(
+                                CustomTypeBuilder.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan())))
                 .build();
 
         final Payment payment = ctpClient.complete(PaymentCreateCommand.of(paymentDraft));
