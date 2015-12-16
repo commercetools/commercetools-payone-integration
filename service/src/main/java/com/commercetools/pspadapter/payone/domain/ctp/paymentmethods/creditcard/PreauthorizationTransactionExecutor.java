@@ -20,6 +20,8 @@ import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionTimestamp;
+import io.sphere.sdk.payments.commands.updateactions.SetAuthorization;
+import io.sphere.sdk.payments.commands.updateactions.SetInterfaceId;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 
@@ -113,7 +115,9 @@ public class PreauthorizationTransactionExecutor implements IdempotentTransactio
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
                         ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
-                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
+                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId()),
+                        SetInterfaceId.of(response.get("txid")),
+                        SetAuthorization.of(paymentWithCartLike.getPayment().getAmountPlanned())
                     ));
                 } else if (status.equals("ERROR")) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
