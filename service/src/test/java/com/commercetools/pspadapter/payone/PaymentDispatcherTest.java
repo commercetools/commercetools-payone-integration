@@ -1,17 +1,17 @@
 package com.commercetools.pspadapter.payone;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.payments.Transaction;
 import org.junit.Test;
 import util.PaymentTestHelper;
 
 import java.util.HashMap;
-
-import static org.assertj.core.api.Assertions.*;
 
 public class PaymentDispatcherTest extends PaymentTestHelper {
     private class CountingPaymentMethodDispatcher extends PaymentMethodDispatcher {
@@ -37,19 +37,22 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
     public void testRefusingWrongPaymentInterface() throws Exception {
         PaymentDispatcher dispatcher = new PaymentDispatcher(null);
 
-        final Throwable noInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentNoInterface(), (Cart)null)));
-        assertThat(noInterface).isInstanceOf(IllegalArgumentException.class);
+        DispatchResult result = dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentNoInterface(), (Cart) null));
+        assertThat(result.getStatusCode()).isEqualTo(400);
+        assertThat(result.getMessage()).isEqualTo("Unsupported Payment Interface");
 
-        final Throwable wrongInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentWrongInterface(), (Cart)null)));
-        assertThat(wrongInterface).isInstanceOf(IllegalArgumentException.class);
+        DispatchResult result2 = dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentWrongInterface(), (Cart) null));
+        assertThat(result2.getStatusCode()).isEqualTo(400);
+        assertThat(result2.getMessage()).isEqualTo("Unsupported Payment Interface");
     }
 
     @Test
     public void testRefusingUnknownPaymentMethod() throws Exception {
         PaymentDispatcher dispatcher = new PaymentDispatcher(new HashMap<>());
 
-        final Throwable noInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentUnknownMethod(), (Cart)null)));
-        assertThat(noInterface).isInstanceOf(IllegalArgumentException.class);
+        DispatchResult result = dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentUnknownMethod(), (Cart) null));
+        assertThat(result.getStatusCode()).isEqualTo(400);
+        assertThat(result.getMessage()).isEqualTo("Unsupported Payment Method");
     }
 
     @Test
