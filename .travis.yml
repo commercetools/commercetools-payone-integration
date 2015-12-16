@@ -22,9 +22,6 @@ install: /bin/true
 script:
   - ./gradlew clean ciBuild
 
-#after_success:
-#  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && ./gradlew publishGhPages
-
 deploy:
   provider: heroku
   api_key:
@@ -33,3 +30,6 @@ deploy:
   on:
     repo: sphereio/commercetools-payone-integration
     branch: durchstich
+
+after_deploy:
+  - ./gradlew publishGhPages
