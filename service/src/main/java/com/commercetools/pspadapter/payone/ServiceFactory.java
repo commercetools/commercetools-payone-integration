@@ -9,7 +9,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.creditcard.PreauthorizationTransactionExecutor;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.creditcard.AuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
@@ -108,7 +108,7 @@ public class ServiceFactory {
         PayoneRequestFactory requestFactory = createPayoneRequestFactory(methodKey, config);
 
         Map<TransactionType, TransactionExecutor> executors = new HashMap<>();
-        executors.put(TransactionType.AUTHORIZATION, new PreauthorizationTransactionExecutor(typeCache, requestFactory, postService, ctpClient));
+        executors.put(TransactionType.AUTHORIZATION, new AuthorizationTransactionExecutor(typeCache, requestFactory, postService, ctpClient));
 
         return new PaymentMethodDispatcher((payment, transaction) -> payment, executors);
     }
