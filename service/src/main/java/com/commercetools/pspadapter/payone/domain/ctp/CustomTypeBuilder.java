@@ -3,10 +3,17 @@ package com.commercetools.pspadapter.payone.domain.ctp;
 import com.commercetools.pspadapter.payone.mapping.CreditCardNetwork;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+
+import io.sphere.sdk.carts.commands.CartDeleteCommand;
+import io.sphere.sdk.carts.queries.CartQuery;
 import io.sphere.sdk.models.LocalizedString;
 import io.sphere.sdk.models.TextInputHint;
+import io.sphere.sdk.orders.commands.OrderDeleteCommand;
+import io.sphere.sdk.orders.queries.OrderQuery;
 import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
+import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.types.BooleanType;
 import io.sphere.sdk.types.DateType;
@@ -17,6 +24,7 @@ import io.sphere.sdk.types.StringType;
 import io.sphere.sdk.types.Type;
 import io.sphere.sdk.types.TypeDraftBuilder;
 import io.sphere.sdk.types.commands.TypeCreateCommand;
+import io.sphere.sdk.types.commands.TypeDeleteCommand;
 import io.sphere.sdk.types.queries.TypeQuery;
 
 /**
@@ -55,15 +63,69 @@ public class CustomTypeBuilder {
     public static final String NOTIFICATION_FIELD = "notification";
     public static final String MESSAGE_FIELD = "message";
 
-    final BlockingClient client;
+    public enum PermissionToStartFromScratch {
+        /**
+         * Permission to erase anything is denied.
+         */
+        DENIED,
 
-    public CustomTypeBuilder(final BlockingClient client) {
-        this.client = client;
+        /**
+         * Permission to erase something is granted.
+         */
+        GRANTED;
+
+        /**
+         * Gets the proper enum value.
+         * @param permission whether or not permission to erase shall be granted
+         * @return {@link #GRANTED} if permission is true, {@link #DENIED} otherwise
+         */
+        public static PermissionToStartFromScratch fromBoolean(final boolean permission) {
+            if (permission) {
+                return GRANTED;
+            }
+
+            return DENIED;
+        }
+    }
+
+    private final BlockingClient ctpClient;
+    private final PermissionToStartFromScratch permissionToStartFromScratch;
+
+    public CustomTypeBuilder(final BlockingClient ctpClient, final PermissionToStartFromScratch permissionToErase) {
+        this.ctpClient = ctpClient;
+        this.permissionToStartFromScratch = permissionToErase;
     }
 
     public void run() {
+        switch (permissionToStartFromScratch) {
+            case GRANTED:
+                resetPlatform();
+                break;
+
+            default:
+                break;
+        }
+
         createPaymentProviderAgnosticTypes();
         createPayoneSpecificTypes();
+    }
+
+    private void resetPlatform() {
+        // TODO jw: use futures
+        // delete all orders
+        ctpClient.complete(OrderQuery.of().withLimit(500)).getResults()
+                .forEach(order -> ctpClient.complete(OrderDeleteCommand.of(order)));
+
+        // delete all carts
+        ctpClient.complete(CartQuery.of().withLimit(500)).getResults()
+                .forEach(cart -> ctpClient.complete(CartDeleteCommand.of(cart)));
+
+        // delete all payments
+        ctpClient.complete(PaymentQuery.of().withLimit(500)).getResults()
+                .forEach(payment -> ctpClient.complete(PaymentDeleteCommand.of(payment)));
+
+        ctpClient.complete(TypeQuery.of().withLimit(500)).getResults()
+                .forEach(type -> ctpClient.complete(TypeDeleteCommand.of(type)));
     }
 
     private void createPaymentProviderAgnosticTypes() {
@@ -131,13 +193,13 @@ public class CustomTypeBuilder {
 
     private Type createType(final String typeKey, final ImmutableList<FieldDefinition> fieldDefinitions, final String resourceTypeId) {
         // TODO replace with cache
-        final PagedQueryResult<Type> result = client.complete(
+        final PagedQueryResult<Type> result = ctpClient.complete(
                 TypeQuery.of()
                         .withPredicates(m -> m.key().is(typeKey))
                         .withLimit(1));
 
         if (result.getTotal() == 0) {
-            return client.complete(TypeCreateCommand.of(TypeDraftBuilder.of(
+            return ctpClient.complete(TypeCreateCommand.of(TypeDraftBuilder.of(
                     typeKey,
                     LocalizedString.ofEnglishLocale(typeKey),
                     ImmutableSet.of(resourceTypeId))

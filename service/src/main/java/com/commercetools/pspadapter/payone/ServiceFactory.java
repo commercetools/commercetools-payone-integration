@@ -38,18 +38,23 @@ public class ServiceFactory {
         final ServiceConfig serviceConfig = new ServiceConfig();
         final CommercetoolsClient commercetoolsClient = ServiceFactory.createCommercetoolsClient(serviceConfig);
         final LoadingCache<String, Type> typeCache = ServiceFactory.createTypeCache(commercetoolsClient);
-        final PaymentDispatcher paymentDispatcher = ServiceFactory.createPaymentDispatcher(typeCache, serviceConfig.getPayoneConfig(), commercetoolsClient);
-        final CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(serviceConfig.getCronNotation());
+        final PaymentDispatcher paymentDispatcher = ServiceFactory.createPaymentDispatcher(
+                typeCache,
+                serviceConfig.getPayoneConfig(),
+                commercetoolsClient);
 
         final IntegrationService integrationService = ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(commercetoolsClient),
                 paymentDispatcher,
-                new CustomTypeBuilder(commercetoolsClient));
+                new CustomTypeBuilder(
+                        commercetoolsClient,
+                        CustomTypeBuilder.PermissionToStartFromScratch.fromBoolean(
+                                serviceConfig.getStartFromScratch())));
 
         integrationService.start();
 
         ScheduledJobFactory.createScheduledJob(
-                cronScheduleBuilder,
+                CronScheduleBuilder.cronSchedule(serviceConfig.getCronNotation()),
                 integrationService,
                 SCHEDULED_JOB_KEY,
                 paymentDispatcher);
@@ -62,7 +67,9 @@ public class ServiceFactory {
         return ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(client),
                 createPaymentDispatcher(typeCache, config.getPayoneConfig(), client),
-                new CustomTypeBuilder(client));
+                new CustomTypeBuilder(
+                        client,
+                        CustomTypeBuilder.PermissionToStartFromScratch.fromBoolean(config.getStartFromScratch())));
     }
 
     private static IntegrationService createService(

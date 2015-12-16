@@ -23,6 +23,7 @@ public class PropertyProvider {
     public static final String CT_PROJECT_KEY = "CT_PROJECT_KEY";
     public static final String CT_CLIENT_ID = "CT_CLIENT_ID";
     public static final String CT_CLIENT_SECRET = "CT_CLIENT_SECRET";
+    public static final String CT_START_FROM_SCRATCH = "CT_START_FROM_SCRATCH";
 
     Map<String, String> internalProperties;
 

@@ -11,6 +11,7 @@ public class ServiceConfig {
     private final String ctClientId;
     private final String ctClientSecret;
     private final PayoneConfig payoneConfig;
+    private final boolean startFromScratch;
 
     public ServiceConfig() {
         this(new PropertyProvider());
@@ -28,6 +29,11 @@ public class ServiceConfig {
         ctClientSecret = propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.CT_CLIENT_SECRET)
                 .filter(s -> !s.isEmpty())
                 .orElseThrow(() -> propertyProvider.createIllegalArgumentException(PropertyProvider.CT_CLIENT_SECRET));
+
+        startFromScratch = Boolean.parseBoolean(
+                propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.CT_START_FROM_SCRATCH)
+                        .filter(s -> !s.isEmpty())
+                        .orElse("false"));
 
         payoneConfig = new PayoneConfig(propertyProvider);
     }
@@ -52,4 +58,7 @@ public class ServiceConfig {
         return payoneConfig;
     }
 
+    public boolean getStartFromScratch() {
+        return startFromScratch;
+    }
 }
