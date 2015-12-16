@@ -160,6 +160,16 @@ project(":functionaltests") {
     }
 }
 
+def staticPages = project.copySpec {
+    into 'latest'
+    from 'ghpages'
+}
+
+def generatedPages = project.copySpec {
+    into 'latest/spec'
+    from 'functionaltests/target/reports/spec'
+}
+
 githubPages {
     repoUri = 'git@github.com:commercetools/commercetools-payone-integration.git'
 
@@ -169,13 +179,8 @@ githubPages {
     }
 
     pages {
-        from 'ghpages'
-
-        into ('latest') {
-            from ('functionaltests/target/reports/spec') {
-                into 'spec'
-            }
-        }
+        into '.'
+        with staticPages, generatedPages
     }
 }
 
