@@ -34,22 +34,47 @@ BillSAFE has been deprecated by PAYONE and is not supported.
 ## TODO: ITEMS TO BE DISCUSSED
 
 With PAYONE:
- * Is the card expiry date of a CC at the end or the beginning of the given Month? 
+
+ * TODO when does `vauthorization` happen?  only on the Billing functionality?
+ * TODO when does `vauthorization` happen?  only on the Billing functionality?
+ * do we need to support `refund` txaction on notification if we trigger only debit and not refund? 
+ * TODO when do we need the `managemandate` call?
+ * TODO (probably already spoken about): which notify_versions can occur if we use the latest API version? only 7.5? 
+ * hwo to calculate the amountPaid in our platform
+ * clarify status. errormessage vs. failedcause vs. ...   -> what is the overall status? TODO PAYONE
 
 With CT Product Management / CT internal:
 
- * Wie übersetzen wir price, receivable, balance in  amountPlanned, amountAuthorized, amountPaid
- * How to represent due amounts that are higher (or lower) than the initial amountPlanned?  (due to dunning and chargeback fees). 
+ * TODO how to trigger address / bank data checks? Just a a payment without transaction is not safe against intermediate states and too implicit.
+   (request=bankaccountcheck / addresscheck / consumerscore)
+   * As data check is not a financial transaction, we don't want to include it in the Transactions. Interactions are the 
+     wrong semantics. 
+   * maybe directly on the integration service? ->  It has to happen synchronously in the checkout anyways.
+     *  GET /commercetools/payments/1234-1234-1234-1234/paymentdatacheck
+     *  GET /commercetools/payments/1234-1234-1234-1234/addresscheck
+     *  GET /commercetools/payments/1234-1234-1234-1234/consumerscore
+
+ * TODO what to write into the CT payment object to trigger an `updatereminder`, i.e. dunning level trigger
+     * also directly on the integration?  POST /commercetools/payments/123.../dunninglevel  
+
  * The definiton of the amountAuthorized field is unclear: Is it the amount that is remaining (not yet charged) from the auth
    or is it just the sum of all successful authorizations? 
- * How to set `capturemode` -> NK define logic how to find out that a capture is the last delivery.
-   * e.g. IF the sum of Charge transaction amounts incl. the now to do Charge equals amountPlanned, THEN it's the last? 
+
+ * Wie übersetzen wir price, receivable, balance in  amountPlanned und amountPaid. Positive Balance heißt, dass der Händler noch Geld offen hat (schon bei PAYONE nachgefragt) 
+   * amountPlanned = price, but the price is zero when only a preauthorization is done yet. And not in Cash Advance payments, too.  
+   * amountPaid = receivable minus balance? (TODO verify with PAYONE as there is no 1:1 example yet.), Can be wrong if receivable = 0 e.g. in cash advance etc. 
+   * XXX field missing XXX = receivable
+     * -> How to represent due amounts that are higher (or lower) than the initial amountPlanned?  (due to dunning and chargeback fees). 
+   * ACTHTUNG: PAYONE Felder in Euro, d.h. * 100 und auf volle cent runden. 
+
+ * (Prio Low) How to set `capturemode` -> NK define logic how to find out that a capture is the last delivery.
+   * e.g. IF the sum of Charge transaction amounts incl. the now to do Charge equals the current `receivable` (for which we don't have a field), THEN it's the last? 
    * (allowed values: completed / notcompleted ). Mandatory just with Billsafe & Klarna.  -> 
   
 Fields that CT could consider making a built-in:
 
   * Reference Nr. ( a use case for the `key` feature )
-  * Customer oriented status LText (`customermessage` at PAYONE)
+  * Customer oriented status LText (`customermessage` at PAYONE )
   * something that makes the difference between originally planned amount and current receivable transparent (dunning fees etc)
   * language assignment. That's a general issue with the architecture that delegates as much as possible to a detached microservice 
     (how does the service know which of the various LText fields in CTP to take?) 
@@ -200,15 +225,15 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
 | interfaceId | `txid` | PAYONE |  |
 | amountPlanned.centAmount | `price` | CT / PAYONE | Initially set by checkout, `price` from PAYONE notification must not deviate on Notifications. PAYONE value has to be multiplied by 100.  |
 | amountPlanned.currency | - | CT |  |
-| amountAuthorized.centAmount | TODO | PAYONE | TODO see TODO list |
-| authorizedUntil | TODO | PAYONE |  |
-| amountPaid.centAmount | `receivable` minus `balance` | PAYONE | TODO verify with PAYONE |
+| amountAuthorized.centAmount | TODO | PAYONE | TODO when the definition of the field is clarified  |
+| authorizedUntil | `txtime` plus seven days | PAYONE | seven days after the txtime value of the `preauthorization` call (not of other transactions!) |
+| amountPaid.centAmount | `receivable` minus `balance` | PAYONE | TODO wait for answer from PAYONE |
 | amountRefunded.centAmount | (from transactions) | PAYONE | (Sum of successful Refund Transactions) |
 | paymentMethodInfo.paymentInterface | - | CT | Must be "PAYONE" in CT, otherwise do not handle the Payment at all |
 | paymentMethodInfo.method | - | CT | (see the method mapping table above) |
 | paymentMethodInfo.name.{locale} | - | - | (not passed, project specific content) |
-| paymentStatus.interfaceCode | `errorcode` OR TODO | PAYONE | none |
-| paymentStatus.interfaceText | `errormessage` | PAYONE | none |
+| paymentStatus.interfaceCode | `status` ?? TODO rather `txaction` & `transaction_status` from notifications, too? | PAYONE | none |
+| paymentStatus.interfaceText | if set (on errors and invalid calls),  `errorcode` followed by a space and the  `errormessage`| PAYONE | none |
 | paymentStatus.state | - | - | (mapping from interfaceCode and transaction states to the Payment State Machine is project specific) |
 | transactions\[\*\].id | - | CT (cannot be changed) |  |
 | transactions\[\*\].timestamp | `txtime` | PAYONE | (from status notification) |
@@ -225,13 +250,6 @@ See below for the custom fields.
 ## PAYONE transaction types -> CT Transaction Types 
 
 ### triggering a new PAYONE transaction request given a CT transaction
-
-* TODO how to trigger address / bank data checks? Just a a payment without transaction is not safe because the integration
-  service processes the Payment Object change messages asynchronously and could miss the intermediate state without a transaction. 
-  * request=bankaccountcheck / addresscheck / consumerscore  
-  * As data check is not a financial transaction, we don't want to include it in the Transactions. A special Interaction? But interactions
-    aren't supposed to be relevant to the checkout and frontend code. 
-* TODO what to write into the CT payment object to trigger an `updatereminder`, i.e. dunning level trigger  
 
 Please take care of idempotency. The `TransactionState` alone does not suffice to avoid creating duplicate PAYONE transactions. 
 It could remain in `Pending` for various reasons.
