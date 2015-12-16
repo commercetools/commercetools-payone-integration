@@ -35,6 +35,7 @@ BillSAFE has been deprecated by PAYONE and is not supported.
 
 With PAYONE:
 
+ * TODO will negative line item amounts lead to failures? our custom line item can be used as a place to set discounts. 
  * TODO when does `vauthorization` happen?  only on the Billing functionality?
  * TODO when does `vauthorization` happen?  only on the Billing functionality?
  * do we need to support `refund` txaction on notification if we trigger only debit and not refund? 
@@ -42,6 +43,9 @@ With PAYONE:
  * TODO (probably already spoken about): which notify_versions can occur if we use the latest API version? only 7.5? 
  * hwo to calculate the amountPaid in our platform
  * clarify status. errormessage vs. failedcause vs. ...   -> what is the overall status? TODO PAYONE
+ 
+ * NK concerning checkout documentation: what's the minimum requirements for a creditcardcheck (esp. concerning hash, secrets etc -> server side stuff)
+   As far as I understand the docs the hashed parameters are all fixed, so the hash can be done just once and that's it.  So what's the security feature of it? 
 
 With CT Product Management / CT internal:
 
@@ -325,9 +329,6 @@ Implementation Notes:
    data at all. If the amount needs to be "fixed" to support PAYONE Invoicing or Klarna payment, this is up to the checkout
    implementation. 
 
-TODO 
- * map custom line items and shipping fees
-
 | CT Cart or Order JSON path | PAYONE Server API | who is Master?  | Value transform |
 |---|---|---|---|
 | id |  |  |  |
@@ -346,27 +347,35 @@ TODO
 | taxedPrice.taxPortions\[\*\].amount.currencyCode |  |  |  |
 | taxedPrice.taxPortions\[\*\].amount.centAmount |  |  |  |
 | cartState | Active/Merged/Ordered |  |  |
-| lineItems\[\*\] | `it[n]` | CT (existence of a line Item) | on lineItems the value is fixed to `goods` |
+| lineItems\[\*\] | `it[n]` | CT (if a line Item object exists) | fixed value `goods` |
 | lineItems\[\*\].id |  |  |  |
-| lineItems\[\*\].name.{locale} | `de[n]` |  | truncate to 255 chars. TODO how to choose the right locale & fallback locale?  |
+| lineItems\[\*\].name.{locale} | `de[n]` |  | truncate to 255 chars. locale to be taken from the `language` custom field of the payment  |
 | lineItems\[\*\].quantity | `no[n]` | CT | fail hard if 3 chars length is exceeded |
 | lineItems\[\*\].variant.id |  |  |  |
 | lineItems\[\*\].variant.sku | `id[n]` | CT | truncate at 32 chars and warn |
-| lineItems\[\*\].totalPrice.value.currencyCode |  |  |  |
-| lineItems\[\*\].totalPrice.value.centAmount | `pr[n]` | CT | a) Divide this by .quantity to get the effective price per Line Item quantity. b) Round commercially to full cents. c) Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. |
+| lineItems\[\*\].totalPrice.currencyCode |  |  |  |
+| lineItems\[\*\].totalPrice.centAmount | `pr[n]` | CT | a) Divide this by .quantity to get the effective price per Line Item quantity. b) Round commercially to full cents. c) Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. |
 | lineItems\[\*\].taxRate.name |  |  |  |
 | lineItems\[\*\].taxRate.amount | `va[n]` | CT | .amount is a float between zero and one. It has to be multiplied with 1000 and rounded to full integer to get base % points.|
 | lineItems\[\*\].taxRate.includedInPrice |  |  | (required for calculating the price, see above)  |
+| customLineItems\[\*\] | `it[n]` | CT (if a custom line Item object exists) | fixed value `goods` |
 | customLineItems\[\*\].id |  |  |  |
-| customLineItems\[\*\].name.{locale} |  |  |  |
-| customLineItems\[\*\].quantity |  |  |  |
-| customLineItems\[\*\].money.currencyCode |  |  |  |
-| customLineItems\[\*\].money.centAmount |  |  |  |
-| customLineItems\[\*\].discountedPrice.value.currencyCode |  |  |  |
-| customLineItems\[\*\].discountedPrice.value.centAmount |  |  |  |
+| customLineItems\[\*\].name.{locale} | `de[n]` |  | truncate to 255 chars. locale to be taken from the `language` custom field of the payment |
+| customLineItems\[\*\].quantity | `no[n]` | CT | fail hard if 3 chars length is exceeded |
+| customLineItems\[\*\].totalPrice.currencyCode |  |  |  |
+| customLineItems\[\*\].totalPrice.centAmount | `pr[n]` | CT | a) Divide this by .quantity to get the effective price per Line Item quantity. b) Round commercially to full cents. c) Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. |
 | customLineItems\[\*\].taxRate.name |  |  |  |
-| customLineItems\[\*\].taxRate.amount |  |  |  |
-| customLineItems\[\*\].taxRate.includedInPrice |  |  |  |
+| customLineItems\[\*\].taxRate.amount | `va[n]` | CT | .amount is a float between zero and one. It has to be multiplied with 1000 and rounded to full integer to get base % points.|
+| customLineItems\[\*\].taxRate.includedInPrice |  |  | (required for calculating the price, see above)  |
+| shippingInfo.shippingMethodName | `shippingprovider`  | CT | any value starting with `DHL` is translated to `DHL` only. Any Value starting with `Bartolini` is translated to `BRT`  |
+| shippingInfo.shippingMethodName | additionally `id[n]` if a shipping price is set  | CT | - |
+| shippingInfo.price |  `it[n]` | CT (count n up from the last real line item if the price object exists) | fixed value `shipment` |
+| shippingInfo.price |  `no[n]` | CT (count n up from the last real line item if the price object exists) | fixed value `1` |
+| shippingInfo.price.currencyCode |  |  |  |
+| shippingInfo.price.centAmount | `pr[n]` | CT | Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. |
+| shippingInfo.taxRate.name |  |  |  |
+| shippingInfo.taxRate.amount | `va[n]` | CT | .amount is a float between zero and one. It has to be multiplied with 1000 and rounded to full integer to get base % points.|
+| shippingInfo.taxRate.includedInPrice |  |  | (required for calculating the price, see above)  |
 | shippingAddress.title | (unused) |  |  |
 | shippingAddress.salutation | (unused) |  |  |
 | shippingAddress.firstName | `shipping_firstname` | CT |  |
@@ -402,12 +411,6 @@ TODO
 | billingAddress.email | `email` | CT |  |
 | billingAddress.phone | `telephonenumber` | CT |  |
 | billingAddress.mobile | `telephonenumber` | CT | fallback value if .phone is not set |
-| shippingInfo.shippingMethodName | `shippingprovider` | CT | any value starting with `DHL` is translated to `DHL` only. Any Value starting with `Bartolini` is translated to `BRT`  |
-| shippingInfo.price.currencyCode |  |  |  |
-| shippingInfo.price.centAmount |  |  |  |
-| shippingInfo.taxRate.centAmount |  |  |  |
-| shippingInfo.discountedPrice.price.currencyCode |  |  |  |
-| shippingInfo.discountedPrice.price.centAmount |  |  |  |
 
 # Constraint Rules to be implemented by the Integration
 
