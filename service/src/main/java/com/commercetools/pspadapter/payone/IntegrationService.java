@@ -31,14 +31,13 @@ public class IntegrationService {
 
         Spark.get("/commercetools/handle/payment/:id", (req, res) -> {
             final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(req.params("id"));
-            // TODO: Properly handle dispatch-result
             try {
-                dispatcher.dispatchPayment(payment);
-                res.status(200);
-                return "";
+                DispatchResult result = dispatcher.dispatchPayment(payment);
+                res.status(result.getStatusCode());
+                return result.getMessage();
             } catch (Exception e) {
                 res.status(500);
-                return "";
+                return e.getMessage();
             }
         });
 

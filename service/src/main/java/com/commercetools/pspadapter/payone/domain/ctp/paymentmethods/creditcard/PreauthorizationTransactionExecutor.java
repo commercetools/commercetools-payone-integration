@@ -6,8 +6,8 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.IdempotentTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
-import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
-import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PreauthorizationRequest;
+import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -33,11 +33,11 @@ import java.util.stream.Stream;
 
 public class PreauthorizationTransactionExecutor implements IdempotentTransactionExecutor {
     private final LoadingCache<String, Type> typeCache;
-    private final CreditCardRequestFactory requestFactory;
+    private final PayoneRequestFactory requestFactory;
     private final PayonePostService payonePostService;
     private final BlockingClient client;
 
-    public PreauthorizationTransactionExecutor(LoadingCache<String, Type> typeCache, CreditCardRequestFactory requestFactory, PayonePostService payonePostService, BlockingClient client) {
+    public PreauthorizationTransactionExecutor(LoadingCache<String, Type> typeCache, PayoneRequestFactory requestFactory, PayonePostService payonePostService, BlockingClient client) {
         this.typeCache = typeCache;
         this.requestFactory = requestFactory;
         this.payonePostService = payonePostService;
@@ -86,12 +86,12 @@ public class PreauthorizationTransactionExecutor implements IdempotentTransactio
     }
 
     private PaymentWithCartLike attemptExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        final CreditCardPreauthorizationRequest request = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        final PreauthorizationRequest request = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
 
         final Payment updatedPayment = client.complete(
             PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
                 AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
-                    ImmutableMap.of(CustomTypeBuilder.REQUEST_FIELD, request.toString() /* TODO */,
+                    ImmutableMap.of(CustomTypeBuilder.REQUEST_FIELD, request.toStringMap().toString() /* TODO */,
                         CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
                         CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */))));
 

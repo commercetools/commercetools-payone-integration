@@ -1,7 +1,6 @@
 package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
@@ -28,10 +27,13 @@ public class PaymentMethodDispatcher {
             .map(transaction -> {
                 PaymentWithCartLike newPaymentWithCartLike = getExecutor(transaction).executeTransaction(paymentWithCartLike, transaction);
                 Transaction newTransaction = getUpdatedTransaction(transaction, newPaymentWithCartLike.getPayment());
-                if (newTransaction.getState().equals(TransactionState.PENDING)) return newPaymentWithCartLike; // Still Pending, stop
-                else return dispatchPayment(newPaymentWithCartLike); // Recursively execute next Pending Transaction
+                if (newTransaction.getState().equals(TransactionState.PENDING)) {
+                    return null; // Still Pending, stop (e.g. not approved or no executor) TODO: e.g. throw error when no executor found!
+                } else {
+                    return dispatchPayment(newPaymentWithCartLike); // Recursively execute next Pending Transaction
+                }
             })
-            .orElse(paymentWithCartLike);
+            .orElse(paymentWithCartLike); //TODO: strategy for returning valid payments and those where transactions could not be processed!
     }
 
     private Transaction getUpdatedTransaction(Transaction transaction, Payment newPayment) {

@@ -41,9 +41,12 @@ public class BaseRequest implements Serializable {
      */
     private String request;
 
+    @SuppressWarnings("unchecked")
     public Map<String, Object> toStringMap() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        //implicit cast
         return mapper.convertValue(this, Map.class);
     }
 

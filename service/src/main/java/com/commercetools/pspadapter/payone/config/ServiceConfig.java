@@ -45,7 +45,7 @@ public class ServiceConfig {
     }
 
     public String getCronNotation() {
-        return "0/5 * * * * ?";
+        return "0/10 * * * * ?";
     }
 
     public PayoneConfig getPayoneConfig() {

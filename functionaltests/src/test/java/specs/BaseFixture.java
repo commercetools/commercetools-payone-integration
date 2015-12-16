@@ -1,6 +1,11 @@
 package specs;
 
 import com.google.common.base.Strings;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.fluent.Request;
+
+import java.io.IOException;
+import java.util.Random;
 
 /**
  * @author fhaertig
@@ -16,6 +21,13 @@ public class BaseFixture {
 
     public String getHandlePaymentUrl(final String paymentId) {
         return "http://localhost:8080/commercetools/handle/payment/" + paymentId;
+    }
+
+    public HttpResponse sendGetRequestToUrl(final String url) throws IOException {
+        return Request.Get(url)
+                .connectTimeout(200)
+                .execute()
+                .returnResponse();
     }
 
     protected String getGetConfigurationParameter(final String configParameterName) {
@@ -41,4 +53,9 @@ public class BaseFixture {
     protected String getVerifiedVisaPseudoCardPan() {
         return getGetConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_3_DS);
     }
+
+    protected String getRandomOrderNumber() {
+        return String.valueOf(new Random().nextInt() + System.currentTimeMillis());
+    }
 }
+
