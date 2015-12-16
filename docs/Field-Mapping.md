@@ -114,9 +114,9 @@ All payment methods:
   * card data:
     * `pseudocardpan` -> `cardDataPlaceholder` of type String (CT initial, PAYONE overrides)
     * `ecommercemode` ("internet" or "3dsecure") -> `force3DSecure` of type Boolean (CT master, PAYONE can force a redirect anyways)
-    * `truncatedcardpan` -> `truncatedCardNumber` of type String (PAYONE master)
+    * `truncatedcardpan` (on initial call) / `cardpan` (on notifications)  -> `MaskedCardNumber` of type String (PAYONE master)
     * `cardholder`  ->  `cardHolderName`  of type String (CT master, PAYONE overrides)
-    * `cardexpirydate` -> `cardExpiryDate`  of type Date (TODO last or first day of the month given?)
+    * `cardexpirydate` -> `cardExpiryDate`  of type Date. The day of the month is not of relevance, but it is recommended to put the last day of the month given. 
     * `cardtype` -> `cardNetwork` of type Enum.  key mapping self-explanatory.  
   * redirect flow support for 3Dsecure 
     * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
