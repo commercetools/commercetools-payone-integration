@@ -96,4 +96,4 @@ Please bear in mind that this repository should be free of any IDE specific file
 
 ## Create a custom version
 
-Just fork it. The MIT License allows you to do anything with the code, commercially or noncommercial.
+Just fork it. The MIT License allows you to do anything with the code, commercially or noncommercial. :)
