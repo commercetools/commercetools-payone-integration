@@ -5,6 +5,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Random;
 
 /**
@@ -22,7 +23,14 @@ public class BaseFixture {
     }
 
     public String getHandlePaymentUrl(final String paymentId) {
-        return "http://localhost:8080/commercetools/handle/payment/" + paymentId;
+        try {
+            //used for external address
+            String url = getGetConfigurationParameter("HANDLE_URL");
+            return url + paymentId;
+        } catch (Exception ex) {
+            //default local address
+            return "http://localhost:8080/commercetools/handle/payment/" + paymentId;
+        }
     }
 
     public HttpResponse sendGetRequestToUrl(final String url) throws IOException {
