@@ -254,40 +254,47 @@ It could remain in `Pending` for various reasons.
    * If a *Customer*  with CT customerNumber = PAYONE `customerid` is found, reference that customer from the payment. 
  3. Add the raw TransactionStatus information as a new Interaction Object to the Payment (and persist)
  
-The Logic defined in the following section can happen either asynchroniously on the "new Interaction added" Message or directly. 
+The Logic defined in the following section can happen asynchroniously on the "new Interaction added" Message with the exception
+of TransactionStatus Calls that happen during a redirect. The latter have to be processed immediately so the purchase
+confirmation page already has the "official" result of the redirect. 
 In any case, the "TSOK" response should be sent back to PAYONE as soon as the Interaction has successfully been stored in 
-commerceotols (200 on the update request), but not earlier. 
+commercetools (200 on the update request), but not earlier. 
 
+> Important note: TransactionStatus Calls are coming asynchronously at no guaranteed time, but _only_ during the redirect
+  flow a TransactionStatus is guaranteed to be done when the buyer is redirected back to the chekcout. 
+  
 ### updating the CT Payment given a PAYONE TransactionStatus Notification (Stored in an Interaction)
 
 See chapter 4.2.1 "List of events (txaction)" and the sample processes in the PAYONE documentation
 
 The matching transaction is found by sequencenumber = interactionId
 
-* TODO when does `vauthorization` happen? What is it? 
-* TODO when do we need the `managemandate` call? 
-* TODO is explicit `3dscheck` (probably rather `check`?) necessary at all or implicit in the preauth/auth? 
+[FH] PAYONE docu says that "you will receive the data and the status for each payment process". 
+     So maybe this table should incooperate also the CT PaymentState?
+> NK @FH: The PaymentState is an open field 
 
-[FH] PAYONE docu says that "you will receive the data and the status for each payment process". So maybe this table should incooperate also the CT PaymentState?
-[FH] transaction_status seems to be only available with txaction "appointed" for now
+[FH] transaction_status seems to be only available with txaction "appointed" for now. 
+> NK @FH: yes. And they announce that more may follow (e.g. on "paid" and "debit"). So I propose to interpret transactio_status
+  not set as `completed` and expect a `pending` anytime (has effect only if our tx would otherwise move to "Success" or "Failure") 
+
+--- EXPERIMENTAL AS DISCUSSION BASIS ---
 
 | PAYONE `txaction` | PAYONE `transaction_status` | PAYONE `notify_version` | CT `TransactionType` | CT `TransactionState` | Notes |
 |---|---|---|---|---|---|
-| `appointed` | pending |  |  |  |  |
-| `appointed` | completed |  |  |  |  |
-| `capture` |  |  |  |  |  |
-| `paid` |  |  |  |  |  |
-| `underpaid` |  |  |  |  |  |
-| `cancelation` |  |  |  |  | TODO is that  |
-| `refund` |  |  |  |  |  |
-| `debit` |  |  |  |  |  |
-| `transfer` |  |  |  |  | Transfer like in "switch"/"move to" another bank account |
-| `reminder` |  |  |  |  | status of dunning procedure, must be activated by PAYONE |
-| `vauthorization` |  |  |  |  | only available with PAYONE Billing module, must be activated |
-| `vsettlement` |  |  |  |  | only available with PAYONE Billing module, must be activated |
-| `invoice` |  |  |  |  |  |
-| `failed` | any | any | TODO all? charges? the one with the right sequence_number?  | `Failure` | (not fully implemented at PAYONE yet) |
-
+| `appointed` | `pending` | `7.5` |  Authorization (must be one and the first) |  Pending | create an Authorization if none there |
+| `appointed` | `completed` | `7.5` | Authorization (must be one and the first | Success  | create an Authorization if none there |
+| `capture` | not set or `completed` | `7.5` | ??? |  |  |
+| `paid` | not set or `completed` | `7.5` | last Charge? | Success | create a Charge if no matching one is found (TODO what is "matching"? one that has no sequencenumber yet?) |
+| `underpaid` | not set or `completed` | `7.5` | last Charge?  | Pending | create a Charge if no matching one found |
+| `cancelation` | not set or `completed` | `7.5` |  |  | TODO how to know if it's a Chargeback or a failed Charge?  |
+| `refund` | not set or `completed` | `7.5` | Refund | Success | create a Refund if no matching one found. TODO do we need to support it if we don't trigger refund anyways but always use debit?  |
+| `debit` | not set or `completed` | `7.5` |  |  | TODO Refund or Chargeback depending whether the `balance` is positive or negative?  |
+| `transfer` | not set or `completed` | `7.5` |  |  | Transfer like in "switch"/"move to" another bank account TODO how to handle?  |
+| `reminder` | not set or `completed` | `7.5` | (nothing) | (nothing) | status of dunning procedure. Just update the payment status field.  |
+| `vauthorization` | not set or `completed` | `7.5` |  | (unsupported?) | only available with PAYONE Billing module, must be activated |
+| `vsettlement` | not set or `completed` | `7.5` |  | (unsupported?) | only available with PAYONE Billing module, must be activated |
+| `invoice` | not set or `completed` | `7.5` | (nothing) | (nothing) | no status change, just write the invoice ID / URL |
+| `failed` | not set or `completed` | `7.5` | Last Charge?  | `Failure` | (not fully implemented at PAYONE yet, feedback pending) |
 
 ## commercetools Cart and Order object (mapping to payment interface on payment creation)
 
