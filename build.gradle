@@ -183,7 +183,19 @@ githubPages {
     }
 }
 
-publishGhPages.dependsOn ':functionaltests:testSpec'
+task createPagesDestination {
+    def pagesDir = new File('latest/spec')
+
+    outputs.file pagesDir
+
+    if (!pagesDir.exists()) {
+        if (!pagesDir.mkdirs()) {
+            throw new GradleException('Failed to create pagesDir: ' + pagesDir)
+        }
+    }
+}
+
+publishGhPages.dependsOn 'createPagesDestination', ':functionaltests:testSpec'
 
 void assertPropertyIsNotNullOrEmpty(String name, Map<String, Object> properties) {
     def property = properties.get(name)
