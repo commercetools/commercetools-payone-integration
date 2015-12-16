@@ -15,6 +15,8 @@ public class BaseFixture {
     private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
     private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
 
+    private static final Random randomSource = new Random();
+
     public String getPayOneApiUrl() {
         return "https://api.pay1.de/post-gateway/";
     }
@@ -55,7 +57,7 @@ public class BaseFixture {
     }
 
     protected String getRandomOrderNumber() {
-        return String.valueOf(new Random().nextInt() + System.currentTimeMillis());
+        return String.valueOf(randomSource.nextInt() + System.currentTimeMillis());
     }
 }
 
