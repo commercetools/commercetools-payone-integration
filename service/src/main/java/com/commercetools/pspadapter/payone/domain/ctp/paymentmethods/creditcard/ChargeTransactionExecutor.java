@@ -6,6 +6,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.IdempotentTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.PreauthorizationRequest;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.google.common.cache.LoadingCache;
@@ -17,11 +18,7 @@ import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
-import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
-import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
-import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionTimestamp;
-import io.sphere.sdk.payments.commands.updateactions.SetAuthorization;
-import io.sphere.sdk.payments.commands.updateactions.SetInterfaceId;
+import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 
@@ -31,13 +28,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class PreauthorizationTransactionExecutor implements IdempotentTransactionExecutor {
+public class ChargeTransactionExecutor implements IdempotentTransactionExecutor {
     private final LoadingCache<String, Type> typeCache;
     private final PayoneRequestFactory requestFactory;
     private final PayonePostService payonePostService;
     private final BlockingClient client;
 
-    public PreauthorizationTransactionExecutor(LoadingCache<String, Type> typeCache, PayoneRequestFactory requestFactory, PayonePostService payonePostService, BlockingClient client) {
+    public ChargeTransactionExecutor(LoadingCache<String, Type> typeCache, PayoneRequestFactory requestFactory, PayonePostService payonePostService, BlockingClient client) {
         this.typeCache = typeCache;
         this.requestFactory = requestFactory;
         this.payonePostService = payonePostService;
@@ -46,12 +43,14 @@ public class PreauthorizationTransactionExecutor implements IdempotentTransactio
 
     @Override
     public TransactionType supportedTransactionType() {
-        return TransactionType.AUTHORIZATION;
+        return TransactionType.CHARGE;
     }
 
     @Override
     public boolean wasExecuted(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE, CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT)
+        return getCustomFieldsOfType(paymentWithCartLike,
+                CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
+                CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT)
             .anyMatch(i -> i.getFieldAsString(CustomTypeBuilder.TRANSACTION_ID_FIELD).equals(transaction.getId()));
     }
 
@@ -86,7 +85,7 @@ public class PreauthorizationTransactionExecutor implements IdempotentTransactio
     }
 
     private PaymentWithCartLike attemptExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        final PreauthorizationRequest request = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        final CaptureRequest request = requestFactory.createCaptureRequest(paymentWithCartLike);
 
         final Payment updatedPayment = client.complete(
             PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
@@ -115,9 +114,7 @@ public class PreauthorizationTransactionExecutor implements IdempotentTransactio
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
                         ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
-                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId()),
-                        SetInterfaceId.of(response.get("txid")),
-                        SetAuthorization.of(paymentWithCartLike.getPayment().getAmountPlanned())
+                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                     ));
                 } else if (status.equals("ERROR")) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(

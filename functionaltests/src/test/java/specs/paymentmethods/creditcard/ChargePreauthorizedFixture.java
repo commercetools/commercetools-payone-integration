@@ -118,54 +118,7 @@ public class ChargePreauthorizedFixture extends BaseFixture {
             final String currencyCode) throws ExecutionException, InterruptedException, PayoneException, IOException {
 
         final MonetaryAmount monetaryAmount = MoneyImpl.ofCents(Long.valueOf(centAmount), currencyCode);
-
-        final List<TransactionDraft> transactions = Collections.singletonList(TransactionDraftBuilder
-                .of(TransactionType.AUTHORIZATION, monetaryAmount, ZonedDateTime.now())
-                .state(TransactionState.PENDING)
-                .build());
-
-        final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
-                .paymentMethodInfo(PaymentMethodInfoBuilder.of()
-                        .method(paymentMethod)
-                        .paymentInterface("PAYONE")
-                        .build())
-                .transactions(transactions)
-                .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
-                        CustomTypeBuilder.PAYMENT_CREDIT_CARD,
-                        ImmutableMap.of(
-                                CustomTypeBuilder.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan(),
-                                CustomTypeBuilder.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage(),
-                                CustomTypeBuilder.REFERENCE_FIELD, "myGlobalKey")))
-                .build();
-
-        Payment payment = ctpClient.complete(PaymentCreateCommand.of(paymentDraft));
-
-        final Address billingAddress = Address.of(CountryCode.DE).withLastName("Test Buyer");
-        //create cart and order with product
-        Product product = ctpClient.complete(ProductQuery.of()).getResults().get(0);
-        CartDraft cardDraft = CartDraftBuilder.of(Monetary.getCurrency("EUR"))
-                .build();
-        Cart cart = ctpClient.execute(CartCreateCommand.of(cardDraft)).toCompletableFuture().get();
-        List<UpdateAction<Cart>> updateActions = Arrays.asList(
-                AddPayment.of(payment),
-                AddLineItem.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1),
-                SetShippingAddress.of(Address.of(CountryCode.DE)),
-                SetBillingAddress.of(billingAddress)
-        );
-        cart = ctpClient.complete(CartUpdateCommand.of(cart, updateActions));
-        final Order order = ctpClient.complete(OrderFromCartCreateCommand.of(OrderFromCartDraft.of(cart, getRandomOrderNumber(), PaymentState.PENDING)));
-        ctpClient.complete(OrderUpdateCommand.of(order,
-                Arrays.asList(
-                        io.sphere.sdk.orders.commands.updateactions.AddPayment.of(payment)
-                )));
-
-        HttpResponse response = sendGetRequestToUrl(getHandlePaymentUrl(payment.getId()));
-
-        //retry processing of payment to assure that authorization was done
-        while (response.getStatusLine().getStatusCode() != 200) {
-            Thread.sleep(200);
-            response = sendGetRequestToUrl(getHandlePaymentUrl(payment.getId()));
-        }
+        Payment payment = preparePaymentWithPreauthorizedAmountAndOrder(monetaryAmount, paymentMethod);
 
         //get newest payment and add new charge transaction
         payment = ctpClient.complete(PaymentByIdGet.of(payment.getId()));
@@ -240,6 +193,57 @@ public class ChargePreauthorizedFixture extends BaseFixture {
 
         ctpClient.complete(TypeQuery.of().withLimit(500)).getResults()
                 .forEach(t -> ctpClient.complete(TypeDeleteCommand.of(t)));
+    }
+
+    private Payment preparePaymentWithPreauthorizedAmountAndOrder(final MonetaryAmount monetaryAmount, final String paymentMethod) throws ExecutionException, InterruptedException, IOException {
+        final List<TransactionDraft> transactions = Collections.singletonList(TransactionDraftBuilder
+                .of(TransactionType.AUTHORIZATION, monetaryAmount, ZonedDateTime.now())
+                .state(TransactionState.PENDING)
+                .build());
+
+        final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
+                .paymentMethodInfo(PaymentMethodInfoBuilder.of()
+                        .method(paymentMethod)
+                        .paymentInterface("PAYONE")
+                        .build())
+                .transactions(transactions)
+                .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
+                        CustomTypeBuilder.PAYMENT_CREDIT_CARD,
+                        ImmutableMap.of(
+                                CustomTypeBuilder.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan(),
+                                CustomTypeBuilder.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage(),
+                                CustomTypeBuilder.REFERENCE_FIELD, "myGlobalKey")))
+                .build();
+
+        Payment payment = ctpClient.complete(PaymentCreateCommand.of(paymentDraft));
+
+        final Address billingAddress = Address.of(CountryCode.DE).withLastName("Test Buyer");
+        //create cart and order with product
+        Product product = ctpClient.complete(ProductQuery.of()).getResults().get(0);
+        CartDraft cardDraft = CartDraftBuilder.of(Monetary.getCurrency("EUR"))
+                .build();
+        Cart cart = ctpClient.execute(CartCreateCommand.of(cardDraft)).toCompletableFuture().get();
+        List<UpdateAction<Cart>> updateActions = Arrays.asList(
+                AddPayment.of(payment),
+                AddLineItem.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1),
+                SetShippingAddress.of(Address.of(CountryCode.DE)),
+                SetBillingAddress.of(billingAddress)
+        );
+        cart = ctpClient.complete(CartUpdateCommand.of(cart, updateActions));
+        final Order order = ctpClient.complete(OrderFromCartCreateCommand.of(OrderFromCartDraft.of(cart, getRandomOrderNumber(), PaymentState.PENDING)));
+        ctpClient.complete(OrderUpdateCommand.of(order,
+                Arrays.asList(
+                        io.sphere.sdk.orders.commands.updateactions.AddPayment.of(payment)
+                )));
+
+        HttpResponse response = sendGetRequestToUrl(getHandlePaymentUrl(payment.getId()));
+
+        //retry processing of payment to assure that authorization was done
+        while (response.getStatusLine().getStatusCode() != 200) {
+            Thread.sleep(200);
+            response = sendGetRequestToUrl(getHandlePaymentUrl(payment.getId()));
+        }
+        return payment;
     }
 
     private Payment fetchPayment(final String paymentId) {
