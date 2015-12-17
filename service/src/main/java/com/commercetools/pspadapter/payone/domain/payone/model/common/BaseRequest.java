@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -73,6 +74,12 @@ public class BaseRequest implements Serializable {
 
     public String getKey() {
         return key;
+    }
+
+    //assure that key will not be deserialized when storing in interface action
+    @JsonIgnore
+    private void setKey(final String key) {
+        this.key = key;
     }
 
     public String getMode() {
