@@ -4,7 +4,10 @@ import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
+import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
 import io.sphere.sdk.carts.commands.CartDeleteCommand;
 import io.sphere.sdk.carts.queries.CartQuery;
@@ -17,6 +20,7 @@ import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.payments.queries.PaymentByIdGet;
 import io.sphere.sdk.payments.queries.PaymentQuery;
+import io.sphere.sdk.types.Type;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
 import org.junit.After;
@@ -27,6 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author fhaertig
@@ -39,6 +44,7 @@ public abstract class BaseFixture {
     private static final Random randomSource = new Random();
     private BlockingClient ctpClient;
     private URL ctPayoneIntegrationBaseUrl;
+    private LoadingCache<String, Type> typeCache;
 
     @Before
     public void initializeCommercetoolsClient() throws MalformedURLException {
@@ -57,6 +63,8 @@ public abstract class BaseFixture {
                 serviceConfig.getCtClientSecret()));
 
         resetCommercetoolsPlatform();
+
+        typeCache = CacheBuilder.newBuilder().build(new TypeCacheLoader(ctpClient));
     }
 
     @After
@@ -137,6 +145,16 @@ public abstract class BaseFixture {
 
     protected Payment fetchPayment(final String paymentId) {
         return ctpClient.complete(PaymentByIdGet.of(paymentId));
+    }
+
+    /**
+     * Gets the ID of the type with name (aka key) {@code typeName}.
+     * @param typeName the name (key) of a type
+     * @return the type's ID
+     * @throws ExecutionException if a checked exception was thrown while loading the value.
+     */
+    public String typeIdOfFromTypeName(final String typeName) throws ExecutionException {
+        return typeCache.get(typeName).getId();
     }
 
     public String getTransactionState(final String paymentId, final String transactionId) {

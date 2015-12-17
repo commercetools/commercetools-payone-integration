@@ -95,11 +95,12 @@ public class ChargePreauthorizedFixture extends BaseFixture {
     public String getInterfaceInteractionCount(
             final String paymentId,
             final String transactionId,
-            final String interactionType,
-            final String requestType) {
+            final String interactionTypeName,
+            final String requestType) throws ExecutionException {
+        final String interactionTypeId = typeIdOfFromTypeName(interactionTypeName);
         final Payment payment = fetchPayment(paymentId);
         return Long.toString(payment.getInterfaceInteractions().stream()
-                .filter(i -> i.getType().getTypeId().equals(interactionType))
+                .filter(i -> i.getType().getTypeId().equals(interactionTypeId))
                 .filter(i -> transactionId.equals(i.getFieldAsString(CustomTypeBuilder.TRANSACTION_ID_FIELD)))
                 .filter(i -> {
                     final String requestField = i.getFieldAsString(CustomTypeBuilder.REQUEST_FIELD);
