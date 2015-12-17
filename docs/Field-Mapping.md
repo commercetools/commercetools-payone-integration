@@ -11,7 +11,7 @@ TODOs:
 See also: [CT Method field convention](https://github.com/nkuehn/payment-integration-specifications/blob/master/Method-Keys.md)
  
 | CT `method` field value |  PAYONE `clearingtype` | Additional PAYONE parameter | common name | CT payment type key |
-|---|---|---|---|
+|---|---|---|---|---|
 | `DIRECT_DEBIT-SEPA` | `elv` |  | Lastschrift / Direct Debit | `payment-DIRECT_DEBIT-SEPA` |
 | `CREDIT_CARD` | `cc` | (card network and specific card data are trasnferred on the client API only -> PCI DSS !) | Credit Card | `payment-CREDIT_CARD` |
 | `BANK_TRANSFER-SOFORTUEBERWEISUNG` | `sb` | `onlinebanktransfertype=PNT` |  Sofortbanking / Sofortüberweisung (DE) | `payment-BANK_TRANSFER` |
