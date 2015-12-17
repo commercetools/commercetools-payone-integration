@@ -12,12 +12,14 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.Transaction
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.UnsupportedTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.creditcard.AuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.creditcard.ChargeTransactionExecutor;
+import com.commercetools.pspadapter.payone.domain.payone.PayoneNotificationService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
@@ -28,6 +30,7 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author fhaertig
@@ -80,7 +83,7 @@ public class ServiceFactory {
             final PaymentDispatcher paymentDispatcher,
             final CustomTypeBuilder customTypeBuilder) {
         // TODO jw: use actual result processor
-        return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, new ResultProcessor() {
+        return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, new PayoneNotificationService(), new ResultProcessor() {
         });
     }
 
@@ -91,12 +94,14 @@ public class ServiceFactory {
     public static PaymentDispatcher createPaymentDispatcher(final LoadingCache<String, Type> typeCache, final PayoneConfig config, final CommercetoolsClient client) {
         final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
 
-        TransactionExecutor defaultExecutor = new UnsupportedTransactionExecutor(client);
+        final TransactionExecutor defaultExecutor = new UnsupportedTransactionExecutor(client);
         final PayonePostServiceImpl postService = PayonePostServiceImpl.of(config.getApiUrl());
 
-        methodDispatcherMap.put(PaymentMethod.CREDIT_CARD, null);
+        final Set<PaymentMethod> supportedMethods = ImmutableSet.of(
+                PaymentMethod.CREDIT_CARD
+        );
 
-        for (PaymentMethod method : methodDispatcherMap.keySet()) {
+        for (PaymentMethod method : supportedMethods) {
             PayoneRequestFactory requestFactory = Optional.ofNullable(createRequestFactory(method, config))
                     .orElseThrow(() -> new IllegalArgumentException("No PayoneRequestFactory could be created for payment method " + method));
             Map<TransactionType, TransactionExecutor> executorsMap = new HashMap<>();

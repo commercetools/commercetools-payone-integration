@@ -3,6 +3,7 @@ package com.commercetools.pspadapter.payone;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.payone.PayoneNotificationService;
 import com.google.common.base.Strings;
 import spark.Spark;
 
@@ -17,16 +18,19 @@ public class IntegrationService {
     private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
     private final PaymentDispatcher dispatcher;
     private final CustomTypeBuilder typeBuilder;
+    private final PayoneNotificationService notificationService;
     private final ResultProcessor resultProcessor;
 
     IntegrationService(
             final CustomTypeBuilder typeBuilder,
             final CommercetoolsQueryExecutor commercetoolsQueryExecutor,
             final PaymentDispatcher dispatcher,
+            final PayoneNotificationService notificationService,
             final ResultProcessor resultProcessor) {
         this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
         this.dispatcher = dispatcher;
         this.typeBuilder = typeBuilder;
+        this.notificationService = notificationService;
         this.resultProcessor = resultProcessor;
     }
 
@@ -57,6 +61,7 @@ public class IntegrationService {
         });
 
         Spark.post("/payone/notification", (req, res) -> {
+            notificationService.receiveNotification(req);
             res.status(501);
             return "Currently not implemented";
         });
