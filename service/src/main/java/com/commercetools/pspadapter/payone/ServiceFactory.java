@@ -27,6 +27,7 @@ import org.quartz.SchedulerException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author fhaertig
@@ -92,18 +93,18 @@ public class ServiceFactory {
         final PayonePostServiceImpl postService = PayonePostServiceImpl.of(config.getApiUrl());
 
         methodDispatcherMap.put(PaymentMethod.CREDIT_CARD, null);
-        methodDispatcherMap.put(PaymentMethod.DIRECT_DEBIT_SEPA, null);
 
         for (PaymentMethod method : methodDispatcherMap.keySet()) {
-            PayoneRequestFactory requestFactory = createRequestFactory(method, config);
+            PayoneRequestFactory requestFactory = Optional.ofNullable(createRequestFactory(method, config))
+                    .orElseThrow(() -> new IllegalArgumentException("No PayoneRequestFactory could be created for payment method " + method));
             Map<TransactionType, TransactionExecutor> executorsMap = new HashMap<>();
             for (TransactionType type : method.getSupportedTransactionTypes()) {
-                executorsMap.put(type, createTransactionExecutor(type, typeCache, client, requestFactory, postService));
+                Optional
+                    .ofNullable(createTransactionExecutor(type, typeCache, client, requestFactory, postService))
+                    .ifPresent(executor -> executorsMap.put(type, executor));
             }
             methodDispatcherMap.put(method, new PaymentMethodDispatcher(defaultExecutor, executorsMap));
         }
-
-
         return new PaymentDispatcher(methodDispatcherMap);
     }
 
