@@ -1,11 +1,11 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 public class BaseRequest implements Serializable {
@@ -42,13 +42,12 @@ public class BaseRequest implements Serializable {
      */
     private String request;
 
-    @SuppressWarnings("unchecked")
     public Map<String, Object> toStringMap() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-        //implicit cast
-        return mapper.convertValue(this, Map.class);
+        return mapper.convertValue(this,
+                mapper.getTypeFactory().constructMapType(HashMap.class, String.class, Object.class));
     }
 
     BaseRequest(final PayoneConfig config, final String requestType) {
@@ -74,12 +73,6 @@ public class BaseRequest implements Serializable {
 
     public String getKey() {
         return key;
-    }
-
-    //assure that key will not be deserialized when storing in interface action
-    @JsonIgnore
-    private void setKey(final String key) {
-        this.key = key;
     }
 
     public String getMode() {

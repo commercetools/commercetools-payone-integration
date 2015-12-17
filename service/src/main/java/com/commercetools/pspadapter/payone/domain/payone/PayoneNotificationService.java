@@ -38,7 +38,6 @@ public class PayoneNotificationService {
         for (String property : properties) {
             String[] param = StringUtils.split(property, "=", 2);
             if (param != null && param.length > 1) {
-                // Attention: the Redirect-param should not be decoded, otherwise the redirect will not work
                 resultMap.put(param[0], param[1]);
             }
         }
