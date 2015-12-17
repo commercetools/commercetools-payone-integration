@@ -18,7 +18,6 @@ import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.OrderFromCartDraft;
 import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.orders.commands.OrderFromCartCreateCommand;
-import io.sphere.sdk.orders.commands.OrderUpdateCommand;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -100,10 +99,8 @@ public class AuthorizationFixture extends BaseFixture {
                         SetBillingAddress.of(Address.of(CountryCode.DE).withLastName("Test Buyer"))
                 )));
 
-        ctpClient.complete(OrderUpdateCommand.of(
-                ctpClient.complete(OrderFromCartCreateCommand.of(
-                        OrderFromCartDraft.of(cart, getRandomOrderNumber(), PaymentState.PENDING))),
-                ImmutableList.of(io.sphere.sdk.orders.commands.updateactions.AddPayment.of(payment))));
+        ctpClient.complete(OrderFromCartCreateCommand.of(
+                OrderFromCartDraft.of(cart, getRandomOrderNumber(), PaymentState.PENDING)));
 
         return payment.getId();
     }

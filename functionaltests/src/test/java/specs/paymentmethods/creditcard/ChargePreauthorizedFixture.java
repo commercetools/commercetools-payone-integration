@@ -15,13 +15,10 @@ import io.sphere.sdk.carts.commands.updateactions.AddLineItem;
 import io.sphere.sdk.carts.commands.updateactions.AddPayment;
 import io.sphere.sdk.carts.commands.updateactions.SetBillingAddress;
 import io.sphere.sdk.carts.commands.updateactions.SetShippingAddress;
-import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.models.Address;
-import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.OrderFromCartDraft;
 import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.orders.commands.OrderFromCartCreateCommand;
-import io.sphere.sdk.orders.commands.OrderUpdateCommand;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -48,7 +45,6 @@ import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -133,26 +129,20 @@ public class ChargePreauthorizedFixture extends BaseFixture {
                  .build();
 
          final BlockingClient ctpClient = ctpClient();
-         Payment payment = ctpClient.complete(PaymentCreateCommand.of(paymentDraft));
-
-         final Address billingAddress = Address.of(CountryCode.DE).withLastName("Test Buyer");
+         final Payment payment = ctpClient.complete(PaymentCreateCommand.of(paymentDraft));
          //create cart and order with product
-         Product product = ctpClient.complete(ProductQuery.of()).getResults().get(0);
-         CartDraft cardDraft = CartDraftBuilder.of(Monetary.getCurrency("EUR"))
-                 .build();
-         Cart cart = ctpClient.execute(CartCreateCommand.of(cardDraft)).toCompletableFuture().get();
-         List<UpdateAction<Cart>> updateActions = Arrays.asList(
-                 AddPayment.of(payment),
-                 AddLineItem.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1),
-                 SetShippingAddress.of(Address.of(CountryCode.DE)),
-                 SetBillingAddress.of(billingAddress)
-         );
-         cart = ctpClient.complete(CartUpdateCommand.of(cart, updateActions));
-         final Order order = ctpClient.complete(OrderFromCartCreateCommand.of(OrderFromCartDraft.of(cart, getRandomOrderNumber(), PaymentState.PENDING)));
-         ctpClient.complete(OrderUpdateCommand.of(order,
-                 Arrays.asList(
-                         io.sphere.sdk.orders.commands.updateactions.AddPayment.of(payment)
+         final Product product = ctpClient.complete(ProductQuery.of()).getResults().get(0);
+         final CartDraft cardDraft = CartDraftBuilder.of(Monetary.getCurrency("EUR")).build();
+         final Cart cart = ctpClient.complete(CartUpdateCommand.of(
+                 ctpClient.complete(CartCreateCommand.of(cardDraft)),
+                 ImmutableList.of(
+                         AddPayment.of(payment),
+                         AddLineItem.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1),
+                         SetShippingAddress.of(Address.of(CountryCode.DE)),
+                         SetBillingAddress.of(Address.of(CountryCode.DE).withLastName("Test Buyer"))
                  )));
+
+         ctpClient.complete(OrderFromCartCreateCommand.of(OrderFromCartDraft.of(cart, getRandomOrderNumber(), PaymentState.PENDING)));
 
          HttpResponse response = sendGetRequestToUrl(getHandlePaymentUrl(payment.getId()));
 
