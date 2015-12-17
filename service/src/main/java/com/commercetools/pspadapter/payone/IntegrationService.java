@@ -35,7 +35,7 @@ public class IntegrationService {
 
         Spark.port(port());
 
-        Spark.get("/commercetools/handle/payment/:id", (req, res) -> {
+        Spark.get("/commercetools/handle/payments/:id", (req, res) -> {
             try {
                 final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(req.params("id"));
                 try {

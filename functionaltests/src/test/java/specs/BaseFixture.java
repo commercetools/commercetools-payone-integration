@@ -77,7 +77,7 @@ public abstract class BaseFixture {
                 ctPayoneIntegrationBaseUrl.getProtocol(),
                 ctPayoneIntegrationBaseUrl.getHost(),
                 ctPayoneIntegrationBaseUrl.getPort(),
-                "/commercetools/handle/payment/" + paymentId)
+                "/commercetools/handle/payments/" + paymentId)
                 .toExternalForm();
     }
 
