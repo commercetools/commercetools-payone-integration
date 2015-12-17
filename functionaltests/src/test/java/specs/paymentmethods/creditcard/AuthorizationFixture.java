@@ -51,7 +51,6 @@ import java.util.concurrent.ExecutionException;
  * @author fhaertig
  * @date 10.12.15
  */
-@ExpectedToFail
 @RunWith(ConcordionRunner.class)
 public class AuthorizationFixture extends BaseFixture {
 
