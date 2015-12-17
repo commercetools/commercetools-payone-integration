@@ -3,7 +3,6 @@ package com.commercetools.pspadapter.payone;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.PaymentMethodInfo;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -16,10 +15,10 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
 
     private static final Logger LOG = LogManager.getLogger(PaymentDispatcher.class);
 
-    private final ImmutableMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap;
+    private final Map<PaymentMethod, PaymentMethodDispatcher> methodDispatcher;
 
-    public PaymentDispatcher(final Map<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap) {
-        this.methodDispatcherMap = ImmutableMap.copyOf(methodDispatcherMap);
+    public PaymentDispatcher(final Map<PaymentMethod, PaymentMethodDispatcher> methodDispatcher) {
+        this.methodDispatcher = methodDispatcher;
     }
 
     @Override
@@ -42,7 +41,7 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
             throw new IllegalArgumentException("No Payment Method provided");
         }
 
-        return Optional.ofNullable(methodDispatcherMap.get(PaymentMethod.getMethodFromString(paymentMethodInfo.getMethod())))
+        return Optional.ofNullable(methodDispatcher.get(PaymentMethod.getMethodFromString(paymentMethodInfo.getMethod())))
             .map(methodDispatcher -> methodDispatcher.dispatchPayment(paymentWithCartLike))
             .orElseThrow(() -> new IllegalArgumentException("Unsupported Payment Method"));
     }
