@@ -42,7 +42,7 @@ public class IntegrationService {
         });
 
         Spark.post("/payone/notification", (req, res) -> {
-            res.status(400);
+            res.status(501);
             return "Currently not implemented";
         });
 
