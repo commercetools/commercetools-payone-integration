@@ -1,7 +1,7 @@
 package com.commercetools.pspadapter.payone;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.ThrowableAssert.catchThrowable;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
@@ -38,13 +38,11 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
     public void testRefusingWrongPaymentInterface() throws Exception {
         PaymentDispatcher dispatcher = new PaymentDispatcher(null);
 
-        DispatchResult result = dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentNoInterface(), (Cart) null));
-        assertThat(result.getStatusCode()).isEqualTo(400);
-        assertThat(result.getMessage()).isEqualTo("Unsupported Payment Interface");
+        final Throwable noInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentNoInterface(), (Cart)null)));
+        assertThat(noInterface).isInstanceOf(IllegalArgumentException.class);
 
-        DispatchResult result2 = dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentWrongInterface(), (Cart) null));
-        assertThat(result2.getStatusCode()).isEqualTo(400);
-        assertThat(result2.getMessage()).isEqualTo("Unsupported Payment Interface");
+        final Throwable wrongInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentWrongInterface(), (Cart)null)));
+        assertThat(wrongInterface).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

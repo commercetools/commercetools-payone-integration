@@ -79,7 +79,9 @@ public class ServiceFactory {
             final CommercetoolsQueryExecutor queryExecutor,
             final PaymentDispatcher paymentDispatcher,
             final CustomTypeBuilder customTypeBuilder) {
-        return new IntegrationService(queryExecutor, paymentDispatcher, customTypeBuilder);
+        // TODO jw: use actual result processor
+        return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, new ResultProcessor() {
+        });
     }
 
     private static LoadingCache<String, Type> createTypeCache(final CommercetoolsClient client) {

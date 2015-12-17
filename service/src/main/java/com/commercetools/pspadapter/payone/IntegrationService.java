@@ -17,11 +17,17 @@ public class IntegrationService {
     private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
     private final PaymentDispatcher dispatcher;
     private final CustomTypeBuilder typeBuilder;
+    private final ResultProcessor resultProcessor;
 
-    IntegrationService(final CommercetoolsQueryExecutor commercetoolsQueryExecutor, final PaymentDispatcher dispatcher, final CustomTypeBuilder typeBuilder) {
+    IntegrationService(
+            final CustomTypeBuilder typeBuilder,
+            final CommercetoolsQueryExecutor commercetoolsQueryExecutor,
+            final PaymentDispatcher dispatcher,
+            final ResultProcessor resultProcessor) {
         this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
         this.dispatcher = dispatcher;
         this.typeBuilder = typeBuilder;
+        this.resultProcessor = resultProcessor;
     }
 
     public void start() {
@@ -30,15 +36,24 @@ public class IntegrationService {
         Spark.port(port());
 
         Spark.get("/commercetools/handle/payment/:id", (req, res) -> {
-            final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(req.params("id"));
             try {
-                DispatchResult result = dispatcher.dispatchPayment(payment);
-                res.status(result.getStatusCode());
-                return result.getMessage();
-            } catch (Exception e) {
-                res.status(500);
-                return e.getMessage();
+                final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(req.params("id"));
+                try {
+                    final PaymentWithCartLike result = dispatcher.dispatchPayment(payment);
+                    resultProcessor.process(result, res);
+                } catch (final Exception e) {
+                    // TODO jw: we probably need to differentiate depending on the exception type
+                    res.status(500);
+                    res.type("text/plain; charset=utf-8");
+                    res.body(String.format("Sorry, but you hit us between the eyes. Cause: %s", e.getMessage()));
+                }
+            } catch (final Exception e) {
+                // TODO jw: we probably need to differentiate depending on the exception type
+                res.status(404);
+                res.type("text/plain; charset=utf-8");
+                res.body("The given payment could not be found.");
             }
+            return res;
         });
 
         Spark.post("/payone/notification", (req, res) -> {
