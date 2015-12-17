@@ -36,9 +36,6 @@ import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.products.Product;
 import io.sphere.sdk.products.queries.ProductQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
-import io.sphere.sdk.types.Type;
-import io.sphere.sdk.types.commands.TypeDeleteCommand;
-import io.sphere.sdk.types.queries.TypeQuery;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.concordion.api.ExpectedToFail;
 import org.concordion.integration.junit4.ConcordionRunner;
@@ -133,11 +130,6 @@ public class ServiceSchedulingFixture {
         PagedQueryResult<Order> orders = client.execute(OrderQuery.of()).toCompletableFuture().get();
         for (Order order : orders.getResults()) {
             client.execute(OrderDeleteCommand.of(order)).toCompletableFuture().get();
-        }
-
-        PagedQueryResult<Type> types = client.execute(TypeQuery.of()).toCompletableFuture().get();
-        for (Type type : types.getResults()) {
-            client.execute(TypeDeleteCommand.of(type)).toCompletableFuture().get();
         }
     }
 
