@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -9,11 +10,12 @@ import java.io.Serializable;
  * @author fhaertig
  * @date 17.12.15
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Notification implements Serializable {
 
     private String key;
 
-    private String txaction;
+    private NotificationAction txaction;
 
     private String transaction_status;
 
@@ -48,7 +50,6 @@ public class Notification implements Serializable {
 
     public static Notification fromJsonString(String jsonString) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-
         return mapper.readValue(jsonString, Notification.class);
     }
 
@@ -64,11 +65,11 @@ public class Notification implements Serializable {
         this.key = key;
     }
 
-    public String getTxaction() {
+    public NotificationAction getTxaction() {
         return txaction;
     }
 
-    public void setTxaction(final String txaction) {
+    public void setTxaction(final NotificationAction txaction) {
         this.txaction = txaction;
     }
 

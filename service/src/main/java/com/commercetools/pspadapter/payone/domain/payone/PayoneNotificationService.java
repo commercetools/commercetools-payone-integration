@@ -2,6 +2,7 @@ package com.commercetools.pspadapter.payone.domain.payone;
 
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.LogManager;
@@ -24,11 +25,13 @@ public class PayoneNotificationService {
     public Notification receiveNotification(Request payoneRequest) throws IOException {
         LOG.info("Received POST from Payone: " + payoneRequest.body());
 
-
         ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         String json = mapper.writeValueAsString(buildMapFromRequestParams(payoneRequest.body()));
 
-        return Notification.fromJsonString(json);
+        Notification notification = Notification.fromJsonString(json);
+
+        return notification;
     }
 
     Map<String, String> buildMapFromRequestParams(final String serverRequest) {
