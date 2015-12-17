@@ -35,7 +35,6 @@ import io.sphere.sdk.types.CustomFieldsDraft;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
-import org.concordion.api.ExpectedToFail;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 import specs.BaseFixture;
@@ -53,7 +52,6 @@ import java.util.concurrent.ExecutionException;
  * @author fhaertig
  * @date 10.12.15
  */
-@ExpectedToFail
 @RunWith(ConcordionRunner.class)
 public class ChargePreauthorizedFixture extends BaseFixture {
 
@@ -87,8 +85,7 @@ public class ChargePreauthorizedFixture extends BaseFixture {
                 .execute()
                 .returnResponse();
 
-        //currently should return 400 because ChargeExecutor is not implemented yet!
-        return response.getStatusLine().getStatusCode() == 400;
+        return response.getStatusLine().getStatusCode() == 200;
     }
 
     public String getInterfaceInteractionCount(
@@ -99,7 +96,7 @@ public class ChargePreauthorizedFixture extends BaseFixture {
         final String interactionTypeId = typeIdOfFromTypeName(interactionTypeName);
         final Payment payment = fetchPayment(paymentId);
         return Long.toString(payment.getInterfaceInteractions().stream()
-                .filter(i -> i.getType().getTypeId().equals(interactionTypeId))
+                .filter(i -> i.getType().getId().equals(interactionTypeId))
                 .filter(i -> transactionId.equals(i.getFieldAsString(CustomTypeBuilder.TRANSACTION_ID_FIELD)))
                 .filter(i -> {
                     final String requestField = i.getFieldAsString(CustomTypeBuilder.REQUEST_FIELD);
@@ -149,7 +146,7 @@ public class ChargePreauthorizedFixture extends BaseFixture {
          //retry processing of payment to assure that authorization was done
          int i = 0;
          while (response.getStatusLine().getStatusCode() != 200) {
-             Thread.sleep(400);
+             Thread.sleep(200);
              response = sendGetRequestToUrl(getHandlePaymentUrl(payment.getId()));
              i++;
              if (i > 100) {
