@@ -2,7 +2,6 @@ package specs.paymentmethods.creditcard;
 
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
-import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.neovisionaries.i18n.CountryCode;
@@ -62,7 +61,7 @@ public class ChargePreauthorizedFixture extends BaseFixture {
             final String paymentMethod,
             final String transactionType,
             final String centAmount,
-            final String currencyCode) throws ExecutionException, InterruptedException, PayoneException, IOException {
+            final String currencyCode) throws Exception {
 
         final MonetaryAmount monetaryAmount = MoneyImpl.ofCents(Long.valueOf(centAmount), currencyCode);
         final String paymentId = preparePaymentWithPreauthorizedAmountAndOrder(monetaryAmount, paymentMethod);
@@ -109,7 +108,7 @@ public class ChargePreauthorizedFixture extends BaseFixture {
                 .count());
     }
 
-     private String preparePaymentWithPreauthorizedAmountAndOrder(final MonetaryAmount monetaryAmount, final String paymentMethod) throws ExecutionException, InterruptedException, IOException {
+     private String preparePaymentWithPreauthorizedAmountAndOrder(final MonetaryAmount monetaryAmount, final String paymentMethod) throws Exception {
          final List<TransactionDraft> transactions = Collections.singletonList(TransactionDraftBuilder
                  .of(TransactionType.AUTHORIZATION, monetaryAmount, ZonedDateTime.now())
                  .state(TransactionState.PENDING)
@@ -148,9 +147,15 @@ public class ChargePreauthorizedFixture extends BaseFixture {
          HttpResponse response = sendGetRequestToUrl(getHandlePaymentUrl(payment.getId()));
 
          //retry processing of payment to assure that authorization was done
+         int i = 0;
          while (response.getStatusLine().getStatusCode() != 200) {
-             Thread.sleep(200);
+             Thread.sleep(400);
              response = sendGetRequestToUrl(getHandlePaymentUrl(payment.getId()));
+             i++;
+             if (i > 100) {
+                 throw new Exception("Expected the service to answer with \"200 OK\" " +
+                         "at least after 100 retries, but received always a different status.");
+             }
          }
          return payment.getId();
      }
