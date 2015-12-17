@@ -5,6 +5,7 @@ import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
@@ -25,6 +26,7 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.SchedulerException;
+import spark.Response;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -84,6 +86,10 @@ public class ServiceFactory {
             final CustomTypeBuilder customTypeBuilder) {
         // TODO jw: use actual result processor
         return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, new PayoneNotificationService(), new ResultProcessor() {
+            @Override
+            public void process(final PaymentWithCartLike paymentWithCartLike, final Response response) {
+                response.status(200);
+            }
         });
     }
 
