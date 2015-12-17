@@ -2,10 +2,6 @@
 
 > for better readability you might want to use a ["wide github"](https://chrome.google.com/webstore/detail/wide-github/kaalofacklcidaampbokdplbklpeldpj) plugin in your Browser
 
-TODOs:
- * go through remaining open questions with CT product managers
- * go through PAYONE status notification fields and responses (currently only the requests have been documented here) 
-
 ## Payment methods covered by this specification
 
 See also: [CT Method field convention](https://github.com/nkuehn/payment-integration-specifications/blob/master/Method-Keys.md)
@@ -36,53 +32,20 @@ BillSAFE has been deprecated by PAYONE and is not supported.
 With PAYONE:
 
  * TODO will negative line item amounts lead to failures? our custom line item can be used as a place to set discounts. 
+ * TODO is addresscheck and paymentdatacheck free?  Would trigger it automatically. 
  * TODO when does `vauthorization` happen?  only on the Billing functionality?
  * TODO when does `vauthorization` happen?  only on the Billing functionality?
  * do we need to support `refund` txaction on notification if we trigger only debit and not refund? 
  * TODO when do we need the `managemandate` call?
  * TODO (probably already spoken about): which notify_versions can occur if we use the latest API version? only 7.5? 
- * hwo to calculate the amountPaid in our platform
  * clarify status. errormessage vs. failedcause vs. ...   -> what is the overall status? TODO PAYONE
+ * Wie übersetzen wir price, receivable, balance in amountPaid. 
+   * amountPaid = receivable minus balance? (TODO verify with PAYONE as there is no 1:1 example yet.), 
+     Can be wrong if receivable = 0 e.g. in cash advance etc. 
+     (Positive Balance heißt, dass der Händler noch Geld offen hat) 
  
- * NK concerning checkout documentation: what's the minimum requirements for a creditcardcheck (esp. concerning hash, secrets etc -> server side stuff)
-   As far as I understand the docs the hashed parameters are all fixed, so the hash can be done just once and that's it.  So what's the security feature of it? 
-
-With CT Product Management / CT internal:
-
- * TODO how to trigger address / bank data checks? Just a a payment without transaction is not safe against intermediate states and too implicit.
-   (request=bankaccountcheck / addresscheck / consumerscore)
-   * As data check is not a financial transaction, we don't want to include it in the Transactions. Interactions are the 
-     wrong semantics. 
-   * maybe directly on the integration service? ->  It has to happen synchronously in the checkout anyways.
-     *  GET /commercetools/payments/1234-1234-1234-1234/paymentdatacheck
-     *  GET /commercetools/payments/1234-1234-1234-1234/addresscheck
-     *  GET /commercetools/payments/1234-1234-1234-1234/consumerscore
-
- * TODO what to write into the CT payment object to trigger an `updatereminder`, i.e. dunning level trigger
-     * also directly on the integration?  POST /commercetools/payments/123.../dunninglevel  
-
- * The definiton of the amountAuthorized field is unclear: Is it the amount that is remaining (not yet charged) from the auth
-   or is it just the sum of all successful authorizations? 
-
- * Wie übersetzen wir price, receivable, balance in  amountPlanned und amountPaid. Positive Balance heißt, dass der Händler noch Geld offen hat (schon bei PAYONE nachgefragt) 
-   * amountPlanned = price, but the price is zero when only a preauthorization is done yet. And not in Cash Advance payments, too.  
-   * amountPaid = receivable minus balance? (TODO verify with PAYONE as there is no 1:1 example yet.), Can be wrong if receivable = 0 e.g. in cash advance etc. 
-   * XXX field missing XXX = receivable
-     * -> How to represent due amounts that are higher (or lower) than the initial amountPlanned?  (due to dunning and chargeback fees). 
-   * ACTHTUNG: PAYONE Felder in Euro, d.h. * 100 und auf volle cent runden. 
-
- * (Prio Low) How to set `capturemode` -> NK define logic how to find out that a capture is the last delivery.
-   * e.g. IF the sum of Charge transaction amounts incl. the now to do Charge equals the current `receivable` (for which we don't have a field), THEN it's the last? 
-   * (allowed values: completed / notcompleted ). Mandatory just with Billsafe & Klarna.  -> 
+ * concerning checkout documentation: what's the security feature of the hash? it's just done over the fields that are plaintext in the page and there is no secret in the hash, too. 
   
-Fields that CT could consider making a built-in:
-
-  * Reference Nr. ( a use case for the `key` feature )
-  * Customer oriented status LText (`customermessage` at PAYONE )
-  * something that makes the difference between originally planned amount and current receivable transparent (dunning fees etc)
-  * language assignment. That's a general issue with the architecture that delegates as much as possible to a detached microservice 
-    (how does the service know which of the various LText fields in CTP to take?) 
-
 ## PAYONE fields that map to custom CT Payment fields (by method)
 
 Please use the commercetools custom payment types (per method) from the [method type specifications](https://github.com/nkuehn/payment-integration-specifications/blob/master/Method-Keys.md) in the payment specifications project. 
@@ -90,6 +53,7 @@ Please use the commercetools custom payment types (per method) from the [method 
 All payment methods:
 
   * _Required_ `language` -> custom field `languageTag` of Type String on the CT Payment
+    * (may be moved to the Order, Cart and Customer Objects later)
   * _Required_ `reference`: should conventionally be the Order Number (assuming just one payment per Order). 
      The OrderNumber is only available on the CT Order, but not the CT Cart.
      Issue at hand: Checkout Implementations vary in respect to whether the Cart is converted into an Order before or after the Order is placed. 
@@ -203,7 +167,7 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
     named `gender`. If the first existing is of Type `Enum` and has a value `Male` or `Female` -> use that one as `f` or `m` respectively.  
  * `ip`: Check for a custom Field `customerIPAddress` of type `String` on the CT Cart / Order. 
  
-## unused PAYONE fields
+## unused PAYONE fields & unsupported features
 
  * `creditor_*`  just for debug? 
  * `bankcountry`, `bankaccount`, `bankcode`, `bic` (all replaced by the IBAN, which is preferable because it has a checksum)
@@ -212,8 +176,17 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
  * `protect_result_avs` konfiguriert nur im backend von PAYONE. Wird quasi nicht genutzt und ist AMEX-Spezifisch. 
  *  All "traditional" bank account data fields (i.e. not IBAN and BIC) are omitted for Refund and Clearing Data Cases as 
     in these cases the Data is not put in manually by the end user. 
- 
-## commercetools Payment resource
+ * `updatereminder` when sumbitted to the PAYONE API.  We do not support manual dunning control. This has to be done per Project. 
+
+### features that have no matching semantics directly in CTP, but can be added per project
+
+Techcnical Infrastructure is there, but not made public by default because that requires a stric security setup:
+ *  Payment Data Check (add  GET /commercetools/payments/1234-1234-1234-1234/paymentdatacheck  call to the Service's own API )
+ *  Address Check ( add GET /commercetools/order/1234-1234-1234-1234/addresscheck  to the Service's own API ) 
+ *  Consumer Scoring ( add GET /commercetools/customer/1234-1234-1234-1234/consumerscore to the Service's own API)
+  
+  
+## commercetools Payment resource mapping
 
 * [CT Payment documentation](http://dev.sphere.io/http-api-projects-payments.html#payment)
 
@@ -227,9 +200,9 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
 | customer.obj.dateOfBirth | `birthday` | CT | transform from ISO 8601 format (`YYYY-MM-DD`) to `YYYYMMDD`, i.e. remove the dashes |
 | externalId | (unused, is intended for merchant-internal systems like ERP) | CT |  |
 | interfaceId | `txid` | PAYONE |  |
-| amountPlanned.centAmount | `price` | CT / PAYONE | Initially set by checkout, `price` from PAYONE notification must not deviate on Notifications. PAYONE value has to be multiplied by 100.  |
+| amountPlanned.centAmount | - | CT | Initially set by checkout and not modified any more. `price` from PAYONE notification must not deviate on Notifications. PAYONE value has to be multiplied by 100.  |
 | amountPlanned.currency | - | CT |  |
-| amountAuthorized.centAmount | TODO | PAYONE | TODO when the definition of the field is clarified  |
+| amountAuthorized.centAmount | `amount` | CT / PAYONE | ONLY on CREDIT_CARD payments: Once the Authorization Transaction is in status "Success", copy the amount here.  |
 | authorizedUntil | `txtime` plus seven days | PAYONE | seven days after the txtime value of the `preauthorization` call (not of other transactions!) |
 | amountPaid.centAmount | `receivable` minus `balance` | PAYONE | TODO wait for answer from PAYONE |
 | amountRefunded.centAmount | (from transactions) | PAYONE | (Sum of successful Refund Transactions) |
@@ -243,6 +216,7 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
 | transactions\[\*\].timestamp | `txtime` | PAYONE | (from status notification) |
 | transactions\[\*\].type |  |  | (see below for transaction types) |
 | transactions\[\*\].amount.centAmount | `amount` | CT | none |
+| transactions\[\*\].amount.centAmount | `capturemode` = `notcompleted` or `completed` | CT | ONLY on Charge Transactions. If the sum of Charge Transactions icluding the current one equals or exceeds the `amountPlanned` of the payment, then send `completed`, otherwise `notcompleted` Only required for Klarna payment methods.  |
 | transactions\[\*\].amount.currency | `currency` | CT | none, but must not deviate from amountPlanned.centAmount |
 | transactions\[\*\].interactionId | `sequencenumber` | CT / PAYONE | There can be only one CT Authorization transaction. This must be the first and gets the sequencenumber 0. All following Charge, CancelAuthorization and Refund transactions count up from the last sequence number received in the last TransactionStatus Notification call from PAYONE (stored in the Interactions Array). *To be set when doing the PAYONE call, not already when creating the Transaction*.  |
 | transactions\[\*\].state | - | - | (see below for transaction states) |
@@ -311,7 +285,7 @@ The matching transaction is found by sequencenumber = interactionId
 | `cancelation` | not set or `completed` | `7.5` |  |  | TODO how to know if it's a Chargeback or a failed Charge?  |
 | `refund` | not set or `completed` | `7.5` | Refund | Success | create a Refund if no matching one found. TODO do we need to support it if we don't trigger refund anyways but always use debit?  |
 | `debit` | not set or `completed` | `7.5` |  |  | TODO Refund or Chargeback depending whether the `balance` is positive or negative?  |
-| `transfer` | not set or `completed` | `7.5` |  |  | Transfer like in "switch"/"move to" another bank account TODO how to handle?  |
+| `transfer` | not set or `completed` | `7.5` |  |  | Transfer like in "switch" / "move to" another bank account TODO how to handle?  |
 | `reminder` | not set or `completed` | `7.5` | (nothing) | (nothing) | status of dunning procedure. Just update the payment status field.  |
 | `vauthorization` | not set or `completed` | `7.5` |  | (unsupported?) | only available with PAYONE Billing module, must be activated |
 | `vsettlement` | not set or `completed` | `7.5` |  | (unsupported?) | only available with PAYONE Billing module, must be activated |
