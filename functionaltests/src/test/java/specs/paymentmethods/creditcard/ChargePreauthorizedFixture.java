@@ -32,7 +32,6 @@ import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.products.Product;
 import io.sphere.sdk.products.queries.ProductQuery;
 import io.sphere.sdk.types.CustomFieldsDraft;
-import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
 import org.concordion.integration.junit4.ConcordionRunner;
@@ -61,7 +60,7 @@ public class ChargePreauthorizedFixture extends BaseFixture {
             final String centAmount,
             final String currencyCode) throws Exception {
 
-        final MonetaryAmount monetaryAmount = MoneyImpl.ofCents(Long.valueOf(centAmount), currencyCode);
+        final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
         final String paymentId = preparePaymentWithPreauthorizedAmountAndOrder(monetaryAmount, paymentMethod);
 
         //get newest payment and add new charge transaction

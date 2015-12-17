@@ -21,11 +21,13 @@ import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.payments.queries.PaymentByIdGet;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.types.Type;
+import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
 import org.junit.After;
 import org.junit.Before;
 
+import javax.money.MonetaryAmount;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -110,6 +112,10 @@ public abstract class BaseFixture {
         throw new RuntimeException(String.format(
                 "Environment variable required for configuration must not be null or empty: %s",
                 configParameterName));
+    }
+
+    protected MonetaryAmount createMonetaryAmountFromCent(final Long centAmount, final String currencyCode) {
+        return MoneyImpl.ofCents(centAmount, currencyCode);
     }
 
     protected String getUnconfirmedVisaPseudoCardPan() {

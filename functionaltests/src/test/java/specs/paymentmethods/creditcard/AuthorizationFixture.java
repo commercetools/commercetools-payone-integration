@@ -33,7 +33,6 @@ import io.sphere.sdk.types.CustomFieldsDraft;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
-import org.concordion.api.ExpectedToFail;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 import specs.BaseFixture;
@@ -60,7 +59,7 @@ public class AuthorizationFixture extends BaseFixture {
             final String centAmount,
             final String currencyCode) throws ExecutionException, InterruptedException {
 
-        final MonetaryAmount monetaryAmount = MoneyImpl.of(centAmount, currencyCode);
+        final MonetaryAmount monetaryAmount = MoneyImpl.ofCents(Long.valueOf(centAmount), currencyCode);
 
         final List<TransactionDraft> transactions = Collections.singletonList(TransactionDraftBuilder
                 .of(TransactionType.valueOf(transactionType), monetaryAmount, ZonedDateTime.now())
