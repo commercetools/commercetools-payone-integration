@@ -6,10 +6,12 @@ import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.UnsupportedTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.creditcard.AuthorizationTransactionExecutor;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.creditcard.ChargeTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
@@ -84,16 +86,47 @@ public class ServiceFactory {
     }
 
     public static PaymentDispatcher createPaymentDispatcher(final LoadingCache<String, Type> typeCache, final PayoneConfig config, final CommercetoolsClient client) {
+        final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
+
+        TransactionExecutor defaultExecutor = new UnsupportedTransactionExecutor(client);
         final PayonePostServiceImpl postService = PayonePostServiceImpl.of(config.getApiUrl());
 
-        final PaymentMethodDispatcher creditCardDispatcher = createPaymentMethodDispatcher(typeCache, MethodKeys.CREDIT_CARD, postService, client, config);
-        final PaymentMethodDispatcher sepaDispatcher = createPaymentMethodDispatcher(typeCache, MethodKeys.DIRECT_DEBIT_SEPA, postService, client, config);
+        methodDispatcherMap.put(PaymentMethod.CREDIT_CARD, null);
+        methodDispatcherMap.put(PaymentMethod.DIRECT_DEBIT_SEPA, null);
 
-        final HashMap<String, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
-        methodDispatcherMap.put(MethodKeys.CREDIT_CARD, creditCardDispatcher);
-        methodDispatcherMap.put(MethodKeys.DIRECT_DEBIT_SEPA, sepaDispatcher);
+        for (PaymentMethod method : methodDispatcherMap.keySet()) {
+            PayoneRequestFactory requestFactory = createRequestFactory(method, config);
+            Map<TransactionType, TransactionExecutor> executorsMap = new HashMap<>();
+            for (TransactionType type : method.getSupportedTransactionTypes()) {
+                executorsMap.put(type, createTransactionExecutor(type, typeCache, client, requestFactory, postService));
+            }
+            methodDispatcherMap.put(method, new PaymentMethodDispatcher(defaultExecutor, executorsMap));
+        }
+
 
         return new PaymentDispatcher(methodDispatcherMap);
+    }
+
+    private static TransactionExecutor createTransactionExecutor(
+            final TransactionType transactionType,
+            final LoadingCache<String, Type> typeCache,
+            final CommercetoolsClient client,
+            final PayoneRequestFactory requestFactory,
+            final PayonePostService postService) {
+
+        switch(transactionType) {
+            case AUTHORIZATION:
+                return new AuthorizationTransactionExecutor(typeCache, requestFactory, postService, client);
+            case CANCEL_AUTHORIZATION:
+                break;
+            case CHARGE:
+                return new ChargeTransactionExecutor(typeCache, requestFactory, postService, client);
+            case REFUND:
+                break;
+            case CHARGEBACK:
+                break;
+        }
+        return null;
     }
 
     private static CommercetoolsClient createCommercetoolsClient(final ServiceConfig config) {
@@ -105,25 +138,12 @@ public class ServiceFactory {
                         config.getCtClientSecret()));
     }
 
-    private static PaymentMethodDispatcher createPaymentMethodDispatcher(
-            final LoadingCache<String, Type> typeCache,
-            final String methodKey,
-            final PayonePostService postService,
-            final CommercetoolsClient ctpClient,
-            final PayoneConfig config) {
-
-        PayoneRequestFactory requestFactory = createPayoneRequestFactory(methodKey, config);
-
-        Map<TransactionType, TransactionExecutor> executors = new HashMap<>();
-        executors.put(TransactionType.AUTHORIZATION, new AuthorizationTransactionExecutor(typeCache, requestFactory, postService, ctpClient));
-
-        return new PaymentMethodDispatcher((payment, transaction) -> payment, executors);
-    }
-
-    private static PayoneRequestFactory createPayoneRequestFactory(final String methodKey, final PayoneConfig config) {
-        if (MethodKeys.CREDIT_CARD.equals(methodKey)) {
-            return new CreditCardRequestFactory(config);
+    private static PayoneRequestFactory createRequestFactory(final PaymentMethod method, final PayoneConfig config) {
+        switch(method) {
+            case CREDIT_CARD:
+                return new CreditCardRequestFactory(config);
+            default:
+                return null;
         }
-        return null;
     }
 }

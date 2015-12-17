@@ -3,7 +3,7 @@ package com.commercetools.pspadapter.payone;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
 import io.sphere.sdk.carts.Cart;
@@ -60,9 +60,9 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
         final CountingPaymentMethodDispatcher creditCardDispatcher = new CountingPaymentMethodDispatcher();
         final CountingPaymentMethodDispatcher sepaDispatcher = new CountingPaymentMethodDispatcher();
 
-        final HashMap<String, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
-        methodDispatcherMap.put(MethodKeys.CREDIT_CARD, creditCardDispatcher);
-        methodDispatcherMap.put(MethodKeys.DIRECT_DEBIT_SEPA, sepaDispatcher);
+        final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
+        methodDispatcherMap.put(PaymentMethod.CREDIT_CARD, creditCardDispatcher);
+        methodDispatcherMap.put(PaymentMethod.DIRECT_DEBIT_SEPA, sepaDispatcher);
 
         PaymentDispatcher dispatcher = new PaymentDispatcher(methodDispatcherMap);
         dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsPending(), (Cart)null));

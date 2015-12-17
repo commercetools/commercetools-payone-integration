@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
 import io.sphere.sdk.payments.PaymentMethodInfo;
 import org.apache.log4j.LogManager;
@@ -14,9 +15,9 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
 
     private static final Logger LOG = LogManager.getLogger(PaymentDispatcher.class);
 
-    private final Map<String, PaymentMethodDispatcher> methodDispatcherMap;
+    private final Map<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap;
 
-    public PaymentDispatcher(Map<String, PaymentMethodDispatcher> methodDispatcherMap) {
+    public PaymentDispatcher(Map<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap) {
         this.methodDispatcherMap = methodDispatcherMap;
     }
 
@@ -30,10 +31,6 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
     }
 
     public DispatchResult dispatchPayment(PaymentWithCartLike paymentWithCartLike) {
-        if (paymentWithCartLike.getPayment() == null) {
-            return DispatchResult.of(404, "The given payment could not be found.");
-        }
-
         final PaymentMethodInfo paymentMethodInfo = paymentWithCartLike.getPayment().getPaymentMethodInfo();
 
         if (!"PAYONE".equals(paymentMethodInfo.getPaymentInterface()))
@@ -42,14 +39,10 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
         if (paymentMethodInfo.getMethod() == null)
             return DispatchResult.of(400, "No Payment Method provided");
 
-        try {
-            Optional.ofNullable(methodDispatcherMap.get(paymentMethodInfo.getMethod()))
-                .map(md -> md.dispatchPayment(paymentWithCartLike))
-                .orElseThrow(() -> new IllegalArgumentException("Unsupported Payment Method"));
-        } catch (Exception ex) {
-            return DispatchResult.of(400, ex.getMessage());
-        }
+        Optional.ofNullable(methodDispatcherMap.get(PaymentMethod.getMethodFromString(paymentMethodInfo.getMethod())))
+            .map(md -> md.dispatchPayment(paymentWithCartLike))
+            .orElseThrow(() -> new IllegalArgumentException("Unsupported Payment Method"));
 
-        return DispatchResult.of(200, "Successfully handled the given payment.");
+        return DispatchResult.of(200, "Successfully handled the given payment");
     }
 }
