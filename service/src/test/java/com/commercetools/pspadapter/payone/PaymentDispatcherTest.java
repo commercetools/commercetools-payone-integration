@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
@@ -50,9 +51,8 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
     public void testRefusingUnknownPaymentMethod() throws Exception {
         PaymentDispatcher dispatcher = new PaymentDispatcher(new HashMap<>());
 
-        DispatchResult result = dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentUnknownMethod(), (Cart) null));
-        assertThat(result.getStatusCode()).isEqualTo(400);
-        assertThat(result.getMessage()).isEqualTo("Unsupported Payment Method");
+        final Throwable noInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentUnknownMethod(), (Cart) null)));
+        assertThat(noInterface).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
