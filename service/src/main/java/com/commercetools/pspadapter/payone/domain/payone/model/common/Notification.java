@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -17,7 +18,8 @@ public class Notification implements Serializable {
 
     private NotificationAction txaction;
 
-    private String transaction_status;
+    @JsonProperty("transaction_status")
+    private TransactionStatus transactionStatus;
 
     private String mode;
 
@@ -73,12 +75,12 @@ public class Notification implements Serializable {
         this.txaction = txaction;
     }
 
-    public String getTransaction_status() {
-        return transaction_status;
+    public TransactionStatus getTransactionStatus() {
+        return transactionStatus;
     }
 
-    public void setTransaction_status(final String transaction_status) {
-        this.transaction_status = transaction_status;
+    public void setTransactionStatus(final TransactionStatus transactionStatus) {
+        this.transactionStatus = transactionStatus;
     }
 
     public String getMode() {

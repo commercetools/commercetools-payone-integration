@@ -21,16 +21,21 @@ import java.util.Map;
 public class PayoneNotificationService {
 
     private static final Logger LOG = LogManager.getLogger(PayoneNotificationService.class);
+    private final NotificationDispatcher notificationDispatcher;
+
+    public PayoneNotificationService(final NotificationDispatcher notificationDispatcher) {
+        this.notificationDispatcher = notificationDispatcher;
+
+    }
 
     public Notification receiveNotification(Request payoneRequest) throws IOException {
-        LOG.info("Received POST from Payone: " + payoneRequest.body());
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         String json = mapper.writeValueAsString(buildMapFromRequestParams(payoneRequest.body()));
 
         Notification notification = Notification.fromJsonString(json);
-
+        notificationDispatcher.dispatchNotification(notification);
         return notification;
     }
 

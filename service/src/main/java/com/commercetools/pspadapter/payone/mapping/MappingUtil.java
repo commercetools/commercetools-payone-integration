@@ -31,7 +31,7 @@ public class MappingUtil {
         request.setSalutation(billingAddress.getSalutation());
         request.setFirstname(billingAddress.getFirstName());
         request.setCompany(billingAddress.getCompany());
-        request.setStreet(billingAddress.getStreetName() + Optional.ofNullable(billingAddress.getStreetNumber()));
+        request.setStreet(buildStreetString(billingAddress.getStreetName(), billingAddress.getStreetNumber()));
         request.setAddressaddition(billingAddress.getAdditionalStreetInfo());
         request.setZip(billingAddress.getPostalCode());
         request.setCity(billingAddress.getCity());
@@ -42,6 +42,17 @@ public class MappingUtil {
 
         //billingAddress.state write to PAYONE only if country=US, CA, CN, JP, MX, BR, AR, ID, TH, IN)
         // and only if value is an ISO3166-2 subdivision
+    }
+
+    private static String buildStreetString(final String streetName, final String streetNumber) {
+        if (Optional.ofNullable(streetName).isPresent()) {
+            if (Optional.ofNullable(streetNumber).isPresent()) {
+                return streetName + " " + streetNumber;
+            } else {
+                return streetName;
+            }
+        }
+        return null;
     }
 
     public static void mapCustomerToRequest(final PreauthorizationRequest request, final Reference<Customer> customer) {

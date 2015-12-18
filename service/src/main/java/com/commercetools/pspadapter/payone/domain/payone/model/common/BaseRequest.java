@@ -3,6 +3,7 @@ package com.commercetools.pspadapter.payone.domain.payone.model.common;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
@@ -36,7 +37,8 @@ public class BaseRequest implements Serializable {
     /**
      * Payone api version
      */
-    private String api_version;
+    @JsonProperty("api_version")
+    private String apiVersion;
 
     /**
      * Defines request type (preauthorization, authorization, ...)
@@ -59,7 +61,7 @@ public class BaseRequest implements Serializable {
         this.key = config.getKeyAsMd5Hash();
         this.mode = config.getMode();
         this.portalid = config.getPortalId();
-        this.api_version = config.getApiVersion();
+        this.apiVersion = config.getApiVersion();
         this.request = requestType;
     }
 
@@ -87,8 +89,8 @@ public class BaseRequest implements Serializable {
         return request;
     }
 
-    public String getApi_version() {
-        return api_version;
+    public String getApiVersion() {
+        return apiVersion;
     }
 
     //**************************************************************

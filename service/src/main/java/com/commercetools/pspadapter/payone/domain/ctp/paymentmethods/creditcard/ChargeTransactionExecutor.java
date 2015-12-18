@@ -86,7 +86,7 @@ public class ChargeTransactionExecutor implements IdempotentTransactionExecutor 
     }
 
     private PaymentWithCartLike attemptExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        final CaptureRequest request = requestFactory.createCaptureRequest(paymentWithCartLike);
+        final CaptureRequest request = requestFactory.createCaptureRequest(paymentWithCartLike, transaction);
 
         final Payment updatedPayment = client.complete(
             PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),

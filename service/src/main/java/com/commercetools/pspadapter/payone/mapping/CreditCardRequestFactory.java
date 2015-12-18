@@ -7,7 +7,10 @@ import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.Credit
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.Transaction;
 import org.javamoney.moneta.function.MonetaryUtil;
+
+import java.util.Optional;
 
 /**
  * @author fhaertig
@@ -46,18 +49,19 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
     }
 
     @Override
-    public CreditCardCaptureRequest createCaptureRequest(final PaymentWithCartLike paymentWithCartLike) {
+    public CreditCardCaptureRequest createCaptureRequest(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
-        final CartLike ctCartLike = paymentWithCartLike.getCartLike();
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         CreditCardCaptureRequest request = new CreditCardCaptureRequest(getConfig());
 
         request.setTxid(ctPayment.getInterfaceId());
-        request.setSequencenumber(1);
-        request.setAmount(MonetaryUtil.minorUnits().queryFrom(ctPayment.getAmountPlanned()).intValue());
-        request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
+        request.setSequencenumber(Integer.getInteger(transaction.getInteractionId()));
+        request.setAmount(MonetaryUtil.minorUnits().queryFrom(ctPayment.getAmountAuthorized()).intValue());
+        Optional
+            .ofNullable(ctPayment.getAmountAuthorized())
+            .ifPresent(m -> request.setCurrency(m.getCurrency().getCurrencyCode()));
 
         return request;
     }

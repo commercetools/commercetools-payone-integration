@@ -39,6 +39,11 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentTwoTransactionsPending.json");
     }
 
+    protected Payment dummyPaymentCreatedMessage() throws Exception {
+        return getPaymentFromFile("dummyPaymentCreatedMessage.json");
+    }
+
+
     protected Payment dummyPaymentTwoTransactionsSuccessPending() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsSuccessPending.json");
     }

@@ -1,29 +1,21 @@
 package specs.common;
 
-import com.commercetools.pspadapter.payone.IntegrationService;
-import com.commercetools.pspadapter.payone.ServiceFactory;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
 import io.sphere.sdk.carts.CartDraftBuilder;
 import io.sphere.sdk.carts.commands.CartCreateCommand;
-import io.sphere.sdk.carts.commands.CartDeleteCommand;
 import io.sphere.sdk.carts.commands.CartUpdateCommand;
 import io.sphere.sdk.carts.commands.updateactions.AddLineItem;
 import io.sphere.sdk.carts.commands.updateactions.AddPayment;
 import io.sphere.sdk.carts.commands.updateactions.SetShippingAddress;
 import io.sphere.sdk.carts.queries.CartByIdGet;
-import io.sphere.sdk.carts.queries.CartQuery;
 import io.sphere.sdk.client.SphereClient;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.models.Address;
-import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.OrderFromCartDraft;
-import io.sphere.sdk.orders.commands.OrderDeleteCommand;
 import io.sphere.sdk.orders.commands.OrderFromCartCreateCommand;
-import io.sphere.sdk.orders.queries.OrderQuery;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -32,10 +24,8 @@ import io.sphere.sdk.payments.TransactionDraftBuilder;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
-import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.products.Product;
 import io.sphere.sdk.products.queries.ProductQuery;
-import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.concordion.api.ExpectedToFail;
 import org.concordion.integration.junit4.ConcordionRunner;
@@ -43,6 +33,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.quartz.SchedulerException;
+import specs.BaseFixture;
 
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
@@ -61,13 +52,12 @@ import java.util.concurrent.ExecutionException;
  */
 @ExpectedToFail
 @RunWith(ConcordionRunner.class)
-public class ServiceSchedulingFixture {
+public class ServiceSchedulingFixture extends BaseFixture {
 
     private static final String SCHEDULED_JOB_KEY = "commercetools-polljob-1";
 
     private SphereClient client;
     private Payment payment;
-    private IntegrationService integrationService;
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException, SchedulerException, MalformedURLException {
@@ -110,27 +100,11 @@ public class ServiceSchedulingFixture {
 
         OrderFromCartDraft orderFromCartDraft = OrderFromCartDraft.of(cart);
         client.execute(OrderFromCartCreateCommand.of(orderFromCartDraft)).toCompletableFuture().get();
-
-
-        integrationService = ServiceFactory.createService(new ServiceConfig());
     }
 
     @After
-    public void tearDown() throws ExecutionException, InterruptedException {
-        //delete payment
-        client.execute(PaymentDeleteCommand.of(payment));
-
-        //delete carts
-        PagedQueryResult<Cart> carts = client.execute(CartQuery.of()).toCompletableFuture().get();
-        for (Cart cart : carts.getResults()) {
-            client.execute(CartDeleteCommand.of(cart)).toCompletableFuture().get();
-        }
-
-        //delete orders
-        PagedQueryResult<Order> orders = client.execute(OrderQuery.of()).toCompletableFuture().get();
-        for (Order order : orders.getResults()) {
-            client.execute(OrderDeleteCommand.of(order)).toCompletableFuture().get();
-        }
+    public void tearDown() {
+        resetCommercetoolsPlatform();
     }
 
     public JobResult checkJobScheduling(String cronNotation) throws SchedulerException, InterruptedException {

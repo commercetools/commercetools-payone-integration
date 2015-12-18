@@ -13,6 +13,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.Transaction
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.UnsupportedTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.creditcard.AuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.creditcard.ChargeTransactionExecutor;
+import com.commercetools.pspadapter.payone.domain.payone.NotificationDispatcher;
 import com.commercetools.pspadapter.payone.domain.payone.PayoneNotificationService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
@@ -85,7 +86,7 @@ public class ServiceFactory {
             final PaymentDispatcher paymentDispatcher,
             final CustomTypeBuilder customTypeBuilder) {
         // TODO jw: use actual result processor
-        return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, new PayoneNotificationService(), new ResultProcessor() {
+        return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, new PayoneNotificationService(new NotificationDispatcher()), new ResultProcessor() {
             @Override
             public void process(final PaymentWithCartLike paymentWithCartLike, final Response response) {
                 response.status(200);

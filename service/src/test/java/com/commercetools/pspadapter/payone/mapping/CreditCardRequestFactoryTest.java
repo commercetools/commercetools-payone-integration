@@ -76,7 +76,7 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         assertThat(result.getPortalid()).isEqualTo(config.getPortalId());
         assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
         assertThat(result.getMode()).isEqualTo(config.getMode());
-        assertThat(result.getApi_version()).isEqualTo(config.getApiVersion());
+        assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
 
         //clearing type
         String clearingType = ClearingType.getClearingTypeByKey(payment.getPaymentMethodInfo().getMethod()).getPayoneCode();
@@ -101,7 +101,7 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         assertThat(result.getLastname()).isEqualTo(billingAddress.getLastName());
         assertThat(result.getBirthday()).isEqualTo(payment.getCustomer().getObj().getDateOfBirth().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
         assertThat(result.getCompany()).isEqualTo(billingAddress.getCompany());
-        assertThat(result.getStreet()).isEqualTo(billingAddress.getStreetName() + Optional.ofNullable(billingAddress.getStreetNumber()));
+        assertThat(result.getStreet()).isEqualTo(billingAddress.getStreetName() + " " + billingAddress.getStreetNumber());
         assertThat(result.getAddressaddition()).isEqualTo(billingAddress.getAdditionalStreetInfo());
         assertThat(result.getCity()).isEqualTo(billingAddress.getCity());
         assertThat(result.getZip()).isEqualTo(order.getBillingAddress().getPostalCode());
@@ -125,7 +125,7 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         Payment payment = dummyPaymentOneAuthPending20Euro();
         Order order = dummyOrderMapToPayoneRequest();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
-        CreditCardCaptureRequest result = factory.createCaptureRequest(paymentWithCartLike);
+        CreditCardCaptureRequest result = factory.createCaptureRequest(paymentWithCartLike, payment.getTransactions().get(0));
 
         //base values
         assertThat(result.getRequest()).isEqualTo(RequestType.CAPTURE.getType());
@@ -133,7 +133,7 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         assertThat(result.getPortalid()).isEqualTo(config.getPortalId());
         assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
         assertThat(result.getMode()).isEqualTo(config.getMode());
-        assertThat(result.getApi_version()).isEqualTo(config.getApiVersion());
+        assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
 
         //monetary
         assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());

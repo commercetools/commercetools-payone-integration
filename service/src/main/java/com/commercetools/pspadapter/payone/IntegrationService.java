@@ -5,6 +5,8 @@ import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.PayoneNotificationService;
 import com.google.common.base.Strings;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import spark.Spark;
 
 /**
@@ -12,6 +14,8 @@ import spark.Spark;
  * @date 02.12.15
  */
 public class IntegrationService {
+
+    public static final Logger LOG = LogManager.getLogger(IntegrationService.class);
 
     public static final String HEROKU_ASSIGNED_PORT = "PORT";
 
@@ -61,6 +65,7 @@ public class IntegrationService {
         });
 
         Spark.post("/payone/notification", (req, res) -> {
+            LOG.info("<- Received POST from Payone: " + req.body());
             notificationService.receiveNotification(req);
             res.status(501);
             return "Currently not implemented";

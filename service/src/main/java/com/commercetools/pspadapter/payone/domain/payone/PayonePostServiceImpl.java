@@ -16,12 +16,13 @@ import java.util.Map;
 
 public class PayonePostServiceImpl implements PayonePostService {
 
-    private static Logger logger = LoggerFactory.getLogger(PayonePostServiceImpl.class);
+    private static Logger LOG = LoggerFactory.getLogger(PayonePostServiceImpl.class);
     private static final String ENCODING_UTF8 = "UTF-8";
 
     private String serverAPIURL;
 
     private int connectionTimeout = 3000;
+
 
     private PayonePostServiceImpl(final String serverAPIURL) {
         Preconditions.checkArgument(
@@ -43,14 +44,14 @@ public class PayonePostServiceImpl implements PayonePostService {
     @Override
     public Map<String, String> executePost(final BaseRequest baseRequest) throws PayoneException {
 
-        logger.info("Payone POST request parameters: " + baseRequest.toStringMap(true).toString());
+        LOG.info("-> Payone POST request parameters: " + baseRequest.toStringMap(true).toString());
 
         try {
             String serverResponse = Unirest.post(this.serverAPIURL)
                     .fields(baseRequest.toStringMap(false))
                     .asString().getBody();
 
-            logger.info("Payone POST response: " + serverResponse);
+            LOG.info("Payone POST response: " + serverResponse);
             return buildMapFromResultParams(serverResponse);
         } catch (UnirestException | UnsupportedEncodingException e) {
             throw new PayoneException("Payone POST request failed.", e);

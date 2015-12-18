@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -30,8 +31,8 @@ public class PayoneNotificationServiceTest {
     // &zip=&city=&email=&country=DE&cardexpiredate=1703&cardtype=V&cardpan=411111xxxxxx1111&transaction_status=completed&balance=0.00&receivable=0.00
 
     @Test
-    public void processPayoneAppointedStatus() throws IOException {
-        PayoneNotificationService notificationService = new PayoneNotificationService();
+    public void processPayoneAppointedNotification() throws IOException {
+        PayoneNotificationService notificationService = new PayoneNotificationService(new NotificationDispatcher());
 
         String requestBody =
                 "key=123&" +
@@ -49,7 +50,7 @@ public class PayoneNotificationServiceTest {
 
         assertThat(notification.getKey()).isEqualTo("123");
         assertThat(notification.getTxaction()).isEqualTo(NotificationAction.APPOINTED);
-        assertThat(notification.getTransaction_status()).isEqualTo("completed");
+        assertThat(notification.getTransactionStatus()).isEqualTo(TransactionStatus.COMPLETED);
         assertThat(notification.getMode()).isEqualTo("test");
         assertThat(notification.getPortalid()).isEqualTo("000");
         assertThat(notification.getAid()).isEqualTo("001");
