@@ -5,9 +5,12 @@ import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Iterables;
 import io.sphere.sdk.carts.commands.CartDeleteCommand;
 import io.sphere.sdk.carts.queries.CartQuery;
@@ -40,6 +43,7 @@ import java.util.concurrent.ExecutionException;
  * @date 10.12.15
  */
 public abstract class BaseFixture {
+    protected static final String EMPTY_STRING = "";
     private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
     private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
 
@@ -47,6 +51,9 @@ public abstract class BaseFixture {
     private BlockingClient ctpClient;
     private URL ctPayoneIntegrationBaseUrl;
     private LoadingCache<String, Type> typeCache;
+
+    /** maps legible payment names to payment IDs (and vice versa)*/
+    private BiMap<String, String> payments = HashBiMap.create();
 
     @Before
     public void initializeCommercetoolsClient() throws MalformedURLException {
@@ -149,8 +156,25 @@ public abstract class BaseFixture {
                 .forEach(payment -> ctpClient.complete(PaymentDeleteCommand.of(payment)));
     }
 
-    protected Payment fetchPayment(final String paymentId) {
-        return ctpClient.complete(PaymentByIdGet.of(paymentId));
+    /**
+     * Gets the latest version of the payment via its legible name - a name that exits only in this test context.
+     * @param paymentName legible name of the payment
+     * @return the payment fetched from the commercetools client
+     * @see #fetchPaymentById(String)
+     */
+    protected Payment fetchPaymentByLegibleName(final String paymentName) {
+        return fetchPaymentById(payments.get(paymentName));
+    }
+
+    /**
+     * Gets the latest version of the payment via its ID.
+     * @param paymentId unique ID of the payment
+     * @return the payment fetched from the commercetools client
+     * @see #fetchPaymentByLegibleName(String)
+     */
+    protected Payment fetchPaymentById(final String paymentId) {
+        return ctpClient.complete(PaymentByIdGet.of(
+                Preconditions.checkNotNull(paymentId, "paymentId must not be null!")));
     }
 
     /**
@@ -159,12 +183,16 @@ public abstract class BaseFixture {
      * @return the type's ID
      * @throws ExecutionException if a checked exception was thrown while loading the value.
      */
-    public String typeIdOfFromTypeName(final String typeName) throws ExecutionException {
+    protected String typeIdFromTypeName(final String typeName) throws ExecutionException {
         return typeCache.get(typeName).getId();
     }
 
-    public String getTransactionState(final String paymentId, final String transactionId) {
-        final Optional<Transaction> transaction = fetchPayment(paymentId).getTransactions()
+    public String getTransactionStateByPaymentId(final String paymentId, final String transactionId) {
+        return getTransactionState(fetchPaymentById(paymentId), transactionId);
+    }
+
+    protected String getTransactionState(final Payment payment, final String transactionId) {
+        final Optional<Transaction> transaction = payment.getTransactions()
                 .stream()
                 .filter(i -> transactionId.equals(i.getId()))
                 .findFirst();
@@ -173,8 +201,35 @@ public abstract class BaseFixture {
         return transactionState != null? transactionState.toSphereName() : "<UNKNOWN>";
     }
 
-    public String getIdOfLastTransaction(final String paymentId) {
-        return Iterables.getLast(fetchPayment(paymentId).getTransactions()).getId();
+    public String getIdOfLastTransactionByPaymentId(final String paymentId) {
+        return getIdOfLastTransaction(fetchPaymentById(paymentId));
+    }
+
+    protected String getIdOfLastTransaction(final Payment payment) {
+        Preconditions.checkNotNull(payment, "payment must not be null");
+        return Iterables.getLast(payment.getTransactions()).getId();
+    }
+
+    protected void registerPaymentWithLegibleName(final String paymentName, final Payment payment) {
+        Preconditions.checkState(!payments.containsKey(paymentName),
+                String.format("Legible payment name '%s' already in use for ID '%s'.",
+                        paymentName, payments.get(paymentName)));
+
+        Preconditions.checkState(!payments.containsValue(payment.getId()),
+                String.format("Payment with ID '%s' already known as '%s' instead of '%s'",
+                        payment.getId(), payments.inverse().get(payment.getId()), paymentName));
+
+        payments.put(paymentName, payment.getId());
+    }
+
+    protected HttpResponse requestToHandlePaymentByLegibleName(final String paymentName) throws IOException {
+        Preconditions.checkState(payments.containsKey(paymentName),
+                String.format("Legible payment name '%s' not mapped to any payment ID.", paymentName));
+
+        return Request.Get(getHandlePaymentUrl(payments.get(paymentName)))
+                .connectTimeout(1000)
+                .execute()
+                .returnResponse();
     }
 }
 

@@ -64,7 +64,7 @@ public class ChargePreauthorizedFixture extends BaseFixture {
         final String paymentId = preparePaymentWithPreauthorizedAmountAndOrder(monetaryAmount, paymentMethod);
 
         //get newest payment and add new charge transaction
-        ctpClient().complete(PaymentUpdateCommand.of(fetchPayment(paymentId),
+        ctpClient().complete(PaymentUpdateCommand.of(fetchPaymentById(paymentId),
                     ImmutableList.of(
                             AddTransaction.of(TransactionDraftBuilder
                                     .of(TransactionType.valueOf(transactionType), monetaryAmount, ZonedDateTime.now())
@@ -92,8 +92,8 @@ public class ChargePreauthorizedFixture extends BaseFixture {
             final String transactionId,
             final String interactionTypeName,
             final String requestType) throws ExecutionException {
-        final String interactionTypeId = typeIdOfFromTypeName(interactionTypeName);
-        final Payment payment = fetchPayment(paymentId);
+        final String interactionTypeId = typeIdFromTypeName(interactionTypeName);
+        final Payment payment = fetchPaymentById(paymentId);
         return Long.toString(payment.getInterfaceInteractions().stream()
                 .filter(i -> i.getType().getId().equals(interactionTypeId))
                 .filter(i -> transactionId.equals(i.getFieldAsString(CustomTypeBuilder.TRANSACTION_ID_FIELD)))

@@ -30,20 +30,20 @@ import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.products.Product;
 import io.sphere.sdk.products.queries.ProductQuery;
 import io.sphere.sdk.types.CustomFieldsDraft;
-import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.fluent.Request;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 import specs.BaseFixture;
 
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
+import javax.money.format.MonetaryFormats;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -54,12 +54,13 @@ import java.util.concurrent.ExecutionException;
 public class AuthorizationFixture extends BaseFixture {
 
     public String createPayment(
+            final String paymentName,
             final String paymentMethod,
             final String transactionType,
             final String centAmount,
             final String currencyCode) throws ExecutionException, InterruptedException {
 
-        final MonetaryAmount monetaryAmount = MoneyImpl.ofCents(Long.valueOf(centAmount), currencyCode);
+        final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
 
         final List<TransactionDraft> transactions = Collections.singletonList(TransactionDraftBuilder
                 .of(TransactionType.valueOf(transactionType), monetaryAmount, ZonedDateTime.now())
@@ -82,6 +83,7 @@ public class AuthorizationFixture extends BaseFixture {
 
         final BlockingClient ctpClient = ctpClient();
         final Payment payment = ctpClient.complete(PaymentCreateCommand.of(paymentDraft));
+        registerPaymentWithLegibleName(paymentName, payment);
 
         // create cart and order with product
         final Product product = ctpClient.complete(ProductQuery.of()).getResults().get(0);
@@ -103,31 +105,35 @@ public class AuthorizationFixture extends BaseFixture {
         return payment.getId();
     }
 
-    public boolean handlePayment(final String paymentId) throws IOException, ExecutionException, InterruptedException {
+    public Map<String, String> handlePayment(final String paymentName,
+                                             final String interactionTypeName,
+                                             final String requestType) throws ExecutionException, IOException {
+        final HttpResponse response = requestToHandlePaymentByLegibleName(paymentName);
+        final Payment payment = fetchPaymentByLegibleName(paymentName);
+        final String transactionId = getIdOfLastTransaction(payment);
+        final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
+                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
+                BaseFixture.EMPTY_STRING;
 
-        final HttpResponse response = Request.Get(getHandlePaymentUrl(paymentId))
-                .connectTimeout(200)
-                .execute()
-                .returnResponse();
-
-        return response.getStatusLine().getStatusCode() == 200;
+        return ImmutableMap.of(
+                "statusCode", Integer.toString(response.getStatusLine().getStatusCode()),
+                "interactionCount", getInterfaceInteractionCount(payment, transactionId, interactionTypeName, requestType),
+                "transactionState", getTransactionState(payment, transactionId),
+                "amountAuthorized", amountAuthorized);
     }
 
-    public String getInterfaceInteractionCount(
-            final String paymentId,
-            final String transactionId,
-            final String interactionTypeName,
-            final String requestType) throws ExecutionException {
-        final String interactionTypeId = typeIdOfFromTypeName(interactionTypeName);
-        final Payment payment = fetchPayment(paymentId);
+    private String getInterfaceInteractionCount(final Payment payment,
+                                                final String transactionId,
+                                                final String interactionTypeName,
+                                                final String requestType) throws ExecutionException {
+        final String interactionTypeId = typeIdFromTypeName(interactionTypeName);
         return Long.toString(payment.getInterfaceInteractions().stream()
                 .filter(i -> i.getType().getId().equals(interactionTypeId))
                 .filter(i -> transactionId.equals(i.getFieldAsString(CustomTypeBuilder.TRANSACTION_ID_FIELD)))
                 .filter(i -> {
                     final String requestField = i.getFieldAsString(CustomTypeBuilder.REQUEST_FIELD);
-                    return requestField != null && requestField.contains("request=" + requestType);
+                    return (requestField != null) && requestField.contains("request=" + requestType);
                 })
                 .count());
     }
-
 }

@@ -79,6 +79,8 @@ project(":functionaltests") {
         }
 
         testCompile 'com.google.code.gson:gson:2.5'
+
+        testRuntime 'org.javamoney:moneta:1.0'
     }
 
     compileJava.dependsOn ':service:jar'
@@ -129,6 +131,11 @@ project(":functionaltests") {
 
         filter {
             includeTestsMatching 'specs.SpecsFixture'
+        }
+
+        if (project.hasProperty('publish.anyway')) {
+            // do not fail the build in case of failing tests, so that the reports can be published
+            ignoreFailures = true
         }
 
         systemProperty 'concordion.output.dir', "$reporting.baseDir/spec"
