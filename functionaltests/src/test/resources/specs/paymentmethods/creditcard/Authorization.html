@@ -30,7 +30,7 @@
         <div class="example">
             <h3>Authorization (without 3-D Secure)</h3>
             <p>
-                Given the following payments for a Credit Card that does not support charges for currencies other than
+                Given the following payments for a credit card that does not support charges for currencies other than
                 EUR:
             </p>
             <table c:execute="createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
@@ -67,7 +67,49 @@
                 <tr>
                     <th c:set="#paymentName">Payment Name</th>
                     <th c:assertEquals="#result.statusCode">Response Status Code</th>
-                    <th c:assertEquals="#result.interactionCount"># of <em>preauthorization</em> requests sent</th>
+                    <th c:assertEquals="#result.interactionCount">total # of <em>preauthorization</em> requests sent</th>
+                    <th c:assertEquals="#result.transactionState">Transaction State</th>
+                    <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
+                </tr>
+                <tr>
+                    <td>Payment 1</td>
+                    <td>200</td>
+                    <td>1</td>
+                    <td>Success</td>
+                    <td>20,00 EUR</td>
+                </tr>
+                <tr>
+                    <td>Payment 2</td>
+                    <td>200</td>
+                    <td>1</td>
+                    <td>Failure</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 3</td>
+                    <td>200</td>
+                    <td>1</td>
+                    <td>Success</td>
+                    <td>47,11 EUR</td>
+                </tr>
+                <tr>
+                    <td>Payment 4</td>
+                    <td>200</td>
+                    <td>1</td>
+                    <td>Success</td>
+                    <td>2.707,13 EUR</td>
+                </tr>
+            </table>
+            <p>
+                The service ensures idempotence, hence when I request it to handle the same payments again then I
+                will get the same results as before, especially the total number of <em>preauthorization</em> requests sent
+                per payment must not change:
+            </p>
+            <table c:execute="#result = handlePayment(#paymentName, #interactionType, #requestType)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:assertEquals="#result.statusCode">Response Status Code</th>
+                    <th c:assertEquals="#result.interactionCount">total # of <em>preauthorization</em> requests sent</th>
                     <th c:assertEquals="#result.transactionState">Transaction State</th>
                     <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
                 </tr>

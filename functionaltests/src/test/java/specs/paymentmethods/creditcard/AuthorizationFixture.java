@@ -119,6 +119,7 @@ public class AuthorizationFixture extends BaseFixture {
                 "statusCode", Integer.toString(response.getStatusLine().getStatusCode()),
                 "interactionCount", getInterfaceInteractionCount(payment, transactionId, interactionTypeName, requestType),
                 "transactionState", getTransactionState(payment, transactionId),
+//                "version", Long.toString(payment.getVersion()),
                 "amountAuthorized", amountAuthorized);
     }
 
