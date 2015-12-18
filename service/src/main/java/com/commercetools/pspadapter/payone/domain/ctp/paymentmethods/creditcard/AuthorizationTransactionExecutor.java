@@ -91,7 +91,7 @@ public class AuthorizationTransactionExecutor implements IdempotentTransactionEx
         final Payment updatedPayment = client.complete(
             PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
                 AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
-                    ImmutableMap.of(CustomTypeBuilder.REQUEST_FIELD, request.toStringMap().toString() /* TODO */,
+                    ImmutableMap.of(CustomTypeBuilder.REQUEST_FIELD, request.toStringMap(true).toString() /* TODO */,
                         CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
                         CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */))));
 

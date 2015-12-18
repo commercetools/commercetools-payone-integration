@@ -7,7 +7,6 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.IdempotentT
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureRequest;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.PreauthorizationRequest;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
@@ -18,7 +17,9 @@ import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
-import io.sphere.sdk.payments.commands.updateactions.*;
+import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
+import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
+import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionTimestamp;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 
@@ -90,7 +91,7 @@ public class ChargeTransactionExecutor implements IdempotentTransactionExecutor 
         final Payment updatedPayment = client.complete(
             PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
                 AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
-                    ImmutableMap.of(CustomTypeBuilder.REQUEST_FIELD, request.toStringMap().toString() /* TODO */,
+                    ImmutableMap.of(CustomTypeBuilder.REQUEST_FIELD, request.toStringMap(true).toString() /* TODO */,
                         CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
                         CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */))));
 

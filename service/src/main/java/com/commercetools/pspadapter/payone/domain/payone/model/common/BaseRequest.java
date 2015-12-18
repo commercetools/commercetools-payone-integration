@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -42,9 +43,12 @@ public class BaseRequest implements Serializable {
      */
     private String request;
 
-    public Map<String, Object> toStringMap() {
+    public Map<String, Object> toStringMap(final boolean shouldClearSecurityValues) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        if (shouldClearSecurityValues) {
+            mapper.addMixIn(this.getClass(), MixIn.class);
+        }
 
         return mapper.convertValue(this,
                 mapper.getTypeFactory().constructMapType(HashMap.class, String.class, Object.class));
@@ -86,4 +90,14 @@ public class BaseRequest implements Serializable {
     public String getApi_version() {
         return api_version;
     }
+
+    //**************************************************************
+    //* Filter for Serialization (e.g. clear out security values)
+    //**************************************************************
+
+    public interface MixIn {
+        @JsonIgnore
+        String getKey();
+    }
+
 }
