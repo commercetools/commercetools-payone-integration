@@ -57,7 +57,10 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         CreditCardCaptureRequest request = new CreditCardCaptureRequest(getConfig());
 
         request.setTxid(ctPayment.getInterfaceId());
-        request.setSequencenumber(Integer.getInteger(transaction.getInteractionId()));
+
+
+        Optional.ofNullable(transaction.getInteractionId())
+                .ifPresent(interactionId -> request.setSequencenumber(Integer.valueOf(interactionId)));
         request.setAmount(MonetaryUtil.minorUnits().queryFrom(ctPayment.getAmountAuthorized()).intValue());
         Optional
             .ofNullable(ctPayment.getAmountAuthorized())

@@ -136,10 +136,11 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
 
         //monetary
-        assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
-        assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
+        assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountAuthorized()).intValue());
+        assertThat(result.getCurrency()).isEqualTo(payment.getAmountAuthorized().getCurrency().getCurrencyCode());
 
         assertThat(result.getTxid()).isEqualTo(payment.getInterfaceId());
+        assertThat(result.getSequencenumber()).isEqualTo(Integer.valueOf(payment.getTransactions().get(0).getInteractionId()));
     }
 
 
