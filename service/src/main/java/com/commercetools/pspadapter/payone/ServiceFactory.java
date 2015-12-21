@@ -21,6 +21,7 @@ import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.payments.TransactionType;
@@ -31,9 +32,7 @@ import spark.Response;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * @author fhaertig
@@ -99,25 +98,28 @@ public class ServiceFactory {
     }
 
     public static PaymentDispatcher createPaymentDispatcher(final LoadingCache<String, Type> typeCache, final PayoneConfig config, final CommercetoolsClient client) {
+        // TODO jw: use immutable map
         final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
 
         final TransactionExecutor defaultExecutor = new UnsupportedTransactionExecutor(client);
         final PayonePostServiceImpl postService = PayonePostServiceImpl.of(config.getApiUrl());
 
-        final Set<PaymentMethod> supportedMethods = ImmutableSet.of(
+        final ImmutableSet<PaymentMethod> supportedMethods = ImmutableSet.of(
                 PaymentMethod.CREDIT_CARD
         );
 
-        for (PaymentMethod method : supportedMethods) {
-            PayoneRequestFactory requestFactory = Optional.ofNullable(createRequestFactory(method, config))
-                    .orElseThrow(() -> new IllegalArgumentException("No PayoneRequestFactory could be created for payment method " + method));
-            Map<TransactionType, TransactionExecutor> executorsMap = new HashMap<>();
-            for (TransactionType type : method.getSupportedTransactionTypes()) {
-                Optional
-                    .ofNullable(createTransactionExecutor(type, typeCache, client, requestFactory, postService))
-                    .ifPresent(executor -> executorsMap.put(type, executor));
+        for (final PaymentMethod paymentMethod : supportedMethods) {
+            final PayoneRequestFactory requestFactory = createRequestFactory(paymentMethod, config);
+            final ImmutableMap.Builder<TransactionType, TransactionExecutor> executors = ImmutableMap.builder();
+            for (final TransactionType type : paymentMethod.getSupportedTransactionTypes()) {
+                // FIXME jw: shouldn't be nullable anymore when payment method is implemented completely
+                final TransactionExecutor executor = Optional
+                            .ofNullable(createTransactionExecutor(type, typeCache, client, requestFactory, postService))
+                            .orElse(defaultExecutor);
+
+                executors.put(type, executor);
             }
-            methodDispatcherMap.put(method, new PaymentMethodDispatcher(defaultExecutor, executorsMap));
+            methodDispatcherMap.put(paymentMethod, new PaymentMethodDispatcher(defaultExecutor, executors.build()));
         }
         return new PaymentDispatcher(methodDispatcherMap);
     }
@@ -158,7 +160,7 @@ public class ServiceFactory {
             case CREDIT_CARD:
                 return new CreditCardRequestFactory(config);
             default:
-                return null;
+                throw new IllegalArgumentException(String.format("No PayoneRequestFactory could be created for payment method %s", method));
         }
     }
 }

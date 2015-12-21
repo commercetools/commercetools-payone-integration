@@ -7,6 +7,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
+import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.payments.Transaction;
 import org.junit.Test;
@@ -24,7 +25,7 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
                 public PaymentWithCartLike executeTransaction(PaymentWithCartLike payment, Transaction transaction) {
                     return payment;
                 }
-            }, new HashMap<>());
+            }, ImmutableMap.of());
         }
 
         @Override
