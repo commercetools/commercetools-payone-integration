@@ -15,7 +15,9 @@ import util.PaymentTestHelper;
 
 import java.util.concurrent.CompletionException;
 
-public class PaymentMethodDispatcherTest extends PaymentTestHelper {
+public class PaymentMethodDispatcherTest {
+    private final PaymentTestHelper payments = new PaymentTestHelper();
+
     private interface CountingTransactionExecutor extends TransactionExecutor {
         int getCount();
     }
@@ -42,7 +44,7 @@ public class PaymentMethodDispatcherTest extends PaymentTestHelper {
             public PaymentWithCartLike executeTransaction(PaymentWithCartLike payment, Transaction transaction) {
                 count += 1;
                 if (count > afterExecutions) try {
-                    return payment.withPayment(dummyPaymentTwoTransactionsSuccessPending());
+                    return payment.withPayment(payments.dummyPaymentTwoTransactionsSuccessPending());
                 } catch (Exception e) {
                     throw new CompletionException(e);
                 }
@@ -59,7 +61,7 @@ public class PaymentMethodDispatcherTest extends PaymentTestHelper {
     public void usesDefaultExecutor() throws Exception {
         final CountingTransactionExecutor countingTransactionExecutor = countingTransactionExecutor();
         final PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(countingTransactionExecutor, ImmutableMap.of());
-        dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsPending(), (Cart)null));
+        dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentTwoTransactionsPending(), (Cart)null));
         assertThat(countingTransactionExecutor.getCount(), is(1));
     }
 
@@ -74,7 +76,7 @@ public class PaymentMethodDispatcherTest extends PaymentTestHelper {
                         TransactionType.CHARGE, chargeExecutor,
                         TransactionType.REFUND, refundExecutor));
 
-        dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsPending(), (Cart)null));
+        dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentTwoTransactionsPending(), (Cart)null));
         assertThat(defaultExecutor.getCount(), is(0));
         assertThat(chargeExecutor.getCount(), is(1));
         assertThat(refundExecutor.getCount(), is(0));
@@ -91,7 +93,7 @@ public class PaymentMethodDispatcherTest extends PaymentTestHelper {
                         TransactionType.CHARGE, chargeExecutor,
                         TransactionType.REFUND, refundExecutor));
 
-        dispatcher.dispatchPayment(dispatcher.dispatchPayment(dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsPending(), (Cart)null))));
+        dispatcher.dispatchPayment(dispatcher.dispatchPayment(dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentTwoTransactionsPending(), (Cart)null))));
         assertThat(defaultExecutor.getCount(), is(0));
         assertThat(chargeExecutor.getCount(), is(3));
         assertThat(refundExecutor.getCount(), is(1));

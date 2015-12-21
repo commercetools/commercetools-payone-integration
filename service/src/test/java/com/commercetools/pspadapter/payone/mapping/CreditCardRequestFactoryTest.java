@@ -33,8 +33,9 @@ import java.util.Optional;
  * @date 14.12.15
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CreditCardRequestFactoryTest extends PaymentTestHelper {
+public class CreditCardRequestFactoryTest {
 
+    private final PaymentTestHelper payments = new PaymentTestHelper();
     private CreditCardRequestFactory factory;
 
     @Mock
@@ -52,8 +53,8 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
 
     @Test
     public void throwExceptionWhenPaymentIncomplete() throws Exception {
-        Payment payment = dummyPaymentNoCustomFields();
-        Order order = dummyOrderMapToPayoneRequest();
+        Payment payment = payments.dummyPaymentNoCustomFields();
+        Order order = payments.dummyOrderMapToPayoneRequest();
         final Throwable throwable = catchThrowable(() -> factory.createPreauthorizationRequest(new PaymentWithCartLike(payment, order)));
 
         Assertions.assertThat(throwable)
@@ -64,8 +65,8 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
     @Test
     public void createFullPreauthorizationRequestFromValidPayment() throws Exception {
 
-        Payment payment = dummyPaymentOneAuthPending20Euro();
-        Order order = dummyOrderMapToPayoneRequest();
+        Payment payment = payments.dummyPaymentOneAuthPending20Euro();
+        Order order = payments.dummyOrderMapToPayoneRequest();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         CreditCardPreauthorizationRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
 
@@ -122,8 +123,8 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
     @Test
     public void createFullCaptureRequestFromValidPayment() throws Exception {
 
-        Payment payment = dummyPaymentOneAuthPending20Euro();
-        Order order = dummyOrderMapToPayoneRequest();
+        Payment payment = payments.dummyPaymentOneAuthPending20Euro();
+        Order order = payments.dummyOrderMapToPayoneRequest();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         CreditCardCaptureRequest result = factory.createCaptureRequest(paymentWithCartLike, payment.getTransactions().get(0));
 
@@ -142,7 +143,6 @@ public class CreditCardRequestFactoryTest extends PaymentTestHelper {
         assertThat(result.getTxid()).isEqualTo(payment.getInterfaceId());
         assertThat(result.getSequencenumber()).isEqualTo(Integer.valueOf(payment.getTransactions().get(0).getInteractionId()));
     }
-
 
 
 }
