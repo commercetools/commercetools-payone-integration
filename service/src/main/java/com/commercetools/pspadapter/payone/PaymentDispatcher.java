@@ -41,7 +41,7 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
             throw new IllegalArgumentException("No Payment Method provided");
         }
 
-        return Optional.ofNullable(methodDispatcher.get(PaymentMethod.getMethodFromString(paymentMethodInfo.getMethod())))
+        return Optional.ofNullable(methodDispatcher.get(PaymentMethod.fromMethodKey(paymentMethodInfo.getMethod())))
             .map(methodDispatcher -> methodDispatcher.dispatchPayment(paymentWithCartLike))
             .orElseThrow(() -> new IllegalArgumentException("Unsupported Payment Method"));
     }
