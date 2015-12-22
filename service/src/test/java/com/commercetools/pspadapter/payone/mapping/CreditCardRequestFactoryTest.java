@@ -45,7 +45,8 @@ public class CreditCardRequestFactoryTest {
 
     @Before
     public void setUp() {
-        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of("dummyValue"));
+        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyValue"));
+        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyValue");
 
         config = new ServiceConfig(propertyProvider).getPayoneConfig();
         factory = new CreditCardRequestFactory(config);

@@ -33,21 +33,37 @@ public class PropertyProvider {
             .build();
     }
 
-    public Optional<String> getEnvironmentOrSystemValue(final String propertyName) {
-        Optional<String> enviromentValue = Optional.ofNullable(System.getenv(propertyName));
-        if (!enviromentValue.isPresent()) {
-            //check for system property
-            return  Optional.ofNullable(System.getProperty(propertyName));
+    /**
+     * Gets an optional property.
+     * @param propertyName the name of the requested property, must not be null
+     * @return the property, an empty Optional if not present; empty values are treated as present
+     */
+    public Optional<String> getProperty(final String propertyName) {
+        final Optional<String> internalProperty = Optional.ofNullable(internalProperties.get(propertyName));
+        if (internalProperty.isPresent()) {
+            return internalProperty;
         }
-        return enviromentValue;
+
+        final Optional<String> environmentValue = Optional.ofNullable(System.getenv(propertyName));
+        if (environmentValue.isPresent()) {
+            return environmentValue;
+        }
+        return Optional.ofNullable(System.getProperty(propertyName));
     }
 
-    public Map<String, String> getInternalProperties() {
-        return internalProperties;
+    /**
+     * Gets a mandatory non-empty property.
+     * @param propertyName the name of the requested property, must not be null
+     * @return the property value
+     * @throws IllegalStateException if the property isn't defined or empty
+     */
+    public String getMandatoryNonEmptyProperty(final String propertyName) {
+        return getProperty(propertyName)
+                .filter(value -> !value.isEmpty())
+                .orElseThrow(() -> createIllegalStateException(propertyName));
     }
 
-
-    public IllegalArgumentException createIllegalArgumentException(final String propertyName) {
-        return new IllegalArgumentException("Value of " + propertyName + " is required and can not be empty!");
+    private IllegalStateException createIllegalStateException(final String propertyName) {
+        return new IllegalStateException("Value of " + propertyName + " is required and can not be empty!");
     }
 }

@@ -23,30 +23,13 @@ public class PayoneConfig {
 
 
     public PayoneConfig(final PropertyProvider propertyProvider) {
-
-        subAccountId = propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_SUBACC_ID)
-                .filter(s -> !s.isEmpty())
-                .orElseThrow(() -> propertyProvider.createIllegalArgumentException(PropertyProvider.PAYONE_SUBACC_ID));
-
-        merchantId = propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_MERCHANT_ID)
-                .filter(s -> !s.isEmpty())
-                .orElseThrow(() -> propertyProvider.createIllegalArgumentException(PropertyProvider.PAYONE_MERCHANT_ID));
-
-        portalId = propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_PORTAL_ID)
-                .filter(s -> !s.isEmpty())
-                .orElseThrow(() -> propertyProvider.createIllegalArgumentException(PropertyProvider.PAYONE_PORTAL_ID));
-
-        mode = propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_MODE)
-                .orElse(DEFAULT_PAYONE_MODE);
-
-        apiUrl = propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_API_URL)
-                .orElse(DEFAULT_PAYONE_API_URL);
-
-        apiVersion = propertyProvider.getInternalProperties().get(PropertyProvider.PAYONE_API_VERSION);
-
-        final String plainKey = propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_KEY)
-                .filter(s -> !s.isEmpty())
-                .orElseThrow(() -> propertyProvider.createIllegalArgumentException(PropertyProvider.PAYONE_KEY));
+        subAccountId = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SUBACC_ID);
+        merchantId = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_MERCHANT_ID);
+        portalId = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_PORTAL_ID);
+        mode = propertyProvider.getProperty(PropertyProvider.PAYONE_MODE).orElse(DEFAULT_PAYONE_MODE);
+        apiUrl = propertyProvider.getProperty(PropertyProvider.PAYONE_API_URL).orElse(DEFAULT_PAYONE_API_URL);
+        apiVersion = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_API_VERSION);
+        final String plainKey = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_KEY);
         keyAsMd5Hash = Hashing.md5().hashString(plainKey, Charsets.UTF_8).toString();
     }
 

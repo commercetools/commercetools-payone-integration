@@ -1,7 +1,9 @@
 package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
+import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
@@ -42,10 +44,34 @@ public class ServiceFactory {
 
     private static final String SCHEDULED_JOB_KEY = "commercetools-platform-polling-1";
 
+    private final ServiceConfig config;
+
+    private ServiceFactory(final ServiceConfig config) {
+        this.config = config;
+    }
+
+    /**
+     * Creates a new service factory initialized with a default {@link ServiceConfig}.
+     * @return the new factory instance, never null
+     */
+    public static ServiceFactory createWithDefaultServiceConfig() {
+        return ServiceFactory.createWithServiceConfig(new ServiceConfig(new PropertyProvider()));
+    }
+
+    /**
+     * Creates a new service factory initialized with the provided {@code config}.
+     * @param config the service configuration
+     * @return the new service factory instance, never null
+     */
+    public static ServiceFactory createWithServiceConfig(final ServiceConfig config) {
+        return new ServiceFactory(config);
+    }
+
     public static void main(String [] args) throws SchedulerException, MalformedURLException {
-        final ServiceConfig serviceConfig = new ServiceConfig();
-        final CommercetoolsClient commercetoolsClient = ServiceFactory.createCommercetoolsClient(serviceConfig);
-        final LoadingCache<String, Type> typeCache = ServiceFactory.createTypeCache(commercetoolsClient);
+        final ServiceConfig serviceConfig = new ServiceConfig(new PropertyProvider());
+        final ServiceFactory serviceFactory = ServiceFactory.createWithServiceConfig(serviceConfig);
+        final CommercetoolsClient commercetoolsClient = serviceFactory.createCommercetoolsClient();
+        final LoadingCache<String, Type> typeCache = serviceFactory.createTypeCache(commercetoolsClient);
         final PaymentDispatcher paymentDispatcher = ServiceFactory.createPaymentDispatcher(
                 typeCache,
                 serviceConfig.getPayoneConfig(),
@@ -68,9 +94,9 @@ public class ServiceFactory {
                 paymentDispatcher);
     }
 
-    public static IntegrationService createService(final ServiceConfig config) {
-        final CommercetoolsClient client = ServiceFactory.createCommercetoolsClient(config);
-        final LoadingCache<String, Type> typeCache = ServiceFactory.createTypeCache(client);
+    public IntegrationService createService() {
+        final CommercetoolsClient client = createCommercetoolsClient();
+        final LoadingCache<String, Type> typeCache = createTypeCache(client);
 
         return ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(client),
@@ -93,7 +119,7 @@ public class ServiceFactory {
         });
     }
 
-    private static LoadingCache<String, Type> createTypeCache(final CommercetoolsClient client) {
+    public LoadingCache<String, Type> createTypeCache(final BlockingClient client) {
         return CacheBuilder.newBuilder().build(new TypeCacheLoader(client));
     }
 
@@ -146,7 +172,7 @@ public class ServiceFactory {
         return null;
     }
 
-    private static CommercetoolsClient createCommercetoolsClient(final ServiceConfig config) {
+    public CommercetoolsClient createCommercetoolsClient() {
         final SphereClientFactory sphereClientFactory = SphereClientFactory.of();
         return new CommercetoolsClient(
                 sphereClientFactory.createClient(

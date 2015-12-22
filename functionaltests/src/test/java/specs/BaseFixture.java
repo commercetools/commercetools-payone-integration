@@ -1,20 +1,16 @@
 package specs;
 
+import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
-import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Iterables;
 import io.sphere.sdk.carts.commands.CartDeleteCommand;
 import io.sphere.sdk.carts.queries.CartQuery;
-import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.orders.commands.OrderDeleteCommand;
 import io.sphere.sdk.orders.queries.OrderQuery;
 import io.sphere.sdk.payments.Payment;
@@ -57,23 +53,16 @@ public abstract class BaseFixture {
 
     @Before
     public void initializeCommercetoolsClient() throws MalformedURLException {
-        final PropertyProvider propertyProvider = new PropertyProvider();
-
-        ctPayoneIntegrationBaseUrl = new URL(propertyProvider.getEnvironmentOrSystemValue("CT_PAYONE_INTEGRATION_URL")
-                .filter(string -> !string.isEmpty())
-                .orElseThrow(() -> new IllegalStateException("CT_PAYONE_INTEGRATION_URL missing")));
-
-        final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
+        ctPayoneIntegrationBaseUrl =
+                new URL(new PropertyProvider().getMandatoryNonEmptyProperty("CT_PAYONE_INTEGRATION_URL"));
 
         //only for creation of test data
-        ctpClient = new CommercetoolsClient(SphereClientFactory.of().createClient(
-                serviceConfig.getCtProjectKey(),
-                serviceConfig.getCtClientId(),
-                serviceConfig.getCtClientSecret()));
+        final ServiceFactory serviceFactory = ServiceFactory.createWithDefaultServiceConfig();
+        ctpClient = serviceFactory.createCommercetoolsClient();
 
         resetCommercetoolsPlatform();
 
-        typeCache = CacheBuilder.newBuilder().build(new TypeCacheLoader(ctpClient));
+        typeCache = serviceFactory.createTypeCache(ctpClient);
     }
 
     @After

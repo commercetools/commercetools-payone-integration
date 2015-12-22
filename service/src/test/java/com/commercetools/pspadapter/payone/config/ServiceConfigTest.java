@@ -2,9 +2,10 @@ package com.commercetools.pspadapter.payone.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -24,54 +25,51 @@ public class ServiceConfigTest {
     @Mock
     private PropertyProvider propertyProvider;
 
-    @Test
-    public void getCtProjectKey() {
-        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of(dummyValue));
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.CT_PROJECT_KEY)).thenReturn(Optional.empty());
-        when(propertyProvider.createIllegalArgumentException(any())).thenCallRealMethod();
-
-        final Throwable throwable = catchThrowable(() -> new ServiceConfig(propertyProvider));
-
-        assertThat(throwable)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Value of " + PropertyProvider.CT_PROJECT_KEY + " is required and can not be empty!");
-
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.CT_PROJECT_KEY)).thenReturn(Optional.of(dummyValue));
-
-        assertThat(new ServiceConfig(propertyProvider).getCtProjectKey()).isEqualTo(dummyValue);
+    @Before
+    public void setUp() {
+        when(propertyProvider.getProperty(anyString())).thenReturn(Optional.of(dummyValue));
+        when(propertyProvider.getMandatoryNonEmptyProperty(anyString())).thenReturn(dummyValue);
     }
 
     @Test
-    public void getCtClientId() {
-        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of(dummyValue));
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.CT_CLIENT_ID)).thenReturn(Optional.empty());
-        when(propertyProvider.createIllegalArgumentException(any())).thenCallRealMethod();
+    public void getsCtProjectKey() {
+        when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY)).thenReturn("project X");
+        assertThat(new ServiceConfig(propertyProvider).getCtProjectKey()).isEqualTo("project X");
+    }
 
-        final Throwable throwable = catchThrowable(() -> new ServiceConfig(propertyProvider));
+    @Test
+    public void throwsInCaseOfMissingCtProjectKey() {
+        assertThatThrowsInCaseOfMissingOrEmptyProperty(PropertyProvider.CT_PROJECT_KEY);
+    }
 
-        assertThat(throwable)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Value of " + PropertyProvider.CT_CLIENT_ID + " is required and can not be empty!");
+    @Test
+    public void getsCtClientId() {
+        when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID)).thenReturn("id X");
+        assertThat(new ServiceConfig(propertyProvider).getCtClientId()).isEqualTo("id X");
+    }
 
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.CT_CLIENT_ID)).thenReturn(Optional.of(dummyValue));
-
-        assertThat(new ServiceConfig(propertyProvider).getCtClientId()).isEqualTo(dummyValue);
+    @Test
+    public void throwsInCaseOfMissingCtClientId() {
+        assertThatThrowsInCaseOfMissingOrEmptyProperty(PropertyProvider.CT_CLIENT_ID);
     }
 
     @Test
     public void getCtClientSecret() {
-        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of(dummyValue));
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.CT_CLIENT_SECRET)).thenReturn(Optional.empty());
-        when(propertyProvider.createIllegalArgumentException(any())).thenCallRealMethod();
+        when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET)).thenReturn("secret X");
+        assertThat(new ServiceConfig(propertyProvider).getCtClientSecret()).isEqualTo("secret X");
+    }
+
+    @Test
+    public void throwsInCaseOfMissingCtClientSecret() {
+        assertThatThrowsInCaseOfMissingOrEmptyProperty(PropertyProvider.CT_CLIENT_SECRET);
+    }
+
+    private void assertThatThrowsInCaseOfMissingOrEmptyProperty(final String propertyName) {
+        final IllegalStateException illegalStateException = new IllegalStateException();
+        when(propertyProvider.getMandatoryNonEmptyProperty(propertyName)).thenThrow(illegalStateException);
 
         final Throwable throwable = catchThrowable(() -> new ServiceConfig(propertyProvider));
 
-        assertThat(throwable)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Value of " + PropertyProvider.CT_CLIENT_SECRET + " is required and can not be empty!");
-
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.CT_CLIENT_SECRET)).thenReturn(Optional.of(dummyValue));
-
-        assertThat(new ServiceConfig(propertyProvider).getCtClientSecret()).isEqualTo(dummyValue);
+        assertThat(throwable).isSameAs(illegalStateException);
     }
 }

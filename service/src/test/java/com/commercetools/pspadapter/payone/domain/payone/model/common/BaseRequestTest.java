@@ -1,78 +1,69 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.google.common.collect.ImmutableMap;
-import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Matchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.MapEntry.entry;
+import static org.mockito.Mockito.when;
 
-import java.util.Map;
-import java.util.Optional;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+
+import com.commercetools.pspadapter.payone.config.PayoneConfig;
 
 /**
  * @author fhaertig
  * @date 11.12.15
  */
-@RunWith(MockitoJUnitRunner.class)
 public class BaseRequestTest {
+    private static final String requestType = "some-request";
+    private static final String merchantId = "merchant X";
+    private static final String portalId = "portal 23";
+    private static final String keyMd5Hash = "hashed key";
+    private static final String mode = "unit test";
+    private static final String apiVersion = "v.1.2.3";
+
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Mock
-    private PropertyProvider propertyProvider;
-
     private PayoneConfig payoneConfig;
 
     @Before
     public void setUp() {
-        Map<String, String> internalProperties = ImmutableMap.<String, String>builder()
-                .put(PropertyProvider.PAYONE_API_VERSION, "3.9")
-                .build();
-
-        Mockito.when(propertyProvider.getEnvironmentOrSystemValue(Matchers.any())).thenReturn(Optional.of("dummyEnvironmentValue"));
-        Mockito.when(propertyProvider.getInternalProperties()).thenReturn(internalProperties);
-        Mockito.when(propertyProvider.createIllegalArgumentException(Matchers.any())).thenCallRealMethod();
-
-        payoneConfig = new PayoneConfig(propertyProvider);
+        when(payoneConfig.getMerchantId()).thenReturn(merchantId);
+        when(payoneConfig.getPortalId()).thenReturn(portalId);
+        when(payoneConfig.getKeyAsMd5Hash()).thenReturn(keyMd5Hash);
+        when(payoneConfig.getMode()).thenReturn(mode);
+        when(payoneConfig.getApiVersion()).thenReturn(apiVersion);
     }
 
     @Test
-    public void serializeBaseRequestToFullStringMap() {
+    public void createsFullMap() {
         //create with required properties
-        BaseRequest request = new BaseRequest(payoneConfig, RequestType.PREAUTHORIZATION.getType());
+        final BaseRequest request = new BaseRequest(payoneConfig, requestType);
 
-        Map<String, Object> resultMap = request.toStringMap(false);
-
-        Assertions.assertThat(resultMap).containsEntry("request", RequestType.PREAUTHORIZATION.getType());
-        Assertions.assertThat(resultMap).containsEntry("mid", payoneConfig.getMerchantId());
-        Assertions.assertThat(resultMap).containsEntry("portalid", payoneConfig.getPortalId());
-        Assertions.assertThat(resultMap).containsEntry("key", payoneConfig.getKeyAsMd5Hash());
-        Assertions.assertThat(resultMap).containsEntry("mode", payoneConfig.getMode());
-        Assertions.assertThat(resultMap).containsEntry("api_version", payoneConfig.getApiVersion());
-
-        //assure that no other properties are contained
-        Assertions.assertThat(resultMap).hasSize(6);
+        assertThat(request.toStringMap(false)).containsOnly(
+                entry("request", requestType),
+                entry("mid", merchantId),
+                entry("portalid", portalId),
+                entry("key", keyMd5Hash),
+                entry("mode", mode),
+                entry("api_version", apiVersion));
     }
 
     @Test
-    public void serializeBaseRequestToClearedStringMap() {
+    public void createsMapWithoutSecrets() {
         //create with required properties
-        BaseRequest request = new BaseRequest(payoneConfig, RequestType.PREAUTHORIZATION.getType());
+        final BaseRequest request = new BaseRequest(payoneConfig, requestType);
 
-        Map<String, Object> resultMap = request.toStringMap(true);
-
-        Assertions.assertThat(resultMap).containsEntry("request", RequestType.PREAUTHORIZATION.getType());
-        Assertions.assertThat(resultMap).containsEntry("mid", payoneConfig.getMerchantId());
-        Assertions.assertThat(resultMap).containsEntry("portalid", payoneConfig.getPortalId());
-        Assertions.assertThat(resultMap).doesNotContainEntry("key", payoneConfig.getKeyAsMd5Hash());
-        Assertions.assertThat(resultMap).containsEntry("mode", payoneConfig.getMode());
-        Assertions.assertThat(resultMap).containsEntry("api_version", payoneConfig.getApiVersion());
-
-        //assure that no other properties are contained
-        Assertions.assertThat(resultMap).hasSize(5);
+        assertThat(request.toStringMap(true)).containsOnly(
+                entry("request", requestType),
+                entry("mid", merchantId),
+                entry("portalid", portalId),
+                entry("mode", mode),
+                entry("api_version", apiVersion));
     }
 }

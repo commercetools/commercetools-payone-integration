@@ -2,18 +2,17 @@ package com.commercetools.pspadapter.payone.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -28,109 +27,100 @@ public class PayoneConfigTest {
     @Mock
     private PropertyProvider propertyProvider;
 
-    @Test
-    public void getSubAccountId() {
-        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of(dummyValue));
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_SUBACC_ID)).thenReturn(Optional.empty());
-        when(propertyProvider.createIllegalArgumentException(any())).thenCallRealMethod();
-
-        final Throwable throwable = catchThrowable(() -> new PayoneConfig(propertyProvider));
-
-        assertThat(throwable)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Value of " + PropertyProvider.PAYONE_SUBACC_ID + " is required and can not be empty!");
-
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_SUBACC_ID)).thenReturn(Optional.of(dummyValue));
-
-        assertThat(new PayoneConfig(propertyProvider).getSubAccountId()).isEqualTo(dummyValue);
+    @Before
+    public void setUp() {
+        when(propertyProvider.getProperty(anyString())).thenReturn(Optional.of(dummyValue));
+        when(propertyProvider.getProperty(PropertyProvider.PAYONE_API_URL)).thenReturn(Optional.of("http://te.st"));
+        when(propertyProvider.getMandatoryNonEmptyProperty(anyString())).thenReturn(dummyValue);
     }
 
     @Test
-    public void getMerchantId() {
-        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of(dummyValue));
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_MERCHANT_ID)).thenReturn(Optional.empty());
-        when(propertyProvider.createIllegalArgumentException(any())).thenCallRealMethod();
-
-        final Throwable throwable = catchThrowable(() -> new PayoneConfig(propertyProvider));
-
-        assertThat(throwable)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Value of " + PropertyProvider.PAYONE_MERCHANT_ID + " is required and can not be empty!");
-
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_MERCHANT_ID)).thenReturn(Optional.of(dummyValue));
-
-        assertThat(new PayoneConfig(propertyProvider).getMerchantId()).isEqualTo(dummyValue);
+    public void getsSubAccountId() {
+        when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SUBACC_ID)).thenReturn("sub 1");
+        assertThat(new PayoneConfig(propertyProvider).getSubAccountId()).isEqualTo("sub 1");
     }
 
     @Test
-    public void getKeyAsMd5Hash() {
-        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of(dummyValue));
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_KEY)).thenReturn(Optional.empty());
-        when(propertyProvider.createIllegalArgumentException(any())).thenCallRealMethod();
+    public void throwsInCaseOfMissingSubAccountId() {
+        assertThatThrowsInCaseOfMissingOrEmptyProperty(PropertyProvider.PAYONE_SUBACC_ID);
+    }
 
-        final Throwable throwable = catchThrowable(() -> new PayoneConfig(propertyProvider));
+    @Test
+    public void getsMerchantId() {
+        when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_MERCHANT_ID)).thenReturn("merchant");
+        assertThat(new PayoneConfig(propertyProvider).getMerchantId()).isEqualTo("merchant");
+    }
 
-        assertThat(throwable)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Value of " + PropertyProvider.PAYONE_KEY + " is required and can not be empty!");
+    @Test
+    public void throwsInCaseOfMissingMerchantId() {
+        assertThatThrowsInCaseOfMissingOrEmptyProperty(PropertyProvider.PAYONE_MERCHANT_ID);
+    }
 
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_KEY)).thenReturn(Optional.of(dummyValue));
-
+    @Test
+    public void getsKeyAsMd5Hash() {
+        when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_KEY)).thenReturn("key 1");
         assertThat(new PayoneConfig(propertyProvider).getKeyAsMd5Hash())
-                .isEqualTo(Hashing.md5().hashString(dummyValue, Charsets.UTF_8).toString());
+                .isEqualTo(Hashing.md5().hashString("key 1", Charsets.UTF_8).toString());
     }
 
     @Test
-    public void getPortalId() {
-        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of(dummyValue));
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_PORTAL_ID)).thenReturn(Optional.empty());
-        when(propertyProvider.createIllegalArgumentException(any())).thenCallRealMethod();
+    public void throwsInCaseOfMissingKey() {
+        assertThatThrowsInCaseOfMissingOrEmptyProperty(PropertyProvider.PAYONE_KEY);
+    }
+
+    @Test
+    public void getsPortalId() {
+        when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_PORTAL_ID)).thenReturn("portal 1");
+        assertThat(new PayoneConfig(propertyProvider).getPortalId()).isEqualTo("portal 1");
+    }
+
+    @Test
+    public void throwsInCaseOfMissingPortalId() {
+        assertThatThrowsInCaseOfMissingOrEmptyProperty(PropertyProvider.PAYONE_PORTAL_ID);
+    }
+
+    @Test
+    public void getsMode() {
+        when(propertyProvider.getProperty(PropertyProvider.PAYONE_MODE)).thenReturn(Optional.of("mode x"));
+        assertThat(new PayoneConfig(propertyProvider).getMode()).isEqualTo("mode x");
+    }
+
+    @Test
+    public void defaultsToTestInCaseOfMissingMode() {
+        when(propertyProvider.getProperty(PropertyProvider.PAYONE_MODE)).thenReturn(Optional.empty());
+        assertThat(new PayoneConfig(propertyProvider).getMode()).isEqualTo(PayoneConfig.DEFAULT_PAYONE_MODE);
+        assertThat(PayoneConfig.DEFAULT_PAYONE_MODE).isEqualTo("test");
+    }
+
+    @Test
+    public void getsApiVersion() {
+        when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_API_VERSION)).thenReturn("v1.0");
+        assertThat(new PayoneConfig(propertyProvider).getApiVersion()).isEqualTo("v1.0");
+    }
+
+    @Test
+    public void throwsInCaseOfMissingApiVersion() {
+        assertThatThrowsInCaseOfMissingOrEmptyProperty(PropertyProvider.PAYONE_API_VERSION);
+    }
+
+    @Test
+    public void getsPayoneApiUrl() {
+        when(propertyProvider.getProperty(PropertyProvider.PAYONE_API_URL)).thenReturn(Optional.of("http://he.re/we/go"));
+        assertThat(new PayoneConfig(propertyProvider).getApiUrl()).isEqualTo("http://he.re/we/go");
+    }
+
+    @Test
+    public void defaultsToPayoneUrlInCaseOfMissingApiUrl() {
+        when(propertyProvider.getProperty(PropertyProvider.PAYONE_API_URL)).thenReturn(Optional.empty());
+        assertThat(new PayoneConfig(propertyProvider).getApiUrl()).isEqualTo(PayoneConfig.DEFAULT_PAYONE_API_URL);
+    }
+
+    private void assertThatThrowsInCaseOfMissingOrEmptyProperty(final String propertyName) {
+        final IllegalStateException illegalStateException = new IllegalStateException();
+        when(propertyProvider.getMandatoryNonEmptyProperty(propertyName)).thenThrow(illegalStateException);
 
         final Throwable throwable = catchThrowable(() -> new PayoneConfig(propertyProvider));
 
-        assertThat(throwable)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Value of " + PropertyProvider.PAYONE_PORTAL_ID + " is required and can not be empty!");
-
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_PORTAL_ID)).thenReturn(Optional.of(dummyValue));
-
-        assertThat(new PayoneConfig(propertyProvider).getPortalId()).isEqualTo(dummyValue);
-    }
-
-    @Test
-    public void getMode() {
-        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of(dummyValue));
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_MODE)).thenReturn(Optional.empty());
-
-        assertThat(new PayoneConfig(propertyProvider).getMode()).isEqualTo(PayoneConfig.DEFAULT_PAYONE_MODE);
-
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_MODE)).thenReturn(Optional.of(dummyValue));
-
-        assertThat(new PayoneConfig(propertyProvider).getMode()).isEqualTo(dummyValue);
-    }
-
-    @Test
-    public void getApiVersion() {
-        Map<String, String> internalProperties = ImmutableMap.<String, String>builder()
-                .put(PropertyProvider.PAYONE_API_VERSION, "3.9")
-                .build();
-
-        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of(dummyValue));
-        when(propertyProvider.getInternalProperties()).thenReturn(internalProperties);
-        when(propertyProvider.createIllegalArgumentException(any())).thenCallRealMethod();
-
-        assertThat(new PayoneConfig(propertyProvider).getApiVersion()).isEqualTo("3.9");
-    }
-
-    @Test
-    public void getPayoneApiUrl() {
-        when(propertyProvider.getEnvironmentOrSystemValue(any())).thenReturn(Optional.of(dummyValue));
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_API_URL)).thenReturn(Optional.empty());
-
-        assertThat(new PayoneConfig(propertyProvider).getApiUrl()).isEqualTo(PayoneConfig.DEFAULT_PAYONE_API_URL);
-
-        when(propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.PAYONE_API_URL)).thenReturn(Optional.of(dummyValue));
-
-        assertThat(new PayoneConfig(propertyProvider).getApiUrl()).isEqualTo(dummyValue);
+        assertThat(throwable).isSameAs(illegalStateException);
     }
 }

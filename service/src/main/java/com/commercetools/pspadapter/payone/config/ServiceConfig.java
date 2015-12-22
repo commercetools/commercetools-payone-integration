@@ -13,29 +13,16 @@ public class ServiceConfig {
     private final PayoneConfig payoneConfig;
     private final boolean startFromScratch;
 
-    public ServiceConfig() {
-        this(new PropertyProvider());
-    }
-
     public ServiceConfig(final PropertyProvider propertyProvider) {
-        ctProjectKey = propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.CT_PROJECT_KEY)
-                .filter(s -> !s.isEmpty())
-                .orElseThrow(() -> propertyProvider.createIllegalArgumentException(PropertyProvider.CT_PROJECT_KEY));
-
-        ctClientId  = propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.CT_CLIENT_ID)
-                .filter(s -> !s.isEmpty())
-                .orElseThrow(() -> propertyProvider.createIllegalArgumentException(PropertyProvider.CT_CLIENT_ID));
-
-        ctClientSecret = propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.CT_CLIENT_SECRET)
-                .filter(s -> !s.isEmpty())
-                .orElseThrow(() -> propertyProvider.createIllegalArgumentException(PropertyProvider.CT_CLIENT_SECRET));
-
-        startFromScratch = Boolean.parseBoolean(
-                propertyProvider.getEnvironmentOrSystemValue(PropertyProvider.CT_START_FROM_SCRATCH)
-                        .filter(s -> !s.isEmpty())
-                        .orElse("false"));
-
+        // FIXME jw: pass PayoneConfig into constructor
         payoneConfig = new PayoneConfig(propertyProvider);
+
+        ctProjectKey = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY);
+        ctClientId  = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID);
+        ctClientSecret = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET);
+        startFromScratch = propertyProvider.getProperty(PropertyProvider.CT_START_FROM_SCRATCH)
+                .map(Boolean::valueOf)
+                .orElse(false);
     }
 
     public String getCtProjectKey() {
