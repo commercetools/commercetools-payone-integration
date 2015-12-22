@@ -30,22 +30,31 @@ BillSAFE has been deprecated by PAYONE and is not supported.
 ## TODO: ITEMS TO BE DISCUSSED
 
 With PAYONE:
-
- * TODO will negative line item amounts lead to failures? our custom line item can be used as a place to set discounts. 
- * TODO is addresscheck and paymentdatacheck free?  Would trigger it automatically. 
- * TODO when does `vauthorization` happen?  only on the Billing functionality?
- * TODO when does `vauthorization` happen?  only on the Billing functionality?
- * do we need to support `refund` txaction on notification if we trigger only debit and not refund? 
- * TODO when do we need the `managemandate` call?
- * TODO (probably already spoken about): which notify_versions can occur if we use the latest API version? only 7.5? 
+   
+ * TODO (probably already spoken about): which notify_versions can occur if we use the latest API version? only 7.5?
+   * -> klärt Hr. Kuchel intern. 
+   
  * clarify status. errormessage vs. failedcause vs. ...   -> what is the overall status? TODO PAYONE
+
  * Wie übersetzen wir price, receivable, balance in amountPaid. 
    * amountPaid = receivable minus balance? (TODO verify with PAYONE as there is no 1:1 example yet.), 
      Can be wrong if receivable = 0 e.g. in cash advance etc. 
      (Positive Balance heißt, dass der Händler noch Geld offen hat) 
  
  * concerning checkout documentation: what's the security feature of the hash? it's just done over the fields that are plaintext in the page and there is no secret in the hash, too. 
-  
+
+CT internal:
+ * How to optionally reference the refundItems in the Refund transaction?  There is no matching field and no way to extend the TX.  
+
+Feedback and PAYONE:
+ * es wäre extrem hilfreich, wenn die sequencenumber shcon in der response vom capture wäre und nicht erst in der notification. 
+ * ein Beispielablauf, der teilweise bezahlung zeigt (entweder bei vorkasse oder wenn dunning mit zahlung überlappt) wäre hilfreich fürs Verständnis. 
+ * doku zu best practices wäre auch hilfreich (z.B. themen wie refund vs. debit). 
+
+TODO NK:
+ * define the line items handling on refund calls. -> Link to refund in commercetools from payment resource. 
+ * spezifizieren, was passiert wenn kein payment zu notification gefunden. 
+ 
 ## PAYONE fields that map to custom CT Payment fields (by method)
 
 Please use the commercetools custom payment types (per method) from the [method type specifications](https://github.com/nkuehn/payment-integration-specifications/blob/master/Method-Keys.md) in the payment specifications project. 
@@ -179,14 +188,14 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
  *  All "traditional" bank account data fields (i.e. not IBAN and BIC) are omitted for Refund and Clearing Data Cases as 
     in these cases the Data is not put in manually by the end user. 
  * `updatereminder` when sumbitted to the PAYONE API.  We do not support manual dunning control. This has to be done per Project. 
+ * Billing-Module (`vauthorization`). 
 
 ### features that have no matching semantics directly in CTP, but can be added per project
 
-Techcnical Infrastructure is there, but not made public by default because that requires a stric security setup:
+Technical Infrastructure is there, but not made public by default because that requires a stric security setup:
  *  Payment Data Check (add  GET /commercetools/payments/1234-1234-1234-1234/paymentdatacheck  call to the Service's own API )
  *  Address Check ( add GET /commercetools/order/1234-1234-1234-1234/addresscheck  to the Service's own API ) 
  *  Consumer Scoring ( add GET /commercetools/customer/1234-1234-1234-1234/consumerscore to the Service's own API)
-  
   
 ## commercetools Payment resource mapping
 
@@ -304,6 +313,7 @@ Implementation Notes:
  * If the sum of sum of `pr[n]` times `no[n]` does not equal the total `amount` of the payment, do not pass the line item
    data at all. If the amount needs to be "fixed" to support PAYONE Invoicing or Klarna payment, this is up to the checkout
    implementation. 
+ * DO NOT transfer any line item data on `refund`  or `debit` calls. 
 
 | CT Cart or Order JSON path | PAYONE Server API | who is Master?  | Value transform |
 |---|---|---|---|
