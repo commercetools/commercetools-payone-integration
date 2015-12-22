@@ -73,7 +73,9 @@ All payment methods:
     * `iban` -> `IBAN` of type String (CT master)
     * `bic`  -> custom `BIC` (CT master)
   * SEPA specifics:
-    * `mandate_identification` -> `sepaMandateId` of type String (CT master)
+    * `mandate_identification` -> `sepaMandateId` of type String (CT / PAYONE master). If the checkout implementation finds an existing mandate ID for the Customer, 
+      it has to set it here. Otherwise the Payment Integraion will create a new one via a `managemandate` call and store it here. The payment integration servicer
+      will also automatically create a new mandate if the one given here turns out to be not valid. 
     * `mandate_dateofsignature` ->  `sepaMandateDate` of type Date  (PAYONE master)
   * traditional identification:
     * `bankcountry` -> `bankCountry`  (CT master)
