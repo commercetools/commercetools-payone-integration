@@ -24,9 +24,11 @@ import io.sphere.sdk.payments.commands.updateactions.SetAuthorization;
 import io.sphere.sdk.payments.commands.updateactions.SetInterfaceId;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
+import io.sphere.sdk.zones.Zone;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -71,6 +73,10 @@ public class AuthorizationTransactionExecutor implements IdempotentTransactionEx
     public PaymentWithCartLike retryLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction, CustomFields lastExecutionAttempt) {
         if (lastExecutionAttempt.getFieldAsDateTime(CustomTypeBuilder.TIMESTAMP_FIELD).isBefore(ZonedDateTime.now().minusMinutes(5))) {
             return attemptExecution(paymentWithCartLike, transaction);
+        }
+        else {
+            if (lastExecutionAttempt.getFieldAsDateTime(CustomTypeBuilder.TIMESTAMP_FIELD).isBefore(ZonedDateTime.now().minusMinutes(1)))
+                throw new ConcurrentModificationException();
         }
         return paymentWithCartLike;
     }

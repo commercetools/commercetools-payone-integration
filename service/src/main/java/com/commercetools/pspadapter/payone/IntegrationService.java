@@ -7,7 +7,10 @@ import com.commercetools.pspadapter.payone.domain.payone.PayoneNotificationServi
 import com.google.common.base.Strings;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import spark.Response;
 import spark.Spark;
+
+import java.util.ConcurrentModificationException;
 
 /**
  * @author fhaertig
@@ -49,11 +52,22 @@ public class IntegrationService {
                 try {
                     final PaymentWithCartLike result = dispatcher.dispatchPayment(payment);
                     resultProcessor.process(result, res);
+                } catch (final ConcurrentModificationException cme) {
+                    try {
+                        // TODO Better
+                        for (int i = 0; i < 10; i++) {
+                            Thread.sleep(100);
+                            final PaymentWithCartLike paymentWithCartLike = commercetoolsQueryExecutor.getPaymentWithCartLike(req.params("id"));
+                            if (paymentWithCartLike.getPayment().getVersion() > payment.getPayment().getVersion()) {
+                                resultProcessor.process(paymentWithCartLike, res);
+                                break;
+                            }
+                        }
+                    } catch (final Exception e) {
+                        logExceptionInResponse(res, e);
+                    }
                 } catch (final Exception e) {
-                    // TODO jw: we probably need to differentiate depending on the exception type
-                    res.status(500);
-                    res.type("text/plain; charset=utf-8");
-                    res.body(String.format("Sorry, but you hit us between the eyes. Cause: %s", e.getMessage()));
+                    logExceptionInResponse(res, e);
                 }
             } catch (final Exception e) {
                 // TODO jw: we probably need to differentiate depending on the exception type
@@ -72,6 +86,13 @@ public class IntegrationService {
         });
 
         Spark.awaitInitialization();
+    }
+
+    private void logExceptionInResponse(Response res, Exception e) {
+        // TODO jw: we probably need to differentiate depending on the exception type
+        res.status(500);
+        res.type("text/plain; charset=utf-8");
+        res.body(String.format("Sorry, but you hit us between the eyes. Cause: %s", e.getMessage()));
     }
 
     private void createCustomTypes() {
