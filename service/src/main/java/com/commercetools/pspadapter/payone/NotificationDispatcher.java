@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.domain.payone;
+package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 
@@ -7,10 +7,10 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
  * @date 17.12.15
  */
 public class NotificationDispatcher {
-    public void dispatchNotification(final Notification notification) {
+    public boolean dispatchNotification(final Notification notification) {
         switch (notification.getTxaction()) {
             case APPOINTED:
-                break;
+                return true;
             case CAPTURE:
                 break;
             case PAID:
@@ -29,6 +29,9 @@ public class NotificationDispatcher {
                 break;
             case INVOICE:
                 break;
+            default:
+                break;
         }
+        return false;
     }
 }

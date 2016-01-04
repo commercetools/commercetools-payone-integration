@@ -1,28 +1,23 @@
-package com.commercetools.pspadapter.payone.domain.payone;
+package com.commercetools.pspadapter.payone;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
+import com.google.common.base.Splitter;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import spark.Request;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author fhaertig
  * @date 17.12.15
  */
-@RunWith(MockitoJUnitRunner.class)
-public class PayoneNotificationServiceTest {
+public class NotificationTest {
 
-    @Mock
-    private Request request;
 
     // EXAMPLE:
     // Received POST from Payone: key=<...>&txaction=appointed&portalid=2022125&aid=<...>&clearingtype=cc
@@ -31,8 +26,7 @@ public class PayoneNotificationServiceTest {
     // &zip=&city=&email=&country=DE&cardexpiredate=1703&cardtype=V&cardpan=411111xxxxxx1111&transaction_status=completed&balance=0.00&receivable=0.00
 
     @Test
-    public void processPayoneAppointedNotification() throws IOException {
-        PayoneNotificationService notificationService = new PayoneNotificationService(new NotificationDispatcher());
+    public void deserializeValidNotification() throws IOException {
 
         String requestBody =
                 "key=123&" +
@@ -41,12 +35,13 @@ public class PayoneNotificationServiceTest {
                 "mode=test&" +
                 "portalid=000&" +
                 "aid=001&" +
+                "sequencenumber=1&" +
                 "clearingtype=cc&" +
-                "cardpan=1";
+                "cardpan=1&" +
+                "blabla=23";   //ignored parameter
 
-        when(request.body()).thenReturn(requestBody);
-
-        Notification notification = notificationService.receiveNotification(request);
+        Map<String, String> notificationValues = Splitter.onPattern("\r?\n?&").withKeyValueSeparator("=").split(requestBody);
+        Notification notification = Notification.fromStringMap(notificationValues);
 
         assertThat(notification.getKey()).isEqualTo("123");
         assertThat(notification.getTxaction()).isEqualTo(NotificationAction.APPOINTED);
@@ -55,7 +50,20 @@ public class PayoneNotificationServiceTest {
         assertThat(notification.getPortalid()).isEqualTo("000");
         assertThat(notification.getAid()).isEqualTo("001");
         assertThat(notification.getClearingtype()).isEqualTo("cc");
+        assertThat(notification.getSequencenumber()).isEqualTo("1");
+    }
 
-        //ignores cardpan as unknown
+    @Test
+    public void throwExceptionForEmptyParameter() throws IOException {
+
+        String requestBody =
+                "key=123&" +
+                "txaction=&" +
+                "blabla=23";
+
+        Map<String, String> notificationValues = Splitter.onPattern("\r?\n?&").withKeyValueSeparator("=").split(requestBody);
+
+        final Throwable noInterface = catchThrowable(() -> Notification.fromStringMap(notificationValues));
+        assertThat(noInterface).isInstanceOf(IllegalArgumentException.class);
     }
 }

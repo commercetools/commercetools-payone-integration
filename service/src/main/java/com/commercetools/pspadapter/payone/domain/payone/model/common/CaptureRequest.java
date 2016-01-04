@@ -10,7 +10,7 @@ public class CaptureRequest extends BaseRequest {
 
     private String txid;
 
-    private int sequencenumber;
+    private Integer sequencenumber;
 
     private int amount;
 
@@ -47,11 +47,11 @@ public class CaptureRequest extends BaseRequest {
         this.txid = txid;
     }
 
-    public int getSequencenumber() {
+    public Integer getSequencenumber() {
         return sequencenumber;
     }
 
-    public void setSequencenumber(final int sequencenumber) {
+    public void setSequencenumber(final Integer sequencenumber) {
         this.sequencenumber = sequencenumber;
     }
 

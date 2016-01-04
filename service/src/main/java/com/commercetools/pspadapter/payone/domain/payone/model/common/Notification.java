@@ -1,11 +1,13 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author fhaertig
@@ -50,9 +52,15 @@ public class Notification implements Serializable {
     private String accessid;
 
 
-    public static Notification fromJsonString(String jsonString) throws IOException {
+    public static Notification fromJsonString(final String jsonString) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(jsonString, Notification.class);
+    }
+
+    public static Notification fromStringMap(final Map<String, String> notificationValues) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        return mapper.convertValue(notificationValues, Notification.class);
     }
 
     //**************************************************************

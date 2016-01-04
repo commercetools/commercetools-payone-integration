@@ -3,11 +3,14 @@ package com.commercetools.pspadapter.payone;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.PayoneNotificationService;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import spark.Spark;
+
+import java.util.Map;
 
 /**
  * @author fhaertig
@@ -20,21 +23,21 @@ public class IntegrationService {
     public static final String HEROKU_ASSIGNED_PORT = "PORT";
 
     private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
-    private final PaymentDispatcher dispatcher;
+    private final PaymentDispatcher paymentDispatcher;
     private final CustomTypeBuilder typeBuilder;
-    private final PayoneNotificationService notificationService;
+    private final NotificationDispatcher notificationDispatcher;
     private final ResultProcessor resultProcessor;
 
     IntegrationService(
             final CustomTypeBuilder typeBuilder,
             final CommercetoolsQueryExecutor commercetoolsQueryExecutor,
-            final PaymentDispatcher dispatcher,
-            final PayoneNotificationService notificationService,
+            final PaymentDispatcher paymentDispatcher,
+            final NotificationDispatcher notificationDispatcher,
             final ResultProcessor resultProcessor) {
         this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
-        this.dispatcher = dispatcher;
+        this.paymentDispatcher = paymentDispatcher;
         this.typeBuilder = typeBuilder;
-        this.notificationService = notificationService;
+        this.notificationDispatcher = notificationDispatcher;
         this.resultProcessor = resultProcessor;
     }
 
@@ -47,7 +50,7 @@ public class IntegrationService {
             try {
                 final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(req.params("id"));
                 try {
-                    final PaymentWithCartLike result = dispatcher.dispatchPayment(payment);
+                    final PaymentWithCartLike result = paymentDispatcher.dispatchPayment(payment);
                     resultProcessor.process(result, res);
                 } catch (final Exception e) {
                     // TODO jw: we probably need to differentiate depending on the exception type
@@ -66,7 +69,10 @@ public class IntegrationService {
 
         Spark.post("/payone/notification", (req, res) -> {
             LOG.info("<- Received POST from Payone: " + req.body());
-            notificationService.receiveNotification(req);
+            Map<String, String> notificationValues = Splitter.onPattern("\r?\n?&").withKeyValueSeparator("=").split(req.body());
+            Notification notification = Notification.fromStringMap(notificationValues);
+
+            notificationDispatcher.dispatchNotification(notification);
             res.status(501);
             return "Currently not implemented";
         });
