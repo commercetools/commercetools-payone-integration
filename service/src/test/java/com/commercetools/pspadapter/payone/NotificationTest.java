@@ -6,11 +6,9 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
-import com.google.common.base.Splitter;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author fhaertig
@@ -40,8 +38,7 @@ public class NotificationTest {
                 "cardpan=1&" +
                 "blabla=23";   //ignored parameter
 
-        Map<String, String> notificationValues = Splitter.onPattern("\r?\n?&").withKeyValueSeparator("=").split(requestBody);
-        Notification notification = Notification.fromStringMap(notificationValues);
+        Notification notification = Notification.fromKeyValueString(requestBody, "\r?\n?&");
 
         assertThat(notification.getKey()).isEqualTo("123");
         assertThat(notification.getTxaction()).isEqualTo(NotificationAction.APPOINTED);
@@ -54,6 +51,17 @@ public class NotificationTest {
     }
 
     @Test
+    public void throwExceptionForInvalidNotification() throws IOException {
+
+        String requestBody =
+                "thisIsNotAValidNotificationString";
+
+        final Throwable noInterface = catchThrowable(() -> Notification.fromKeyValueString(requestBody, "\r?\n?&"));
+        assertThat(noInterface).isInstanceOf(IllegalArgumentException.class);
+        assertThat(noInterface).hasMessageEndingWith("is not a valid entry");
+    }
+
+    @Test
     public void throwExceptionForEmptyParameter() throws IOException {
 
         String requestBody =
@@ -61,9 +69,7 @@ public class NotificationTest {
                 "txaction=&" +
                 "blabla=23";
 
-        Map<String, String> notificationValues = Splitter.onPattern("\r?\n?&").withKeyValueSeparator("=").split(requestBody);
-
-        final Throwable noInterface = catchThrowable(() -> Notification.fromStringMap(notificationValues));
+        final Throwable noInterface = catchThrowable(() -> Notification.fromKeyValueString(requestBody, "\r?\n?&"));
         assertThat(noInterface).isInstanceOf(IllegalArgumentException.class);
     }
 }

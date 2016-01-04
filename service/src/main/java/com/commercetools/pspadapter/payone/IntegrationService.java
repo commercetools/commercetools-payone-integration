@@ -4,13 +4,10 @@ import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import spark.Spark;
-
-import java.util.Map;
 
 /**
  * @author fhaertig
@@ -69,8 +66,7 @@ public class IntegrationService {
 
         Spark.post("/payone/notification", (req, res) -> {
             LOG.info("<- Received POST from Payone: " + req.body());
-            Map<String, String> notificationValues = Splitter.onPattern("\r?\n?&").withKeyValueSeparator("=").split(req.body());
-            Notification notification = Notification.fromStringMap(notificationValues);
+            Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
 
             notificationDispatcher.dispatchNotification(notification);
             res.status(501);

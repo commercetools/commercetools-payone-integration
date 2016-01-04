@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Splitter;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -52,12 +52,10 @@ public class Notification implements Serializable {
     private String accessid;
 
 
-    public static Notification fromJsonString(final String jsonString) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(jsonString, Notification.class);
-    }
+    public static Notification fromKeyValueString(final String keyValueString, final String separatorPattern) {
 
-    public static Notification fromStringMap(final Map<String, String> notificationValues) {
+        Map<String, String> notificationValues = Splitter.onPattern(separatorPattern).withKeyValueSeparator("=").split(keyValueString);
+
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return mapper.convertValue(notificationValues, Notification.class);
