@@ -18,7 +18,7 @@ public class PaymentTestHelper {
         return SphereJsonUtils.readObject(IOUtils.toString(dummyPaymentJson), Payment.typeReference());
     }
 
-    public Order getOrderFromFile(String filePath) throws IOException {
+    private Order getOrderFromFile(String filePath) throws IOException {
         final InputStream dummyPaymentJson = getJsonFromFile(filePath);
         return SphereJsonUtils.readObject(IOUtils.toString(dummyPaymentJson), Order.typeReference());
     }
@@ -37,10 +37,6 @@ public class PaymentTestHelper {
 
     public Payment dummyPaymentTwoTransactionsPending() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsPending.json");
-    }
-
-    public Payment dummyPaymentCreatedMessage() throws Exception {
-        return getPaymentFromFile("dummyPaymentCreatedMessage.json");
     }
 
     public Payment dummyPaymentTwoTransactionsSuccessPending() throws Exception {
