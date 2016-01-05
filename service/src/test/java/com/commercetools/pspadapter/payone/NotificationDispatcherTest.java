@@ -38,7 +38,9 @@ public class NotificationDispatcherTest {
 
             @Override
             public boolean processTransactionStatusNotification(final Notification notification, final Payment payment) {
-                if (notification.getTxid().equals(payment.getInterfaceId())) {
+                if (notification.getTxid().equals(payment.getInterfaceId())
+                        && payment.getPaymentMethodInfo().getPaymentInterface().equals("PAYONE")
+                        && notification.getTxaction().equals(NotificationAction.APPOINTED)) {
                     count++;
                     return true;
                 }
