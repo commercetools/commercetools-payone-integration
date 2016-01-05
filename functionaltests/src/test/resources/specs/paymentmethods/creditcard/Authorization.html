@@ -30,34 +30,39 @@
         <div class="example">
             <h3>Authorization (without 3-D Secure)</h3>
             <p>
-                Given the following payments for a credit card that does not support charges for currencies other than
-                EUR:
+                Given the following payments for
+                <em>a credit card that does <b>not</b> support charges for currencies other than EUR</em>:
             </p>
-            <table c:execute="createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
+            <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
                 <tr>
                     <th c:set="#paymentName">Payment Name</th>
                     <th c:set="#centAmount">Cent Amount</th>
                     <th c:set="#currencyCode">Currency Code</th>
+                    <th c:echo="#paymentId">Payment ID (for information only)</th>
                 </tr>
                 <tr>
                     <td>Payment 1</td>
                     <td>2000</td>
                     <td>EUR</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>Payment 2</td>
                     <td>123498</td>
                     <td>USD</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>Payment 3</td>
                     <td>4711</td>
                     <td>EUR</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>Payment 4</td>
                     <td>270713</td>
                     <td>EUR</td>
+                    <td></td>
                 </tr>
             </table>
             <p>
@@ -70,6 +75,7 @@
                     <th c:assertEquals="#result.interactionCount">total # of <em>preauthorization</em> requests sent</th>
                     <th c:assertEquals="#result.transactionState">Transaction State</th>
                     <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
+                    <th c:echo="#result.version">Version (for information only)</th>
                 </tr>
                 <tr>
                     <td>Payment 1</td>
@@ -77,12 +83,14 @@
                     <td>1</td>
                     <td>Success</td>
                     <td>20,00 EUR</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>Payment 2</td>
                     <td>200</td>
                     <td>1</td>
                     <td>Failure</td>
+                    <td></td>
                     <td></td>
                 </tr>
                 <tr>
@@ -91,6 +99,7 @@
                     <td>1</td>
                     <td>Success</td>
                     <td>47,11 EUR</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>Payment 4</td>
@@ -98,6 +107,7 @@
                     <td>1</td>
                     <td>Success</td>
                     <td>2.707,13 EUR</td>
+                    <td></td>
                 </tr>
             </table>
             <p>
@@ -112,6 +122,7 @@
                     <th c:assertEquals="#result.interactionCount">total # of <em>preauthorization</em> requests sent</th>
                     <th c:assertEquals="#result.transactionState">Transaction State</th>
                     <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
+                    <th c:echo="#result.version">Version (for information only)</th>
                 </tr>
                 <tr>
                     <td>Payment 1</td>
@@ -119,12 +130,14 @@
                     <td>1</td>
                     <td>Success</td>
                     <td>20,00 EUR</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>Payment 2</td>
                     <td>200</td>
                     <td>1</td>
                     <td>Failure</td>
+                    <td></td>
                     <td></td>
                 </tr>
                 <tr>
@@ -133,6 +146,7 @@
                     <td>1</td>
                     <td>Success</td>
                     <td>47,11 EUR</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>Payment 4</td>
@@ -140,6 +154,7 @@
                     <td>1</td>
                     <td>Success</td>
                     <td>2.707,13 EUR</td>
+                    <td></td>
                 </tr>
             </table>
         </div>
