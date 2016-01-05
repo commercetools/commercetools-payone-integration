@@ -1,6 +1,6 @@
 # commercetools <-> PAYONE Integration Service
 
-[![Build Status](https://travis-ci.com/sphereio/commercetools-payone-integration.svg?token=BGS8vSNxuriRBqs9Ffzs&branch=master)](https://travis-ci.com/sphereio/commercetools-payone-integration)
+[![Build Status](https://travis-ci.com/commercetools/commercetools-payone-integration.svg?token=BGS8vSNxuriRBqs9Ffzs&branch=master)](https://travis-ci.com/commercetools/commercetools-payone-integration)
 
 This software provides an integration between the [commercetools eCommerce platform](http://dev.sphere.io) API
 and the [PAYONE](http://www.payone.de) payment service provider API. 
@@ -96,4 +96,4 @@ Please bear in mind that this repository should be free of any IDE specific file
 
 ## Create a custom version
 
-Just fork it. The MIT License allows you to do anything with the code, commercially or noncommercial.
+Just fork it. The MIT License allows you to do anything with the code, commercially or noncommercial. :)
