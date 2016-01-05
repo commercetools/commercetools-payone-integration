@@ -215,22 +215,22 @@ Technical Infrastructure is there, but not made public by default because that r
 | amountPlanned.currency | - | CT |  |
 | amountAuthorized.centAmount | `amount` | CT / PAYONE | ONLY on CREDIT_CARD payments: Once the Authorization Transaction is in status "Success", copy the amount here.  |
 | authorizedUntil | `txtime` plus seven days | PAYONE | seven days after the txtime value of the `preauthorization` call (not of other transactions!) |
-| amountPaid.centAmount | `receivable` minus `balance` | PAYONE | TODO wait for answer from PAYONE |
+| amountPaid.centAmount | `receivable` minus `balance` | PAYONE | only if both parameters available |
 | amountRefunded.centAmount | (from transactions) | PAYONE | (Sum of successful Refund Transactions) |
 | paymentMethodInfo.paymentInterface | - | CT | Must be "PAYONE" in CT, otherwise do not handle the Payment at all |
 | paymentMethodInfo.method | - | CT | (see the method mapping table above) |
 | paymentMethodInfo.name.{locale} | - | - | (not passed, project specific content) |
-| paymentStatus.interfaceCode | `status` ?? TODO rather `txaction` & `transaction_status` from notifications, too? | PAYONE | none |
-| paymentStatus.interfaceText | if set (on errors and invalid calls),  `errorcode` followed by a space and the  `errormessage`| PAYONE | none |
+| paymentStatus.interfaceCode | `status [errorcode (errormessage)]` f.i. "ERROR 917 (Refund limit exceeded)" or "APPROVED" | PAYONE | none |
+| paymentStatus.interfaceText | `customermessage` if available else `status` | PAYONE | none |
 | paymentStatus.state | - | - | (mapping from interfaceCode and transaction states to the Payment State Machine is project specific) |
 | transactions\[\*\].id | - | CT (cannot be changed) |  |
-| transactions\[\*\].timestamp | `txtime` | PAYONE | (from status notification) |
+| transactions\[\*\].timestamp | `txtime` | PAYONE (from status notification) | |
 | transactions\[\*\].type |  |  | (see below for transaction types) |
 | transactions\[\*\].amount.centAmount | `amount` | CT | none |
 | transactions\[\*\].amount.centAmount | `capturemode` = `notcompleted` or `completed` | CT | ONLY on Charge Transactions. If the sum of Charge Transactions icluding the current one equals or exceeds the `amountPlanned` of the payment, then send `completed`, otherwise `notcompleted` Only required for Klarna payment methods.  |
 | transactions\[\*\].amount.currency | `currency` | CT | none, but must not deviate from amountPlanned.centAmount |
 | transactions\[\*\].interactionId | `sequencenumber` | CT / PAYONE | There can be only one CT Authorization transaction. This must be the first and gets the sequencenumber 0. All following Charge, CancelAuthorization and Refund transactions count up from the last sequence number received in the last TransactionStatus Notification call from PAYONE (stored in the Interactions Array). *To be set when doing the PAYONE call, not already when creating the Transaction*.  |
-| transactions\[\*\].state | - | - | (see below for transaction states) |
+| transactions\[\*\].state | - | CT / PAYONE | (see below for transaction states) |
 
 See below for the custom fields. 
 
@@ -259,30 +259,21 @@ It could remain in `Pending` for various reasons.
  2. In none matches, *create one* (checkout error situation).  
    * If an *Order* with CT orderNumber = PAYONE `reference` is found, reference the payment from that
    * If a *Customer*  with CT customerNumber = PAYONE `customerid` is found, reference that customer from the payment. 
- 3. Add the raw TransactionStatus information as a new Interaction Object to the Payment (and persist)
+ 3. Immediately apply the logic defined in the following section
+ 4. Add the raw TransactionStatus information as a new Interaction Object to the Payment and update (persist) the other fields (from step 3) 
  
-The Logic defined in the following section can happen asynchroniously on the "new Interaction added" Message with the exception
-of TransactionStatus Calls that happen during a redirect. The latter have to be processed immediately so the purchase
-confirmation page already has the "official" result of the redirect. 
 In any case, the "TSOK" response should be sent back to PAYONE as soon as the Interaction has successfully been stored in 
 commercetools (200 on the update request), but not earlier. 
 
 > Important note: TransactionStatus Calls are coming asynchronously at no guaranteed time, but _only_ during the redirect
-  flow a TransactionStatus is guaranteed to be done when the buyer is redirected back to the chekcout. 
+  flow a TransactionStatus is guaranteed to be done when the buyer is redirected back to the checkout. 
   
 ### updating the CT Payment given a PAYONE TransactionStatus Notification (Stored in an Interaction)
 
 See chapter 4.2.1 "List of events (txaction)" and the sample processes in the PAYONE documentation
 
-The matching transaction is found by sequencenumber = interactionId
-
-[FH] PAYONE docu says that "you will receive the data and the status for each payment process". 
-     So maybe this table should incooperate also the CT PaymentState?
-> NK @FH: The PaymentState is an open field 
-
-[FH] transaction_status seems to be only available with txaction "appointed" for now. 
-> NK @FH: yes. And they announce that more may follow (e.g. on "paid" and "debit"). So I propose to interpret transactio_status
-  not set as `completed` and expect a `pending` anytime (has effect only if our tx would otherwise move to "Success" or "Failure") 
+The matching transaction is found by sequencenumber = interactionId.
+> Please note, that in case of cancelation notification of an PAYONE authorization, the sequencenumber of the CT Chargeback can collide with the sequencenumber of the initial CT Charge (w/o CT Authorization) transaction.
 
 | PAYONE `txaction` | PAYONE `transaction_status` | PAYONE `notify_version` | CT `TransactionType` | CT `TransactionState` | Notes |
 |---|---|---|---|---|---|
@@ -301,6 +292,11 @@ The matching transaction is found by sequencenumber = interactionId
 | `vsettlement` | not set or `completed` | `7.5` | (unsupported) | (unsupported) | only available with PAYONE Billing module, must be activated |
 | `invoice` | not set or `completed` | `7.5` | (nothing) | (nothing) | no status change, just write the invoice ID / URL |
 | `failed` | not set or `completed` | `7.5` | (unsupported)  | (unsupported) | (not fully implemented at PAYONE yet) |
+
+
+Additional fields to be updated in any case:
+ * amountPaid
+ * amountRefunded
 
 ## commercetools Cart and Order object (mapping to payment interface on payment creation)
 
