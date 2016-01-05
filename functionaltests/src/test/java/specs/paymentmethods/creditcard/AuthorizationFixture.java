@@ -115,12 +115,13 @@ public class AuthorizationFixture extends BaseFixture {
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
                 BaseFixture.EMPTY_STRING;
 
-        return ImmutableMap.of(
-                "statusCode", Integer.toString(response.getStatusLine().getStatusCode()),
-                "interactionCount", getInterfaceInteractionCount(payment, transactionId, interactionTypeName, requestType),
-                "transactionState", getTransactionState(payment, transactionId),
-//                "version", Long.toString(payment.getVersion()),
-                "amountAuthorized", amountAuthorized);
+        return ImmutableMap.<String, String> builder()
+                .put("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
+                .put("interactionCount", getInterfaceInteractionCount(payment, transactionId, interactionTypeName, requestType))
+                .put("transactionState", getTransactionState(payment, transactionId))
+                .put("version", Long.toString(payment.getVersion()))
+                .put("amountAuthorized", amountAuthorized)
+                .build();
     }
 
     private String getInterfaceInteractionCount(final Payment payment,
