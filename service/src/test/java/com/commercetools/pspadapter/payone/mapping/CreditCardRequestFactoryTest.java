@@ -1,6 +1,5 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -17,6 +16,7 @@ import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.javamoney.moneta.function.MonetaryUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,46 +70,47 @@ public class CreditCardRequestFactoryTest {
         Order order = payments.dummyOrderMapToPayoneRequest();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         CreditCardPreauthorizationRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
+        SoftAssertions softly = new SoftAssertions();
 
         //base values
-        assertThat(result.getRequest()).isEqualTo(RequestType.PREAUTHORIZATION.getType());
-        assertThat(result.getAid()).isEqualTo(config.getSubAccountId());
-        assertThat(result.getMid()).isEqualTo(config.getMerchantId());
-        assertThat(result.getPortalid()).isEqualTo(config.getPortalId());
-        assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
-        assertThat(result.getMode()).isEqualTo(config.getMode());
-        assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
+        softly.assertThat(result.getRequest()).isEqualTo(RequestType.PREAUTHORIZATION.getType());
+        softly.assertThat(result.getAid()).isEqualTo(config.getSubAccountId());
+        softly.assertThat(result.getMid()).isEqualTo(config.getMerchantId());
+        softly.assertThat(result.getPortalid()).isEqualTo(config.getPortalId());
+        softly.assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
+        softly.assertThat(result.getMode()).isEqualTo(config.getMode());
+        softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
 
         //clearing type
         String clearingType = ClearingType.getClearingTypeByKey(payment.getPaymentMethodInfo().getMethod()).getPayoneCode();
-        assertThat(result.getClearingtype()).isEqualTo(clearingType);
+        softly.assertThat(result.getClearingtype()).isEqualTo(clearingType);
 
         //references
-        assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber().get());
-        assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
+        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber().get());
+        softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
 
         //monetary
-        assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
-        assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
+        softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
+        softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
         //3d secure
-        assertThat(result.getEcommercemode()).isEqualTo(payment.getCustom().getFieldAsBoolean(CustomFieldKeys.FORCE3DSECURE_KEY));
+        softly.assertThat(result.getEcommercemode()).isEqualTo(payment.getCustom().getFieldAsBoolean(CustomFieldKeys.FORCE3DSECURE_KEY));
 
         //address data
         Address billingAddress = order.getBillingAddress();
-        assertThat(result.getTitle()).isEqualTo(billingAddress.getTitle());
-        assertThat(result.getSalutation()).isEqualTo(billingAddress.getSalutation());
-        assertThat(result.getFirstname()).isEqualTo(billingAddress.getFirstName());
-        assertThat(result.getLastname()).isEqualTo(billingAddress.getLastName());
-        assertThat(result.getBirthday()).isEqualTo(payment.getCustomer().getObj().getDateOfBirth().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-        assertThat(result.getCompany()).isEqualTo(billingAddress.getCompany());
-        assertThat(result.getStreet()).isEqualTo(billingAddress.getStreetName() + " " + billingAddress.getStreetNumber());
-        assertThat(result.getAddressaddition()).isEqualTo(billingAddress.getAdditionalStreetInfo());
-        assertThat(result.getCity()).isEqualTo(billingAddress.getCity());
-        assertThat(result.getZip()).isEqualTo(order.getBillingAddress().getPostalCode());
-        assertThat(result.getCountry()).isEqualTo(order.getBillingAddress().getCountry().toLocale().getCountry());
-        assertThat(result.getEmail()).isEqualTo(order.getBillingAddress().getEmail());
-        assertThat(result.getTelephonenumber()).isEqualTo(Optional
+        softly.assertThat(result.getTitle()).isEqualTo(billingAddress.getTitle());
+        softly.assertThat(result.getSalutation()).isEqualTo(billingAddress.getSalutation());
+        softly.assertThat(result.getFirstname()).isEqualTo(billingAddress.getFirstName());
+        softly.assertThat(result.getLastname()).isEqualTo(billingAddress.getLastName());
+        softly.assertThat(result.getBirthday()).isEqualTo(payment.getCustomer().getObj().getDateOfBirth().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+        softly.assertThat(result.getCompany()).isEqualTo(billingAddress.getCompany());
+        softly.assertThat(result.getStreet()).isEqualTo(billingAddress.getStreetName() + " " + billingAddress.getStreetNumber());
+        softly.assertThat(result.getAddressaddition()).isEqualTo(billingAddress.getAdditionalStreetInfo());
+        softly.assertThat(result.getCity()).isEqualTo(billingAddress.getCity());
+        softly.assertThat(result.getZip()).isEqualTo(order.getBillingAddress().getPostalCode());
+        softly.assertThat(result.getCountry()).isEqualTo(order.getBillingAddress().getCountry().toLocale().getCountry());
+        softly.assertThat(result.getEmail()).isEqualTo(order.getBillingAddress().getEmail());
+        softly.assertThat(result.getTelephonenumber()).isEqualTo(Optional
                 .ofNullable(billingAddress.getPhone())
                 .orElse(billingAddress.getMobile()));
 
@@ -118,7 +119,7 @@ public class CreditCardRequestFactoryTest {
         //billingAddress.state
         //shippingAddress
 
-
+        softly.assertAll();
     }
 
     @Test
@@ -128,21 +129,24 @@ public class CreditCardRequestFactoryTest {
         Order order = payments.dummyOrderMapToPayoneRequest();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         CreditCardCaptureRequest result = factory.createCaptureRequest(paymentWithCartLike, payment.getTransactions().get(0));
+        SoftAssertions softly = new SoftAssertions();
 
         //base values
-        assertThat(result.getRequest()).isEqualTo(RequestType.CAPTURE.getType());
-        assertThat(result.getMid()).isEqualTo(config.getMerchantId());
-        assertThat(result.getPortalid()).isEqualTo(config.getPortalId());
-        assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
-        assertThat(result.getMode()).isEqualTo(config.getMode());
-        assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
+        softly.assertThat(result.getRequest()).isEqualTo(RequestType.CAPTURE.getType());
+        softly.assertThat(result.getMid()).isEqualTo(config.getMerchantId());
+        softly.assertThat(result.getPortalid()).isEqualTo(config.getPortalId());
+        softly.assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
+        softly.assertThat(result.getMode()).isEqualTo(config.getMode());
+        softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
 
         //monetary
-        assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountAuthorized()).intValue());
-        assertThat(result.getCurrency()).isEqualTo(payment.getAmountAuthorized().getCurrency().getCurrencyCode());
+        softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountAuthorized()).intValue());
+        softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountAuthorized().getCurrency().getCurrencyCode());
 
-        assertThat(result.getTxid()).isEqualTo(payment.getInterfaceId());
-        assertThat(result.getSequencenumber()).isEqualTo(Integer.valueOf(payment.getTransactions().get(0).getInteractionId()));
+        softly.assertThat(result.getTxid()).isEqualTo(payment.getInterfaceId());
+        softly.assertThat(result.getSequencenumber()).isEqualTo(Integer.valueOf(payment.getTransactions().get(0).getInteractionId()));
+
+        softly.assertAll();
     }
 
 

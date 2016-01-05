@@ -1,11 +1,9 @@
-package com.commercetools.pspadapter.payone;
+package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -40,14 +38,17 @@ public class NotificationTest {
 
         Notification notification = Notification.fromKeyValueString(requestBody, "\r?\n?&");
 
-        assertThat(notification.getKey()).isEqualTo("123");
-        assertThat(notification.getTxaction()).isEqualTo(NotificationAction.APPOINTED);
-        assertThat(notification.getTransactionStatus()).isEqualTo(TransactionStatus.COMPLETED);
-        assertThat(notification.getMode()).isEqualTo("test");
-        assertThat(notification.getPortalid()).isEqualTo("000");
-        assertThat(notification.getAid()).isEqualTo("001");
-        assertThat(notification.getClearingtype()).isEqualTo("cc");
-        assertThat(notification.getSequencenumber()).isEqualTo("1");
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(notification.getKey()).isEqualTo("123");
+        softly.assertThat(notification.getTxaction()).isEqualTo(NotificationAction.APPOINTED);
+        softly.assertThat(notification.getTransactionStatus()).isEqualTo(TransactionStatus.COMPLETED);
+        softly.assertThat(notification.getMode()).isEqualTo("test");
+        softly.assertThat(notification.getPortalid()).isEqualTo("000");
+        softly.assertThat(notification.getAid()).isEqualTo("001");
+        softly.assertThat(notification.getClearingtype()).isEqualTo("cc");
+        softly.assertThat(notification.getSequencenumber()).isEqualTo("1");
+
+        softly.assertAll();
     }
 
     @Test
