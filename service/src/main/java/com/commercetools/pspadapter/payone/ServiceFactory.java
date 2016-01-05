@@ -17,6 +17,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.creditcard.
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.creditcard.ChargeTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.google.common.cache.CacheBuilder;
@@ -74,10 +75,13 @@ public class ServiceFactory {
                 typeCache,
                 serviceConfig.getPayoneConfig(),
                 commercetoolsClient);
+        final NotificationDispatcher notificationDispatcher = ServiceFactory.createNotificationDispatcher(
+                commercetoolsClient);
 
         final IntegrationService integrationService = ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(commercetoolsClient),
                 paymentDispatcher,
+                notificationDispatcher,
                 new CustomTypeBuilder(
                         commercetoolsClient,
                         CustomTypeBuilder.PermissionToStartFromScratch.fromBoolean(
@@ -99,17 +103,20 @@ public class ServiceFactory {
         return ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(client),
                 createPaymentDispatcher(typeCache, config.getPayoneConfig(), client),
+                createNotificationDispatcher(client),
                 new CustomTypeBuilder(
                         client,
                         CustomTypeBuilder.PermissionToStartFromScratch.fromBoolean(config.getStartFromScratch())));
     }
 
+
     private static IntegrationService createService(
             final CommercetoolsQueryExecutor queryExecutor,
             final PaymentDispatcher paymentDispatcher,
+            final NotificationDispatcher notificationDispatcher,
             final CustomTypeBuilder customTypeBuilder) {
         // TODO jw: use actual result processor
-        return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, new NotificationDispatcher(), new ResultProcessor() {
+        return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, notificationDispatcher, new ResultProcessor() {
             @Override
             public void process(final PaymentWithCartLike paymentWithCartLike, final Response response) {
                 response.status(200);
@@ -119,6 +126,14 @@ public class ServiceFactory {
 
     public LoadingCache<String, Type> createTypeCache(final BlockingClient client) {
         return CacheBuilder.newBuilder().build(new TypeCacheLoader(client));
+    }
+
+    public static NotificationDispatcher createNotificationDispatcher(final CommercetoolsClient client) {
+        //TODO fh: use actual NotificationProcessor implementation
+        NotificationProcessor defaultNotificationProcessor = (notification, payment) -> false;
+
+        final ImmutableMap<NotificationAction, NotificationProcessor> notificationProcessorMap = ImmutableMap.of();
+        return new NotificationDispatcher(defaultNotificationProcessor, notificationProcessorMap, client);
     }
 
     public static PaymentDispatcher createPaymentDispatcher(final LoadingCache<String, Type> typeCache, final PayoneConfig config, final CommercetoolsClient client) {

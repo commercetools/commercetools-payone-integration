@@ -35,7 +35,7 @@ public class CommercetoolsQueryExecutor {
         this.client = client;
     }
 
-    public PaymentWithCartLike getPaymentWithCartLike(String paymentId) {
+    public PaymentWithCartLike getPaymentWithCartLike(final String paymentId) {
         final CompletionStage<Payment> payment = client.execute(PaymentByIdGet.of(paymentId));
         return getPaymentWithCartLike(paymentId, payment);
     }
@@ -106,4 +106,5 @@ public class CommercetoolsQueryExecutor {
             total = result.getTotal();
         } while (processed < total);
     }
+
 }

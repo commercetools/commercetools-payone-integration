@@ -3,6 +3,8 @@ package util;
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.queries.PaymentQuery;
+import io.sphere.sdk.queries.PagedQueryResult;
 import spark.utils.IOUtils;
 
 import java.io.IOException;
@@ -21,6 +23,11 @@ public class PaymentTestHelper {
     private Order getOrderFromFile(String filePath) throws IOException {
         final InputStream dummyPaymentJson = getJsonFromFile(filePath);
         return SphereJsonUtils.readObject(IOUtils.toString(dummyPaymentJson), Order.typeReference());
+    }
+
+    public PagedQueryResult<Payment> getPaymentQueryResultFromFile(String filePath) throws IOException {
+        final InputStream dummyPaymentJson = getJsonFromFile(filePath);
+        return SphereJsonUtils.readObject(IOUtils.toString(dummyPaymentJson), PaymentQuery.resultTypeReference());
     }
 
     public Payment dummyPaymentOneAuthPending20Euro() throws Exception {
