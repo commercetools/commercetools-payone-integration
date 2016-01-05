@@ -1,5 +1,9 @@
 package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
 
+/**
+ * This file is generated from Method-Keys.md. Do not edit!
+ * See https://github.com/nkuehn/payment-integration-specifications/tree/scala-tools
+ */
 public class MethodKeys {
 
     /**
@@ -60,42 +64,6 @@ public class MethodKeys {
      * Generic Key for any type of Credit Card (recommended, implementation will autodetect specific variant)
      */
     public static final String CREDIT_CARD = "CREDIT_CARD";
-
-    /**
-     * (two dashes!) Credit Card with explicit whish for 3Dsecure check
-     * Will autodetect the card network, but force 3Dsecure check redirect
-     */
-    public static final String CREDIT_CARD__3DSECURE = "CREDIT_CARD--3DSECURE";
-
-    /**
-     * In case explicit restriction to MasterCard is intended
-     */
-    public static final String CREDIT_CARD_MASTERCARD = "CREDIT_CARD-MASTERCARD";
-
-    /**
-     * 3Dsecure of MasterCard
-     */
-    public static final String CREDIT_CARD_MASTERCARD_SECURECODE = "CREDIT_CARD-MASTERCARD-SECURECODE";
-
-    public static final String CREDIT_CARD_VISA = "CREDIT_CARD-VISA";
-
-    /**
-     * 3Dsecure of VISA
-     */
-    public static final String CREDIT_CARD_VISA_VERIFIED_BY_VISA = "CREDIT_CARD-VISA-VERIFIED_BY_VISA";
-
-    public static final String CREDIT_CARD_AMERICAN_EXPRESS = "CREDIT_CARD-AMERICAN_EXPRESS";
-
-    /**
-     * 3Dsecure of Amex
-     */
-    public static final String CREDIT_CARD_AMERICAN_EXPRESS_SAFE_KEY = "CREDIT_CARD-AMERICAN_EXPRESS-SAFE_KEY";
-
-    public static final String CREDIT_CARD_DINERS_CLUB = "CREDIT_CARD-DINERS_CLUB";
-
-    public static final String CREDIT_CARD_DISCOVER = "CREDIT_CARD-DISCOVER";
-
-    public static final String CREDIT_CARD_JCB = "CREDIT_CARD-JCB";
 
     /**
      * (probably never directly used)
@@ -167,4 +135,39 @@ public class MethodKeys {
      */
     public static final String BANK_TRANSFER_POSTFINANCE_CARD = "BANK_TRANSFER-POSTFINANCE_CARD";
 
+    /**
+     * (two dashes!) Credit Card with explicit whish for 3Dsecure check
+     * Will autodetect the card network, but force 3Dsecure check redirect
+     */
+    public static final String CREDIT_CARD__3DSECURE = "CREDIT_CARD--3DSECURE";
+
+    /**
+     * In case explicit restriction to MasterCard is intended
+     */
+    public static final String CREDIT_CARD_MASTERCARD = "CREDIT_CARD-MASTERCARD";
+
+    /**
+     * 3Dsecure of MasterCard
+     */
+    public static final String CREDIT_CARD_MASTERCARD_SECURECODE = "CREDIT_CARD-MASTERCARD-SECURECODE";
+
+    public static final String CREDIT_CARD_VISA = "CREDIT_CARD-VISA";
+
+    /**
+     * 3Dsecure of VISA
+     */
+    public static final String CREDIT_CARD_VISA_VERIFIED_BY_VISA = "CREDIT_CARD-VISA-VERIFIED_BY_VISA";
+
+    public static final String CREDIT_CARD_AMERICAN_EXPRESS = "CREDIT_CARD-AMERICAN_EXPRESS";
+
+    /**
+     * 3Dsecure of Amex
+     */
+    public static final String CREDIT_CARD_AMERICAN_EXPRESS_SAFE_KEY = "CREDIT_CARD-AMERICAN_EXPRESS-SAFE_KEY";
+
+    public static final String CREDIT_CARD_DINERS_CLUB = "CREDIT_CARD-DINERS_CLUB";
+
+    public static final String CREDIT_CARD_DISCOVER = "CREDIT_CARD-DISCOVER";
+
+    public static final String CREDIT_CARD_JCB = "CREDIT_CARD-JCB";
 }

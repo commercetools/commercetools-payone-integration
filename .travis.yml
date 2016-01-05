@@ -16,5 +16,20 @@ env:
   global:
     secure: cZ0FItWJEGTacfRoYy+Rh9y0QYQEOY3praKn/yLFoj8UdIYBUIZQyK2mDNBOck9EGCK1qt4cTTYpPE28xrmaRdClNg0WHnMwX/8qcyHghaMxnN0YDxYmQLPbfd/fK/D1fmbdB/2PF3GfEUNLBaMjh5t674ocIfyEDFGJN5b8ADizbfgwbE7Xw2PmLjNl5sEh3g77c4P++DxTjSm06NpbBNahv+SE2gMfU80WBaEG8Yo5mFhuQqu5j+cb5EZXT9ndKRpB8hhXVghIRpEeuv0tSJKVvtv3/chsXMC00zAM41V0MXO9Rfjr4fIzJg7hK6Q+Jb/d5RZBJODqzhKlLQo9fw3f8RWteFMn9SvvrA7dfytacLsSCFJU/+mg7Z1WV6rywa119nusQV7Y07KY9z6Z4jUBgYwjPVkESMDH2OOegqbUgQQMCrxZggVqEH1DecwZrgAMxL66XUVb/2pzcqen93Ti3IzhFPTHKtkvnF/OQ0sLxme5xu7yYSH7hFPYG75CGG4HRknr9HuMhE/A5Esgf+prYSiAix6NFmSPczKGMBxG3Mh3sJHl7DvMaDfCbArZUWC3Id6wy5A40dBdDZ9p7q7cLz2yduPrfzggKeX7g/WzpHr+7H9CrGcDfE/JeN+rio2BSzzrft6oqBBDxyedznW05dxSbFKxYv+VqSU/Yco=
 
-after_success:
-  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && ./gradlew publishGhPages
+# skip the default install step which would call ./gradlew assemble
+install: /bin/true
+
+script:
+  - ./gradlew clean ciBuild
+
+deploy:
+  provider: heroku
+  api_key:
+    secure: Nr8wB7M7gGyVis86Lt5yrBRYg1U+hv4x4kP5yGG46G957ewU63qWto9//AOSiAtsJ6PKb6Ydvsqg6V1KZa1RDX37Wo9Ljm+G6DedHqZFbWHtiKgeaYqmVFiYoLmatmAysK0eTRclP91x8FnohdWXM53OHi+SMBrhCFmSlpxTuD1DQK8ChvzmlYcWIgNf6RU5CCDYB8EdsXBJjBAid+p7+meCs75Z+Odz3+fzI1SKUBgjzPbCi5wOF28sQ+lNPgcZBBj1zRucWkQMecS0gTaCWX2+kSGdawBjsOVZF8GyCiscFPQqym/LbUUXxJ7FEDXHYbGXN2RGXF/9R0sLm4RrlyoM4ki75/IDNRJxU67Vc47DYuqzu5HN6ftk9gi+2cfQbnV7Iy3JkndJpP5XwbJ5UOuL/w7xsDzTge2Ac30c7rjO2NFATGY4jk231BjbF5b50T1Q66xt/74aIoWAECVGsBKQ7hiYx+yYPt8AbhMJucrtc+h+nt4SEKNH3mBTOHvFyG+daUIo3i7CcFnTDAcQgmVrFLUdBGZq+CGHiYqjKQ1AYrVXEcfMdK2xybHEOVRa9wWVkLnUVtqQljSBweSZCdopg96FntQtYP3DUIeDDm6NAbRutkyG2ehL7C+TmkbY/HHfx0lBOTMKSqLIz4nrSUXXjU0+zldrGVVmaYRBEPY=
+  app: ct-p1-integration-staging
+  on:
+    repo: commercetools/commercetools-payone-integration
+    branch: durchstich
+
+after_deploy:
+  - ./gradlew -Ppublish.anyway=yeah publishGhPages

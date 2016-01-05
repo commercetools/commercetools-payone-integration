@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone;
+package util;
 
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.orders.Order;
@@ -19,39 +19,39 @@ public class PaymentTestHelper {
     }
 
     private Order getOrderFromFile(String filePath) throws IOException {
-        InputStream dummyPaymentJson = getJsonFromFile(filePath);
+        final InputStream dummyPaymentJson = getJsonFromFile(filePath);
         return SphereJsonUtils.readObject(IOUtils.toString(dummyPaymentJson), Order.typeReference());
     }
 
-    protected Payment dummyPaymentMapToPayoneRequest() throws Exception {
-        return getPaymentFromFile("dummyPaymentMapToPayoneRequest.json");
+    public Payment dummyPaymentOneAuthPending20Euro() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneAuthPending20Euro.json");
     }
 
-    protected Payment dummyPaymentNoCustomFields() throws Exception {
+    public Payment dummyPaymentNoCustomFields() throws Exception {
         return getPaymentFromFile("dummyPaymentNoCustomFields.json");
     }
 
-    protected Order dummyOrderMapToPayoneRequest() throws Exception {
+    public Order dummyOrderMapToPayoneRequest() throws Exception {
         return getOrderFromFile("dummyOrderMapToPayoneRequest.json");
     }
 
-    protected Payment dummyPaymentTwoTransactionsPending() throws Exception {
+    public Payment dummyPaymentTwoTransactionsPending() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsPending.json");
     }
 
-    protected Payment dummyPaymentTwoTransactionsSuccessPending() throws Exception {
+    public Payment dummyPaymentTwoTransactionsSuccessPending() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsSuccessPending.json");
     }
 
-    protected Payment dummyPaymentNoInterface() throws Exception {
+    public Payment dummyPaymentNoInterface() throws Exception {
         return getPaymentFromFile("dummyPaymentNoInterface.json");
     }
 
-    protected Payment dummyPaymentWrongInterface() throws Exception {
+    public Payment dummyPaymentWrongInterface() throws Exception {
         return getPaymentFromFile("dummyPaymentWrongInterface.json");
     }
 
-    protected Payment dummyPaymentUnknownMethod() throws Exception {
+    public Payment dummyPaymentUnknownMethod() throws Exception {
         return getPaymentFromFile("dummyPaymentUnknownMethod.json");
     }
 }

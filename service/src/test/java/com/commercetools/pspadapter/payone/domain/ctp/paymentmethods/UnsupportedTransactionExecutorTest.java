@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.when;
 
-import com.commercetools.pspadapter.payone.PaymentTestHelper;
+import util.PaymentTestHelper;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import io.sphere.sdk.carts.Cart;
@@ -25,7 +25,9 @@ import java.util.concurrent.CompletionException;
 /**
  * @author Jan Wolter
  */
-public class UnsupportedTransactionExecutorTest extends PaymentTestHelper {
+public class UnsupportedTransactionExecutorTest {
+    private final PaymentTestHelper payments = new PaymentTestHelper();
+
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
@@ -37,8 +39,8 @@ public class UnsupportedTransactionExecutorTest extends PaymentTestHelper {
 
     @Test
     public void addsInterfaceInteractionAndSetsStateToFailure() throws Exception {
-        final Payment inputPayment = dummyPaymentTwoTransactionsPending();
-        final Payment outputPayment = dummyPaymentTwoTransactionsSuccessPending();
+        final Payment inputPayment = payments.dummyPaymentTwoTransactionsPending();
+        final Payment outputPayment = payments.dummyPaymentTwoTransactionsSuccessPending();
         final Transaction transaction = inputPayment.getTransactions().get(0);
 
         // TODO jw: use more specific matchers
@@ -49,7 +51,7 @@ public class UnsupportedTransactionExecutorTest extends PaymentTestHelper {
 
     @Test
     public void throwsCompletionException() throws Exception {
-        final Payment inputPayment = dummyPaymentTwoTransactionsSuccessPending();
+        final Payment inputPayment = payments.dummyPaymentTwoTransactionsSuccessPending();
         final Transaction transaction = inputPayment.getTransactions().get(0);
 
         // TODO jw: use more specific matchers

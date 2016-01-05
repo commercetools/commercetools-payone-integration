@@ -4,15 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class PayonePostServiceImplTest {
@@ -49,40 +44,21 @@ public class PayonePostServiceImplTest {
         assertThat(payonePostService.getServerAPIURL()).isEqualTo(PAYONE_SERVER_API_URL);
     }
 
-    @Test
-    public void shouldBuildRequestParamsString() throws PayoneException {
-        Map<String, String> requestParams = new HashMap<String, String>();
-        requestParams.put("paramA", "a");
-        requestParams.put("paramB", "b");
-        StringBuffer result = payonePostService.buildRequestParamsString(requestParams);
-        assertThat(result).isNotEmpty();
-        assertThat(result).hasToString("paramA=a&paramB=b");
-    }
-
-    @Test
-    public void shouldReturnEmptyParamsString() throws PayoneException {
-        Map<String, String> requestParams = Collections.emptyMap();
-        StringBuffer result = payonePostService.buildRequestParamsString(requestParams);
-        assertThat(result).hasSize(0);
-        assertThat(result.toString()).isEqualTo("");
-    }
 
     @Test
     public void shouldBuildMapFromServerResponse() throws UnsupportedEncodingException {
-        List<String> serverResponse = Lists.newArrayList();
-        serverResponse.add("paramA=a");
-        serverResponse.add("redirecturl=https://www.redirect.de/xxx");
+        String serverResponse = "paramA=a\nredirecturl=https://www.redirect.de/xxx\nstatus=SUCCESSFUL";
         Map<String, String> result = payonePostService.buildMapFromResultParams(serverResponse);
         assertThat(result).isNotEmpty();
-        assertThat(result).hasSize(2);
-        assertThat(result).containsKey("paramA");
-        assertThat(result).containsValue("a");
+        assertThat(result).hasSize(3);
+        assertThat(result).containsEntry("paramA", "a");
         assertThat(result).containsEntry("redirecturl", "https://www.redirect.de/xxx");
+        assertThat(result).containsEntry("status", "SUCCESSFUL");
     }
 
     @Test
     public void shouldReturnEmptyMap() throws UnsupportedEncodingException {
-        List<String> serverResponse = ImmutableList.of("=", "x=");
+        String serverResponse = "=x=";
         Map<String, String> result = payonePostService.buildMapFromResultParams(serverResponse);
         assertThat(result).isEmpty();
     }

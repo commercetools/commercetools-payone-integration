@@ -3,9 +3,10 @@ package com.commercetools.pspadapter.payone;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.google.common.base.Joiner;
-import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.queries.PaymentByIdGet;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
+import com.google.common.base.Strings;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import spark.Spark;
 
 /**
@@ -14,16 +15,27 @@ import spark.Spark;
  */
 public class IntegrationService {
 
-    final Joiner joiner = Joiner.on('\n');
+    public static final Logger LOG = LogManager.getLogger(IntegrationService.class);
+
+    public static final String HEROKU_ASSIGNED_PORT = "PORT";
 
     private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
-    private final PaymentDispatcher dispatcher;
+    private final PaymentDispatcher paymentDispatcher;
     private final CustomTypeBuilder typeBuilder;
+    private final NotificationDispatcher notificationDispatcher;
+    private final ResultProcessor resultProcessor;
 
-    IntegrationService(final CommercetoolsQueryExecutor commercetoolsQueryExecutor, final PaymentDispatcher dispatcher, final CustomTypeBuilder typeBuilder) {
+    IntegrationService(
+            final CustomTypeBuilder typeBuilder,
+            final CommercetoolsQueryExecutor commercetoolsQueryExecutor,
+            final PaymentDispatcher paymentDispatcher,
+            final NotificationDispatcher notificationDispatcher,
+            final ResultProcessor resultProcessor) {
         this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
-        this.dispatcher = dispatcher;
+        this.paymentDispatcher = paymentDispatcher;
         this.typeBuilder = typeBuilder;
+        this.notificationDispatcher = notificationDispatcher;
+        this.resultProcessor = resultProcessor;
     }
 
     public void start() {
@@ -31,28 +43,34 @@ public class IntegrationService {
 
         Spark.port(port());
 
-        Spark.get("/commercetools/handle/payment/:id", (req, res) -> {
-            final int status = 403;
-            res.status(status);
-            res.type("text/json");
-            return joiner.join(
-                    "{",
-                    String.format("\"statusCode\": %d,", status),
-                    "\"message\": \"Not implemented, yet.\"",
-                    "}");
+        Spark.get("/commercetools/handle/payments/:id", (req, res) -> {
+            try {
+                final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(req.params("id"));
+                try {
+                    final PaymentWithCartLike result = paymentDispatcher.dispatchPayment(payment);
+                    resultProcessor.process(result, res);
+                } catch (final Exception e) {
+                    // TODO jw: we probably need to differentiate depending on the exception type
+                    res.status(500);
+                    res.type("text/plain; charset=utf-8");
+                    res.body(String.format("Sorry, but you hit us between the eyes. Cause: %s", e.getMessage()));
+                }
+            } catch (final Exception e) {
+                // TODO jw: we probably need to differentiate depending on the exception type
+                res.status(404);
+                res.type("text/plain; charset=utf-8");
+                res.body("The given payment could not be found.");
+            }
+            return res;
         });
 
+        Spark.post("/payone/notification", (req, res) -> {
+            LOG.info("<- Received POST from Payone: " + req.body());
+            Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
 
-        Spark.get("/handle/:id", (req, res) -> {
-            final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(req.params("id"));
-            // TODO: Properly handle dispatch-result
-            try {
-                dispatcher.dispatchPayment(payment);
-                return "";
-            } catch (Exception e) {
-                res.status(500);
-                return "";
-            }
+            notificationDispatcher.dispatchNotification(notification);
+            res.status(501);
+            return "Currently not implemented";
         });
 
         Spark.awaitInitialization();
@@ -67,7 +85,13 @@ public class IntegrationService {
     }
 
     public int port() {
-        return 8080;
+        final String environmentVariable = System.getenv(HEROKU_ASSIGNED_PORT);
+        if (!Strings.isNullOrEmpty(environmentVariable)) {
+            return Integer.parseInt(environmentVariable);
+        }
+
+        final String systemProperty = System.getProperty(HEROKU_ASSIGNED_PORT, "8080");
+        return Integer.parseInt(systemProperty);
     }
 
     public CommercetoolsQueryExecutor getCommercetoolsQueryExecutor() {

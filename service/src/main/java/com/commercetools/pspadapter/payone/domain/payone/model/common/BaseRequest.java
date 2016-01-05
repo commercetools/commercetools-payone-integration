@@ -1,14 +1,16 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
-import com.commercetools.pspadapter.payone.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
-public class PayoneBaseRequest implements Serializable {
+public class BaseRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -35,34 +37,31 @@ public class PayoneBaseRequest implements Serializable {
     /**
      * Payone api version
      */
-    private String api_version;
+    @JsonProperty("api_version")
+    private String apiVersion;
 
     /**
-     * Defines request type (preauthorization, authorization, ...). Default will be 'preauthorization'
+     * Defines request type (preauthorization, authorization, ...)
      */
     private String request;
 
-    public static TypeReference<PayoneBaseRequest> getTypeReference() {
-        return new TypeReference<PayoneBaseRequest>() {
-            @Override
-            public String toString() {
-                return "TypeReference<" + PayoneBaseRequest.class.getSimpleName() + ">";
-            }
-        };
-    }
-
-    public Map<String, Object> toStringMap() {
+    public Map<String, Object> toStringMap(final boolean shouldClearSecurityValues) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        return mapper.convertValue(this, Map.class);
+        if (shouldClearSecurityValues) {
+            mapper.addMixIn(this.getClass(), MixIn.class);
+        }
+
+        return mapper.convertValue(this,
+                mapper.getTypeFactory().constructMapType(HashMap.class, String.class, Object.class));
     }
 
-    PayoneBaseRequest(final PayoneConfig config, final String requestType) {
+    BaseRequest(final PayoneConfig config, final String requestType) {
         this.mid = config.getMerchantId();
-        this.key = config.getKey();
+        this.key = config.getKeyAsMd5Hash();
         this.mode = config.getMode();
         this.portalid = config.getPortalId();
-        this.api_version = config.getApiVersion();
+        this.apiVersion = config.getApiVersion();
         this.request = requestType;
     }
 
@@ -90,7 +89,17 @@ public class PayoneBaseRequest implements Serializable {
         return request;
     }
 
-    public String getApi_version() {
-        return api_version;
+    public String getApiVersion() {
+        return apiVersion;
     }
+
+    //**************************************************************
+    //* Filter for Serialization (e.g. clear out security values)
+    //**************************************************************
+
+    public interface MixIn {
+        @JsonIgnore
+        String getKey();
+    }
+
 }

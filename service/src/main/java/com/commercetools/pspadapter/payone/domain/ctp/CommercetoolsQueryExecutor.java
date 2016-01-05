@@ -6,7 +6,6 @@ import io.sphere.sdk.messages.GenericMessageImpl;
 import io.sphere.sdk.messages.MessageDerivateHint;
 import io.sphere.sdk.messages.queries.MessageQuery;
 import io.sphere.sdk.orders.Order;
-import io.sphere.sdk.orders.queries.OrderByIdGet;
 import io.sphere.sdk.orders.queries.OrderQuery;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.messages.PaymentCreatedMessage;
@@ -16,7 +15,12 @@ import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.queries.Query;
 
 import java.time.ZonedDateTime;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -29,14 +33,6 @@ public class CommercetoolsQueryExecutor {
 
     public CommercetoolsQueryExecutor(final CommercetoolsClient client) {
         this.client = client;
-    }
-
-    public Order getOrderById(String id) {
-        return client.complete(OrderByIdGet.of(id));
-    }
-
-    public Payment getPaymentById(String id) {
-        return client.complete(PaymentByIdGet.of(id));
     }
 
     public PaymentWithCartLike getPaymentWithCartLike(String paymentId) {
@@ -101,8 +97,10 @@ public class CommercetoolsQueryExecutor {
                 .<T>forMessageType(messageHint);
             final PagedQueryResult<T> result = client.complete(query);
 
-            // TODO null check
-            result.getResults().forEach(msg -> paymentConsumer.accept(msg.getResource().getObj()));
+            result.getResults()
+                    .stream()
+                    .filter(msg -> msg.getResource().getObj() != null)
+                    .forEach(msg -> paymentConsumer.accept(msg.getResource().getObj()));
 
             processed = result.getOffset() + result.size();
             total = result.getTotal();

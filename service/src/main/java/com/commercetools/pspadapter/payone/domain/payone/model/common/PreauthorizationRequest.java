@@ -1,12 +1,12 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
-import com.commercetools.pspadapter.payone.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.PayoneConfig;
 
 /**
  * @author fhaertig
  * @date 11.12.15
  */
-public class PreauthorizationRequest extends PayoneBaseRequest {
+public class PreauthorizationRequest extends BaseRequest {
 
     /**
      * ID of the sub account

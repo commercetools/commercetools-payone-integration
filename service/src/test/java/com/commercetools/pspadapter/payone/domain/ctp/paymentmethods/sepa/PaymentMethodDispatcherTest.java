@@ -1,22 +1,23 @@
 package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
-import com.commercetools.pspadapter.payone.PaymentTestHelper;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
+import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.Cart;
-import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
 import org.junit.Test;
+import util.PaymentTestHelper;
 
-import java.util.HashMap;
 import java.util.concurrent.CompletionException;
 
-import static org.junit.Assert.*;
+public class PaymentMethodDispatcherTest {
+    private final PaymentTestHelper payments = new PaymentTestHelper();
 
-public class PaymentMethodDispatcherTest extends PaymentTestHelper {
     private interface CountingTransactionExecutor extends TransactionExecutor {
         int getCount();
     }
@@ -43,7 +44,7 @@ public class PaymentMethodDispatcherTest extends PaymentTestHelper {
             public PaymentWithCartLike executeTransaction(PaymentWithCartLike payment, Transaction transaction) {
                 count += 1;
                 if (count > afterExecutions) try {
-                    return payment.withPayment(dummyPaymentTwoTransactionsSuccessPending());
+                    return payment.withPayment(payments.dummyPaymentTwoTransactionsSuccessPending());
                 } catch (Exception e) {
                     throw new CompletionException(e);
                 }
@@ -58,22 +59,24 @@ public class PaymentMethodDispatcherTest extends PaymentTestHelper {
 
     @Test
     public void usesDefaultExecutor() throws Exception {
-        CountingTransactionExecutor countingTransactionExecutor = countingTransactionExecutor();
-        PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(countingTransactionExecutor, new HashMap<>());
-        dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsPending(), (Cart)null));
+        final CountingTransactionExecutor countingTransactionExecutor = countingTransactionExecutor();
+        final PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(countingTransactionExecutor, ImmutableMap.of());
+        dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentTwoTransactionsPending(), (Cart)null));
         assertThat(countingTransactionExecutor.getCount(), is(1));
     }
 
     @Test
     public void callsCorrectExecutor() throws Exception {
-        CountingTransactionExecutor defaultExecutor = countingTransactionExecutor();
-        CountingTransactionExecutor chargeExecutor = countingTransactionExecutor();
-        CountingTransactionExecutor refundExecutor = countingTransactionExecutor();
-        final HashMap<TransactionType, TransactionExecutor> executorMap = new HashMap<>();
-        executorMap.put(TransactionType.CHARGE, chargeExecutor);
-        executorMap.put(TransactionType.REFUND, refundExecutor);
-        PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(defaultExecutor, executorMap);
-        dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsPending(), (Cart)null));
+        final CountingTransactionExecutor defaultExecutor = countingTransactionExecutor();
+        final CountingTransactionExecutor chargeExecutor = countingTransactionExecutor();
+        final CountingTransactionExecutor refundExecutor = countingTransactionExecutor();
+        final PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(
+                defaultExecutor,
+                ImmutableMap.of(
+                        TransactionType.CHARGE, chargeExecutor,
+                        TransactionType.REFUND, refundExecutor));
+
+        dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentTwoTransactionsPending(), (Cart)null));
         assertThat(defaultExecutor.getCount(), is(0));
         assertThat(chargeExecutor.getCount(), is(1));
         assertThat(refundExecutor.getCount(), is(0));
@@ -81,14 +84,16 @@ public class PaymentMethodDispatcherTest extends PaymentTestHelper {
 
     @Test
     public void callsSecondExecutorAfterFirstTransactionStateChanged() throws Exception {
-        CountingTransactionExecutor defaultExecutor = countingTransactionExecutor();
-        CountingTransactionExecutor chargeExecutor = returnSuccessTransactionExecutor(2);
-        CountingTransactionExecutor refundExecutor = countingTransactionExecutor();
-        final HashMap<TransactionType, TransactionExecutor> executorMap = new HashMap<>();
-        executorMap.put(TransactionType.CHARGE, chargeExecutor);
-        executorMap.put(TransactionType.REFUND, refundExecutor);
-        PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(defaultExecutor, executorMap);
-        dispatcher.dispatchPayment(dispatcher.dispatchPayment(dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsPending(), (Cart)null))));
+        final CountingTransactionExecutor defaultExecutor = countingTransactionExecutor();
+        final CountingTransactionExecutor chargeExecutor = returnSuccessTransactionExecutor(2);
+        final CountingTransactionExecutor refundExecutor = countingTransactionExecutor();
+        final PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(
+                defaultExecutor,
+                ImmutableMap.of(
+                        TransactionType.CHARGE, chargeExecutor,
+                        TransactionType.REFUND, refundExecutor));
+
+        dispatcher.dispatchPayment(dispatcher.dispatchPayment(dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentTwoTransactionsPending(), (Cart)null))));
         assertThat(defaultExecutor.getCount(), is(0));
         assertThat(chargeExecutor.getCount(), is(3));
         assertThat(refundExecutor.getCount(), is(1));

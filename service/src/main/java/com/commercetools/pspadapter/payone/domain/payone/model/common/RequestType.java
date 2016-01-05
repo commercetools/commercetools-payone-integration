@@ -31,7 +31,7 @@ public enum RequestType {
         }
     }
 
-    public static RequestType getRequestType(String type) {
+    public static RequestType getRequestTypeOf(String type) {
         RequestType requestType = LOOKUP_TYPE.get(type);
         return requestType;
     }

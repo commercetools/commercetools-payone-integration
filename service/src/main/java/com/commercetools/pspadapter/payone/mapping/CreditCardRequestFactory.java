@@ -1,11 +1,16 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import com.commercetools.pspadapter.payone.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CCPreauthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardCaptureRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.Transaction;
+import org.javamoney.moneta.function.MonetaryUtil;
+
+import java.util.Optional;
 
 /**
  * @author fhaertig
@@ -13,32 +18,54 @@ import io.sphere.sdk.payments.Payment;
  */
 public class CreditCardRequestFactory extends PayoneRequestFactory {
 
+    public CreditCardRequestFactory(final PayoneConfig config) {
+        super(config);
+    }
+
     @Override
-    public CCPreauthorizationRequest createPreauthorizationRequest(
-            final PaymentWithCartLike paymentWithCartLike,
-            final PayoneConfig config) {
+    public CreditCardPreauthorizationRequest createPreauthorizationRequest(
+            final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.PSEUDOCARDPAN_KEY);
-        CCPreauthorizationRequest request = new CCPreauthorizationRequest(config, pseudocardpan);
+        CreditCardPreauthorizationRequest request = new CreditCardPreauthorizationRequest(getConfig(), pseudocardpan);
 
         if (paymentWithCartLike.getOrderNumber().isPresent()) {
             request.setReference(paymentWithCartLike.getOrderNumber().get());
         }
 
-        request.setAmount(ctPayment.getAmountPlanned().getNumber().intValueExact());
+        request.setAmount(MonetaryUtil.minorUnits().queryFrom(ctPayment.getAmountPlanned()).intValue());
         request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
         request.setNarrative_text(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.NARRATIVETEXT_KEY));
         request.setUserid(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.USERID_KEY));
 
-        request = (CCPreauthorizationRequest) MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
-        request = (CCPreauthorizationRequest) MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
-        request = (CCPreauthorizationRequest) MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
+        MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
+        MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
+        MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
         return request;
     }
 
+    @Override
+    public CreditCardCaptureRequest createCaptureRequest(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction) {
 
+        final Payment ctPayment = paymentWithCartLike.getPayment();
+        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
+
+        CreditCardCaptureRequest request = new CreditCardCaptureRequest(getConfig());
+
+        request.setTxid(ctPayment.getInterfaceId());
+
+
+        Optional.ofNullable(transaction.getInteractionId())
+                .ifPresent(interactionId -> request.setSequencenumber(Integer.valueOf(interactionId)));
+        request.setAmount(MonetaryUtil.minorUnits().queryFrom(ctPayment.getAmountAuthorized()).intValue());
+        Optional
+            .ofNullable(ctPayment.getAmountAuthorized())
+            .ifPresent(m -> request.setCurrency(m.getCurrency().getCurrencyCode()));
+
+        return request;
+    }
 }

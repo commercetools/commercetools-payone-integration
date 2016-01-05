@@ -1,21 +1,23 @@
 package com.commercetools.pspadapter.payone;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa.PaymentMethodDispatcher;
+import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.Cart;
-import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
-import io.sphere.sdk.payments.TransactionType;
 import org.junit.Test;
+import util.PaymentTestHelper;
 
 import java.util.HashMap;
-import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
+public class PaymentDispatcherTest {
+    private final PaymentTestHelper payments = new PaymentTestHelper();
 
-public class PaymentDispatcherTest extends PaymentTestHelper {
     private class CountingPaymentMethodDispatcher extends PaymentMethodDispatcher {
         public int count = 0;
 
@@ -25,7 +27,7 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
                 public PaymentWithCartLike executeTransaction(PaymentWithCartLike payment, Transaction transaction) {
                     return payment;
                 }
-            }, new HashMap<>());
+            }, ImmutableMap.of());
         }
 
         @Override
@@ -39,10 +41,10 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
     public void testRefusingWrongPaymentInterface() throws Exception {
         PaymentDispatcher dispatcher = new PaymentDispatcher(null);
 
-        final Throwable noInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentNoInterface(), (Cart)null)));
+        final Throwable noInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentNoInterface(), (Cart)null)));
         assertThat(noInterface).isInstanceOf(IllegalArgumentException.class);
 
-        final Throwable wrongInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentWrongInterface(), (Cart)null)));
+        final Throwable wrongInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentWrongInterface(), (Cart)null)));
         assertThat(wrongInterface).isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -50,7 +52,7 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
     public void testRefusingUnknownPaymentMethod() throws Exception {
         PaymentDispatcher dispatcher = new PaymentDispatcher(new HashMap<>());
 
-        final Throwable noInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentUnknownMethod(), (Cart)null)));
+        final Throwable noInterface = catchThrowable(() -> dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentUnknownMethod(), (Cart) null)));
         assertThat(noInterface).isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -59,13 +61,13 @@ public class PaymentDispatcherTest extends PaymentTestHelper {
         final CountingPaymentMethodDispatcher creditCardDispatcher = new CountingPaymentMethodDispatcher();
         final CountingPaymentMethodDispatcher sepaDispatcher = new CountingPaymentMethodDispatcher();
 
-        final HashMap<String, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
-        methodDispatcherMap.put(MethodKeys.CREDIT_CARD, creditCardDispatcher);
-        methodDispatcherMap.put(MethodKeys.DIRECT_DEBIT_SEPA, sepaDispatcher);
+        final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
+        methodDispatcherMap.put(PaymentMethod.CREDIT_CARD, creditCardDispatcher);
+        methodDispatcherMap.put(PaymentMethod.DIRECT_DEBIT_SEPA, sepaDispatcher);
 
         PaymentDispatcher dispatcher = new PaymentDispatcher(methodDispatcherMap);
-        dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsPending(), (Cart)null));
-        dispatcher.dispatchPayment(new PaymentWithCartLike(dummyPaymentTwoTransactionsSuccessPending(), (Cart)null));
+        dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentTwoTransactionsPending(), (Cart)null));
+        dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentTwoTransactionsSuccessPending(), (Cart)null));
 
         assertThat(creditCardDispatcher.count).isEqualTo(2);
         assertThat(sepaDispatcher.count).isEqualTo(0);

@@ -1,7 +1,6 @@
 package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.CustomFields;
@@ -37,7 +36,7 @@ public interface IdempotentTransactionExecutor extends TransactionExecutor {
      * @param transaction
      * @return A new version of the PaymentWithCartLike. If the attempt has concluded, the state of the Transaction is now either Success or Failure.
      */
-    PaymentWithCartLike firstExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction);
+    PaymentWithCartLike attemptFirstExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction);
 
     /**
      * Finds a previous execution attempt for the transaction. If there are multiple ones, it selects the last one.
@@ -71,6 +70,6 @@ public interface IdempotentTransactionExecutor extends TransactionExecutor {
 
         return findLastExecutionAttempt(paymentWithCartLike, transaction)
             .map(attempt -> retryLastExecutionAttempt(paymentWithCartLike, transaction, attempt))
-            .orElseGet(() -> firstExecutionAttempt(paymentWithCartLike, transaction));
+            .orElseGet(() -> attemptFirstExecution(paymentWithCartLike, transaction));
     }
 }

@@ -1,10 +1,20 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.2'
+    }
+}
+
 plugins {
     id 'org.ajoberstar.github-pages' version '1.3.2'
 }
 
 allprojects {
     group = 'com.commercetools'
-    version = '0.1'
+    version = '0.1-SNAPSHOT'
 
     project.buildDir = 'target'
 }
@@ -23,6 +33,7 @@ subprojects {
         compile 'io.sphere.sdk.jvm:sphere-java-client:1.0.0-M23'
         compile 'io.sphere.sdk.jvm:sphere-models:1.0.0-M23'
         compile 'com.google.guava:guava:18.0'
+        compile 'org.slf4j:slf4j-log4j12:1.7.13'
 
         testCompile 'junit:junit:4.12'
     }
@@ -34,8 +45,14 @@ task wrapper(type: Wrapper) {
 }
 
 project(":service") {
+    apply plugin: 'com.github.johnrengelman.shadow'
+
     dependencies {
-        compile 'com.sparkjava:spark-core:2.3'
+        compile 'org.apache.httpcomponents:fluent-hc:4.5.1'
+        compile 'com.mashape.unirest:unirest-java:1.4.7'
+        compile('com.sparkjava:spark-core:2.3') {
+            exclude group: 'org.slf4j', module: 'slf4j-simple'
+        }
         compile 'org.quartz-scheduler:quartz:2.2.2'
 
         testCompile 'org.assertj:assertj-core:3.2.0'
@@ -60,14 +77,17 @@ project(":functionaltests") {
             // ensure that the newer version required by sparkjava is used
             exclude group: 'org.mortbay.jetty', module: 'servlet-api'
         }
-        testCompile 'org.apache.httpcomponents:fluent-hc:4.5.1'
+
         testCompile 'com.google.code.gson:gson:2.5'
+
+        testRuntime 'org.javamoney:moneta:1.0'
     }
 
+    compileJava.dependsOn ':service:jar'
+
     test {
-        filter {
-            includeTestsMatching 'specs.SpecsFixture'
-        }
+        description 'This task is supposed to run single tests, only.'
+
         systemProperty 'concordion.output.dir', "$reporting.baseDir/spec"
         systemProperty 'concordion.extensions', 'org.concordion.ext.inputstyle.InputStyleExtension,org.concordion.ext.runtotals.RunTotalsExtension'
 
@@ -79,13 +99,95 @@ project(":functionaltests") {
         
         systemProperty 'CT_CLIENT_SECRET', project.hasProperty('CT_CLIENT_SECRET') ? CT_CLIENT_SECRET : System.getenv('CT_CLIENT_SECRET')
         assertPropertyIsNotNullOrEmpty('CT_CLIENT_SECRET', getSystemProperties())
-        
+
+        systemProperty 'CT_PAYONE_INTEGRATION_URL', project.hasProperty('CT_PAYONE_INTEGRATION_URL') ? CT_PAYONE_INTEGRATION_URL : System.getenv('CT_PAYONE_INTEGRATION_URL')
+//        assertPropertyIsNotNullOrEmpty('CT_PAYONE_INTEGRATION_URL', getSystemProperties())
+
         systemProperty 'CRON_NOTATION', project.hasProperty('CRON_NOTATION') ? CRON_NOTATION : System.getenv('CRON_NOTATION')
+
+        systemProperty 'CT_START_FROM_SCRATCH', project.hasProperty('CT_START_FROM_SCRATCH') ? CT_START_FROM_SCRATCH : System.getenv('CT_START_FROM_SCRATCH')
+
+        systemProperty 'TEST_DATA_VISA_CREDIT_CARD_NO_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_NO_3DS') ? TEST_DATA_VISA_CREDIT_CARD_NO_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_NO_3DS')
+//        assertPropertyIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_NO_3DS', getSystemProperties())
+
+        systemProperty 'TEST_DATA_VISA_CREDIT_CARD_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_3DS') ? TEST_DATA_VISA_CREDIT_CARD_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_3DS')
+//        assertPropertyIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_3DS', getSystemProperties())
+
+        systemProperty 'PAYONE_MERCHANT_ID', project.hasProperty('PAYONE_MERCHANT_ID') ? PAYONE_MERCHANT_ID : System.getenv('PAYONE_MERCHANT_ID')
+        assertPropertyIsNotNullOrEmpty('PAYONE_MERCHANT_ID', getSystemProperties())
+
+        systemProperty 'PAYONE_SUBACC_ID', project.hasProperty('PAYONE_SUBACC_ID') ? PAYONE_SUBACC_ID : System.getenv('PAYONE_SUBACC_ID')
+        assertPropertyIsNotNullOrEmpty('PAYONE_SUBACC_ID', getSystemProperties())
+
+        systemProperty 'PAYONE_PORTAL_ID', project.hasProperty('PAYONE_PORTAL_ID') ? PAYONE_PORTAL_ID : System.getenv('PAYONE_PORTAL_ID')
+        assertPropertyIsNotNullOrEmpty('PAYONE_PORTAL_ID', getSystemProperties())
+
+        systemProperty 'PAYONE_KEY', project.hasProperty('PAYONE_KEY') ? PAYONE_KEY : System.getenv('PAYONE_KEY')
+        assertPropertyIsNotNullOrEmpty('PAYONE_KEY', getSystemProperties())
+    }
+
+    task testSpec(type: Test) {
+        description 'This task tests the executable Concordion specification.'
+
+        filter {
+            includeTestsMatching 'specs.SpecsFixture'
+        }
+
+        if (project.hasProperty('publish.anyway')) {
+            // do not fail the build in case of failing tests, so that the reports can be published
+            ignoreFailures = true
+        }
+
+        systemProperty 'concordion.output.dir', "$reporting.baseDir/spec"
+        systemProperty 'concordion.extensions', 'org.concordion.ext.inputstyle.InputStyleExtension,org.concordion.ext.runtotals.RunTotalsExtension'
+
+        systemProperty 'CT_PROJECT_KEY', project.hasProperty('CT_PROJECT_KEY') ? CT_PROJECT_KEY : System.getenv('CT_PROJECT_KEY')
+        assertPropertyIsNotNullOrEmpty('CT_PROJECT_KEY', getSystemProperties())
+
+        systemProperty 'CT_CLIENT_ID', project.hasProperty('CT_CLIENT_ID') ? CT_CLIENT_ID : System.getenv('CT_CLIENT_ID')
+        assertPropertyIsNotNullOrEmpty('CT_CLIENT_ID', getSystemProperties())
+
+        systemProperty 'CT_CLIENT_SECRET', project.hasProperty('CT_CLIENT_SECRET') ? CT_CLIENT_SECRET : System.getenv('CT_CLIENT_SECRET')
+        assertPropertyIsNotNullOrEmpty('CT_CLIENT_SECRET', getSystemProperties())
+
+        systemProperty 'CT_PAYONE_INTEGRATION_URL', project.hasProperty('CT_PAYONE_INTEGRATION_URL') ? CT_PAYONE_INTEGRATION_URL : System.getenv('CT_PAYONE_INTEGRATION_URL')
+//        assertPropertyIsNotNullOrEmpty('CT_PAYONE_INTEGRATION_URL', getSystemProperties())
+
+        systemProperty 'CRON_NOTATION', project.hasProperty('CRON_NOTATION') ? CRON_NOTATION : System.getenv('CRON_NOTATION')
+
+        systemProperty 'CT_START_FROM_SCRATCH', project.hasProperty('CT_START_FROM_SCRATCH') ? CT_START_FROM_SCRATCH : System.getenv('CT_START_FROM_SCRATCH')
+
+        systemProperty 'TEST_DATA_VISA_CREDIT_CARD_NO_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_NO_3DS') ? TEST_DATA_VISA_CREDIT_CARD_NO_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_NO_3DS')
+//        assertPropertyIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_NO_3DS', getSystemProperties())
+
+        systemProperty 'TEST_DATA_VISA_CREDIT_CARD_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_3DS') ? TEST_DATA_VISA_CREDIT_CARD_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_3DS')
+//        assertPropertyIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_3DS', getSystemProperties())
+
+        systemProperty 'PAYONE_MERCHANT_ID', project.hasProperty('PAYONE_MERCHANT_ID') ? PAYONE_MERCHANT_ID : System.getenv('PAYONE_MERCHANT_ID')
+        assertPropertyIsNotNullOrEmpty('PAYONE_MERCHANT_ID', getSystemProperties())
+
+        systemProperty 'PAYONE_SUBACC_ID', project.hasProperty('PAYONE_SUBACC_ID') ? PAYONE_SUBACC_ID : System.getenv('PAYONE_SUBACC_ID')
+        assertPropertyIsNotNullOrEmpty('PAYONE_SUBACC_ID', getSystemProperties())
+
+        systemProperty 'PAYONE_PORTAL_ID', project.hasProperty('PAYONE_PORTAL_ID') ? PAYONE_PORTAL_ID : System.getenv('PAYONE_PORTAL_ID')
+        assertPropertyIsNotNullOrEmpty('PAYONE_PORTAL_ID', getSystemProperties())
+
+        systemProperty 'PAYONE_KEY', project.hasProperty('PAYONE_KEY') ? PAYONE_KEY : System.getenv('PAYONE_KEY')
+        assertPropertyIsNotNullOrEmpty('PAYONE_KEY', getSystemProperties())
     }
 }
 
+def staticPages = project.copySpec {
+    from 'ghpages'
+}
+
+def generatedPages = project.copySpec {
+    into 'latest/spec'
+    from 'functionaltests/target/reports/spec'
+}
+
 githubPages {
-    repoUri = 'git@github.com:sphereio/commercetools-payone-integration.git'
+    repoUri = 'git@github.com:commercetools/commercetools-payone-integration.git'
 
     credentials {
         username = System.getenv('GH_TOKEN')
@@ -93,15 +195,12 @@ githubPages {
     }
 
     pages {
-        from 'ghpages'
-
-        into ('latest') {
-            from ('functionaltests/target/reports/spec') {
-                into 'spec'
-            }
-        }
+        into '.'
+        with staticPages, generatedPages
     }
 }
+
+prepareGhPages.dependsOn ':functionaltests:testSpec'
 
 void assertPropertyIsNotNullOrEmpty(String name, Map<String, Object> properties) {
     def property = properties.get(name)
@@ -110,3 +209,12 @@ void assertPropertyIsNotNullOrEmpty(String name, Map<String, Object> properties)
     }
 }
 
+task stage {
+    description 'This task is run by Heroku and generates the service jar including all dependencies.'
+    dependsOn ':service:shadowJar'
+}
+
+task ciBuild {
+    description 'This task is run by Travis. It builds the service and runs its unit tests. In addition it builds the functionaltests.'
+    dependsOn ':service:test', ':functionaltests:compileTestJava'
+}

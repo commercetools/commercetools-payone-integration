@@ -18,8 +18,8 @@ implementations.
  * (maybe) commercetools general payment conventions https://github.com/nkuehn/payment-specs
  * PAYONE API documentation https://pmi.pay1.de/merchants/?navi=downloads 
  * The PSP integratins requirements and checkout protocol specification document (sent to you individually for now)
- * Documentation of the integration service http://sphereio.github.io/commercetools-payone-integration/index.html
-   * including [latest "living" specification](http://sphereio.github.io/commercetools-payone-integration/latest/spec/specs/Specs.html)
+ * Documentation of the integration service http://commercetools.github.io/commercetools-payone-integration/index.html
+   * including [latest "living" specification](http://commercetools.github.io/commercetools-payone-integration/latest/spec/specs/Specs.html)
  
 ## Using the Integration in a project
 
