@@ -284,24 +284,23 @@ The matching transaction is found by sequencenumber = interactionId
 > NK @FH: yes. And they announce that more may follow (e.g. on "paid" and "debit"). So I propose to interpret transactio_status
   not set as `completed` and expect a `pending` anytime (has effect only if our tx would otherwise move to "Success" or "Failure") 
 
---- EXPERIMENTAL AS DISCUSSION BASIS ---
-
 | PAYONE `txaction` | PAYONE `transaction_status` | PAYONE `notify_version` | CT `TransactionType` | CT `TransactionState` | Notes |
 |---|---|---|---|---|---|
 | `appointed` | `pending` | `7.5` |  Authorization (must be one and the first) |  Pending | create an Authorization if none there |
 | `appointed` | `completed` | `7.5` | Authorization (must be one and the first | Success  | create an Authorization if none there |
-| `capture` | not set or `completed` | `7.5` | ??? |  |  |
-| `paid` | not set or `completed` | `7.5` | last Charge? | Success | create a Charge if no matching one is found (TODO what is "matching"? one that has no sequencenumber yet?) |
-| `underpaid` | not set or `completed` | `7.5` | last Charge?  | Pending | create a Charge if no matching one found |
-| `cancelation` | not set or `completed` | `7.5` |  |  | TODO how to know if it's a Chargeback or a failed Charge?  |
-| `refund` | not set or `completed` | `7.5` | Refund | Success | create a Refund if no matching one found. TODO do we need to support it if we don't trigger refund anyways but always use debit?  |
-| `debit` | not set or `completed` | `7.5` |  |  | TODO Refund or Chargeback depending whether the `balance` is positive or negative?  |
-| `transfer` | not set or `completed` | `7.5` |  |  | Transfer like in "switch" / "move to" another bank account TODO how to handle?  |
-| `reminder` | not set or `completed` | `7.5` | (nothing) | (nothing) | status of dunning procedure. Just update the payment status field.  |
-| `vauthorization` | not set or `completed` | `7.5` |  | (unsupported?) | only available with PAYONE Billing module, must be activated |
-| `vsettlement` | not set or `completed` | `7.5` |  | (unsupported?) | only available with PAYONE Billing module, must be activated |
+| `appointed` | `completed` | `7.5` | *NOT* Authorization | Pending  | |
+| `capture` | not set or `completed` | `7.5` | Charge | ??? does "paid" follow with matching sequencenumber? | create a Charge if none with matching sequencenumber there |
+| `paid` | not set or `completed` | `7.5` | Charge | Success | create a Charge if no matching one is found |
+| `underpaid` | not set or `completed` | `7.5` | Charge  | Pending | create a Charge if no matching one found |
+| `cancelation` | not set or `completed` | `7.5` | new Chargeback | Success | see 4.2.6 Sample: authorization, ELV with cancelation to derive formula for amount |
+| `refund` | not set or `completed` | `7.5` | Refund | Success | create a Refund if no matching one found. |
+| `debit` | not set or `completed` | `7.5` | Refund if receivable has decreased (Fee does not exist, yet) | Success if balance has decreased by the same amount, Pending otherwise | new Refund if no matching there |
+| `transfer` | not set or `completed` | `7.5` | (nothing) | (nothing) | Transfer like in "switch" / "move to" another bank account |
+| `reminder` | not set or `completed` | `7.5` | (nothing) | (nothing) | status of dunning procedure |
+| `vauthorization` | not set or `completed` | `7.5` | (unsupported) | (unsupported) | only available with PAYONE Billing module, must be activated |
+| `vsettlement` | not set or `completed` | `7.5` | (unsupported) | (unsupported) | only available with PAYONE Billing module, must be activated |
 | `invoice` | not set or `completed` | `7.5` | (nothing) | (nothing) | no status change, just write the invoice ID / URL |
-| `failed` | not set or `completed` | `7.5` | Last Charge?  | `Failure` | (not fully implemented at PAYONE yet, feedback pending) |
+| `failed` | not set or `completed` | `7.5` | (unsupported)  | (unsupported) | (not fully implemented at PAYONE yet) |
 
 ## commercetools Cart and Order object (mapping to payment interface on payment creation)
 
