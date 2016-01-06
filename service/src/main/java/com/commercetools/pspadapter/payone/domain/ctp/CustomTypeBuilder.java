@@ -15,12 +15,12 @@ import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
-import io.sphere.sdk.types.BooleanType;
-import io.sphere.sdk.types.DateType;
-import io.sphere.sdk.types.EnumType;
+import io.sphere.sdk.types.BooleanFieldType;
+import io.sphere.sdk.types.DateFieldType;
+import io.sphere.sdk.types.EnumFieldType;
 import io.sphere.sdk.types.FieldDefinition;
 import io.sphere.sdk.types.FieldType;
-import io.sphere.sdk.types.StringType;
+import io.sphere.sdk.types.StringFieldType;
 import io.sphere.sdk.types.Type;
 import io.sphere.sdk.types.TypeDraftBuilder;
 import io.sphere.sdk.types.commands.TypeCreateCommand;
@@ -137,12 +137,12 @@ public class CustomTypeBuilder {
                 createSingleLineStringFieldDefinition(SUCCESS_URL_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(ERROR_URL_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CANCEL_URL_FIELD, FieldClassifier.OPTIONAL),
-                createFieldDefinition(BooleanType.of(), FORCE_3DSECURE_FIELD, null, FieldClassifier.OPTIONAL),
+                createFieldDefinition(BooleanFieldType.of(), FORCE_3DSECURE_FIELD, null, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CARD_DATA_PLACEHOLDER_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(TRUNCATED_CARD_NUMBER_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CARD_HOLDER_NAME_FIELD, FieldClassifier.OPTIONAL),
-                createFieldDefinition(DateType.of(), CARD_EXPIRY_DATE_FIELD, null, FieldClassifier.OPTIONAL),
-                createFieldDefinition(EnumType.of(CreditCardNetwork.getValuesAsListOfEnumValue()), CARD_NETWORK_FIELD, null, FieldClassifier.OPTIONAL)
+                createFieldDefinition(DateFieldType.of(), CARD_EXPIRY_DATE_FIELD, null, FieldClassifier.OPTIONAL),
+                createFieldDefinition(EnumFieldType.of(CreditCardNetwork.getValuesAsListOfEnumValue()), CARD_NETWORK_FIELD, null, FieldClassifier.OPTIONAL)
         ));
     }
 
@@ -213,11 +213,11 @@ public class CustomTypeBuilder {
     }
 
     private FieldDefinition createSingleLineStringFieldDefinition(final String fieldName, final FieldClassifier classifier) {
-        return createFieldDefinition(StringType.of(), fieldName, TextInputHint.SINGLE_LINE, classifier);
+        return createFieldDefinition(StringFieldType.of(), fieldName, TextInputHint.SINGLE_LINE, classifier);
     }
 
     private FieldDefinition createMultiLineStringFieldDefinition(final String fieldName, final FieldClassifier classifier) {
-        return createFieldDefinition(StringType.of(), fieldName, TextInputHint.MULTI_LINE, classifier);
+        return createFieldDefinition(StringFieldType.of(), fieldName, TextInputHint.MULTI_LINE, classifier);
     }
 
     private FieldDefinition createFieldDefinition(final FieldType fieldType, final String fieldName, final TextInputHint inputHint, final FieldClassifier classifier) {
