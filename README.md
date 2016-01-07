@@ -93,9 +93,9 @@ required:
 
 To run the executable specification invoke the following command line:
 
-    ```sh
-    ./gradlew :functionaltests:cleanTest :functionaltests:test
-    ```
+```sh
+./gradlew :functionaltests:cleanTest :functionaltests:test
+```
 
 Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the specification) has changed.
 
