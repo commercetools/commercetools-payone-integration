@@ -1,9 +1,9 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-*Table of Contents*
 
-- [Payment methods covered](#payment-methods-covered)
+
 - [TODO: ITEMS TO BE DISCUSSED](#todo-items-to-be-discussed)
+- [Payment methods covered](#payment-methods-covered)
 - [API Data Mapping between PAYONE and the commercetools platform](#api-data-mapping-between-payone-and-the-commercetools-platform)
   - [commercetools Payment resource mapping](#commercetools-payment-resource-mapping)
   - [commercetools Cart and Order object (mapping to payment interface on payment creation)](#commercetools-cart-and-order-object-mapping-to-payment-interface-on-payment-creation)
@@ -19,6 +19,20 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 > for better readability you might want to use a ["wide github"](https://chrome.google.com/webstore/detail/wide-github/kaalofacklcidaampbokdplbklpeldpj) plugin in your Browser
+
+# TODO: ITEMS TO BE DISCUSSED
+
+With PAYONE:
+
+ * TODO (probably already spoken about): which notify_versions can occur if we use the latest API version? only 7.5?
+   * -> klärt Hr. Kuchel intern. 
+ * concerning checkout documentation: what's the security feature of the hash? it's just done over the fields that are plaintext in the page and there is no secret in the hash, too. 
+
+Feedback an PAYONE:
+ * es wäre extrem hilfreich, wenn die sequencenumber schon in der response vom capture wäre und nicht erst in der notification.
+ * es wäre einfacher, wenn eine cancellation (chargeback / rücklastschrift) eine eigene sequencenumber bekäme  
+ * ein Beispielablauf, der teilweise bezahlung zeigt (entweder bei vorkasse oder wenn dunning mit zahlung überlappt) wäre hilfreich fürs Verständnis. 
+ * doku zu best practices wäre auch hilfreich (z.B. themen wie refund vs. debit). 
 
 # Payment methods covered
 
@@ -42,20 +56,6 @@ See also: [CT Method field convention](https://github.com/nkuehn/payment-integra
 | `INVOICE-KLARNA` | `fnc` | `financingtype=KLV` | Klarna Invoice | `payment-INVOICE-KLARNA` |
 
 BillSAFE has been deprecated by PAYONE and is not supported. 
-
-# TODO: ITEMS TO BE DISCUSSED
-
-With PAYONE:
-
- * TODO (probably already spoken about): which notify_versions can occur if we use the latest API version? only 7.5?
-   * -> klärt Hr. Kuchel intern. 
- * concerning checkout documentation: what's the security feature of the hash? it's just done over the fields that are plaintext in the page and there is no secret in the hash, too. 
-
-Feedback an PAYONE:
- * es wäre extrem hilfreich, wenn die sequencenumber schon in der response vom capture wäre und nicht erst in der notification.
- * es wäre einfacher, wenn eine cancellation (chargeback / rücklastschrift) eine eigene sequencenumber bekäme  
- * ein Beispielablauf, der teilweise bezahlung zeigt (entweder bei vorkasse oder wenn dunning mit zahlung überlappt) wäre hilfreich fürs Verständnis. 
- * doku zu best practices wäre auch hilfreich (z.B. themen wie refund vs. debit). 
 
 # API Data Mapping between PAYONE and the commercetools platform
   
