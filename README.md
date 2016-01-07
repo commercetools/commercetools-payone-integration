@@ -48,7 +48,29 @@ TODO
 
 ### Deploy and Run
 
-TODO docker and heroku options
+TODO docker and (complete) heroku options
+
+#### Configuration via Environment Variables
+
+The integration service can be configured by the following environment variables:
+
+* commercetools API client credentials (can be found in [Commercetools Merchant Center](https://admin.sphere.io/))
+  * `CT_PROJECT_KEY` - the project key 
+  * `CT_CLIENT_ID` - the client id
+  * `CT_CLIENT_SECRET` - the client secret
+* PAYONE API client credentials (can be found in [PMI](https://pmi.pay1.de/))
+  * `PAYONE_MERCHANT_ID` - Merchant account ID
+  * `PAYONE_PORTAL_ID` - Payment portal ID
+  * `PAYONE_KEY` - Payment portal key
+* `CRON_NOTATION` - cron expression to specify when the service will poll for commercetools messages like
+  [PaymentInteractionAdded](http://dev.commercetools.com/http-api-projects-messages.html#payment-interaction-added-message),
+  _optional_ (default: poll every 30 seconds)
+* `PAYONE_MODE` - the mode of operation with PAYONE, _optional_:
+  * `"live"` for production mode, (i.e. _actual payments_) or
+  * `"test"` for test mode, the default mode
+* `CT_START_FROM_SCRATCH`- _**Handle with care!**_ If and only if equal, ignoring case, to `"true"`
+  the service will create the custom types it needs.
+  _**Therefor it first deletes all Order, Cart, Payment and Type entities**_.
 
 ### Notes to the checkout implementation
 
@@ -61,6 +83,21 @@ TODO docker and heroku options
 ## Test environments
 
 SEE PAYONE DOCUMENTATION - ALL TEST DATA THERE, JUST PAYPAL REQUIRES AN OWN ACCOUNT
+
+### Functional Tests
+
+To execute the functional tests (using [Concordion](http://concordion.org/)) the following environment variable is
+required:
+
+* `CT_PAYONE_INTEGRATION_URL` - the URL of the service instance under test
+
+To run the executable specification invoke the following command line:
+
+    ```Shell
+    ./gradlew :functionaltests:cleanTest :functionaltests:test
+    ```
+
+Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the specification) has changed.
 
 ### Paypal Sandbox Account
 
