@@ -1,8 +1,26 @@
-# Data Mapping between PAYONE and the commercetools platform
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+*Table of Contents*
+
+- [Payment methods covered](#payment-methods-covered)
+- [TODO: ITEMS TO BE DISCUSSED](#todo-items-to-be-discussed)
+- [API Data Mapping between PAYONE and the commercetools platform](#api-data-mapping-between-payone-and-the-commercetools-platform)
+  - [commercetools Payment resource mapping](#commercetools-payment-resource-mapping)
+  - [commercetools Cart and Order object (mapping to payment interface on payment creation)](#commercetools-cart-and-order-object-mapping-to-payment-interface-on-payment-creation)
+  - [PAYONE fields that map to custom CT Payment fields (by payment method)](#payone-fields-that-map-to-custom-ct-payment-fields-by-payment-method)
+  - [PAYONE fields that map to custom Fields on CT Cart, CT Customer or CT Order](#payone-fields-that-map-to-custom-fields-on-ct-cart-ct-customer-or-ct-order)
+  - [PAYONE transaction types -> CT Transaction Types](#payone-transaction-types---ct-transaction-types)
+    - [triggering a new PAYONE transaction request given a CT transaction](#triggering-a-new-payone-transaction-request-given-a-ct-transaction)
+    - [receiving the PAYONE TransactionStatus Notifications and storing them in an Interaction](#receiving-the-payone-transactionstatus-notifications-and-storing-them-in-an-interaction)
+    - [updating the CT Payment given a PAYONE TransactionStatus Notification (Stored in an Interaction)](#updating-the-ct-payment-given-a-payone-transactionstatus-notification-stored-in-an-interaction)
+- [Unused / unsupported PAYONE fields & features](#unused--unsupported-payone-fields-&-features)
+- [Constraint Rules to be implemented by the Integration](#constraint-rules-to-be-implemented-by-the-integration)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 > for better readability you might want to use a ["wide github"](https://chrome.google.com/webstore/detail/wide-github/kaalofacklcidaampbokdplbklpeldpj) plugin in your Browser
 
-## Payment methods covered by this specification
+# Payment methods covered
 
 See also: [CT Method field convention](https://github.com/nkuehn/payment-integration-specifications/blob/master/Method-Keys.md)
  
@@ -25,12 +43,10 @@ See also: [CT Method field convention](https://github.com/nkuehn/payment-integra
 
 BillSAFE has been deprecated by PAYONE and is not supported. 
 
-# API Data mapping
-
-## TODO: ITEMS TO BE DISCUSSED
+# TODO: ITEMS TO BE DISCUSSED
 
 With PAYONE:
-   
+
  * TODO (probably already spoken about): which notify_versions can occur if we use the latest API version? only 7.5?
    * -> klärt Hr. Kuchel intern. 
  * concerning checkout documentation: what's the security feature of the hash? it's just done over the fields that are plaintext in the page and there is no secret in the hash, too. 
@@ -40,8 +56,140 @@ Feedback an PAYONE:
  * es wäre einfacher, wenn eine cancellation (chargeback / rücklastschrift) eine eigene sequencenumber bekäme  
  * ein Beispielablauf, der teilweise bezahlung zeigt (entweder bei vorkasse oder wenn dunning mit zahlung überlappt) wäre hilfreich fürs Verständnis. 
  * doku zu best practices wäre auch hilfreich (z.B. themen wie refund vs. debit). 
- 
-## PAYONE fields that map to custom CT Payment fields (by method)
+
+# API Data Mapping between PAYONE and the commercetools platform
+  
+## commercetools Payment resource mapping
+
+* [CT Payment documentation](http://dev.sphere.io/http-api-projects-payments.html#payment)
+
+| CT payment JSON path | PAYONE Server API field | Who is master? |  Value transform | 
+|---|---|---|---|
+| id | (unused) | CT |  |
+| version | (unused) | CT |  |
+| customer.obj.id | `customerid` | CT | Use only as fallback to `.customerNumber` if that is not set. Extract first 20 non-dash characters to get a 20char string.  |
+| customer.obj.customerNumber | `customerid` | CT | Log a Warning and ignore if the Number exceeds 20 characters. Do not truncate. |
+| customer.obj.vatId | `vatId` | CT |  |
+| customer.obj.dateOfBirth | `birthday` | CT | transform from ISO 8601 format (`YYYY-MM-DD`) to `YYYYMMDD`, i.e. remove the dashes |
+| externalId | (unused, is intended for merchant-internal systems like ERP) | CT |  |
+| interfaceId | `txid` | PAYONE |  |
+| amountPlanned.centAmount | - | CT | Initially set by checkout and not modified any more. `price` from PAYONE notification must not deviate on Notifications. PAYONE value has to be multiplied by 100.  |
+| amountPlanned.currency | - | CT |  |
+| amountAuthorized.centAmount | `amount` | CT / PAYONE | ONLY on CREDIT_CARD payments: Once the Authorization Transaction is in status "Success", copy the amount here.  |
+| authorizedUntil | `txtime` plus seven days | PAYONE | seven days after the txtime value of the `preauthorization` call (not of other transactions!) |
+| amountPaid.centAmount | `receivable` minus `balance` | PAYONE | only if both parameters available |
+| amountRefunded.centAmount | (from transactions) | PAYONE | (Sum of successful Refund Transactions) |
+| paymentMethodInfo.paymentInterface | - | CT | Must be "PAYONE" in CT, otherwise do not handle the Payment at all |
+| paymentMethodInfo.method | - | CT | (see the method mapping table above) |
+| paymentMethodInfo.name.{locale} | - | - | (not passed, project specific content) |
+| paymentStatus.interfaceCode | `status [errorcode (errormessage)]` f.i. "ERROR 917 (Refund limit exceeded)" or "APPROVED" | PAYONE | none |
+| paymentStatus.interfaceText | `customermessage` if available else `status` | PAYONE | none |
+| paymentStatus.state | - | - | (mapping from interfaceCode and transaction states to the Payment State Machine is project specific) |
+| transactions\[\*\].id | - | CT (cannot be changed) |  |
+| transactions\[\*\].timestamp | `txtime` | PAYONE (from status notification) | |
+| transactions\[\*\].type |  |  | (see below for transaction types) |
+| transactions\[\*\].amount.centAmount | `amount` | CT | none |
+| transactions\[\*\].amount.centAmount | `capturemode` = `notcompleted` or `completed` | CT | ONLY on Charge Transactions. If the sum of Charge Transactions icluding the current one equals or exceeds the `amountPlanned` of the payment, then send `completed`, otherwise `notcompleted` Only required for Klarna payment methods.  |
+| transactions\[\*\].amount.currency | `currency` | CT | none, but must not deviate from amountPlanned.centAmount |
+| transactions\[\*\].interactionId | `sequencenumber` | CT / PAYONE | *To be set when doing the PAYONE call, not already when creating the Transaction.* For transaction requests initiating a payment process (CT Authorization or CT Charge w/o CT Authorization) the `sequencenumber` is not required - PAYONE implicitly uses `0`. PAYONE posts transaction status notifications which include the `sequencenumber`. If a CT transaction (CancelAuthorization, Charge or Refund) following the initial CT transaction is added, the integration service must use the `sequencenumber` of the latest notification received from PAYONE and increment it by `1` for the new request it sends to PAYONE. Notifications are stored in the interactions array. *Please, note that PAYONE will use `sequencenumber 0` for transaction status notifications `paid` and `cancelation` related to the initiating PAYONE authorization request (CT Charge w/o CT Authorization), i.e. there will be CT transactions of different type (Charge, Chargeback) with `sequencenumber 0` in the payment.* See below for transaction status notification processing. |
+| transactions\[\*\].state | - | CT / PAYONE | (see below for transaction states) |
+
+## commercetools Cart and Order object (mapping to payment interface on payment creation)
+
+Related Documentation:
+ * [CT Order documentation](http://dev.sphere.io/http-api-projects-orders.html#order)
+ * [CT Cart documentation](http://dev.sphere.io/http-api-projects-carts.html#cart)
+
+Implementation Notes:
+ * If the sum of sum of `pr[n]` times `no[n]` does not equal the total `amount` of the payment, do not pass the line item
+   data at all. If the amount needs to be "fixed" to support PAYONE Invoicing or Klarna payment, this is up to the checkout
+   implementation. 
+ * DO NOT transfer any line item data on `refund`  or `debit` calls. 
+
+| CT Cart or Order JSON path | PAYONE Server API | who is Master?  | Value transform |
+|---|---|---|---|
+| id |  |  |  |
+| createdAt |  |  |  |
+| lastModifiedAt |  |  |  |
+| customerId |  |  |  |
+| customerEmail |  |  |  |
+| country |  |  |  |
+| totalPrice.currencyCode |  |  |  |
+| totalPrice.centAmount |  |  |  |
+| taxedPrice.totalNet.currencyCode |  |  |  |
+| taxedPrice.totalNet.centAmount |  |  |  |
+| taxedPrice.totalGross.currencyCode |  |  |  |
+| taxedPrice.totalGross.centAmount |  |  |  |
+| taxedPrice.taxPortions\[\*\].rate |  |  |  |
+| taxedPrice.taxPortions\[\*\].amount.currencyCode |  |  |  |
+| taxedPrice.taxPortions\[\*\].amount.centAmount |  |  |  |
+| cartState | Active/Merged/Ordered |  |  |
+| lineItems\[\*\] | `it[n]` | CT (if a line Item object exists) | fixed value `goods` |
+| lineItems\[\*\].id |  |  |  |
+| lineItems\[\*\].name.{locale} | `de[n]` |  | truncate to 255 chars. locale to be taken from the `language` custom field of the payment  |
+| lineItems\[\*\].quantity | `no[n]` | CT | fail hard if 3 chars length is exceeded |
+| lineItems\[\*\].variant.id |  |  |  |
+| lineItems\[\*\].variant.sku | `id[n]` | CT | truncate at 32 chars and warn |
+| lineItems\[\*\].totalPrice.currencyCode |  |  |  |
+| lineItems\[\*\].totalPrice.centAmount | `pr[n]` | CT | a) Divide this by .quantity to get the effective price per Line Item quantity. b) Round commercially to full cents. c) Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. |
+| lineItems\[\*\].taxRate.name |  |  |  |
+| lineItems\[\*\].taxRate.amount | `va[n]` | CT | .amount is a float between zero and one. It has to be multiplied with 1000 and rounded to full integer to get base % points.|
+| lineItems\[\*\].taxRate.includedInPrice |  |  | (required for calculating the price, see above)  |
+| customLineItems\[\*\] | `it[n]` | CT (if a custom line Item object exists) | fixed value `goods` |
+| customLineItems\[\*\].id |  |  |  |
+| customLineItems\[\*\].name.{locale} | `de[n]` |  | truncate to 255 chars. locale to be taken from the `language` custom field of the payment |
+| customLineItems\[\*\].quantity | `no[n]` | CT | fail hard if 3 chars length is exceeded |
+| customLineItems\[\*\].totalPrice.currencyCode |  |  |  |
+| customLineItems\[\*\].totalPrice.centAmount | `pr[n]` | CT | a) Divide this by .quantity to get the effective price per Line Item quantity. b) Round commercially to full cents. c) Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. |
+| customLineItems\[\*\].taxRate.name |  |  |  |
+| customLineItems\[\*\].taxRate.amount | `va[n]` | CT | .amount is a float between zero and one. It has to be multiplied with 1000 and rounded to full integer to get base % points.|
+| customLineItems\[\*\].taxRate.includedInPrice |  |  | (required for calculating the price, see above)  |
+| shippingInfo.shippingMethodName | `shippingprovider`  | CT | any value starting with `DHL` is translated to `DHL` only. Any Value starting with `Bartolini` is translated to `BRT`  |
+| shippingInfo.shippingMethodName | additionally `id[n]` if a shipping price is set  | CT | - |
+| shippingInfo.price |  `it[n]` | CT (count n up from the last real line item if the price object exists) | fixed value `shipment` |
+| shippingInfo.price |  `no[n]` | CT (count n up from the last real line item if the price object exists) | fixed value `1` |
+| shippingInfo.price.currencyCode |  |  |  |
+| shippingInfo.price.centAmount | `pr[n]` | CT | Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. |
+| shippingInfo.taxRate.name |  |  |  |
+| shippingInfo.taxRate.amount | `va[n]` | CT | .amount is a float between zero and one. It has to be multiplied with 1000 and rounded to full integer to get base % points.|
+| shippingInfo.taxRate.includedInPrice |  |  | (required for calculating the price, see above)  |
+| shippingAddress.title | (unused) |  |  |
+| shippingAddress.salutation | (unused) |  |  |
+| shippingAddress.firstName | `shipping_firstname` | CT |  |
+| shippingAddress.lastName | `shipping_lastname` | CT |  |
+| shippingAddress.streetName | `shipping_street` | CT |  |
+| shippingAddress.streetNumber | `shipping_street` | CT | if set: append to .streetName, separated by space |
+| shippingAddress.additionalStreetInfo | (unused) | CT |  |
+| shippingAddress.postalCode | `shipping_zip` | CT |  |
+| shippingAddress.city | `shipping_city` | CT |  |
+| shippingAddress.region | (unused) |  |  |
+| shippingAddress.state | `shipping_state` | CT | (only if country=US, CA, CN, JP, MX, BR, AR, ID, TH, IN), Only if an ISO-3166-2 subdivision |
+| shippingAddress.country | `shipping_country` | CT |  |
+| shippingAddress.company | `shipping_company` | CT |  |
+| shippingAddress.department | `shipping_company` | CT | if set: append to .company, separated with a commma |
+| shippingAddress.building | (unused) |  |  |
+| shippingAddress.apartment | (unused) |  |  |
+| shippingAddress.pOBox | (unused) |  |  |
+| shippingAddress.phone | (unused) |  |  |
+| shippingAddress.mobile | (unused) |  |  |
+| shippingAddress.email | (unused) |  |  |
+| billingAddress.title | `title` | CT |  |
+| billingAddress.salutation | `salutation` | CT |  |
+| billingAddress.firstName | `firstname` | CT |  |
+| billingAddress.lastName | `lastname` | CT |  |
+| billingAddress.company | `company` | CT |  |
+| billingAddress.streetName | `street` | CT |  |
+| billingAddress.streetNumber | `street` | CT | if set: append to .streetName, separated with a space |
+| billingAddress.additionalStreetInfo | `addressaddition` | CT |  |
+| billingAddress.postalCode | `zip` | CT |  |
+| billingAddress.city | `city` | CT |  |
+| billingAddress.country | `country` | CT | both use ISO 3166 |
+| billingAddress.state | `state` | CT | write to PAYONE only if country=US, CA, CN, JP, MX, BR, AR, ID, TH, IN) and only if value is an ISO3166-2 subdivision |
+| billingAddress.email | `email` | CT |  |
+| billingAddress.phone | `telephonenumber` | CT |  |
+| billingAddress.mobile | `telephonenumber` | CT | fallback value if .phone is not set |
+
+## PAYONE fields that map to custom CT Payment fields (by payment method)
 
 Please use the commercetools custom payment types (per method) from the [method type specifications](https://github.com/nkuehn/payment-integration-specifications/blob/master/Method-Keys.md) in the payment specifications project. 
 
@@ -163,64 +311,6 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
  * `gender`: Check the Cart for a custom field `customerGender`, as fallback check the Customer for a custom field 
     named `gender`. If the first existing is of Type `Enum` and has a value `Male` or `Female` -> use that one as `f` or `m` respectively.  
  * `ip`: Check for a custom Field `customerIPAddress` of type `String` on the CT Cart / Order. 
- 
-## unused PAYONE fields & unsupported features
-
- * `creditor_*`  just for debug? 
- * `bankcountry`, `bankaccount`, `bankcode`, `bic` (all replaced by the IBAN, which is preferable because it has a checksum)
- * `xid`, `cavv`, `eci` (3Dsecure is done via redirect only) 
- * `sd[n]` "delivery date"  and `ed[n]` delivery end date (there is no matching equivalent on the CT Cart Line Item) 
- * `protect_result_avs` konfiguriert nur im backend von PAYONE. Wird quasi nicht genutzt und ist AMEX-Spezifisch. 
- *  All "traditional" bank account data fields (i.e. not IBAN and BIC) are omitted for Refund and Clearing Data Cases as 
-    in these cases the Data is not put in manually by the end user. 
- * `updatereminder` when sumbitted to the PAYONE API.  We do not support manual dunning control. This has to be done per Project. 
- * Billing-Module (`vauthorization`). 
-
-### features that have no matching semantics directly in CTP, but can be added per project
-
-Technical Infrastructure is there, but not made public by default because that requires a stric security setup:
- *  Payment Data Check (add  GET /commercetools/payments/1234-1234-1234-1234/paymentdatacheck  call to the Service's own API )
- *  Address Check ( add GET /commercetools/order/1234-1234-1234-1234/addresscheck  to the Service's own API ) 
- *  Consumer Scoring ( add GET /commercetools/customer/1234-1234-1234-1234/consumerscore to the Service's own API)
-  
-## commercetools Payment resource mapping
-
-* [CT Payment documentation](http://dev.sphere.io/http-api-projects-payments.html#payment)
-
-| CT payment JSON path | PAYONE Server API field | Who is master? |  Value transform | 
-|---|---|---|---|
-| id | (unused) | CT |  |
-| version | (unused) | CT |  |
-| customer.obj.id | `customerid` | CT | Use only as fallback to `.customerNumber` if that is not set. Extract first 20 non-dash characters to get a 20char string.  |
-| customer.obj.customerNumber | `customerid` | CT | Log a Warning and ignore if the Number exceeds 20 characters. Do not truncate. |
-| customer.obj.vatId | `vatId` | CT |  |
-| customer.obj.dateOfBirth | `birthday` | CT | transform from ISO 8601 format (`YYYY-MM-DD`) to `YYYYMMDD`, i.e. remove the dashes |
-| externalId | (unused, is intended for merchant-internal systems like ERP) | CT |  |
-| interfaceId | `txid` | PAYONE |  |
-| amountPlanned.centAmount | - | CT | Initially set by checkout and not modified any more. `price` from PAYONE notification must not deviate on Notifications. PAYONE value has to be multiplied by 100.  |
-| amountPlanned.currency | - | CT |  |
-| amountAuthorized.centAmount | `amount` | CT / PAYONE | ONLY on CREDIT_CARD payments: Once the Authorization Transaction is in status "Success", copy the amount here.  |
-| authorizedUntil | `txtime` plus seven days | PAYONE | seven days after the txtime value of the `preauthorization` call (not of other transactions!) |
-| amountPaid.centAmount | `receivable` minus `balance` | PAYONE | only if both parameters available |
-| amountRefunded.centAmount | (from transactions) | PAYONE | (Sum of successful Refund Transactions) |
-| paymentMethodInfo.paymentInterface | - | CT | Must be "PAYONE" in CT, otherwise do not handle the Payment at all |
-| paymentMethodInfo.method | - | CT | (see the method mapping table above) |
-| paymentMethodInfo.name.{locale} | - | - | (not passed, project specific content) |
-| paymentStatus.interfaceCode | `status [errorcode (errormessage)]` f.i. "ERROR 917 (Refund limit exceeded)" or "APPROVED" | PAYONE | none |
-| paymentStatus.interfaceText | `customermessage` if available else `status` | PAYONE | none |
-| paymentStatus.state | - | - | (mapping from interfaceCode and transaction states to the Payment State Machine is project specific) |
-| transactions\[\*\].id | - | CT (cannot be changed) |  |
-| transactions\[\*\].timestamp | `txtime` | PAYONE (from status notification) | |
-| transactions\[\*\].type |  |  | (see below for transaction types) |
-| transactions\[\*\].amount.centAmount | `amount` | CT | none |
-| transactions\[\*\].amount.centAmount | `capturemode` = `notcompleted` or `completed` | CT | ONLY on Charge Transactions. If the sum of Charge Transactions icluding the current one equals or exceeds the `amountPlanned` of the payment, then send `completed`, otherwise `notcompleted` Only required for Klarna payment methods.  |
-| transactions\[\*\].amount.currency | `currency` | CT | none, but must not deviate from amountPlanned.centAmount |
-| transactions\[\*\].interactionId | `sequencenumber` | CT / PAYONE | *To be set when doing the PAYONE call, not already when creating the Transaction.* For transaction requests initiating a payment process (CT Authorization or CT Charge w/o CT Authorization) the `sequencenumber` is not required - PAYONE implicitly uses `0`. PAYONE posts transaction status notifications which include the `sequencenumber`. If a CT transaction (CancelAuthorization, Charge or Refund) following the initial CT transaction is added, the integration service must use the `sequencenumber` of the latest notification received from PAYONE and increment it by `1` for the new request it sends to PAYONE. Notifications are stored in the interactions array. *Please, note that PAYONE will use `sequencenumber 0` for transaction status notifications `paid` and `cancelation` related to the initiating PAYONE authorization request (CT Charge w/o CT Authorization), i.e. there will be CT transactions of different type (Charge, Chargeback) with `sequencenumber 0` in the payment.* See below for transaction status notification processing. |
-| transactions\[\*\].state | - | CT / PAYONE | (see below for transaction states) |
-
-See below for the custom fields. 
-
-## Transaction Types and States
 
 ## PAYONE transaction types -> CT Transaction Types 
 
@@ -279,105 +369,27 @@ The matching transaction is found by sequencenumber = interactionId.
 | `invoice` | not set or `completed` | `7.5` | (nothing) | (nothing) | no status change, just write the invoice ID / URL |
 | `failed` | not set or `completed` | `7.5` | (unsupported)  | (unsupported) | (not fully implemented at PAYONE yet) |
 
-
 Additional fields to be updated in any case:
  * amountPaid
  * amountRefunded
 
-## commercetools Cart and Order object (mapping to payment interface on payment creation)
+# Unused / unsupported PAYONE fields & features
 
-Related Documentation:
- * [CT Order documentation](http://dev.sphere.io/http-api-projects-orders.html#order)
- * [CT Cart documentation](http://dev.sphere.io/http-api-projects-carts.html#cart)
+Unsupported PAYONE Fields
+ * `creditor_*`  just for debug? 
+ * `bankcountry`, `bankaccount`, `bankcode`, `bic` (all replaced by the IBAN, which is preferable because it has a checksum)
+ * `xid`, `cavv`, `eci` (3Dsecure is done via redirect only) 
+ * `sd[n]` "delivery date"  and `ed[n]` delivery end date (there is no matching equivalent on the CT Cart Line Item) 
+ * `protect_result_avs` konfiguriert nur im backend von PAYONE. Wird quasi nicht genutzt und ist AMEX-Spezifisch. 
+ *  All "traditional" bank account data fields (i.e. not IBAN and BIC) are omitted for Refund and Clearing Data Cases as 
+    in these cases the Data is not put in manually by the end user. 
+ * `updatereminder` when sumbitted to the PAYONE API.  We do not support manual dunning control. This has to be done per Project. 
+ * Billing-Module (`vauthorization`). 
 
-Implementation Notes:
- * If the sum of sum of `pr[n]` times `no[n]` does not equal the total `amount` of the payment, do not pass the line item
-   data at all. If the amount needs to be "fixed" to support PAYONE Invoicing or Klarna payment, this is up to the checkout
-   implementation. 
- * DO NOT transfer any line item data on `refund`  or `debit` calls. 
-
-| CT Cart or Order JSON path | PAYONE Server API | who is Master?  | Value transform |
-|---|---|---|---|
-| id |  |  |  |
-| createdAt |  |  |  |
-| lastModifiedAt |  |  |  |
-| customerId |  |  |  |
-| customerEmail |  |  |  |
-| country |  |  |  |
-| totalPrice.currencyCode |  |  |  |
-| totalPrice.centAmount |  |  |  |
-| taxedPrice.totalNet.currencyCode |  |  |  |
-| taxedPrice.totalNet.centAmount |  |  |  |
-| taxedPrice.totalGross.currencyCode |  |  |  |
-| taxedPrice.totalGross.centAmount |  |  |  |
-| taxedPrice.taxPortions\[\*\].rate |  |  |  |
-| taxedPrice.taxPortions\[\*\].amount.currencyCode |  |  |  |
-| taxedPrice.taxPortions\[\*\].amount.centAmount |  |  |  |
-| cartState | Active/Merged/Ordered |  |  |
-| lineItems\[\*\] | `it[n]` | CT (if a line Item object exists) | fixed value `goods` |
-| lineItems\[\*\].id |  |  |  |
-| lineItems\[\*\].name.{locale} | `de[n]` |  | truncate to 255 chars. locale to be taken from the `language` custom field of the payment  |
-| lineItems\[\*\].quantity | `no[n]` | CT | fail hard if 3 chars length is exceeded |
-| lineItems\[\*\].variant.id |  |  |  |
-| lineItems\[\*\].variant.sku | `id[n]` | CT | truncate at 32 chars and warn |
-| lineItems\[\*\].totalPrice.currencyCode |  |  |  |
-| lineItems\[\*\].totalPrice.centAmount | `pr[n]` | CT | a) Divide this by .quantity to get the effective price per Line Item quantity. b) Round commercially to full cents. c) Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. |
-| lineItems\[\*\].taxRate.name |  |  |  |
-| lineItems\[\*\].taxRate.amount | `va[n]` | CT | .amount is a float between zero and one. It has to be multiplied with 1000 and rounded to full integer to get base % points.|
-| lineItems\[\*\].taxRate.includedInPrice |  |  | (required for calculating the price, see above)  |
-| customLineItems\[\*\] | `it[n]` | CT (if a custom line Item object exists) | fixed value `goods` |
-| customLineItems\[\*\].id |  |  |  |
-| customLineItems\[\*\].name.{locale} | `de[n]` |  | truncate to 255 chars. locale to be taken from the `language` custom field of the payment |
-| customLineItems\[\*\].quantity | `no[n]` | CT | fail hard if 3 chars length is exceeded |
-| customLineItems\[\*\].totalPrice.currencyCode |  |  |  |
-| customLineItems\[\*\].totalPrice.centAmount | `pr[n]` | CT | a) Divide this by .quantity to get the effective price per Line Item quantity. b) Round commercially to full cents. c) Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. |
-| customLineItems\[\*\].taxRate.name |  |  |  |
-| customLineItems\[\*\].taxRate.amount | `va[n]` | CT | .amount is a float between zero and one. It has to be multiplied with 1000 and rounded to full integer to get base % points.|
-| customLineItems\[\*\].taxRate.includedInPrice |  |  | (required for calculating the price, see above)  |
-| shippingInfo.shippingMethodName | `shippingprovider`  | CT | any value starting with `DHL` is translated to `DHL` only. Any Value starting with `Bartolini` is translated to `BRT`  |
-| shippingInfo.shippingMethodName | additionally `id[n]` if a shipping price is set  | CT | - |
-| shippingInfo.price |  `it[n]` | CT (count n up from the last real line item if the price object exists) | fixed value `shipment` |
-| shippingInfo.price |  `no[n]` | CT (count n up from the last real line item if the price object exists) | fixed value `1` |
-| shippingInfo.price.currencyCode |  |  |  |
-| shippingInfo.price.centAmount | `pr[n]` | CT | Add VAT vie .taxRate.amount if .taxRate.includedInPrice=false . d) Fail hard if 8 chars length is exceeded. |
-| shippingInfo.taxRate.name |  |  |  |
-| shippingInfo.taxRate.amount | `va[n]` | CT | .amount is a float between zero and one. It has to be multiplied with 1000 and rounded to full integer to get base % points.|
-| shippingInfo.taxRate.includedInPrice |  |  | (required for calculating the price, see above)  |
-| shippingAddress.title | (unused) |  |  |
-| shippingAddress.salutation | (unused) |  |  |
-| shippingAddress.firstName | `shipping_firstname` | CT |  |
-| shippingAddress.lastName | `shipping_lastname` | CT |  |
-| shippingAddress.streetName | `shipping_street` | CT |  |
-| shippingAddress.streetNumber | `shipping_street` | CT | if set: append to .streetName, separated by space |
-| shippingAddress.additionalStreetInfo | (unused) | CT |  |
-| shippingAddress.postalCode | `shipping_zip` | CT |  |
-| shippingAddress.city | `shipping_city` | CT |  |
-| shippingAddress.region | (unused) |  |  |
-| shippingAddress.state | `shipping_state` | CT | (only if country=US, CA, CN, JP, MX, BR, AR, ID, TH, IN), Only if an ISO-3166-2 subdivision |
-| shippingAddress.country | `shipping_country` | CT |  |
-| shippingAddress.company | `shipping_company` | CT |  |
-| shippingAddress.department | `shipping_company` | CT | if set: append to .company, separated with a commma |
-| shippingAddress.building | (unused) |  |  |
-| shippingAddress.apartment | (unused) |  |  |
-| shippingAddress.pOBox | (unused) |  |  |
-| shippingAddress.phone | (unused) |  |  |
-| shippingAddress.mobile | (unused) |  |  |
-| shippingAddress.email | (unused) |  |  |
-| billingAddress.title | `title` | CT |  |
-| billingAddress.salutation | `salutation` | CT |  |
-| billingAddress.firstName | `firstname` | CT |  |
-| billingAddress.lastName | `lastname` | CT |  |
-| billingAddress.company | `company` | CT |  |
-| billingAddress.streetName | `street` | CT |  |
-| billingAddress.streetNumber | `street` | CT | if set: append to .streetName, separated with a space |
-| billingAddress.additionalStreetInfo | `addressaddition` | CT |  |
-| billingAddress.postalCode | `zip` | CT |  |
-| billingAddress.city | `city` | CT |  |
-| billingAddress.country | `country` | CT | both use ISO 3166 |
-| billingAddress.state | `state` | CT | write to PAYONE only if country=US, CA, CN, JP, MX, BR, AR, ID, TH, IN) and only if value is an ISO3166-2 subdivision |
-| billingAddress.email | `email` | CT |  |
-| billingAddress.phone | `telephonenumber` | CT |  |
-| billingAddress.mobile | `telephonenumber` | CT | fallback value if .phone is not set |
+Features that have no matching semantics directly in CTP, but can be added per project (Technical Infrastructure is there, but not made public by default because that requires a stric security setup):
+ *  Payment Data Check (add  GET /commercetools/payments/1234-1234-1234-1234/paymentdatacheck  call to the Service's own API )
+ *  Address Check ( add GET /commercetools/order/1234-1234-1234-1234/addresscheck  to the Service's own API ) 
+ *  Consumer Scoring ( add GET /commercetools/customer/1234-1234-1234-1234/consumerscore to the Service's own API)
 
 # Constraint Rules to be implemented by the Integration
 
