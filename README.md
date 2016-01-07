@@ -34,7 +34,7 @@ TODO
 https://pmi.pay1.de/
 
  * create a Payment Portal of type "Shop" for the site you are planning (please also maintain separate portal for 
-   automated testing, demo systmes etc.)
+   automated testing, demo systems etc.)
  * set the hashing algorithm to sha2-384  ("advanced" tab in the portal config)
  * put the notification listener URL of where you will deploy the microservice into "Transaction Status URL" in the 
    "advanced" tab of the portal
