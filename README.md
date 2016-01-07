@@ -93,7 +93,7 @@ required:
 
 To run the executable specification invoke the following command line:
 
-```sh
+```
 ./gradlew :functionaltests:cleanTest :functionaltests:test
 ```
 
