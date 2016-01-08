@@ -82,9 +82,14 @@ public class IntegrationService {
             LOG.info("<- Received POST from Payone: " + req.body());
             Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
 
-            notificationDispatcher.dispatchNotification(notification);
-            res.status(501);
-            return "Currently not implemented";
+            try {
+                notificationDispatcher.dispatchNotification(notification);
+                res.status(501);
+                return "Currently not implemented";
+            } catch (IllegalArgumentException ex) {
+                res.status(400);
+                return ex.getMessage();
+            }
         });
 
         Spark.awaitInitialization();

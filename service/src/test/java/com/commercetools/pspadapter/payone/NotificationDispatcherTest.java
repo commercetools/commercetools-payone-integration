@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -140,7 +141,12 @@ public class NotificationDispatcherTest {
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
         NotificationDispatcher dispatcher = new NotificationDispatcher(createDefaultNotificationProcessor(), processors, client, config);
-        assertThat(dispatcher.dispatchNotification(notification)).isEqualTo(false);
+
+        final Throwable throwable = catchThrowable(() -> dispatcher.dispatchNotification(notification));
+
+        assertThat(throwable)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("is not valid for this service instance");
 
         assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(0);
         assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);

@@ -4,6 +4,7 @@ import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
@@ -40,18 +41,16 @@ public class NotificationDispatcher {
 
     public boolean dispatchNotification(final Notification notification) throws IllegalArgumentException {
 
-        if (hasValidSecrets(notification)) {
-            Payment payment = getPaymentByInterfaceId(notification.getTxid())
-                    .orElseGet(() -> {
-                        PaymentDraft paymentDraft = createNewPaymentDraftFromNotification(notification);
-                        return client.complete(PaymentCreateCommand.of(paymentDraft));
-                    });
+        validateSecrets(notification);
 
-            return processors.getOrDefault(notification.getTxaction(), defaultProcessor)
-                    .processTransactionStatusNotification(notification, payment);
-        } else {
-            return false;
-        }
+        Payment payment = getPaymentByInterfaceId(notification.getTxid())
+                .orElseGet(() -> {
+                    PaymentDraft paymentDraft = createNewPaymentDraftFromNotification(notification);
+                    return client.complete(PaymentCreateCommand.of(paymentDraft));
+                });
+
+        return processors.getOrDefault(notification.getTxaction(), defaultProcessor)
+                .processTransactionStatusNotification(notification, payment);
     }
 
     /**
@@ -59,14 +58,17 @@ public class NotificationDispatcher {
      * are matching the corresponding config values of this service instance.
      *
      * @param notification the notification object to check
-     * @return true if all secrets match
+     * @throws IllegalArgumentException if any argument is null or not matching
      */
-    private boolean hasValidSecrets(final Notification notification) {
-         return config.getKeyAsMd5Hash().equals(notification.getKey())
-                && config.getPortalId().equals(notification.getPortalid())
-                && config.getSubAccountId().equals(notification.getAid())
-                && config.getMode().equals(notification.getMode());
-
+    private void validateSecrets(final Notification notification) throws IllegalArgumentException {
+        Preconditions.checkArgument(config.getKeyAsMd5Hash().equals(notification.getKey()),
+                "the value for 'key' is not valid for this service instance: " + notification.getKey());
+        Preconditions.checkArgument(config.getPortalId().equals(notification.getPortalid()),
+                "the value for 'portalid' is not valid for this service instance: " + notification.getPortalid());
+        Preconditions.checkArgument(config.getSubAccountId().equals(notification.getAid()),
+                "the value for 'aid' is not valid for this service instance: " + notification.getAid());
+        Preconditions.checkArgument(config.getMode().equals(notification.getMode()),
+                "the value for 'mode' is not valid for this service instance: " + notification.getMode());
     }
 
     private Optional<Payment> getPaymentByInterfaceId(final String interfaceId) {
