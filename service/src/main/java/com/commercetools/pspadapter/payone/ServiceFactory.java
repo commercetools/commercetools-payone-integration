@@ -43,37 +43,42 @@ public class ServiceFactory {
 
     private static final String SCHEDULED_JOB_KEY = "commercetools-platform-polling-1";
 
-    private final ServiceConfig config;
+    private final ServiceConfig serviceConfig;
+    private final PropertyProvider propertyProvider;
 
-    private ServiceFactory(final ServiceConfig config) {
-        this.config = config;
+    private ServiceFactory(final PropertyProvider propertyProvider) {
+        this.propertyProvider = propertyProvider;
+        this.serviceConfig = new ServiceConfig(propertyProvider);
     }
 
     /**
-     * Creates a new service factory initialized with a default {@link ServiceConfig}.
+     * Creates a new service factory initialized with a default {@link PropertyProvider}.
      * @return the new factory instance, never null
      */
-    public static ServiceFactory createWithDefaultServiceConfig() {
-        return ServiceFactory.createWithServiceConfig(new ServiceConfig(new PropertyProvider()));
+    public static ServiceFactory create() {
+        return ServiceFactory.withPropertiesFrom(new PropertyProvider());
     }
 
     /**
-     * Creates a new service factory initialized with the provided {@code config}.
-     * @param config the service configuration
+     * Creates a new service factory initialized with the provided {@code propertyProvider}.
+     * @param propertyProvider provides the configuration parameters
      * @return the new service factory instance, never null
      */
-    public static ServiceFactory createWithServiceConfig(final ServiceConfig config) {
-        return new ServiceFactory(config);
+    public static ServiceFactory withPropertiesFrom(final PropertyProvider propertyProvider) {
+        return new ServiceFactory(propertyProvider);
     }
 
     public static void main(String [] args) throws SchedulerException, MalformedURLException {
-        final ServiceConfig serviceConfig = new ServiceConfig(new PropertyProvider());
-        final ServiceFactory serviceFactory = ServiceFactory.createWithServiceConfig(serviceConfig);
+        final PropertyProvider propertyProvider = new PropertyProvider();
+        // FIXME get rid of this (by using instance methods...)
+        final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
+        final PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
+        final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(propertyProvider);
         final CommercetoolsClient commercetoolsClient = serviceFactory.createCommercetoolsClient();
         final LoadingCache<String, Type> typeCache = serviceFactory.createTypeCache(commercetoolsClient);
         final PaymentDispatcher paymentDispatcher = ServiceFactory.createPaymentDispatcher(
                 typeCache,
-                serviceConfig.getPayoneConfig(),
+                payoneConfig,
                 commercetoolsClient);
         final NotificationDispatcher notificationDispatcher = ServiceFactory.createNotificationDispatcher(
                 commercetoolsClient);
@@ -96,20 +101,40 @@ public class ServiceFactory {
                 paymentDispatcher);
     }
 
+    /**
+     * FIXME return shared instance
+     * Creates a new commercetools client instance.
+     * @return the client
+     */
+    public CommercetoolsClient createCommercetoolsClient() {
+        final SphereClientFactory sphereClientFactory = SphereClientFactory.of();
+        return new CommercetoolsClient(
+                sphereClientFactory.createClient(
+                        serviceConfig.getCtProjectKey(),
+                        serviceConfig.getCtClientId(),
+                        serviceConfig.getCtClientSecret()));
+    }
+
+    // FIXME return shared instance
+    public LoadingCache<String, Type> createTypeCache(final BlockingClient client) {
+        return CacheBuilder.newBuilder().build(new TypeCacheLoader(client));
+    }
+
     public IntegrationService createService() {
         final CommercetoolsClient client = createCommercetoolsClient();
         final LoadingCache<String, Type> typeCache = createTypeCache(client);
+        final PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
 
         return ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(client),
-                createPaymentDispatcher(typeCache, config.getPayoneConfig(), client),
+                createPaymentDispatcher(typeCache, payoneConfig, client),
                 createNotificationDispatcher(client),
                 new CustomTypeBuilder(
                         client,
-                        CustomTypeBuilder.PermissionToStartFromScratch.fromBoolean(config.getStartFromScratch())));
+                        CustomTypeBuilder.PermissionToStartFromScratch.fromBoolean(serviceConfig.getStartFromScratch())));
     }
 
-
+    // FIXME get rid of this static method
     private static IntegrationService createService(
             final CommercetoolsQueryExecutor queryExecutor,
             final PaymentDispatcher paymentDispatcher,
@@ -124,10 +149,6 @@ public class ServiceFactory {
         });
     }
 
-    public LoadingCache<String, Type> createTypeCache(final BlockingClient client) {
-        return CacheBuilder.newBuilder().build(new TypeCacheLoader(client));
-    }
-
     public static NotificationDispatcher createNotificationDispatcher(final CommercetoolsClient client) {
         //TODO fh: use actual NotificationProcessor implementation
         NotificationProcessor defaultNotificationProcessor = (notification, payment) -> false;
@@ -136,6 +157,13 @@ public class ServiceFactory {
         return new NotificationDispatcher(defaultNotificationProcessor, notificationProcessorMap, client);
     }
 
+    /**
+     * TODO transform into instance method
+     * @param typeCache
+     * @param config
+     * @param client
+     * @return
+     */
     public static PaymentDispatcher createPaymentDispatcher(final LoadingCache<String, Type> typeCache, final PayoneConfig config, final CommercetoolsClient client) {
         // TODO jw: use immutable map
         final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
@@ -183,15 +211,6 @@ public class ServiceFactory {
                 break;
         }
         return null;
-    }
-
-    public CommercetoolsClient createCommercetoolsClient() {
-        final SphereClientFactory sphereClientFactory = SphereClientFactory.of();
-        return new CommercetoolsClient(
-                sphereClientFactory.createClient(
-                        config.getCtProjectKey(),
-                        config.getCtClientId(),
-                        config.getCtClientSecret()));
     }
 
     private static PayoneRequestFactory createRequestFactory(final PaymentMethod method, final PayoneConfig config) {

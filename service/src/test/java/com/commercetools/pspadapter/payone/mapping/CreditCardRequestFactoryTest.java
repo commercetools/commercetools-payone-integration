@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
@@ -48,7 +47,7 @@ public class CreditCardRequestFactoryTest {
         when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyValue"));
         when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyValue");
 
-        config = new ServiceConfig(propertyProvider).getPayoneConfig();
+        config = new PayoneConfig(propertyProvider);
         factory = new CreditCardRequestFactory(config);
     }
 

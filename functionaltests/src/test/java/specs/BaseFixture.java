@@ -51,13 +51,15 @@ public abstract class BaseFixture {
     /** maps legible payment names to payment IDs (and vice versa)*/
     private BiMap<String, String> payments = HashBiMap.create();
 
+    // FIXME use BeforeClass
     @Before
     public void initializeCommercetoolsClient() throws MalformedURLException {
+        final PropertyProvider propertyProvider = new PropertyProvider();
         ctPayoneIntegrationBaseUrl =
-                new URL(new PropertyProvider().getMandatoryNonEmptyProperty("CT_PAYONE_INTEGRATION_URL"));
+                new URL(propertyProvider.getMandatoryNonEmptyProperty("CT_PAYONE_INTEGRATION_URL"));
 
         //only for creation of test data
-        final ServiceFactory serviceFactory = ServiceFactory.createWithDefaultServiceConfig();
+        final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(propertyProvider);
         ctpClient = serviceFactory.createCommercetoolsClient();
 
         resetCommercetoolsPlatform();

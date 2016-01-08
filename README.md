@@ -50,7 +50,7 @@ TODO
 
 TODO docker and (complete) heroku options
 
-#### Configuration via Environment Variables
+#### <a name="configEnv"> Configuration via Environment Variables
 
 The integration service can be configured by the following environment variables:
 
@@ -86,10 +86,12 @@ SEE PAYONE DOCUMENTATION - ALL TEST DATA THERE, JUST PAYPAL REQUIRES AN OWN ACCO
 
 ### Functional Tests
 
-To execute the functional tests (using [Concordion](http://concordion.org/)) the following environment variable is
-required:
+The executable specification (using [Concordion](http://concordion.org/)) requires the following environment variables
+in addition to the commercetools API client credentials ([see above](#configEnv)):
 
 * `CT_PAYONE_INTEGRATION_URL` - the URL of the service instance under test
+* `TEST_DATA_VISA_CREDIT_CARD_NO_3DS` - the pseudocardpan of an unconfirmed VISA credit card
+* `TEST_DATA_VISA_CREDIT_CARD_3DS` - the pseudocardpan of a VISA credit card verified by 3-D Secure
 
 To run the executable specification invoke the following command line:
 
