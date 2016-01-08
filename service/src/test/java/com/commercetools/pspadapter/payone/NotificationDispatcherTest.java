@@ -1,19 +1,28 @@
 package com.commercetools.pspadapter.payone;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
+import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.hash.Hashing;
 import io.sphere.sdk.payments.Payment;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 import util.SphereClientDoubleCreator;
+
+import java.util.Optional;
 
 /**
  * @author fhaertig
@@ -27,7 +36,16 @@ public class NotificationDispatcherTest {
 
     private final PaymentTestHelper testHelper = new PaymentTestHelper();
 
-    private CountingNotificationProcessor countingNotificationProcessor() {
+    @Mock
+    private PropertyProvider propertyProvider;
+
+    private PayoneConfig config;
+
+    private ImmutableMap<NotificationAction, NotificationProcessor> processors;
+
+    private CountingNotificationProcessor defaultNotificationProcessor;
+
+    private CountingNotificationProcessor createAppointedNotificationProcessor() {
         return new CountingNotificationProcessor() {
             int count = 0;
 
@@ -49,6 +67,23 @@ public class NotificationDispatcherTest {
         };
     }
 
+    private CountingNotificationProcessor createDefaultNotificationProcessor() {
+        return new CountingNotificationProcessor() {
+            int count = 0;
+
+            @Override
+            public int getCount() {
+                return count;
+            }
+
+            @Override
+            public boolean processTransactionStatusNotification(final Notification notification, final Payment payment) {
+                count++;
+                return false;
+            }
+        };
+    }
+
     @Before
     public void setUp() throws Exception {
         client = new CommercetoolsClient(SphereClientDoubleCreator
@@ -63,22 +98,52 @@ public class NotificationDispatcherTest {
                     throw new UnsupportedOperationException(
                             String.format("I'm not prepared for this request: %s", intent));
                 }));
+
+        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyConfigValue"));
+        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyConfigValue");
+
+        config = new PayoneConfig(propertyProvider);
+
+        processors = ImmutableMap.<NotificationAction, NotificationProcessor>builder()
+                .put(NotificationAction.APPOINTED, createAppointedNotificationProcessor())
+                .build();
+
+        defaultNotificationProcessor = createDefaultNotificationProcessor();
     }
 
     @Test
-    public void processAppointedNotification() {
+    public void dispatchValidAppointedNotification() {
         final Notification notification = new Notification();
         notification.setTxid("123");
         notification.setCurrency("EUR");
+        notification.setPortalid("dummyConfigValue");
+        notification.setAid("dummyConfigValue");
+        notification.setKey(Hashing.md5().hashString("dummyConfigValue", Charsets.UTF_8).toString());
+        notification.setMode("dummyConfigValue");
         notification.setTxaction(NotificationAction.APPOINTED);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
-        final CountingNotificationProcessor countingNotificationProcessor = countingNotificationProcessor();
+        NotificationDispatcher dispatcher = new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
+        assertThat(dispatcher.dispatchNotification(notification)).isEqualTo(true);
 
-        NotificationDispatcher dispatcher = new NotificationDispatcher(countingNotificationProcessor, ImmutableMap.of(), client);
-        dispatcher.dispatchNotification(notification);
+        assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(1);
+        assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);
+    }
 
-        assertThat(countingNotificationProcessor.getCount()).isEqualTo(1);
+    @Test
+    public void refuseNotificationWithWrongSecrets() {
+        final Notification notification = new Notification();
+        notification.setTxid("123");
+        notification.setCurrency("EUR");
+        notification.setPortalid("invalidPortal");
+        notification.setTxaction(NotificationAction.APPOINTED);
+        notification.setTransactionStatus(TransactionStatus.COMPLETED);
+
+        NotificationDispatcher dispatcher = new NotificationDispatcher(createDefaultNotificationProcessor(), processors, client, config);
+        assertThat(dispatcher.dispatchNotification(notification)).isEqualTo(false);
+
+        assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(0);
+        assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);
     }
 
     private interface CountingNotificationProcessor extends NotificationProcessor {

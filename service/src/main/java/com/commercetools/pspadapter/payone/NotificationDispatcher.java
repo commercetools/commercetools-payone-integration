@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone;
 
+import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
@@ -24,26 +25,48 @@ public class NotificationDispatcher {
     private final NotificationProcessor defaultProcessor;
     private final ImmutableMap<NotificationAction, NotificationProcessor> processors;
     private final CommercetoolsClient client;
+    private final PayoneConfig config;
 
     public NotificationDispatcher(
             final NotificationProcessor defaultProcessor,
             final ImmutableMap<NotificationAction, NotificationProcessor> processors,
-            final CommercetoolsClient client) {
+            final CommercetoolsClient client,
+            final PayoneConfig config) {
         this.defaultProcessor = defaultProcessor;
         this.processors = processors;
         this.client = client;
+        this.config = config;
     }
 
-    public boolean dispatchNotification(final Notification notification) {
+    public boolean dispatchNotification(final Notification notification) throws IllegalArgumentException {
 
-        Payment payment = getPaymentByInterfaceId(notification.getTxid())
-                .orElseGet(() -> {
-                    PaymentDraft paymentDraft = createNewPaymentDraftFromNotification(notification);
-                    return client.complete(PaymentCreateCommand.of(paymentDraft));
-                });
+        if (hasValidSecrets(notification)) {
+            Payment payment = getPaymentByInterfaceId(notification.getTxid())
+                    .orElseGet(() -> {
+                        PaymentDraft paymentDraft = createNewPaymentDraftFromNotification(notification);
+                        return client.complete(PaymentCreateCommand.of(paymentDraft));
+                    });
 
-        return processors.getOrDefault(notification.getTxaction(), defaultProcessor)
-            .processTransactionStatusNotification(notification, payment);
+            return processors.getOrDefault(notification.getTxaction(), defaultProcessor)
+                    .processTransactionStatusNotification(notification, payment);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * checks if the secrets of the received notification
+     * are matching the corresponding config values of this service instance.
+     *
+     * @param notification the notification object to check
+     * @return true if all secrets match
+     */
+    private boolean hasValidSecrets(final Notification notification) {
+         return config.getKeyAsMd5Hash().equals(notification.getKey())
+                && config.getPortalId().equals(notification.getPortalid())
+                && config.getSubAccountId().equals(notification.getAid())
+                && config.getMode().equals(notification.getMode());
+
     }
 
     private Optional<Payment> getPaymentByInterfaceId(final String interfaceId) {

@@ -150,11 +150,16 @@ public class ServiceFactory {
     }
 
     public static NotificationDispatcher createNotificationDispatcher(final CommercetoolsClient client) {
+    public LoadingCache<String, Type> createTypeCache(final BlockingClient client) {
+        return CacheBuilder.newBuilder().build(new TypeCacheLoader(client));
+    }
+
+    public static NotificationDispatcher createNotificationDispatcher(final CommercetoolsClient client, final PayoneConfig config) {
         //TODO fh: use actual NotificationProcessor implementation
         NotificationProcessor defaultNotificationProcessor = (notification, payment) -> false;
 
         final ImmutableMap<NotificationAction, NotificationProcessor> notificationProcessorMap = ImmutableMap.of();
-        return new NotificationDispatcher(defaultNotificationProcessor, notificationProcessorMap, client);
+        return new NotificationDispatcher(defaultNotificationProcessor, notificationProcessorMap, client, config);
     }
 
     /**
