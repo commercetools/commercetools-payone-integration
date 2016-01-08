@@ -81,7 +81,7 @@ public class ServiceFactory {
                 payoneConfig,
                 commercetoolsClient);
         final NotificationDispatcher notificationDispatcher = ServiceFactory.createNotificationDispatcher(
-                commercetoolsClient);
+                commercetoolsClient, payoneConfig);
 
         final IntegrationService integrationService = ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(commercetoolsClient),
@@ -128,7 +128,7 @@ public class ServiceFactory {
         return ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(client),
                 createPaymentDispatcher(typeCache, payoneConfig, client),
-                createNotificationDispatcher(client),
+                createNotificationDispatcher(client, payoneConfig),
                 new CustomTypeBuilder(
                         client,
                         CustomTypeBuilder.PermissionToStartFromScratch.fromBoolean(serviceConfig.getStartFromScratch())));
@@ -147,11 +147,6 @@ public class ServiceFactory {
                 response.status(200);
             }
         });
-    }
-
-    public static NotificationDispatcher createNotificationDispatcher(final CommercetoolsClient client) {
-    public LoadingCache<String, Type> createTypeCache(final BlockingClient client) {
-        return CacheBuilder.newBuilder().build(new TypeCacheLoader(client));
     }
 
     public static NotificationDispatcher createNotificationDispatcher(final CommercetoolsClient client, final PayoneConfig config) {
