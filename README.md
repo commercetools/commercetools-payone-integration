@@ -52,25 +52,26 @@ TODO docker and (complete) heroku options
 
 #### <a name="configEnv"> Configuration via Environment Variables
 
-The integration service can be configured by the following environment variables:
+The integration service requires - _unless otherwise stated_ - the following environment variables:
 
 * commercetools API client credentials (can be found in [Commercetools Merchant Center](https://admin.sphere.io/))
   * `CT_PROJECT_KEY` - the project key 
   * `CT_CLIENT_ID` - the client id
   * `CT_CLIENT_SECRET` - the client secret
 * PAYONE API client credentials (can be found in [PMI](https://pmi.pay1.de/))
-  * `PAYONE_MERCHANT_ID` - Merchant account ID
   * `PAYONE_PORTAL_ID` - Payment portal ID
   * `PAYONE_KEY` - Payment portal key
+  * `PAYONE_MERCHANT_ID` - Merchant account ID
+  * `PAYONE_SUBACC_ID` - Subaccount ID
 * `CRON_NOTATION` - cron expression to specify when the service will poll for commercetools messages like
   [PaymentInteractionAdded](http://dev.commercetools.com/http-api-projects-messages.html#payment-interaction-added-message),
   _optional_ (default: poll every 30 seconds)
 * `PAYONE_MODE` - the mode of operation with PAYONE, _optional_:
   * `"live"` for production mode, (i.e. _actual payments_) or
   * `"test"` for test mode, the default mode
-* `CT_START_FROM_SCRATCH`- _**Handle with care!**_ If and only if equal, ignoring case, to `"true"`
+* `CT_START_FROM_SCRATCH`- :warning: _**Handle with care!**_ If and only if equal, ignoring case, to `"true"`
   the service will create the custom types it needs.
-  _**Therefor it first deletes all Order, Cart, Payment and Type entities**_.
+  _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. See issue #34.
 
 ### Notes to the checkout implementation
 
