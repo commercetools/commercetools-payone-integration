@@ -71,7 +71,8 @@ The integration service requires - _unless otherwise stated_ - the following env
   * `"test"` for test mode, the default mode
 * `CT_START_FROM_SCRATCH`- :warning: _**Handle with care!**_ If and only if equal, ignoring case, to `"true"`
   the service will create the custom types it needs.
-  _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. See issue #34.
+  _**Therefor it first deletes all Order, Cart, Payment and Type entities**_.
+  See [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34).
 
 ### Notes to the checkout implementation
 
