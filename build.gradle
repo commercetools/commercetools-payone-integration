@@ -69,6 +69,35 @@ project(":service") {
     }
 }
 
+/**
+ * Asserts that the environment variables required for running the executable specification are set.
+ *
+ * @param project the project
+ * @param test the test task to assert the variables for
+ */
+void assertPropertiesAreDefined(Project project, Test test) {
+    test.systemProperty 'concordion.output.dir', project.reporting.baseDir.getAbsolutePath() + "/spec"
+    test.systemProperty 'concordion.extensions', 'org.concordion.ext.inputstyle.InputStyleExtension,org.concordion.ext.runtotals.RunTotalsExtension'
+
+    test.systemProperty 'CT_PROJECT_KEY', project.hasProperty('CT_PROJECT_KEY') ? project.CT_PROJECT_KEY : System.getenv('CT_PROJECT_KEY')
+    assertPropertyIsNotNullOrEmpty('CT_PROJECT_KEY', test.getSystemProperties())
+
+    test.systemProperty 'CT_CLIENT_ID', project.hasProperty('CT_CLIENT_ID') ? project.CT_CLIENT_ID : System.getenv('CT_CLIENT_ID')
+    assertPropertyIsNotNullOrEmpty('CT_CLIENT_ID', test.getSystemProperties())
+
+    test.systemProperty 'CT_CLIENT_SECRET', project.hasProperty('CT_CLIENT_SECRET') ? project.CT_CLIENT_SECRET : System.getenv('CT_CLIENT_SECRET')
+    assertPropertyIsNotNullOrEmpty('CT_CLIENT_SECRET', test.getSystemProperties())
+
+    test.systemProperty 'CT_PAYONE_INTEGRATION_URL', project.hasProperty('CT_PAYONE_INTEGRATION_URL') ? project.CT_PAYONE_INTEGRATION_URL : System.getenv('CT_PAYONE_INTEGRATION_URL')
+    assertPropertyIsNotNullOrEmpty('CT_PAYONE_INTEGRATION_URL', test.getSystemProperties())
+
+    test.systemProperty 'TEST_DATA_VISA_CREDIT_CARD_NO_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_NO_3DS') ? project.TEST_DATA_VISA_CREDIT_CARD_NO_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_NO_3DS')
+    assertPropertyIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_NO_3DS', test.getSystemProperties())
+
+    test.systemProperty 'TEST_DATA_VISA_CREDIT_CARD_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_3DS') ? project.TEST_DATA_VISA_CREDIT_CARD_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_3DS')
+    assertPropertyIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_3DS', test.getSystemProperties())
+}
+
 project(":functionaltests") {
     dependencies {
         compile project(":service")
@@ -83,27 +112,10 @@ project(":functionaltests") {
 
     test {
         description 'This task is supposed to run single tests, only.'
+    }
 
-        systemProperty 'concordion.output.dir', "$reporting.baseDir/spec"
-        systemProperty 'concordion.extensions', 'org.concordion.ext.inputstyle.InputStyleExtension,org.concordion.ext.runtotals.RunTotalsExtension'
-
-        systemProperty 'CT_PROJECT_KEY', project.hasProperty('CT_PROJECT_KEY') ? CT_PROJECT_KEY : System.getenv('CT_PROJECT_KEY')
-        assertPropertyIsNotNullOrEmpty('CT_PROJECT_KEY', getSystemProperties())
-
-        systemProperty 'CT_CLIENT_ID', project.hasProperty('CT_CLIENT_ID') ? CT_CLIENT_ID : System.getenv('CT_CLIENT_ID')
-        assertPropertyIsNotNullOrEmpty('CT_CLIENT_ID', getSystemProperties())
-
-        systemProperty 'CT_CLIENT_SECRET', project.hasProperty('CT_CLIENT_SECRET') ? CT_CLIENT_SECRET : System.getenv('CT_CLIENT_SECRET')
-        assertPropertyIsNotNullOrEmpty('CT_CLIENT_SECRET', getSystemProperties())
-
-        systemProperty 'CT_PAYONE_INTEGRATION_URL', project.hasProperty('CT_PAYONE_INTEGRATION_URL') ? CT_PAYONE_INTEGRATION_URL : System.getenv('CT_PAYONE_INTEGRATION_URL')
-        assertPropertyIsNotNullOrEmpty('CT_PAYONE_INTEGRATION_URL', getSystemProperties())
-
-        systemProperty 'TEST_DATA_VISA_CREDIT_CARD_NO_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_NO_3DS') ? TEST_DATA_VISA_CREDIT_CARD_NO_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_NO_3DS')
-        assertPropertyIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_NO_3DS', getSystemProperties())
-
-        systemProperty 'TEST_DATA_VISA_CREDIT_CARD_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_3DS') ? TEST_DATA_VISA_CREDIT_CARD_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_3DS')
-        assertPropertyIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_3DS', getSystemProperties())
+    test.doFirst {
+        assertPropertiesAreDefined(project, test)
     }
 
     task testSpec(type: Test) {
@@ -117,27 +129,10 @@ project(":functionaltests") {
             // do not fail the build in case of failing tests, so that the reports can be published
             ignoreFailures = true
         }
+    }
 
-        systemProperty 'concordion.output.dir', "$reporting.baseDir/spec"
-        systemProperty 'concordion.extensions', 'org.concordion.ext.inputstyle.InputStyleExtension,org.concordion.ext.runtotals.RunTotalsExtension'
-
-        systemProperty 'CT_PROJECT_KEY', project.hasProperty('CT_PROJECT_KEY') ? CT_PROJECT_KEY : System.getenv('CT_PROJECT_KEY')
-        assertPropertyIsNotNullOrEmpty('CT_PROJECT_KEY', getSystemProperties())
-
-        systemProperty 'CT_CLIENT_ID', project.hasProperty('CT_CLIENT_ID') ? CT_CLIENT_ID : System.getenv('CT_CLIENT_ID')
-        assertPropertyIsNotNullOrEmpty('CT_CLIENT_ID', getSystemProperties())
-
-        systemProperty 'CT_CLIENT_SECRET', project.hasProperty('CT_CLIENT_SECRET') ? CT_CLIENT_SECRET : System.getenv('CT_CLIENT_SECRET')
-        assertPropertyIsNotNullOrEmpty('CT_CLIENT_SECRET', getSystemProperties())
-
-        systemProperty 'CT_PAYONE_INTEGRATION_URL', project.hasProperty('CT_PAYONE_INTEGRATION_URL') ? CT_PAYONE_INTEGRATION_URL : System.getenv('CT_PAYONE_INTEGRATION_URL')
-        assertPropertyIsNotNullOrEmpty('CT_PAYONE_INTEGRATION_URL', getSystemProperties())
-
-        systemProperty 'TEST_DATA_VISA_CREDIT_CARD_NO_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_NO_3DS') ? TEST_DATA_VISA_CREDIT_CARD_NO_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_NO_3DS')
-        assertPropertyIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_NO_3DS', getSystemProperties())
-
-        systemProperty 'TEST_DATA_VISA_CREDIT_CARD_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_3DS') ? TEST_DATA_VISA_CREDIT_CARD_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_3DS')
-        assertPropertyIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_3DS', getSystemProperties())
+    testSpec.doFirst {
+        assertPropertiesAreDefined(project, testSpec)
     }
 }
 
