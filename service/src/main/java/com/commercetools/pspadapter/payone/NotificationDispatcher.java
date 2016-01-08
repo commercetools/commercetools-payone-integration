@@ -13,6 +13,7 @@ import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.utils.MoneyImpl;
 
 import javax.money.MonetaryAmount;
+import java.util.Optional;
 
 /**
  * @author fhaertig
@@ -35,29 +36,22 @@ public class NotificationDispatcher {
 
     public boolean dispatchNotification(final Notification notification) {
 
-        Payment payment = getPaymentByInterfaceIdOrCreateNew(notification.getTxid());
-
-        if (payment == null) {
-            //matching payment could not be found, create it
-            PaymentDraft paymentDraft = createNewPaymentDraftFromNotification(notification);
-            payment = client.complete(PaymentCreateCommand.of(paymentDraft));
-        }
+        Payment payment = getPaymentByInterfaceId(notification.getTxid())
+                .orElseGet(() -> {
+                    PaymentDraft paymentDraft = createNewPaymentDraftFromNotification(notification);
+                    return client.complete(PaymentCreateCommand.of(paymentDraft));
+                });
 
         return processors.getOrDefault(notification.getTxaction(), defaultProcessor)
             .processTransactionStatusNotification(notification, payment);
     }
 
-    private Payment getPaymentByInterfaceIdOrCreateNew(final String interfaceId) {
+    private Optional<Payment> getPaymentByInterfaceId(final String interfaceId) {
         final PagedQueryResult<Payment> queryResult = client.complete(
                 PaymentQuery.of()
-                        .withPredicates(p -> p.interfaceId().is(interfaceId))
-                        .withPredicates(p -> p.paymentMethodInfo().paymentInterface().is("PAYONE")));
-
-        if (queryResult.getTotal() > 0) {
-            return queryResult.getResults().get(0);
-        } else {
-            return null;
-        }
+                        .plusPredicates(p -> p.interfaceId().is(interfaceId))
+                        .plusPredicates(p -> p.paymentMethodInfo().paymentInterface().is("PAYONE")));
+        return queryResult.head();
     }
 
     private PaymentDraft createNewPaymentDraftFromNotification(final Notification notification) {
