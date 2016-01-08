@@ -24,6 +24,9 @@
 
 With PAYONE:
 
+ * can a cancellation happen on paypal, same for online bank transfer?
+ * verify that there is no difference between authorization and preauthorization in sofortüberweisung. Both directly transfer money. 
+  * sofortüberweisung: can there be a chargeback / cancellation? 
  * TODO (probably already spoken about): which notify_versions can occur if we use the latest API version? only 7.5?
    * -> klärt Hr. Kuchel intern. 
  * concerning checkout documentation: what's the security feature of the hash? it's just done over the fields that are plaintext in the page and there is no secret in the hash, too. 
@@ -356,13 +359,13 @@ The matching transaction is found by sequencenumber = interactionId.
 | `appointed` | `pending` | `7.5` |  Authorization (must be one and the first) |  Pending | create an Authorization if none there |
 | `appointed` | `completed` | `7.5` | Authorization (must be one and the first | Success  | create an Authorization if none there |
 | `appointed` | `completed` | `7.5` | *NOT* Authorization | Pending  | |
-| `capture` | not set or `completed` | `7.5` | Charge | ??? does "paid" follow with matching sequencenumber? | create a Charge if none with matching sequencenumber there |
-| `paid` | not set or `completed` | `7.5` | Charge | Success | create a Charge if no matching one is found |
+| `capture` | not set or `completed` | `7.5` | Charge | unsually a `paid` follows separately (CT Pending), but on direct debit the `capture` already means money flow -> CT Success | create a Charge if none with matching sequencenumber there |
+| `paid` | not set or `completed` | `7.5` | Charge | Success | create a Charge if no matching one is found. Does not count up the sequence number |
 | `underpaid` | not set or `completed` | `7.5` | Charge  | Pending | create a Charge if no matching one found |
 | `cancelation` | not set or `completed` | `7.5` | new Chargeback | Success | see 4.2.6 Sample: authorization, ELV with cancelation to derive formula for amount |
 | `refund` | not set or `completed` | `7.5` | Refund | Success | create a Refund if no matching one found. |
 | `debit` | not set or `completed` | `7.5` | Refund if receivable has decreased (Fee does not exist, yet) | Success if balance has decreased by the same amount, Pending otherwise | new Refund if no matching there |
-| `transfer` | not set or `completed` | `7.5` | (nothing) | (nothing) | Transfer like in "switch" / "move to" another bank account |
+| `transfer` | not set or `completed` | `7.5` | (nothing) | (nothing) TODO Warnung reinschreiben, da auf anderen Kunden umgeschaltet.   | Transfer like in "switch" / "move to" another bank account |
 | `reminder` | not set or `completed` | `7.5` | (nothing) | (nothing) | status of dunning procedure |
 | `vauthorization` | not set or `completed` | `7.5` | (unsupported) | (unsupported) | only available with PAYONE Billing module, must be activated |
 | `vsettlement` | not set or `completed` | `7.5` | (unsupported) | (unsupported) | only available with PAYONE Billing module, must be activated |
