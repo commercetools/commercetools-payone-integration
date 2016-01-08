@@ -24,6 +24,7 @@ import io.sphere.sdk.payments.commands.updateactions.SetAuthorization;
 import io.sphere.sdk.payments.commands.updateactions.SetInterfaceId;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
+import io.sphere.sdk.utils.MoneyImpl;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -122,7 +123,7 @@ public class AuthorizationTransactionExecutor implements IdempotentTransactionEx
                         ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
                         ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId()),
                         SetInterfaceId.of(response.get("txid")),
-                        SetAuthorization.of(paymentWithCartLike.getPayment().getAmountPlanned())
+                        SetAuthorization.of(MoneyImpl.of(response.get("price"), response.get("currency")))
                     ));
                 } else if (status.equals("ERROR")) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(

@@ -1,11 +1,9 @@
-package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.sepa;
+package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.TransactionExecutor;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.payments.Transaction;
