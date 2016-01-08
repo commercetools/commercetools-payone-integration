@@ -50,29 +50,40 @@ TODO
 
 TODO docker and (complete) heroku options
 
-#### <a name="configEnv"> Configuration via Environment Variables
+#### Configuration via Environment Variables
 
 The integration service requires - _unless otherwise stated_ - the following environment variables:
 
-* commercetools API client credentials (can be found in [Commercetools Merchant Center](https://admin.sphere.io/))
-  * `CT_PROJECT_KEY` - the project key 
-  * `CT_CLIENT_ID` - the client id
-  * `CT_CLIENT_SECRET` - the client secret
-* PAYONE API client credentials (can be found in [PMI](https://pmi.pay1.de/))
-  * `PAYONE_PORTAL_ID` - Payment portal ID
-  * `PAYONE_KEY` - Payment portal key
-  * `PAYONE_MERCHANT_ID` - Merchant account ID
-  * `PAYONE_SUBACC_ID` - Subaccount ID
-* `CRON_NOTATION` - cron expression to specify when the service will poll for commercetools messages like
-  [PaymentInteractionAdded](http://dev.commercetools.com/http-api-projects-messages.html#payment-interaction-added-message),
-  _optional_ (default: poll every 30 seconds)
-* `PAYONE_MODE` - the mode of operation with PAYONE, _optional_:
-  * `"live"` for production mode, (i.e. _actual payments_) or
-  * `"test"` for test mode, the default mode
-* `CT_START_FROM_SCRATCH`- :warning: _**Handle with care!**_ If and only if equal, ignoring case, to `"true"`
-  the service will create the custom types it needs.
-  _**Therefor it first deletes all Order, Cart, Payment and Type entities**_.
-  See [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34).
+##### <a name="configEnvCtCredentials"> commercetools API client credentials
+
+Name | Content
+---- | -------
+`CT_PROJECT_KEY` | the project key
+`CT_CLIENT_ID` | the client id
+`CT_CLIENT_SECRET` | the client secret
+
+All required.  
+Can be found in [Commercetools Merchant Center](https://admin.sphere.io/).
+
+##### PAYONE API client credentials
+
+Name | Content
+---- | -------
+`PAYONE_PORTAL_ID` | Payment portal ID
+`PAYONE_KEY` | Payment portal key
+`PAYONE_MERCHANT_ID` | Merchant account ID
+`PAYONE_SUBACC_ID` | Subaccount ID
+
+All required.  
+Can be found in the [PAYONE Merchant Interface](https://pmi.pay1.de/).
+
+##### Service configuration parameters
+
+Name | Content | Default
+---- | ------- | --------
+`CRON_NOTATION` | cron expression to specify when the service will poll for commercetools messages like [PaymentInteractionAdded](http://dev.commercetools.com/http-api-projects-messages.html#payment-interaction-added-message) | poll every 30 seconds
+`PAYONE_MODE` | the mode of operation with PAYONE <ul><li>`"live"` for production mode, (i.e. _actual payments_) or</li><li>`"test"` for test mode</li></ul> | `"test"`  
+`CT_START_FROM_SCRATCH` | :warning: _**Handle with care!**_ If and only if equal, ignoring case, to `"true"` the service will create the custom types it needs. _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. See [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34). | `"false"`
 
 ### Notes to the checkout implementation
 
@@ -89,11 +100,13 @@ SEE PAYONE DOCUMENTATION - ALL TEST DATA THERE, JUST PAYPAL REQUIRES AN OWN ACCO
 ### Functional Tests
 
 The executable specification (using [Concordion](http://concordion.org/)) requires the following environment variables
-in addition to the commercetools API client credentials ([see above](#configEnv)):
+in addition to the commercetools API client credentials ([see above](#configEnvCtCredentials)):
 
-* `CT_PAYONE_INTEGRATION_URL` - the URL of the service instance under test
-* `TEST_DATA_VISA_CREDIT_CARD_NO_3DS` - the pseudocardpan of an unconfirmed VISA credit card
-* `TEST_DATA_VISA_CREDIT_CARD_3DS` - the pseudocardpan of a VISA credit card verified by 3-D Secure
+Name | Content
+---- | -------
+`CT_PAYONE_INTEGRATION_URL` | the URL of the service instance under test
+`TEST_DATA_VISA_CREDIT_CARD_NO_3DS` | the pseudocardpan of an unconfirmed VISA credit card
+`TEST_DATA_VISA_CREDIT_CARD_3DS` | the pseudocardpan of a VISA credit card verified by 3-D Secure
 
 To run the executable specification invoke the following command line:
 
