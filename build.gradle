@@ -124,11 +124,6 @@ project(":functionaltests") {
         filter {
             includeTestsMatching 'specs.SpecsFixture'
         }
-
-        if (project.hasProperty('publish.anyway')) {
-            // do not fail the build in case of failing tests, so that the reports can be published
-            ignoreFailures = true
-        }
     }
 
     testSpec.doFirst {
@@ -158,8 +153,6 @@ githubPages {
         with staticPages, generatedPages
     }
 }
-
-prepareGhPages.dependsOn ':functionaltests:testSpec'
 
 void assertPropertyIsNotNullOrEmpty(String name, Map<String, Object> properties) {
     def property = properties.get(name)
