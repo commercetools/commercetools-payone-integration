@@ -70,16 +70,16 @@ project(":service") {
 }
 
 /**
- * Asserts that the environment variables required for running the executable specification are set.
+ * Asserts that system properties and environment variables required for running the executable specification are set.
  *
  * @param project the project
- * @param test the test task to assert the variables for
+ * @param test the test task to assert the configuration for
  *
- * @throws GradleException if any required environment variable is undefined or empty
+ * @throws GradleException if any required system property or environment variable is undefined or empty
  */
-void assertEnvironmentVariablesAreDefined(Project project, Test test) {
-    test.environment 'concordion.output.dir', project.reporting.baseDir.getAbsolutePath() + "/spec"
-    test.environment 'concordion.extensions', 'org.concordion.ext.inputstyle.InputStyleExtension,org.concordion.ext.runtotals.RunTotalsExtension'
+void assertExecutableSpecRequirements(Project project, Test test) {
+    test.systemProperties 'concordion.output.dir', project.reporting.baseDir.getAbsolutePath() + "/spec"
+    test.systemProperties 'concordion.extensions', 'org.concordion.ext.inputstyle.InputStyleExtension,org.concordion.ext.runtotals.RunTotalsExtension'
 
     test.environment 'CT_PROJECT_KEY', project.hasProperty('CT_PROJECT_KEY') ? project.CT_PROJECT_KEY : System.getenv('CT_PROJECT_KEY')
     assertValueIsNotNullOrEmpty('CT_PROJECT_KEY', test.getEnvironment())
@@ -117,7 +117,7 @@ project(":functionaltests") {
     }
 
     test.doFirst {
-        assertEnvironmentVariablesAreDefined(project, test)
+        assertExecutableSpecRequirements(project, test)
     }
 
     task testSpec(type: Test) {
@@ -129,7 +129,7 @@ project(":functionaltests") {
     }
 
     testSpec.doFirst {
-        assertEnvironmentVariablesAreDefined(project, testSpec)
+        assertExecutableSpecRequirements(project, testSpec)
     }
 }
 
