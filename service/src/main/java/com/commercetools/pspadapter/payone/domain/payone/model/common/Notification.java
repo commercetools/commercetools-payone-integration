@@ -61,6 +61,26 @@ public class Notification implements Serializable {
         return mapper.convertValue(notificationValues, Notification.class);
     }
 
+    @Override
+    public String toString() {
+        return "Notification{" +
+                "accessid='" + accessid + '\'' +
+                ", productid='" + productid + '\'' +
+                ", price='" + price + '\'' +
+                ", sequencenumber='" + sequencenumber + '\'' +
+                ", reference='" + reference + '\'' +
+                ", txid='" + txid + '\'' +
+                ", country='" + country + '\'' +
+                ", userid='" + userid + '\'' +
+                ", currency='" + currency + '\'' +
+                ", txtime='" + txtime + '\'' +
+                ", clearingtype='" + clearingtype + '\'' +
+                ", mode='" + mode + '\'' +
+                ", transactionStatus=" + transactionStatus +
+                ", txaction=" + txaction +
+                '}';
+    }
+
     //**************************************************************
     //* GETTER AND SETTER METHODS
     //**************************************************************

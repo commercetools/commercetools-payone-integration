@@ -96,7 +96,7 @@ public abstract class BaseFixture {
                 .returnResponse();
     }
 
-    protected String getGetConfigurationParameter(final String configParameterName) {
+    protected String getConfigurationParameter(final String configParameterName) {
         final String envVariable = System.getenv(configParameterName);
         if (!Strings.isNullOrEmpty(envVariable)) {
             return envVariable;
@@ -117,11 +117,11 @@ public abstract class BaseFixture {
     }
 
     protected String getUnconfirmedVisaPseudoCardPan() {
-        return getGetConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
+        return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
     }
 
     protected String getVerifiedVisaPseudoCardPan() {
-        return getGetConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_3_DS);
+        return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_3_DS);
     }
 
     protected String getRandomOrderNumber() {

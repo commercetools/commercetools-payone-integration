@@ -17,14 +17,20 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.creditcard.
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.creditcard.ChargeTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
+import com.commercetools.pspadapter.payone.notification.AppointedNotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
+import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.client.SphereClientFactory;
+import io.sphere.sdk.commands.UpdateAction;
+import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
 import org.quartz.CronScheduleBuilder;
@@ -32,7 +38,9 @@ import org.quartz.SchedulerException;
 import spark.Response;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -151,9 +159,26 @@ public class ServiceFactory {
 
     public static NotificationDispatcher createNotificationDispatcher(final CommercetoolsClient client, final PayoneConfig config) {
         //TODO fh: use actual NotificationProcessor implementation
-        NotificationProcessor defaultNotificationProcessor = (notification, payment) -> false;
+        NotificationProcessor defaultNotificationProcessor = new NotificationProcessor() {
+            @Override
+            public NotificationAction supportedNotificationAction() {
+                return null;
+            }
 
-        final ImmutableMap<NotificationAction, NotificationProcessor> notificationProcessorMap = ImmutableMap.of();
+            @Override
+            public boolean processTransactionStatusNotification(final Notification notification, final Payment payment) {
+                return false;
+            }
+
+            @Override
+            public List<UpdateAction<Payment>> getTransactionUpdates(final Payment payment, final Notification notification) {
+                return new ArrayList<>();
+            }
+        };
+
+        final ImmutableMap<NotificationAction, NotificationProcessor> notificationProcessorMap = ImmutableMap.of(
+                NotificationAction.APPOINTED, new AppointedNotificationProcessor(client)
+        );
         return new NotificationDispatcher(defaultNotificationProcessor, notificationProcessorMap, client, config);
     }
 

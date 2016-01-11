@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone;
+package com.commercetools.pspadapter.payone.notification;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
@@ -54,7 +54,7 @@ public class NotificationDispatcher {
     }
 
     /**
-     * checks if the secrets of the received notification
+     * Checks if the secrets of the received notification
      * are matching the corresponding config values of this service instance.
      *
      * @param notification the notification object to check

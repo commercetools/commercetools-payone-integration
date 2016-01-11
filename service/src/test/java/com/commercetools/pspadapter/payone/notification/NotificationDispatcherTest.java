@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone;
+package com.commercetools.pspadapter.payone.notification;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
@@ -14,6 +14,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Transactio
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
+import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 import util.SphereClientDoubleCreator;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -56,6 +58,11 @@ public class NotificationDispatcherTest {
             }
 
             @Override
+            public NotificationAction supportedNotificationAction() {
+                return NotificationAction.APPOINTED;
+            }
+
+            @Override
             public boolean processTransactionStatusNotification(final Notification notification, final Payment payment) {
                 if (notification.getTxid().equals(payment.getInterfaceId())
                         && payment.getPaymentMethodInfo().getPaymentInterface().equals("PAYONE")
@@ -75,6 +82,11 @@ public class NotificationDispatcherTest {
             @Override
             public int getCount() {
                 return count;
+            }
+
+            @Override
+            public NotificationAction supportedNotificationAction() {
+                return NotificationAction.APPOINTED;
             }
 
             @Override
@@ -154,6 +166,11 @@ public class NotificationDispatcherTest {
 
     private interface CountingNotificationProcessor extends NotificationProcessor {
         int getCount();
+
+        @Override
+        default List<UpdateAction<Payment>> getTransactionUpdates(final Payment payment, final Notification notification) {
+            return null;
+        }
     }
 
 }

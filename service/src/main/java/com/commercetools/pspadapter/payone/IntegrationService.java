@@ -4,6 +4,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
+import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.google.common.base.Strings;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
