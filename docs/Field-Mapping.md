@@ -359,7 +359,7 @@ The matching transaction is found by sequencenumber = interactionId.
 | `appointed` | `pending` | `7.5` |  Authorization (must be one and the first) |  Pending | create an Authorization if none there |
 | `appointed` | `completed` | `7.5` | Authorization (must be one and the first | Success  | create an Authorization if none there |
 | `appointed` | `completed` | `7.5` | *NOT* Authorization | Pending  | |
-| `capture` | not set or `completed` | `7.5` | Charge | unsually a `paid` follows separately (CT Pending), but on direct debit the `capture` already means money flow -> CT Success | create a Charge if none with matching sequencenumber there |
+| `capture` | not set or `completed` | `7.5` | Charge | usually a `paid` follows separately (CT Pending), but on direct debit the `capture` already means money flow -> CT Success | create a Charge if none with matching sequencenumber there |
 | `paid` | not set or `completed` | `7.5` | Charge | Success | create a Charge if no matching one is found. Does not count up the sequence number |
 | `underpaid` | not set or `completed` | `7.5` | Charge  | Pending | create a Charge if no matching one found |
 | `cancelation` | not set or `completed` | `7.5` | new Chargeback | Success | see 4.2.6 Sample: authorization, ELV with cancelation to derive formula for amount |
