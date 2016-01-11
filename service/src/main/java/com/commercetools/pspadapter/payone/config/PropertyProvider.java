@@ -2,7 +2,6 @@ package com.commercetools.pspadapter.payone.config;
 
 import com.google.common.collect.ImmutableMap;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -25,7 +24,7 @@ public class PropertyProvider {
     public static final String CT_CLIENT_SECRET = "CT_CLIENT_SECRET";
     public static final String CT_START_FROM_SCRATCH = "CT_START_FROM_SCRATCH";
 
-    Map<String, String> internalProperties;
+    private final ImmutableMap<String, String> internalProperties;
 
     public PropertyProvider() {
         internalProperties = ImmutableMap.<String, String>builder()
@@ -45,10 +44,7 @@ public class PropertyProvider {
         }
 
         final Optional<String> environmentValue = Optional.ofNullable(System.getenv(propertyName));
-        if (environmentValue.isPresent()) {
-            return environmentValue;
-        }
-        return Optional.ofNullable(System.getProperty(propertyName));
+        return environmentValue;
     }
 
     /**
