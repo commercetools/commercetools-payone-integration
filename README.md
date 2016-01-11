@@ -54,7 +54,7 @@ TODO docker and (complete) heroku options
 
 The integration service requires - _unless otherwise stated_ - the following environment variables:
 
-##### <a name="configEnvCtCredentials"> commercetools API client credentials
+##### commercetools API client credentials
 
 Name | Content
 ---- | -------
@@ -100,7 +100,7 @@ SEE PAYONE DOCUMENTATION - ALL TEST DATA THERE, JUST PAYPAL REQUIRES AN OWN ACCO
 ### Functional Tests
 
 The executable specification (using [Concordion](http://concordion.org/)) requires the following environment variables
-in addition to the [commercetools API client credentials](#configEnvCtCredentials):
+in addition to the [commercetools API client credentials](#commercetools-api-client-credentials):
 
 Name | Content
 ---- | -------
