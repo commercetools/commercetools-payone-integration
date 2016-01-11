@@ -62,7 +62,6 @@ Name | Content
 `CT_CLIENT_ID` | the client id
 `CT_CLIENT_SECRET` | the client secret
 
-All required.  
 Can be found in [Commercetools Merchant Center](https://admin.sphere.io/).
 
 ##### PAYONE API client credentials
@@ -74,10 +73,11 @@ Name | Content
 `PAYONE_MERCHANT_ID` | Merchant account ID
 `PAYONE_SUBACC_ID` | Subaccount ID
 
-All required.  
 Can be found in the [PAYONE Merchant Interface](https://pmi.pay1.de/).
 
 ##### Service configuration parameters
+
+All optional.
 
 Name | Content | Default
 ---- | ------- | --------
@@ -100,7 +100,7 @@ SEE PAYONE DOCUMENTATION - ALL TEST DATA THERE, JUST PAYPAL REQUIRES AN OWN ACCO
 ### Functional Tests
 
 The executable specification (using [Concordion](http://concordion.org/)) requires the following environment variables
-in addition to the commercetools API client credentials ([see above](#configEnvCtCredentials)):
+in addition to the [commercetools API client credentials](#configEnvCtCredentials):
 
 Name | Content
 ---- | -------
