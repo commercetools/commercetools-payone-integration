@@ -20,7 +20,9 @@ import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import javax.money.MonetaryAmount;
@@ -35,6 +37,7 @@ import java.util.List;
  * @author fhaertig
  * @date 11.01.16
  */
+@RunWith(MockitoJUnitRunner.class)
 public class AppointedNotificationProcessorTest {
 
     private static final Integer millis = 1450365542;
@@ -46,8 +49,6 @@ public class AppointedNotificationProcessorTest {
     private final PaymentTestHelper testHelper = new PaymentTestHelper();
 
     private Notification notification;
-
-    private AddInterfaceInteraction interfaceInteraction;
 
     private Payment payment;
 
@@ -62,11 +63,7 @@ public class AppointedNotificationProcessorTest {
         notification.setSequencenumber("0");
         notification.setTxaction(NotificationAction.APPOINTED);
         notification.setTransactionStatus(TransactionStatus.PENDING);
-        interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
-                ImmutableMap.of(
-                        CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
-                        CustomTypeBuilder.TRANSACTION_ID_FIELD, "",
-                        CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString()));
+
     }
 
     @Test
@@ -85,6 +82,11 @@ public class AppointedNotificationProcessorTest {
                 .state(TransactionState.PENDING)
                 .interactionId(notification.getSequencenumber())
                 .build());
+        AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
+                ImmutableMap.of(
+                        CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                        CustomTypeBuilder.TRANSACTION_ID_FIELD, "",
+                        CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString()));
 
         assertThat(updateActions).isNotEmpty().hasSize(2);
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("addTransaction"))
@@ -97,6 +99,12 @@ public class AppointedNotificationProcessorTest {
 
     @Test
     public void getUpdatesForExistingTransaction() throws IOException {
+        AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
+                ImmutableMap.of(
+                        CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                        CustomTypeBuilder.TRANSACTION_ID_FIELD, payment.getTransactions().get(0).getId(),
+                        CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString()));
+
         AppointedNotificationProcessor processor = new AppointedNotificationProcessor(client);
 
         List<UpdateAction<Payment>> updateActions = processor.createPaymentUpdates(payment, notification);
@@ -106,5 +114,8 @@ public class AppointedNotificationProcessorTest {
             .containsOnly(ChangeTransactionState.of(TransactionState.PENDING, payment.getTransactions().get(0).getId()));
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("changeTransactionInteractionId"))
             .containsOnly(ChangeTransactionInteractionId.of(notification.getSequencenumber(), payment.getTransactions().get(0).getId()));
+        assertThat(updateActions).filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
+                .usingElementComparatorOnFields("fields")
+                .containsOnly(interfaceInteraction);
     }
 }

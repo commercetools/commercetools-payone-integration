@@ -58,6 +58,8 @@ public class AppointedNotificationProcessor implements NotificationProcessor {
 
     @Override
     public ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment, final Notification notification) {
+        LocalDateTime timestamp = LocalDateTime.ofEpochSecond(Long.valueOf(notification.getTxtime()), 0, ZoneOffset.UTC);
+
         return payment.getTransactions().stream()
                 .filter(t -> t.getType().equals(authorizationTransactionType))
                 .findFirst()
@@ -71,7 +73,7 @@ public class AppointedNotificationProcessor implements NotificationProcessor {
                     final AddInterfaceInteraction newInterfaceInteraction = AddInterfaceInteraction
                             .ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                                     ImmutableMap.of(
-                                            CustomTypeBuilder.TIMESTAMP_FIELD, notification.getTxtime(),
+                                            CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
                                             CustomTypeBuilder.TRANSACTION_ID_FIELD, t.getId(),
                                             CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString()));
 
@@ -84,7 +86,6 @@ public class AppointedNotificationProcessor implements NotificationProcessor {
                 .orElseGet(() -> {
                     //create new transaction
                     MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-                    LocalDateTime timestamp = LocalDateTime.ofEpochSecond(Long.valueOf(notification.getTxtime()), 0, ZoneOffset.UTC);
 
                     TransactionDraft transactionDraft = TransactionDraftBuilder.of(authorizationTransactionType, amount)
                             .timestamp(ZonedDateTime.of(timestamp, ZoneId.of("UTC")))
