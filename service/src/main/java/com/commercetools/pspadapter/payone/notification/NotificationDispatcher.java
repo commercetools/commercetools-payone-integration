@@ -2,6 +2,7 @@ package com.commercetools.pspadapter.payone.notification;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.google.common.base.Preconditions;
@@ -9,6 +10,7 @@ import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
+import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
@@ -74,16 +76,23 @@ public class NotificationDispatcher {
     private Optional<Payment> getPaymentByInterfaceId(final String interfaceId) {
         final PagedQueryResult<Payment> queryResult = client.complete(
                 PaymentQuery.of()
-                        .plusPredicates(p -> p.interfaceId().is(interfaceId))
+                        .withPredicates(p -> p.interfaceId().is(interfaceId))
                         .plusPredicates(p -> p.paymentMethodInfo().paymentInterface().is("PAYONE")));
         return queryResult.head();
     }
 
     private PaymentDraft createNewPaymentDraftFromNotification(final Notification notification) {
         MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
+        ClearingType clearingType = ClearingType.getClearingTypeByCode(notification.getClearingtype());
         return PaymentDraftBuilder
                 .of(amount)
                 .interfaceId(notification.getTxid())
+                .paymentMethodInfo(
+                        PaymentMethodInfoBuilder
+                                .of()
+                                .paymentInterface("PAYONE")
+                                .method(clearingType.getKey())
+                                .build())
                 .build();
     }
 }

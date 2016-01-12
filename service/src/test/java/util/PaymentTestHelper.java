@@ -50,6 +50,10 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentTwoTransactionsSuccessPending.json");
     }
 
+    public Payment dummyPaymentCreatedByNotification() throws Exception {
+        return getPaymentFromFile("dummyPaymentCreatedByNotification.json");
+    }
+
     public Payment dummyPaymentNoInterface() throws Exception {
         return getPaymentFromFile("dummyPaymentNoInterface.json");
     }

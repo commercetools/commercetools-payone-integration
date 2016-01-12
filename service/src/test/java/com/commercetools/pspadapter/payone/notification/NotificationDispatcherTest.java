@@ -17,14 +17,17 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.queries.PaymentQuery;
+import io.sphere.sdk.queries.PagedQueryResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
-import util.SphereClientDoubleCreator;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -34,7 +37,9 @@ import java.util.Optional;
 @RunWith(MockitoJUnitRunner.class)
 public class NotificationDispatcherTest {
 
+    private static final String dummyInterfaceId = "123";
 
+    @Mock
     private CommercetoolsClient client;
 
     private final PaymentTestHelper testHelper = new PaymentTestHelper();
@@ -47,6 +52,111 @@ public class NotificationDispatcherTest {
     private ImmutableMap<NotificationAction, NotificationProcessor> processors;
 
     private CountingNotificationProcessor defaultNotificationProcessor;
+
+    @Before
+    public void setUp() throws Exception {
+        when(client.complete(any(PaymentQuery.class)))
+                .then(a -> {
+                    List arguments = Arrays.asList(a.getArguments());
+                    try {
+                        //client is asked to get matching payments
+                        if (((PaymentQuery) arguments.get(0)).predicates()
+                                .stream()
+                                .filter(f -> f.equals(dummyInterfaceId))
+                                .findFirst().isPresent()) {
+                            return testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json");
+                        } else {
+                            return PagedQueryResult.empty();
+                        }
+                    } catch (ClassCastException ex) {
+                        //client is asked to create payment
+                        if (arguments.get(0).toString().contains("interfaceId=123"))
+                        {
+                            return testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head().get();
+                        } else {
+                            return testHelper.dummyPaymentCreatedByNotification();
+                        }
+                    }
+                });
+
+        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyConfigValue"));
+        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyConfigValue");
+
+        config = new PayoneConfig(propertyProvider);
+
+        processors = ImmutableMap.<NotificationAction, NotificationProcessor>builder()
+                .put(NotificationAction.APPOINTED, createAppointedNotificationProcessor())
+                .build();
+
+        defaultNotificationProcessor = createDefaultNotificationProcessor();
+    }
+
+    @Test
+    public void dispatchValidAppointedNotification() {
+        final Notification notification = new Notification();
+        //txid = interfaceId -> must match the dummyPaymentQueryResult.json!
+        notification.setTxid("123");
+        notification.setClearingtype("cc");
+        notification.setPrice("200.00");
+        notification.setCurrency("EUR");
+        notification.setPortalid("dummyConfigValue");
+        notification.setAid("dummyConfigValue");
+        notification.setKey(Hashing.md5().hashString("dummyConfigValue", Charsets.UTF_8).toString());
+        notification.setMode("dummyConfigValue");
+        notification.setTxtime("1450365542");
+        notification.setTxaction(NotificationAction.APPOINTED);
+        notification.setTransactionStatus(TransactionStatus.COMPLETED);
+
+        NotificationDispatcher dispatcher = new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
+        assertThat(dispatcher.dispatchNotification(notification)).isEqualTo(true);
+
+        assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(1);
+        assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);
+    }
+
+    @Test
+    public void refuseNotificationWithWrongSecrets() {
+        final Notification notification = new Notification();
+        notification.setTxid("123");
+        notification.setPortalid("invalidPortal");
+        notification.setTxtime("1450365542");
+        notification.setTxaction(NotificationAction.APPOINTED);
+        notification.setTransactionStatus(TransactionStatus.COMPLETED);
+
+        NotificationDispatcher dispatcher = new NotificationDispatcher(createDefaultNotificationProcessor(), processors, client, config);
+
+        final Throwable throwable = catchThrowable(() -> dispatcher.dispatchNotification(notification));
+
+        assertThat(throwable)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("is not valid for this service instance");
+
+        assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(0);
+        assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);
+    }
+
+    @Test
+    public void dispatchNotificationToNewPayment() {
+        final Notification notification = new Notification();
+        //txid = interfaceId -> must NOT match the dummyPaymentQueryResult.json!
+        notification.setTxid("456");
+        notification.setClearingtype("cc");
+        notification.setPrice("200.00");
+        notification.setCurrency("EUR");
+        notification.setPortalid("dummyConfigValue");
+        notification.setAid("dummyConfigValue");
+        notification.setKey(Hashing.md5().hashString("dummyConfigValue", Charsets.UTF_8).toString());
+        notification.setMode("dummyConfigValue");
+        notification.setTxtime("1450365542");
+        notification.setTxaction(NotificationAction.APPOINTED);
+        notification.setTransactionStatus(TransactionStatus.COMPLETED);
+
+        NotificationDispatcher dispatcher = new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
+        assertThat(dispatcher.dispatchNotification(notification)).isEqualTo(true);
+
+        assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(1);
+        assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);
+    }
 
     private CountingNotificationProcessor createAppointedNotificationProcessor() {
         return new CountingNotificationProcessor() {
@@ -95,75 +205,6 @@ public class NotificationDispatcherTest {
                 return false;
             }
         };
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        client = new CommercetoolsClient(SphereClientDoubleCreator
-                .getSphereClientWithResponseFunction((intent) -> {
-                    try {
-                        if (intent.getPath().startsWith("/payments")) {
-                            return testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json");
-                        }
-                    } catch (final Exception e) {
-                        throw new RuntimeException(String.format("Failed to load resource: %s", intent), e);
-                    }
-                    throw new UnsupportedOperationException(
-                            String.format("I'm not prepared for this request: %s", intent));
-                }));
-
-        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyConfigValue"));
-        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyConfigValue");
-
-        config = new PayoneConfig(propertyProvider);
-
-        processors = ImmutableMap.<NotificationAction, NotificationProcessor>builder()
-                .put(NotificationAction.APPOINTED, createAppointedNotificationProcessor())
-                .build();
-
-        defaultNotificationProcessor = createDefaultNotificationProcessor();
-    }
-
-    @Test
-    public void dispatchValidAppointedNotification() {
-        final Notification notification = new Notification();
-        notification.setTxid("123");
-        notification.setCurrency("EUR");
-        notification.setPortalid("dummyConfigValue");
-        notification.setAid("dummyConfigValue");
-        notification.setKey(Hashing.md5().hashString("dummyConfigValue", Charsets.UTF_8).toString());
-        notification.setMode("dummyConfigValue");
-        notification.setTxtime("1450365542");
-        notification.setTxaction(NotificationAction.APPOINTED);
-        notification.setTransactionStatus(TransactionStatus.COMPLETED);
-
-        NotificationDispatcher dispatcher = new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
-        assertThat(dispatcher.dispatchNotification(notification)).isEqualTo(true);
-
-        assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(1);
-        assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);
-    }
-
-    @Test
-    public void refuseNotificationWithWrongSecrets() {
-        final Notification notification = new Notification();
-        notification.setTxid("123");
-        notification.setCurrency("EUR");
-        notification.setPortalid("invalidPortal");
-        notification.setTxtime("1450365542");
-        notification.setTxaction(NotificationAction.APPOINTED);
-        notification.setTransactionStatus(TransactionStatus.COMPLETED);
-
-        NotificationDispatcher dispatcher = new NotificationDispatcher(createDefaultNotificationProcessor(), processors, client, config);
-
-        final Throwable throwable = catchThrowable(() -> dispatcher.dispatchNotification(notification));
-
-        assertThat(throwable)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("is not valid for this service instance");
-
-        assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(0);
-        assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);
     }
 
     private interface CountingNotificationProcessor extends NotificationProcessor {
