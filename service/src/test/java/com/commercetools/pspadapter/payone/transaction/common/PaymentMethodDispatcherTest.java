@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
+package com.commercetools.pspadapter.payone.transaction.common;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

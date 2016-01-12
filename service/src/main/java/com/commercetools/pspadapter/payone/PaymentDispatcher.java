@@ -2,7 +2,7 @@ package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethodDispatcher;
+import com.commercetools.pspadapter.payone.transaction.common.PaymentMethodDispatcher;
 import io.sphere.sdk.payments.PaymentMethodInfo;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;

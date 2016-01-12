@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
+package com.commercetools.pspadapter.payone.transaction.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.when;
 
-import util.PaymentTestHelper;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import io.sphere.sdk.carts.Cart;
@@ -19,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import util.PaymentTestHelper;
 
 import java.util.concurrent.CompletionException;
 

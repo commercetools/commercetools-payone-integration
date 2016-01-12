@@ -1,7 +1,6 @@
-package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
+package com.commercetools.pspadapter.payone.transaction.common;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 
 /**
