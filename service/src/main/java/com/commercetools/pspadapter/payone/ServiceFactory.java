@@ -7,14 +7,8 @@ import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
-import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
-import com.commercetools.pspadapter.payone.transaction.common.PaymentMethodDispatcher;
-import com.commercetools.pspadapter.payone.transaction.common.TransactionExecutor;
-import com.commercetools.pspadapter.payone.transaction.common.UnsupportedTransactionExecutor;
-import com.commercetools.pspadapter.payone.transaction.creditcard.AuthorizationTransactionExecutor;
-import com.commercetools.pspadapter.payone.transaction.creditcard.ChargeTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
@@ -24,6 +18,11 @@ import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.commercetools.pspadapter.payone.notification.AppointedNotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
+import com.commercetools.pspadapter.payone.transaction.common.PaymentMethodDispatcher;
+import com.commercetools.pspadapter.payone.transaction.common.TransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.common.UnsupportedTransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.creditcard.AuthorizationTransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.creditcard.ChargeTransactionExecutor;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
@@ -35,7 +34,6 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.SchedulerException;
-import spark.Response;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -149,12 +147,7 @@ public class ServiceFactory {
             final NotificationDispatcher notificationDispatcher,
             final CustomTypeBuilder customTypeBuilder) {
         // TODO jw: use actual result processor
-        return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, notificationDispatcher, new ResultProcessor() {
-            @Override
-            public void process(final PaymentWithCartLike paymentWithCartLike, final Response response) {
-                response.status(200);
-            }
-        });
+        return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, notificationDispatcher);
     }
 
     public static NotificationDispatcher createNotificationDispatcher(final CommercetoolsClient client, final PayoneConfig config) {

@@ -6,16 +6,18 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.google.common.base.Strings;
+import io.sphere.sdk.http.HttpStatusCode;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import spark.Response;
 import spark.Spark;
 
+import javax.annotation.Nonnull;
 import java.util.ConcurrentModificationException;
+import java.util.concurrent.CompletionException;
 
 /**
  * @author fhaertig
- * @date 02.12.15
+ * @author Jan Wolter
  */
 public class IntegrationService {
 
@@ -27,19 +29,16 @@ public class IntegrationService {
     private final PaymentDispatcher paymentDispatcher;
     private final CustomTypeBuilder typeBuilder;
     private final NotificationDispatcher notificationDispatcher;
-    private final ResultProcessor resultProcessor;
 
     IntegrationService(
             final CustomTypeBuilder typeBuilder,
             final CommercetoolsQueryExecutor commercetoolsQueryExecutor,
             final PaymentDispatcher paymentDispatcher,
-            final NotificationDispatcher notificationDispatcher,
-            final ResultProcessor resultProcessor) {
+            final NotificationDispatcher notificationDispatcher) {
         this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
         this.paymentDispatcher = paymentDispatcher;
         this.typeBuilder = typeBuilder;
         this.notificationDispatcher = notificationDispatcher;
-        this.resultProcessor = resultProcessor;
     }
 
     public void start() {
@@ -49,27 +48,9 @@ public class IntegrationService {
 
         Spark.get("/commercetools/handle/payments/:id", (req, res) -> {
             try {
-                final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(req.params("id"));
-                try {
-                    final PaymentWithCartLike result = paymentDispatcher.dispatchPayment(payment);
-                    resultProcessor.process(result, res);
-                } catch (final ConcurrentModificationException cme) {
-                    try {
-                        // TODO Better
-                        for (int i = 0; i < 10; i++) {
-                            Thread.sleep(100);
-                            final PaymentWithCartLike paymentWithCartLike = commercetoolsQueryExecutor.getPaymentWithCartLike(req.params("id"));
-                            if (paymentWithCartLike.getPayment().getVersion() > payment.getPayment().getVersion()) {
-                                resultProcessor.process(paymentWithCartLike, res);
-                                break;
-                            }
-                        }
-                    } catch (final Exception e) {
-                        logExceptionInResponse(res, e);
-                    }
-                } catch (final Exception e) {
-                    logExceptionInResponse(res, e);
-                }
+                final PaymentHandleResult paymentHandleResult = handlePayment(req.params("id"));
+                res.status(paymentHandleResult.statusCode());
+                // TODO response body
             } catch (final Exception e) {
                 // TODO jw: we probably need to differentiate depending on the exception type
                 res.status(404);
@@ -96,11 +77,62 @@ public class IntegrationService {
         Spark.awaitInitialization();
     }
 
-    private void logExceptionInResponse(Response res, Exception e) {
+    /**
+     * Tries to handle the payment with the provided ID.
+     *
+     * @param paymentId identifies the payment to be processed
+     * @return the result of handling the payment
+     */
+    public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
+        try {
+            final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
+            if (!"PAYONE".equals(payment.getPayment().getPaymentMethodInfo().getPaymentInterface()))
+            {
+                return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
+            }
+
+            try {
+                final PaymentWithCartLike result = paymentDispatcher.dispatchPayment(payment);
+                return new PaymentHandleResult(HttpStatusCode.OK_200);
+            } catch (final ConcurrentModificationException cme) {
+                try {
+                    // TODO Better
+                    for (int i = 0; i < 10; i++) {
+                        Thread.sleep(100);
+                        final PaymentWithCartLike paymentWithCartLike =
+                                commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
+
+                        if (paymentWithCartLike.getPayment().getVersion() > payment.getPayment().getVersion()) {
+                            // TODO review this, it assumes that the concurrent modifier processes the same transaction
+                            // but it could be a notification processor;
+                            // maybe another dispatcher invocation would make more sense
+                            return new PaymentHandleResult(HttpStatusCode.OK_200);
+                        }
+                    }
+                    return new PaymentHandleResult(HttpStatusCode.ACCEPTED_202);
+                } catch (final RuntimeException | InterruptedException e) {
+                    return logThrowableInResponse(e);
+                }
+            } catch (final RuntimeException e) {
+                return logThrowableInResponse(e);
+            }
+        } catch (final CompletionException e) {
+            // TODO clarify if we should use localized message
+            final String body =
+                    String.format("Could not find payment with ID \"%s\", cause: %s", paymentId, e.getMessage());
+
+            return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
+        } catch (final RuntimeException e) {
+            // TODO clarify if we should use localized message
+            return new PaymentHandleResult(HttpStatusCode.INTERNAL_SERVER_ERROR_500, e.getMessage());
+        }
+    }
+
+    private PaymentHandleResult logThrowableInResponse(final Throwable throwable) {
         // TODO jw: we probably need to differentiate depending on the exception type
-        res.status(500);
-        res.type("text/plain; charset=utf-8");
-        res.body(String.format("Sorry, but you hit us between the eyes. Cause: %s", e.getMessage()));
+        return new PaymentHandleResult(
+                HttpStatusCode.INTERNAL_SERVER_ERROR_500,
+                String.format("Sorry, but you hit us between the eyes. Cause: %s", throwable.getMessage()));
     }
 
     private void createCustomTypes() {
