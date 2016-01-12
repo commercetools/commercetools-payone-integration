@@ -67,6 +67,7 @@ public class AppointedNotificationProcessorTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void getUpdatesForNewTransaction() throws IOException {
         Payment payment = testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head().get();
         payment.getTransactions().clear();
@@ -91,13 +92,14 @@ public class AppointedNotificationProcessorTest {
         assertThat(updateActions).isNotEmpty().hasSize(2);
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("addTransaction"))
                 .usingElementComparatorOnFields("transaction.type", "transaction.amount", "transaction.state", "transaction.timestamp")
-                .containsOnly(transaction);
+                .containsOnlyOnce(transaction);
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
                 .usingElementComparatorOnFields("fields")
-                .containsOnly(interfaceInteraction);
+                .<UpdateAction<Payment>>containsOnly(interfaceInteraction);
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void getUpdatesForExistingTransaction() throws IOException {
         AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                 ImmutableMap.of(

@@ -36,7 +36,7 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * @author fhaertig
- * @date 10.12.15
+ * @since  10.12.15
  */
 public abstract class BaseFixture {
     protected static final String EMPTY_STRING = "";
