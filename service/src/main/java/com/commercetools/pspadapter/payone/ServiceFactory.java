@@ -145,7 +145,6 @@ public class ServiceFactory {
             final PaymentDispatcher paymentDispatcher,
             final NotificationDispatcher notificationDispatcher,
             final CustomTypeBuilder customTypeBuilder) {
-        // TODO jw: use actual result processor
         return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, notificationDispatcher);
     }
 
