@@ -6,7 +6,7 @@ import java.util.Optional;
 
 /**
  * @author fhaertig
- * @date 15.12.15
+ * @since 15.12.15
  */
 public class PropertyProvider {
 

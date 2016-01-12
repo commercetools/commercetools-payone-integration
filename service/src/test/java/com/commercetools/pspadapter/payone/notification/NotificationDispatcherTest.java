@@ -29,7 +29,7 @@ import java.util.Optional;
 
 /**
  * @author fhaertig
- * @date 05.01.16
+ * @since 05.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
 public class NotificationDispatcherTest {

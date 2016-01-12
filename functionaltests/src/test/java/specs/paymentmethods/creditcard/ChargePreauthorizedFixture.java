@@ -49,7 +49,7 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * @author fhaertig
- * @date 10.12.15
+ * @since 10.12.15
  */
 @RunWith(ConcordionRunner.class)
 public class ChargePreauthorizedFixture extends BaseFixture {

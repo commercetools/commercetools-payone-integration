@@ -2,7 +2,7 @@ package com.commercetools.pspadapter.payone.mapping;
 
 /**
  * @author fhaertig
- * @date 14.12.15
+ * @since 14.12.15
  */
 public class CustomFieldKeys {
 

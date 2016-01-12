@@ -15,7 +15,7 @@ import java.util.Optional;
 
 /**
  * @author fhaertig
- * @date 03.12.15
+ * @since 03.12.15
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceConfigTest {

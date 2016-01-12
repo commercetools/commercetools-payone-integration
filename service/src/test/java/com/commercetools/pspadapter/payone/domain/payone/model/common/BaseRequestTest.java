@@ -15,7 +15,7 @@ import com.commercetools.pspadapter.payone.config.PayoneConfig;
 
 /**
  * @author fhaertig
- * @date 11.12.15
+ * @since 11.12.15
  */
 public class BaseRequestTest {
     private static final String requestType = "some-request";

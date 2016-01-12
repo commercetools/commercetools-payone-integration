@@ -8,7 +8,7 @@ import io.sphere.sdk.payments.Transaction;
 
 /**
  * @author fhaertig
- * @date 14.12.15
+ * @since 14.12.15
  */
 public abstract class PayoneRequestFactory {
 

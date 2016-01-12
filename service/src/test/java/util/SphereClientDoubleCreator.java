@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 /**
  * @author fhaertig
- * @date 07.12.15
+ * @since 07.12.15
  */
 public class SphereClientDoubleCreator {
 

@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author fhaertig
- * @date 15.12.15
+ * @since 15.12.15
  */
 public enum CreditCardNetwork {
 
@@ -37,12 +37,9 @@ public enum CreditCardNetwork {
     }
 
     public static List<EnumValue> getValuesAsListOfEnumValue() {
-        List<EnumValue> enumValues =
-                EnumSet.allOf(CreditCardNetwork.class)
+        return EnumSet.allOf(CreditCardNetwork.class)
                         .stream()
                         .map(p -> EnumValue.of(p.name(), p.getLabel()))
                         .collect(Collectors.toList());
-
-        return enumValues;
     }
 }

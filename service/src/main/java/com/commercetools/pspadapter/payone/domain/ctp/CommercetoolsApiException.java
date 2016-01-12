@@ -2,7 +2,7 @@ package com.commercetools.pspadapter.payone.domain.ctp;
 
 /**
  * @author fhaertig
- * @date 03.12.15
+ * @since 03.12.15
  */
 public class CommercetoolsApiException extends Exception {
 

@@ -10,7 +10,7 @@ import java.io.IOException;
 
 /**
  * @author fhaertig
- * @date 17.12.15
+ * @since 17.12.15
  */
 public class NotificationTest {
 

@@ -5,7 +5,7 @@ package com.commercetools.pspadapter.payone.config;
  *
  * @author fhaertig
  * @author Jan Wolter
- * @date 02.12.15
+ * @since 02.12.15
  */
 public class ServiceConfig {
 

@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * @author fhaertig
- * @date 16.12.15
+ * @since 16.12.15
  */
 public class DispatchResult {
 

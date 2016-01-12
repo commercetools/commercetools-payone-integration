@@ -4,7 +4,7 @@ import com.commercetools.pspadapter.payone.config.PayoneConfig;
 
 /**
  * @author fhaertig
- * @date 15.12.15
+ * @since 15.12.15
  */
 public class CaptureRequest extends BaseRequest {
 

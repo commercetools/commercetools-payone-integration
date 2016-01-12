@@ -5,7 +5,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureReq
 
 /**
  * @author fhaertig
- * @date 15.12.15
+ * @since 15.12.15
  */
 public class CreditCardCaptureRequest extends CaptureRequest {
 

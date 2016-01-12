@@ -19,7 +19,7 @@ import java.util.Optional;
 
 /**
  * @author fhaertig
- * @date 17.12.15
+ * @since 17.12.15
  */
 public class NotificationDispatcher {
 
@@ -81,10 +81,9 @@ public class NotificationDispatcher {
 
     private PaymentDraft createNewPaymentDraftFromNotification(final Notification notification) {
         MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-        PaymentDraft paymentDraft = PaymentDraftBuilder
+        return PaymentDraftBuilder
                 .of(amount)
                 .interfaceId(notification.getTxid())
                 .build();
-        return paymentDraft;
     }
 }

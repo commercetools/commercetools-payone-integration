@@ -5,7 +5,7 @@ import com.google.common.hash.Hashing;
 
 /**
  * @author fhaertig
- * @date 11.12.15
+ * @since 11.12.15
  */
 public class PayoneConfig {
 

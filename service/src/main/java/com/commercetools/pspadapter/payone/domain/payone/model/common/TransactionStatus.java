@@ -5,7 +5,7 @@ import io.sphere.sdk.payments.TransactionState;
 
 /**
  * @author fhaertig
- * @date 18.12.15
+ * @since 18.12.15
  */
 public enum TransactionStatus {
 

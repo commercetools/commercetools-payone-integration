@@ -12,7 +12,7 @@ import java.util.Optional;
 
 /**
  * @author fhaertig
- * @date 13.12.15
+ * @since 13.12.15
  */
 public class MappingUtil {
 

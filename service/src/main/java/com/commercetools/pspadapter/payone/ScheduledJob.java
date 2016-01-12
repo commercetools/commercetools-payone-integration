@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 
 /**
  * @author fhaertig
- * @date 07.12.15
+ * @since 07.12.15
  */
 public class ScheduledJob implements Job {
 

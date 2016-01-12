@@ -6,7 +6,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Preauthori
 
 /**
  * @author fhaertig
- * @date 11.12.15
+ * @since 11.12.15
  */
 public class CreditCardPreauthorizationRequest extends PreauthorizationRequest {
 

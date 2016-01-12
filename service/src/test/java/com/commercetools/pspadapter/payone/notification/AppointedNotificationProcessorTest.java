@@ -35,7 +35,7 @@ import java.util.List;
 
 /**
  * @author fhaertig
- * @date 11.01.16
+ * @since 11.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
 public class AppointedNotificationProcessorTest {

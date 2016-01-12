@@ -14,7 +14,7 @@ import org.quartz.JobExecutionException;
 
 /**
  * @author fhaertig
- * @date 07.12.15
+ * @since 07.12.15
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ScheduledJobTest {

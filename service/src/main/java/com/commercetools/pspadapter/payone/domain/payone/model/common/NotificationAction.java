@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 /**
  * @author fhaertig
- * @date 17.12.15
+ * @since 17.12.15
  */
 public enum NotificationAction implements Serializable {
 

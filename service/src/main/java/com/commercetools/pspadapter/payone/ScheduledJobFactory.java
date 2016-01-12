@@ -11,7 +11,7 @@ import org.quartz.impl.StdSchedulerFactory;
 
 /**
  * @author fhaertig
- * @date 04.12.15
+ * @since 04.12.15
  */
 public class ScheduledJobFactory {
 

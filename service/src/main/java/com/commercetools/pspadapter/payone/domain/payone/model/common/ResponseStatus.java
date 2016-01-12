@@ -2,7 +2,7 @@ package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 /**
  * @author fhaertig
- * @date 11.12.15
+ * @since 11.12.15
  */
 public enum ResponseStatus {
     REDIRECT("REDIRECT"),

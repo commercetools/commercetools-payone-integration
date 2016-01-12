@@ -8,7 +8,7 @@ import java.util.Map;
 
 /**
  * @author fhaertig
- * @date 11.12.15
+ * @since 11.12.15
  */
 public enum ClearingType {
     PAYONE_ELV("PayoneELV", "elv", ""),
@@ -50,8 +50,8 @@ public enum ClearingType {
      * </code>
      * **/
     private final String subType;
-    private static final Map<String, ClearingType> LOOKUP_TYPE = new HashMap<String, ClearingType>();
-    private static final Map<String, ClearingType> LOOKUP_CODE = new HashMap<String, ClearingType>();
+    private static final Map<String, ClearingType> LOOKUP_TYPE = new HashMap<>();
+    private static final Map<String, ClearingType> LOOKUP_CODE = new HashMap<>();
 
     static {
         for (ClearingType p : EnumSet.allOf(ClearingType.class)) {
@@ -60,7 +60,7 @@ public enum ClearingType {
         }
     }
 
-    private ClearingType(final String key, final String payoneCode, final String subType) {
+    ClearingType(final String key, final String payoneCode, final String subType) {
         this.key = key;
         this.payoneCode = payoneCode;
         this.subType = subType;

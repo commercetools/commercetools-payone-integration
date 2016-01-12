@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * @author fhaertig
- * @date 17.12.15
+ * @since 17.12.15
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Notification implements Serializable {

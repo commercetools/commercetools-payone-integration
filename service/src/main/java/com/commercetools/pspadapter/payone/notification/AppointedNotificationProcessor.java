@@ -25,8 +25,11 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 /**
+ * An implementation of a NotificationProcessor specifically for notifications with txaction 'appointed'.
+ * Determines the necessary UpdateActions for the payment and applies them.
+ *
  * @author fhaertig
- * @date 08.01.16
+ * @since 08.01.16
  */
 public class AppointedNotificationProcessor implements NotificationProcessor {
 

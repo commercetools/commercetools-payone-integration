@@ -4,6 +4,7 @@ import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.queries.CartQuery;
 import io.sphere.sdk.messages.GenericMessageImpl;
 import io.sphere.sdk.messages.MessageDerivateHint;
+import io.sphere.sdk.messages.expansion.MessageExpansionModel;
 import io.sphere.sdk.messages.queries.MessageQuery;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.queries.OrderQuery;
@@ -25,8 +26,9 @@ import java.util.function.Consumer;
 
 /**
  * @author fhaertig
- * @date 02.12.15
+ * @since 02.12.15
  */
+//TODO: refactor class since it has mixed concerns (maybe MessageConsumer only)
 public class CommercetoolsQueryExecutor {
 
     private CommercetoolsClient client;
@@ -74,19 +76,22 @@ public class CommercetoolsQueryExecutor {
         }
     }
 
-    public void consumePaymentCreatedMessages(ZonedDateTime sinceDate, Consumer<Payment> paymentConsumer) {
+    public void consumePaymentCreatedMessages(final ZonedDateTime sinceDate, final Consumer<Payment> paymentConsumer) {
         consumeAllMessages(sinceDate, paymentConsumer, PaymentCreatedMessage.MESSAGE_HINT);
     }
 
-    public void consumePaymentTransactionAddedMessages(ZonedDateTime sinceDate, Consumer<Payment> paymentConsumer) {
+    public void consumePaymentTransactionAddedMessages(final ZonedDateTime sinceDate, final Consumer<Payment> paymentConsumer) {
         consumeAllMessages(sinceDate, paymentConsumer, PaymentTransactionAddedMessage.MESSAGE_HINT);
     }
 
-    private <T extends GenericMessageImpl<Payment>> void consumeAllMessages(ZonedDateTime sinceDate, Consumer<Payment> paymentConsumer, MessageDerivateHint<T> messageHint) {
+    private <T extends GenericMessageImpl<Payment>> void consumeAllMessages(
+            final ZonedDateTime sinceDate,
+            final Consumer<Payment> paymentConsumer,
+            final MessageDerivateHint<T> messageHint) {
         final MessageQuery baseQuery = MessageQuery.of()
             .withPredicates(m -> m.createdAt().isGreaterThanOrEqualTo(sinceDate))
             .withSort(m -> m.createdAt().sort().asc())
-            .withExpansionPaths(m -> m.resource())
+            .withExpansionPaths(MessageExpansionModel::resource)
             .withLimit(500); // Maximum
 
         long processed = 0, total = 0;
@@ -94,7 +99,7 @@ public class CommercetoolsQueryExecutor {
         do {
             Query<T> query = baseQuery
                 .withOffset(processed)
-                .<T>forMessageType(messageHint);
+                .forMessageType(messageHint);
             final PagedQueryResult<T> result = client.complete(query);
 
             result.getResults()
