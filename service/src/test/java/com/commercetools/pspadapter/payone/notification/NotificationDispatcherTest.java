@@ -12,6 +12,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
 import io.sphere.sdk.commands.UpdateAction;
@@ -24,7 +25,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 import util.SphereClientDoubleCreator;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -133,6 +133,7 @@ public class NotificationDispatcherTest {
         notification.setAid("dummyConfigValue");
         notification.setKey(Hashing.md5().hashString("dummyConfigValue", Charsets.UTF_8).toString());
         notification.setMode("dummyConfigValue");
+        notification.setTxtime("1450365542");
         notification.setTxaction(NotificationAction.APPOINTED);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
@@ -149,6 +150,7 @@ public class NotificationDispatcherTest {
         notification.setTxid("123");
         notification.setCurrency("EUR");
         notification.setPortalid("invalidPortal");
+        notification.setTxtime("1450365542");
         notification.setTxaction(NotificationAction.APPOINTED);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
@@ -168,7 +170,7 @@ public class NotificationDispatcherTest {
         int getCount();
 
         @Override
-        default List<UpdateAction<Payment>> getTransactionUpdates(final Payment payment, final Notification notification) {
+        default ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment, final Notification notification) {
             return null;
         }
     }

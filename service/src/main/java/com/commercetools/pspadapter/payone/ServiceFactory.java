@@ -25,6 +25,7 @@ import com.commercetools.pspadapter.payone.transaction.creditcard.AuthorizationT
 import com.commercetools.pspadapter.payone.transaction.creditcard.ChargeTransactionExecutor;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.client.SphereClientFactory;
@@ -36,9 +37,7 @@ import org.quartz.CronScheduleBuilder;
 import org.quartz.SchedulerException;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -164,8 +163,8 @@ public class ServiceFactory {
             }
 
             @Override
-            public List<UpdateAction<Payment>> getTransactionUpdates(final Payment payment, final Notification notification) {
-                return new ArrayList<>();
+            public ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment, final Notification notification) {
+                return ImmutableList.of();
             }
         };
 

@@ -65,10 +65,14 @@ public class IntegrationService {
             Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
 
             try {
-                notificationDispatcher.dispatchNotification(notification);
-                res.status(501);
-                return "Currently not implemented";
-            } catch (IllegalArgumentException ex) {
+                if (notificationDispatcher.dispatchNotification(notification)) {
+                    res.status(200);
+                    return "TSOK";
+                } else {
+                    res.status(500);
+                    return "Couldn't process the notification because of an unknown error!";
+                }
+            } catch (RuntimeException ex) {
                 res.status(400);
                 return ex.getMessage();
             }

@@ -39,7 +39,7 @@ public class NotificationDispatcher {
         this.config = config;
     }
 
-    public boolean dispatchNotification(final Notification notification) throws IllegalArgumentException {
+    public boolean dispatchNotification(final Notification notification) {
 
         validateSecrets(notification);
 

@@ -33,6 +33,7 @@ public class NotificationTest {
                 "aid=001&" +
                 "sequencenumber=1&" +
                 "clearingtype=cc&" +
+                "txtime=1450365542&" +
                 "cardpan=1&" +
                 "blabla=23";   //ignored parameter
 
@@ -47,6 +48,7 @@ public class NotificationTest {
         softly.assertThat(notification.getAid()).isEqualTo("001");
         softly.assertThat(notification.getClearingtype()).isEqualTo("cc");
         softly.assertThat(notification.getSequencenumber()).isEqualTo("1");
+        softly.assertThat(notification.getTxtime()).isEqualTo("1450365542");
 
         softly.assertAll();
     }
