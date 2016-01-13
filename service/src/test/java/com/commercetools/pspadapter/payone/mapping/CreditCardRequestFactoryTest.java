@@ -93,7 +93,7 @@ public class CreditCardRequestFactoryTest {
         softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
         //3d secure
-        softly.assertThat(result.getEcommercemode()).isEqualTo(payment.getCustom().getFieldAsBoolean(CustomFieldKeys.FORCE3DSECURE_KEY));
+        softly.assertThat(result.getEcommercemode()).isEqualTo(payment.getCustom().getFieldAsBoolean(CustomFieldKeys.FORCE_3DSECURE_FIELD));
 
         //address data
         Address billingAddress = order.getBillingAddress();

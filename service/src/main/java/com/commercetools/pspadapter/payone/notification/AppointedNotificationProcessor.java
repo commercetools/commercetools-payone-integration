@@ -5,6 +5,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
+import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.commands.UpdateAction;
@@ -88,14 +89,14 @@ public class AppointedNotificationProcessor implements NotificationProcessor {
                                 .of(notification.getTransactionStatus().getCtTransactionState(), t.getId()));
                     }
 
-
                     //add new interface interaction
                     listBuilder.add(AddInterfaceInteraction
                             .ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                                     ImmutableMap.of(
-                                            CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
-                                            CustomTypeBuilder.TRANSACTION_ID_FIELD, t.getId(),
-                                            CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString())));
+                                            CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                                            CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
+                                            CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
+                                            CustomFieldKeys.NOTIFICATION_FIELD, notification.toString())));
 
                     return listBuilder.build();
                 })
@@ -113,10 +114,10 @@ public class AppointedNotificationProcessor implements NotificationProcessor {
                     final AddInterfaceInteraction newInterfaceInteraction = AddInterfaceInteraction
                             .ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                                     ImmutableMap.of(
-                                            CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
-                                            // TODO: its impossible to get id of the new transaction, we need to change the customType to reflect this
-                                            CustomTypeBuilder.TRANSACTION_ID_FIELD, "",
-                                            CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString()));
+                                            CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                                            CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
+                                            CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
+                                            CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
 
                     return ImmutableList.of(
                             AddTransaction.of(transactionDraft),

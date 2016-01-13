@@ -1,9 +1,9 @@
 package com.commercetools.pspadapter.payone.domain.ctp;
 
 import com.commercetools.pspadapter.payone.mapping.CreditCardNetwork;
+import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-
 import io.sphere.sdk.carts.commands.CartDeleteCommand;
 import io.sphere.sdk.carts.queries.CartQuery;
 import io.sphere.sdk.models.LocalizedString;
@@ -34,34 +34,12 @@ public class CustomTypeBuilder {
     // TODO jw: not that custom, general type for all PSPs, move somewhere else
     public static final String PAYMENT_CREDIT_CARD = "payment-CREDIT_CARD";
 
-    public static final String LANGUAGE_CODE_FIELD = "languageCode";
-    public static final String REFERENCE_FIELD = "reference";
-    public static final String REFERENCE_TEXT_FIELD = "referenceText";
-    public static final String REDIRECT_URL_FIELD = "redirectUrl";
-    public static final String SUCCESS_URL_FIELD = "successUrl";
-    public static final String ERROR_URL_FIELD = "errorUrl";
-    public static final String CANCEL_URL_FIELD = "cancelUrl";
-    public static final String FORCE_3DSECURE_FIELD = "force3DSecure";
-    public static final String CARD_DATA_PLACEHOLDER_FIELD = "cardDataPlaceholder";
-    public static final String TRUNCATED_CARD_NUMBER_FIELD = "truncatedCardNumber";
-    public static final String CARD_HOLDER_NAME_FIELD = "cardHolderName";
-    public static final String CARD_EXPIRY_DATE_FIELD = "cardExpiryDate";
-    public static final String CARD_NETWORK_FIELD = "cardNetwork";
-
     public static final String PAYONE_INTERACTION_REQUEST = "PAYONE_INTERACTION_REQUEST";
     public static final String PAYONE_INTERACTION_RESPONSE = "PAYONE_INTERACTION_RESPONSE";
     public static final String PAYONE_INTERACTION_REDIRECT = "PAYONE_INTERACTION_REDIRECT";
     public static final String PAYONE_INTERACTION_NOTIFICATION = "PAYONE_INTERACTION_NOTIFICATION";
     public static final String PAYONE_INTERACTION_TEMPORARY_ERROR = "PAYONE_INTERACTION_TEMPORARY_ERROR";
     public static final String PAYONE_UNSUPPORTED_TRANSACTION = "PAYONE_UNSUPPORTED_TRANSACTION";
-
-    public static final String TIMESTAMP_FIELD = "timestamp";
-    public static final String TRANSACTION_ID_FIELD = "transactionId";
-    public static final String REQUEST_FIELD = "request";
-    public static final String RESPONSE_FIELD = "response";
-
-    public static final String NOTIFICATION_FIELD = "notification";
-    public static final String MESSAGE_FIELD = "message";
 
     public enum PermissionToStartFromScratch {
         /**
@@ -130,57 +108,61 @@ public class CustomTypeBuilder {
 
     private void createPaymentProviderAgnosticTypes() {
         createPaymentCustomType(PAYMENT_CREDIT_CARD, ImmutableList.of(
-                createSingleLineStringFieldDefinition(LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(REFERENCE_FIELD, FieldClassifier.REQUIRED),
-                createMultiLineStringFieldDefinition(REFERENCE_TEXT_FIELD, FieldClassifier.OPTIONAL),
-                createSingleLineStringFieldDefinition(REDIRECT_URL_FIELD, FieldClassifier.OPTIONAL),
-                createSingleLineStringFieldDefinition(SUCCESS_URL_FIELD, FieldClassifier.OPTIONAL),
-                createSingleLineStringFieldDefinition(ERROR_URL_FIELD, FieldClassifier.OPTIONAL),
-                createSingleLineStringFieldDefinition(CANCEL_URL_FIELD, FieldClassifier.OPTIONAL),
-                createFieldDefinition(BooleanFieldType.of(), FORCE_3DSECURE_FIELD, null, FieldClassifier.OPTIONAL),
-                createSingleLineStringFieldDefinition(CARD_DATA_PLACEHOLDER_FIELD, FieldClassifier.OPTIONAL),
-                createSingleLineStringFieldDefinition(TRUNCATED_CARD_NUMBER_FIELD, FieldClassifier.OPTIONAL),
-                createSingleLineStringFieldDefinition(CARD_HOLDER_NAME_FIELD, FieldClassifier.OPTIONAL),
-                createFieldDefinition(DateFieldType.of(), CARD_EXPIRY_DATE_FIELD, null, FieldClassifier.OPTIONAL),
-                createFieldDefinition(EnumFieldType.of(CreditCardNetwork.getValuesAsListOfEnumValue()), CARD_NETWORK_FIELD, null, FieldClassifier.OPTIONAL)
+                createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
+                createMultiLineStringFieldDefinition(CustomFieldKeys.REFERENCE_TEXT_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REDIRECT_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.SUCCESS_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.ERROR_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.CANCEL_URL_FIELD, FieldClassifier.OPTIONAL),
+                createFieldDefinition(BooleanFieldType.of(), CustomFieldKeys.FORCE_3DSECURE_FIELD, null, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.TRUNCATED_CARD_NUMBER_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.CARD_HOLDER_NAME_FIELD, FieldClassifier.OPTIONAL),
+                createFieldDefinition(DateFieldType.of(), CustomFieldKeys.CARD_EXPIRY_DATE_FIELD, null, FieldClassifier.OPTIONAL),
+                createFieldDefinition(EnumFieldType.of(CreditCardNetwork.getValuesAsListOfEnumValue()), CustomFieldKeys.CARD_NETWORK_FIELD, null, FieldClassifier.OPTIONAL)
         ));
     }
 
     private void createPayoneSpecificTypes() {
-        final FieldDefinition timestampField = createSingleLineStringFieldDefinition(TIMESTAMP_FIELD, FieldClassifier.REQUIRED);
-        final FieldDefinition transactionIdField = createSingleLineStringFieldDefinition(TRANSACTION_ID_FIELD, FieldClassifier.REQUIRED);
+        final FieldDefinition timestampField = createSingleLineStringFieldDefinition(CustomFieldKeys.TIMESTAMP_FIELD, FieldClassifier.REQUIRED);
+        final FieldDefinition transactionIdField = createSingleLineStringFieldDefinition(CustomFieldKeys.TRANSACTION_ID_FIELD, FieldClassifier.REQUIRED);
 
         createInteractionRequest(timestampField, transactionIdField);
         createInteractionResponse(timestampField, transactionIdField);
         createInteractionRedirect(timestampField, transactionIdField);
-        createInteractionNotification(timestampField, transactionIdField);
+        createInteractionNotification(timestampField);
         createInteractionTemporaryError(timestampField, transactionIdField);
         createPayoneUnsupportedTransaction(timestampField, transactionIdField);
     }
 
     private Type createInteractionRequest(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createInterfaceInteractionType(PAYONE_INTERACTION_REQUEST, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(REQUEST_FIELD,  FieldClassifier.REQUIRED)));
+        return createInterfaceInteractionType(PAYONE_INTERACTION_REQUEST, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(CustomFieldKeys.REQUEST_FIELD,  FieldClassifier.REQUIRED)));
     }
 
     private Type createInteractionResponse(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createInterfaceInteractionType(PAYONE_INTERACTION_RESPONSE, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(RESPONSE_FIELD, FieldClassifier.REQUIRED)));
+        return createInterfaceInteractionType(PAYONE_INTERACTION_RESPONSE, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(CustomFieldKeys.RESPONSE_FIELD, FieldClassifier.REQUIRED)));
     }
 
     private Type createInteractionRedirect(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
         return createInterfaceInteractionType(PAYONE_INTERACTION_REDIRECT,
-                ImmutableList.of(timestampField, transactionIdField, createSingleLineStringFieldDefinition(REDIRECT_URL_FIELD, FieldClassifier.REQUIRED), createMultiLineStringFieldDefinition(RESPONSE_FIELD, FieldClassifier.REQUIRED)));
+                ImmutableList.of(timestampField, transactionIdField, createSingleLineStringFieldDefinition(CustomFieldKeys.REDIRECT_URL_FIELD, FieldClassifier.REQUIRED), createMultiLineStringFieldDefinition(CustomFieldKeys.RESPONSE_FIELD, FieldClassifier.REQUIRED)));
     }
 
     private Type createInteractionTemporaryError(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createInterfaceInteractionType(PAYONE_INTERACTION_TEMPORARY_ERROR, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(RESPONSE_FIELD, FieldClassifier.REQUIRED)));
+        return createInterfaceInteractionType(PAYONE_INTERACTION_TEMPORARY_ERROR, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(CustomFieldKeys.RESPONSE_FIELD, FieldClassifier.REQUIRED)));
     }
 
-    private Type createInteractionNotification(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createInterfaceInteractionType(PAYONE_INTERACTION_NOTIFICATION, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(NOTIFICATION_FIELD, FieldClassifier.REQUIRED)));
+    private Type createInteractionNotification(final FieldDefinition timestampField) {
+        final FieldDefinition sequenceNumberField = createSingleLineStringFieldDefinition(CustomFieldKeys.SEQUENCE_NUMBER_FIELD, FieldClassifier.REQUIRED);
+        final FieldDefinition txActionField = createSingleLineStringFieldDefinition(CustomFieldKeys.TX_ACTION_FIELD, FieldClassifier.REQUIRED);
+        final FieldDefinition notificationField = createMultiLineStringFieldDefinition(CustomFieldKeys.NOTIFICATION_FIELD, FieldClassifier.REQUIRED);
+
+        return createInterfaceInteractionType(PAYONE_INTERACTION_NOTIFICATION, ImmutableList.of(timestampField, sequenceNumberField, txActionField, notificationField));
     }
 
     private Type createPayoneUnsupportedTransaction(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createInterfaceInteractionType(PAYONE_UNSUPPORTED_TRANSACTION, ImmutableList.of(timestampField, transactionIdField, createSingleLineStringFieldDefinition(MESSAGE_FIELD, FieldClassifier.REQUIRED)));
+        return createInterfaceInteractionType(PAYONE_UNSUPPORTED_TRANSACTION, ImmutableList.of(timestampField, transactionIdField, createSingleLineStringFieldDefinition(CustomFieldKeys.MESSAGE_FIELD, FieldClassifier.REQUIRED)));
     }
 
     private Type createInterfaceInteractionType(final String typeKey, final ImmutableList<FieldDefinition> fieldDefinitions) {

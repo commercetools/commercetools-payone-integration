@@ -2,6 +2,7 @@ package specs.paymentmethods.creditcard;
 
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
+import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.neovisionaries.i18n.CountryCode;
@@ -76,9 +77,9 @@ public class AuthorizationFixture extends BaseFixture {
                 .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
                         CustomTypeBuilder.PAYMENT_CREDIT_CARD,
                         ImmutableMap.of(
-                                CustomTypeBuilder.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan(),
-                                CustomTypeBuilder.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage(),
-                                CustomTypeBuilder.REFERENCE_FIELD, "myGlobalKey")))
+                                CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan(),
+                                CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage(),
+                                CustomFieldKeys.REFERENCE_FIELD, "myGlobalKey")))
                 .build();
 
         final BlockingClient ctpClient = ctpClient();
@@ -131,9 +132,9 @@ public class AuthorizationFixture extends BaseFixture {
         final String interactionTypeId = typeIdFromTypeName(interactionTypeName);
         return Long.toString(payment.getInterfaceInteractions().stream()
                 .filter(i -> i.getType().getId().equals(interactionTypeId))
-                .filter(i -> transactionId.equals(i.getFieldAsString(CustomTypeBuilder.TRANSACTION_ID_FIELD)))
+                .filter(i -> transactionId.equals(i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))
                 .filter(i -> {
-                    final String requestField = i.getFieldAsString(CustomTypeBuilder.REQUEST_FIELD);
+                    final String requestField = i.getFieldAsString(CustomFieldKeys.REQUEST_FIELD);
                     return (requestField != null) && requestField.contains("request=" + requestType);
                 })
                 .count());

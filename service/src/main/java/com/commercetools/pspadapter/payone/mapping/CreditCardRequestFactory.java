@@ -30,7 +30,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
-        String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.PSEUDOCARDPAN_KEY);
+        String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
         CreditCardPreauthorizationRequest request = new CreditCardPreauthorizationRequest(getConfig(), pseudocardpan);
 
         if (paymentWithCartLike.getOrderNumber().isPresent()) {
@@ -39,8 +39,8 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
 
         request.setAmount(MonetaryUtil.minorUnits().queryFrom(ctPayment.getAmountPlanned()).intValue());
         request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
-        request.setNarrative_text(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.NARRATIVETEXT_KEY));
-        request.setUserid(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.USERID_KEY));
+        request.setNarrative_text(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_TEXT_FIELD));
+        request.setUserid(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.USER_ID_FIELD));
 
         MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
         MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());

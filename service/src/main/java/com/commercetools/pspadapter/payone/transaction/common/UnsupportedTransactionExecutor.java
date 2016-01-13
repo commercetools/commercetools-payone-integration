@@ -3,6 +3,7 @@ package com.commercetools.pspadapter.payone.transaction.common;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Payment;
@@ -38,8 +39,8 @@ public class UnsupportedTransactionExecutor implements TransactionExecutor {
         final AddInterfaceInteraction addInterfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(
                 CustomTypeBuilder.PAYONE_UNSUPPORTED_TRANSACTION,
                 ImmutableMap.<String, Object>of(
-                        CustomTypeBuilder.TRANSACTION_ID_FIELD, transaction.getId(),
-                        CustomTypeBuilder.MESSAGE_FIELD, "Transaction type not supported."));
+                        CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
+                        CustomFieldKeys.MESSAGE_FIELD, "Transaction type not supported."));
 
         return paymentWithCartLike.withPayment(
             client.complete(

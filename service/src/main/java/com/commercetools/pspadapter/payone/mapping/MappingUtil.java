@@ -68,7 +68,7 @@ public class MappingUtil {
             //TODO: Gender can also be a CustomField enum @Cart with values Female/Male
             //gender
             Optional.ofNullable(customer.getObj().getCustom()).ifPresent(customs -> {
-                Optional.ofNullable(customs.getFieldAsString(CustomFieldKeys.GENDER_KEY))
+                Optional.ofNullable(customs.getFieldAsString(CustomFieldKeys.GENDER_FIELD))
                     .ifPresent(gender -> {
                         request.setGender(gender.substring(0, 0));
                     });

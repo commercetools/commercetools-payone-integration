@@ -8,6 +8,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
+import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
@@ -95,9 +96,10 @@ public class AppointedNotificationProcessorTest {
 
         AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                 ImmutableMap.of(
-                        CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
-                        CustomTypeBuilder.TRANSACTION_ID_FIELD, "",
-                        CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString()));
+                        CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                        CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
+                        CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
+                        CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
 
         assertThat(updateActions).isNotEmpty().hasSize(2);
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("addTransaction"))
@@ -124,9 +126,10 @@ public class AppointedNotificationProcessorTest {
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
         AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                 ImmutableMap.of(
-                        CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
-                        CustomTypeBuilder.TRANSACTION_ID_FIELD, payment.getTransactions().get(0).getId(),
-                        CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString()));
+                        CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                        CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
+                        CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
+                        CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
 
         assertThat(updateActions).isNotEmpty().hasSize(3);
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("changeTransactionState"))
@@ -156,9 +159,10 @@ public class AppointedNotificationProcessorTest {
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
         AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                 ImmutableMap.of(
-                        CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
-                        CustomTypeBuilder.TRANSACTION_ID_FIELD, payment.getTransactions().get(0).getId(),
-                        CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString()));
+                        CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                        CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
+                        CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
+                        CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
 
         assertThat(updateActions).isNotEmpty().hasSize(2);
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("changeTransactionInteractionId"))
