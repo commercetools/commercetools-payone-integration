@@ -66,17 +66,21 @@ public enum ClearingType {
         this.subType = subType;
     }
 
-    public static ClearingType getClearingTypeByKey(final String key) {
+    public static ClearingType getClearingTypeByKey(final String ctKey) {
         ClearingType clearingType = null;
         // Same paymentmodes could have different codes, when they have for example different paymentcosts. Because
         // of that only the prefix of each paymentmode is checked
         for (String lookupPaymentType : LOOKUP_TYPE.keySet()) {
-            if (StringUtils.containsIgnoreCase(key, lookupPaymentType)) {
+            if (StringUtils.containsIgnoreCase(ctKey, lookupPaymentType)) {
                 clearingType = LOOKUP_TYPE.get(lookupPaymentType);
                 break;
             }
         }
-        return clearingType;
+        if (clearingType == null) {
+            throw new IllegalArgumentException("Commercetools clearingtype '" + ctKey + "' could not be mapped.");
+        } else {
+            return clearingType;
+        }
     }
 
     public static ClearingType getClearingTypeByCode(final String payoneCode) {
@@ -90,7 +94,11 @@ public enum ClearingType {
             }
         }
 
-        return clearingType;
+        if (clearingType == null) {
+            throw new IllegalArgumentException("Payone clearingtype '" + payoneCode + "' could not be mapped.");
+        } else {
+            return clearingType;
+        }
     }
 
     public String getKey() {
