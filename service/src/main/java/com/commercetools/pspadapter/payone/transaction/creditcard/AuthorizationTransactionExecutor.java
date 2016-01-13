@@ -53,8 +53,15 @@ public class AuthorizationTransactionExecutor implements IdempotentTransactionEx
 
     @Override
     public boolean wasExecuted(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE, CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT)
-            .anyMatch(i -> i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD).equals(transaction.getId()));
+        if (getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE, CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT)
+            .noneMatch(fields -> transaction.getId().equals(fields.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))) {
+
+            return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)
+                    //sequenceNumber field is mandatory -> can't be null
+                    .anyMatch(fields -> fields.getFieldAsString(CustomFieldKeys.SEQUENCE_NUMBER_FIELD).equals(transaction.getInteractionId()));
+        } else {
+            return true;
+        }
     }
 
     @Override
@@ -65,8 +72,8 @@ public class AuthorizationTransactionExecutor implements IdempotentTransactionEx
     @Override
     public Optional<CustomFields> findLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
         return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_REQUEST)
-            .filter(i -> i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD).equals(transaction.getId()))
-            .reduce((previous, current) -> current); // .findLast()
+            .filter(i -> transaction.getId().equals(i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))
+                .reduce((previous, current) -> current); // .findLast()
     }
 
     @Override
