@@ -25,11 +25,9 @@ import com.commercetools.pspadapter.payone.transaction.creditcard.AuthorizationT
 import com.commercetools.pspadapter.payone.transaction.creditcard.ChargeTransactionExecutor;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.client.SphereClientFactory;
-import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
@@ -159,11 +157,6 @@ public class ServiceFactory {
             @Override
             public boolean processTransactionStatusNotification(final Notification notification, final Payment payment) {
                 return false;
-            }
-
-            @Override
-            public ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment, final Notification notification) {
-                return ImmutableList.of();
             }
         };
 

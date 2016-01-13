@@ -2,8 +2,6 @@ package com.commercetools.pspadapter.payone.notification;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
-import com.google.common.collect.ImmutableList;
-import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 
 import java.util.concurrent.CompletionException;
@@ -30,14 +28,4 @@ public interface NotificationProcessor {
     boolean processTransactionStatusNotification(
             final Notification notification,
             final Payment payment);
-
-    /**
-     * Generates a list of update actions which can be applied to the payment in one step.
-     *
-     * @param payment the payment to which the updates may apply
-     * @param notification the notification to process
-     * @return an immutable list of update actions which will e.g. add an interfaceInteraction to the payment
-     * or apply changes to a corresponding transaction in the payment
-     */
-    ImmutableList<UpdateAction<Payment>> createPaymentUpdates(Payment payment, Notification notification);
 }
