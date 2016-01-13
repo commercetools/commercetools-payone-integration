@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.notification;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
@@ -13,6 +14,7 @@ import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.TransactionDraftBuilder;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
+import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractionId;
@@ -21,6 +23,9 @@ import io.sphere.sdk.utils.MoneyImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
@@ -45,6 +50,12 @@ public class AppointedNotificationProcessorTest {
     @Mock
     private CommercetoolsClient client;
 
+    @InjectMocks
+    private AppointedNotificationProcessor testee;
+
+    @Captor
+    private ArgumentCaptor<PaymentUpdateCommand> paymentRequestCaptor;
+
     private final PaymentTestHelper testHelper = new PaymentTestHelper();
 
     private Notification notification;
@@ -62,12 +73,18 @@ public class AppointedNotificationProcessorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void getUpdatesForNewTransaction() throws Exception {
+    public void processesNotificationAboutNewTransaction() throws Exception {
         Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
         payment.getTransactions().clear();
 
-        AppointedNotificationProcessor processor = new AppointedNotificationProcessor(client);
-        List<UpdateAction<Payment>> updateActions = processor.createPaymentUpdates(payment, notification);
+        // act
+        final boolean wasNotificationProcessed = testee.processTransactionStatusNotification(notification, payment);
+
+        // assert
+        assertThat(wasNotificationProcessed).as("notification processing result").isTrue();
+        verify(client).complete(paymentRequestCaptor.capture());
+
+        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
 
         MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
@@ -75,6 +92,7 @@ public class AppointedNotificationProcessorTest {
                 .state(TransactionState.SUCCESS)
                 .interactionId(notification.getSequencenumber())
                 .build());
+
         AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                 ImmutableMap.of(
                         CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
@@ -92,18 +110,23 @@ public class AppointedNotificationProcessorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void getUpdatesForExistingTransactionWithStateChange() throws Exception {
+    public void processesNotificationAboutExistingTransaction() throws Exception {
+        // arrange
         Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
 
+        // act
+        final boolean wasNotificationProcessed = testee.processTransactionStatusNotification(notification, payment);
+
+        // assert
+        assertThat(wasNotificationProcessed).as("notification processing result").isTrue();
+        verify(client).complete(paymentRequestCaptor.capture());
+
+        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
         AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                 ImmutableMap.of(
                         CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
                         CustomTypeBuilder.TRANSACTION_ID_FIELD, payment.getTransactions().get(0).getId(),
                         CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString()));
-
-        AppointedNotificationProcessor processor = new AppointedNotificationProcessor(client);
-
-        List<UpdateAction<Payment>> updateActions = processor.createPaymentUpdates(payment, notification);
 
         assertThat(updateActions).isNotEmpty().hasSize(3);
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("changeTransactionState"))
@@ -117,20 +140,25 @@ public class AppointedNotificationProcessorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void getUpdatesForExistingTransactionNoStateChange() throws Exception {
+    public void processesNotificationAboutExistingTransactionRequiringNoStateChange() throws Exception {
+        // arrange
         //modify transaction status to omit ChangeTransactionState Action
         notification.setTransactionStatus(TransactionStatus.PENDING);
         Payment payment = testHelper.dummyPaymentAuthSuccess();
 
+        // act
+        final boolean wasNotificationProcessed = testee.processTransactionStatusNotification(notification, payment);
+
+        // assert
+        assertThat(wasNotificationProcessed).as("notification processing result").isTrue();
+        verify(client).complete(paymentRequestCaptor.capture());
+
+        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
         AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                 ImmutableMap.of(
                         CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
                         CustomTypeBuilder.TRANSACTION_ID_FIELD, payment.getTransactions().get(0).getId(),
                         CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString()));
-
-        AppointedNotificationProcessor processor = new AppointedNotificationProcessor(client);
-
-        List<UpdateAction<Payment>> updateActions = processor.createPaymentUpdates(payment, notification);
 
         assertThat(updateActions).isNotEmpty().hasSize(2);
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("changeTransactionInteractionId"))

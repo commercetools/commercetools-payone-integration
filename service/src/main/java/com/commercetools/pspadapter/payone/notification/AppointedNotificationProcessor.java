@@ -61,8 +61,15 @@ public class AppointedNotificationProcessor implements NotificationProcessor {
         return true;
     }
 
-    @Override
-    public ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment, final Notification notification) {
+    /**
+     * Generates a list of update actions which can be applied to the payment in one step.
+     *
+     * @param payment the payment to which the updates may apply
+     * @param notification the notification to process
+     * @return an immutable list of update actions which will e.g. add an interfaceInteraction to the payment
+     * or apply changes to a corresponding transaction in the payment
+     */
+    private ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment, final Notification notification) {
         LocalDateTime timestamp = LocalDateTime.ofEpochSecond(Long.valueOf(notification.getTxtime()), 0, ZoneOffset.UTC);
 
         return payment.getTransactions().stream()
