@@ -26,7 +26,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import javax.money.MonetaryAmount;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -50,37 +49,30 @@ public class AppointedNotificationProcessorTest {
 
     private Notification notification;
 
-    private Payment payment;
-
     @Before
     public void setUp() throws Exception {
-        payment = testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head().get();
-
         notification = new Notification();
         notification.setPrice("20.00");
         notification.setCurrency("EUR");
         notification.setTxtime(millis.toString());
         notification.setSequencenumber("0");
         notification.setTxaction(NotificationAction.APPOINTED);
-        notification.setTransactionStatus(TransactionStatus.PENDING);
-
+        notification.setTransactionStatus(TransactionStatus.COMPLETED);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void getUpdatesForNewTransaction() throws IOException {
-        Payment payment = testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head().get();
+    public void getUpdatesForNewTransaction() throws Exception {
+        Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
         payment.getTransactions().clear();
 
         AppointedNotificationProcessor processor = new AppointedNotificationProcessor(client);
-
         List<UpdateAction<Payment>> updateActions = processor.createPaymentUpdates(payment, notification);
 
         MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-
         AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
                 .of(TransactionType.AUTHORIZATION, amount, ZonedDateTime.of(timestamp, ZoneId.of("UTC")))
-                .state(TransactionState.PENDING)
+                .state(TransactionState.SUCCESS)
                 .interactionId(notification.getSequencenumber())
                 .build());
         AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
@@ -95,12 +87,14 @@ public class AppointedNotificationProcessorTest {
                 .containsOnlyOnce(transaction);
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
                 .usingElementComparatorOnFields("fields")
-                .<UpdateAction<Payment>>containsOnly(interfaceInteraction);
+                .containsOnly(interfaceInteraction);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void getUpdatesForExistingTransaction() throws IOException {
+    public void getUpdatesForExistingTransactionWithStateChange() throws Exception {
+        Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
+
         AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                 ImmutableMap.of(
                         CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
@@ -113,9 +107,34 @@ public class AppointedNotificationProcessorTest {
 
         assertThat(updateActions).isNotEmpty().hasSize(3);
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("changeTransactionState"))
-            .containsOnly(ChangeTransactionState.of(TransactionState.PENDING, payment.getTransactions().get(0).getId()));
+            .containsOnly(ChangeTransactionState.of(TransactionState.SUCCESS, payment.getTransactions().get(0).getId()));
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("changeTransactionInteractionId"))
             .containsOnly(ChangeTransactionInteractionId.of(notification.getSequencenumber(), payment.getTransactions().get(0).getId()));
+        assertThat(updateActions).filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
+                .usingElementComparatorOnFields("fields")
+                .containsOnly(interfaceInteraction);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void getUpdatesForExistingTransactionNoStateChange() throws Exception {
+        //modify transaction status to omit ChangeTransactionState Action
+        notification.setTransactionStatus(TransactionStatus.PENDING);
+        Payment payment = testHelper.dummyPaymentAuthSuccess();
+
+        AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
+                ImmutableMap.of(
+                        CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                        CustomTypeBuilder.TRANSACTION_ID_FIELD, payment.getTransactions().get(0).getId(),
+                        CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString()));
+
+        AppointedNotificationProcessor processor = new AppointedNotificationProcessor(client);
+
+        List<UpdateAction<Payment>> updateActions = processor.createPaymentUpdates(payment, notification);
+
+        assertThat(updateActions).isNotEmpty().hasSize(2);
+        assertThat(updateActions).filteredOn(u -> u.getAction().equals("changeTransactionInteractionId"))
+                .containsOnly(ChangeTransactionInteractionId.of(notification.getSequencenumber(), payment.getTransactions().get(0).getId()));
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
                 .usingElementComparatorOnFields("fields")
                 .containsOnly(interfaceInteraction);

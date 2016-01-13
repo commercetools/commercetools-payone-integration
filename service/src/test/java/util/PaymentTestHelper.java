@@ -34,6 +34,10 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro.json");
     }
 
+    public Payment dummyPaymentAuthSuccess() throws Exception {
+        return getPaymentFromFile("dummyPaymentAuthSuccess.json");
+    }
+
     public Payment dummyPaymentNoCustomFields() throws Exception {
         return getPaymentFromFile("dummyPaymentNoCustomFields.json");
     }

@@ -158,7 +158,7 @@ public class ServiceFactory {
 
             @Override
             public boolean processTransactionStatusNotification(final Notification notification, final Payment payment) {
-                return false;
+                throw new UnsupportedOperationException("the notification '" + notification.getTxaction() + "' is not supported by this instance!");
             }
 
             @Override

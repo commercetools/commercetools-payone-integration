@@ -69,6 +69,7 @@ public class IntegrationService {
                     res.status(200);
                     return "TSOK";
                 } else {
+                    //TODO: this shouldn't happen, with not processable notifications there should be always an exception!
                     res.status(500);
                     return "Couldn't process the notification because of an unknown error!";
                 }

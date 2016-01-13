@@ -4,12 +4,14 @@ import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.TransactionDraft;
 import io.sphere.sdk.payments.TransactionDraftBuilder;
+import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
@@ -67,24 +69,28 @@ public class AppointedNotificationProcessor implements NotificationProcessor {
                 .filter(t -> t.getType().equals(authorizationTransactionType))
                 .findFirst()
                 .map(t -> {
+                    ImmutableList.Builder<UpdateAction<Payment>> listBuilder = new ImmutableList.Builder<>();
+
                     //map sequenceNr to interactionId in existing transaction
-                    final UpdateAction<Payment> changeInteractionId = ChangeTransactionInteractionId.of(notification.getSequencenumber(), t.getId());
-                    //set transactionState according to notification
-                    final UpdateAction<Payment> changeTransactionState = ChangeTransactionState.of(notification.getTransactionStatus().getCtTransactionState(), t.getId());
+                    listBuilder.add(ChangeTransactionInteractionId.of(notification.getSequencenumber(), t.getId()));
+
+                    //set transactionState if still pending and notification has status "complete"
+                    if (t.getState().equals(TransactionState.PENDING) &&
+                            notification.getTransactionStatus().equals(TransactionStatus.COMPLETED)){
+                        listBuilder.add(ChangeTransactionState
+                                .of(notification.getTransactionStatus().getCtTransactionState(), t.getId()));
+                    }
+
 
                     //add new interface interaction
-                    final AddInterfaceInteraction newInterfaceInteraction = AddInterfaceInteraction
+                    listBuilder.add(AddInterfaceInteraction
                             .ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                                     ImmutableMap.of(
                                             CustomTypeBuilder.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
                                             CustomTypeBuilder.TRANSACTION_ID_FIELD, t.getId(),
-                                            CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString()));
+                                            CustomTypeBuilder.NOTIFICATION_FIELD, notification.toString())));
 
-                    return ImmutableList.of(
-                            changeInteractionId,
-                            changeTransactionState,
-                            newInterfaceInteraction
-                    );
+                    return listBuilder.build();
                 })
                 .orElseGet(() -> {
                     //create new transaction
