@@ -40,7 +40,7 @@ public class ScheduledJob implements Job {
                 final PaymentWithCartLike paymentWithCartLike = queryExecutor.getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
                 paymentDispatcher.accept(paymentWithCartLike);
             } catch (final NoCartLikeFoundException ex) {
-                LOG.debug(String.format("Could not dispatch payment with ID \"%s\": %s" + payment.getId(), ex.getMessage()));
+                LOG.debug(String.format("Could not dispatch payment with ID \"%s\": %s", payment.getId(), ex.getMessage()));
             }
         };
 
