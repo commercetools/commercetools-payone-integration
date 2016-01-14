@@ -166,11 +166,6 @@ public class NotificationDispatcherTest {
             }
 
             @Override
-            public NotificationAction supportedNotificationAction() {
-                return NotificationAction.APPOINTED;
-            }
-
-            @Override
             public boolean processTransactionStatusNotification(final Notification notification, final Payment payment) {
                 if (notification.getTxid().equals(payment.getInterfaceId())
                         && payment.getPaymentMethodInfo().getPaymentInterface().equals("PAYONE")
@@ -190,11 +185,6 @@ public class NotificationDispatcherTest {
             @Override
             public int getCount() {
                 return count;
-            }
-
-            @Override
-            public NotificationAction supportedNotificationAction() {
-                return NotificationAction.APPOINTED;
             }
 
             @Override

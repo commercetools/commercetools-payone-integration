@@ -1,7 +1,6 @@
 package com.commercetools.pspadapter.payone.notification;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import io.sphere.sdk.payments.Payment;
 
 import java.util.concurrent.CompletionException;
@@ -13,8 +12,6 @@ import java.util.concurrent.CompletionException;
  */
 public interface NotificationProcessor {
 
-    NotificationAction supportedNotificationAction();
-
     /**
      * Processes the transaction status {@code notification}.
      *
@@ -25,7 +22,5 @@ public interface NotificationProcessor {
      * @throws RuntimeException if the payment update fails
      * @throws CompletionException if the payment update fails
      */
-    boolean processTransactionStatusNotification(
-            final Notification notification,
-            final Payment payment);
+    boolean processTransactionStatusNotification(final Notification notification, final Payment payment);
 }

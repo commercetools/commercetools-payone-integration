@@ -11,14 +11,13 @@ import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
-import com.commercetools.pspadapter.payone.notification.common.AppointedNotificationProcessor;
-import com.commercetools.pspadapter.payone.notification.common.CaptureNotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.common.AppointedNotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.common.CaptureNotificationProcessor;
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.UnsupportedTransactionExecutor;
@@ -29,7 +28,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.client.SphereClientFactory;
-import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
 import org.quartz.CronScheduleBuilder;
@@ -148,17 +146,9 @@ public class ServiceFactory {
     }
 
     public static NotificationDispatcher createNotificationDispatcher(final CommercetoolsClient client, final PayoneConfig config) {
-        //TODO fh: use actual NotificationProcessor implementation
-        NotificationProcessor defaultNotificationProcessor = new NotificationProcessor() {
-            @Override
-            public NotificationAction supportedNotificationAction() {
-                return null;
-            }
-
-            @Override
-            public boolean processTransactionStatusNotification(final Notification notification, final Payment payment) {
-                throw new UnsupportedOperationException("the notification '" + notification.getTxaction() + "' is not supported by this instance!");
-            }
+        final NotificationProcessor defaultNotificationProcessor = (notification, payment) -> {
+            throw new UnsupportedOperationException(
+                    "the notification '" + notification.getTxaction() + "' is not supported by this instance!");
         };
 
         final ImmutableMap.Builder<NotificationAction, NotificationProcessor> builder = ImmutableMap.builder();

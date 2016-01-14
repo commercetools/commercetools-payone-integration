@@ -5,7 +5,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.commands.UpdateAction;
@@ -14,7 +14,6 @@ import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionDraftBuilder;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
-import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.utils.MoneyImpl;
@@ -35,9 +34,7 @@ import java.util.Optional;
  *
  * @author Jan Wolter
  */
-public class CaptureNotificationProcessor implements NotificationProcessor {
-
-    private final BlockingClient client;
+public class CaptureNotificationProcessor extends NotificationProcessorBase {
 
     /**
      * Initializes a new instance.
@@ -45,38 +42,12 @@ public class CaptureNotificationProcessor implements NotificationProcessor {
      * @param client the client for the commercetools platform API
      */
     public CaptureNotificationProcessor(final BlockingClient client) {
-        this.client = client;
+        super(client);
     }
 
     @Override
-    public NotificationAction supportedNotificationAction() {
-        return NotificationAction.CAPTURE;
-    }
-
-    @Override
-    public boolean processTransactionStatusNotification(final Notification notification, final Payment payment) {
-        if (!notification.getTxaction().equals(supportedNotificationAction())) {
-            throw new IllegalArgumentException(String.format(
-                    "txaction \"%s\" is not supported by %s",
-                    notification.getTxaction(),
-                    this.getClass().getSimpleName()));
-        }
-
-        client.complete(PaymentUpdateCommand.of(payment, createPaymentUpdates(payment, notification)));
-
-        return true;
-    }
-
-    /**
-     * Generates a list of update actions which can be applied to the payment in one step.
-     *
-     * @param payment the payment to which the updates may apply
-     * @param notification the notification to process
-     * @return an immutable list of update actions which will e.g. add an interfaceInteraction to the payment
-     * or apply changes to a corresponding transaction in the payment
-     */
-    private ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
-                                                                      final Notification notification) {
+    protected ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
+                                                                        final Notification notification) {
         final LocalDateTime timestamp =
                 LocalDateTime.ofEpochSecond(Long.valueOf(notification.getTxtime()), 0, ZoneOffset.UTC);
 
@@ -136,4 +107,7 @@ public class CaptureNotificationProcessor implements NotificationProcessor {
         return Optional.ofNullable(string).orElse("0");
     }
 
+    public NotificationAction supportedNotificationAction() {
+        return NotificationAction.CAPTURE;
+    }
 }
