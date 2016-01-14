@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.notification;
+package com.commercetools.pspadapter.payone.notification.common;
 
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
@@ -6,6 +6,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
+import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.commands.UpdateAction;
