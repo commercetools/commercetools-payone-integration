@@ -10,6 +10,7 @@ import java.io.IOException;
 
 /**
  * @author fhaertig
+ * @author Jan Wolter
  * @since 17.12.15
  */
 public class NotificationTest {
@@ -40,15 +41,78 @@ public class NotificationTest {
         Notification notification = Notification.fromKeyValueString(requestBody, "\r?\n?&");
 
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(notification.getKey()).isEqualTo("123");
-        softly.assertThat(notification.getTxaction()).isEqualTo(NotificationAction.APPOINTED);
-        softly.assertThat(notification.getTransactionStatus()).isEqualTo(TransactionStatus.COMPLETED);
-        softly.assertThat(notification.getMode()).isEqualTo("test");
-        softly.assertThat(notification.getPortalid()).isEqualTo("000");
-        softly.assertThat(notification.getAid()).isEqualTo("001");
-        softly.assertThat(notification.getClearingtype()).isEqualTo("cc");
-        softly.assertThat(notification.getSequencenumber()).isEqualTo("1");
-        softly.assertThat(notification.getTxtime()).isEqualTo("1450365542");
+        softly.assertThat(notification.getKey()).as("key").isEqualTo("123");
+        softly.assertThat(notification.getTxaction()).as("txaction").isEqualTo(NotificationAction.APPOINTED);
+        softly.assertThat(notification.getTransactionStatus()).as("transaction_status").isEqualTo(TransactionStatus.COMPLETED);
+        softly.assertThat(notification.getMode()).as("mode").isEqualTo("test");
+        softly.assertThat(notification.getPortalid()).as("portalid").isEqualTo("000");
+        softly.assertThat(notification.getAid()).as("aid").isEqualTo("001");
+        softly.assertThat(notification.getClearingtype()).as("clearingtype").isEqualTo("cc");
+        softly.assertThat(notification.getSequencenumber()).as("sequencenumber").isEqualTo("1");
+        softly.assertThat(notification.getTxtime()).as("txtime").isEqualTo("1450365542");
+
+        softly.assertAll();
+    }
+
+    @Test
+    public void deserializeValidNotificationWithTransactionStatusPending() throws IOException {
+
+        final String requestBody =
+                "key=123&" +
+                "txaction=appointed&" +
+                "transaction_status=pending&" +
+                "mode=test&" +
+                "portalid=000&" +
+                "aid=001&" +
+                "sequencenumber=1&" +
+                "clearingtype=cc&" +
+                "txtime=1450365542&" +
+                "cardpan=1&" +
+                "blabla=23";   //ignored parameter
+
+        final Notification notification = Notification.fromKeyValueString(requestBody, "\r?\n?&");
+
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(notification.getKey()).as("key").isEqualTo("123");
+        softly.assertThat(notification.getTxaction()).as("txaction").isEqualTo(NotificationAction.APPOINTED);
+        softly.assertThat(notification.getTransactionStatus()).as("transaction_status").isEqualTo(TransactionStatus.PENDING);
+        softly.assertThat(notification.getMode()).as("mode").isEqualTo("test");
+        softly.assertThat(notification.getPortalid()).as("portalid").isEqualTo("000");
+        softly.assertThat(notification.getAid()).as("aid").isEqualTo("001");
+        softly.assertThat(notification.getClearingtype()).as("clearingtype").isEqualTo("cc");
+        softly.assertThat(notification.getSequencenumber()).as("sequencenumber").isEqualTo("1");
+        softly.assertThat(notification.getTxtime()).as("txtime").isEqualTo("1450365542");
+
+        softly.assertAll();
+    }
+
+    @Test
+    public void deserializeValidNotificationWithoutTransactionStatus() throws IOException {
+
+        final String requestBody =
+                "key=123&" +
+                "txaction=appointed&" +
+                "mode=test&" +
+                "portalid=000&" +
+                "aid=001&" +
+                "sequencenumber=1&" +
+                "clearingtype=cc&" +
+                "txtime=1450365542&" +
+                "cardpan=1&" +
+                "blabla=23";   //ignored parameter
+
+        final Notification notification = Notification.fromKeyValueString(requestBody, "\r?\n?&");
+
+        final SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(notification.getKey()).as("key").isEqualTo("123");
+        softly.assertThat(notification.getTxaction()).as("txaction").isEqualTo(NotificationAction.APPOINTED);
+        softly.assertThat(notification.getTransactionStatus()).as("transaction_status").isEqualTo(TransactionStatus.COMPLETED);
+        softly.assertThat(notification.getMode()).as("mode").isEqualTo("test");
+        softly.assertThat(notification.getPortalid()).as("portalid").isEqualTo("000");
+        softly.assertThat(notification.getAid()).as("aid").isEqualTo("001");
+        softly.assertThat(notification.getClearingtype()).as("clearingtype").isEqualTo("cc");
+        softly.assertThat(notification.getSequencenumber()).as("sequencenumber").isEqualTo("1");
+        softly.assertThat(notification.getTxtime()).as("txtime").isEqualTo("1450365542");
 
         softly.assertAll();
     }

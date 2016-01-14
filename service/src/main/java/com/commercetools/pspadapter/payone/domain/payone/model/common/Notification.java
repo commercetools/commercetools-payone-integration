@@ -102,7 +102,7 @@ public class Notification implements Serializable {
     }
 
     public TransactionStatus getTransactionStatus() {
-        return transactionStatus;
+        return transactionStatus != null ? transactionStatus : TransactionStatus.COMPLETED;
     }
 
     public void setTransactionStatus(final TransactionStatus transactionStatus) {
