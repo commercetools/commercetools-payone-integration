@@ -11,6 +11,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.google.common.cache.CacheBuilder;
+import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
@@ -34,8 +35,7 @@ import java.util.Arrays;
 @RunWith(MockitoJUnitRunner.class)
 public class AuthorizationTransactionExecutorTest {
 
-    @Mock
-    private PaymentWithCartLike paymentWithCartLike;
+    private static final Cart UNUSED_CART = null;
 
     @Mock
     private PayoneRequestFactory requestFactory;
@@ -79,25 +79,34 @@ public class AuthorizationTransactionExecutorTest {
     public void pendingAuthorizationNotExecuted() throws Exception {
         Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
         Transaction transaction = payment.getTransactions().stream().filter(t -> t.getState().equals(TransactionState.PENDING)).findFirst().get();
-        when(paymentWithCartLike.getPayment()).thenReturn(payment);
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
 
         assertThat(testee.wasExecuted(paymentWithCartLike, transaction)).isFalse();
     }
 
     @Test
     public void pendingAuthorizationWasExecutedStillPending() throws Exception {
-        Payment payment = testHelper.dummyPaymentOneAuthPending20EuroPendingResponse();
-        Transaction transaction = payment.getTransactions().stream().filter(t -> t.getState().equals(TransactionState.PENDING)).findFirst().get();
-        when(paymentWithCartLike.getPayment()).thenReturn(payment);
+        Payment paymentPendingResponse = testHelper.dummyPaymentOneAuthPending20EuroPendingResponse();
+        Transaction transaction1 = paymentPendingResponse.getTransactions().stream().filter(t -> t.getState().equals(TransactionState.PENDING)).findFirst().get();
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(paymentPendingResponse, UNUSED_CART);
 
-        assertThat(testee.wasExecuted(paymentWithCartLike, transaction)).isTrue();
+        assertThat(testee.wasExecuted(paymentWithCartLike, transaction1)).isTrue();
+    }
+
+    @Test
+    public void pendingAuthorizationWasExecutedRedirect() throws Exception {
+        Payment paymentRedirectResponse = testHelper.dummyPaymentOneAuthPending20EuroRedirectResponse();
+        Transaction transaction2 = paymentRedirectResponse.getTransactions().stream().filter(t -> t.getState().equals(TransactionState.PENDING)).findFirst().get();
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(paymentRedirectResponse, UNUSED_CART);
+
+        assertThat(testee.wasExecuted(paymentWithCartLike, transaction2)).as("transaction was executed result").isTrue();
     }
 
     @Test
     public void pendingAuthorizationCreatedByNotification() throws Exception {
         Payment payment = testHelper.dummyPaymentCreatedByNotification();
         Transaction transaction = payment.getTransactions().stream().filter(t -> t.getState().equals(TransactionState.PENDING)).findFirst().get();
-        when(paymentWithCartLike.getPayment()).thenReturn(payment);
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
 
         assertThat(testee.wasExecuted(paymentWithCartLike, transaction)).isTrue();
     }

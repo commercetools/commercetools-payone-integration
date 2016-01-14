@@ -95,7 +95,7 @@ public class AuthorizationTransactionExecutor implements IdempotentTransactionEx
             .stream()
             .filter(i -> Arrays.stream(typeKeys)
                 .map(t -> typeCache.getUnchecked(t).toReference())
-                .anyMatch(t -> t.equals(i.getType())));
+                .anyMatch(t -> t.getId().equals(i.getType().getId())));
     }
 
     private PaymentWithCartLike attemptExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
