@@ -15,7 +15,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
-import com.commercetools.pspadapter.payone.notification.AppointedNotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.common.AppointedNotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
 import com.commercetools.pspadapter.payone.transaction.common.PaymentMethodDispatcher;

@@ -53,6 +53,10 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentOneAuthPending20EuroRedirectResponse.json");
     }
 
+    public Payment dummyPaymentOneChargePending20Euro() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneChargePending20Euro.json");
+    }
+
     public Payment dummyPaymentAuthSuccess() throws Exception {
         return getPaymentFromFile("dummyPaymentAuthSuccess.json");
     }
