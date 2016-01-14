@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.transaction.common;
+package com.commercetools.pspadapter.payone.transaction;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.google.common.collect.ImmutableMap;

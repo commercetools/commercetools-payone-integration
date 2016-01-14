@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
-import com.commercetools.pspadapter.payone.transaction.common.PaymentMethodDispatcher;
-import com.commercetools.pspadapter.payone.transaction.common.TransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
+import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.payments.Transaction;
