@@ -73,8 +73,13 @@ public class AppointedNotificationProcessorTest {
     }
 
     @Test
+    public void supportsAppointedNotificationAction() {
+        assertThat(testee.supportedNotificationAction()).isSameAs(NotificationAction.APPOINTED);
+    }
+
+    @Test
     @SuppressWarnings("unchecked")
-    public void processesNotificationAboutNewTransaction() throws Exception {
+    public void processingNotificationAboutUnknownTransactionAddsAuthorizationTransactionWithStateSuccess() throws Exception {
         Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
         payment.getTransactions().clear();
 
@@ -112,7 +117,7 @@ public class AppointedNotificationProcessorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void processesNotificationAboutExistingTransaction() throws Exception {
+    public void processingNotificationForPendingAuthorizationTransactionChangesStateToSuccess() throws Exception {
         // arrange
         Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
 
@@ -143,7 +148,7 @@ public class AppointedNotificationProcessorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void processesNotificationAboutExistingTransactionRequiringNoStateChange() throws Exception {
+    public void processingNotificationForSuccessfulAuthorizationTransactionDoesNotChangeState() throws Exception {
         // arrange
         //modify transaction status to omit ChangeTransactionState Action
         notification.setTransactionStatus(TransactionStatus.PENDING);
@@ -168,6 +173,35 @@ public class AppointedNotificationProcessorTest {
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("changeTransactionInteractionId"))
                 .containsOnly(ChangeTransactionInteractionId.of(notification.getSequencenumber(), payment.getTransactions().get(0).getId()));
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
+                .usingElementComparatorOnFields("fields")
+                .containsOnly(interfaceInteraction);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void processingNotificationForPendingChargeTransactionDoesNotChangeState() throws Exception {
+        // arrange
+        final Payment payment = testHelper.dummyPaymentOneChargePending20Euro();
+
+        // act
+        final boolean wasNotificationProcessed = testee.processTransactionStatusNotification(notification, payment);
+
+        // assert
+        assertThat(wasNotificationProcessed).as("notification processing result").isTrue();
+        verify(client).complete(paymentRequestCaptor.capture());
+
+        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
+        final AddInterfaceInteraction interfaceInteraction =
+                AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
+                        ImmutableMap.of(
+                                CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                                CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
+                                CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
+                                CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
+
+        assertThat(updateActions).as("# of payment update actions").hasSize(1);
+        assertThat(updateActions).as("content of payment update action")
+                .filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
                 .usingElementComparatorOnFields("fields")
                 .containsOnly(interfaceInteraction);
     }
