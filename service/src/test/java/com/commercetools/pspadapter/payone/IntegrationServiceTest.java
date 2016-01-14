@@ -13,6 +13,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import io.sphere.sdk.carts.Cart;
+import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.http.HttpStatusCode;
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.payments.Payment;
@@ -25,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.ConcurrentModificationException;
 import java.util.Random;
 import java.util.concurrent.CompletionException;
 

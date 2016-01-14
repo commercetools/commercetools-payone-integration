@@ -7,13 +7,13 @@ import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFound
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.google.common.base.Strings;
+import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.http.HttpStatusCode;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import spark.Spark;
 
 import javax.annotation.Nonnull;
-import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletionException;
 
 /**
