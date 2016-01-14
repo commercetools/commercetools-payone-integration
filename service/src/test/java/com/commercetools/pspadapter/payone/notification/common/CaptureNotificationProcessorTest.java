@@ -19,7 +19,6 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
-import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,10 +86,9 @@ public class CaptureNotificationProcessorTest {
         notification.setTransactionStatus(TransactionStatus.PENDING);
 
         // act
-        final boolean wasNotificationProcessed = testee.processTransactionStatusNotification(notification, payment);
+        testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        assertThat(wasNotificationProcessed).as("notification processing result").isTrue();
         verify(client).complete(paymentRequestCaptor.capture());
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
@@ -132,10 +130,9 @@ public class CaptureNotificationProcessorTest {
         payment.getTransactions().clear();
 
         // act
-        final boolean wasNotificationProcessed = testee.processTransactionStatusNotification(notification, payment);
+        testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        assertThat(wasNotificationProcessed).as("notification processing result").isTrue();
         verify(client).complete(paymentRequestCaptor.capture());
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
@@ -179,10 +176,9 @@ public class CaptureNotificationProcessorTest {
         notification.setTransactionStatus(TransactionStatus.PENDING);
 
         // act
-        final boolean wasNotificationProcessed = testee.processTransactionStatusNotification(notification, payment);
+        testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        assertThat(wasNotificationProcessed).as("notification processing result").isTrue();
         verify(client).complete(paymentRequestCaptor.capture());
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
@@ -213,10 +209,9 @@ public class CaptureNotificationProcessorTest {
         notification.setSequencenumber(chargeTransaction.getInteractionId());
 
         // act
-        final boolean wasNotificationProcessed = testee.processTransactionStatusNotification(notification, payment);
+        testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        assertThat(wasNotificationProcessed).as("notification processing result").isTrue();
         verify(client).complete(paymentRequestCaptor.capture());
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();

@@ -7,6 +7,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -41,17 +42,25 @@ public class NotificationDispatcher {
         this.config = config;
     }
 
-    public boolean dispatchNotification(final Notification notification) {
-
+    /**
+     * Dispatches the {@code notification} to a notification processor
+     *
+     * @param notification a PAYONE transaction status notification
+     *
+     * @throws ConcurrentModificationException in case the respective payment could not be updated due to concurrent
+     *                                         modifications; a retry at a later time might be successful
+     * @throws RuntimeException in case of an unexpected (and probably unrecoverable) error
+     */
+    public void dispatchNotification(final Notification notification) {
         validateSecrets(notification);
 
-        Payment payment = getPaymentByInterfaceId(notification.getTxid())
+        final Payment payment = getPaymentByInterfaceId(notification.getTxid())
                 .orElseGet(() -> {
                     PaymentDraft paymentDraft = createNewPaymentDraftFromNotification(notification);
                     return client.complete(PaymentCreateCommand.of(paymentDraft));
                 });
 
-        return processors.getOrDefault(notification.getTxaction(), defaultProcessor)
+        processors.getOrDefault(notification.getTxaction(), defaultProcessor)
                 .processTransactionStatusNotification(notification, payment);
     }
 

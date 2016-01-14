@@ -106,7 +106,7 @@ public class NotificationDispatcherTest {
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
         NotificationDispatcher dispatcher = new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
-        assertThat(dispatcher.dispatchNotification(notification)).isEqualTo(true);
+        dispatcher.dispatchNotification(notification);
 
         assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(1);
         assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);
@@ -150,7 +150,7 @@ public class NotificationDispatcherTest {
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
         NotificationDispatcher dispatcher = new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
-        assertThat(dispatcher.dispatchNotification(notification)).isEqualTo(true);
+        dispatcher.dispatchNotification(notification);
 
         assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(1);
         assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);
@@ -166,14 +166,12 @@ public class NotificationDispatcherTest {
             }
 
             @Override
-            public boolean processTransactionStatusNotification(final Notification notification, final Payment payment) {
+            public void processTransactionStatusNotification(final Notification notification, final Payment payment) {
                 if (notification.getTxid().equals(payment.getInterfaceId())
                         && payment.getPaymentMethodInfo().getPaymentInterface().equals("PAYONE")
                         && notification.getTxaction().equals(NotificationAction.APPOINTED)) {
                     count++;
-                    return true;
                 }
-                return false;
             }
         };
     }
@@ -188,9 +186,8 @@ public class NotificationDispatcherTest {
             }
 
             @Override
-            public boolean processTransactionStatusNotification(final Notification notification, final Payment payment) {
+            public void processTransactionStatusNotification(final Notification notification, final Payment payment) {
                 count++;
-                return false;
             }
         };
     }

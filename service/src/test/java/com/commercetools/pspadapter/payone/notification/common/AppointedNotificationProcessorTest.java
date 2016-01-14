@@ -84,10 +84,9 @@ public class AppointedNotificationProcessorTest {
         payment.getTransactions().clear();
 
         // act
-        final boolean wasNotificationProcessed = testee.processTransactionStatusNotification(notification, payment);
+        testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        assertThat(wasNotificationProcessed).as("notification processing result").isTrue();
         verify(client).complete(paymentRequestCaptor.capture());
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
@@ -122,10 +121,9 @@ public class AppointedNotificationProcessorTest {
         Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
 
         // act
-        final boolean wasNotificationProcessed = testee.processTransactionStatusNotification(notification, payment);
+        testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        assertThat(wasNotificationProcessed).as("notification processing result").isTrue();
         verify(client).complete(paymentRequestCaptor.capture());
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
@@ -155,10 +153,9 @@ public class AppointedNotificationProcessorTest {
         Payment payment = testHelper.dummyPaymentAuthSuccess();
 
         // act
-        final boolean wasNotificationProcessed = testee.processTransactionStatusNotification(notification, payment);
+        testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        assertThat(wasNotificationProcessed).as("notification processing result").isTrue();
         verify(client).complete(paymentRequestCaptor.capture());
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
@@ -184,10 +181,9 @@ public class AppointedNotificationProcessorTest {
         final Payment payment = testHelper.dummyPaymentOneChargePending20Euro();
 
         // act
-        final boolean wasNotificationProcessed = testee.processTransactionStatusNotification(notification, payment);
+        testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        assertThat(wasNotificationProcessed).as("notification processing result").isTrue();
         verify(client).complete(paymentRequestCaptor.capture());
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();

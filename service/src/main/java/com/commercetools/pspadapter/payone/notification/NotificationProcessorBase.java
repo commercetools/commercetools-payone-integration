@@ -27,7 +27,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
     }
 
     @Override
-    public boolean processTransactionStatusNotification(final Notification notification, final Payment payment) {
+    public void processTransactionStatusNotification(final Notification notification, final Payment payment) {
         if (!notification.getTxaction().equals(supportedNotificationAction())) {
             throw new IllegalArgumentException(String.format(
                     "txaction \"%s\" is not supported by %s",
@@ -36,8 +36,6 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
         }
 
         client.complete(PaymentUpdateCommand.of(payment, createPaymentUpdates(payment, notification)));
-
-        return true;
     }
 
     /**

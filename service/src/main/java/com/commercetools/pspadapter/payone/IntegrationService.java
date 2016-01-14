@@ -57,22 +57,18 @@ public class IntegrationService {
         });
 
         Spark.post("/payone/notification", (req, res) -> {
+            // FIXME take care of sensitive data
             LOG.info("<- Received POST from Payone: " + req.body());
-            Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
+            final Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
 
             try {
-                if (notificationDispatcher.dispatchNotification(notification)) {
-                    res.status(200);
-                    return "TSOK";
-                } else {
-                    //TODO: this shouldn't happen, with not processable notifications there should be always an exception!
-                    res.status(500);
-                    return "Couldn't process the notification because of an unknown error!";
-                }
+                notificationDispatcher.dispatchNotification(notification);
             } catch (RuntimeException ex) {
                 res.status(400);
                 return ex.getMessage();
             }
+            res.status(200);
+            return "TSOK";
         });
 
         Spark.awaitInitialization();

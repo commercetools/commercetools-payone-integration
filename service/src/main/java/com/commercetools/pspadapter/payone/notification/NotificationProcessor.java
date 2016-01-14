@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.notification;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
+import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.payments.Payment;
 
 import java.util.concurrent.CompletionException;
@@ -17,10 +18,12 @@ public interface NotificationProcessor {
      *
      * @param notification the PAYONE transaction notification to be processed, not null
      * @param payment the payment for which a transaction status notification shall be processed, not null
-     * @return whether the notification was processed successfully, i.e. the notification was persisted in the payment
+     *
+     * @throws ConcurrentModificationException in case the respective payment could not be updated due to concurrent
+     *                                         modifications; a retry at a later time might be successful
      * @throws IllegalArgumentException if notification is not supported by this processor
-     * @throws RuntimeException if the payment update fails
      * @throws CompletionException if the payment update fails
+     * @throws RuntimeException in case of an unexpected (and probably unrecoverable) error
      */
-    boolean processTransactionStatusNotification(final Notification notification, final Payment payment);
+    void processTransactionStatusNotification(final Notification notification, final Payment payment);
 }
