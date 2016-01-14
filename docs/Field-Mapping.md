@@ -67,7 +67,7 @@ BillSAFE has been deprecated by PAYONE and is not supported.
 WORK IN PROGRESS (only active calls to PO here, no status notifications yet)
  
 | common name |  PAYONE `clearingtype` | PAYONE status notification beahavior (money flow in bold). XXX müsste separat für auth /capture etc sein?  | PO calls with actual money flows | CT Authorization supported (money really reserved)? | Cancelation can happen (=Chargeback) |
-|---|---|---|---|---|
+|---|---|---|---|---|---|
 | `DIRECT_DEBIT-SEPA` | `elv` | *capture*: appointed -> **capture** (TODO auch noch **paid**?)| auth, capture, refund, **any** debit  | NO | YES |
 | `CREDIT_CARD` | `cc` | *capture*: appointed -> capture -> **paid** | auth, capture, refund, **any** debit | **YES** | YES |
 | `BANK_TRANSFER_*` (all) | `sb` |  | **preauth**, auth, refund, reimbursing debit  (preauth sets no receivable, auth does) | NO | NO |
