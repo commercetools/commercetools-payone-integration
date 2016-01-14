@@ -81,7 +81,7 @@ public class AuthorizationTransactionExecutorTest {
         Transaction transaction = payment.getTransactions().stream().filter(t -> t.getState().equals(TransactionState.PENDING)).findFirst().get();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
 
-        assertThat(testee.wasExecuted(paymentWithCartLike, transaction)).isFalse();
+        assertThat(testee.wasExecuted(paymentWithCartLike, transaction)).as("transactionExecutor wasExecuted result").isFalse();
     }
 
     @Test
@@ -90,7 +90,7 @@ public class AuthorizationTransactionExecutorTest {
         Transaction transaction1 = paymentPendingResponse.getTransactions().stream().filter(t -> t.getState().equals(TransactionState.PENDING)).findFirst().get();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(paymentPendingResponse, UNUSED_CART);
 
-        assertThat(testee.wasExecuted(paymentWithCartLike, transaction1)).isTrue();
+        assertThat(testee.wasExecuted(paymentWithCartLike, transaction1)).as("transactionExecutor wasExecuted result").isTrue();
     }
 
     @Test
@@ -99,7 +99,7 @@ public class AuthorizationTransactionExecutorTest {
         Transaction transaction2 = paymentRedirectResponse.getTransactions().stream().filter(t -> t.getState().equals(TransactionState.PENDING)).findFirst().get();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(paymentRedirectResponse, UNUSED_CART);
 
-        assertThat(testee.wasExecuted(paymentWithCartLike, transaction2)).as("transaction was executed result").isTrue();
+        assertThat(testee.wasExecuted(paymentWithCartLike, transaction2)).as("transactionExecutor wasExecuted result").isTrue();
     }
 
     @Test
@@ -108,7 +108,7 @@ public class AuthorizationTransactionExecutorTest {
         Transaction transaction = payment.getTransactions().stream().filter(t -> t.getState().equals(TransactionState.PENDING)).findFirst().get();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
 
-        assertThat(testee.wasExecuted(paymentWithCartLike, transaction)).isTrue();
+        assertThat(testee.wasExecuted(paymentWithCartLike, transaction)).as("transactionExecutor wasExecuted result").isTrue();
     }
 
 

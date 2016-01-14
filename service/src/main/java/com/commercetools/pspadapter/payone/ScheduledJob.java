@@ -2,7 +2,10 @@ package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
 import io.sphere.sdk.payments.Payment;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -10,7 +13,6 @@ import org.quartz.JobExecutionException;
 
 import java.time.ZonedDateTime;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 
 /**
@@ -18,6 +20,8 @@ import java.util.function.Consumer;
  * @since 07.12.15
  */
 public class ScheduledJob implements Job {
+
+    public static final Logger LOG = LogManager.getLogger(ScheduledJob.class);
 
     public static final String SERVICE_KEY = "INTEGRATIONSERVICE";
     public static final String DISPATCHER_KEY = "DISPATCHERSUPPLIER";
@@ -31,10 +35,13 @@ public class ScheduledJob implements Job {
         final ZonedDateTime sinceDate = ZonedDateTime.now().minusDays(2);
 
         final CommercetoolsQueryExecutor queryExecutor = service.getCommercetoolsQueryExecutor();
-
         final Consumer<Payment> paymentConsumer = payment -> {
-            final PaymentWithCartLike paymentWithCartLike = queryExecutor.getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
-            paymentDispatcher.accept(paymentWithCartLike);
+            try {
+                final PaymentWithCartLike paymentWithCartLike = queryExecutor.getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
+                paymentDispatcher.accept(paymentWithCartLike);
+            } catch (final NoCartLikeFoundException ex) {
+                LOG.debug(String.format("Could not dispatch payment with ID \"%s\": %s" + payment.getId(), ex.getMessage()));
+            }
         };
 
         queryExecutor.consumePaymentCreatedMessages(sinceDate, paymentConsumer);

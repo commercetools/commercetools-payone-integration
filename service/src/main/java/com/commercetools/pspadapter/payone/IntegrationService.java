@@ -3,6 +3,7 @@ package com.commercetools.pspadapter.payone;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.google.common.base.Strings;
@@ -47,16 +48,11 @@ public class IntegrationService {
         Spark.port(port());
 
         Spark.get("/commercetools/handle/payments/:id", (req, res) -> {
-            try {
-                final PaymentHandleResult paymentHandleResult = handlePayment(req.params("id"));
-                res.status(paymentHandleResult.statusCode());
-                // TODO response body
-            } catch (final Exception e) {
-                // TODO jw: we probably need to differentiate depending on the exception type
-                res.status(404);
-                res.type("text/plain; charset=utf-8");
-                res.body("The given payment could not be found.");
+            final PaymentHandleResult paymentHandleResult = handlePayment(req.params("id"));
+            if (!paymentHandleResult.body().isEmpty()) {
+                LOG.info(String.format("--> Result body of handle/payments/%s: %s", req.params("id"), paymentHandleResult.body()));
             }
+            res.status(paymentHandleResult.statusCode());
             return res;
         });
 
@@ -125,6 +121,12 @@ public class IntegrationService {
             // TODO clarify if we should use localized message
             final String body =
                     String.format("Could not find payment with ID \"%s\", cause: %s", paymentId, e.getMessage());
+
+            return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
+        } catch (final NoCartLikeFoundException e) {
+            // TODO clarify if we should use localized message
+            final String body =
+                    String.format("Could not process payment with ID \"%s\", cause: %s", paymentId, e.getMessage());
 
             return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
         } catch (final RuntimeException e) {

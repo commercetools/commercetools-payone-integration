@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.domain.ctp;
 
+import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.queries.CartQuery;
 import io.sphere.sdk.messages.GenericMessageImpl;
@@ -42,21 +43,21 @@ public class CommercetoolsQueryExecutor {
         return getPaymentWithCartLike(paymentId, payment);
     }
 
-    public PaymentWithCartLike getPaymentWithCartLike(String paymentId, CompletionStage<Payment> paymentFuture) {
+    public PaymentWithCartLike getPaymentWithCartLike(String paymentId, CompletionStage<Payment> paymentFuture)  {
         final CompletionStage<PagedQueryResult<Order>> orderFuture = client.execute(OrderQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)));
         final CompletionStage<PagedQueryResult<Cart>> cartFuture = client.execute(CartQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)));
 
         final CompletionStage<PaymentWithCartLike> paymentWithCartLikeFuture = paymentFuture.thenCompose(payment ->
             orderFuture.thenCompose(orderResult -> {
                 if (orderResult.getTotal() > 0) {
-                    final Order order1 = orderResult.getResults().get(0);
-                    return CompletableFuture.completedFuture(new PaymentWithCartLike(payment, order1));
+                    final Order order = orderResult.getResults().get(0);
+                    return CompletableFuture.completedFuture(new PaymentWithCartLike(payment, order));
                 } else {
                     return cartFuture.thenApply(cartResult -> {
                         if (cartResult.getTotal() > 0) {
                             return new PaymentWithCartLike(payment, cartResult.getResults().get(0));
                         } else {
-                            throw new IllegalStateException("No Order or Cart found for the payment");
+                            throw new NoCartLikeFoundException();
                         }
                     });
                 }
