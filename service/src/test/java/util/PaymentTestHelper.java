@@ -5,6 +5,8 @@ import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
+import io.sphere.sdk.types.Type;
+import io.sphere.sdk.types.queries.TypeQuery;
 import spark.utils.IOUtils;
 
 import java.io.IOException;
@@ -30,8 +32,21 @@ public class PaymentTestHelper {
         return SphereJsonUtils.readObject(IOUtils.toString(dummyPaymentJson), PaymentQuery.resultTypeReference());
     }
 
+    private PagedQueryResult<Type> getTypeQueryResultFromFile(String filePath) throws IOException {
+        final InputStream dummyPaymentJson = getJsonFromFile(filePath);
+        return SphereJsonUtils.readObject(IOUtils.toString(dummyPaymentJson), TypeQuery.resultTypeReference());
+    }
+
+    public PagedQueryResult<Type> getCustomTypes() throws Exception {
+        return getTypeQueryResultFromFile("customTypes.json");
+    }
+
     public Payment dummyPaymentOneAuthPending20Euro() throws Exception {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro.json");
+    }
+
+    public Payment dummyPaymentOneAuthPending20EuroPendingResponse() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneAuthPending20EuroPendingResponse.json");
     }
 
     public Payment dummyPaymentAuthSuccess() throws Exception {
