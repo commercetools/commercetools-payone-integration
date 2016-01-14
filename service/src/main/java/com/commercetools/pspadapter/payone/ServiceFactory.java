@@ -16,6 +16,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.commercetools.pspadapter.payone.notification.common.AppointedNotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.common.CaptureNotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
@@ -160,10 +161,11 @@ public class ServiceFactory {
             }
         };
 
-        final ImmutableMap<NotificationAction, NotificationProcessor> notificationProcessorMap = ImmutableMap.of(
-                NotificationAction.APPOINTED, new AppointedNotificationProcessor(client)
-        );
-        return new NotificationDispatcher(defaultNotificationProcessor, notificationProcessorMap, client, config);
+        final ImmutableMap.Builder<NotificationAction, NotificationProcessor> builder = ImmutableMap.builder();
+        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(client));
+        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(client));
+
+        return new NotificationDispatcher(defaultNotificationProcessor, builder.build(), client, config);
     }
 
     /**
