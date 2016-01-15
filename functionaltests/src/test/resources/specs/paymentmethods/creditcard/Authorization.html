@@ -73,23 +73,20 @@
                     <th c:set="#paymentName">Payment Name</th>
                     <th c:assertEquals="#result.statusCode">Response Status Code</th>
                     <th c:assertEquals="#result.interactionCount">total # of <em>preauthorization</em> requests sent</th>
-                    <th c:assertEquals="#result.transactionState">Transaction State</th>
-                    <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
+                    <th c:echo="#result.transactionState">Transaction State </th>
                     <th c:echo="#result.version">Version (for information only)</th>
                 </tr>
                 <tr>
                     <td>Payment 1</td>
                     <td>200</td>
                     <td>1</td>
-                    <td>Success</td>
-                    <td>20,00 EUR</td>
+                    <td></td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Payment 2</td>
                     <td>200</td>
                     <td>1</td>
-                    <td>Failure</td>
                     <td></td>
                     <td></td>
                 </tr>
@@ -97,19 +94,58 @@
                     <td>Payment 3</td>
                     <td>200</td>
                     <td>1</td>
-                    <td>Success</td>
-                    <td>47,11 EUR</td>
+                    <td></td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Payment 4</td>
                     <td>200</td>
                     <td>1</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+            <p>
+                A successful request and a response status code 20X does not mean that the transaction is in state Success.
+            </p>
+            <p>
+                After a certain amount of time I will have received a notification from PAYONE with the txaction <b>appointed</b>
+                and the transactionstatus <b>completed</b>. The transaction state and the authorized amount should be set correctly not later than now.
+            </p>
+            <table c:execute="#result = waitForNotification(#paymentName)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:assertEquals="#result.notificationCount">total # of <em>appointed/completed</em> notifications</th>
+                    <th c:assertEquals="#result.transactionState">Transaction State</th>
+                    <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
+                    <th c:echo="#result.version">Version (for information only)</th>
+                </tr>
+                <tr>
+                    <td>Payment 1</td>
+                    <td>1</td>
+                    <td>Success</td>
+                    <td>20,00 EUR</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 3</td>
+                    <td>1</td>
+                    <td>Success</td>
+                    <td>47,11 EUR</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 4</td>
+                    <td>1</td>
                     <td>Success</td>
                     <td>2.707,13 EUR</td>
                     <td></td>
                 </tr>
             </table>
+            <p>
+                The failed payment <span c:set="#failedPaymentName">Payment 2</span>
+                must have received <span c:assertEquals="getInteractionAppointedNotificationCount(#failedPaymentName)">0</span> notifications.
+            </p>
             <p>
                 The service ensures idempotence, hence when I request it to handle the same payments again then I
                 will get the same results as before, especially the total number of <em>preauthorization</em> requests sent
@@ -162,10 +198,7 @@
         <div class="example">
             <h3>Successful Authorization with redirect (3-D Secure)</h3>
             <p>
-                Clarify: Is 3D-Secure always client driven or can PAYONE send a response with REDIRECT
-                and the client needs to be notified about that (reason: amount > settings in PAYONE portal)?
-
-                If client driven, this is not a use case.
+                TODO
             </p>
         </div>
 

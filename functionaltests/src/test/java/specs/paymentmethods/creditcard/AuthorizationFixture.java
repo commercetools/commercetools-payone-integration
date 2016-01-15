@@ -118,17 +118,44 @@ public class AuthorizationFixture extends BaseFixture {
 
         return ImmutableMap.<String, String> builder()
                 .put("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
-                .put("interactionCount", getInterfaceInteractionCount(payment, transactionId, interactionTypeName, requestType))
+                .put("interactionCount", getInteractionCount(payment, transactionId, interactionTypeName, requestType))
                 .put("transactionState", getTransactionState(payment, transactionId))
                 .put("amountAuthorized", amountAuthorized)
                 .put("version", payment.getVersion().toString())
                 .build();
     }
 
-    private String getInterfaceInteractionCount(final Payment payment,
-                                                final String transactionId,
-                                                final String interactionTypeName,
-                                                final String requestType) throws ExecutionException {
+    public Map<String, String> waitForNotification(final String paymentName) throws InterruptedException, ExecutionException {
+
+        int remainingWaitTimeInMillis = 180000;
+        Payment payment = fetchPaymentByLegibleName(paymentName);
+
+        long appointedNotificationCount = getInteractionAppointedNotificationCount(payment);
+        while(appointedNotificationCount == 0 && remainingWaitTimeInMillis > 0) {
+            Thread.sleep(100);
+            payment = fetchPaymentByLegibleName(paymentName);
+            appointedNotificationCount = getInteractionAppointedNotificationCount(payment);
+            remainingWaitTimeInMillis -= 100;
+        }
+
+        final String transactionId = getIdOfLastTransaction(payment);
+        final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
+                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
+                BaseFixture.EMPTY_STRING;
+
+        return ImmutableMap.<String, String> builder()
+                .put("notificationCount", Long.toString(appointedNotificationCount))
+                .put("transactionState", getTransactionState(payment, transactionId))
+                .put("amountAuthorized", amountAuthorized)
+                .put("version", payment.getVersion().toString())
+                .build();
+    }
+
+
+    private String getInteractionCount(final Payment payment,
+                                       final String transactionId,
+                                       final String interactionTypeName,
+                                       final String requestType) throws ExecutionException {
         final String interactionTypeId = typeIdFromTypeName(interactionTypeName);
         return Long.toString(payment.getInterfaceInteractions().stream()
                 .filter(i -> i.getType().getId().equals(interactionTypeId))
@@ -138,5 +165,26 @@ public class AuthorizationFixture extends BaseFixture {
                     return (requestField != null) && requestField.contains("request=" + requestType);
                 })
                 .count());
+    }
+
+    public long getInteractionAppointedNotificationCount(final String paymentName) throws ExecutionException {
+        Payment payment = fetchPaymentByLegibleName(paymentName);
+        return getInteractionAppointedNotificationCount(payment);
+    }
+
+
+    private long getInteractionAppointedNotificationCount(final Payment payment) throws ExecutionException {
+        final String interactionTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION);
+        final String txAction = "appointed";
+        final String transactionStatus = "completed";
+
+        return payment.getInterfaceInteractions().stream()
+                .filter(i -> i.getType().getId().equals(interactionTypeId))
+                .filter(i -> i.getFieldAsString(CustomFieldKeys.TX_ACTION_FIELD).equals(txAction))
+                .filter(i -> {
+                    final String notificationField = i.getFieldAsString(CustomFieldKeys.NOTIFICATION_FIELD);
+                    return (notificationField != null && notificationField.toLowerCase().contains("transactionstatus=" + transactionStatus));
+                })
+                .count();
     }
 }
