@@ -12,7 +12,6 @@ import com.commercetools.pspadapter.payone.transaction.IdempotentTransactionExec
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
@@ -29,6 +28,7 @@ import io.sphere.sdk.types.Type;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -83,7 +83,9 @@ public class AuthorizationTransactionExecutor implements IdempotentTransactionEx
         }
         else {
             if (lastExecutionAttempt.getFieldAsDateTime(CustomFieldKeys.TIMESTAMP_FIELD).isAfter(ZonedDateTime.now().minusMinutes(1)))
-                throw new ConcurrentModificationException();
+                throw new ConcurrentModificationException( String.format(
+                                "A processing of payment with ID \"%s\" started during the last 60 seconds and is likely to be finished soon, no need to retry now.",
+                                paymentWithCartLike.getPayment().getId()));
         }
         return paymentWithCartLike;
     }

@@ -64,6 +64,7 @@ public class CommercetoolsQueryExecutor {
             }
         ));
 
+        //TODO: refactor since BlockingClient is available
         try {
             return paymentWithCartLikeFuture
                 .toCompletableFuture()

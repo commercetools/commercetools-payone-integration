@@ -12,8 +12,9 @@ import static org.mockito.Mockito.when;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
 import io.sphere.sdk.carts.Cart;
-import io.sphere.sdk.client.ConcurrentModificationException;
+import io.sphere.sdk.client.NotFoundException;
 import io.sphere.sdk.http.HttpStatusCode;
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.payments.Payment;
@@ -26,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.ConcurrentModificationException;
 import java.util.Random;
 import java.util.concurrent.CompletionException;
 
@@ -90,7 +92,10 @@ public class IntegrationServiceTest
         final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
         final Payment modifiedPayment = mock(Payment.class, "modified payment");
         final PaymentWithCartLike modifiedPaymentWithCartLike = new PaymentWithCartLike(modifiedPayment, UNUSED_CART);
+        final PaymentMethodInfo paymentMethodInfo = paymentMethodInfo("PAYONE");
 
+        when(payment.getPaymentMethodInfo()).thenReturn(paymentMethodInfo);
+        when(modifiedPayment.getPaymentMethodInfo()).thenReturn(paymentMethodInfo);
         when(paymentDispatcher.dispatchPayment(same(paymentWithCartLike)))
                 .thenThrow(ConcurrentModificationException.class);
 
@@ -131,19 +136,35 @@ public class IntegrationServiceTest
         // arrange
         final String paymentId = randomString();
 
-        final String completionExceptionMessage = randomString();
-        final CompletionException completionException = new CompletionException(completionExceptionMessage) {
-        };
+        final NotFoundException notFoundException = new NotFoundException();
 
-        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenThrow(completionException);
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenThrow(notFoundException);
 
         // act
         final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
 
         // assert
         assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.NOT_FOUND_404));
-        assertThat(paymentHandleResult.body(), containsString("Could not find payment with ID \"" + paymentId + "\""));
-        assertThat(paymentHandleResult.body(), containsString(completionExceptionMessage));
+        assertThat(paymentHandleResult.body(), containsString("Could not process payment with ID \"" + paymentId + "\""));
+        assertThat(paymentHandleResult.body(), containsString(notFoundException.getMessage()));
+    }
+
+    @Test
+    public void returnsStatusCodeNotFound404InCaseOfCartLikeMissing() {
+        // arrange
+        final String paymentId = randomString();
+
+        final NoCartLikeFoundException noCartLikeFoundException = new NoCartLikeFoundException();
+
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenThrow(noCartLikeFoundException);
+
+        // act
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+
+        // assert
+        assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.NOT_FOUND_404));
+        assertThat(paymentHandleResult.body(), containsString("Could not process payment with ID \"" + paymentId + "\""));
+        assertThat(paymentHandleResult.body(), containsString(noCartLikeFoundException.getMessage()));
     }
 
     @Test
@@ -165,12 +186,12 @@ public class IntegrationServiceTest
     }
 
     @Test
-    public void returnsStatusCodeInternalServerError500InCaseOfUnexpectedExceptionFromQuery() {
+    public void returnsStatusCodeInternalServerError500InCaseOfUnexpectedExceptionFromCommercetoolsQuery() {
         // arrange
         final String paymentId = randomString();
 
         final String exceptionMessage = randomString();
-        final RuntimeException exception = new RuntimeException(exceptionMessage) {
+        final CompletionException exception = new CompletionException(exceptionMessage) {
         };
 
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenThrow(exception);
@@ -180,6 +201,27 @@ public class IntegrationServiceTest
 
         // assert
         assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.INTERNAL_SERVER_ERROR_500));
+        assertThat(paymentHandleResult.body(), containsString("An error occured during communication with the commercetools platform"));
+        assertThat(paymentHandleResult.body(), containsString(exceptionMessage));
+    }
+
+    @Test
+    public void returnsStatusCodeInternalServerError500InCaseOfUnexpectedExceptionFromPaymentWithCartLike() {
+        // arrange
+        final String paymentId = randomString();
+
+        final String exceptionMessage = randomString();
+        final RuntimeException runtimeException = new RuntimeException(exceptionMessage);
+
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId)))
+                .thenThrow(runtimeException);
+
+        // act
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+
+        // assert
+        assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.INTERNAL_SERVER_ERROR_500));
+        assertThat(paymentHandleResult.body(), containsString("Sorry, but you hit us between the eyes"));
         assertThat(paymentHandleResult.body(), containsString(exceptionMessage));
     }
 

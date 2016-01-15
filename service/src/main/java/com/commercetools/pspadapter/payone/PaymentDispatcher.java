@@ -3,6 +3,7 @@ package com.commercetools.pspadapter.payone;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
+import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.payments.PaymentMethodInfo;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -25,8 +26,8 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
     public void accept(PaymentWithCartLike paymentWithCartLike) {
         try {
             dispatchPayment(paymentWithCartLike);
-        } catch (Exception e) {
-            LOG.error("Error dispatching payment with id " + paymentWithCartLike.getPayment().getId(), e);
+        } catch (RuntimeException e) {
+            LOG.error(String.format("Error dispatching payment with ID \"%s\"", paymentWithCartLike.getPayment().getId()), e);
         }
     }
 
@@ -34,15 +35,24 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
         final PaymentMethodInfo paymentMethodInfo = paymentWithCartLike.getPayment().getPaymentMethodInfo();
 
         if (!"PAYONE".equals(paymentMethodInfo.getPaymentInterface())) {
-            throw new IllegalArgumentException("Unsupported Payment Interface");
+            throw new IllegalArgumentException(String.format(
+                    "unsupported payment interface '%s'", paymentMethodInfo.getPaymentInterface()));
         }
 
         if (paymentMethodInfo.getMethod() == null) {
-            throw new IllegalArgumentException("No Payment Method provided");
+            throw new IllegalArgumentException("No payment method provided");
         }
 
         return Optional.ofNullable(methodDispatcher.get(PaymentMethod.fromMethodKey(paymentMethodInfo.getMethod())))
-            .map(methodDispatcher -> methodDispatcher.dispatchPayment(paymentWithCartLike))
-            .orElseThrow(() -> new IllegalArgumentException("Unsupported Payment Method"));
+            .map(methodDispatcher -> {
+                try {
+                    return methodDispatcher.dispatchPayment(paymentWithCartLike);
+                } catch (final ConcurrentModificationException cme) {
+                    throw new java.util.ConcurrentModificationException
+                            ("The payment could not be dispatched: " + cme.getMessage(), cme);
+                }
+            })
+            .orElseThrow(() -> new IllegalArgumentException(String.format(
+                    "Unsupported payment method '%s'", paymentMethodInfo.getMethod())));
     }
 }
