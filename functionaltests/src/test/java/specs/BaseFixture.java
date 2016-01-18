@@ -9,16 +9,10 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Iterables;
-import io.sphere.sdk.carts.commands.CartDeleteCommand;
-import io.sphere.sdk.carts.queries.CartQuery;
-import io.sphere.sdk.orders.commands.OrderDeleteCommand;
-import io.sphere.sdk.orders.queries.OrderQuery;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
-import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.payments.queries.PaymentByIdGet;
-import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.types.Type;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
@@ -135,16 +129,16 @@ public abstract class BaseFixture {
     protected void resetCommercetoolsPlatform() {
         // TODO jw: use futures
         // delete all orders
-        ctpClient.complete(OrderQuery.of().withLimit(500)).getResults()
-                .forEach(order -> ctpClient.complete(OrderDeleteCommand.of(order)));
+        //ctpClient.complete(OrderQuery.of().withLimit(500)).getResults()
+        //        .forEach(order -> ctpClient.complete(OrderDeleteCommand.of(order)));
 
         // delete all carts
-        ctpClient.complete(CartQuery.of().withLimit(500)).getResults()
-                .forEach(cart -> ctpClient.complete(CartDeleteCommand.of(cart)));
+        //ctpClient.complete(CartQuery.of().withLimit(500)).getResults()
+        //        .forEach(cart -> ctpClient.complete(CartDeleteCommand.of(cart)));
 
         // delete all payments
-        ctpClient.complete(PaymentQuery.of().withLimit(500)).getResults()
-                .forEach(payment -> ctpClient.complete(PaymentDeleteCommand.of(payment)));
+        //ctpClient.complete(PaymentQuery.of().withLimit(500)).getResults()
+        //        .forEach(payment -> ctpClient.complete(PaymentDeleteCommand.of(payment)));
     }
 
     /**
