@@ -7,7 +7,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.Credit
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.Transaction;
 import org.javamoney.moneta.function.MonetaryUtil;
 
 import java.util.Optional;
@@ -49,7 +48,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
     }
 
     @Override
-    public CreditCardCaptureRequest createCaptureRequest(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction) {
+    public CreditCardCaptureRequest createCaptureRequest(final PaymentWithCartLike paymentWithCartLike, final int sequenceNumber) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
@@ -58,9 +57,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
 
         request.setTxid(ctPayment.getInterfaceId());
 
-
-        Optional.ofNullable(transaction.getInteractionId())
-                .ifPresent(interactionId -> request.setSequencenumber(Integer.valueOf(interactionId)));
+        request.setSequencenumber(sequenceNumber);
         request.setAmount(MonetaryUtil.minorUnits().queryFrom(ctPayment.getAmountAuthorized()).intValue());
         Optional
             .ofNullable(ctPayment.getAmountAuthorized())

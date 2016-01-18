@@ -19,6 +19,7 @@ import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
+import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractionId;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionTimestamp;
 import io.sphere.sdk.types.CustomFields;
@@ -82,14 +83,19 @@ public class ChargeTransactionExecutor extends IdempotentTransactionExecutor {
 
     private PaymentWithCartLike attemptExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
 
-        final CaptureRequest request = requestFactory.createCaptureRequest(paymentWithCartLike, transaction);
+        final int sequenceNumber = getNextSequenceNumber(paymentWithCartLike);
+
+        final CaptureRequest request = requestFactory.createCaptureRequest(paymentWithCartLike, sequenceNumber);
 
         final Payment updatedPayment = client.complete(
             PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
-                AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
-                    ImmutableMap.of(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString() /* TODO */,
-                            CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
-                            CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */))));
+                ImmutableList.of(
+                        AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
+                            ImmutableMap.of(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString() /* TODO */,
+                                    CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
+                                    CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */)),
+                        ChangeTransactionInteractionId.of(String.valueOf(sequenceNumber), transaction.getId()))
+            ));
 
         try {
             final Map<String, String> response = payonePostService.executePost(request);

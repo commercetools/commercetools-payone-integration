@@ -1,6 +1,8 @@
 package com.commercetools.pspadapter.payone.transaction;
 
+import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.cache.LoadingCache;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
@@ -82,6 +84,18 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
      * @return A new version of the PaymentWithCartLike.
      */
     protected abstract PaymentWithCartLike retryLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction, CustomFields lastExecutionAttempt);
+
+    /**
+     *
+     * @param paymentWithCartLike
+     * @return
+     */
+    protected int getNextSequenceNumber(final PaymentWithCartLike paymentWithCartLike) {
+        return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)
+                .mapToInt(f -> Integer.valueOf(f.getFieldAsString(CustomFieldKeys.SEQUENCE_NUMBER_FIELD)) + 1)
+                .max()
+                .orElse(0);
+    }
 
     protected Stream<CustomFields> getCustomFieldsOfType(PaymentWithCartLike paymentWithCartLike, String... typeKeys) {
         return paymentWithCartLike

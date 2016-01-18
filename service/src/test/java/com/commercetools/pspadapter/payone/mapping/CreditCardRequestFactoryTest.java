@@ -124,10 +124,10 @@ public class CreditCardRequestFactoryTest {
     @Test
     public void createFullCaptureRequestFromValidPayment() throws Exception {
 
-        Payment payment = payments.dummyPaymentOneAuthPending20Euro();
+        Payment payment = payments.dummyPaymentOneChargePending20Euro();
         Order order = payments.dummyOrderMapToPayoneRequest();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
-        CreditCardCaptureRequest result = factory.createCaptureRequest(paymentWithCartLike, payment.getTransactions().get(0));
+        CreditCardCaptureRequest result = factory.createCaptureRequest(paymentWithCartLike, 0);
         SoftAssertions softly = new SoftAssertions();
 
         //base values
