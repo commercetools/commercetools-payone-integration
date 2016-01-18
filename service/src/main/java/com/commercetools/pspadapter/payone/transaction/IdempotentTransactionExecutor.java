@@ -12,6 +12,7 @@ import io.sphere.sdk.types.Type;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.IntUnaryOperator;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -95,15 +96,19 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
      */
     protected int getNextSequenceNumber(final PaymentWithCartLike paymentWithCartLike) {
         IntUnaryOperator increase = (x) -> x + 1;
+        Predicate<String> isInteger = (i) -> i != null && i.matches("-?[0-9]+");
 
         return IntStream.concat(
             getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)
-                .mapToInt(f -> Integer.valueOf(f.getFieldAsString(CustomFieldKeys.SEQUENCE_NUMBER_FIELD))),
+                .map(f -> f.getFieldAsString(CustomFieldKeys.SEQUENCE_NUMBER_FIELD))
+                .filter(isInteger::test)
+                .mapToInt(Integer::parseInt),
             paymentWithCartLike
                 .getPayment()
                 .getTransactions()
                 .stream()
-                .mapToInt(t -> Integer.valueOf(t.getInteractionId()))
+                .filter(t -> isInteger.test(t.getInteractionId()))
+                .mapToInt(t -> Integer.parseInt(t.getInteractionId().trim()))
         )
         .map(increase)
         .max()
