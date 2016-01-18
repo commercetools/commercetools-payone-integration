@@ -27,20 +27,17 @@ import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-public class AuthorizationTransactionExecutor implements IdempotentTransactionExecutor {
-    private final LoadingCache<String, Type> typeCache;
+public class AuthorizationTransactionExecutor extends IdempotentTransactionExecutor {
     private final PayoneRequestFactory requestFactory;
     private final PayonePostService payonePostService;
     private final BlockingClient client;
 
     public AuthorizationTransactionExecutor(LoadingCache<String, Type> typeCache, PayoneRequestFactory requestFactory, PayonePostService payonePostService, BlockingClient client) {
-        this.typeCache = typeCache;
+        super(typeCache);
         this.requestFactory = requestFactory;
         this.payonePostService = payonePostService;
         this.client = client;
@@ -52,7 +49,7 @@ public class AuthorizationTransactionExecutor implements IdempotentTransactionEx
     }
 
     @Override
-    public boolean wasExecuted(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
+    protected boolean wasExecuted(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
         if (getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE, CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT)
             .noneMatch(fields -> transaction.getId().equals(fields.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))) {
 
@@ -65,19 +62,19 @@ public class AuthorizationTransactionExecutor implements IdempotentTransactionEx
     }
 
     @Override
-    public PaymentWithCartLike attemptFirstExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
+    protected PaymentWithCartLike attemptFirstExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
         return attemptExecution(paymentWithCartLike, transaction);
     }
 
     @Override
-    public Optional<CustomFields> findLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
+    protected Optional<CustomFields> findLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
         return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_REQUEST)
             .filter(i -> transaction.getId().equals(i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))
                 .reduce((previous, current) -> current); // .findLast()
     }
 
     @Override
-    public PaymentWithCartLike retryLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction, CustomFields lastExecutionAttempt) {
+    protected PaymentWithCartLike retryLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction, CustomFields lastExecutionAttempt) {
         if (lastExecutionAttempt.getFieldAsDateTime(CustomFieldKeys.TIMESTAMP_FIELD).isBefore(ZonedDateTime.now().minusMinutes(5))) {
             return attemptExecution(paymentWithCartLike, transaction);
         }
@@ -88,16 +85,6 @@ public class AuthorizationTransactionExecutor implements IdempotentTransactionEx
                                 paymentWithCartLike.getPayment().getId()));
         }
         return paymentWithCartLike;
-    }
-
-    private Stream<CustomFields> getCustomFieldsOfType(PaymentWithCartLike paymentWithCartLike, String... typeKeys) {
-        return paymentWithCartLike
-            .getPayment()
-            .getInterfaceInteractions()
-            .stream()
-            .filter(i -> Arrays.stream(typeKeys)
-                .map(t -> typeCache.getUnchecked(t).toReference())
-                .anyMatch(t -> t.getId().equals(i.getType().getId())));
     }
 
     private PaymentWithCartLike attemptExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {

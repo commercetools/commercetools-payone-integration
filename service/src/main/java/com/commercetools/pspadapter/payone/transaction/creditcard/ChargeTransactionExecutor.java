@@ -3,12 +3,12 @@ package com.commercetools.pspadapter.payone.transaction.creditcard;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.commercetools.pspadapter.payone.transaction.IdempotentTransactionExecutor;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureRequest;
+import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
+import com.commercetools.pspadapter.payone.transaction.IdempotentTransactionExecutor;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -25,19 +25,16 @@ import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-public class ChargeTransactionExecutor implements IdempotentTransactionExecutor {
-    private final LoadingCache<String, Type> typeCache;
+public class ChargeTransactionExecutor extends IdempotentTransactionExecutor {
     private final PayoneRequestFactory requestFactory;
     private final PayonePostService payonePostService;
     private final BlockingClient client;
 
     public ChargeTransactionExecutor(LoadingCache<String, Type> typeCache, PayoneRequestFactory requestFactory, PayonePostService payonePostService, BlockingClient client) {
-        this.typeCache = typeCache;
+        super(typeCache);
         this.requestFactory = requestFactory;
         this.payonePostService = payonePostService;
         this.client = client;
@@ -49,11 +46,18 @@ public class ChargeTransactionExecutor implements IdempotentTransactionExecutor 
     }
 
     @Override
-    public boolean wasExecuted(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        return getCustomFieldsOfType(paymentWithCartLike,
+    protected boolean wasExecuted(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
+        if (getCustomFieldsOfType(paymentWithCartLike,
                 CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                 CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT)
-            .anyMatch(i -> i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD).equals(transaction.getId()));
+                .noneMatch(fields -> transaction.getId().equals(fields.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))) {
+
+            return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)
+                    //sequenceNumber field is mandatory -> can't be null
+                    .anyMatch(fields -> fields.getFieldAsString(CustomFieldKeys.SEQUENCE_NUMBER_FIELD).equals(transaction.getInteractionId()));
+        } else {
+            return true;
+        }
     }
 
     @Override
@@ -76,17 +80,8 @@ public class ChargeTransactionExecutor implements IdempotentTransactionExecutor 
         return paymentWithCartLike;
     }
 
-    private Stream<CustomFields> getCustomFieldsOfType(PaymentWithCartLike paymentWithCartLike, String... typeKeys) {
-        return paymentWithCartLike
-            .getPayment()
-            .getInterfaceInteractions()
-            .stream()
-            .filter(i -> Arrays.stream(typeKeys)
-                .map(t -> typeCache.getUnchecked(t).toReference())
-                .anyMatch(t -> t.equals(i.getType())));
-    }
-
     private PaymentWithCartLike attemptExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
+
         final CaptureRequest request = requestFactory.createCaptureRequest(paymentWithCartLike, transaction);
 
         final Payment updatedPayment = client.complete(
