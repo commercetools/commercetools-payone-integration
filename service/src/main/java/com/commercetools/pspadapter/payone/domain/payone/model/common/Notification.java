@@ -47,6 +47,10 @@ public class Notification implements Serializable {
 
     private String price;
 
+    private String receivable;
+
+    private String balance;
+
     private String productid;
 
     private String accessid;
@@ -203,6 +207,22 @@ public class Notification implements Serializable {
 
     public void setPrice(final String price) {
         this.price = price;
+    }
+
+    public String getReceivable() {
+        return receivable;
+    }
+
+    public void setReceivable(final String receivable) {
+        this.receivable = receivable;
+    }
+
+    public String getBalance() {
+        return balance;
+    }
+
+    public void setBalance(final String balance) {
+        this.balance = balance;
     }
 
     public String getProductid() {

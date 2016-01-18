@@ -68,6 +68,9 @@ public class NotificationTest {
                 "clearingtype=cc&" +
                 "txtime=1450365542&" +
                 "cardpan=1&" +
+                "price=123,45&" +
+                "receivable=0,00&" +
+                "balance=98,76&" +
                 "blabla=23";   //ignored parameter
 
         final Notification notification = Notification.fromKeyValueString(requestBody, "\r?\n?&");
@@ -82,6 +85,9 @@ public class NotificationTest {
         softly.assertThat(notification.getClearingtype()).as("clearingtype").isEqualTo("cc");
         softly.assertThat(notification.getSequencenumber()).as("sequencenumber").isEqualTo("1");
         softly.assertThat(notification.getTxtime()).as("txtime").isEqualTo("1450365542");
+        softly.assertThat(notification.getPrice()).as("price").isEqualTo("123,45");
+        softly.assertThat(notification.getReceivable()).as("receivable").isEqualTo("0,00");
+        softly.assertThat(notification.getBalance()).as("balance").isEqualTo("98,76");
 
         softly.assertAll();
     }

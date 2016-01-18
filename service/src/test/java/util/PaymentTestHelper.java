@@ -57,6 +57,10 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentOneChargePending20Euro.json");
     }
 
+    public Payment dummyPaymentOneChargeFailure20Euro() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneChargeFailure20Euro.json");
+    }
+
     public Payment dummyPaymentAuthSuccess() throws Exception {
         return getPaymentFromFile("dummyPaymentAuthSuccess.json");
     }
