@@ -30,7 +30,7 @@ public class CaptureRequest extends BaseRequest {
 
     private String invoiceappendix;
 
-    public CaptureRequest(final PayoneConfig config) {
+    protected CaptureRequest(final PayoneConfig config) {
         super(config, RequestType.CAPTURE.getType());
     }
 

@@ -1,6 +1,9 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import com.commercetools.pspadapter.payone.domain.payone.model.common.PreauthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
+import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.models.Reference;
@@ -9,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author fhaertig
@@ -18,8 +22,21 @@ public class MappingUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(MappingUtil.class);
 
+    private static final Set<CountryCode> countriesWithStateAllowed = ImmutableSet.of(
+        CountryCode.US,
+        CountryCode.CA,
+        CountryCode.CN,
+        CountryCode.JP,
+        CountryCode.MX,
+        CountryCode.BR,
+        CountryCode.AR,
+        CountryCode.ID,
+        CountryCode.TH,
+        CountryCode.IN
+    );
+
     public static void mapBillingAddressToRequest(
-            final PreauthorizationRequest request,
+            final AuthorizationRequest request,
             final Address billingAddress) {
 
         //required
@@ -31,7 +48,9 @@ public class MappingUtil {
         request.setSalutation(billingAddress.getSalutation());
         request.setFirstname(billingAddress.getFirstName());
         request.setCompany(billingAddress.getCompany());
-        request.setStreet(buildStreetString(billingAddress.getStreetName(), billingAddress.getStreetNumber()));
+        request.setStreet(Joiner.on(" ")
+                .skipNulls()
+                .join(billingAddress.getStreetName(), billingAddress.getStreetNumber()));
         request.setAddressaddition(billingAddress.getAdditionalStreetInfo());
         request.setZip(billingAddress.getPostalCode());
         request.setCity(billingAddress.getCity());
@@ -40,22 +59,12 @@ public class MappingUtil {
                 .ofNullable(billingAddress.getPhone())
                 .orElse(billingAddress.getMobile()));
 
-        //billingAddress.state write to PAYONE only if country=US, CA, CN, JP, MX, BR, AR, ID, TH, IN)
-        // and only if value is an ISO3166-2 subdivision
-    }
-
-    private static String buildStreetString(final String streetName, final String streetNumber) {
-        if (Optional.ofNullable(streetName).isPresent()) {
-            if (Optional.ofNullable(streetNumber).isPresent()) {
-                return streetName + " " + streetNumber;
-            } else {
-                return streetName;
-            }
+        if (countriesWithStateAllowed.contains(billingAddress.getCountry())) {
+            request.setState(billingAddress.getState());
         }
-        return null;
     }
 
-    public static void mapCustomerToRequest(final PreauthorizationRequest request, final Reference<Customer> customer) {
+    public static void mapCustomerToRequest(final AuthorizationRequest request, final Reference<Customer> customer) {
 
         if (customer != null && customer.getObj() != null) {
             request.setVatid(customer.getObj().getVatId());
@@ -90,9 +99,24 @@ public class MappingUtil {
         }
     }
 
-    public static void mapShippingAddressToRequest(final PreauthorizationRequest request, final Address shippingAddress) {
+    public static void mapShippingAddressToRequest(final AuthorizationRequest request, final Address shippingAddress) {
 
-        //TODO: shipping data in request object
+        request.setShipping_firstname(shippingAddress.getFirstName());
+        request.setShipping_lastname(shippingAddress.getLastName());
+        request.setShipping_street(Joiner.on(" ")
+                .skipNulls()
+                .join(shippingAddress.getStreetName(), shippingAddress.getStreetNumber()));
+        request.setShipping_zip(shippingAddress.getPostalCode());
+        request.setShipping_city(shippingAddress.getCity());
+        request.setShipping_country(shippingAddress.getCountry().toLocale().getCountry());
+        request.setShipping_company(Joiner.on(" ")
+                .skipNulls()
+                .join(shippingAddress.getCompany(), shippingAddress.getDepartment()));
+
+        if (countriesWithStateAllowed.contains(shippingAddress.getCountry())) {
+            request.setShipping_state(shippingAddress.getState());
+        }
+
 
     }
 }

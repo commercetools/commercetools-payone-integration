@@ -6,7 +6,7 @@ import com.commercetools.pspadapter.payone.config.PayoneConfig;
  * @author fhaertig
  * @since 11.12.15
  */
-public class PreauthorizationRequest extends BaseRequest {
+public class AuthorizationRequest extends BaseRequest {
 
     /**
      * ID of the sub account
@@ -67,8 +67,25 @@ public class PreauthorizationRequest extends BaseRequest {
 
     private String ip;
 
-    public PreauthorizationRequest(final PayoneConfig config, final String clearingtype) {
-        super(config, RequestType.PREAUTHORIZATION.getType());
+    private String shipping_firstname;
+
+    private String shipping_lastname;
+
+    private String shipping_company;
+
+    private String shipping_street;
+
+    private String shipping_zip;
+
+    private String shipping_city;
+
+    private String shipping_state;
+
+    private String shipping_country;
+
+
+    protected AuthorizationRequest(final PayoneConfig config, final String requestType, final String clearingtype) {
+        super(config, requestType);
 
         this.aid = config.getSubAccountId();
         this.clearingtype = clearingtype;
@@ -293,5 +310,69 @@ public class PreauthorizationRequest extends BaseRequest {
 
     public void setIp(final String ip) {
         this.ip = ip;
+    }
+
+    public String getShipping_firstname() {
+        return shipping_firstname;
+    }
+
+    public void setShipping_firstname(final String shipping_firstname) {
+        this.shipping_firstname = shipping_firstname;
+    }
+
+    public String getShipping_lastname() {
+        return shipping_lastname;
+    }
+
+    public void setShipping_lastname(final String shipping_lastname) {
+        this.shipping_lastname = shipping_lastname;
+    }
+
+    public String getShipping_company() {
+        return shipping_company;
+    }
+
+    public void setShipping_company(final String shipping_company) {
+        this.shipping_company = shipping_company;
+    }
+
+    public String getShipping_street() {
+        return shipping_street;
+    }
+
+    public void setShipping_street(final String shipping_street) {
+        this.shipping_street = shipping_street;
+    }
+
+    public String getShipping_zip() {
+        return shipping_zip;
+    }
+
+    public void setShipping_zip(final String shipping_zip) {
+        this.shipping_zip = shipping_zip;
+    }
+
+    public String getShipping_city() {
+        return shipping_city;
+    }
+
+    public void setShipping_city(final String shipping_city) {
+        this.shipping_city = shipping_city;
+    }
+
+    public String getShipping_state() {
+        return shipping_state;
+    }
+
+    public void setShipping_state(final String shipping_state) {
+        this.shipping_state = shipping_state;
+    }
+
+    public String getShipping_country() {
+        return shipping_country;
+    }
+
+    public void setShipping_country(final String shipping_country) {
+        this.shipping_country = shipping_country;
     }
 }

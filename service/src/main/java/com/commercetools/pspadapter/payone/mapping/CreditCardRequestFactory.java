@@ -2,6 +2,7 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardCaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
 import com.google.common.base.Preconditions;
@@ -29,7 +30,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
-        String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
+        final String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
         CreditCardPreauthorizationRequest request = new CreditCardPreauthorizationRequest(getConfig(), pseudocardpan);
 
         if (paymentWithCartLike.getOrderNumber().isPresent()) {
@@ -44,6 +45,29 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
         MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
         MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
+        return request;
+    }
+
+    @Override
+    public CreditCardAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
+
+        final Payment ctPayment = paymentWithCartLike.getPayment();
+        final CartLike ctCartLike = paymentWithCartLike.getCartLike();
+        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
+
+
+        final String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
+        CreditCardAuthorizationRequest request = new CreditCardAuthorizationRequest(getConfig(), pseudocardpan);
+
+        request.setAmount(MonetaryUtil.minorUnits().queryFrom(ctPayment.getAmountPlanned()).intValue());
+        request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
+        request.setNarrative_text(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_TEXT_FIELD));
+        request.setUserid(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.USER_ID_FIELD));
+
+        MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
+        MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
+        MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
+
         return request;
     }
 
