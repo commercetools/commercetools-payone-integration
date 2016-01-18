@@ -86,9 +86,10 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
     protected abstract PaymentWithCartLike retryLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction, CustomFields lastExecutionAttempt);
 
     /**
+     * Determines the next sequence number to use from already received notifications.
      *
-     * @param paymentWithCartLike
-     * @return
+     * @param paymentWithCartLike the payment with cart/order to search in
+     * @return 0 if no notifications received yet, else the highest sequence number received + 1
      */
     protected int getNextSequenceNumber(final PaymentWithCartLike paymentWithCartLike) {
         return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)

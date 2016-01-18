@@ -40,6 +40,7 @@ import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import javax.money.format.MonetaryFormats;
 import java.io.IOException;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -110,6 +111,7 @@ public class AuthorizationFixture extends BaseFixture {
                                              final String interactionTypeName,
                                              final String requestType) throws ExecutionException, IOException {
         final HttpResponse response = requestToHandlePaymentByLegibleName(paymentName);
+        final ZonedDateTime fetchedAt = ZonedDateTime.now(ZoneId.of("UTC"));
         final Payment payment = fetchPaymentByLegibleName(paymentName);
         final String transactionId = getIdOfLastTransaction(payment);
         final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
@@ -122,6 +124,7 @@ public class AuthorizationFixture extends BaseFixture {
                 .put("transactionState", getTransactionState(payment, transactionId))
                 .put("amountAuthorized", amountAuthorized)
                 .put("version", payment.getVersion().toString())
+                .put("fetchedAt", fetchedAt.toString())
                 .build();
     }
 
