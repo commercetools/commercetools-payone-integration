@@ -127,7 +127,7 @@ public class AuthorizationFixture extends BaseFixture {
 
     public Map<String, String> waitForNotification(final String paymentName) throws InterruptedException, ExecutionException {
 
-        int remainingWaitTimeInMillis = 180000;
+        int remainingWaitTimeInMillis = PAYONE_NOTIFICATION_TIMEOUT;
         Payment payment = fetchPaymentByLegibleName(paymentName);
 
         long appointedNotificationCount = getInteractionAppointedNotificationCount(payment);

@@ -34,8 +34,11 @@ import java.util.concurrent.ExecutionException;
  */
 public abstract class BaseFixture {
     protected static final String EMPTY_STRING = "";
+    protected static final int PAYONE_NOTIFICATION_TIMEOUT = 180000;
+
     private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
     private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
+    private static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 1500;
 
     private static final Random randomSource = new Random();
     private BlockingClient ctpClient;
@@ -85,7 +88,7 @@ public abstract class BaseFixture {
 
     public HttpResponse sendGetRequestToUrl(final String url) throws IOException {
         return Request.Get(url)
-                .connectTimeout(200)
+                .connectTimeout(INTEGRATION_SERVICE_REQUEST_TIMEOUT)
                 .execute()
                 .returnResponse();
     }
@@ -212,7 +215,7 @@ public abstract class BaseFixture {
                 String.format("Legible payment name '%s' not mapped to any payment ID.", paymentName));
 
         return Request.Get(getHandlePaymentUrl(payments.get(paymentName)))
-                .connectTimeout(1000)
+                .connectTimeout(INTEGRATION_SERVICE_REQUEST_TIMEOUT)
                 .execute()
                 .returnResponse();
     }
