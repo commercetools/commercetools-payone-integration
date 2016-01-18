@@ -11,6 +11,8 @@ import io.sphere.sdk.types.Type;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.IntUnaryOperator;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -92,10 +94,20 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
      * @return 0 if no notifications received yet, else the highest sequence number received + 1
      */
     protected int getNextSequenceNumber(final PaymentWithCartLike paymentWithCartLike) {
-        return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)
-                .mapToInt(f -> Integer.valueOf(f.getFieldAsString(CustomFieldKeys.SEQUENCE_NUMBER_FIELD)) + 1)
-                .max()
-                .orElse(0);
+        IntUnaryOperator increase = (x) -> x + 1;
+
+        return IntStream.concat(
+            getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)
+                .mapToInt(f -> Integer.valueOf(f.getFieldAsString(CustomFieldKeys.SEQUENCE_NUMBER_FIELD))),
+            paymentWithCartLike
+                .getPayment()
+                .getTransactions()
+                .stream()
+                .mapToInt(t -> Integer.valueOf(t.getInteractionId()))
+        )
+        .map(increase)
+        .max()
+        .orElse(0);
     }
 
     protected Stream<CustomFields> getCustomFieldsOfType(PaymentWithCartLike paymentWithCartLike, String... typeKeys) {
