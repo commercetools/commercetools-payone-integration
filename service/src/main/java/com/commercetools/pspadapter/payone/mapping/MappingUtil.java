@@ -2,7 +2,6 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.customers.Customer;
@@ -40,8 +39,6 @@ public class MappingUtil {
             final AuthorizationRequest request,
             final Address billingAddress) {
 
-        Preconditions.checkArgument(billingAddress != null, "billing address is null");
-
         //required
         request.setLastname(billingAddress.getLastName());
         request.setCountry(billingAddress.getCountry().toLocale().getCountry());
@@ -68,8 +65,6 @@ public class MappingUtil {
     }
 
     public static void mapCustomerToRequest(final AuthorizationRequest request, final Reference<Customer> customer) {
-
-        Preconditions.checkArgument(customer != null && customer.getObj() != null, "no or empty reference to customer");
 
         request.setVatid(customer.getObj().getVatId());
 
@@ -102,8 +97,6 @@ public class MappingUtil {
     }
 
     public static void mapShippingAddressToRequest(final AuthorizationRequest request, final Address shippingAddress) {
-
-        Preconditions.checkArgument(shippingAddress != null, "shipping address is null");
 
         request.setShipping_firstname(shippingAddress.getFirstName());
         request.setShipping_lastname(shippingAddress.getLastName());
