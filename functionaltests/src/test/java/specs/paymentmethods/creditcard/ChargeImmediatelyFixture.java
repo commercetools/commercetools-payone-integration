@@ -17,6 +17,8 @@ import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
 
 import javax.money.MonetaryAmount;
@@ -34,6 +36,8 @@ import java.util.concurrent.ExecutionException;
  */
 @RunWith(ConcordionRunner.class)
 public class ChargeImmediatelyFixture extends BaseFixture {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyFixture.class);
 
     public String createPayment(final String paymentName,
                                 final String paymentMethod,
@@ -53,6 +57,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                         .method(paymentMethod)
                         .paymentInterface("PAYONE")
                         .build())
+                .amountPlanned(monetaryAmount)
                 .transactions(transactions)
                 .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
                         CustomTypeBuilder.PAYMENT_CREDIT_CARD,
@@ -106,6 +111,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
             appointedNotificationCount = getInteractionPaidNotificationCount(payment);
             remainingWaitTimeInMillis -= 100;
         }
+        LOG.info(String.format("waited %d seconds to receive notifications for payment %s", (PAYONE_NOTIFICATION_TIMEOUT - remainingWaitTimeInMillis)/1000, payment.getId()));
 
         final String transactionId = getIdOfLastTransaction(payment);
         final String amountAuthorized = (payment.getAmountAuthorized() != null) ?

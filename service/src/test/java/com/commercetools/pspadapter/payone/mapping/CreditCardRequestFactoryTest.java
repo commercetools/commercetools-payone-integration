@@ -149,6 +149,10 @@ public class CreditCardRequestFactoryTest {
         String clearingType = ClearingType.getClearingTypeByKey(payment.getPaymentMethodInfo().getMethod()).getPayoneCode();
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType);
 
+        //references
+        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber().get());
+        softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
+
         //billing address data
         Address billingAddress = order.getBillingAddress();
         softly.assertThat(result.getTitle()).isEqualTo(billingAddress.getTitle());
