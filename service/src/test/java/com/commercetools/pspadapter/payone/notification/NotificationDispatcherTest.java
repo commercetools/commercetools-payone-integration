@@ -3,6 +3,11 @@ package com.commercetools.pspadapter.payone.notification;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
@@ -14,7 +19,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Transactio
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
-import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
 import org.junit.Before;
@@ -25,11 +29,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Optional;
 
 /**
  * @author fhaertig
+ * @author Jan Wolter
  * @since 05.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -40,16 +46,20 @@ public class NotificationDispatcherTest {
     @Mock
     private CommercetoolsClient client;
 
-    private final PaymentTestHelper testHelper = new PaymentTestHelper();
-
     @Mock
     private PropertyProvider propertyProvider;
+
+    @Mock
+    private NotificationProcessor defaultNotificationProcessor;
+
+    @Mock
+    private NotificationProcessor specificNotificationProcessor;
+
+    private final PaymentTestHelper testHelper = new PaymentTestHelper();
 
     private PayoneConfig config;
 
     private ImmutableMap<NotificationAction, NotificationProcessor> processors;
-
-    private CountingNotificationProcessor defaultNotificationProcessor;
 
     @Before
     public void setUp() throws Exception {
@@ -82,15 +92,12 @@ public class NotificationDispatcherTest {
 
         config = new PayoneConfig(propertyProvider);
 
-        processors = ImmutableMap.<NotificationAction, NotificationProcessor>builder()
-                .put(NotificationAction.APPOINTED, createAppointedNotificationProcessor())
-                .build();
-
-        defaultNotificationProcessor = createDefaultNotificationProcessor();
+        processors = ImmutableMap.of(NotificationAction.APPOINTED, specificNotificationProcessor);
     }
 
     @Test
     public void dispatchValidAppointedNotification() {
+        // arrange
         final Notification notification = new Notification();
         //txid = interfaceId -> must match the dummyPaymentQueryResult.json!
         notification.setTxid("123");
@@ -105,15 +112,54 @@ public class NotificationDispatcherTest {
         notification.setTxaction(NotificationAction.APPOINTED);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
-        NotificationDispatcher dispatcher = new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
+        final NotificationDispatcher dispatcher =
+                new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
+
+        // act
         dispatcher.dispatchNotification(notification);
 
-        assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(1);
-        assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);
+        // assert
+        // TODO check for specific payment instead of "any"
+        verify(specificNotificationProcessor).processTransactionStatusNotification(same(notification), any());
+        verifyZeroInteractions(defaultNotificationProcessor);
+    }
+
+    @Test
+    public void retriesToDispatchValidAppointedNotificationInCaseOfConcurrentModificationException() {
+        // arrange
+        final Notification notification = new Notification();
+        //txid = interfaceId -> must match the dummyPaymentQueryResult.json!
+        notification.setTxid("123");
+        notification.setClearingtype("cc");
+        notification.setPrice("200.00");
+        notification.setCurrency("EUR");
+        notification.setPortalid("dummyConfigValue");
+        notification.setAid("dummyConfigValue");
+        notification.setKey(Hashing.md5().hashString("dummyConfigValue", Charsets.UTF_8).toString());
+        notification.setMode("dummyConfigValue");
+        notification.setTxtime("1450365542");
+        notification.setTxaction(NotificationAction.APPOINTED);
+        notification.setTransactionStatus(TransactionStatus.COMPLETED);
+
+        final NotificationDispatcher dispatcher =
+                new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
+
+        doThrow(new ConcurrentModificationException("payment modified concurrently")) // 1st try throws
+                .doNothing() // will succeed from 2nd try on
+                .when(specificNotificationProcessor).processTransactionStatusNotification(same(notification), any());
+
+        // act
+        dispatcher.dispatchNotification(notification);
+
+        // assert
+        // TODO check for specific payment instead of "any"
+        verify(specificNotificationProcessor, times(2)).processTransactionStatusNotification(same(notification), any());
+        verifyZeroInteractions(defaultNotificationProcessor);
     }
 
     @Test
     public void refuseNotificationWithWrongSecrets() {
+        // arrange
         final Notification notification = new Notification();
         notification.setTxid("123");
         notification.setPortalid("invalidPortal");
@@ -121,20 +167,23 @@ public class NotificationDispatcherTest {
         notification.setTxaction(NotificationAction.APPOINTED);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
-        NotificationDispatcher dispatcher = new NotificationDispatcher(createDefaultNotificationProcessor(), processors, client, config);
+        final NotificationDispatcher dispatcher =
+                new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
 
+        // act
         final Throwable throwable = catchThrowable(() -> dispatcher.dispatchNotification(notification));
 
+        // assert
         assertThat(throwable)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("is not valid for this service instance");
 
-        assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(0);
-        assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);
+        verifyZeroInteractions(specificNotificationProcessor, defaultNotificationProcessor);
     }
 
     @Test
     public void dispatchNotificationToNewPayment() {
+        // arrange
         final Notification notification = new Notification();
         //txid = interfaceId -> must NOT match the dummyPaymentQueryResult.json!
         notification.setTxid("456");
@@ -149,51 +198,15 @@ public class NotificationDispatcherTest {
         notification.setTxaction(NotificationAction.APPOINTED);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
-        NotificationDispatcher dispatcher = new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
+        final NotificationDispatcher dispatcher =
+                new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
+
+        // act
         dispatcher.dispatchNotification(notification);
 
-        assertThat(((CountingNotificationProcessor) processors.get(NotificationAction.APPOINTED)).getCount()).isEqualTo(1);
-        assertThat(defaultNotificationProcessor.getCount()).isEqualTo(0);
+        // assert
+        // TODO check for specific payment instead of "any"
+        verify(specificNotificationProcessor).processTransactionStatusNotification(same(notification), any());
+        verifyZeroInteractions(defaultNotificationProcessor);
     }
-
-    private CountingNotificationProcessor createAppointedNotificationProcessor() {
-        return new CountingNotificationProcessor() {
-            int count = 0;
-
-            @Override
-            public int getCount() {
-                return count;
-            }
-
-            @Override
-            public void processTransactionStatusNotification(final Notification notification, final Payment payment) {
-                if (notification.getTxid().equals(payment.getInterfaceId())
-                        && payment.getPaymentMethodInfo().getPaymentInterface().equals("PAYONE")
-                        && notification.getTxaction().equals(NotificationAction.APPOINTED)) {
-                    count++;
-                }
-            }
-        };
-    }
-
-    private CountingNotificationProcessor createDefaultNotificationProcessor() {
-        return new CountingNotificationProcessor() {
-            int count = 0;
-
-            @Override
-            public int getCount() {
-                return count;
-            }
-
-            @Override
-            public void processTransactionStatusNotification(final Notification notification, final Payment payment) {
-                count++;
-            }
-        };
-    }
-
-    private interface CountingNotificationProcessor extends NotificationProcessor {
-        int getCount();
-    }
-
 }

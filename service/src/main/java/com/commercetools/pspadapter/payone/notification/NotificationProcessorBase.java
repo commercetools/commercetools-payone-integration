@@ -43,15 +43,19 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
     }
 
     @Override
-    public void processTransactionStatusNotification(final Notification notification, final Payment payment) {
-        if (!notification.getTxaction().equals(supportedNotificationAction())) {
+    public final void processTransactionStatusNotification(final Notification notification, final Payment payment) {
+            if (!notification.getTxaction().equals(supportedNotificationAction())) {
             throw new IllegalArgumentException(String.format(
                     "txaction \"%s\" is not supported by %s",
                     notification.getTxaction(),
                     this.getClass().getName()));
         }
 
-        client.complete(PaymentUpdateCommand.of(payment, createPaymentUpdates(payment, notification)));
+        try {
+            client.complete(PaymentUpdateCommand.of(payment, createPaymentUpdates(payment, notification)));
+        } catch (final io.sphere.sdk.client.ConcurrentModificationException e) {
+            throw new java.util.ConcurrentModificationException(e);
+        }
     }
 
     /**

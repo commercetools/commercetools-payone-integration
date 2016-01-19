@@ -7,7 +7,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -18,6 +17,7 @@ import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.utils.MoneyImpl;
 
 import javax.money.MonetaryAmount;
+import java.util.ConcurrentModificationException;
 import java.util.Optional;
 
 /**
@@ -54,14 +54,14 @@ public class NotificationDispatcher {
     public void dispatchNotification(final Notification notification) {
         validateSecrets(notification);
 
-        final Payment payment = getPaymentByInterfaceId(notification.getTxid())
-                .orElseGet(() -> {
-                    PaymentDraft paymentDraft = createNewPaymentDraftFromNotification(notification);
-                    return client.complete(PaymentCreateCommand.of(paymentDraft));
-                });
+        final NotificationProcessor notificationProcessor = getNotificationProcessor(notification.getTxaction());
 
-        processors.getOrDefault(notification.getTxaction(), defaultProcessor)
-                .processTransactionStatusNotification(notification, payment);
+        try {
+            dispatchNotificationToProcessor(notification, notificationProcessor);
+        } catch (final ConcurrentModificationException e) {
+            // try once more
+            dispatchNotificationToProcessor(notification, notificationProcessor);
+        }
     }
 
     /**
@@ -80,6 +80,21 @@ public class NotificationDispatcher {
                 "the value for 'aid' is not valid for this service instance: " + notification.getAid());
         Preconditions.checkArgument(config.getMode().equals(notification.getMode()),
                 "the value for 'mode' is not valid for this service instance: " + notification.getMode());
+    }
+
+    private NotificationProcessor getNotificationProcessor(final NotificationAction txAction) {
+        return processors.getOrDefault(txAction, defaultProcessor);
+    }
+
+    private void dispatchNotificationToProcessor(final Notification notification,
+                                                 final NotificationProcessor notificationProcessor) {
+        final Payment payment = getPaymentByInterfaceId(notification.getTxid())
+                .orElseGet(() -> {
+                    PaymentDraft paymentDraft = createNewPaymentDraftFromNotification(notification);
+                    return client.complete(PaymentCreateCommand.of(paymentDraft));
+                });
+
+        notificationProcessor.processTransactionStatusNotification(notification, payment);
     }
 
     private Optional<Payment> getPaymentByInterfaceId(final String interfaceId) {
