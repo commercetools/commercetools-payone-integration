@@ -5,7 +5,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.commercetools.pspadapter.payone.transaction.IdempotentTransactionExecutor;
@@ -85,7 +85,7 @@ public class ChargeTransactionExecutor extends IdempotentTransactionExecutor {
 
         final int sequenceNumber = getNextSequenceNumber(paymentWithCartLike);
 
-        final CaptureRequest request = requestFactory.createCaptureRequest(paymentWithCartLike, sequenceNumber);
+        final AuthorizationRequest request = requestFactory.createAuthorizationRequest(paymentWithCartLike);
 
         final Payment updatedPayment = client.complete(
             PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),

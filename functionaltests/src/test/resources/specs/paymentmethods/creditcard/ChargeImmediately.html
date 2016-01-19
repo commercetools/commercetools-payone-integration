@@ -11,38 +11,200 @@
             The integration service allows to charge a credit card in a one step process without initiating a separate authorization before.
         </p>
         <p>
+            It will do so by sending an <em c:set="#requestType">authorization</em> request to the PAYONE platform.
+            <br/>
+            It will store information about such a request as an interface interaction of type
+            <em c:set="#interactionType">PAYONE_INTERACTION_REQUEST</em>.
+        </p>
+        <p>
             <i>
                 Note: it is necessary to do a creditcardcheck via PAYONE client API to avoid complying to PCI-DSS standard.
             </i>
         </p>
         <h2>Examples</h2>
+        <h3>Common Setup</h3>
+        <ul>
+            <li>payment.paymentMethodInfo.method: <span c:set="#paymentMethod">CREDIT_CARD</span></li>
+            <li>payment.transactions[0].type: <span c:set="#transactionType">CHARGE</span></li>
+        </ul>
         <div class="example">
-            <h3>Successful Charge</h3>
+            <h3>Charge immediately</h3>
             <p>
-                If I charge a credit card with an amount without authorizing it before, an interfaceInteraction is added to the payment:
-                and after that, an "authorization" request to PAYONE will be sent.
-                The PAYONE response will lead to changes in the interfaceInteraction:
+                Given the following payments for
+                <em>a credit card that does <b>not</b> support charges for currencies other than EUR</em>:
             </p>
-        </div>
-        <div class="example">
-            <h3>Pending Charge</h3>
+            <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:set="#centAmount">Cent Amount</th>
+                    <th c:set="#currencyCode">Currency Code</th>
+                    <th c:echo="#paymentId">Payment ID (for information only)</th>
+                </tr>
+                <tr>
+                    <td>Payment 1</td>
+                    <td>2000</td>
+                    <td>EUR</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 2</td>
+                    <td>123498</td>
+                    <td>USD</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 3</td>
+                    <td>4711</td>
+                    <td>EUR</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 4</td>
+                    <td>270713</td>
+                    <td>EUR</td>
+                    <td></td>
+                </tr>
+            </table>
             <p>
-                If I charge a credit card with an amount without authorizing it before, an interfaceInteraction is added to the payment:
-                and after that, an "authorization" request to PAYONE will be sent with status PENDING.
-                No changes to the interfaceInteraction will be made.
+                When I request the integration service to handle them I will get the following results:
             </p>
-        </div>
-        <div class="example">
-            <h3>Successful Charge with redirect (3-D Secure)</h3>
+            <table c:execute="#result = handlePayment(#paymentName, #interactionType, #requestType)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:assertEquals="#result.statusCode">Response Status Code</th>
+                    <th c:assertEquals="#result.interactionCount">total # of <em>authorization</em> requests sent</th>
+                    <th c:echo="#result.transactionState">Transaction State </th>
+                    <th c:echo="#result.version">Version (for information only)</th>
+                </tr>
+                <tr>
+                    <td>Payment 1</td>
+                    <td>200</td>
+                    <td>1</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 2</td>
+                    <td>200</td>
+                    <td>1</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 3</td>
+                    <td>200</td>
+                    <td>1</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 4</td>
+                    <td>200</td>
+                    <td>1</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
             <p>
-                TODO
+                A successful request and a response status code 20X does not mean that the transaction is in state Success.
             </p>
-        </div>
-        <div class="example">
-            <h3>Charge fails with PAYONE error</h3>
             <p>
-                TODO
+                After a certain amount of time I will have received a notification from PAYONE with the txaction <b>appointed</b>
+                and the transactionstatus <b>completed</b>. The transaction state and the authorized amount should be set correctly not later than now.
             </p>
+            <table c:execute="#result = waitForNotification(#paymentName)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:assertEquals="#result.notificationCount">total # of <em>paid/completed</em> notifications</th>
+                    <th c:assertEquals="#result.transactionState">Transaction State</th>
+                    <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
+                    <th c:assertEquals="#result.amountPaid">Paid Amount</th>
+                    <th c:echo="#result.version">Version (for information only)</th>
+                </tr>
+                <tr>
+                    <td>Payment 1</td>
+                    <td>1</td>
+                    <td>Success</td>
+                    <td>20,00 EUR</td>
+                    <td>20,00 EUR</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 3</td>
+                    <td>1</td>
+                    <td>Success</td>
+                    <td>47,11 EUR</td>
+                    <td>47,11 EUR</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 4</td>
+                    <td>1</td>
+                    <td>Success</td>
+                    <td>2.707,13 EUR</td>
+                    <td>2.707,13 EUR</td>
+                    <td></td>
+                </tr>
+            </table>
+            <p>
+                The failed payment <span c:set="#failedPaymentName">Payment 2</span>
+                must have received <span c:assertEquals="getInteractionPaidNotificationCount(#failedPaymentName)">0</span> notifications.
+            </p>
+            <p>
+                The service ensures idempotence, hence when I request it to handle the same payments again then I
+                will get the same results as before, especially the total number of <em>preauthorization</em> requests sent
+                per payment must not change:
+            </p>
+            <table c:execute="#result = handlePayment(#paymentName, #interactionType, #requestType)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:assertEquals="#result.statusCode">Response Status Code</th>
+                    <th c:assertEquals="#result.interactionCount">total # of <em>authorization</em> requests sent</th>
+                    <th c:assertEquals="#result.transactionState">Transaction State</th>
+                    <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
+                    <th c:assertEquals="#result.amountPaid">Paid Amount</th>
+                    <th c:echo="#result.version">Version (for information only)</th>
+                </tr>
+                <tr>
+                    <td>Payment 1</td>
+                    <td>200</td>
+                    <td>1</td>
+                    <td>Success</td>
+                    <td>20,00 EUR</td>
+                    <td>20,00 EUR</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 2</td>
+                    <td>200</td>
+                    <td>1</td>
+                    <td>Failure</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 3</td>
+                    <td>200</td>
+                    <td>1</td>
+                    <td>Success</td>
+                    <td>47,11 EUR</td>
+                    <td>47,11 EUR</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 4</td>
+                    <td>200</td>
+                    <td>1</td>
+                    <td>Success</td>
+                    <td>2.707,13 EUR</td>
+                    <td>2.707,13 EUR</td>
+                    <td></td>
+                </tr>
+            </table>
         </div>
     </body>
 </html>
