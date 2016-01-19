@@ -56,7 +56,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
             MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
             MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
         } catch (final IllegalArgumentException ex) {
-            LOG.warn(String.format("Could not map payment with ID '%s' correctly. Cause: ", paymentWithCartLike.getPayment().getId()), ex.getMessage());
+            LOG.warn(String.format("Could not fully map payment with ID '%s'. Cause: %s", paymentWithCartLike.getPayment().getId(), ex.getMessage()));
         }
 
         return request;
@@ -86,7 +86,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
             MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
             MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
         } catch (final IllegalArgumentException ex) {
-            LOG.warn(String.format("Could not fully map payment with ID '%s'. Cause: ", paymentWithCartLike.getPayment().getId()), ex.getMessage());
+            LOG.warn(String.format("Could not fully map payment with ID '%s'. Cause: %s", paymentWithCartLike.getPayment().getId(), ex.getMessage()));
         }
 
         return request;
