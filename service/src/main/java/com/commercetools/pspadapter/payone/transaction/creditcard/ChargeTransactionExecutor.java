@@ -22,6 +22,7 @@ import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractionId;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionTimestamp;
+import io.sphere.sdk.payments.commands.updateactions.SetInterfaceId;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 
@@ -106,7 +107,9 @@ public class ChargeTransactionExecutor extends IdempotentTransactionExecutor {
                     ImmutableMap.of(CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
-                return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));
+                return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
+                        interfaceInteraction,
+                        SetInterfaceId.of(response.get("txid"))));
             } else {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, response.toString() /* TODO */,
@@ -115,9 +118,10 @@ public class ChargeTransactionExecutor extends IdempotentTransactionExecutor {
 
                 if (status.equals("APPROVED")) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
-                        interfaceInteraction,
-                        ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
-                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
+                            interfaceInteraction,
+                            SetInterfaceId.of(response.get("txid")),
+                            ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
+                            ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                     ));
                 } else if (status.equals("ERROR")) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
@@ -126,7 +130,9 @@ public class ChargeTransactionExecutor extends IdempotentTransactionExecutor {
                         ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                     ));
                 } else if (status.equals("PENDING")) {
-                    return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));
+                    return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
+                            interfaceInteraction,
+                            SetInterfaceId.of(response.get("txid"))));
                 }
             }
 

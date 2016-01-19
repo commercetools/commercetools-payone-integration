@@ -113,7 +113,9 @@ public class AuthorizationTransactionExecutor extends IdempotentTransactionExecu
                     ImmutableMap.of(CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
-                return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));
+                return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
+                        interfaceInteraction,
+                        SetInterfaceId.of(response.get("txid"))));
             } else {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, response.toString() /* TODO */,
@@ -135,7 +137,9 @@ public class AuthorizationTransactionExecutor extends IdempotentTransactionExecu
                         ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                     ));
                 } else if (status.equals("PENDING")) {
-                    return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));
+                    return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
+                            interfaceInteraction,
+                            SetInterfaceId.of(response.get("txid"))));
                 }
             }
 
