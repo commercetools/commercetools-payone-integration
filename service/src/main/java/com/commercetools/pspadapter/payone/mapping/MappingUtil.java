@@ -2,6 +2,7 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.customers.Customer;
@@ -39,6 +40,8 @@ public class MappingUtil {
             final AuthorizationRequest request,
             final Address billingAddress) {
 
+        Preconditions.checkArgument(billingAddress != null, "billing address is null");
+
         //required
         request.setLastname(billingAddress.getLastName());
         request.setCountry(billingAddress.getCountry().toLocale().getCountry());
@@ -66,40 +69,41 @@ public class MappingUtil {
 
     public static void mapCustomerToRequest(final AuthorizationRequest request, final Reference<Customer> customer) {
 
-        if (customer != null && customer.getObj() != null) {
-            request.setVatid(customer.getObj().getVatId());
+        Preconditions.checkArgument(customer != null && customer.getObj() != null, "no or empty reference to customer");
 
-            //birthday
-            Optional.ofNullable(customer.getObj().getDateOfBirth()).ifPresent(birthday -> {
-                request.setBirthday(birthday.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-            });
+        request.setVatid(customer.getObj().getVatId());
 
-            //TODO: Gender can also be a CustomField enum @Cart with values Female/Male
-            //gender
-            Optional.ofNullable(customer.getObj().getCustom()).ifPresent(customs -> {
-                Optional.ofNullable(customs.getFieldAsString(CustomFieldKeys.GENDER_FIELD))
+        //birthday
+        Optional.ofNullable(customer.getObj().getDateOfBirth()).ifPresent(birthday -> {
+            request.setBirthday(birthday.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+        });
+
+        //TODO: Gender can also be a CustomField enum @Cart with values Female/Male
+        //gender
+        Optional.ofNullable(customer.getObj().getCustom()).ifPresent(customs -> {
+            Optional.ofNullable(customs.getFieldAsString(CustomFieldKeys.GENDER_FIELD))
                     .ifPresent(gender -> {
                         request.setGender(gender.substring(0, 0));
                     });
+        });
+
+        //customerNumber
+        Optional.ofNullable(customer.getObj().getCustomerNumber())
+            .ifPresent(customerNumber -> {
+                if (customerNumber.length() > 20) {
+                    LOG.warn("customer.customerNumber exceeds the maximum length of 20! Using substring of customer.id as fallback.");
+                    String id = customer.getObj().getId();
+                    id = id.replace("-", "").substring(0, 19);
+                    request.setCustomerid(id);
+                } else {
+                    request.setCustomerid(customerNumber);
+                }
             });
-
-            //customerNumber
-            Optional.ofNullable(customer.getObj().getCustomerNumber())
-                .ifPresent(customerNumber -> {
-                    if (customerNumber.length() > 20) {
-                        LOG.warn("customer.customerNumber exceeds the maximum length of 20! Using substring of customer.id as fallback.");
-                        String id = customer.getObj().getId();
-                        id = id.replace("-", "").substring(0, 19);
-                        request.setCustomerid(id);
-                    } else {
-                        request.setCustomerid(customerNumber);
-                    }
-                });
-
-        }
     }
 
     public static void mapShippingAddressToRequest(final AuthorizationRequest request, final Address shippingAddress) {
+
+        Preconditions.checkArgument(shippingAddress != null, "shipping address is null");
 
         request.setShipping_firstname(shippingAddress.getFirstName());
         request.setShipping_lastname(shippingAddress.getLastName());
