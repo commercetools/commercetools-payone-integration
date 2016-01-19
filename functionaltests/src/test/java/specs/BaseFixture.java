@@ -8,11 +8,28 @@ import com.google.common.base.Strings;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.neovisionaries.i18n.CountryCode;
+import io.sphere.sdk.carts.Cart;
+import io.sphere.sdk.carts.CartDraft;
+import io.sphere.sdk.carts.CartDraftBuilder;
+import io.sphere.sdk.carts.commands.CartCreateCommand;
+import io.sphere.sdk.carts.commands.CartUpdateCommand;
+import io.sphere.sdk.carts.commands.updateactions.AddLineItem;
+import io.sphere.sdk.carts.commands.updateactions.AddPayment;
+import io.sphere.sdk.carts.commands.updateactions.SetBillingAddress;
+import io.sphere.sdk.carts.commands.updateactions.SetShippingAddress;
+import io.sphere.sdk.models.Address;
+import io.sphere.sdk.orders.OrderFromCartDraft;
+import io.sphere.sdk.orders.PaymentState;
+import io.sphere.sdk.orders.commands.OrderFromCartCreateCommand;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.queries.PaymentByIdGet;
+import io.sphere.sdk.products.Product;
+import io.sphere.sdk.products.queries.ProductQuery;
 import io.sphere.sdk.types.Type;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
@@ -20,6 +37,7 @@ import org.apache.http.client.fluent.Request;
 import org.junit.After;
 import org.junit.Before;
 
+import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -113,6 +131,25 @@ public abstract class BaseFixture {
         return MoneyImpl.ofCents(centAmount, currencyCode);
     }
 
+    protected void createCartAndOrderForPayment(final Payment payment, final String currencyCode) {
+        // create cart and order with product
+        final Product product = ctpClient.complete(ProductQuery.of()).getResults().get(0);
+
+        final CartDraft cardDraft = CartDraftBuilder.of(Monetary.getCurrency(currencyCode)).build();
+
+        final Cart cart = ctpClient.complete(CartUpdateCommand.of(
+                ctpClient.complete(CartCreateCommand.of(cardDraft)),
+                ImmutableList.of(
+                        AddPayment.of(payment),
+                        AddLineItem.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1),
+                        SetShippingAddress.of(Address.of(CountryCode.DE)),
+                        SetBillingAddress.of(Address.of(CountryCode.DE).withLastName("Test Buyer"))
+                )));
+
+        ctpClient.complete(OrderFromCartCreateCommand.of(
+                OrderFromCartDraft.of(cart, getRandomOrderNumber(), PaymentState.PENDING)));
+    }
+
     protected String getUnconfirmedVisaPseudoCardPan() {
         return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
     }
@@ -147,7 +184,7 @@ public abstract class BaseFixture {
     /**
      * Gets the latest version of the payment via its legible name - a name that exits only in this test context.
      * @param paymentName legible name of the payment
-     * @return the payment fetched from the commercetools client
+     * @return the payment fetched from the commercetools client, can be null!
      * @see #fetchPaymentById(String)
      */
     protected Payment fetchPaymentByLegibleName(final String paymentName) {
@@ -157,7 +194,7 @@ public abstract class BaseFixture {
     /**
      * Gets the latest version of the payment via its ID.
      * @param paymentId unique ID of the payment
-     * @return the payment fetched from the commercetools client
+     * @return the payment fetched from the commercetools client, can be null!
      * @see #fetchPaymentByLegibleName(String)
      */
     protected Payment fetchPaymentById(final String paymentId) {
@@ -194,7 +231,8 @@ public abstract class BaseFixture {
     }
 
     protected String getIdOfLastTransaction(final Payment payment) {
-        Preconditions.checkNotNull(payment, "payment must not be null");
+        Preconditions.checkNotNull(payment,
+                "payment is null. This could be due to a restarting service instance which has not finished cleaning the platform from custom types, payments, orders and carts!");
         return Iterables.getLast(payment.getTransactions()).getId();
     }
 
