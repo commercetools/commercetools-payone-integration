@@ -3,7 +3,10 @@ package specs.paymentmethods.creditcard;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -17,6 +20,8 @@ import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
 
 import javax.money.MonetaryAmount;
@@ -24,11 +29,13 @@ import javax.money.format.MonetaryFormats;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author fhaertig
@@ -36,6 +43,9 @@ import java.util.concurrent.ExecutionException;
  */
 @RunWith(ConcordionRunner.class)
 public class AuthorizationFixture extends BaseFixture {
+    private static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
+
+    private static final Logger LOG = LoggerFactory.getLogger(AuthorizationFixture.class);
 
     public String createPayment(
             final String paymentName,
@@ -95,9 +105,54 @@ public class AuthorizationFixture extends BaseFixture {
                 .build();
     }
 
-    public Map<String, String> waitForNotification(final String paymentName) throws InterruptedException, ExecutionException {
+    public boolean receivedAppointedNotificationFor(final String paymentNames)
+            throws InterruptedException, ExecutionException {
+        final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 
-        int remainingWaitTimeInMillis = PAYONE_NOTIFICATION_TIMEOUT;
+        long remainingWaitTimeInMillis = PAYONE_NOTIFICATION_TIMEOUT;
+
+        final long sleepDuration = 100L;
+
+        long numberOfPaymentsWithAppointedNotification = countPaymentsWithAppointeddNotification(paymentNamesList);
+        while ((numberOfPaymentsWithAppointedNotification != paymentNamesList.size())
+                && (remainingWaitTimeInMillis > 0L)) {
+            Thread.sleep(sleepDuration);
+            remainingWaitTimeInMillis -= sleepDuration;
+            numberOfPaymentsWithAppointedNotification = countPaymentsWithAppointeddNotification(paymentNamesList);
+        }
+
+        LOG.info(String.format(
+                "waited %d seconds to receive notifications for payments %s",
+                TimeUnit.MILLISECONDS.toSeconds(PAYONE_NOTIFICATION_TIMEOUT - remainingWaitTimeInMillis),
+                Arrays.toString(paymentNamesList.stream().map(this::getIdForLegibleName).toArray())));
+
+        return numberOfPaymentsWithAppointedNotification == paymentNamesList.size();
+    }
+
+    private long countPaymentsWithAppointeddNotification(final ImmutableList<String> paymentNames)
+            throws ExecutionException {
+        final List<ExecutionException> exceptions = Lists.newArrayList();
+        final long result = paymentNames.stream().mapToLong(paymentName -> {
+            final Payment payment = fetchPaymentByLegibleName(paymentName);
+            try {
+                return getInteractionAppointedNotificationCount(payment);
+            } catch (final ExecutionException e) {
+                LOG.error("Exception: %s", e);
+                exceptions.add(e);
+                return 0L;
+            }
+        }).filter(notifications -> notifications > 0L).count();
+
+        if (!exceptions.isEmpty()) {
+            throw exceptions.get(0);
+        }
+
+        return result;
+    }
+
+    public Map<String, String> fetchPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
+
+        long remainingWaitTimeInMillis = PAYONE_NOTIFICATION_TIMEOUT;
         Payment payment = fetchPaymentByLegibleName(paymentName);
 
         long appointedNotificationCount = getInteractionAppointedNotificationCount(payment);
@@ -120,7 +175,6 @@ public class AuthorizationFixture extends BaseFixture {
                 .put("version", payment.getVersion().toString())
                 .build();
     }
-
 
     private String getInteractionCount(final Payment payment,
                                        final String transactionId,

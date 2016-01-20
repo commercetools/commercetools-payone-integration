@@ -45,6 +45,7 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author fhaertig
@@ -52,7 +53,7 @@ import java.util.concurrent.ExecutionException;
  */
 public abstract class BaseFixture {
     protected static final String EMPTY_STRING = "";
-    protected static final int PAYONE_NOTIFICATION_TIMEOUT = 180000;
+    protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(8);
 
     private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
     private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
@@ -256,6 +257,10 @@ public abstract class BaseFixture {
                 .connectTimeout(INTEGRATION_SERVICE_REQUEST_TIMEOUT)
                 .execute()
                 .returnResponse();
+    }
+
+    protected String getIdForLegibleName(final String paymentName) {
+        return payments.get(paymentName);
     }
 }
 
