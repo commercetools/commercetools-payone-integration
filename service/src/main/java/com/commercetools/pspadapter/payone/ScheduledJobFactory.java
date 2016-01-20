@@ -15,6 +15,8 @@ import org.quartz.impl.StdSchedulerFactory;
  */
 public class ScheduledJobFactory {
 
+    private static final int DELAY_START_IN_SECONDS = 10;
+
     public static Scheduler createScheduledJob(
             final CronScheduleBuilder cronScheduleBuilder,
             final IntegrationService integrationService,
@@ -32,7 +34,7 @@ public class ScheduledJobFactory {
                 .usingJobData(dataMap)
                 .build();
 
-        scheduler.start();
+        scheduler.startDelayed(DELAY_START_IN_SECONDS);
         scheduler.scheduleJob(JobBuilder.newJob(ScheduledJob.class).build(), trigger);
         return scheduler;
     }
