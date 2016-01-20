@@ -30,7 +30,7 @@ import java.util.Optional;
 
 /**
  * @author fhaertig
- * @date 18.01.16
+ * @since 18.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
 public class IdempotentTransactionExecutorTest {

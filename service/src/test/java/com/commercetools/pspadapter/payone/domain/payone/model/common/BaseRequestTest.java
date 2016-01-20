@@ -4,19 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * @author fhaertig
  * @since 11.12.15
  */
+@RunWith(MockitoJUnitRunner.class)
 public class BaseRequestTest {
     private static final String requestType = "some-request";
     private static final String merchantId = "merchant X";
@@ -24,9 +23,6 @@ public class BaseRequestTest {
     private static final String keyMd5Hash = "hashed key";
     private static final String mode = "unit test";
     private static final String apiVersion = "v.1.2.3";
-
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Mock
     private PayoneConfig payoneConfig;

@@ -16,7 +16,7 @@ public enum ClearingType {
     PAYONE_VOR("PayoneVOR", "vor", ""),
     PAYONE_REC("PayoneREC", "rec", ""),
     PAYONE_COD("PayoneCOD", "cod", ""),
-    PAYONE_PP("PayonePP", "wlt", ""),
+    PAYONE_PPE("WALLET-PAYPAL", "wlt", ""),
     PAYONE_SU("PayoneSU", "sb", "PNT"),
     PAYONE_EPS("PayoneEPS", "sb", "EPS"),
     PAYONE_GP("PayoneGP", "sb", "GPY"),

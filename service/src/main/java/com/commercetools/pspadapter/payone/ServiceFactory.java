@@ -14,6 +14,7 @@ import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
+import com.commercetools.pspadapter.payone.mapping.PaypalRequestFactory;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.common.AppointedNotificationProcessor;
@@ -175,7 +176,8 @@ public class ServiceFactory {
         final PayonePostServiceImpl postService = PayonePostServiceImpl.of(config.getApiUrl());
 
         final ImmutableSet<PaymentMethod> supportedMethods = ImmutableSet.of(
-                PaymentMethod.CREDIT_CARD
+                PaymentMethod.CREDIT_CARD,
+                PaymentMethod.WALLET_PAYPAL
         );
 
         for (final PaymentMethod paymentMethod : supportedMethods) {
@@ -220,6 +222,8 @@ public class ServiceFactory {
         switch(method) {
             case CREDIT_CARD:
                 return new CreditCardRequestFactory(config);
+            case WALLET_PAYPAL:
+                return new PaypalRequestFactory(config);
             default:
                 throw new IllegalArgumentException(String.format("No PayoneRequestFactory could be created for payment method %s", method));
         }

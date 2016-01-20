@@ -25,7 +25,13 @@ public enum PaymentMethod {
     CREDIT_CARD(MethodKeys.CREDIT_CARD,
                     TransactionType.AUTHORIZATION,
                     TransactionType.CHARGE
-    );
+    ),
+
+    /**
+     * @see MethodKeys#WALLET_PAYPAL
+     */
+    WALLET_PAYPAL(MethodKeys.WALLET_PAYPAL,
+                    TransactionType.AUTHORIZATION);
 
     private String key;
     private ImmutableSet<TransactionType> supportedTransactionTypes;

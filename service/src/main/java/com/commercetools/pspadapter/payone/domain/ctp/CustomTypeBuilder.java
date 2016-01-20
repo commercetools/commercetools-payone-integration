@@ -33,6 +33,7 @@ import io.sphere.sdk.types.queries.TypeQuery;
 public class CustomTypeBuilder {
     // TODO jw: not that custom, general type for all PSPs, move somewhere else
     public static final String PAYMENT_CREDIT_CARD = "payment-CREDIT_CARD";
+    public static final String PAYMENT_WALLET = "payment-WALLET";
 
     public static final String PAYONE_INTERACTION_REQUEST = "PAYONE_INTERACTION_REQUEST";
     public static final String PAYONE_INTERACTION_RESPONSE = "PAYONE_INTERACTION_RESPONSE";
@@ -107,6 +108,7 @@ public class CustomTypeBuilder {
     }
 
     private void createPaymentProviderAgnosticTypes() {
+        //TODO: add also other payment methods with same layout?
         createPaymentCustomType(PAYMENT_CREDIT_CARD, ImmutableList.of(
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
