@@ -77,8 +77,8 @@ public class MappingUtilTest {
         MappingUtil.mapBillingAddressToRequest(authorizationRequestWithNameNumber, addressWithNameNumber);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestWithNameNumber, addressWithNameNumber);
 
-        softly.assertThat(authorizationRequestWithNameNumber.getStreet()).isEqualTo(addressWithNameNumber.getStreetName() + " " + addressWithNameNumber.getStreetNumber());
-        softly.assertThat(authorizationRequestWithNameNumber.getShipping_street()).isEqualTo(addressWithNameNumber.getStreetName() + " " + addressWithNameNumber.getStreetNumber());
+        softly.assertThat(authorizationRequestWithNameNumber.getStreet()).as("billing address state").isEqualTo(addressWithNameNumber.getStreetName() + " " + addressWithNameNumber.getStreetNumber());
+        softly.assertThat(authorizationRequestWithNameNumber.getShipping_street()).as("shipping address state").isEqualTo(addressWithNameNumber.getStreetName() + " " + addressWithNameNumber.getStreetNumber());
 
         softly.assertAll();
     }
@@ -94,8 +94,8 @@ public class MappingUtilTest {
         MappingUtil.mapBillingAddressToRequest(authorizationRequestNoNumber, addressNoNumber);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestNoNumber, addressNoNumber);
 
-        softly.assertThat(authorizationRequestNoNumber.getStreet()).isEqualTo(addressNoNumber.getStreetName());
-        softly.assertThat(authorizationRequestNoNumber.getShipping_street()).isEqualTo(addressNoNumber.getStreetName());
+        softly.assertThat(authorizationRequestNoNumber.getStreet()).as("billing address state").isEqualTo(addressNoNumber.getStreetName());
+        softly.assertThat(authorizationRequestNoNumber.getShipping_street()).as("shipping address state").isEqualTo(addressNoNumber.getStreetName());
 
         softly.assertAll();
     }
@@ -111,8 +111,8 @@ public class MappingUtilTest {
         MappingUtil.mapBillingAddressToRequest(authorizationRequestNoName, addressNoName);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestNoName, addressNoName);
 
-        softly.assertThat(authorizationRequestNoName.getStreet()).isEmpty();
-        softly.assertThat(authorizationRequestNoName.getShipping_street()).isEmpty();
+        softly.assertThat(authorizationRequestNoName.getStreet()).as("DE billing address state").isEqualTo("5");
+        softly.assertThat(authorizationRequestNoName.getShipping_street()).as("DE shipping address state").isEqualTo("5");
 
         softly.assertAll();
     }
