@@ -215,8 +215,6 @@ Please use the commercetools custom payment types (per method) from the [method 
 
 All payment methods:
 
-  * _Required_ `language` -> custom field `languageTag` of Type String on the CT Payment
-    * (may be moved to the Order, Cart and Customer Objects later)
   * _Required_ `reference`: should conventionally be the Order Number (assuming just one payment per Order). 
      The OrderNumber is only available on the CT Order, but not the CT Cart.
      Issue at hand: Checkout Implementations vary in respect to whether the Cart is converted into an Order before or after the Order is placed. 
@@ -302,6 +300,8 @@ All payment methods:
     * `clearing_bankbic` ->  `paidFromBIC` 
    
 `INVOICE-KLARNA`:
+  * _Required_ `language` -> custom field `languageTag` of Type String on the CT Payment
+    * (may be moved to the Order, Cart and Customer Objects later)
   * `clearing_instructionnote` ->  `invoiceUrl` field of type String, PAYONE master
   * mandatory risk management fields:
    * `personalid` -> Personal ID Nr.  Mandatory for Klarna if customers billing address is in certain nordics countries. -> `personalId` custom field of type String. 
