@@ -24,11 +24,7 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
 
     @Override
     public void accept(PaymentWithCartLike paymentWithCartLike) {
-        try {
-            dispatchPayment(paymentWithCartLike);
-        } catch (RuntimeException e) {
-            LOG.error(String.format("Error dispatching payment with ID \"%s\"", paymentWithCartLike.getPayment().getId()), e);
-        }
+        dispatchPayment(paymentWithCartLike);
     }
 
     public PaymentWithCartLike dispatchPayment(PaymentWithCartLike paymentWithCartLike) {

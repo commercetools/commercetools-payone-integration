@@ -45,6 +45,8 @@ public class ScheduledJob implements Job {
             } catch (final ConcurrentModificationException ex) {
                 LOG.info(String.format("Could not dispatch payment with ID \"%s\": The payment is currently processed by someone else.", payment.getId()));
                 LOG.debug(ex);
+            } catch (final RuntimeException ex) {
+                LOG.error(String.format("Error dispatching payment with ID \"%s\"", payment.getId()), ex);
             }
         };
 
