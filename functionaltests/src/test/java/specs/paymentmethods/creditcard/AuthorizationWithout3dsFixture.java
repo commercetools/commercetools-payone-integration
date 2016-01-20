@@ -6,7 +6,6 @@ import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -42,10 +41,10 @@ import java.util.concurrent.TimeUnit;
  * @since 10.12.15
  */
 @RunWith(ConcordionRunner.class)
-public class AuthorizationFixture extends BaseFixture {
+public class AuthorizationWithout3dsFixture extends BaseFixture {
     private static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
-    private static final Logger LOG = LoggerFactory.getLogger(AuthorizationFixture.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AuthorizationWithout3dsFixture.class);
 
     public String createPayment(
             final String paymentName,
@@ -55,6 +54,7 @@ public class AuthorizationFixture extends BaseFixture {
             final String currencyCode) throws ExecutionException, InterruptedException {
 
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
+        final String pseudocardpan = getUnconfirmedVisaPseudoCardPan();
 
         final List<TransactionDraft> transactions = Collections.singletonList(TransactionDraftBuilder
                 .of(TransactionType.valueOf(transactionType), monetaryAmount, ZonedDateTime.now())
@@ -70,7 +70,7 @@ public class AuthorizationFixture extends BaseFixture {
                 .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
                         CustomTypeBuilder.PAYMENT_CREDIT_CARD,
                         ImmutableMap.of(
-                                CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan(),
+                                CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, pseudocardpan,
                                 CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage(),
                                 CustomFieldKeys.REFERENCE_FIELD, "myGlobalKey")))
                 .build();
@@ -85,7 +85,6 @@ public class AuthorizationFixture extends BaseFixture {
     }
 
     public Map<String, String> handlePayment(final String paymentName,
-                                             final String interactionTypeName,
                                              final String requestType) throws ExecutionException, IOException {
         final HttpResponse response = requestToHandlePaymentByLegibleName(paymentName);
         final ZonedDateTime fetchedAt = ZonedDateTime.now(ZoneId.of("UTC"));
@@ -97,7 +96,7 @@ public class AuthorizationFixture extends BaseFixture {
 
         return ImmutableMap.<String, String> builder()
                 .put("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
-                .put("interactionCount", getInteractionCount(payment, transactionId, interactionTypeName, requestType))
+                .put("interactionCount", getInteractionRequestCount(payment, transactionId, requestType))
                 .put("transactionState", getTransactionState(payment, transactionId))
                 .put("amountAuthorized", amountAuthorized)
                 .put("version", payment.getVersion().toString())
@@ -105,7 +104,7 @@ public class AuthorizationFixture extends BaseFixture {
                 .build();
     }
 
-    public boolean receivedAppointedNotificationFor(final String paymentNames)
+    public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction)
             throws InterruptedException, ExecutionException {
         final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 
@@ -113,12 +112,12 @@ public class AuthorizationFixture extends BaseFixture {
 
         final long sleepDuration = 100L;
 
-        long numberOfPaymentsWithAppointedNotification = countPaymentsWithAppointeddNotification(paymentNamesList);
+        long numberOfPaymentsWithAppointedNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
         while ((numberOfPaymentsWithAppointedNotification != paymentNamesList.size())
                 && (remainingWaitTimeInMillis > 0L)) {
             Thread.sleep(sleepDuration);
             remainingWaitTimeInMillis -= sleepDuration;
-            numberOfPaymentsWithAppointedNotification = countPaymentsWithAppointeddNotification(paymentNamesList);
+            numberOfPaymentsWithAppointedNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
         }
 
         LOG.info(String.format(
@@ -129,39 +128,10 @@ public class AuthorizationFixture extends BaseFixture {
         return numberOfPaymentsWithAppointedNotification == paymentNamesList.size();
     }
 
-    private long countPaymentsWithAppointeddNotification(final ImmutableList<String> paymentNames)
-            throws ExecutionException {
-        final List<ExecutionException> exceptions = Lists.newArrayList();
-        final long result = paymentNames.stream().mapToLong(paymentName -> {
-            final Payment payment = fetchPaymentByLegibleName(paymentName);
-            try {
-                return getInteractionAppointedNotificationCount(payment);
-            } catch (final ExecutionException e) {
-                LOG.error("Exception: %s", e);
-                exceptions.add(e);
-                return 0L;
-            }
-        }).filter(notifications -> notifications > 0L).count();
-
-        if (!exceptions.isEmpty()) {
-            throw exceptions.get(0);
-        }
-
-        return result;
-    }
-
     public Map<String, String> fetchPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
 
-        long remainingWaitTimeInMillis = PAYONE_NOTIFICATION_TIMEOUT;
         Payment payment = fetchPaymentByLegibleName(paymentName);
-
-        long appointedNotificationCount = getInteractionAppointedNotificationCount(payment);
-        while(appointedNotificationCount == 0 && remainingWaitTimeInMillis > 0) {
-            Thread.sleep(100);
-            payment = fetchPaymentByLegibleName(paymentName);
-            appointedNotificationCount = getInteractionAppointedNotificationCount(payment);
-            remainingWaitTimeInMillis -= 100;
-        }
+        long appointedNotificationCount = getInteractionNotificationCountOfAction(payment, "appointed");
 
         final String transactionId = getIdOfLastTransaction(payment);
         final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
@@ -176,39 +146,8 @@ public class AuthorizationFixture extends BaseFixture {
                 .build();
     }
 
-    private String getInteractionCount(final Payment payment,
-                                       final String transactionId,
-                                       final String interactionTypeName,
-                                       final String requestType) throws ExecutionException {
-        final String interactionTypeId = typeIdFromTypeName(interactionTypeName);
-        return Long.toString(payment.getInterfaceInteractions().stream()
-                .filter(i -> i.getType().getId().equals(interactionTypeId))
-                .filter(i -> transactionId.equals(i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))
-                .filter(i -> {
-                    final String requestField = i.getFieldAsString(CustomFieldKeys.REQUEST_FIELD);
-                    return (requestField != null) && requestField.contains("request=" + requestType);
-                })
-                .count());
-    }
-
-    public long getInteractionAppointedNotificationCount(final String paymentName) throws ExecutionException {
+    public long getInteractionNotificationOfActionCount(final String paymentName, final String txaction) throws ExecutionException {
         Payment payment = fetchPaymentByLegibleName(paymentName);
-        return getInteractionAppointedNotificationCount(payment);
-    }
-
-
-    private long getInteractionAppointedNotificationCount(final Payment payment) throws ExecutionException {
-        final String interactionTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION);
-        final String txAction = "appointed";
-        final String transactionStatus = "completed";
-
-        return payment.getInterfaceInteractions().stream()
-                .filter(i -> i.getType().getId().equals(interactionTypeId))
-                .filter(i -> i.getFieldAsString(CustomFieldKeys.TX_ACTION_FIELD).equals(txAction))
-                .filter(i -> {
-                    final String notificationField = i.getFieldAsString(CustomFieldKeys.NOTIFICATION_FIELD);
-                    return (notificationField != null && notificationField.toLowerCase().contains("transactionstatus=" + transactionStatus));
-                })
-                .count();
+        return getInteractionNotificationCountOfAction(payment, txaction);
     }
 }

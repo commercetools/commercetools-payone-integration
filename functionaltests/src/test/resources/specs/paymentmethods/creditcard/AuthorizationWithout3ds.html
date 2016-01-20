@@ -14,7 +14,7 @@
             It will do so by sending a <em c:set="#requestType">preauthorization</em> request to the PAYONE platform.
             <br/>
             It will store information about such a request as an interface interaction of type
-            <em c:set="#interactionType">PAYONE_INTERACTION_REQUEST</em>.
+            <em>PAYONE_INTERACTION_REQUEST</em>.
         </p>
         <h2>Examples</h2>
         <h3>Common Setup</h3>
@@ -26,7 +26,7 @@
             <h3>Authorization (without 3-D Secure)</h3>
             <p>
                 Given the following payments for
-                <em>a credit card that does <b>not</b> support charges for currencies other than EUR</em>:
+                <em>a credit card that does <b>not</b> support charges for currencies other than EUR and without 3-D Secure verification</em>:
             </p>
             <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
                 <tr>
@@ -63,7 +63,7 @@
             <p>
                 When I request the integration service to handle them I will get the following results:
             </p>
-            <table c:execute="#result = handlePayment(#paymentName, #interactionType, #requestType)">
+            <table c:execute="#result = handlePayment(#paymentName, #requestType)">
                 <tr>
                     <th c:set="#paymentName">Payment Name</th>
                     <th c:assertEquals="#result.statusCode">Response Status Code</th>
@@ -108,10 +108,10 @@
             <p>
                 A successful request and a response status code 20X does not mean that the transaction is in state Success.
             </p>
-            <p c:execute="#receivedAllNotifications = receivedAppointedNotificationFor(#successfulPayments)">
+            <p c:execute="#receivedAllNotifications = receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)">
                 After a certain amount of time the Integration Service will have
                 <span c:assertTrue="#receivedAllNotifications">processed a notification from PAYONE</span>
-                with the txaction <b>appointed</b> and the transactionstatus <b>completed</b> (or <b>null</b>)
+                with the txaction <b c:set="#txactionAppointed">appointed</b> and the transactionstatus <b>completed</b> (or <b>null</b>)
                 for each of the payments <span c:set="#successfulPayments">Payment 1, Payment 3, Payment 4</span>.
                 The transaction state and the authorized amount should be set correctly not later than now.
             </p>
@@ -147,14 +147,14 @@
             </table>
             <p>
                 The failed payment <span c:set="#failedPaymentName">Payment 2</span>
-                must have received <span c:assertEquals="getInteractionAppointedNotificationCount(#failedPaymentName)">0</span> notifications.
+                must have received <span c:assertEquals="getInteractionNotificationOfActionCount(#failedPaymentName, #txactionAppointed)">0</span> notifications.
             </p>
             <p>
                 The service ensures idempotence, hence when I request it to handle the same payments again then I
                 will get the same results as before, especially the total number of <em>preauthorization</em> requests sent
                 per payment must not change:
             </p>
-            <table c:execute="#result = handlePayment(#paymentName, #interactionType, #requestType)">
+            <table c:execute="#result = handlePayment(#paymentName, #requestType)">
                 <tr>
                     <th c:set="#paymentName">Payment Name</th>
                     <th c:assertEquals="#result.statusCode">Response Status Code</th>
@@ -197,13 +197,5 @@
                 </tr>
             </table>
         </div>
-
-        <div class="example">
-            <h3>Successful Authorization with redirect (3-D Secure)</h3>
-            <p>
-                TODO
-            </p>
-        </div>
-
     </body>
 </html>

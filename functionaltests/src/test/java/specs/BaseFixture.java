@@ -3,6 +3,8 @@ package specs;
 import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
+import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
+import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.cache.LoadingCache;
@@ -10,6 +12,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
@@ -30,18 +33,22 @@ import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.queries.PaymentByIdGet;
 import io.sphere.sdk.products.Product;
 import io.sphere.sdk.products.queries.ProductQuery;
+import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -52,11 +59,13 @@ import java.util.concurrent.TimeUnit;
  * @since  10.12.15
  */
 public abstract class BaseFixture {
+    private static final Logger LOG = LoggerFactory.getLogger(BaseFixture.class);
+
     protected static final String EMPTY_STRING = "";
     protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(8);
 
     private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
-    private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
+    private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_3DS";
     private static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 1500;
 
     private static final Random randomSource = new Random();
@@ -261,6 +270,70 @@ public abstract class BaseFixture {
 
     protected String getIdForLegibleName(final String paymentName) {
         return payments.get(paymentName);
+    }
+
+
+    protected String getInteractionRequestCount(final Payment payment,
+                                                final String transactionId,
+                                                final String requestType) throws ExecutionException {
+        final String interactionTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST);
+        return Long.toString(payment.getInterfaceInteractions().stream()
+                .filter(i -> interactionTypeId.equals(i.getType().getId()))
+                .filter(i -> transactionId.equals(i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))
+                .filter(i -> {
+                    final String requestField = i.getFieldAsString(CustomFieldKeys.REQUEST_FIELD);
+                    return (requestField != null) && requestField.contains("request=" + requestType);
+                })
+                .count());
+    }
+
+    protected Optional<CustomFields> getInteractionRedirect(final Payment payment,
+                                            final String transactionId) throws ExecutionException {
+        final String interactionTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT);
+        return payment.getInterfaceInteractions().stream()
+                .filter(i -> interactionTypeId.equals(i.getType().getId()))
+                .filter(i -> transactionId.equals(i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))
+                .filter(i -> {
+                    final String redirectField = i.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD);
+                    return redirectField != null && !redirectField.isEmpty();
+                })
+                .findFirst();
+
+    }
+
+    protected long countPaymentsWithNotificationOfAction(final ImmutableList<String> paymentNames, final String txaction) throws ExecutionException {
+        final List<ExecutionException> exceptions = Lists.newArrayList();
+        final long result = paymentNames.stream().mapToLong(paymentName -> {
+            final Payment payment = fetchPaymentByLegibleName(paymentName);
+            try {
+                return getInteractionNotificationCountOfAction(payment, txaction);
+            } catch (final ExecutionException e) {
+                LOG.error("Exception: %s", e);
+                exceptions.add(e);
+                return 0L;
+            }
+        }).filter(notifications -> notifications > 0L).count();
+
+        if (!exceptions.isEmpty()) {
+            throw exceptions.get(0);
+        }
+
+        return result;
+    }
+
+    protected long getInteractionNotificationCountOfAction(final Payment payment, final String txaction) throws ExecutionException {
+        final String interactionTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION);
+
+        return payment.getInterfaceInteractions().stream()
+                .filter(i -> interactionTypeId.equals(i.getType().getId()))
+                .filter(i -> txaction.equals(i.getFieldAsString(CustomFieldKeys.TX_ACTION_FIELD)))
+                .filter(i -> {
+                    final String notificationField = i.getFieldAsString(CustomFieldKeys.NOTIFICATION_FIELD);
+                    return (notificationField != null) &&
+                            (notificationField.toLowerCase().contains("transactionstatus=completed")
+                                    || notificationField.toLowerCase().contains("transactionstatus=null"));
+                })
+                .count();
     }
 }
 
