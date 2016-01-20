@@ -110,7 +110,8 @@ public class AuthorizationTransactionExecutor extends IdempotentTransactionExecu
             final String status = response.get("status");
             if (status.equals("REDIRECT")) {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT,
-                    ImmutableMap.of(CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"),
+                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, response.toString() /* TODO */,
+                            CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
