@@ -41,6 +41,10 @@ public class PaymentTestHelper {
         return getTypeQueryResultFromFile("customTypes.json");
     }
 
+    public Payment dummyPaymentNoTransaction20EuroPlanned() throws Exception {
+        return getPaymentFromFile("dummyPaymentNoTransaction20EuroPlanned.json");
+    }
+
     public Payment dummyPaymentOneAuthPending20Euro() throws Exception {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro.json");
     }

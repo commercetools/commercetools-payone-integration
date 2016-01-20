@@ -3,7 +3,7 @@ package com.commercetools.pspadapter.payone.notification.common;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
+import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
@@ -20,6 +20,7 @@ import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractionId;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
+import io.sphere.sdk.payments.commands.updateactions.SetAuthorization;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,11 +46,14 @@ import java.util.List;
 @RunWith(MockitoJUnitRunner.class)
 public class AppointedNotificationProcessorTest {
 
-    private static final Integer millis = 1450365542;
-    private static final LocalDateTime timestamp = LocalDateTime.ofEpochSecond(millis, 0, ZoneOffset.UTC);
+    private static final Integer seconds = 1450365542;
+    private static final ZonedDateTime TXTIME_ZONED_DATE_TIME =
+            ZonedDateTime.of(LocalDateTime.ofEpochSecond(seconds, 0, ZoneOffset.UTC), ZoneId.of("UTC"));
+
+    private static final ZonedDateTime TXTIME_PLUS_7_DAYS_ZONED_DATE_TIME = TXTIME_ZONED_DATE_TIME.plusDays(7);
 
     @Mock
-    private CommercetoolsClient client;
+    private BlockingClient client;
 
     @InjectMocks
     private AppointedNotificationProcessor testee;
@@ -65,23 +69,20 @@ public class AppointedNotificationProcessorTest {
     public void setUp() throws Exception {
         notification = new Notification();
         notification.setPrice("20.00");
+        notification.setBalance("0.00");
+        notification.setReceivable("0.00");
         notification.setCurrency("EUR");
-        notification.setTxtime(millis.toString());
+        notification.setTxtime(seconds.toString());
         notification.setSequencenumber("0");
         notification.setTxaction(NotificationAction.APPOINTED);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
     }
 
     @Test
-    public void supportsAppointedNotificationAction() {
-        assertThat(testee.supportedNotificationAction()).isSameAs(NotificationAction.APPOINTED);
-    }
-
-    @Test
     @SuppressWarnings("unchecked")
-    public void processingNotificationAboutUnknownTransactionAddsAuthorizationTransactionWithStateSuccess() throws Exception {
-        Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
-        payment.getTransactions().clear();
+    public void processingNotificationWithZeroBalanceAboutUnknownTransactionAddsAuthorizationTransactionWithStateSuccess() throws Exception {
+        // arrange
+        final Payment payment = testHelper.dummyPaymentNoTransaction20EuroPlanned();
 
         // act
         testee.processTransactionStatusNotification(notification, payment);
@@ -91,34 +92,80 @@ public class AppointedNotificationProcessorTest {
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
 
-        MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-        AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
-                .of(TransactionType.AUTHORIZATION, amount, ZonedDateTime.of(timestamp, ZoneId.of("UTC")))
+        final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
+        final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
+                .of(TransactionType.AUTHORIZATION, amount, TXTIME_ZONED_DATE_TIME)
                 .state(TransactionState.SUCCESS)
                 .interactionId(notification.getSequencenumber())
                 .build());
 
-        AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
+        final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(
+                CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                 ImmutableMap.of(
-                        CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                        CustomFieldKeys.TIMESTAMP_FIELD, TXTIME_ZONED_DATE_TIME,
                         CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
                         CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
                         CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
 
-        assertThat(updateActions).isNotEmpty().hasSize(2);
+        assertThat(updateActions).filteredOn(u -> u.getAction().equals("setAuthorization"))
+                .containsOnly(SetAuthorization.of(payment.getAmountPlanned(), TXTIME_PLUS_7_DAYS_ZONED_DATE_TIME));
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("addTransaction"))
-                .usingElementComparatorOnFields("transaction.type", "transaction.amount", "transaction.state", "transaction.timestamp")
+                .usingElementComparatorOnFields(
+                        "transaction.type", "transaction.amount", "transaction.state", "transaction.timestamp")
                 .containsOnlyOnce(transaction);
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
                 .usingElementComparatorOnFields("fields")
                 .containsOnly(interfaceInteraction);
+        assertThat(updateActions).as("# of update actions").hasSize(3);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void processingNotificationWithNonZeroBalanceAboutUnknownTransactionAddsChargeTransactionWithStatePending() throws Exception {
+        // arrange
+        final Payment payment = testHelper.dummyPaymentNoTransaction20EuroPlanned();
+
+        notification.setBalance("20.00");
+
+        // act
+        testee.processTransactionStatusNotification(notification, payment);
+
+        // assert
+        verify(client).complete(paymentRequestCaptor.capture());
+
+        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
+
+        final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
+        final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
+                .of(TransactionType.CHARGE, amount, TXTIME_ZONED_DATE_TIME)
+                .state(TransactionState.PENDING)
+                .interactionId(notification.getSequencenumber())
+                .build());
+
+        final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(
+                CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
+                ImmutableMap.of(
+                        CustomFieldKeys.TIMESTAMP_FIELD, TXTIME_ZONED_DATE_TIME,
+                        CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
+                        CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
+                        CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
+
+        assertThat(updateActions).filteredOn(u -> u.getAction().equals("addTransaction"))
+                .usingElementComparatorOnFields(
+                        "transaction.type", "transaction.amount", "transaction.state", "transaction.timestamp")
+                .containsOnlyOnce(transaction);
+        assertThat(updateActions).filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
+                .usingElementComparatorOnFields("fields")
+                .containsOnly(interfaceInteraction);
+        assertThat(updateActions).as("# of update actions").hasSize(2);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void processingNotificationForPendingAuthorizationTransactionChangesStateToSuccess() throws Exception {
         // arrange
-        Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
+        final Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
+        notification.setBalance("20.00");
 
         // act
         testee.processTransactionStatusNotification(notification, payment);
@@ -127,21 +174,35 @@ public class AppointedNotificationProcessorTest {
         verify(client).complete(paymentRequestCaptor.capture());
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
-        AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
+        AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(
+                CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                 ImmutableMap.of(
-                        CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                        CustomFieldKeys.TIMESTAMP_FIELD, TXTIME_ZONED_DATE_TIME,
                         CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
                         CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
                         CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
 
-        assertThat(updateActions).isNotEmpty().hasSize(3);
-        assertThat(updateActions).filteredOn(u -> u.getAction().equals("changeTransactionState"))
-            .containsOnly(ChangeTransactionState.of(TransactionState.SUCCESS, payment.getTransactions().get(0).getId()));
-        assertThat(updateActions).filteredOn(u -> u.getAction().equals("changeTransactionInteractionId"))
-            .containsOnly(ChangeTransactionInteractionId.of(notification.getSequencenumber(), payment.getTransactions().get(0).getId()));
-        assertThat(updateActions).filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
+        assertThat(updateActions).as("setAuthorization action")
+                .filteredOn(u -> u.getAction().equals("setAuthorization"))
+                .containsOnly(SetAuthorization.of(payment.getAmountPlanned(), TXTIME_PLUS_7_DAYS_ZONED_DATE_TIME));
+
+        assertThat(updateActions).as("changeTransactionState action")
+                .filteredOn(u -> u.getAction().equals("changeTransactionState"))
+                .containsOnly(
+                        ChangeTransactionState.of(TransactionState.SUCCESS, payment.getTransactions().get(0).getId()));
+
+        assertThat(updateActions).as("changeTransactionInteractionId action")
+                .filteredOn(u -> u.getAction().equals("changeTransactionInteractionId"))
+                .containsOnly(ChangeTransactionInteractionId.of(
+                        notification.getSequencenumber(),
+                        payment.getTransactions().get(0).getId()));
+
+        assertThat(updateActions).as("addInterfaceInteraction action")
+                .filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
                 .usingElementComparatorOnFields("fields")
                 .containsOnly(interfaceInteraction);
+
+        assertThat(updateActions).as("# of update actions").hasSize(4);
     }
 
     @Test
@@ -161,17 +222,17 @@ public class AppointedNotificationProcessorTest {
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
         AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                 ImmutableMap.of(
-                        CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                        CustomFieldKeys.TIMESTAMP_FIELD, TXTIME_ZONED_DATE_TIME,
                         CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
                         CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
                         CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
 
-        assertThat(updateActions).isNotEmpty().hasSize(2);
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("changeTransactionInteractionId"))
                 .containsOnly(ChangeTransactionInteractionId.of(notification.getSequencenumber(), payment.getTransactions().get(0).getId()));
         assertThat(updateActions).filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
                 .usingElementComparatorOnFields("fields")
                 .containsOnly(interfaceInteraction);
+        assertThat(updateActions).as("# of update actions").hasSize(2);
     }
 
     @Test
@@ -190,15 +251,15 @@ public class AppointedNotificationProcessorTest {
         final AddInterfaceInteraction interfaceInteraction =
                 AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
                         ImmutableMap.of(
-                                CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.of(timestamp, ZoneId.of("UTC")),
+                                CustomFieldKeys.TIMESTAMP_FIELD, TXTIME_ZONED_DATE_TIME,
                                 CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
                                 CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
                                 CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
 
-        assertThat(updateActions).as("# of payment update actions").hasSize(1);
         assertThat(updateActions).as("content of payment update action")
                 .filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
                 .usingElementComparatorOnFields("fields")
                 .containsOnly(interfaceInteraction);
+        assertThat(updateActions).as("# of update actions").hasSize(1);
     }
 }
