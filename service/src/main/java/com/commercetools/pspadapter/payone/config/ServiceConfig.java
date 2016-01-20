@@ -55,12 +55,21 @@ public class ServiceConfig {
     }
 
     /**
-     * Gets the cron expression for polling commercetools messages.
+     * Gets the cron expression for polling commercetools messages with a shorter timeframe.
      * @return the cron expression
      */
-    public String getCronNotation() {
+    public String getCronNotationForShortTimeframePoll() {
         // FIXME evaluate environment variable
         return "0/10 * * * * ?";
+    }
+
+    /**
+     * Gets the cron expression for polling commercetools messages with a longer timeframe.
+     * @return the cron expression
+     */
+    public String getCronNotationForLongTimeframePoll() {
+        // FIXME evaluate environment variable
+        return "0 0 0/1 * * ?";
     }
 
     /**
