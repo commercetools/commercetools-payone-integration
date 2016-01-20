@@ -13,6 +13,8 @@ public class ServiceConfig {
     private final String ctClientId;
     private final String ctClientSecret;
     private final boolean startFromScratch;
+    private final String scheduledJobCronShortTimeframe;
+    private final String scheduledJobCronLongTimeframe;
 
     /**
      * Initializes the configuration.
@@ -25,6 +27,12 @@ public class ServiceConfig {
         ctProjectKey = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY);
         ctClientId  = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID);
         ctClientSecret = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET);
+        scheduledJobCronShortTimeframe = propertyProvider.getProperty(PropertyProvider.SCHEDULED_JOB_CRON)
+                .map(String::valueOf)
+                .orElse("0/30 * * * * ?");
+        scheduledJobCronLongTimeframe = propertyProvider.getProperty(PropertyProvider.SCHEDULED_JOB_CRON)
+                .map(String::valueOf)
+                .orElse("0 0 0/1 * * ?");
         startFromScratch = propertyProvider.getProperty(PropertyProvider.CT_START_FROM_SCRATCH)
                 .map(Boolean::valueOf)
                 .orElse(false);
@@ -58,18 +66,16 @@ public class ServiceConfig {
      * Gets the cron expression for polling commercetools messages with a shorter timeframe.
      * @return the cron expression
      */
-    public String getCronNotationForShortTimeframePoll() {
-        // FIXME evaluate environment variable
-        return "0/10 * * * * ?";
+    public String getScheduledJobCronForShortTimeframePoll() {
+        return scheduledJobCronShortTimeframe;
     }
 
     /**
      * Gets the cron expression for polling commercetools messages with a longer timeframe.
      * @return the cron expression
      */
-    public String getCronNotationForLongTimeframePoll() {
-        // FIXME evaluate environment variable
-        return "0 0 0/1 * * ?";
+    public String getScheduledJobCronForLongTimeframePoll() {
+        return scheduledJobCronLongTimeframe;
     }
 
     /**

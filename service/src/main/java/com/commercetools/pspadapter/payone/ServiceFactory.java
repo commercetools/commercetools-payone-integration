@@ -98,14 +98,14 @@ public class ServiceFactory {
         integrationService.start();
 
         ScheduledJobFactory.createScheduledJob(
-                CronScheduleBuilder.cronSchedule(serviceConfig.getCronNotationForShortTimeframePoll()),
+                CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForShortTimeframePoll()),
                 ScheduledJobShortTimeframe.class,
                 integrationService,
                 SCHEDULED_JOB_KEY,
                 paymentDispatcher);
 
         ScheduledJobFactory.createScheduledJob(
-                CronScheduleBuilder.cronSchedule(serviceConfig.getCronNotationForLongTimeframePoll()),
+                CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForLongTimeframePoll()),
                 ScheduledJobLongTimeframe.class,
                 integrationService,
                 SCHEDULED_JOB_KEY,
