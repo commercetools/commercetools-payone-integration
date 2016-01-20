@@ -88,7 +88,7 @@ public class MappingUtil {
                 if (customerNumber.length() > 20) {
                     LOG.warn("customer.customerNumber exceeds the maximum length of 20! Using substring of customer.id as fallback.");
                     String id = customer.getObj().getId();
-                    id = id.replace("-", "").substring(0, 19);
+                    id = id.replace("-", "").substring(0, 20);
                     request.setCustomerid(id);
                 } else {
                     request.setCustomerid(customerNumber);

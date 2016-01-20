@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.mapping;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -7,7 +8,9 @@ import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardAuthorizationRequest;
 import com.neovisionaries.i18n.CountryCode;
+import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
+import io.sphere.sdk.models.Reference;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +31,9 @@ public class MappingUtilTest {
 
     @Mock
     private PropertyProvider propertyProvider;
+
+    @Mock
+    private Customer customer;
 
     @Before
     public void setUp() {
@@ -107,5 +113,32 @@ public class MappingUtilTest {
 
         softly.assertThat(authorizationRequestNoName.getStreet()).isEmpty();
         softly.assertThat(authorizationRequestNoName.getShipping_street()).isEmpty();
+
+        softly.assertAll();
+    }
+
+    @Test
+    public void customerNumberDefault() {
+        when(customer.getCustomerNumber()).thenReturn("01234567890123456789");
+        Reference<Customer> customerReference = Reference.of(Customer.referenceTypeId(), customer);
+
+        CreditCardAuthorizationRequest authorizationRequest = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
+
+        MappingUtil.mapCustomerToRequest(authorizationRequest, customerReference);
+
+        assertThat(authorizationRequest.getCustomerid()).isEqualTo("01234567890123456789");
+    }
+
+    @Test
+    public void customerNumberExceedsLength() {
+        when(customer.getCustomerNumber()).thenReturn("01234567890123456789123456789");
+        when(customer.getId()).thenReturn("276829bd-6fa3-450f-9e2a-9a8715a9a104");
+        Reference<Customer> customerReference = Reference.of(Customer.referenceTypeId(), customer);
+
+        CreditCardAuthorizationRequest authorizationRequest = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
+
+        MappingUtil.mapCustomerToRequest(authorizationRequest, customerReference);
+
+        assertThat(authorizationRequest.getCustomerid()).isEqualTo("276829bd6fa3450f9e2a");
     }
 }
