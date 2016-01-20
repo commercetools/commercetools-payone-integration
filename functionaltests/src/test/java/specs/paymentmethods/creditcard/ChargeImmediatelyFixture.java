@@ -18,7 +18,6 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
-import org.concordion.api.ExpectedToFail;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -41,7 +40,6 @@ import java.util.concurrent.TimeUnit;
  * @author Jan Wolter
  */
 @RunWith(ConcordionRunner.class)
-@ExpectedToFail
 public class ChargeImmediatelyFixture extends BaseFixture {
     private static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
@@ -111,7 +109,8 @@ public class ChargeImmediatelyFixture extends BaseFixture {
 
         final Payment payment = fetchPaymentByLegibleName(paymentName);
 
-        final long appointedNotificationCount = getInteractionPaidNotificationCount(payment);
+        final long appointedNotificationCount = getInteractionNotificationCountOfAction(payment, "appointed");
+        final long paidNotificationCount = getInteractionNotificationCountOfAction(payment, "paid");
 
         final String transactionId = getIdOfLastTransaction(payment);
         final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
@@ -123,7 +122,8 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                 BaseFixture.EMPTY_STRING;
 
         return ImmutableMap.<String, String> builder()
-                .put("notificationCount", Long.toString(appointedNotificationCount))
+                .put("appointedNotificationCount", Long.toString(appointedNotificationCount))
+                .put("paidNotificationCount", Long.toString(paidNotificationCount))
                 .put("transactionState", getTransactionState(payment, transactionId))
                 .put("amountAuthorized", amountAuthorized)
                 .put("amountPaid", amountPaid)
@@ -131,34 +131,35 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                 .build();
     }
 
-    public boolean receivedPaidNotificationFor(final String paymentNames) throws InterruptedException, ExecutionException {
+    public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws InterruptedException, ExecutionException {
         final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 
         long remainingWaitTimeInMillis = PAYONE_NOTIFICATION_TIMEOUT;
 
         final long sleepDuration = 100L;
 
-        long numberOfPaymentsWithPaidNotification = countPaymentsWithPaidNotification(paymentNamesList);
-        while ((numberOfPaymentsWithPaidNotification != paymentNamesList.size()) && (remainingWaitTimeInMillis > 0L)) {
+        long numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
+        while ((numberOfPaymentsWithNotification != paymentNamesList.size()) && (remainingWaitTimeInMillis > 0L)) {
             Thread.sleep(sleepDuration);
             remainingWaitTimeInMillis -= sleepDuration;
-            numberOfPaymentsWithPaidNotification = countPaymentsWithPaidNotification(paymentNamesList);
+            numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
         }
 
         LOG.info(String.format(
-                "waited %d seconds to receive notifications for payments %s",
+                "waited %d seconds to receive notifications of type '%s' for payments %s",
                 TimeUnit.MILLISECONDS.toSeconds(PAYONE_NOTIFICATION_TIMEOUT - remainingWaitTimeInMillis),
+                txaction,
                 Arrays.toString(paymentNamesList.stream().map(this::getIdForLegibleName).toArray())));
 
-        return numberOfPaymentsWithPaidNotification == paymentNamesList.size();
+        return numberOfPaymentsWithNotification == paymentNamesList.size();
     }
 
-    private long countPaymentsWithPaidNotification(final ImmutableList<String> paymentNames) throws ExecutionException {
+    private long countPaymentsWithNotificationOfAction(final ImmutableList<String> paymentNames, final String txaction) throws ExecutionException {
         final List<ExecutionException> exceptions = Lists.newArrayList();
         final long result = paymentNames.stream().mapToLong(paymentName -> {
             final Payment payment = fetchPaymentByLegibleName(paymentName);
             try {
-                return getInteractionPaidNotificationCount(payment);
+                return getInteractionNotificationCountOfAction(payment, txaction);
             } catch (final ExecutionException e) {
                 LOG.error("Exception: %s", e);
                 exceptions.add(e);
@@ -188,17 +189,17 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                 .count());
     }
 
-    public long getInteractionPaidNotificationCount(final String paymentName) throws ExecutionException {
+    public long getInteractionNotificationCountOfAction(final String paymentName, final String txaction) throws ExecutionException {
         Payment payment = fetchPaymentByLegibleName(paymentName);
-        return getInteractionPaidNotificationCount(payment);
+        return getInteractionNotificationCountOfAction(payment, txaction);
     }
 
-    private long getInteractionPaidNotificationCount(final Payment payment) throws ExecutionException {
+    private long getInteractionNotificationCountOfAction(final Payment payment, final String txaction) throws ExecutionException {
         final String interactionTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION);
 
         return payment.getInterfaceInteractions().stream()
                 .filter(i -> interactionTypeId.equals(i.getType().getId()))
-                .filter(i -> "paid".equals(i.getFieldAsString(CustomFieldKeys.TX_ACTION_FIELD)))
+                .filter(i -> txaction.equals(i.getFieldAsString(CustomFieldKeys.TX_ACTION_FIELD)))
                 .filter(i -> {
                     final String notificationField = i.getFieldAsString(CustomFieldKeys.NOTIFICATION_FIELD);
                     return (notificationField != null) &&
