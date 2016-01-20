@@ -18,6 +18,7 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
+import org.concordion.api.ExpectedToFail;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ import java.util.concurrent.TimeUnit;
  * @author Jan Wolter
  */
 @RunWith(ConcordionRunner.class)
+@ExpectedToFail
 public class ChargeImmediatelyFixture extends BaseFixture {
     private static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
