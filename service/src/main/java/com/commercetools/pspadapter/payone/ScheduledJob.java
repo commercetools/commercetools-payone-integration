@@ -12,6 +12,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 import java.time.ZonedDateTime;
+import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -41,6 +42,9 @@ public class ScheduledJob implements Job {
                 paymentDispatcher.accept(paymentWithCartLike);
             } catch (final NoCartLikeFoundException ex) {
                 LOG.debug(String.format("Could not dispatch payment with ID \"%s\": %s", payment.getId(), ex.getMessage()));
+            } catch (final ConcurrentModificationException ex) {
+                LOG.info(String.format("Could not dispatch payment with ID \"%s\": The payment is currently processed by someone else.", payment.getId()));
+                LOG.debug(ex);
             }
         };
 
