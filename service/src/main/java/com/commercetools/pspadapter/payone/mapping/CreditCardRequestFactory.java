@@ -32,6 +32,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
+
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         final String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
@@ -48,26 +49,25 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
                             .queryFrom(amount)
                             .intValue());
                 });
-        request.setNarrative_text(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_TEXT_FIELD));
-        request.setUserid(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.USER_ID_FIELD));
 
+        MappingUtil.mapCustomFieldsFromPayment(request, ctPayment.getCustom());
 
         try {
             MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
-        } catch (final NullPointerException ex) {
-            LOG.warn("Could not map customer details from payment with ID " + paymentWithCartLike.getPayment().getId(), ex);
+        } catch (final IllegalArgumentException ex) {
+            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
         try {
             MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
-        } catch (final NullPointerException ex) {
-            LOG.warn("Could not map billing details from payment with ID " + paymentWithCartLike.getPayment().getId(), ex);
+        } catch (final IllegalArgumentException ex) {
+            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
         try {
             MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
-        } catch (final NullPointerException ex) {
-            LOG.warn("Could not map shipping details from payment with ID " + paymentWithCartLike.getPayment().getId(), ex);
+        } catch (final IllegalArgumentException ex) {
+            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
         return request;
@@ -78,6 +78,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
+
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         final String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
@@ -92,25 +93,25 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
                                                     .queryFrom(ctPayment.getAmountPlanned())
                                                     .intValue()));
         request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
-        request.setNarrative_text(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_TEXT_FIELD));
-        request.setUserid(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.USER_ID_FIELD));
+
+        MappingUtil.mapCustomFieldsFromPayment(request, ctPayment.getCustom());
 
         try {
             MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
-        } catch (final NullPointerException ex) {
-            LOG.warn("Could not map customer details from payment with ID " + paymentWithCartLike.getPayment().getId(), ex);
+        } catch (final IllegalArgumentException ex) {
+            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
         try {
             MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
-        } catch (final NullPointerException ex) {
-            LOG.warn("Could not map billing details from payment with ID " + paymentWithCartLike.getPayment().getId(), ex);
+        } catch (final IllegalArgumentException ex) {
+            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
         try {
             MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
-        } catch (final NullPointerException ex) {
-            LOG.warn("Could not map shipping details from payment with ID " + paymentWithCartLike.getPayment().getId(), ex);
+        } catch (final IllegalArgumentException ex) {
+            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
         return request;
@@ -120,7 +121,6 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
     public CreditCardCaptureRequest createCaptureRequest(final PaymentWithCartLike paymentWithCartLike, final int sequenceNumber) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
-        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         CreditCardCaptureRequest request = new CreditCardCaptureRequest(getConfig());
 

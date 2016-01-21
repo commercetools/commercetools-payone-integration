@@ -78,6 +78,11 @@ public class PaypalRequestFactoryTest {
         softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
         softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
+        //urls
+        softly.assertThat(result.getSuccessurl()).isEqualTo("www.test.de/success");
+        softly.assertThat(result.getErrorurl()).isEqualTo("www.test.de/error");
+        softly.assertThat(result.getBackurl()).isEqualTo("www.test.de/cancel");
+
         //billing address data
         Address billingAddress = order.getBillingAddress();
         softly.assertThat(result.getTitle()).isEqualTo(billingAddress.getTitle());

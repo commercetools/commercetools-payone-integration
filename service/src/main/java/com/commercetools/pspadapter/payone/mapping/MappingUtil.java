@@ -2,11 +2,13 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.models.Reference;
+import io.sphere.sdk.types.CustomFields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +41,8 @@ public class MappingUtil {
             final AuthorizationRequest request,
             final Address billingAddress) {
 
+        Preconditions.checkArgument(billingAddress != null, "Missing billing address details");
+
         //required
         request.setLastname(billingAddress.getLastName());
         request.setCountry(billingAddress.getCountry().toLocale().getCountry());
@@ -64,18 +68,21 @@ public class MappingUtil {
         }
     }
 
-    public static void mapCustomerToRequest(final AuthorizationRequest request, final Reference<Customer> customer) {
+    public static void mapCustomerToRequest(final AuthorizationRequest request, final Reference<Customer> customerReference) {
 
-        request.setVatid(customer.getObj().getVatId());
+        Preconditions.checkArgument(customerReference != null && customerReference.getObj() != null, "Missing customer object");
+        final Customer customer = customerReference.getObj();
+
+        request.setVatid(customer.getVatId());
 
         //birthday
-        Optional.ofNullable(customer.getObj().getDateOfBirth()).ifPresent(birthday -> {
+        Optional.ofNullable(customer.getDateOfBirth()).ifPresent(birthday -> {
             request.setBirthday(birthday.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
         });
 
         //TODO: Gender can also be a CustomField enum @Cart with values Female/Male
         //gender
-        Optional.ofNullable(customer.getObj().getCustom()).ifPresent(customs -> {
+        Optional.ofNullable(customer.getCustom()).ifPresent(customs -> {
             Optional.ofNullable(customs.getFieldAsString(CustomFieldKeys.GENDER_FIELD))
                     .ifPresent(gender -> {
                         request.setGender(gender.substring(0, 0));
@@ -83,11 +90,11 @@ public class MappingUtil {
         });
 
         //customerNumber
-        Optional.ofNullable(customer.getObj().getCustomerNumber())
+        Optional.ofNullable(customer.getCustomerNumber())
             .ifPresent(customerNumber -> {
                 if (customerNumber.length() > 20) {
                     LOG.warn("customer.customerNumber exceeds the maximum length of 20! Using substring of customer.id as fallback.");
-                    String id = customer.getObj().getId();
+                    String id = customer.getId();
                     id = id.replace("-", "").substring(0, 20);
                     request.setCustomerid(id);
                 } else {
@@ -97,6 +104,8 @@ public class MappingUtil {
     }
 
     public static void mapShippingAddressToRequest(final AuthorizationRequest request, final Address shippingAddress) {
+
+        Preconditions.checkArgument(shippingAddress != null, "Missing shipping address details");
 
         request.setShipping_firstname(shippingAddress.getFirstName());
         request.setShipping_lastname(shippingAddress.getLastName());
@@ -115,5 +124,15 @@ public class MappingUtil {
         }
 
 
+    }
+
+    public static void mapCustomFieldsFromPayment(final AuthorizationRequest request, final CustomFields ctPaymentCustomFields) {
+
+        request.setNarrative_text(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.REFERENCE_TEXT_FIELD));
+        request.setUserid(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.USER_ID_FIELD));
+
+        request.setSuccessurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.SUCCESS_URL_FIELD));
+        request.setErrorurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.ERROR_URL_FIELD));
+        request.setBackurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.CANCEL_URL_FIELD));
     }
 }

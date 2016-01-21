@@ -83,6 +83,12 @@ public class AuthorizationRequest extends BaseRequest {
 
     private String shipping_country;
 
+    private String successurl;
+
+    private String errorurl;
+
+    private String backurl;
+
 
     protected AuthorizationRequest(final PayoneConfig config, final String requestType, final String clearingtype) {
         super(config, requestType);
@@ -374,5 +380,29 @@ public class AuthorizationRequest extends BaseRequest {
 
     public void setShipping_country(final String shipping_country) {
         this.shipping_country = shipping_country;
+    }
+
+    public String getSuccessurl() {
+        return successurl;
+    }
+
+    public void setSuccessurl(final String successurl) {
+        this.successurl = successurl;
+    }
+
+    public String getErrorurl() {
+        return errorurl;
+    }
+
+    public void setErrorurl(final String errorurl) {
+        this.errorurl = errorurl;
+    }
+
+    public String getBackurl() {
+        return backurl;
+    }
+
+    public void setBackurl(final String backurl) {
+        this.backurl = backurl;
     }
 }

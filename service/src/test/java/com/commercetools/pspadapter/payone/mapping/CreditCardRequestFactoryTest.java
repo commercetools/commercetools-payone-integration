@@ -93,6 +93,11 @@ public class CreditCardRequestFactoryTest {
         softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
         softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
+        //urls
+        softly.assertThat(result.getSuccessurl()).isEqualTo("www.test.de/success");
+        softly.assertThat(result.getErrorurl()).isEqualTo("www.test.de/error");
+        softly.assertThat(result.getBackurl()).isEqualTo("www.test.de/cancel");
+
         //3d secure
         softly.assertThat(result.getEcommercemode()).isEqualTo(payment.getCustom().getFieldAsBoolean(CustomFieldKeys.FORCE_3DSECURE_FIELD));
 
@@ -152,6 +157,11 @@ public class CreditCardRequestFactoryTest {
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber().get());
         softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
+
+        //urls
+        softly.assertThat(result.getSuccessurl()).isEqualTo("www.test.de/success");
+        softly.assertThat(result.getErrorurl()).isEqualTo("www.test.de/error");
+        softly.assertThat(result.getBackurl()).isEqualTo("www.test.de/cancel");
 
         //billing address data
         Address billingAddress = order.getBillingAddress();

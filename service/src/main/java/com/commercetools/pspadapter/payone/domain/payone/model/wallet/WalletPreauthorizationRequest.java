@@ -13,12 +13,6 @@ public class WalletPreauthorizationRequest extends AuthorizationRequest {
 
     private String wallettype;
 
-    private String successurl;
-
-    private String errorurl;
-
-    private String backurl;
-
     public WalletPreauthorizationRequest(final PayoneConfig config, final String wallettype) {
         super(config, RequestType.PREAUTHORIZATION.getType(), ClearingType.PAYONE_PPE.getPayoneCode());
 
@@ -32,29 +26,5 @@ public class WalletPreauthorizationRequest extends AuthorizationRequest {
 
     public String getWallettype() {
         return wallettype;
-    }
-
-    public String getSuccessurl() {
-        return successurl;
-    }
-
-    public void setSuccessurl(final String successurl) {
-        this.successurl = successurl;
-    }
-
-    public String getErrorurl() {
-        return errorurl;
-    }
-
-    public void setErrorurl(final String errorurl) {
-        this.errorurl = errorurl;
-    }
-
-    public String getBackurl() {
-        return backurl;
-    }
-
-    public void setBackurl(final String backurl) {
-        this.backurl = backurl;
     }
 }
