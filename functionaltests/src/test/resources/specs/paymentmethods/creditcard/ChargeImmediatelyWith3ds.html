@@ -3,27 +3,34 @@
     <head>
         <meta charset="UTF-8"/>
         <link href="../../../concordion.css" rel="stylesheet" type="text/css" />
-        <title>Authorization</title>
+        <title>Charge Immediately</title>
     </head>
     <body>
-        <h1>Credit Card Authorization</h1>
+        <h1>Charge Credit Card Immediately (verified by 3-D Secure)</h1>
         <p>
-            The integration service allows to reserve an amount of money to be charged later on.
+            The integration service allows to charge a credit card in a one step process without initiating a separate
+            authorization before.
         </p>
         <p>
-            It will do so by sending a <em c:set="#requestType">preauthorization</em> request to the PAYONE platform.
+            It will do so by sending an <em c:set="#requestType">authorization</em> request to the PAYONE platform.
             <br/>
             It will store information about such a request as an interface interaction of type
             <em>PAYONE_INTERACTION_REQUEST</em>.
         </p>
+        <p>
+            If a verification by 3-D Secure is required, it will store the response from PAYONE
+            as an interface interaction of type <em>PAYONE_INTERACTION_REDIRECT</em> with a field "redirectUrl" containing the actual
+            redirect url to follow.
+        </p>
+
         <h2>Examples</h2>
         <h3>Common Setup</h3>
         <ul>
             <li>payment.paymentMethodInfo.method: <span c:set="#paymentMethod">CREDIT_CARD</span></li>
-            <li>payment.transactions[0].type: <span c:set="#transactionType">AUTHORIZATION</span></li>
+            <li>payment.transactions[0].type: <span c:set="#transactionType">CHARGE</span></li>
         </ul>
         <div class="example">
-            <h3>Authorization (with 3-D Secure)</h3>
+            <h3>Charge immediately</h3>
             <p>
                 Given the following payments for
                 <em>a credit card that does <b>not</b> support charges for currencies other than EUR and is taking part in 3-D Secure verification</em>:
@@ -37,25 +44,25 @@
                 </tr>
                 <tr>
                     <td>Payment 1</td>
-                    <td>502</td>
+                    <td>406</td>
                     <td>EUR</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Payment 2</td>
-                    <td>6121</td>
+                    <td>91341</td>
                     <td>USD</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Payment 3</td>
-                    <td>223812</td>
+                    <td>6113</td>
                     <td>EUR</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Payment 4</td>
-                    <td>3921</td>
+                    <td>111283</td>
                     <td>EUR</td>
                     <td></td>
                 </tr>
@@ -136,16 +143,23 @@
                 responses of type PAYONE_INTERACTION_REDIRECT.
             </p>
             <p>
-                If I follow the 3-D Secure process and verify the payments with this credit card, I get forwarded to a predefined success url
-                and for each of the payments <span c:set="#successfulPayments">Payment 1, Payment 3, Payment 4</span>
-                an <b c:set="#txactionAppointed">appointed</b>/<b>completed</b> notification will be received.
+                If I follow the 3-D Secure process for <span c:set="#successfulPayments">Payment 1, Payment 3, Payment 4</span> and
+                <span c:assertTrue="executeRedirectForPayments(#successfulPayments)">verify them successfully</span> with this credit card,
+                I get forwarded to a predefined success url and for each of the payments the following notifications will be received:
             </p>
-            <table c:execute="#result = executeRedirectAndWaitForNotificationOfAction(#paymentName, #txactionAppointed)">
+            <ol>
+                <li>(txaction=<b c:set="#txactionAppointed">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)">received</span> -> has no effect, just as a confirmation</li>
+                <li>(txaction=<b c:set="#txactionPaid">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)">received</span>
+                    ->  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
+            </ol>
+            <table c:execute="#result = fetchPaymentDetails(#paymentName)">
                 <tr>
                     <th c:set="#paymentName">Payment Name</th>
                     <th c:assertEquals="#result.transactionState">Transaction State</th>
-                    <th c:assertEquals="#result.appointedNotificationCount">total # of <em>appointed/completed</em> notifications</th>
+                    <th c:assertEquals="#result.appointedNotificationCount">total # of <br/><em>appointed/completed</em> notifications</th>
+                    <th c:assertEquals="#result.paidNotificationCount">total # of <br/><em>paid/completed</em> notifications</th>
                     <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
+                    <th c:assertEquals="#result.amountPaid">Paid Amount</th>
                     <th c:assertEquals="#result.successUrl">url called after successful verification</th>
                     <th c:echo="#result.version">Version (for information only)</th>
                 </tr>
@@ -153,7 +167,9 @@
                     <td>Payment 1</td>
                     <td>Success</td>
                     <td>1</td>
-                    <td>5,02 EUR</td>
+                    <td>1</td>
+                    <td>4,06 EUR</td>
+                    <td>null</td>
                     <td>https://www.google.de/#q=Payment+1+Success</td>
                     <td></td>
                 </tr>
@@ -161,7 +177,9 @@
                     <td>Payment 3</td>
                     <td>Success</td>
                     <td>1</td>
-                    <td>2.238,12 EUR</td>
+                    <td>1</td>
+                    <td>61,13 EUR</td>
+                    <td>null</td>
                     <td>https://www.google.de/#q=Payment+3+Success</td>
                     <td></td>
                 </tr>
@@ -169,7 +187,9 @@
                     <td>Payment 4</td>
                     <td>Success</td>
                     <td>1</td>
-                    <td>39,21 EUR</td>
+                    <td>1</td>
+                    <td>1.112,83 EUR</td>
+                    <td>null</td>
                     <td>https://www.google.de/#q=Payment+4+Success</td>
                     <td></td>
                 </tr>
@@ -177,6 +197,7 @@
             <p>
                 To see the full set of redirect cases including error and cancel result, please visit <a href="../RedirectExamples.html">Redirect Examples</a>
             </p>
-          </div>
+        </div>
+
     </body>
 </html>

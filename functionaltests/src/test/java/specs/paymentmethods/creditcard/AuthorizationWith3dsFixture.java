@@ -32,7 +32,6 @@ import javax.money.format.MonetaryFormats;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -108,7 +107,6 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
     public Map<String, String> handlePayment(final String paymentName,
                                              final String requestType) throws ExecutionException, IOException {
         final HttpResponse response = requestToHandlePaymentByLegibleName(paymentName);
-        final ZonedDateTime fetchedAt = ZonedDateTime.now(ZoneId.of("UTC"));
         final Payment payment = fetchPaymentByLegibleName(paymentName);
         final String transactionId = getIdOfLastTransaction(payment);
 
@@ -117,7 +115,6 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
                 .put("interactionCount", getInteractionRequestCount(payment, transactionId, requestType))
                 .put("transactionState", getTransactionState(payment, transactionId))
                 .put("version", payment.getVersion().toString())
-                .put("fetchedAt", fetchedAt.toString())
                 .build();
     }
 
@@ -147,7 +144,7 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
                 .orElse(EMPTY_STRING);
         final String successUrl = getUrlAfter3dsVerification(responseRedirectUrl);
 
-        //wait just a little till notification was processed (is triggered immediately after verification)
+        //wait just a little until notification was processed (is triggered immediately after verification)
         Thread.sleep(100);
 
         payment = fetchPaymentById(payment.getId());
