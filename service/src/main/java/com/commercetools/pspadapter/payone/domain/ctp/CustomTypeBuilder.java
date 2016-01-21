@@ -108,7 +108,6 @@ public class CustomTypeBuilder {
     }
 
     private void createPaymentProviderAgnosticTypes() {
-        //TODO: add also other payment methods with same layout?
         createPaymentCustomType(PAYMENT_CREDIT_CARD, ImmutableList.of(
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
@@ -123,6 +122,16 @@ public class CustomTypeBuilder {
                 createSingleLineStringFieldDefinition(CustomFieldKeys.CARD_HOLDER_NAME_FIELD, FieldClassifier.OPTIONAL),
                 createFieldDefinition(DateFieldType.of(), CustomFieldKeys.CARD_EXPIRY_DATE_FIELD, null, FieldClassifier.OPTIONAL),
                 createFieldDefinition(EnumFieldType.of(CreditCardNetwork.getValuesAsListOfEnumValue()), CustomFieldKeys.CARD_NETWORK_FIELD, null, FieldClassifier.OPTIONAL)
+        ));
+
+        createPaymentCustomType(PAYMENT_WALLET, ImmutableList.of(
+                createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
+                createMultiLineStringFieldDefinition(CustomFieldKeys.REFERENCE_TEXT_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REDIRECT_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.SUCCESS_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.ERROR_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.CANCEL_URL_FIELD, FieldClassifier.OPTIONAL)
         ));
     }
 
