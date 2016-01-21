@@ -214,6 +214,10 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
             Thread.sleep(sleepDuration);
             remainingWaitTimeInMillis -= sleepDuration;
             numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
+            if (remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(4)
+                    || remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(2)) {
+                LOG.info("Waiting for " + txaction + " notifications in ChargedImmediatelyWith3dsFixture takes longer than usual.");
+            }
         }
 
         LOG.info(String.format(
