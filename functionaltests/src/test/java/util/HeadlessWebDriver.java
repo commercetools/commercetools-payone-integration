@@ -22,7 +22,8 @@ public class HeadlessWebDriver extends HtmlUnitDriver {
         this.manage().timeouts().pageLoadTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
         this.manage().timeouts().setScriptTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
-        getWebClient().getOptions().setThrowExceptionOnScriptError(false);
+        getWebClient().waitForBackgroundJavaScript(1000);
+        getWebClient().getOptions().setThrowExceptionOnScriptError(true);
         getWebClient().getOptions().setPopupBlockerEnabled(true);
         getWebClient().setCssErrorHandler(new DefaultCssErrorHandler() {
 
