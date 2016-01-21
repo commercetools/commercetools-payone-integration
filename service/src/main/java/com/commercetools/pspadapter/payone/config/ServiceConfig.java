@@ -13,7 +13,8 @@ public class ServiceConfig {
     private final String ctClientId;
     private final String ctClientSecret;
     private final boolean startFromScratch;
-    private final String scheduledJobCron;
+    private final String scheduledJobCronShortTimeFrame;
+    private final String scheduledJobCronLongTimeFrame;
 
     /**
      * Initializes the configuration.
@@ -26,9 +27,14 @@ public class ServiceConfig {
         ctProjectKey = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY);
         ctClientId  = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID);
         ctClientSecret = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET);
-        scheduledJobCron = propertyProvider.getProperty(PropertyProvider.SCHEDULED_JOB_CRON)
-                .map(String::valueOf)
-                .orElse("0/30 * * * * ?");
+        scheduledJobCronShortTimeFrame =
+                propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON)
+                        .map(String::valueOf)
+                        .orElse("0/30 * * * * ? *");
+        scheduledJobCronLongTimeFrame =
+                propertyProvider.getProperty(PropertyProvider.LONG_TIME_FRAME_SCHEDULED_JOB_CRON)
+                        .map(String::valueOf)
+                        .orElse("5 0 0/1 * * ? *");
         startFromScratch = propertyProvider.getProperty(PropertyProvider.CT_START_FROM_SCRATCH)
                 .map(Boolean::valueOf)
                 .orElse(false);
@@ -59,11 +65,23 @@ public class ServiceConfig {
     }
 
     /**
-     * Gets the cron expression for polling commercetools messages.
+     * Gets the
+     * <a href="http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger">QUARTZ cron expression</a>
+     * for polling commercetools messages with a shorter time frame.
      * @return the cron expression
      */
-    public String getScheduledJobCron() {
-        return scheduledJobCron;
+    public String getScheduledJobCronForShortTimeFramePoll() {
+        return scheduledJobCronShortTimeFrame;
+    }
+
+    /**
+     * Gets the
+     * <a href="http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger">QUARTZ cron expression</a>
+     * for polling commercetools messages with a longer time frame.
+     * @return the cron expression
+     */
+    public String getScheduledJobCronForLongTimeFramePoll() {
+        return scheduledJobCronLongTimeFrame;
     }
 
     /**

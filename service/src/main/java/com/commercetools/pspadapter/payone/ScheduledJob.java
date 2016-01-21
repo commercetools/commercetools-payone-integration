@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  * @author fhaertig
  * @since 07.12.15
  */
-public class ScheduledJob implements Job {
+public abstract class ScheduledJob implements Job {
 
     public static final Logger LOG = LogManager.getLogger(ScheduledJob.class);
 
@@ -33,7 +33,7 @@ public class ScheduledJob implements Job {
         IntegrationService service = (IntegrationService) dataMap.get(SERVICE_KEY);
 
         final PaymentDispatcher paymentDispatcher = (PaymentDispatcher) dataMap.get(DISPATCHER_KEY);
-        final ZonedDateTime sinceDate = ZonedDateTime.now().minusDays(2);
+        final ZonedDateTime sinceDate = getSinceDateTime();
 
         final CommercetoolsQueryExecutor queryExecutor = service.getCommercetoolsQueryExecutor();
         final Consumer<Payment> paymentConsumer = payment -> {
@@ -53,4 +53,6 @@ public class ScheduledJob implements Job {
         queryExecutor.consumePaymentCreatedMessages(sinceDate, paymentConsumer);
         queryExecutor.consumePaymentTransactionAddedMessages(sinceDate, paymentConsumer);
     }
+
+    protected abstract ZonedDateTime getSinceDateTime();
 }

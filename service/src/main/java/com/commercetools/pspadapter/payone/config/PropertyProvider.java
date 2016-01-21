@@ -23,7 +23,8 @@ public class PropertyProvider {
     public static final String CT_CLIENT_ID = "CT_CLIENT_ID";
     public static final String CT_CLIENT_SECRET = "CT_CLIENT_SECRET";
     public static final String CT_START_FROM_SCRATCH = "CT_START_FROM_SCRATCH";
-    public static final String SCHEDULED_JOB_CRON = "SCHEDULED_JOB_CRON";
+    public static final String SHORT_TIME_FRAME_SCHEDULED_JOB_CRON = "SHORT_TIME_FRAME_SCHEDULED_JOB_CRON";
+    public static final String LONG_TIME_FRAME_SCHEDULED_JOB_CRON = "LONG_TIME_FRAME_SCHEDULED_JOB_CRON";
 
     private final ImmutableMap<String, String> internalProperties;
 

@@ -19,6 +19,7 @@ public class ScheduledJobFactory {
 
     public static Scheduler createScheduledJob(
             final CronScheduleBuilder cronScheduleBuilder,
+            final Class<? extends ScheduledJob> jobClass,
             final IntegrationService integrationService,
             final String jobKey,
             final PaymentDispatcher paymentDispatcher) throws SchedulerException {
@@ -35,7 +36,7 @@ public class ScheduledJobFactory {
                 .build();
 
         scheduler.startDelayed(DELAY_START_IN_SECONDS);
-        scheduler.scheduleJob(JobBuilder.newJob(ScheduledJob.class).build(), trigger);
+        scheduler.scheduleJob(JobBuilder.newJob(jobClass).build(), trigger);
         return scheduler;
     }
 }

@@ -12,6 +12,8 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import java.time.ZonedDateTime;
+
 /**
  * @author fhaertig
  * @since 07.12.15
@@ -30,8 +32,13 @@ public class ScheduledJobTest {
 
     @Test
     public void createScheduledJob() throws JobExecutionException {
-        ScheduledJob job = new ScheduledJob();
-        JobDataMap dataMap = new JobDataMap();
+        final ScheduledJob job = new ScheduledJob() {
+            @Override
+            protected ZonedDateTime getSinceDateTime() {
+                return ZonedDateTime.now().minusMinutes(2);
+            }
+        };
+        final JobDataMap dataMap = new JobDataMap();
         dataMap.put(ScheduledJob.SERVICE_KEY, integrationService);
         when(jobExecutionContext.getMergedJobDataMap()).thenReturn(dataMap);
         when(integrationService.getCommercetoolsQueryExecutor()).thenReturn(commercetoolsQueryExecutor);

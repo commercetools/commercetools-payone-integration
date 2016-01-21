@@ -54,9 +54,41 @@ public class ServiceConfigTest {
     }
 
     @Test
-    public void getCtClientSecret() {
+    public void getsCtClientSecret() {
         when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET)).thenReturn("secret X");
         assertThat(new ServiceConfig(propertyProvider).getCtClientSecret()).isEqualTo("secret X");
+    }
+
+    @Test
+    public void getsScheduledJobCronForShortTimeFramePoll() {
+        when(propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON))
+                .thenReturn(Optional.of("short cron"));
+        assertThat(new ServiceConfig(propertyProvider).getScheduledJobCronForShortTimeFramePoll())
+                .isEqualTo("short cron");
+    }
+
+    @Test
+    public void getsDefaultScheduledJobCronForShortTimeFramePollIfPropertyIsNotProvided() {
+        when(propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON))
+                .thenReturn(Optional.empty());
+        assertThat(new ServiceConfig(propertyProvider).getScheduledJobCronForShortTimeFramePoll())
+                .isEqualTo("0/30 * * * * ? *");
+    }
+
+    @Test
+    public void getsScheduledJobCronForLongTimeFramePoll() {
+        when(propertyProvider.getProperty(PropertyProvider.LONG_TIME_FRAME_SCHEDULED_JOB_CRON))
+                .thenReturn(Optional.of("long cron"));
+        assertThat(new ServiceConfig(propertyProvider).getScheduledJobCronForLongTimeFramePoll())
+                .isEqualTo("long cron");
+    }
+
+    @Test
+    public void getsDefaultScheduledJobCronForLongTimeFramePollIfPropertyIsNotProvided() {
+        when(propertyProvider.getProperty(PropertyProvider.LONG_TIME_FRAME_SCHEDULED_JOB_CRON))
+                .thenReturn(Optional.empty());
+        assertThat(new ServiceConfig(propertyProvider).getScheduledJobCronForLongTimeFramePoll())
+                .isEqualTo("5 0 0/1 * * ? *");
     }
 
     @Test
