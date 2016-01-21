@@ -50,6 +50,7 @@ subprojects {
         testCompile 'junit:junit:4.12'
         testCompile "org.hamcrest:hamcrest-core:$versions.hamcrest"
         testCompile "org.hamcrest:hamcrest-library:$versions.hamcrest"
+
     }
 
 }
@@ -110,6 +111,9 @@ void assertExecutableSpecRequirements(Project project, Test test) {
 
     test.environment 'TEST_DATA_VISA_CREDIT_CARD_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_3DS') ? project.TEST_DATA_VISA_CREDIT_CARD_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_3DS')
     assertValueIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_3DS', test.getEnvironment())
+
+    test.environment 'TEST_DATA_3_DS_PASSWORD', project.hasProperty('TEST_DATA_3_DS_PASSWORD') ? project.TEST_DATA_3_DS_PASSWORD : System.getenv('TEST_DATA_3_DS_PASSWORD')
+    assertValueIsNotNullOrEmpty('TEST_DATA_3_DS_PASSWORD', test.getEnvironment())
 }
 
 project(":functionaltests") {
@@ -120,6 +124,7 @@ project(":functionaltests") {
         testCompile 'org.concordion:concordion-input-style-extension:0.1'
         testCompile 'org.concordion:concordion-run-totals-extension:1.0.0'
         testCompile 'org.concordion:concordion-parallel-run-extension:1.0.1'
+        testCompile 'org.seleniumhq.selenium:selenium-java:2.49.0'
 
     }
 

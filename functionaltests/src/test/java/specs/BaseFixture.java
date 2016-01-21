@@ -66,6 +66,7 @@ public abstract class BaseFixture {
 
     private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
     private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_3DS";
+    private static final String TEST_DATA_3_DS_PASSWORD = "TEST_DATA_3_DS_PASSWORD";
     private static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 1500;
 
     private static final Random randomSource = new Random();
@@ -162,6 +163,10 @@ public abstract class BaseFixture {
 
     protected String getUnconfirmedVisaPseudoCardPan() {
         return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
+    }
+
+    protected String getTestData3DsPassword() {
+        return getConfigurationParameter(TEST_DATA_3_DS_PASSWORD);
     }
 
     protected String getVerifiedVisaPseudoCardPan() {
@@ -335,5 +340,6 @@ public abstract class BaseFixture {
                 })
                 .count();
     }
+
 }
 
