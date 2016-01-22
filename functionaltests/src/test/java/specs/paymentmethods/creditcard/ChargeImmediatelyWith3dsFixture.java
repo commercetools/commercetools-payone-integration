@@ -164,8 +164,7 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
                 .build();
     }
 
-    public boolean executeRedirectForPayments(final String paymentNames)
-            throws InterruptedException, ExecutionException {
+    public boolean executeRedirectForPayments(final String paymentNames) throws ExecutionException {
 
         final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 

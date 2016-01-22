@@ -170,7 +170,7 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
         return getInteractionRedirect(payment, transactionId).isPresent();
     }
 
-    protected String getUrlAfter3dsVerification(final String responseRedirectUrl) throws InterruptedException {
+    protected String getUrlAfter3dsVerification(final String responseRedirectUrl) {
         if (responseRedirectUrl == null || responseRedirectUrl.isEmpty()) {
             return EMPTY_STRING;
         }
