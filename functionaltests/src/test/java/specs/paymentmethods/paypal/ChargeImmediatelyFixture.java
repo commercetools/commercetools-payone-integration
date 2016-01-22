@@ -17,7 +17,6 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
-import org.concordion.api.ExpectedToFail;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.After;
 import org.junit.Before;
@@ -49,7 +48,6 @@ import java.util.concurrent.TimeUnit;
  * @author Jan Wolter
  */
 @RunWith(ConcordionRunner.class)
-@ExpectedToFail
 public class ChargeImmediatelyFixture extends BaseFixture {
 
     private static final String baseRedirectUrl = "https://github.com/sphereio/sphere-jvm-sdk/search?q=";
@@ -118,7 +116,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                                              final String requestType) throws ExecutionException, IOException {
         final HttpResponse response = requestToHandlePaymentByLegibleName(paymentName);
         final Payment payment = fetchPaymentByLegibleName(paymentName);
-        final String transactionId = getIdOfLastTransaction(payment);
+        final String transactionId = getIdOfFirstTransaction(payment);
         final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
                 BaseFixture.EMPTY_STRING;
@@ -128,7 +126,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
 
         return ImmutableMap.<String, String> builder()
                 .put("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
-                .put("interactionCount", getInteractionRequestCount(payment, transactionId, requestType))
+                .put("interactionCount", getInteractionRequestCountOverAllTransactions(payment, requestType))
                 .put("transactionState", getTransactionState(payment, transactionId))
                 .put("amountAuthorized", amountAuthorized)
                 .put("amountPaid", amountPaid)
@@ -136,12 +134,11 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                 .build();
     }
 
-
     public Map<String, String> fetchPaymentDetails(final String paymentName)
             throws InterruptedException, ExecutionException {
         final Payment payment = fetchPaymentByLegibleName(paymentName);
 
-        final String transactionId = getIdOfLastTransaction(payment);
+        final String transactionId = getIdOfFirstTransaction(payment);
         final String responseRedirectUrl = Optional.ofNullable(payment.getCustom())
                 .flatMap(customFields ->
                         Optional.ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)))
@@ -149,8 +146,10 @@ public class ChargeImmediatelyFixture extends BaseFixture {
 
         final int urlTrimAt = responseRedirectUrl.contains("?") ? responseRedirectUrl.indexOf("?") : 0;
 
-        final long appointedNotificationCount = getInteractionNotificationCountOfAction(payment, "appointed");
-        final long paidNotificationCount = getInteractionNotificationCountOfAction(payment, "paid");
+        final long appointedNotificationCount =
+                getInteractionNotificationCountOfAction(payment, "appointed", transactionId);
+
+        final long paidNotificationCount = getInteractionNotificationCountOfAction(payment, "paid", transactionId);
 
         final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :

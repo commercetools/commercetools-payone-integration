@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -262,6 +263,12 @@ public abstract class BaseFixture {
         return Iterables.getLast(payment.getTransactions()).getId();
     }
 
+    protected String getIdOfFirstTransaction(final Payment payment) {
+        return Objects.requireNonNull(payment,
+                "payment is null. This could be due to a restarting service instance which has not finished cleaning the platform from custom types, payments, orders and carts!")
+                .getTransactions().get(0).getId();
+    }
+
     protected void registerPaymentWithLegibleName(final String paymentName, final Payment payment) {
         Preconditions.checkState(!payments.containsKey(paymentName),
                 String.format("Legible payment name '%s' already in use for ID '%s'.",
@@ -296,6 +303,18 @@ public abstract class BaseFixture {
         return Long.toString(payment.getInterfaceInteractions().stream()
                 .filter(i -> interactionTypeId.equals(i.getType().getId()))
                 .filter(i -> transactionId.equals(i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))
+                .filter(i -> {
+                    final String requestField = i.getFieldAsString(CustomFieldKeys.REQUEST_FIELD);
+                    return (requestField != null) && requestField.contains("request=" + requestType);
+                })
+                .count());
+    }
+
+    protected String getInteractionRequestCountOverAllTransactions(final Payment payment,
+                                                                   final String requestType) throws ExecutionException {
+        final String interactionTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST);
+        return Long.toString(payment.getInterfaceInteractions().stream()
+                .filter(i -> interactionTypeId.equals(i.getType().getId()))
                 .filter(i -> {
                     final String requestField = i.getFieldAsString(CustomFieldKeys.REQUEST_FIELD);
                     return (requestField != null) && requestField.contains("request=" + requestType);
@@ -343,6 +362,24 @@ public abstract class BaseFixture {
         return payment.getInterfaceInteractions().stream()
                 .filter(i -> interactionTypeId.equals(i.getType().getId()))
                 .filter(i -> txaction.equals(i.getFieldAsString(CustomFieldKeys.TX_ACTION_FIELD)))
+                .filter(i -> {
+                    final String notificationField = i.getFieldAsString(CustomFieldKeys.NOTIFICATION_FIELD);
+                    return (notificationField != null) &&
+                            (notificationField.toLowerCase().contains("transactionstatus=completed")
+                                    || notificationField.toLowerCase().contains("transactionstatus=null"));
+                })
+                .count();
+    }
+
+    protected long getInteractionNotificationCountOfAction(final Payment payment,
+                                                           final String txaction,
+                                                           final String ctTransactionId) throws ExecutionException {
+        final String interactionTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION);
+
+        return payment.getInterfaceInteractions().stream()
+                .filter(i -> interactionTypeId.equals(i.getType().getId()))
+                .filter(i -> txaction.equals(i.getFieldAsString(CustomFieldKeys.TX_ACTION_FIELD)))
+                .filter(i -> ctTransactionId.equals(i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))
                 .filter(i -> {
                     final String notificationField = i.getFieldAsString(CustomFieldKeys.NOTIFICATION_FIELD);
                     return (notificationField != null) &&
