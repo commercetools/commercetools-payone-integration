@@ -1,14 +1,15 @@
-package specs.paymentmethods;
+package specs.paymentmethods.creditcard;
 
 import org.concordion.api.Unimplemented;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 
+import specs.BaseFixture;
+
 /**
- * @author fhaertig
- * @date 21.01.16
+ * @author Jan Wolter
  */
 @RunWith(ConcordionRunner.class)
 @Unimplemented
-public class RedirectExamplesFixture {
+public class ChargeImmediatelyWith3dsIncorrectPasswordFixture extends BaseFixture{
 }
