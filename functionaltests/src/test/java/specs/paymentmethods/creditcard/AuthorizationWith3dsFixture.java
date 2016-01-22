@@ -140,7 +140,8 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
         final String responseRedirectUrl = getInteractionRedirect(payment, transactionId)
                 .map(i -> i.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
                 .orElse(EMPTY_STRING);
-        final String successUrl = getUrlAfter3dsVerification(responseRedirectUrl);
+        String successUrl = getUrlAfter3dsVerification(responseRedirectUrl);
+        successUrl = successUrl.replace(baseRedirectUrl, "[...]");
 
         //wait just a little until notification was processed (is triggered immediately after verification)
         Thread.sleep(100);
