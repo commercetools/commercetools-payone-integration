@@ -19,6 +19,9 @@ public final class CustomFieldKeys {
     public static final String CARD_HOLDER_NAME_FIELD = "cardHolderName";
     public static final String CARD_EXPIRY_DATE_FIELD = "cardExpiryDate";
     public static final String CARD_NETWORK_FIELD = "cardNetwork";
+    public static final String IBAN_FIELD = "IBAN";
+    public static final String BIC_FIELD = "BIC";
+
 
     public static final String TIMESTAMP_FIELD = "timestamp";
     public static final String TRANSACTION_ID_FIELD = "transactionId";

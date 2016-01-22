@@ -32,6 +32,12 @@ public enum PaymentMethod {
      */
     WALLET_PAYPAL(MethodKeys.WALLET_PAYPAL,
                     TransactionType.AUTHORIZATION,
+                    TransactionType.CHARGE),
+
+    /**
+     * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
+     */
+    BANK_TRANSFER_SOFORTUEBERWEISUNG(MethodKeys.BANK_TRANSFER_SOFORTUEBERWEISUNG,
                     TransactionType.CHARGE);
 
     private String key;

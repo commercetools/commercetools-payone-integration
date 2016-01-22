@@ -34,6 +34,7 @@ public class CustomTypeBuilder {
     // TODO jw: not that custom, general type for all PSPs, move somewhere else
     public static final String PAYMENT_CREDIT_CARD = "payment-CREDIT_CARD";
     public static final String PAYMENT_WALLET = "payment-WALLET";
+    public static final String PAYMENT_BANK_TRANSFER = "payment-BANK_TRANSFER";
 
     public static final String PAYONE_INTERACTION_REQUEST = "PAYONE_INTERACTION_REQUEST";
     public static final String PAYONE_INTERACTION_RESPONSE = "PAYONE_INTERACTION_RESPONSE";
@@ -132,6 +133,18 @@ public class CustomTypeBuilder {
                 createSingleLineStringFieldDefinition(CustomFieldKeys.SUCCESS_URL_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.ERROR_URL_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.CANCEL_URL_FIELD, FieldClassifier.OPTIONAL)
+        ));
+
+        createPaymentCustomType(PAYMENT_BANK_TRANSFER, ImmutableList.of(
+                createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
+                createMultiLineStringFieldDefinition(CustomFieldKeys.REFERENCE_TEXT_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REDIRECT_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.SUCCESS_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.ERROR_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.CANCEL_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.IBAN_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.BIC_FIELD, FieldClassifier.OPTIONAL)
         ));
     }
 

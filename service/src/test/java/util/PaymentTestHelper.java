@@ -53,6 +53,10 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_PPE.json");
     }
 
+    public Payment dummyPaymentOneAuthPending20EuroPNT() throws IOException {
+        return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_PNT.json");
+    }
+
     public Payment dummyPaymentOneAuthPending20EuroPendingResponse() throws Exception {
         return getPaymentFromFile("dummyPaymentOneAuthPending20EuroPendingResponse.json");
     }
@@ -104,4 +108,6 @@ public class PaymentTestHelper {
     public Payment dummyPaymentUnknownMethod() throws Exception {
         return getPaymentFromFile("dummyPaymentUnknownMethod.json");
     }
+
+
 }
