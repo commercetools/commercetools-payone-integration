@@ -341,5 +341,9 @@ public abstract class BaseFixture {
                 .count();
     }
 
+    public boolean customStringFieldIsNull(final String paymentName, final String fieldName) {
+        final Payment payment = fetchPaymentByLegibleName(paymentName);
+        return payment.getCustom().getFieldAsString(fieldName) == null;
+    }
 }
 
