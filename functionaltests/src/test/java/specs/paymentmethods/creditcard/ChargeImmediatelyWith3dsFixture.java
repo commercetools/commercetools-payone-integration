@@ -176,7 +176,8 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
                     .map(i -> i.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
                     .orElse(EMPTY_STRING);
 
-            final String successUrl = webDriver.execute3dsRedirectWithPassword(responseRedirectUrl, getTestData3DsPassword());
+            String successUrl = webDriver.execute3dsRedirectWithPassword(responseRedirectUrl, getTestData3DsPassword());
+            successUrl = successUrl.replace(baseRedirectUrl, "[...]");
             successUrlForPayment.put(paymentName, successUrl);
         }
 

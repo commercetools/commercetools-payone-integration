@@ -4,6 +4,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.DefaultCssErrorHandler;
+import com.gargoylesoftware.htmlunit.IncorrectnessListener;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -33,6 +34,13 @@ public class WebDriver3ds extends HtmlUnitDriver {
         getWebClient().setJavaScriptTimeout(2000);
         getWebClient().getOptions().setThrowExceptionOnScriptError(false);
         getWebClient().getOptions().setPopupBlockerEnabled(true);
+
+        getWebClient().setIncorrectnessListener(new IncorrectnessListener() {
+            @Override
+            public void notify(final String message, final Object origin) {
+                //swallow these messages
+            }
+        });
         getWebClient().setCssErrorHandler(new DefaultCssErrorHandler() {
 
             @Override

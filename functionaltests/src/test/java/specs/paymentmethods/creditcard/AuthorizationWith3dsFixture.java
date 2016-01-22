@@ -3,7 +3,6 @@ package specs.paymentmethods.creditcard;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
@@ -43,9 +42,10 @@ import java.util.concurrent.ExecutionException;
  */
 @RunWith(ConcordionRunner.class)
 public class AuthorizationWith3dsFixture extends BaseFixture {
-    private static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationWith3dsFixture.class);
+
+    private static final String baseRedirectUrl = "http://dev.commercetools.com/search.html?stp=1&stq=";
 
     private WebDriver3ds webDriver;
 
@@ -86,9 +86,9 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
                         ImmutableMap.<String, Object>builder()
                                 .put(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, pseudocardpan)
                                 .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage())
-                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, "https://www.google.de/#q=" + URLEncoder.encode(paymentName + " Success", "UTF-8"))
-                                .put(CustomFieldKeys.ERROR_URL_FIELD, "https://www.google.de/#q=" + URLEncoder.encode(paymentName + " Error", "UTF-8"))
-                                .put(CustomFieldKeys.CANCEL_URL_FIELD, "https://www.google.de/#q=" + URLEncoder.encode(paymentName + " Cancel", "UTF-8"))
+                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8"))
+                                .put(CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8"))
+                                .put(CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8"))
                                 .put(CustomFieldKeys.REFERENCE_FIELD, "myGlobalKey")
                                 .build()))
                 .build();
