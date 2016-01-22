@@ -33,11 +33,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -132,21 +134,24 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
                 .build();
     }
 
-    public Map<String, String> fetchPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
-        Payment payment = fetchPaymentByLegibleName(paymentName);
+    public Map<String, String> fetchPaymentDetails(final String paymentName)
+            throws InterruptedException, ExecutionException {
+        final Payment payment = fetchPaymentByLegibleName(paymentName);
 
         final String transactionId = getIdOfLastTransaction(payment);
-        final String responseRedirectUrl = getInteractionRedirect(payment, transactionId)
-                .map(i -> i.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
-                .orElse(EMPTY_STRING);
-        int urlTrimAt = responseRedirectUrl.contains("?") ? responseRedirectUrl.indexOf("?") : 0;
+        final String responseRedirectUrl = Optional.ofNullable(payment.getCustom())
+                .flatMap(customFields ->
+                        Optional.ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)))
+                .orElse(NULL_STRING);
 
-        long appointedNotificationCount = getInteractionNotificationCountOfAction(payment, "appointed");
-        long paidNotificationCount = getInteractionNotificationCountOfAction(payment, "paid");
+        final int urlTrimAt = responseRedirectUrl.contains("?") ? responseRedirectUrl.indexOf("?") : 0;
+
+        final long appointedNotificationCount = getInteractionNotificationCountOfAction(payment, "appointed");
+        final long paidNotificationCount = getInteractionNotificationCountOfAction(payment, "paid");
 
         final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
-                "null";
+                NULL_STRING;
 
         final String amountPaid = (payment.getAmountPaid() != null) ?
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountPaid()) :
@@ -165,20 +170,22 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
     }
 
     public boolean executeRedirectForPayments(final String paymentNames) throws ExecutionException {
+        final Collection<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 
-        final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
+        paymentNamesList.forEach(paymentName -> {
+            final Payment payment = fetchPaymentByLegibleName(paymentName);
+            final Optional<String> responseRedirectUrl = Optional.ofNullable(payment.getCustom())
+                    .flatMap(customFields ->
+                            Optional.ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)));
 
-        for (String paymentName : paymentNamesList) {
-            Payment payment = fetchPaymentByLegibleName(paymentName);
-            final String transactionId = getIdOfLastTransaction(payment);
-            final String responseRedirectUrl = getInteractionRedirect(payment, transactionId)
-                    .map(i -> i.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
-                    .orElse(EMPTY_STRING);
+            if (responseRedirectUrl.isPresent()) {
+                final String successUrl =
+                        webDriver.execute3dsRedirectWithPassword(responseRedirectUrl.get(), getTestData3DsPassword())
+                                .replace(baseRedirectUrl, "[...]");
 
-            String successUrl = webDriver.execute3dsRedirectWithPassword(responseRedirectUrl, getTestData3DsPassword());
-            successUrl = successUrl.replace(baseRedirectUrl, "[...]");
-            successUrlForPayment.put(paymentName, successUrl);
-        }
+                successUrlForPayment.put(paymentName, successUrl);
+            }
+        });
 
         return successUrlForPayment.size() == paymentNamesList.size();
     }

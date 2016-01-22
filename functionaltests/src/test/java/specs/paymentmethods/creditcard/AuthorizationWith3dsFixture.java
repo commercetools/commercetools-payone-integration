@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -116,14 +117,17 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
                 .build();
     }
 
-    public Map<String, String> fetchPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
-        Payment payment = fetchPaymentByLegibleName(paymentName);
+    public Map<String, String> fetchPaymentDetails(final String paymentName)
+            throws InterruptedException, ExecutionException {
+        final Payment payment = fetchPaymentByLegibleName(paymentName);
 
         final String transactionId = getIdOfLastTransaction(payment);
-        final String responseRedirectUrl = getInteractionRedirect(payment, transactionId)
-                .map(i -> i.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
-                .orElse(EMPTY_STRING);
-        int urlTrimAt = responseRedirectUrl.contains("?") ? responseRedirectUrl.indexOf("?") : 0;
+        final String responseRedirectUrl = Optional.ofNullable(payment.getCustom())
+                .flatMap(customFields ->
+                        Optional.ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)))
+                .orElse(NULL_STRING);
+
+        final int urlTrimAt = responseRedirectUrl.contains("?") ? responseRedirectUrl.indexOf("?") : 0;
 
         return ImmutableMap.<String, String>builder()
                 .put("transactionState", getTransactionState(payment, transactionId))
@@ -132,33 +136,44 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
                 .build();
     }
 
-    public  Map<String, String> executeRedirectAndWaitForNotificationOfAction(final String paymentName, final String txaction)
+    public  Map<String, String> executeRedirectAndWaitForNotificationOfAction(final String paymentName,
+                                                                              final String txAction)
             throws InterruptedException, ExecutionException {
 
-        Payment payment = fetchPaymentByLegibleName(paymentName);
-        final String transactionId = getIdOfLastTransaction(payment);
-        final String responseRedirectUrl = getInteractionRedirect(payment, transactionId)
-                .map(i -> i.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
-                .orElse(EMPTY_STRING);
-        String successUrl = getUrlAfter3dsVerification(responseRedirectUrl);
-        successUrl = successUrl.replace(baseRedirectUrl, "[...]");
+        final Payment payment = fetchPaymentByLegibleName(paymentName);
+        final String redirectUrlFieldName = CustomFieldKeys.REDIRECT_URL_FIELD;
+        final String responseRedirectUrl = Optional.ofNullable(payment.getCustom())
+                .flatMap(customFields -> Optional.ofNullable(customFields.getFieldAsString(redirectUrlFieldName)))
+                .orElseThrow(() -> new IllegalStateException(
+                        "No custom field \"" + redirectUrlFieldName + "\" found for Payment: " + paymentName));
+
+        final String successUrl = getUrlAfter3dsVerification(responseRedirectUrl).replace(baseRedirectUrl, "[...]");
 
         //wait just a little until notification was processed (is triggered immediately after verification)
         Thread.sleep(100);
 
-        payment = fetchPaymentById(payment.getId());
-        long appointedNotificationCount = getInteractionNotificationCountOfAction(payment, txaction);
+        return ImmutableMap.<String, String>builder()
+                .putAll(fetchPaymentDetailsAfterAppointedNotification(payment, txAction))
+                .put("successUrl", successUrl)
+                .build();
+    }
 
-        final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
-                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
+    private Map<String, String> fetchPaymentDetailsAfterAppointedNotification(final Payment payment,
+                                                                              final String txAction)
+            throws ExecutionException {
+        final String transactionId = getIdOfLastTransaction(payment);
+        final Payment updatedPayment = fetchPaymentById(payment.getId());
+        final long appointedNotificationCount = getInteractionNotificationCountOfAction(updatedPayment, txAction);
+
+        final String amountAuthorized = (updatedPayment.getAmountAuthorized() != null) ?
+                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(updatedPayment.getAmountAuthorized()) :
                 BaseFixture.EMPTY_STRING;
 
         return ImmutableMap.<String, String> builder()
                 .put("appointedNotificationCount", String.valueOf(appointedNotificationCount))
-                .put("transactionState", getTransactionState(payment, transactionId))
+                .put("transactionState", getTransactionState(updatedPayment, transactionId))
                 .put("amountAuthorized", amountAuthorized)
-                .put("successUrl", successUrl)
-                .put("version", payment.getVersion().toString())
+                .put("version", updatedPayment.getVersion().toString())
                 .build();
     }
 

@@ -62,6 +62,7 @@ public abstract class BaseFixture {
     private static final Logger LOG = LoggerFactory.getLogger(BaseFixture.class);
 
     protected static final String EMPTY_STRING = "";
+    protected static final String NULL_STRING = "null";
     protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(8);
 
     private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
