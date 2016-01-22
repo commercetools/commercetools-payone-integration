@@ -102,13 +102,13 @@
             </table>
             <p>
                 The transaction will stay in state Pending
-                as long as we don't follow the received redirect url and authorize the payment for this account.
+                as long as we don't follow the received redirect URL and authorize the payment for this account.
             </p>
             <table c:execute="#result = fetchPaymentDetails(#paymentName)">
                 <tr>
                     <th c:set="#paymentName">Payment Name</th>
                     <th c:assertEquals="#result.transactionState">Transaction State </th>
-                    <th c:assertEquals="#result.responseRedirectUrl">redirect url starts with</th>
+                    <th c:assertEquals="#result.responseRedirectUrl">redirect URL starts with</th>
                     <th c:echo="#result.version">Version (for information only)</th>
                 </tr>
                 <tr>
@@ -139,7 +139,7 @@
             <p>
                 If I follow the 3-D Secure process for <span c:set="#successfulPayments">Payment 1, Payment 3, Payment 4</span> and
                 <span c:assertTrue="executeRedirectForPayments(#successfulPayments)">verify them successfully</span> with this credit card,
-                I get forwarded to a predefined success url and for each of the payments the following notifications will be received:
+                I get forwarded to a predefined success URL and for each of the payments the following notifications will be received:
             </p>
             <ol>
                 <li>(txaction=<b c:set="#txactionAppointed">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)">received</span> -> has no effect, just as a confirmation</li>
@@ -155,6 +155,7 @@
                     <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
                     <th c:assertEquals="#result.amountPaid">Paid Amount</th>
                     <th c:assertEquals="#result.successUrl">url called after successful verification</th>
+                    <th c:assertEquals="#result.successUrl">URL called after successful verification</th>
                     <th c:echo="#result.version">Version (for information only)</th>
                 </tr>
                 <tr>
