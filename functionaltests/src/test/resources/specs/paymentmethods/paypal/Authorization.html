@@ -36,8 +36,140 @@
         </tr>
         <tr>
             <td>Payment 1</td>
-            <td>2200</td>
+            <td>7</td>
             <td>EUR</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 2</td>
+            <td>2234</td>
+            <td>USD</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>43434</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>715431</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+    </table>
+    <p>
+        When I request the integration service to handle them I will get the following results:
+    </p>
+    <table c:execute="#result = handlePayment(#paymentName, #requestType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:assertEquals="#result.interactionCount">total # of <br/><em>preauthorization</em> requests sent</th>
+            <th c:assertEquals="#result.transactionState">Transaction State </th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>200</td>
+            <td>1</td>
+            <td>Pending</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 2</td>
+            <td>200</td>
+            <td>1</td>
+            <td>Failure</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>200</td>
+            <td>1</td>
+            <td>Pending</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>200</td>
+            <td>1</td>
+            <td>Pending</td>
+            <td></td>
+        </tr>
+    </table>
+    <p>
+        The transaction will stay in state Pending
+        as long as we don't follow the received redirect url and authorize the payment for this account.
+    </p>
+    <table c:execute="#result = fetchPaymentDetails(#paymentName)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#result.transactionState">Transaction State </th>
+            <th c:assertEquals="#result.responseRedirectUrl">redirect url starts with</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>Pending</td>
+            <td>https://www.sandbox.paypal.com/webscr</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>Pending</td>
+            <td>https://www.sandbox.paypal.com/webscr</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>Pending</td>
+            <td>https://www.sandbox.paypal.com/webscr</td>
+            <td></td>
+        </tr>
+    </table>
+    <p>
+        The failed payment <span c:set="#failedPaymentName">Payment 2</span>
+        must have received <span c:assertFalse="isInteractionRedirectPresent(#failedPaymentName)">0</span>
+        responses of type PAYONE_INTERACTION_REDIRECT.
+    </p>
+    <p>
+        If I follow the url and complete the Paypal verification process, I get forwarded to a predefined success url
+        and for each of the payments <span c:set="#successfulPayments">Payment 1, Payment 3, Payment 4</span>
+        an <b c:set="#txactionAppointed">appointed</b>/<b>completed</b> notification will be received.
+    </p>
+    <table c:execute="#result = executeRedirectAndWaitForNotificationOfAction(#paymentName, #txactionAppointed)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:assertEquals="#result.appointedNotificationCount">total # of <em>appointed/completed</em> notifications</th>
+            <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
+            <th c:assertEquals="#result.successUrl">url called after successful verification</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>Success</td>
+            <td>1</td>
+            <td>0,07 EUR</td>
+            <td>[...]Payment+1+Success</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>Success</td>
+            <td>1</td>
+            <td>434,34 EUR</td>
+            <td>[...]Payment+3+Success</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>Success</td>
+            <td>1</td>
+            <td>7.154,31 EUR</td>
+            <td>[...]Payment+4+Success</td>
             <td></td>
         </tr>
     </table>

@@ -90,15 +90,11 @@ public class AuthorizationWithout3dsFixture extends BaseFixture {
         final ZonedDateTime fetchedAt = ZonedDateTime.now(ZoneId.of("UTC"));
         final Payment payment = fetchPaymentByLegibleName(paymentName);
         final String transactionId = getIdOfLastTransaction(payment);
-        final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
-                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
-                BaseFixture.EMPTY_STRING;
 
         return ImmutableMap.<String, String> builder()
                 .put("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
                 .put("interactionCount", getInteractionRequestCount(payment, transactionId, requestType))
                 .put("transactionState", getTransactionState(payment, transactionId))
-                .put("amountAuthorized", amountAuthorized)
                 .put("version", payment.getVersion().toString())
                 .put("fetchedAt", fetchedAt.toString())
                 .build();
