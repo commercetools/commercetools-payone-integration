@@ -18,7 +18,6 @@ import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
-import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,13 +54,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyWith3dsFixture.class);
 
-    private Map<String, String> successUrlForPayment;
-
-    @Before
-    public void setUp() {
-        successUrlForPayment = new HashMap<>();
-    }
-
+    private final Map<String, String> successUrlForPayment = new HashMap<>();
 
     public String createPayment(final String paymentName,
                                 final String paymentMethod,
