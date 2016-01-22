@@ -199,18 +199,28 @@ public class ChargeImmediatelyFixture extends BaseFixture {
     public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws InterruptedException, ExecutionException {
         final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 
+        int notificationsToReceive = paymentNamesList.size();
+        for (String paymentName : paymentNamesList) {
+            //quick way to check if it is neccessary to wait for notifications
+            // (e.g. if selenium produced errors the success url may not be as expected and no notifications will be received for this payment)
+            if (!successUrlForPayment.get(paymentName).toLowerCase().contains("success")) {
+                notificationsToReceive -= 1;
+            }
+        }
+
         long remainingWaitTimeInMillis = PAYONE_NOTIFICATION_TIMEOUT;
 
         final long sleepDuration = 100L;
 
+
         long numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
-        while ((numberOfPaymentsWithNotification != paymentNamesList.size()) && (remainingWaitTimeInMillis > 0L)) {
+        while ((numberOfPaymentsWithNotification != notificationsToReceive) && (remainingWaitTimeInMillis > 0L)) {
             Thread.sleep(sleepDuration);
             remainingWaitTimeInMillis -= sleepDuration;
             numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
             if (remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(4)
                     || remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(2)) {
-                LOG.info("Waiting for " + txaction + " notifications in ChargedImmediatelyWith3dsFixture takes longer than usual.");
+                LOG.info("Waiting for " + txaction + " notifications in PaypalChargedImmediatelyFixture takes longer than usual.");
             }
         }
 
