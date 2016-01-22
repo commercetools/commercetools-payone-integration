@@ -18,7 +18,6 @@ import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -58,19 +57,11 @@ public class ChargeImmediatelyFixture extends BaseFixture {
 
     private Map<String, String> successUrlForPayment;
 
-    private WebDriverPaypal webDriver;
-
-
     @Before
     public void setUp() {
-        webDriver = new WebDriverPaypal();
         successUrlForPayment = new HashMap<>();
     }
 
-    @After
-    public void tearDown() {
-        webDriver.quit();
-    }
 
     public String createPayment(final String paymentName,
                                 final String paymentMethod,
