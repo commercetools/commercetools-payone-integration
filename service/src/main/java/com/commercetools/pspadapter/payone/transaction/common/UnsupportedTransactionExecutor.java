@@ -14,6 +14,8 @@ import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 
+import java.time.ZonedDateTime;
+
 /**
  * @author Jan Wolter
  *
@@ -40,6 +42,7 @@ public class UnsupportedTransactionExecutor implements TransactionExecutor {
         final AddInterfaceInteraction addInterfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(
                 CustomTypeBuilder.PAYONE_UNSUPPORTED_TRANSACTION,
                 ImmutableMap.<String, Object>of(
+                        CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now(),
                         CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                         CustomFieldKeys.MESSAGE_FIELD, "Transaction type not supported."));
 
