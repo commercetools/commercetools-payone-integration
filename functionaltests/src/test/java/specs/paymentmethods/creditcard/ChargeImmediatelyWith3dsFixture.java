@@ -21,12 +21,10 @@ import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
-import util.HeadlessWebDriver;
+import util.WebDriver3ds;
 
 import javax.money.MonetaryAmount;
 import javax.money.format.MonetaryFormats;
@@ -51,15 +49,17 @@ import java.util.concurrent.TimeUnit;
 public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
     private static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
+    private static final String baseRedirectUrl = "http://dev.commercetools.com/search.html?stp=1&stq=";
+
     private static final Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyWith3dsFixture.class);
 
-    private HeadlessWebDriver webDriver;
+    private WebDriver3ds webDriver;
 
     private Map<String, String> successUrlForPayment;
 
     @Before
     public void setUp() {
-        webDriver = new HeadlessWebDriver();
+        webDriver = new WebDriver3ds();
         successUrlForPayment = new HashMap<>();
     }
 
@@ -94,9 +94,9 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
                         ImmutableMap.<String, Object>builder()
                                 .put(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, pseudocardpan)
                                 .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage())
-                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, "https://www.google.de/#q=" + URLEncoder.encode(paymentName + " Success", "UTF-8"))
-                                .put(CustomFieldKeys.ERROR_URL_FIELD, "https://www.google.de/#q=" + URLEncoder.encode(paymentName + " Error", "UTF-8"))
-                                .put(CustomFieldKeys.CANCEL_URL_FIELD, "https://www.google.de/#q=" + URLEncoder.encode(paymentName + " Cancel", "UTF-8"))
+                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8"))
+                                .put(CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8"))
+                                .put(CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8"))
                                 .put(CustomFieldKeys.REFERENCE_FIELD, "myGlobalKey")
                                 .build()))
                 .build();
@@ -176,7 +176,8 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
                     .map(i -> i.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
                     .orElse(EMPTY_STRING);
 
-            successUrlForPayment.put(paymentName, getUrlAfter3dsVerification(responseRedirectUrl));
+            final String successUrl = webDriver.execute3dsRedirectWithPassword(responseRedirectUrl, getTestData3DsPassword());
+            successUrlForPayment.put(paymentName, successUrl);
         }
 
         return successUrlForPayment.size() == paymentNamesList.size();
@@ -188,18 +189,6 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
         final String transactionId = getIdOfLastTransaction(payment);
 
         return getInteractionRedirect(payment, transactionId).isPresent();
-    }
-
-    protected String getUrlAfter3dsVerification(final String responseRedirectUrl) throws InterruptedException {
-        if (responseRedirectUrl == null || responseRedirectUrl.isEmpty()) {
-            return EMPTY_STRING;
-        }
-
-        webDriver.navigate().to(responseRedirectUrl);
-        WebElement element = webDriver.findElement(By.xpath("//input[@name=\"password\"]"));
-        element.sendKeys(getTestData3DsPassword());
-        element.submit();
-        return webDriver.getCurrentUrl();
     }
 
     public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws InterruptedException, ExecutionException {

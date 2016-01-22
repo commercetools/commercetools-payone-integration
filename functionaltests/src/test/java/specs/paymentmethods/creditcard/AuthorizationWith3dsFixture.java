@@ -20,12 +20,10 @@ import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
-import util.HeadlessWebDriver;
+import util.WebDriver3ds;
 
 import javax.money.MonetaryAmount;
 import javax.money.format.MonetaryFormats;
@@ -49,11 +47,11 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationWith3dsFixture.class);
 
-    private HeadlessWebDriver webDriver;
+    private WebDriver3ds webDriver;
 
     @Before
     public void setUp() {
-        webDriver = new HeadlessWebDriver();
+        webDriver = new WebDriver3ds();
     }
 
     @After
@@ -176,10 +174,6 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
             return EMPTY_STRING;
         }
 
-        webDriver.navigate().to(responseRedirectUrl);
-        WebElement element = webDriver.findElement(By.xpath("//input[@name=\"password\"]"));
-        element.sendKeys(getTestData3DsPassword());
-        element.submit();
-        return webDriver.getCurrentUrl();
+        return webDriver.execute3dsRedirectWithPassword(responseRedirectUrl, getTestData3DsPassword());
     }
 }
