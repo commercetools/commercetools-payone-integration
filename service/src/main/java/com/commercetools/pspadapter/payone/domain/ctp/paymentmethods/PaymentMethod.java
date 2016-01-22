@@ -31,7 +31,8 @@ public enum PaymentMethod {
      * @see MethodKeys#WALLET_PAYPAL
      */
     WALLET_PAYPAL(MethodKeys.WALLET_PAYPAL,
-                    TransactionType.AUTHORIZATION);
+                    TransactionType.AUTHORIZATION,
+                    TransactionType.CHARGE);
 
     private String key;
     private ImmutableSet<TransactionType> supportedTransactionTypes;

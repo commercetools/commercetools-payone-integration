@@ -54,7 +54,7 @@ public class PayonePostServiceImpl implements PayonePostService {
             LOG.info("Payone POST response: " + serverResponse);
             return buildMapFromResultParams(serverResponse);
         } catch (UnirestException | UnsupportedEncodingException e) {
-            throw new PayoneException("Payone POST request failed.", e);
+            throw new PayoneException("Payone POST request failed. Cause: " + e.getMessage(), e);
         }
     }
 
