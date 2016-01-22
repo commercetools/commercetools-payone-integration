@@ -23,6 +23,7 @@ import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractio
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionTimestamp;
 import io.sphere.sdk.payments.commands.updateactions.SetAuthorization;
+import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.payments.commands.updateactions.SetInterfaceId;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
@@ -111,7 +112,8 @@ public class ChargeTransactionExecutor extends IdempotentTransactionExecutor {
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
-                        SetInterfaceId.of(response.get("txid"))));
+                        SetInterfaceId.of(response.get("txid")),
+                        SetCustomField.ofObject(CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"))));
             } else {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, response.toString() /* TODO */,
