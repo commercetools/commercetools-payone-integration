@@ -66,7 +66,7 @@ public class CreditCardRequestFactoryTest {
     @Test
     public void createFullPreauthorizationRequestFromValidPayment() throws Exception {
 
-        Payment payment = payments.dummyPaymentOneAuthPending20Euro();
+        Payment payment = payments.dummyPaymentOneAuthPending20EuroCC();
         Order order = payments.dummyOrderMapToPayoneRequest();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         CreditCardPreauthorizationRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
@@ -135,7 +135,7 @@ public class CreditCardRequestFactoryTest {
 
     @Test
     public void createFullAuthorizationRequestFromValidPayment() throws Exception {
-        Payment payment = payments.dummyPaymentOneAuthPending20Euro();
+        Payment payment = payments.dummyPaymentOneAuthPending20EuroCC();
         Order order = payments.dummyOrderMapToPayoneRequest();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         CreditCardAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);

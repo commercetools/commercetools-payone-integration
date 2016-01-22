@@ -77,7 +77,7 @@ public class AuthorizationTransactionExecutorTest {
 
     @Test
     public void pendingAuthorizationNotExecuted() throws Exception {
-        Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
+        Payment payment = testHelper.dummyPaymentOneAuthPending20EuroCC();
         Transaction transaction = payment.getTransactions().stream().filter(t -> t.getState().equals(TransactionState.PENDING)).findFirst().get();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
 

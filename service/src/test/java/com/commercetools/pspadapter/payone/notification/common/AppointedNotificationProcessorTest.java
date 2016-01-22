@@ -164,7 +164,7 @@ public class AppointedNotificationProcessorTest {
     @SuppressWarnings("unchecked")
     public void processingNotificationForPendingAuthorizationTransactionChangesStateToSuccess() throws Exception {
         // arrange
-        final Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
+        final Payment payment = testHelper.dummyPaymentOneAuthPending20EuroCC();
         notification.setBalance("20.00");
 
         // act

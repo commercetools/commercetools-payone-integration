@@ -80,7 +80,7 @@ public class CaptureNotificationProcessorTest {
     @SuppressWarnings("unchecked")
     public void processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending() throws Exception {
         // arrange
-        final Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
+        final Payment payment = testHelper.dummyPaymentOneAuthPending20EuroCC();
         payment.getTransactions().clear();
 
         notification.setTransactionStatus(TransactionStatus.PENDING);
@@ -126,7 +126,7 @@ public class CaptureNotificationProcessorTest {
     @SuppressWarnings("unchecked")
     public void processingCompletedNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending() throws Exception {
         // arrange
-        final Payment payment = testHelper.dummyPaymentOneAuthPending20Euro();
+        final Payment payment = testHelper.dummyPaymentOneAuthPending20EuroCC();
         payment.getTransactions().clear();
 
         // act

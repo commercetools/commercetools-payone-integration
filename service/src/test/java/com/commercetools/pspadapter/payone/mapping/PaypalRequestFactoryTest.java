@@ -52,8 +52,9 @@ public class PaypalRequestFactoryTest {
     @Test
      public void createFullPreauthorizationRequestFromValidPayment() throws Exception {
 
-        Payment payment = payments.dummyPaymentOneAuthPending20Euro();
+        Payment payment = payments.dummyPaymentOneAuthPending20EuroPPE();
         Order order = payments.dummyOrderMapToPayoneRequest();
+
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         WalletPreauthorizationRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
         SoftAssertions softly = new SoftAssertions();
@@ -68,8 +69,9 @@ public class PaypalRequestFactoryTest {
         softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
 
         //clearing type
-        String clearingType = ClearingType.getClearingTypeByKey("WALLET-PAYPAL").getPayoneCode();
-        softly.assertThat(result.getClearingtype()).isEqualTo(clearingType);
+        ClearingType clearingType = ClearingType.getClearingTypeByKey("WALLET-PAYPAL");
+        softly.assertThat(result.getClearingtype()).isEqualTo(clearingType.getPayoneCode());
+        softly.assertThat(result.getWallettype()).isEqualTo(clearingType.getSubType());
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber().get());
@@ -119,8 +121,9 @@ public class PaypalRequestFactoryTest {
     @Test
     public void createFullAuthorizationRequestFromValidPayment() throws Exception {
 
-        Payment payment = payments.dummyPaymentOneAuthPending20Euro();
+        Payment payment = payments.dummyPaymentOneAuthPending20EuroPPE();
         Order order = payments.dummyOrderMapToPayoneRequest();
+
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         WalletAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
         SoftAssertions softly = new SoftAssertions();
@@ -135,8 +138,9 @@ public class PaypalRequestFactoryTest {
         softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
 
         //clearing type
-        String clearingType = ClearingType.getClearingTypeByKey("WALLET-PAYPAL").getPayoneCode();
-        softly.assertThat(result.getClearingtype()).isEqualTo(clearingType);
+        ClearingType clearingType = ClearingType.getClearingTypeByKey("WALLET-PAYPAL");
+        softly.assertThat(result.getWallettype()).isEqualTo(clearingType.getSubType());
+        softly.assertThat(result.getClearingtype()).isEqualTo(clearingType.getPayoneCode());
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber().get());

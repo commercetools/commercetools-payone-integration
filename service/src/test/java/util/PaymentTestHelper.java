@@ -45,8 +45,12 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentNoTransaction20EuroPlanned.json");
     }
 
-    public Payment dummyPaymentOneAuthPending20Euro() throws Exception {
-        return getPaymentFromFile("dummyPaymentOneAuthPending20Euro.json");
+    public Payment dummyPaymentOneAuthPending20EuroCC() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_CC.json");
+    }
+
+    public Payment dummyPaymentOneAuthPending20EuroPPE() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_PPE.json");
     }
 
     public Payment dummyPaymentOneAuthPending20EuroPendingResponse() throws Exception {
