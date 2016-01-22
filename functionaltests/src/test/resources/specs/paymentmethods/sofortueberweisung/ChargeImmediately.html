@@ -25,7 +25,40 @@
 <div class="example">
     <h3>Charge immediately</h3>
     <p>
-        //TODO
+        Given the following payments for
+        <em>a Sofortüberweisung account that does <b>not</b> support charges for currencies other than EUR</em>:
+    </p>
+    <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#centAmount">Cent Amount</th>
+            <th c:set="#currencyCode">Currency Code</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>406</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 2</td>
+            <td>91341</td>
+            <td>USD</td>
+            <td></td>
+        </tr>
+    </table>
+    <p>
+        Due to difficulties during testing, unfortunately we can not provide an automated test here. The test was carried out
+        manually with the result, that Payment 2 was denied as expected. Payment 1 received the redirect url successfully, but
+        when following the url and acknowledging the payment, we unexpectedly received an <b>appointed/completed</b> notification with
+        <b>sequencenumber 1</b>. The Charge transaction can not be matched because it was processed with sequencenumber 0. This
+        is not a behavior expected from the docs by PAYONE and is also related to the issue for PAYPAL ChargeImmediately.
+    </p>
+    <p>
+        You can see both examples in the commercetools platform:
+        Payment 1 - 9f0a9d65-5200-4aeb-8e4c-d97282250667
+        Payment 2 - adf0ea2d-922f-482b-b36a-e9fb246cee6a
     </p>
 </div>
 </body>
