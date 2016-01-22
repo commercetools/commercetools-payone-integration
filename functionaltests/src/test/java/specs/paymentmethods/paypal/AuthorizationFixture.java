@@ -3,7 +3,6 @@ package specs.paymentmethods.paypal;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
@@ -17,8 +16,6 @@ import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.runner.RunWith;
 import specs.BaseFixture;
 import util.WebDriverPaypal;
@@ -43,23 +40,7 @@ import java.util.concurrent.ExecutionException;
 @RunWith(ConcordionRunner.class)
 public class AuthorizationFixture extends BaseFixture {
 
-    private WebDriverPaypal webDriver;
-
-    private static final String baseRedirectUrl = "http://dev.commercetools.com/search.html?stp=1&stq=";
-
-    private static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
-
-    private Map<String, String> successUrlForPayment;
-
-    @Before
-    public void setUp() {
-        webDriver = new WebDriverPaypal();
-    }
-
-    @After
-    public void tearDown() {
-        webDriver.quit();
-    }
+    private static final String baseRedirectUrl = "https://github.com/sphereio/sphere-jvm-sdk/search?q=";
 
     public String createPayment(
             final String paymentName,
@@ -138,8 +119,11 @@ public class AuthorizationFixture extends BaseFixture {
         final String transactionId = getIdOfLastTransaction(payment);
         final String responseRedirectUrl = payment.getCustom().getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD);
 
-        String successUrl = new WebDriverPaypal().executePaypalPayment(responseRedirectUrl, getTestDataPaypalEmail(), getTestDataPaypalPassword());
+        //need to create new webDriver for each payment because of Paypal session handling
+        WebDriverPaypal webDriver = new WebDriverPaypal();
+        String successUrl = webDriver.executePaypalPayment(responseRedirectUrl, getTestDataPaypalEmail(), getTestDataPaypalPassword());
         successUrl = successUrl.replace(baseRedirectUrl, "[...]");
+        webDriver.quit();
 
         //wait just a little until notification was processed (is triggered immediately after verification)
         Thread.sleep(100);
@@ -166,23 +150,4 @@ public class AuthorizationFixture extends BaseFixture {
 
         return getInteractionRedirect(payment, transactionId).isPresent();
     }
-
-
- /*protected  void resetCommercetoolsPlatform() {
-        // TODO jw: use futures
-        // delete all orders
-        ctpClient().complete(OrderQuery.of().withLimit(500)).getResults()
-                .forEach(order -> ctpClient().complete(OrderDeleteCommand.of(order)));
-
-        // delete all carts
-        ctpClient().complete(CartQuery.of().withLimit(500)).getResults()
-                .forEach(cart -> ctpClient().complete(CartDeleteCommand.of(cart)));
-
-        // delete all payments
-        ctpClient().complete(PaymentQuery.of().withLimit(500)).getResults()
-                .forEach(payment -> ctpClient().complete(PaymentDeleteCommand.of(payment)));
-
-         ctpClient().complete(TypeQuery.of().withLimit(500)).getResults()
-                 .forEach(type -> ctpClient().complete(TypeDeleteCommand.of(type)));
-    }*/
 }

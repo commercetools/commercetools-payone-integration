@@ -2,14 +2,10 @@ package util;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
-import com.gargoylesoftware.htmlunit.WebClient;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -22,39 +18,27 @@ import java.util.concurrent.TimeUnit;
  * @author fhaertig
  * @since 22.01.16
  */
-public class WebDriverPaypal extends HtmlUnitDriver{
+public class WebDriverPaypal extends FirefoxDriver{
 
     private static final Logger LOG = LoggerFactory.getLogger(WebDriverPaypal.class);
 
     private static final int DEFAULT_TIMEOUT = 10;
 
     public WebDriverPaypal() {
-        super(BrowserVersion.FIREFOX_38, false);
+        super();
 
         this.manage().timeouts().implicitlyWait(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
         this.manage().timeouts().pageLoadTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
         this.manage().timeouts().setScriptTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
-
-        final WebClient webClient = getWebClient();
-        webClient.getOptions().setThrowExceptionOnScriptError(false);
-        webClient.getOptions().setPopupBlockerEnabled(true);
-
-        webClient.setIncorrectnessListener((message, origin) -> {
-            //swallow these messages
-        });
-        webClient.setCssErrorHandler(new SilentCssErrorHandler());
     }
 
-    public void doLogin(final String email, final String password) {
-        try {
-            WebElement loginEmailInput = this.findElement(By.id("login_email"));
-            WebElement loginPwInput = this.findElement(By.id("login_password"));
-            loginEmailInput.sendKeys(email);
-            loginPwInput.sendKeys(password);
-            loginPwInput.submit();
-        } catch (NoSuchElementException ex) {
-            LOG.info("already logged in or login input fields not found.");
-        }
+    private void doLogin(final String email, final String password) {
+        WebElement loginEmailInput = this.findElement(By.id("login_email"));
+        WebElement loginPwInput = this.findElement(By.id("login_password"));
+        loginEmailInput.sendKeys(email);
+        loginPwInput.sendKeys(password);
+        WebElement submitButton = this.findElement(By.id("submitLogin"));
+        submitButton.click();
     }
 
 
@@ -62,10 +46,11 @@ public class WebDriverPaypal extends HtmlUnitDriver{
         this.navigate().to(url);
         doLogin(email, password);
 
-        WebElement payButton = this.findElement(By.xpath("//input[@id=\"continue\"]"));
-        payButton.submit();
-
         final Wait<WebDriver> wait = new WebDriverWait(this, 10);
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("continue")));
+        WebElement payButton = this.findElement(By.id("continue"));
+        payButton.click();
+
         wait.until(not(ExpectedConditions.urlContains("paypal")));
 
         return this.getCurrentUrl();

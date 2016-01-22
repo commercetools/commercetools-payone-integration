@@ -54,9 +54,10 @@ public class WebDriver3ds extends HtmlUnitDriver {
     public String execute3dsRedirectWithPassword(final String url, final String password) {
         navigate().to(url);
 
-        final WebElement element = findElement(By.xpath("//input[@name=\"password\"]"));
-        element.sendKeys(password);
-        element.submit();
+        final WebElement pwInput = findElement(By.cssSelector("input[type=password]"));
+        pwInput.sendKeys(password);
+        final WebElement submitButton = findElement(By.cssSelector("input[name=send]"));
+        submitButton.click();
 
         // Wait for redirect to complete
         final Wait<WebDriver> wait = new WebDriverWait(this, 10);
