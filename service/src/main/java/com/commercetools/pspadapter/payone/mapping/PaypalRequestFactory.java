@@ -2,6 +2,7 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPreauthorizationRequest;
 import com.google.common.base.Preconditions;
@@ -28,10 +29,11 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
     @Override
     public WalletPreauthorizationRequest createPreauthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
 
-        WalletPreauthorizationRequest request = new WalletPreauthorizationRequest(getConfig(), "PPE");
-
         final Payment ctPayment = paymentWithCartLike.getPayment();
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
+
+        final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
+        WalletPreauthorizationRequest request = new WalletPreauthorizationRequest(getConfig(), clearingSubType);
 
         //TODO: determine from custom object definition if not present at Order
         paymentWithCartLike.getOrderNumber().ifPresent(request::setReference);
@@ -72,10 +74,11 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
     @Override
     public WalletAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
 
-        WalletAuthorizationRequest request = new WalletAuthorizationRequest(getConfig(), "PPE");
-
         final Payment ctPayment = paymentWithCartLike.getPayment();
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
+
+        final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
+        WalletAuthorizationRequest request = new WalletAuthorizationRequest(getConfig(), clearingSubType);
 
         //TODO: determine from custom object definition if not present at Order
         paymentWithCartLike.getOrderNumber().ifPresent(request::setReference);

@@ -11,18 +11,9 @@ import java.util.Map;
  * @since 11.12.15
  */
 public enum ClearingType {
-    PAYONE_ELV("PayoneELV", "elv", ""),
     PAYONE_CC("CREDIT_CARD", "cc", ""),
-    PAYONE_VOR("PayoneVOR", "vor", ""),
-    PAYONE_REC("PayoneREC", "rec", ""),
-    PAYONE_COD("PayoneCOD", "cod", ""),
-    PAYONE_PPE("WALLET-PAYPAL", "wlt", ""),
-    PAYONE_SU("PayoneSU", "sb", "PNT"),
-    PAYONE_EPS("PayoneEPS", "sb", "EPS"),
-    PAYONE_GP("PayoneGP", "sb", "GPY"),
-    PAYONE_PFF("PayonePFF", "sb", "PFF"),
-    PAYONE_PFC("PayonePFC", "sb", "PFC"),
-    PAYONE_BSV("PayoneBSV", "fnc", "BSV");
+    PAYONE_PPE("WALLET-PAYPAL", "wlt", "PPE"),
+    PAYONE_PNT("BANK_TRANSFER-SOFORTUEBERWEISUNG", "sb", "PNT");
 
     private final String key;
     /**
