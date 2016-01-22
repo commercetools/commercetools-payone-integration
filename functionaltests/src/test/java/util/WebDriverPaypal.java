@@ -2,6 +2,7 @@ package util;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 
+import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -25,11 +26,11 @@ public class WebDriverPaypal extends HtmlUnitDriver {
     private static final int DEFAULT_TIMEOUT = 10;
 
     public WebDriverPaypal() {
-        super();
-
         this.manage().timeouts().implicitlyWait(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
         this.manage().timeouts().pageLoadTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
         this.manage().timeouts().setScriptTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
+
+        getWebClient().setCssErrorHandler(new SilentCssErrorHandler());
     }
 
     private void doLogin(final String email, final String password) {
