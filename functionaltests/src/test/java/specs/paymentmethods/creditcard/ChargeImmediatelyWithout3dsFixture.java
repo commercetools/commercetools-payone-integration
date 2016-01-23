@@ -10,11 +10,12 @@ import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
 import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
-import io.sphere.sdk.payments.TransactionDraft;
 import io.sphere.sdk.payments.TransactionDraftBuilder;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
+import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
+import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
@@ -28,8 +29,6 @@ import javax.money.format.MonetaryFormats;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -52,18 +51,12 @@ public class ChargeImmediatelyWithout3dsFixture extends BaseFixture {
 
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
 
-        final List<TransactionDraft> transactions = Collections.singletonList(TransactionDraftBuilder
-                .of(TransactionType.valueOf(transactionType), monetaryAmount, ZonedDateTime.now())
-                .state(TransactionState.PENDING)
-                .build());
-
         final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
                 .paymentMethodInfo(PaymentMethodInfoBuilder.of()
                         .method(paymentMethod)
                         .paymentInterface("PAYONE")
                         .build())
                 .amountPlanned(monetaryAmount)
-                .transactions(transactions)
                 .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
                         CustomTypeBuilder.PAYMENT_CREDIT_CARD,
                         ImmutableMap.of(
@@ -77,6 +70,15 @@ public class ChargeImmediatelyWithout3dsFixture extends BaseFixture {
         registerPaymentWithLegibleName(paymentName, payment);
 
         createCartAndOrderForPayment(payment, currencyCode);
+
+        ctpClient.complete(PaymentUpdateCommand.of(
+                payment,
+                AddTransaction.of(TransactionDraftBuilder.of(
+                        TransactionType.valueOf(transactionType),
+                        monetaryAmount,
+                        ZonedDateTime.now())
+                        .state(TransactionState.PENDING)
+                        .build())));
 
         return payment.getId();
     }

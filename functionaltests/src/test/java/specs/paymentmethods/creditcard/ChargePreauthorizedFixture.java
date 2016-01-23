@@ -23,7 +23,6 @@ import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
 import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
-import io.sphere.sdk.payments.TransactionDraft;
 import io.sphere.sdk.payments.TransactionDraftBuilder;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
@@ -44,8 +43,6 @@ import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
@@ -108,17 +105,11 @@ public class ChargePreauthorizedFixture extends BaseFixture {
     }
 
      private String preparePaymentWithPreauthorizedAmountAndOrder(final MonetaryAmount monetaryAmount, final String paymentMethod) throws Exception {
-         final List<TransactionDraft> transactions = Collections.singletonList(TransactionDraftBuilder
-                 .of(TransactionType.AUTHORIZATION, monetaryAmount, ZonedDateTime.now())
-                 .state(TransactionState.PENDING)
-                 .build());
-
          final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
                  .paymentMethodInfo(PaymentMethodInfoBuilder.of()
                          .method(paymentMethod)
                          .paymentInterface("PAYONE")
                          .build())
-                 .transactions(transactions)
                  .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
                          CustomTypeBuilder.PAYMENT_CREDIT_CARD,
                          ImmutableMap.of(
@@ -142,6 +133,11 @@ public class ChargePreauthorizedFixture extends BaseFixture {
                  )));
 
          ctpClient.complete(OrderFromCartCreateCommand.of(OrderFromCartDraft.of(cart, getRandomOrderNumber(), PaymentState.PENDING)));
+
+         ctpClient.complete(PaymentUpdateCommand.of(payment, AddTransaction.of(TransactionDraftBuilder
+                 .of(TransactionType.AUTHORIZATION, monetaryAmount, ZonedDateTime.now())
+                 .state(TransactionState.PENDING)
+                 .build())));
 
          HttpResponse response = sendGetRequestToUrl(getHandlePaymentUrl(payment.getId()));
 
