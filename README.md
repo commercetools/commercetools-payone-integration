@@ -8,10 +8,6 @@ and the [PAYONE](http://www.payone.de) payment service provider API.
 It is a standalone Microservice that connects the two cloud platforms and provides own helper APIs to checkout
 implementations. 
 
-(remove after public:) 
- * There is a public hipchat support room for all things CT API and JVM SDK https://www.hipchat.com/gCOStFSHE
- * Same for skype: https://join.skype.com/dc9D8GW9SFnp 
- 
 ## Resources
  * commercetools API documentation at http://dev.commercetools.com
  * commercetools JVM SDK Javadoc at http://sphereio.github.io/sphere-jvm-sdk/javadoc/master/index.html
@@ -24,36 +20,41 @@ implementations.
  
 ## Using the Integration in a project
 
-TODO
+TODO link to generic tutorial on microservice payment integrations when available
 
 ### Required Configuration in commercetools
 
-TODO
+ * Make sure your project contains the recommended custom types for the payment methods you intend to use as documented here https://github.com/nkuehn/payment-specs
+  * This integration can automatically create them (e.g. used in integration tests of the integration itself), but this is not the recommended production process.
+ * In the code that creates payments, have a good plan on how to fill the "reference" custom field. 
+   It appears on the customer's account statement and must be unique.  Often the Order Number is used, but this may not always suffice. 
+
+#### Domain Constraints 
+
+ 1. If the PAYONE invoice generation feature or the Klarna payment methods are to be supported, the checkout has to make
+    sure that 
+    `amountPlanned = Sum over all Line Items ( round ( totalPrice.centAmount / quantity ) * quantity ))` 
+    and handle deviations accordingly.  Deviations can especially occur if absolute discounts are applied and there are
+    Line Items with quantity > 1.  On deviations the Line Item Data will not be transferred to PAYONE. 
 
 ### Required Configuration in PAYONE
 
 https://pmi.pay1.de/
 
- * create a Payment Portal of type "Shop" for the site you are planning (please also maintain separate portal for 
+ * Create a Payment Portal of type "Shop" for the site you are planning (please also maintain separate portal for 
    automated testing, demo systems etc.)
- * set the hashing algorithm to sha2-384  ("advanced" tab in the portal config)
- * put the notification listener URL of where you will deploy the microservice into "Transaction Status URL" in the 
-   "advanced" tab of the portal
- * configure the "riskcheck" settings as intended (esp. 3Dsecure)
+ * Set the hashing algorithm to sha2-384  ("advanced" tab in the portal config)
+ * Put the notification listener URL of where you will deploy the microservice into "Transaction Status URL" in the 
+   "advanced" tab of the portal. The value typically is https://{your-service-instance.example.com}/payone/notification .  
+ * Configure the "riskcheck" settings as intended (esp. 3Dsecure)
 
--> DO NOT USE A MERCHANT ACCOUNT ACROSS commercetools projects, you may end up mixing customer accounts (debitorenkonten). 
+> Do not use a merchant account across commercetools projects, you may end up mixing customer accounts (debitorenkonten). 
 
-### Configuration Options of the Integration itself
+#### Configuration of the Integration Service itself
 
-TODO 
+The integration service requires - _unless otherwise stated_ - the following environment variables. 
 
-### Deploy and Run
-
-TODO docker and (complete) heroku options
-
-#### Configuration via Environment Variables
-
-The integration service requires - _unless otherwise stated_ - the following environment variables:
+At the end of this README you can find a copy/past shell template that sets the variables.
 
 ##### commercetools API client credentials
 
@@ -67,6 +68,8 @@ Can be found in [Commercetools Merchant Center](https://admin.sphere.io/).
 
 ##### PAYONE API client credentials
 
+All required. 
+
 Name | Content
 ---- | -------
 `PAYONE_PORTAL_ID` | Payment portal ID
@@ -75,6 +78,8 @@ Name | Content
 `PAYONE_SUBACC_ID` | Subaccount ID
 
 Can be found in the [PAYONE Merchant Interface](https://pmi.pay1.de/).
+
+These credentials should not be necessary in the frontend application if all transaction initiation is done through this service. 
 
 ##### Service configuration parameters
 
@@ -87,17 +92,41 @@ Name | Content | Default
 `PAYONE_MODE` | the mode of operation with PAYONE <ul><li>`"live"` for production mode, (i.e. _actual payments_) or</li><li>`"test"` for test mode</li></ul> | `"test"`  
 `CT_START_FROM_SCRATCH` | :warning: _**Handle with care!**_ If and only if equal, ignoring case, to `"true"` the service will create the custom types it needs. _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. See [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34). | `"false"`
 
-### Notes to the checkout implementation
+### Build
 
- 1. If the PAYONE invoice generation feature or the Klarna payment methods are to be supported, the checkout has to make
-    sure that 
-    `amountPlanned = Sum over all Line Items ( round ( totalPrice.centAmount / quantity ) * quantity ))` 
-    and handle deviations accordingly.  Deviations can especially occur if absolute discounts are applied and there are
-    Line Items with quantity > 1.  On deviations the Line Item Data will not be transferred to PAYONE. 
+The Integration is built as a "fat jar" that can be directly started via  the `java -jar` command. The jar is built as follows:
+
+```
+./gradlew :service:jar
+```
+
+The resulting artifact location is `service/target/libs/service-0.1-SNAPSHOT.jar`.
+
+### Deploy and Run
+
+TODO docker and (complete) heroku options
+
+TODO SSL
+
+TODO availability of the /payone/notification URL to the public or just the payone servers. 
 
 ## Test environments
 
-SEE PAYONE DOCUMENTATION - ALL TEST DATA THERE, JUST PAYPAL REQUIRES AN OWN ACCOUNT
+Via the Payone PMI you have access to a full set of test data, which are implemented in the integration tests
+of this integration. 
+
+As a notable exception, testing PayPal payments requires an own developer sandbox account at PayPal (see below). 
+Please note that the Payone documentation is a but out of date concerning the session handling (the PayPal 
+sandbox test buyers do not require a previous developer account login any more).  
+
+### Development workflow
+
+> TODO document best practice on how to work in day-to-day development, esp. on how local machine, travis and heroku play together.  
+
+The integration tests of this implementation use a heroku instance of the service. If you are authorized to configure it. 
+the backend can be found at https://dashboard.heroku.com/apps/ct-p1-integration-staging/resources . 
+
+Please do not access this instance for playgroud or experimental reasons as you may risk breaking running automated integration tests. 
 
 ### Functional Tests
 
@@ -122,6 +151,8 @@ To run the executable specification invoke the following command line:
 ./gradlew :functionaltests:cleanTest :functionaltests:testSpec
 ```
 
+The tests take a faily long time to run as they have to wait for the Payone notification calls to arrive.
+
 Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the specification) has changed.
 
 ### Paypal Sandbox Account
@@ -140,8 +171,6 @@ For the time being, the following sandbox buyer can be used
 
 If you want to add a useful functionality or found a bug please open an issue here to announce and discuss what you
 have in mind.  Then fork the project somewhere or in GitHub and create a pull request here once you're done. 
-
-fooBar (target group are solution implementors using the integration)
 
 ## Development Notes
 
