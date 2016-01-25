@@ -80,6 +80,10 @@ public class CreditCardRequestFactoryTest {
         softly.assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
         softly.assertThat(result.getMode()).isEqualTo(config.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
+        softly.assertThat(result.getSolutionName()).isEqualTo(config.getSolutionName());
+        softly.assertThat(result.getSolutionVersion()).isEqualTo(config.getSolutionVersion());
+        softly.assertThat(result.getIntegratorName()).isEqualTo(config.getIntegratorName());
+        softly.assertThat(result.getIntegratorVersion()).isEqualTo(config.getIntegratorVersion());
 
         //clearing type
         String clearingType = ClearingType.getClearingTypeByKey(payment.getPaymentMethodInfo().getMethod()).getPayoneCode();
@@ -149,6 +153,10 @@ public class CreditCardRequestFactoryTest {
         softly.assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
         softly.assertThat(result.getMode()).isEqualTo(config.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
+        softly.assertThat(result.getSolutionName()).isEqualTo(config.getSolutionName());
+        softly.assertThat(result.getSolutionVersion()).isEqualTo(config.getSolutionVersion());
+        softly.assertThat(result.getIntegratorName()).isEqualTo(config.getIntegratorName());
+        softly.assertThat(result.getIntegratorVersion()).isEqualTo(config.getIntegratorVersion());
 
         //clearing type
         String clearingType = ClearingType.getClearingTypeByKey(payment.getPaymentMethodInfo().getMethod()).getPayoneCode();
@@ -211,6 +219,10 @@ public class CreditCardRequestFactoryTest {
         softly.assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
         softly.assertThat(result.getMode()).isEqualTo(config.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
+        softly.assertThat(result.getSolutionName()).isEqualTo(config.getSolutionName());
+        softly.assertThat(result.getSolutionVersion()).isEqualTo(config.getSolutionVersion());
+        softly.assertThat(result.getIntegratorName()).isEqualTo(config.getIntegratorName());
+        softly.assertThat(result.getIntegratorVersion()).isEqualTo(config.getIntegratorVersion());
 
         //monetary
         softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountAuthorized()).intValue());

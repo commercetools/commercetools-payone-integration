@@ -41,6 +41,30 @@ public class BaseRequest implements Serializable {
     private String apiVersion;
 
     /**
+     * Payone api version
+     */
+    @JsonProperty("solution_name")
+    private String solutionName;
+
+    /**
+     * Payone api version
+     */
+    @JsonProperty("solution_version")
+    private String solutionVersion;
+
+    /**
+     * Payone api version
+     */
+    @JsonProperty("integrator_name")
+    private String integratorName;
+
+    /**
+     * Payone api version
+     */
+    @JsonProperty("integrator_version")
+    private String integratorVersion;
+
+    /**
      * Defines request type (preauthorization, authorization, ...)
      */
     private String request;
@@ -63,6 +87,10 @@ public class BaseRequest implements Serializable {
         this.portalid = config.getPortalId();
         this.apiVersion = config.getApiVersion();
         this.request = requestType;
+        this.solutionName = config.getSolutionName();
+        this.solutionVersion = config.getSolutionVersion();
+        this.integratorName = config.getIntegratorName();
+        this.integratorVersion = config.getIntegratorVersion();
     }
 
     //**************************************************************
@@ -91,6 +119,22 @@ public class BaseRequest implements Serializable {
 
     public String getApiVersion() {
         return apiVersion;
+    }
+
+    public String getSolutionName() {
+        return solutionName;
+    }
+
+    public String getSolutionVersion() {
+        return solutionVersion;
+    }
+
+    public String getIntegratorName() {
+        return integratorName;
+    }
+
+    public String getIntegratorVersion() {
+        return integratorVersion;
     }
 
     //**************************************************************
