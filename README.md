@@ -150,4 +150,33 @@ Please bear in mind that this repository should be free of any IDE specific file
 
 ## Create a custom version
 
-Just fork it. The MIT License allows you to do anything with the code, commercially or noncommercial. :)
+Just fork it. The MIT License allows you to do anything with the code, commercially or noncommercial. 
+Contributing an Improvement is the better Idea though because you will save maintanance work when not forking. 
+
+## Appendix 1: Shell script template that sets the environment variables:
+
+(fill in the values required for your environment)
+
+```
+#!/bin/sh
+export CT_PROJECT_KEY=""
+export CT_CLIENT_ID=""
+export CT_CLIENT_SECRET=""
+export CT_START_FROM_SCRATCH="false"
+
+export PAYONE_KEY=""
+export PAYONE_MERCHANT_ID=""
+export PAYONE_MODE=""
+export PAYONE_PORTAL_ID=""
+export PAYONE_SUBACC_ID=""
+
+# from here on only test related
+
+export CT_PAYONE_INTEGRATION_URL=""
+
+export TEST_DATA_VISA_CREDIT_CARD_NO_3DS=""
+export TEST_DATA_VISA_CREDIT_CARD_3DS=""
+export TEST_DATA_3_DS_PASSWORD=""
+export TEST_DATA_PAYPAL_EMAIL=""
+export TEST_DATA_PAYPAL_PASSWORD=""
+```
