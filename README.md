@@ -109,6 +109,12 @@ Name | Content
 `CT_PAYONE_INTEGRATION_URL` | the URL of the service instance under test
 `TEST_DATA_VISA_CREDIT_CARD_NO_3DS` | the pseudocardpan of an unconfirmed VISA credit card
 `TEST_DATA_VISA_CREDIT_CARD_3DS` | the pseudocardpan of a VISA credit card verified by 3-D Secure
+`TEST_DATA_3_DS_PASSWORD` | the 3DS password of the test card. Payone Test Cards use `12345` 
+`TEST_DATA_PAYPAL_EMAIL` | the email address of the PayPal sandbox buyer to be used (see below). 
+`TEST_DATA_PAYPAL_PASSWORD` | the password of the PayPal sandbox buyer to be used. 
+
+> TODO document how to practically acquire the pseudocardpans (from the client API). Can this be automated?
+> TODO why does the 3DS pwd need an evironment variable if a fixed value? 
 
 To run the executable specification invoke the following command line:
 
@@ -124,19 +130,11 @@ https://developer.paypal.com/docs/classic/lifecycle/ug_sandbox/
 
 To test, you need to be logged in with the developer account and then use the Sandbox Buyer credentials in the checkout (see below). 
 
-Developer Acccount: create your own or use an existing company internal one (CT has one just in case)
+Developer Acccount: create your own or use an existing company internal one (CT has one just in case). 
 
-Interim Sandbox Merchant: nikolaus.kuehn+facilitator-1@commercetools.de
-
+For the time being, the following sandbox buyer can be used
+ * email: nikolaus.kuehn+buyer-1@commercetools.de  
  * Password: CT-test$
- * API user: nikolaus.kuehn+facilitator-1_api1.commercetools.de 
- * API password: J6JN4CNFGLGFFDDP
- * API signature: ADKylXE-6VhPNHJJ24JEiclO9bIyAjsZlJJJbpv6DkQJ15W1XkKa3BqV
-
-Interim Sanbox Buyer: nikolaus.kuehn+buyer-1@commercetools.de  
- 
- * Password: CT-test$
- * (has no API access) 
 
 ## Contribute Improvements
 
