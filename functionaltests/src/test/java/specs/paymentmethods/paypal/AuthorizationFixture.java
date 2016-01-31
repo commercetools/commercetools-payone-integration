@@ -123,7 +123,7 @@ public class AuthorizationFixture extends BaseFixture {
 
         //need to create new webDriver for each payment because of Paypal session handling
         WebDriverPaypal webDriver = new WebDriverPaypal();
-        String successUrl = webDriver.executePaypalPayment(responseRedirectUrl, getTestDataPaypalEmail(), getTestDataPaypalPassword());
+        String successUrl = webDriver.doLoginAndConfirmation(responseRedirectUrl, getTestDataPaypalAuthorization());
         successUrl = successUrl.replace(baseRedirectUrl, "[...]");
         webDriver.quit();
 

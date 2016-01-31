@@ -170,7 +170,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                 //need to create new webDriver for each payment because of Paypal session handling
                 WebDriverPaypal webDriver = new WebDriverPaypal();
                 final String successUrl =
-                        webDriver.executePaypalPayment(responseRedirectUrl.get(), getTestDataPaypalEmail(), getTestDataPaypalPassword())
+                        webDriver.doLoginAndConfirmation(responseRedirectUrl.get(), getTestDataPaypalCharge())
                                 .replace(baseRedirectUrl, "[...]");
                 webDriver.quit();
 

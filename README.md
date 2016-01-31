@@ -115,9 +115,10 @@ TODO availability of the /payone/notification URL to the public or just the payo
 Via the Payone PMI you have access to a full set of test data, which are implemented in the integration tests
 of this integration. 
 
-As a notable exception, testing PayPal payments requires an own developer sandbox account at PayPal (see below). 
-Please note that the Payone documentation is a but out of date concerning the session handling (the PayPal 
-sandbox test buyers do not require a previous developer account login any more).  
+As a notable exception, testing PayPal payments requires 2 own developer sandbox accounts at PayPal (see below).
+Please note that the Payone documentation is out of date concerning the session handling (the PayPal
+sandbox test buyers do not require a previous developer account login any more). Due to PayPals complex and restrictive
+browser session handling and the parallel execution of tests we were forced to use seperate accounts for each of the transaction types (see below).
 
 ### Development workflow
 
@@ -139,11 +140,12 @@ Name | Content
 `TEST_DATA_VISA_CREDIT_CARD_NO_3DS` | the pseudocardpan of an unconfirmed VISA credit card
 `TEST_DATA_VISA_CREDIT_CARD_3DS` | the pseudocardpan of a VISA credit card verified by 3-D Secure
 `TEST_DATA_3_DS_PASSWORD` | the 3DS password of the test card. Payone Test Cards use `12345` 
-`TEST_DATA_PAYPAL_EMAIL` | the email address of the PayPal sandbox buyer to be used (see below). 
-`TEST_DATA_PAYPAL_PASSWORD` | the password of the PayPal sandbox buyer to be used. 
+`TEST_DATA_PAYPAL_AUTH_EMAIL` | the email address of the first PayPal sandbox buyer to be used (see below).
+`TEST_DATA_PAYPAL_CHARGE_EMAIL` | the email address of the second PayPal sandbox buyer to be used (see below).
+`TEST_DATA_PAYPAL_PASSWORD` | the password of the PayPal sandbox buyer to be used, for simplicity it is the same for both accounts.
 
 > TODO document how to practically acquire the pseudocardpans (from the client API). Can this be automated?
-> TODO why does the 3DS pwd need an evironment variable if a fixed value? 
+> TODO why does the 3DS pwd need an evironment variable if a fixed value? --> is a parameter which could change in future
 
 To run the executable specification invoke the following command line:
 
@@ -151,21 +153,22 @@ To run the executable specification invoke the following command line:
 ./gradlew :functionaltests:cleanTest :functionaltests:testSpec
 ```
 
-The tests take a faily long time to run as they have to wait for the Payone notification calls to arrive.
+The tests take a fairly long time to run as they have to wait for the Payone notification calls to arrive.
 
 Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the specification) has changed.
 
 ### Paypal Sandbox Account
 
-https://developer.paypal.com/docs/classic/lifecycle/ug_sandbox/
+To test with Paypal, you need 2 seperate Sandbox Buyer credential sets in the checkout. This is due to parallel execution
+of the integration tests which is somehow influencing the browser sessions when simulating the click through.
 
-To test, you need to be logged in with the developer account and then use the Sandbox Buyer credentials in the checkout (see below). 
-
-Developer Acccount: create your own or use an existing company internal one (CT has one just in case). 
-
-For the time being, the following sandbox buyer can be used
+For the time being, the following sandbox buyers are used
+- for Paypal Authorization
  * email: nikolaus.kuehn+buyer-1@commercetools.de  
- * Password: CT-test$
+ * password: CT-test$
+- for Paypal ChargeImmediately
+ * email: zhtcfwgs@boximail.com
+ * password: CT-test$
 
 ## Contribute Improvements
 

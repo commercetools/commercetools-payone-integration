@@ -2,6 +2,7 @@ package util;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -23,32 +24,51 @@ public class WebDriverPaypal extends HtmlUnitDriver {
 
     private static final Logger LOG = LoggerFactory.getLogger(WebDriverPaypal.class);
 
-    private static final int DEFAULT_TIMEOUT = 10;
+    private static final int DEFAULT_TIMEOUT = 20;
 
     public WebDriverPaypal() {
+        super(BrowserVersion.FIREFOX_38, true);
+
         this.manage().timeouts().implicitlyWait(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
         this.manage().timeouts().pageLoadTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
         this.manage().timeouts().setScriptTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
         getWebClient().setCssErrorHandler(new SilentCssErrorHandler());
+        getWebClient().getOptions().setThrowExceptionOnScriptError(false);
+
+        getWebClient().getOptions().setUseInsecureSSL(true);
+        getWebClient().getOptions().setRedirectEnabled(true);
+        getWebClient().setJavaScriptTimeout(30000);
     }
 
-    private void doLogin(final String email, final String password) {
+    private void doLogin(final LoginData loginData) {
         WebElement loginEmailInput = this.findElement(By.id("login_email"));
         WebElement loginPwInput = this.findElement(By.id("login_password"));
-        loginEmailInput.sendKeys(email);
-        loginPwInput.sendKeys(password);
         WebElement submitButton = this.findElement(By.id("submitLogin"));
+
+        loginEmailInput.clear();
+        loginEmailInput.sendKeys(loginData.getAccountIdentifier());
+        loginPwInput.sendKeys(loginData.getPassword());
         submitButton.click();
     }
 
+    /**
+     * Executes an order of commands to click through a page flow e.g. for a redirect process.
+     *
+     * @param url the url where to enter the login information.
+     * @param loginData a container providing the account identifier (e.g. email) and password for login.
+     * @return the final url the user was redirected to after confirming the payment.
+     */
+    public synchronized String doLoginAndConfirmation(
+            final String url,
+            final LoginData loginData) {
 
-    public String executePaypalPayment(final String url, final String email, final String password) {
+        final Wait<WebDriver> wait = new WebDriverWait(this, DEFAULT_TIMEOUT);
+
         this.navigate().to(url);
-        doLogin(email, password);
-
-        final Wait<WebDriver> wait = new WebDriverWait(this, 10);
+        doLogin(loginData);
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("continue")));
+
         WebElement payButton = this.findElement(By.id("continue"));
         payButton.click();
 
