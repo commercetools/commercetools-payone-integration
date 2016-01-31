@@ -3,6 +3,7 @@ package util;
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.IncorrectnessListener;
 import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -24,10 +25,10 @@ public class WebDriverPaypal extends HtmlUnitDriver {
 
     private static final Logger LOG = LoggerFactory.getLogger(WebDriverPaypal.class);
 
-    private static final int DEFAULT_TIMEOUT = 20;
+    private static final int DEFAULT_TIMEOUT = 30;
 
     public WebDriverPaypal() {
-        super(BrowserVersion.FIREFOX_38, true);
+        super(BrowserVersion.FIREFOX_38, false);
 
         this.manage().timeouts().implicitlyWait(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
         this.manage().timeouts().pageLoadTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
@@ -38,7 +39,12 @@ public class WebDriverPaypal extends HtmlUnitDriver {
 
         getWebClient().getOptions().setUseInsecureSSL(true);
         getWebClient().getOptions().setRedirectEnabled(true);
-        getWebClient().setJavaScriptTimeout(30000);
+        getWebClient().setIncorrectnessListener(new IncorrectnessListener() {
+            @Override
+            public void notify(final String message, final Object origin) {
+                //silent
+            }
+        });
     }
 
     private void doLogin(final LoginData loginData) {
@@ -59,7 +65,7 @@ public class WebDriverPaypal extends HtmlUnitDriver {
      * @param loginData a container providing the account identifier (e.g. email) and password for login.
      * @return the final url the user was redirected to after confirming the payment.
      */
-    public synchronized String doLoginAndConfirmation(
+    public String doLoginAndConfirmation(
             final String url,
             final LoginData loginData) {
 
