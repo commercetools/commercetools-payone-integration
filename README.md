@@ -167,7 +167,7 @@ For the time being, the following sandbox buyers are used
  * email: nikolaus.kuehn+buyer-1@commercetools.de  
  * password: CT-test$
 - for Paypal ChargeImmediately
- * email: zhtcfwgs@boximail.com
+ * email: zukfiprz@boximail.com
  * password: CT-test$
 
 ## Contribute Improvements
