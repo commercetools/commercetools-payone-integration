@@ -115,10 +115,10 @@ TODO availability of the /payone/notification URL to the public or just the payo
 Via the Payone PMI you have access to a full set of test data, which are implemented in the integration tests
 of this integration. 
 
-As a notable exception, testing PayPal payments requires 2 own developer sandbox accounts at PayPal (see below).
-Please note that the Payone documentation is out of date concerning the session handling (the PayPal
-sandbox test buyers do not require a previous developer account login any more). Due to PayPals complex and restrictive
-browser session handling and the parallel execution of tests we were forced to use seperate accounts for each of the transaction types (see below).
+As a notable exception, testing PayPal payments requires developer sandbox accounts at PayPal (see [Paypal Sandbox Accounts](#paypal-sandbox-accounts)).
+
+:warning: Due to PayPal's complex and restrictive browser session handling and the parallel execution of tests (necessary due to PAYONE's notifications which take up to 7 minutes per transaction)
+a seperate account is required for each of the transaction types (see [Functional Tests configuration](#functional-tests)).
 
 ### Development workflow
 
@@ -127,7 +127,7 @@ browser session handling and the parallel execution of tests we were forced to u
 The integration tests of this implementation use a heroku instance of the service. If you are authorized to configure it. 
 the backend can be found at https://dashboard.heroku.com/apps/ct-p1-integration-staging/resources . 
 
-Please do not access this instance for playgroud or experimental reasons as you may risk breaking running automated integration tests. 
+Please do not access this instance for playground or experimental reasons as you may risk breaking running automated integration tests. 
 
 ### Functional Tests
 
@@ -157,10 +157,10 @@ The tests take a fairly long time to run as they have to wait for the Payone not
 
 Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the specification) has changed.
 
-### Paypal Sandbox Account
+### Paypal Sandbox Accounts
 
-To test with Paypal, you need 2 seperate Sandbox Buyer credential sets in the checkout. This is due to parallel execution
-of the integration tests which is somehow influencing the browser sessions when simulating the click through.
+To test with Paypal, you need seperate Sandbox Buyer credentials. This is due to parallel execution
+of the functional tests which is somehow influencing the browser sessions when simulating the click through.
 
 For the time being, the following sandbox buyers are used
 - for Paypal Authorization
