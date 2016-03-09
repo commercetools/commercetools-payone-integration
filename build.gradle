@@ -75,6 +75,17 @@ project(":service") {
         testCompile 'org.exparity:hamcrest-date:2.0.1'
         testCompile 'org.mockito:mockito-core:1.10.19'
     }
+
+    /*
+    build and start
+    ./gradlew stage && java -jar service/target/libs/commercetools-payone-integration.jar
+     */
+    shadowJar {
+        archiveName = "commercetools-payone-integration.jar"
+        manifest {
+            attributes 'Main-Class': 'com.commercetools.pspadapter.payone.ServiceFactory'
+        }
+    }
 }
 
 /**
