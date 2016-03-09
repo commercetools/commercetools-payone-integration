@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -cp service/target/libs/service-0.1-SNAPSHOT-all.jar com.commercetools.pspadapter.payone.ServiceFactory
+web: java $JAVA_OPTS -cp service/target/libs/commercetools-payone-integration.jar
