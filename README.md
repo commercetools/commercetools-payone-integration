@@ -97,10 +97,14 @@ Name | Content | Default
 The Integration is built as a "fat jar" that can be directly started via  the `java -jar` command. The jar is built as follows:
 
 ```
-./gradlew :service:jar
+./gradlew stage
 ```
 
-The resulting artifact location is `service/target/libs/service-0.1-SNAPSHOT.jar`.
+Run the JAR:
+
+```
+java -jar service/target/libs/commercetools-payone-integration.jar
+```
 
 ### Deploy and Run
 
