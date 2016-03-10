@@ -35,8 +35,8 @@ public class PaidNotificationProcessor extends NotificationProcessorBase {
     }
 
     @Override
-    protected NotificationAction supportedNotificationAction() {
-        return NotificationAction.PAID;
+    protected boolean canProcess(final Notification notification) {
+        return NotificationAction.PAID.equals(notification.getTxaction());
     }
 
     @Override

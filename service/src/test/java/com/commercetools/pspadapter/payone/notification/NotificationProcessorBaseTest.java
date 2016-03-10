@@ -56,8 +56,8 @@ public class NotificationProcessorBaseTest {
 
         final NotificationProcessorBase testee = new NotificationProcessorBase(client) {
             @Override
-            protected NotificationAction supportedNotificationAction() {
-                return txAction;
+            protected boolean canProcess(final Notification notification) {
+                return true;
             }
 
             @Override

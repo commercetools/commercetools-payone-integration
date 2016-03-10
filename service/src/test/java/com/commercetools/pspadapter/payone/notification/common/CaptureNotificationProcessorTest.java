@@ -72,11 +72,6 @@ public class CaptureNotificationProcessorTest {
     }
 
     @Test
-    public void supportsCaptureNotificationAction() {
-        assertThat(testee.supportedNotificationAction()).isSameAs(NotificationAction.CAPTURE);
-    }
-
-    @Test
     @SuppressWarnings("unchecked")
     public void processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending() throws Exception {
         // arrange

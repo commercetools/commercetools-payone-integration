@@ -34,8 +34,8 @@ public class CaptureNotificationProcessor extends NotificationProcessorBase {
     }
 
     @Override
-    protected NotificationAction supportedNotificationAction() {
-        return NotificationAction.CAPTURE;
+    protected boolean canProcess(final Notification notification) {
+        return NotificationAction.CAPTURE.equals(notification.getTxaction());
     }
 
     @Override

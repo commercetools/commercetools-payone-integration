@@ -44,8 +44,8 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
     }
 
     @Override
-    protected NotificationAction supportedNotificationAction() {
-        return NotificationAction.APPOINTED;
+    protected boolean canProcess(final Notification notification) {
+        return NotificationAction.APPOINTED.equals(notification.getTxaction());
     }
 
     @Override

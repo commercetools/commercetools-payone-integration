@@ -3,7 +3,6 @@ package com.commercetools.pspadapter.payone.notification;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
@@ -44,7 +43,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
 
     @Override
     public final void processTransactionStatusNotification(final Notification notification, final Payment payment) {
-            if (!notification.getTxaction().equals(supportedNotificationAction())) {
+        if (!canProcess(notification)) {
             throw new IllegalArgumentException(String.format(
                     "txaction \"%s\" is not supported by %s",
                     notification.getTxaction(),
@@ -59,10 +58,11 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
     }
 
     /**
-     * Gets the PAYONE "txaction" supported by the instance.
-     * @return the "txaction"
+     * Returns whether the provided PAYONE {@code notification) can be processed by this instance.
+     * @param notification a PAYONE notification
+     * @return whether the {@code notification) can be processed
      */
-    protected abstract NotificationAction supportedNotificationAction();
+    protected abstract boolean canProcess(final Notification notification);
 
     /**
      * Generates a list of update actions which can be applied to the payment in one step.
