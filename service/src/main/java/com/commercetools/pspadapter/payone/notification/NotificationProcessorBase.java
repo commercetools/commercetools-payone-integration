@@ -58,9 +58,9 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
     }
 
     /**
-     * Returns whether the provided PAYONE {@code notification) can be processed by this instance.
+     * Returns whether the provided PAYONE {@code notification} can be processed by this instance.
      * @param notification a PAYONE notification
-     * @return whether the {@code notification) can be processed
+     * @return whether the {@code notification} can be processed
      */
     protected abstract boolean canProcess(final Notification notification);
 
