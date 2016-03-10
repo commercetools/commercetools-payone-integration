@@ -103,7 +103,7 @@ The Integration is built as a "fat jar" that can be directly started via  the `j
 Run the JAR:
 
 ```
-java -jar service/target/libs/commercetools-payone-integration.jar
+java -jar service/build/libs/commercetools-payone-integration.jar
 ```
 
 ### Deploy and Run
