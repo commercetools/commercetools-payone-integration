@@ -144,9 +144,6 @@ Name | Content
 `TEST_DATA_VISA_CREDIT_CARD_NO_3DS` | the pseudocardpan of an unconfirmed VISA credit card
 `TEST_DATA_VISA_CREDIT_CARD_3DS` | the pseudocardpan of a VISA credit card verified by 3-D Secure
 `TEST_DATA_3_DS_PASSWORD` | the 3DS password of the test card. Payone Test Cards use `12345` 
-`TEST_DATA_PAYPAL_AUTH_EMAIL` | the email address of the first PayPal sandbox buyer to be used (see below).
-`TEST_DATA_PAYPAL_CHARGE_EMAIL` | the email address of the second PayPal sandbox buyer to be used (see below).
-`TEST_DATA_PAYPAL_PASSWORD` | the password of the PayPal sandbox buyer to be used, for simplicity it is the same for both accounts.
 
 > TODO document how to practically acquire the pseudocardpans (from the client API). Can this be automated?
 > TODO why does the 3DS pwd need an evironment variable if a fixed value? --> is a parameter which could change in future
@@ -163,8 +160,7 @@ Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the s
 
 ### Paypal Sandbox Accounts
 
-To test with Paypal, you need seperate Sandbox Buyer credentials. This is due to parallel execution
-of the functional tests which is somehow influencing the browser sessions when simulating the click through.
+To test with Paypal, you need Sandbox Buyer credentials.
 
 For the time being, the following sandbox buyers are used
 - for Paypal Authorization
@@ -213,6 +209,4 @@ export CT_PAYONE_INTEGRATION_URL=""
 export TEST_DATA_VISA_CREDIT_CARD_NO_3DS=""
 export TEST_DATA_VISA_CREDIT_CARD_3DS=""
 export TEST_DATA_3_DS_PASSWORD=""
-export TEST_DATA_PAYPAL_EMAIL=""
-export TEST_DATA_PAYPAL_PASSWORD=""
 ```

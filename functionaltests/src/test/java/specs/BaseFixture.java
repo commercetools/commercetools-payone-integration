@@ -42,7 +42,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.LoginData;
 
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
@@ -177,18 +176,6 @@ public abstract class BaseFixture {
 
     protected String getVerifiedVisaPseudoCardPan() {
         return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_3_DS);
-    }
-
-    protected LoginData getTestDataPaypalAuthorization() {
-        return new LoginData(
-                        getConfigurationParameter(TEST_DATA_PAYPAL_AUTH_EMAIL),
-                        getConfigurationParameter(TEST_DATA_PAYPAL_PASSWORD));
-    }
-
-    protected LoginData getTestDataPaypalCharge() {
-        return new LoginData(
-                        getConfigurationParameter(TEST_DATA_PAYPAL_CHARGE_EMAIL),
-                        getConfigurationParameter(TEST_DATA_PAYPAL_PASSWORD));
     }
 
     protected String getRandomOrderNumber() {

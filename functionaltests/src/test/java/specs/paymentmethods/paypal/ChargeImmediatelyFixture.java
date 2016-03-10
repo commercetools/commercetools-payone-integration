@@ -3,8 +3,6 @@ package specs.paymentmethods.paypal;
 import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
@@ -24,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
 import specs.paymentmethods.creditcard.ChargeImmediatelyWith3dsFixture;
-import util.WebDriverPaypal;
 
 import javax.money.MonetaryAmount;
 import javax.money.format.MonetaryFormats;
@@ -32,14 +29,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Jan Wolter
@@ -49,11 +42,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
 
     private static final String baseRedirectUrl = "https://github.com/sphereio/sphere-jvm-sdk/search?q=";
 
-    private static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
-
     private static final Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyWith3dsFixture.class);
-
-    private final Map<String, String> successUrlForPayment = new HashMap<>();
 
     public Map<String, String> createPayment(final String paymentName,
                                 final String paymentMethod,
@@ -156,72 +145,10 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                 .put("responseRedirectUrl", responseRedirectUrl.substring(0, urlTrimAt))
                 .put("amountAuthorized", amountAuthorized)
                 .put("amountPaid", amountPaid)
-                .put("successUrl", successUrlForPayment.getOrDefault(paymentName, EMPTY_STRING))
                 .put("appointedNotificationCount", String.valueOf(appointedNotificationCount))
                 .put("paidNotificationCount", String.valueOf(paidNotificationCount))
                 .put("version", payment.getVersion().toString())
                 .build();
-    }
-
-    public boolean executeRedirectForPayments(final String paymentNames) throws ExecutionException {
-        final Collection<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
-
-        paymentNamesList.forEach(paymentName -> {
-            final Payment payment = fetchPaymentByLegibleName(paymentName);
-            final Optional<String> responseRedirectUrl = Optional.ofNullable(payment.getCustom())
-                    .flatMap(customFields ->
-                            Optional.ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)));
-
-            if (responseRedirectUrl.isPresent()) {
-                //need to create new webDriver for each payment because of Paypal session handling
-                WebDriverPaypal webDriver = new WebDriverPaypal();
-                final String successUrl =
-                        webDriver.doLoginAndConfirmation(responseRedirectUrl.get(), getTestDataPaypalCharge())
-                                .replace(baseRedirectUrl, "[...]");
-                webDriver.quit();
-
-                successUrlForPayment.put(paymentName, successUrl);
-            }
-        });
-
-        return successUrlForPayment.size() == paymentNamesList.size();
-    }
-
-    public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws InterruptedException, ExecutionException {
-        final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
-
-        int notificationsToReceive = paymentNamesList.size();
-        for (String paymentName : paymentNamesList) {
-            //quick way to check if it is neccessary to wait for notifications
-            // (e.g. if selenium produced errors the success url may not be as expected and no notifications will be received for this payment)
-            if (!successUrlForPayment.get(paymentName).toLowerCase().contains("success")) {
-                notificationsToReceive -= 1;
-            }
-        }
-
-        long remainingWaitTimeInMillis = PAYONE_NOTIFICATION_TIMEOUT;
-
-        final long sleepDuration = 100L;
-
-
-        long numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
-        while ((numberOfPaymentsWithNotification != notificationsToReceive) && (remainingWaitTimeInMillis > 0L)) {
-            Thread.sleep(sleepDuration);
-            remainingWaitTimeInMillis -= sleepDuration;
-            numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
-            if (remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(4)
-                    || remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(2)) {
-                LOG.info("Waiting for " + txaction + " notifications in PaypalChargedImmediatelyFixture takes longer than usual.");
-            }
-        }
-
-        LOG.info(String.format(
-                "waited %d seconds to receive notifications of type '%s' for payments %s",
-                TimeUnit.MILLISECONDS.toSeconds(PAYONE_NOTIFICATION_TIMEOUT - remainingWaitTimeInMillis),
-                txaction,
-                Arrays.toString(paymentNamesList.stream().map(this::getIdForLegibleName).toArray())));
-
-        return numberOfPaymentsWithNotification == paymentNamesList.size();
     }
 
     public boolean isInteractionRedirectPresent(final String paymentName) throws ExecutionException {
