@@ -25,19 +25,25 @@
 <div class="example">
     <h3>Authorization</h3>
     <p>
-        Given the following payments for a paypal account:
+        Given the following payments for a PayPal account:
     </p>
-    <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
+    <table c:execute="#result = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
             <th c:set="#centAmount">Cent Amount</th>
             <th c:set="#currencyCode">Currency Code</th>
-            <th c:echo="#paymentId">Payment ID (for information only)</th>
+            <th c:echo="#result.paymentId">Payment ID (for information only)</th>
+            <th c:echo="#result.successUrl">Success URL (for information only)</th>
+            <th c:echo="#result.errorUrl">Error URL (for information only)</th>
+            <th c:echo="#result.cancelUrl">Cancel URL (for information only)</th>
         </tr>
         <tr>
             <td>Payment 1</td>
             <td>7</td>
             <td>EUR</td>
+            <td></td>
+            <td></td>
+            <td></td>
             <td></td>
         </tr>
         <tr>
@@ -45,17 +51,26 @@
             <td>2234</td>
             <td>USD</td>
             <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
         </tr>
         <tr>
             <td>Payment 3</td>
             <td>43434</td>
             <td>EUR</td>
             <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
         </tr>
         <tr>
             <td>Payment 4</td>
             <td>715431</td>
             <td>EUR</td>
+            <td></td>
+            <td></td>
+            <td></td>
             <td></td>
         </tr>
     </table>
@@ -107,7 +122,8 @@
         <tr>
             <th c:set="#paymentName">Payment Name</th>
             <th c:assertEquals="#result.transactionState">Transaction State </th>
-            <th c:assertEquals="#result.responseRedirectUrl">redirect URL starts with</th>
+            <th c:assertEquals="#result.responseRedirectUrlStart">redirect URL starts with</th>
+            <th c:echo="#result.responseRedirectUrlFull">full redirect URL</th>
             <th c:echo="#result.version">Version (for information only)</th>
         </tr>
         <tr>
@@ -115,17 +131,62 @@
             <td>Pending</td>
             <td>https://www.sandbox.paypal.com/webscr</td>
             <td></td>
+            <td></td>
         </tr>
         <tr>
             <td>Payment 3</td>
             <td>Pending</td>
             <td>https://www.sandbox.paypal.com/webscr</td>
             <td></td>
+            <td></td>
         </tr>
         <tr>
             <td>Payment 4</td>
             <td>Pending</td>
             <td>https://www.sandbox.paypal.com/webscr</td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+    <p>
+        The service ensures idempotence, hence when I request it to handle the same payments again then I
+        will get the same results as before, especially the total number of <em c:echo="#requestType"></em> requests
+        sent per payment must not change:
+    </p>
+    <table c:execute="#result = handlePayment(#paymentName, #requestType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:assertEquals="#result.interactionCount">total # of <br/><em>preauthorization</em> requests sent</th>
+            <th c:assertEquals="#result.transactionState">Transaction State </th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>200</td>
+            <td>1</td>
+            <td>Pending</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 2</td>
+            <td>200</td>
+            <td>1</td>
+            <td>Failure</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>200</td>
+            <td>1</td>
+            <td>Pending</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>200</td>
+            <td>1</td>
+            <td>Pending</td>
             <td></td>
         </tr>
     </table>
@@ -135,44 +196,16 @@
         responses of type PAYONE_INTERACTION_REDIRECT.
     </p>
     <p>
-        If I follow the URL and complete the Paypal verification process, I get forwarded to a predefined success URL
-        and for each of the payments <span c:set="#successfulPayments">Payment 1, Payment 3, Payment 4</span>
-        an <b c:set="#txactionAppointed">appointed</b>/<b>completed</b> notification will be received.
+        If I follow the URL and complete the PayPal verification process, I get forwarded to the predefined success URL
+        and for each of the payments <em>Payment 1</em>, <em>Payment 3</em> and <em>Payment 4</em>
+        an <em>appointed/completed</em> notification will be received and as a consequence the transaction state will be
+        set to <em>Success</em>.
     </p>
-    <table c:execute="#result = executeRedirectAndWaitForNotificationOfAction(#paymentName, #txactionAppointed)">
-        <tr>
-            <th c:set="#paymentName">Payment Name</th>
-            <th c:assertEquals="#result.transactionState">Transaction State</th>
-            <th c:assertEquals="#result.appointedNotificationCount">total # of <em>appointed/completed</em> notifications</th>
-            <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
-            <th c:assertEquals="#result.successUrl">URL called after successful verification</th>
-            <th c:echo="#result.version">Version (for information only)</th>
-        </tr>
-        <tr>
-            <td>Payment 1</td>
-            <td>Success</td>
-            <td>1</td>
-            <td>0,07 EUR</td>
-            <td>[...]Payment+1+Success</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Payment 3</td>
-            <td>Success</td>
-            <td>1</td>
-            <td>434,34 EUR</td>
-            <td>[...]Payment+3+Success</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Payment 4</td>
-            <td>Success</td>
-            <td>1</td>
-            <td>7.154,31 EUR</td>
-            <td>[...]Payment+4+Success</td>
-            <td></td>
-        </tr>
-    </table>
+    <h4>Note</h4>
+    <p>
+        Due to inconsistent behavior of PayPal's sandbox test system, the redirect and any follow-up verifications
+        must be performed manually.
+    </p>
 </div>
 <h2>Further Details</h2>
 <h3>What happens if the verification fails?</h3>

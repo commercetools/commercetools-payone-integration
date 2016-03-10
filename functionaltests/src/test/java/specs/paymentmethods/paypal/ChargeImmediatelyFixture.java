@@ -55,7 +55,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
 
     private final Map<String, String> successUrlForPayment = new HashMap<>();
 
-    public String createPayment(final String paymentName,
+    public Map<String, String> createPayment(final String paymentName,
                                 final String paymentMethod,
                                 final String transactionType,
                                 final String centAmount,
@@ -63,6 +63,9 @@ public class ChargeImmediatelyFixture extends BaseFixture {
 
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
 
+        final String successUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8");
+        final String errorUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8");
+        final String cancelUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8");
         final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
                 .paymentMethodInfo(PaymentMethodInfoBuilder.of()
                         .method(paymentMethod)
@@ -73,9 +76,9 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                         CustomTypeBuilder.PAYMENT_WALLET,
                         ImmutableMap.<String, Object>builder()
                                 .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage())
-                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8"))
-                                .put(CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8"))
-                                .put(CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8"))
+                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, successUrl)
+                                .put(CustomFieldKeys.ERROR_URL_FIELD, errorUrl)
+                                .put(CustomFieldKeys.CANCEL_URL_FIELD, cancelUrl)
                                 .put(CustomFieldKeys.REFERENCE_FIELD, "myGlobalKey")
                                 .build()))
                 .build();
@@ -95,7 +98,10 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                         .state(TransactionState.PENDING)
                         .build())));
 
-        return payment.getId();
+        return ImmutableMap.of(
+                "paymentId", payment.getId(),
+                "successUrl", successUrl,
+                "cancelUrl", cancelUrl);
     }
 
     public Map<String, String> handlePayment(final String paymentName,

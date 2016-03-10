@@ -19,10 +19,8 @@ import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 import specs.BaseFixture;
-import util.WebDriverPaypal;
 
 import javax.money.MonetaryAmount;
-import javax.money.format.MonetaryFormats;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -41,7 +39,7 @@ public class AuthorizationFixture extends BaseFixture {
 
     private static final String baseRedirectUrl = "https://github.com/sphereio/sphere-jvm-sdk/search?q=";
 
-    public String createPayment(
+    public Map<String, String>  createPayment(
             final String paymentName,
             final String paymentMethod,
             final String transactionType,
@@ -50,6 +48,9 @@ public class AuthorizationFixture extends BaseFixture {
 
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
 
+        final String successUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8");
+        final String errorUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8");
+        final String cancelUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8");
         final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
                 .paymentMethodInfo(PaymentMethodInfoBuilder.of()
                         .method(paymentMethod)
@@ -59,9 +60,9 @@ public class AuthorizationFixture extends BaseFixture {
                         CustomTypeBuilder.PAYMENT_WALLET,
                         ImmutableMap.<String, Object>builder()
                                 .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage())
-                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8"))
-                                .put(CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8"))
-                                .put(CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8"))
+                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, successUrl)
+                                .put(CustomFieldKeys.ERROR_URL_FIELD, errorUrl)
+                                .put(CustomFieldKeys.CANCEL_URL_FIELD, cancelUrl)
                                 .put(CustomFieldKeys.REFERENCE_FIELD, "myGlobalKey")
                                 .build()))
                 .build();
@@ -81,7 +82,10 @@ public class AuthorizationFixture extends BaseFixture {
                         .state(TransactionState.PENDING)
                         .build())));
 
-        return payment.getId();
+        return ImmutableMap.of(
+                "paymentId", payment.getId(),
+                "successUrl", successUrl,
+                "cancelUrl", cancelUrl);
     }
 
     public Map<String, String> handlePayment(final String paymentName,
@@ -99,6 +103,7 @@ public class AuthorizationFixture extends BaseFixture {
                 .put("fetchedAt", fetchedAt.toString())
                 .build();
     }
+
     public Map<String, String> fetchPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
         Payment payment = fetchPaymentByLegibleName(paymentName);
 
@@ -110,38 +115,8 @@ public class AuthorizationFixture extends BaseFixture {
 
         return ImmutableMap.<String, String>builder()
                 .put("transactionState", getTransactionState(payment, transactionId))
-                .put("responseRedirectUrl", responseRedirectUrl.substring(0, urlTrimAt))
-                .put("version", payment.getVersion().toString())
-                .build();
-    }
-
-    public  Map<String, String> executeRedirectAndWaitForNotificationOfAction(final String paymentName, final String txaction) throws ExecutionException, InterruptedException {
-
-        Payment payment = fetchPaymentByLegibleName(paymentName);
-        final String transactionId = getIdOfLastTransaction(payment);
-        final String responseRedirectUrl = payment.getCustom().getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD);
-
-        //need to create new webDriver for each payment because of Paypal session handling
-        WebDriverPaypal webDriver = new WebDriverPaypal();
-        String successUrl = webDriver.doLoginAndConfirmation(responseRedirectUrl, getTestDataPaypalAuthorization());
-        successUrl = successUrl.replace(baseRedirectUrl, "[...]");
-        webDriver.quit();
-
-        //wait just a little until notification was processed (is triggered immediately after verification)
-        Thread.sleep(100);
-
-        payment = fetchPaymentById(payment.getId());
-        long appointedNotificationCount = getInteractionNotificationCountOfAction(payment, txaction);
-
-        final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
-                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
-                BaseFixture.EMPTY_STRING;
-
-        return ImmutableMap.<String, String> builder()
-                .put("appointedNotificationCount", String.valueOf(appointedNotificationCount))
-                .put("transactionState", getTransactionState(payment, transactionId))
-                .put("amountAuthorized", amountAuthorized)
-                .put("successUrl", successUrl)
+                .put("responseRedirectUrlStart", responseRedirectUrl.substring(0, urlTrimAt))
+                .put("responseRedirectUrlFull", responseRedirectUrl)
                 .put("version", payment.getVersion().toString())
                 .build();
     }

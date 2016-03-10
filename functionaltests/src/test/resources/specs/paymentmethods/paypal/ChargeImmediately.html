@@ -28,17 +28,23 @@
                 Given the following payments for
                 <em>a PayPal account that does <b>not</b> support charges for currencies other than EUR</em>:
             </p>
-            <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
+            <table c:execute="#result = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
                 <tr>
                     <th c:set="#paymentName">Payment Name</th>
                     <th c:set="#centAmount">Cent Amount</th>
                     <th c:set="#currencyCode">Currency Code</th>
-                    <th c:echo="#paymentId">Payment ID (for information only)</th>
+                    <th c:echo="#result.paymentId">Payment ID (for information only)</th>
+                    <th c:echo="#result.successUrl">Success URL (for information only)</th>
+                    <th c:echo="#result.errorUrl">Error URL (for information only)</th>
+                    <th c:echo="#result.cancelUrl">Cancel URL (for information only)</th>
                 </tr>
                 <tr>
                     <td>Payment 1</td>
                     <td>406</td>
                     <td>EUR</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                     <td></td>
                 </tr>
                 <tr>
@@ -46,17 +52,26 @@
                     <td>91341</td>
                     <td>USD</td>
                     <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>Payment 3</td>
                     <td>6113</td>
                     <td>EUR</td>
                     <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td>Payment 4</td>
                     <td>111283</td>
                     <td>EUR</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                     <td></td>
                 </tr>
             </table>
@@ -131,142 +146,74 @@
                 </tr>
             </table>
             <p>
-                The failed payment <span c:set="#failedPaymentName">Payment 2</span>
-                must have received <span c:assertFalse="isInteractionRedirectPresent(#failedPaymentName)">0</span>
-                responses of type PAYONE_INTERACTION_REDIRECT and its custom field <span c:set="#fieldName">redirectUrl</span>
-                <span c:assertTrue="customStringFieldIsNull(#failedPaymentName, #fieldName)">must be null</span>.
-            </p>
-            <p>
-                If I follow the PayPal redirect process for <span c:set="#successfulPayments">Payment 1, Payment 3, Payment 4</span> and
-                <span c:assertTrue="executeRedirectForPayments(#successfulPayments)">verify them successfully</span> with this account,
-                I get forwarded to a predefined success URL and for each of the payments the following notifications will be received:
-            </p>
-            <ol>
-                <li>(txaction=<b c:set="#txactionAppointed">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)">received</span> -> has no effect, just as a confirmation</li>
-                <li>(txaction=<b c:set="#txactionPaid">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)">received</span>
-                    ->  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
-            </ol>
-            <h4>Note</h4>
-            <p>
-                Due to a discrepancy between the example in the PAYONE Server API documentation and what can be observed
-                by running this executable specification the values in the columns
-                <b>"Transaction State"</b> and
-                <b>"total # of <br/><em>appointed/completed</em> notifications"</b>
-                aren't asserted, just printed into the table.
-            </p>
-            <p>
-                In section <em>4.2.8 Sample: preauthorization, WLT (with “pending”)</em> the PAYONE Server API states
-                that a PAYONE <em>authorization</em> request will lead to <em>appointed/pending</em>,
-                <em>appointed/completed</em> and <em>paid</em> notifications all with parameter
-                <em>sequencenumber=0</em>.
-            </p>
-            <p>
-                As one can see in the <em>interfaceInteractions</em> list of the payments used in this specification
-                run there are no notifications with <em>sequencenumber=0</em>. Instead there are notifications with
-                <em>sequencenumber=<b>1</b></em>.
-            </p>
-            <p>
-                Corresponding to the Integration Service's
-                <a href="https://github.com/commercetools/commercetools-payone-integration/blob/master/docs/Field-Mapping.md#updating-the-ct-payment-given-a-payone-transactionstatus-notification-stored-in-an-interaction">field mapping specification</a>
-                a new transaction is created in case of a notification with a <em>sequencenumber</em> that doesn't match
-                any of the payment's transactions' <em>interactionId</em>.
-            </p>
-            <p>
-                The original transactions that triggered the requests to PAYONE remain in state <em>Pending</em> because
-                the notifications cannot be linked to them by the Integration Service.
-            </p>
-            <p>
-                See <a href="https://github.com/commercetools/commercetools-payone-integration/issues/67">issue #67</a>.
-            </p>
-            <table c:execute="#result = fetchPaymentDetails(#paymentName)">
-                <tr>
-                    <th c:set="#paymentName">Payment Name</th>
-                    <th c:echo="#result.transactionState">Transaction State</th>
-                    <th c:echo="#result.appointedNotificationCount">total # of <br/><em>appointed/completed</em> notifications</th>
-                    <th c:echo="#result.paidNotificationCount">total # of <br/><em>paid/completed</em> notifications</th>
-                    <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
-                    <th c:assertEquals="#result.amountPaid">Paid Amount</th>
-                    <th c:assertEquals="#result.successUrl">URL called after successful verification</th>
-                    <th c:echo="#result.version">Version (for information only)</th>
-                </tr>
-                <tr>
-                    <td>Payment 1</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>null</td>
-                    <td>4,06 EUR</td>
-                    <td>[...]Payment+1+Success</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Payment 3</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>null</td>
-                    <td>61,13 EUR</td>
-                    <td>[...]Payment+3+Success</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Payment 4</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>null</td>
-                    <td>1.112,83 EUR</td>
-                    <td>[...]Payment+4+Success</td>
-                    <td></td>
-                </tr>
-            </table>
-            <p>
                 The service ensures idempotence, hence when I request it to handle the same payments again then I
-                will get the same results as before, especially the total number of <em>authorization</em> requests sent
-                per payment must not change:
+                will get the same results as before, especially the total number of <em c:echo="#requestType"></em>
+                requests sent per payment must not change:
             </p>
             <table c:execute="#result = handlePayment(#paymentName, #requestType)">
                 <tr>
                     <th c:set="#paymentName">Payment Name</th>
-                    <th c:assertEquals="#result.statusCode">Response Status Code</th>
-                    <th c:assertEquals="#result.interactionCount">total # of <em>authorization</em> requests sent</th>
-                    <th c:echo="#result.transactionState">Transaction State</th>
-                    <th c:assertEquals="#result.amountPaid">Paid Amount</th>
+                    <th c:assertEquals="#result.statusCode">Response <br/>Status Code</th>
+                    <th c:assertEquals="#result.interactionCount">total # of <br/><em>authorization</em> requests sent</th>
+                    <th c:assertEquals="#result.transactionState">Transaction State </th>
                     <th c:echo="#result.version">Version (for information only)</th>
                 </tr>
                 <tr>
                     <td>Payment 1</td>
                     <td>200</td>
                     <td>1</td>
-                    <td></td>
-                    <td>4,06 EUR</td>
+                    <td>Pending</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Payment 2</td>
                     <td>200</td>
                     <td>1</td>
-                    <td></td>
-                    <td></td>
+                    <td>Failure</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Payment 3</td>
                     <td>200</td>
                     <td>1</td>
-                    <td></td>
-                    <td>61,13 EUR</td>
+                    <td>Pending</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Payment 4</td>
                     <td>200</td>
                     <td>1</td>
-                    <td></td>
-                    <td>1.112,83 EUR</td>
+                    <td>Pending</td>
                     <td></td>
                 </tr>
             </table>
+            <p>
+                The failed payment <span c:set="#failedPaymentName">Payment 2</span>
+                must have received <span c:assertFalse="isInteractionRedirectPresent(#failedPaymentName)">0</span>
+                responses of type PAYONE_INTERACTION_REDIRECT and its custom field <span c:set="#fieldName">redirectUrl</span>
+                <span c:assertTrue="customStringFieldIsNull(#failedPaymentName, #fieldName)">must be null</span>.
+            </p>
+            <p>
+                If I follow the PayPal redirect process for <em>Payment 1</em>, <em>Payment 3</em> and <em>Payment 4</em>
+                and verify them successfully with this account, I get forwarded to the success URL and for each of the
+                payments the following notifications will be received:
+            </p>
+            <ol>
+                <li>
+                    (txaction=<b c:set="#txactionAppointed">appointed</b>, transactionstatus=<b>completed</b>)
+                    -> has no effect, just as a confirmation
+                </li>
+                <li>
+                    (txaction=<b c:set="#txactionPaid">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>)
+                    ->  The state of the Charge transaction, the authorized amount and the paid amount should be set
+                    correctly not later than now.
+                </li>
+            </ol>
+            <h4>Note</h4>
+            <p>
+                Due to inconsistent behavior of PayPal's sandbox test system, the redirect and any follow-up verifications
+                must be performed manually.
+            </p>
         </div>
         <h2>Further Details</h2>
         <h3>What happens if the verification fails?</h3>
