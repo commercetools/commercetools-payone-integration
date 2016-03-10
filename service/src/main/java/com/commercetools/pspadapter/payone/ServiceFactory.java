@@ -20,6 +20,7 @@ import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.common.AppointedNotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.common.CaptureNotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.common.DefaultNotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.common.PaidNotificationProcessor;
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
@@ -157,10 +158,7 @@ public class ServiceFactory {
     }
 
     public static NotificationDispatcher createNotificationDispatcher(final CommercetoolsClient client, final PayoneConfig config) {
-        final NotificationProcessor defaultNotificationProcessor = (notification, payment) -> {
-            throw new UnsupportedOperationException(
-                    "the notification '" + notification.getTxaction() + "' is not supported by this instance!");
-        };
+        final NotificationProcessor defaultNotificationProcessor = new DefaultNotificationProcessor(client);
 
         final ImmutableMap.Builder<NotificationAction, NotificationProcessor> builder = ImmutableMap.builder();
         builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(client));
