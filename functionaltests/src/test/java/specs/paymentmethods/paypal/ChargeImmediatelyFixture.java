@@ -142,7 +142,8 @@ public class ChargeImmediatelyFixture extends BaseFixture {
 
         return ImmutableMap.<String, String>builder()
                 .put("transactionState", getTransactionState(payment, transactionId))
-                .put("responseRedirectUrl", responseRedirectUrl.substring(0, urlTrimAt))
+                .put("responseRedirectUrlStart", responseRedirectUrl.substring(0, urlTrimAt))
+                .put("responseRedirectUrlFull", responseRedirectUrl)
                 .put("amountAuthorized", amountAuthorized)
                 .put("amountPaid", amountPaid)
                 .put("appointedNotificationCount", String.valueOf(appointedNotificationCount))
