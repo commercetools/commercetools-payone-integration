@@ -37,7 +37,7 @@ import java.util.concurrent.ExecutionException;
 @RunWith(ConcordionRunner.class)
 public class AuthorizationFixture extends BaseFixture {
 
-    private static final String baseRedirectUrl = "https://github.com/sphereio/sphere-jvm-sdk/search?q=";
+    private static final String baseRedirectUrl = "https://example.com/paypal_authorization/";
 
     public Map<String, String>  createPayment(
             final String paymentName,

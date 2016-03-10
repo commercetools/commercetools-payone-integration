@@ -40,7 +40,7 @@ import java.util.concurrent.ExecutionException;
 @RunWith(ConcordionRunner.class)
 public class ChargeImmediatelyFixture extends BaseFixture {
 
-    private static final String baseRedirectUrl = "https://github.com/sphereio/sphere-jvm-sdk/search?q=";
+    private static final String baseRedirectUrl = "https://example.com/paypal_charge_immediately/";
 
     private static final Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyWith3dsFixture.class);
 
