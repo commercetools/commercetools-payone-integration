@@ -90,6 +90,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
         return ImmutableMap.of(
                 "paymentId", payment.getId(),
                 "successUrl", successUrl,
+                "errorUrl", errorUrl,
                 "cancelUrl", cancelUrl);
     }
 

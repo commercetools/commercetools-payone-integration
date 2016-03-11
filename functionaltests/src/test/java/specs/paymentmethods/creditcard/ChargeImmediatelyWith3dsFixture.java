@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
     private static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
-    private static final String baseRedirectUrl = "https://example.com/creditcard_charge_immediately_with_3ds/";
+    private static final String baseRedirectUrl = "https://example.com/creditcard_charge_immediately_with_verification/";
 
     private static final Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyWith3dsFixture.class);
 

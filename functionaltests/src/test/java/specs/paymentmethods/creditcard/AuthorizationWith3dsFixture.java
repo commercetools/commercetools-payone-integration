@@ -45,7 +45,7 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationWith3dsFixture.class);
 
-    private static final String baseRedirectUrl = "https://example.com/creditcard_authorization_with_3ds/";
+    private static final String baseRedirectUrl = "https://example.com/creditcard_authorization_with_verification/";
 
     private WebDriver3ds webDriver;
 
