@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
 public class ServiceFactory {
 
     private static final String SCHEDULED_JOB_KEY = "commercetools-platform-polling-1";
-    private static final long CTP_CLIENT_TIMEOUT = 1;
+    private static final long DEFAULT_CTP_CLIENT_TIMEOUT = 10;
 
     private final ServiceConfig serviceConfig;
     private final PropertyProvider propertyProvider;
@@ -128,7 +128,7 @@ public class ServiceFactory {
                         serviceConfig.getCtProjectKey(),
                         serviceConfig.getCtClientId(),
                         serviceConfig.getCtClientSecret()),
-                CTP_CLIENT_TIMEOUT,
+                DEFAULT_CTP_CLIENT_TIMEOUT,
                 TimeUnit.SECONDS);
     }
 
