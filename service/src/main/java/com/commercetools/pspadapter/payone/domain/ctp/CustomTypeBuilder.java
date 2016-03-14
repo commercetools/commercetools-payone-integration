@@ -208,7 +208,7 @@ public class CustomTypeBuilder {
         if (result.getTotal() == 0) {
             return ctpClient.executeBlocking(TypeCreateCommand.of(TypeDraftBuilder.of(
                     typeKey,
-                    LocalizedString.ofEnglishLocale(typeKey),
+                    LocalizedString.ofEnglish(typeKey),
                     ImmutableSet.of(resourceTypeId))
                     .fieldDefinitions(
                             fieldDefinitions)
@@ -231,7 +231,7 @@ public class CustomTypeBuilder {
         return FieldDefinition.of(
                     fieldType,
                     fieldName,
-                    LocalizedString.ofEnglishLocale(fieldName),
+                    LocalizedString.ofEnglish(fieldName),
                     classifier.toBoolean(),
                     inputHint);
     }
