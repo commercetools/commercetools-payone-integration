@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.carts.commands.CartDeleteCommand;
 import io.sphere.sdk.carts.queries.CartQuery;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.models.LocalizedString;
 import io.sphere.sdk.models.TextInputHint;
 import io.sphere.sdk.orders.commands.OrderDeleteCommand;
@@ -68,10 +69,10 @@ public class CustomTypeBuilder {
         }
     }
 
-    private final BlockingClient ctpClient;
+    private final BlockingSphereClient ctpClient;
     private final PermissionToStartFromScratch permissionToStartFromScratch;
 
-    public CustomTypeBuilder(final BlockingClient ctpClient, final PermissionToStartFromScratch permissionToErase) {
+    public CustomTypeBuilder(final BlockingSphereClient ctpClient, final PermissionToStartFromScratch permissionToErase) {
         this.ctpClient = ctpClient;
         this.permissionToStartFromScratch = permissionToErase;
     }
@@ -93,19 +94,19 @@ public class CustomTypeBuilder {
     private void resetPlatform() {
         // TODO jw: use futures
         // delete all orders
-        ctpClient.complete(OrderQuery.of().withLimit(500)).getResults()
-                .forEach(order -> ctpClient.complete(OrderDeleteCommand.of(order)));
+        ctpClient.executeBlocking(OrderQuery.of().withLimit(500)).getResults()
+                .forEach(order -> ctpClient.executeBlocking(OrderDeleteCommand.of(order)));
 
         // delete all carts
-        ctpClient.complete(CartQuery.of().withLimit(500)).getResults()
-                .forEach(cart -> ctpClient.complete(CartDeleteCommand.of(cart)));
+        ctpClient.executeBlocking(CartQuery.of().withLimit(500)).getResults()
+                .forEach(cart -> ctpClient.executeBlocking(CartDeleteCommand.of(cart)));
 
         // delete all payments
-        ctpClient.complete(PaymentQuery.of().withLimit(500)).getResults()
-                .forEach(payment -> ctpClient.complete(PaymentDeleteCommand.of(payment)));
+        ctpClient.executeBlocking(PaymentQuery.of().withLimit(500)).getResults()
+                .forEach(payment -> ctpClient.executeBlocking(PaymentDeleteCommand.of(payment)));
 
-        ctpClient.complete(TypeQuery.of().withLimit(500)).getResults()
-                .forEach(type -> ctpClient.complete(TypeDeleteCommand.of(type)));
+        ctpClient.executeBlocking(TypeQuery.of().withLimit(500)).getResults()
+                .forEach(type -> ctpClient.executeBlocking(TypeDeleteCommand.of(type)));
     }
 
     private void createPaymentProviderAgnosticTypes() {
@@ -199,13 +200,13 @@ public class CustomTypeBuilder {
 
     private Type createType(final String typeKey, final ImmutableList<FieldDefinition> fieldDefinitions, final String resourceTypeId) {
         // TODO replace with cache
-        final PagedQueryResult<Type> result = ctpClient.complete(
+        final PagedQueryResult<Type> result = ctpClient.executeBlocking(
                 TypeQuery.of()
                         .withPredicates(m -> m.key().is(typeKey))
                         .withLimit(1));
 
         if (result.getTotal() == 0) {
-            return ctpClient.complete(TypeCreateCommand.of(TypeDraftBuilder.of(
+            return ctpClient.executeBlocking(TypeCreateCommand.of(TypeDraftBuilder.of(
                     typeKey,
                     LocalizedString.ofEnglishLocale(typeKey),
                     ImmutableSet.of(resourceTypeId))

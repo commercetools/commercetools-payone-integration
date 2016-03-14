@@ -1,12 +1,12 @@
 package com.commercetools.pspadapter.payone.notification;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -28,13 +28,13 @@ public class NotificationDispatcher {
 
     private final NotificationProcessor defaultProcessor;
     private final ImmutableMap<NotificationAction, NotificationProcessor> processors;
-    private final CommercetoolsClient client;
+    private final BlockingSphereClient client;
     private final PayoneConfig config;
 
     public NotificationDispatcher(
             final NotificationProcessor defaultProcessor,
             final ImmutableMap<NotificationAction, NotificationProcessor> processors,
-            final CommercetoolsClient client,
+            final BlockingSphereClient client,
             final PayoneConfig config) {
         this.defaultProcessor = defaultProcessor;
         this.processors = processors;
@@ -91,14 +91,14 @@ public class NotificationDispatcher {
         final Payment payment = getPaymentByInterfaceId(notification.getTxid())
                 .orElseGet(() -> {
                     PaymentDraft paymentDraft = createNewPaymentDraftFromNotification(notification);
-                    return client.complete(PaymentCreateCommand.of(paymentDraft));
+                    return client.executeBlocking(PaymentCreateCommand.of(paymentDraft));
                 });
 
         notificationProcessor.processTransactionStatusNotification(notification, payment);
     }
 
     private Optional<Payment> getPaymentByInterfaceId(final String interfaceId) {
-        final PagedQueryResult<Payment> queryResult = client.complete(
+        final PagedQueryResult<Payment> queryResult = client.executeBlocking(
                 PaymentQuery.of()
                         .withPredicates(p -> p.interfaceId().is(interfaceId))
                         .plusPredicates(p -> p.paymentMethodInfo().paymentInterface().is("PAYONE")));

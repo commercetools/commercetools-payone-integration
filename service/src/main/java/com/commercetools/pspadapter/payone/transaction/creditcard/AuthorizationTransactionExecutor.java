@@ -1,6 +1,5 @@
 package com.commercetools.pspadapter.payone.transaction.creditcard;
 
-import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
@@ -12,6 +11,7 @@ import com.commercetools.pspadapter.payone.transaction.IdempotentTransactionExec
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
@@ -36,9 +36,9 @@ import java.util.Optional;
 public class AuthorizationTransactionExecutor extends IdempotentTransactionExecutor {
     private final PayoneRequestFactory requestFactory;
     private final PayonePostService payonePostService;
-    private final BlockingClient client;
+    private final BlockingSphereClient client;
 
-    public AuthorizationTransactionExecutor(LoadingCache<String, Type> typeCache, PayoneRequestFactory requestFactory, PayonePostService payonePostService, BlockingClient client) {
+    public AuthorizationTransactionExecutor(LoadingCache<String, Type> typeCache, PayoneRequestFactory requestFactory, PayonePostService payonePostService, BlockingSphereClient client) {
         super(typeCache);
         this.requestFactory = requestFactory;
         this.payonePostService = payonePostService;
@@ -94,7 +94,7 @@ public class AuthorizationTransactionExecutor extends IdempotentTransactionExecu
 
         final AuthorizationRequest request = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
 
-        final Payment updatedPayment = client.complete(
+        final Payment updatedPayment = client.executeBlocking(
             PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
                     ImmutableList.of(
                             AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
@@ -159,6 +159,6 @@ public class AuthorizationTransactionExecutor extends IdempotentTransactionExecu
 
     private PaymentWithCartLike update(PaymentWithCartLike paymentWithCartLike, Payment payment, ImmutableList<UpdateActionImpl<Payment>> updateActions) {
         return paymentWithCartLike.withPayment(
-            client.complete(PaymentUpdateCommand.of(payment, updateActions)));
+            client.executeBlocking(PaymentUpdateCommand.of(payment, updateActions)));
     }
 }

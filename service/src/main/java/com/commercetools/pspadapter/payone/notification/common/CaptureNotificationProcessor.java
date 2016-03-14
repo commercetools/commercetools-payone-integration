@@ -1,10 +1,10 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
-import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
 import com.google.common.collect.ImmutableList;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
@@ -29,7 +29,7 @@ public class CaptureNotificationProcessor extends NotificationProcessorBase {
      *
      * @param client the client for the commercetools platform API
      */
-    public CaptureNotificationProcessor(final BlockingClient client) {
+    public CaptureNotificationProcessor(final BlockingSphereClient client) {
         super(client);
     }
 

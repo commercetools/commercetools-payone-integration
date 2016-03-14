@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
@@ -12,6 +11,7 @@ import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.google.common.cache.CacheBuilder;
 import io.sphere.sdk.carts.Cart;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
@@ -44,7 +44,7 @@ public class AuthorizationTransactionExecutorTest {
     private PayonePostService postService;
 
     @Mock
-    private CommercetoolsClient client;
+    private BlockingSphereClient client;
 
     private final PaymentTestHelper testHelper = new PaymentTestHelper();
 
@@ -52,7 +52,7 @@ public class AuthorizationTransactionExecutorTest {
 
     @Before
     public void setUp() {
-        when(client.complete(any(TypeQuery.class))).then(a -> {
+        when(client.executeBlocking(any(TypeQuery.class))).then(a -> {
             PagedQueryResult<Type> customTypes = testHelper.getCustomTypes();
             String queryString = Arrays.asList(a.getArguments()).get(0).toString();
             if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE)) {

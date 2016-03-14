@@ -1,11 +1,11 @@
 package specs.paymentmethods.creditcard;
 
-import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -96,13 +96,13 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
                                 .build()))
                 .build();
 
-        final BlockingClient ctpClient = ctpClient();
-        final Payment payment = ctpClient.complete(PaymentCreateCommand.of(paymentDraft));
+        final BlockingSphereClient ctpClient = ctpClient();
+        final Payment payment = ctpClient.executeBlocking(PaymentCreateCommand.of(paymentDraft));
         registerPaymentWithLegibleName(paymentName, payment);
 
         createCartAndOrderForPayment(payment, currencyCode);
 
-        ctpClient.complete(PaymentUpdateCommand.of(
+        ctpClient.executeBlocking(PaymentUpdateCommand.of(
                 payment,
                 AddTransaction.of(TransactionDraftBuilder.of(
                         TransactionType.valueOf(transactionType),

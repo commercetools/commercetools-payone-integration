@@ -1,9 +1,9 @@
 package specs.paymentmethods.paypal;
 
-import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.collect.ImmutableMap;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -67,13 +67,13 @@ public class AuthorizationFixture extends BaseFixture {
                                 .build()))
                 .build();
 
-        final BlockingClient ctpClient = ctpClient();
-        Payment payment = ctpClient.complete(PaymentCreateCommand.of(paymentDraft));
+        final BlockingSphereClient ctpClient = ctpClient();
+        Payment payment = ctpClient.executeBlocking(PaymentCreateCommand.of(paymentDraft));
         registerPaymentWithLegibleName(paymentName, payment);
 
         createCartAndOrderForPayment(payment, currencyCode);
 
-        ctpClient.complete(PaymentUpdateCommand.of(
+        ctpClient.executeBlocking(PaymentUpdateCommand.of(
                 payment,
                 AddTransaction.of(TransactionDraftBuilder.of(
                         TransactionType.valueOf(transactionType),

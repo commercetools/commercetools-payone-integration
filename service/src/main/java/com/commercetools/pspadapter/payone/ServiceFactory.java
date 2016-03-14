@@ -3,8 +3,6 @@ package com.commercetools.pspadapter.payone;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
-import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
@@ -31,6 +29,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
@@ -40,6 +39,7 @@ import org.quartz.SchedulerException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author fhaertig
@@ -48,6 +48,7 @@ import java.util.Optional;
 public class ServiceFactory {
 
     private static final String SCHEDULED_JOB_KEY = "commercetools-platform-polling-1";
+    private static final long CTP_CLIENT_TIMEOUT = 1;
 
     private final ServiceConfig serviceConfig;
     private final PropertyProvider propertyProvider;
@@ -80,7 +81,7 @@ public class ServiceFactory {
         final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
         final PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
         final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(propertyProvider);
-        final CommercetoolsClient commercetoolsClient = serviceFactory.createCommercetoolsClient();
+        final BlockingSphereClient commercetoolsClient = serviceFactory.createCommercetoolsClient();
         final LoadingCache<String, Type> typeCache = serviceFactory.createTypeCache(commercetoolsClient);
         final PaymentDispatcher paymentDispatcher = ServiceFactory.createPaymentDispatcher(
                 typeCache,
@@ -120,22 +121,24 @@ public class ServiceFactory {
      * Creates a new commercetools client instance.
      * @return the client
      */
-    public CommercetoolsClient createCommercetoolsClient() {
+    public BlockingSphereClient createCommercetoolsClient() {
         final SphereClientFactory sphereClientFactory = SphereClientFactory.of();
-        return new CommercetoolsClient(
+        return BlockingSphereClient.of(
                 sphereClientFactory.createClient(
                         serviceConfig.getCtProjectKey(),
                         serviceConfig.getCtClientId(),
-                        serviceConfig.getCtClientSecret()));
+                        serviceConfig.getCtClientSecret()),
+                CTP_CLIENT_TIMEOUT,
+                TimeUnit.SECONDS);
     }
 
     // FIXME return shared instance
-    public LoadingCache<String, Type> createTypeCache(final BlockingClient client) {
+    public LoadingCache<String, Type> createTypeCache(final BlockingSphereClient client) {
         return CacheBuilder.newBuilder().build(new TypeCacheLoader(client));
     }
 
     public IntegrationService createService() {
-        final CommercetoolsClient client = createCommercetoolsClient();
+        final BlockingSphereClient client = createCommercetoolsClient();
         final LoadingCache<String, Type> typeCache = createTypeCache(client);
         final PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
 
@@ -157,7 +160,7 @@ public class ServiceFactory {
         return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, notificationDispatcher);
     }
 
-    public static NotificationDispatcher createNotificationDispatcher(final CommercetoolsClient client, final PayoneConfig config) {
+    public static NotificationDispatcher createNotificationDispatcher(final BlockingSphereClient client, final PayoneConfig config) {
         final NotificationProcessor defaultNotificationProcessor = new DefaultNotificationProcessor(client);
 
         final ImmutableMap.Builder<NotificationAction, NotificationProcessor> builder = ImmutableMap.builder();
@@ -175,7 +178,7 @@ public class ServiceFactory {
      * @param client
      * @return
      */
-    public static PaymentDispatcher createPaymentDispatcher(final LoadingCache<String, Type> typeCache, final PayoneConfig config, final CommercetoolsClient client) {
+    public static PaymentDispatcher createPaymentDispatcher(final LoadingCache<String, Type> typeCache, final PayoneConfig config, final BlockingSphereClient client) {
         // TODO jw: use immutable map
         final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
 
@@ -207,7 +210,7 @@ public class ServiceFactory {
     private static TransactionExecutor createTransactionExecutor(
             final TransactionType transactionType,
             final LoadingCache<String, Type> typeCache,
-            final CommercetoolsClient client,
+            final BlockingSphereClient client,
             final PayoneRequestFactory requestFactory,
             final PayonePostService postService) {
 

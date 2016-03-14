@@ -3,6 +3,7 @@ package com.commercetools.pspadapter.payone.domain.ctp;
 import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.queries.CartQuery;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.messages.GenericMessageImpl;
 import io.sphere.sdk.messages.MessageDerivateHint;
 import io.sphere.sdk.messages.expansion.MessageExpansionModel;
@@ -32,9 +33,9 @@ import java.util.function.Consumer;
 //TODO: refactor class since it has mixed concerns (maybe MessageConsumer only)
 public class CommercetoolsQueryExecutor {
 
-    private CommercetoolsClient client;
+    private BlockingSphereClient client;
 
-    public CommercetoolsQueryExecutor(final CommercetoolsClient client) {
+    public CommercetoolsQueryExecutor(final BlockingSphereClient client) {
         this.client = client;
     }
 
@@ -102,7 +103,7 @@ public class CommercetoolsQueryExecutor {
             Query<T> query = baseQuery
                 .withOffset(processed)
                 .forMessageType(messageHint);
-            final PagedQueryResult<T> result = client.complete(query);
+            final PagedQueryResult<T> result = client.executeBlocking(query);
 
             result.getResults()
                     .stream()

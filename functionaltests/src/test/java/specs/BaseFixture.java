@@ -2,7 +2,6 @@ package specs;
 
 import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.base.Preconditions;
@@ -23,6 +22,7 @@ import io.sphere.sdk.carts.commands.updateactions.AddLineItem;
 import io.sphere.sdk.carts.commands.updateactions.AddPayment;
 import io.sphere.sdk.carts.commands.updateactions.SetBillingAddress;
 import io.sphere.sdk.carts.commands.updateactions.SetShippingAddress;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.OrderFromCartDraft;
 import io.sphere.sdk.orders.PaymentState;
@@ -75,7 +75,7 @@ public abstract class BaseFixture {
     private static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 1500;
 
     private static final Random randomSource = new Random();
-    private BlockingClient ctpClient;
+    private BlockingSphereClient ctpClient;
     private URL ctPayoneIntegrationBaseUrl;
     private LoadingCache<String, Type> typeCache;
 
@@ -149,12 +149,12 @@ public abstract class BaseFixture {
 
     protected void createCartAndOrderForPayment(final Payment payment, final String currencyCode) {
         // create cart and order with product
-        final Product product = ctpClient.complete(ProductQuery.of()).getResults().get(0);
+        final Product product = ctpClient.executeBlocking(ProductQuery.of()).getResults().get(0);
 
         final CartDraft cardDraft = CartDraftBuilder.of(Monetary.getCurrency(currencyCode)).build();
 
-        final Cart cart = ctpClient.complete(CartUpdateCommand.of(
-                ctpClient.complete(CartCreateCommand.of(cardDraft)),
+        final Cart cart = ctpClient.executeBlocking(CartUpdateCommand.of(
+                ctpClient.executeBlocking(CartCreateCommand.of(cardDraft)),
                 ImmutableList.of(
                         AddPayment.of(payment),
                         AddLineItem.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1),
@@ -162,7 +162,7 @@ public abstract class BaseFixture {
                         SetBillingAddress.of(Address.of(CountryCode.DE).withLastName("Test Buyer"))
                 )));
 
-        ctpClient.complete(OrderFromCartCreateCommand.of(
+        ctpClient.executeBlocking(OrderFromCartCreateCommand.of(
                 OrderFromCartDraft.of(cart, getRandomOrderNumber(), PaymentState.PENDING)));
     }
 
@@ -182,7 +182,7 @@ public abstract class BaseFixture {
         return String.valueOf(randomSource.nextInt() + System.currentTimeMillis());
     }
 
-    protected BlockingClient ctpClient() {
+    protected BlockingSphereClient ctpClient() {
         return ctpClient;
     }
 
@@ -218,7 +218,7 @@ public abstract class BaseFixture {
      * @see #fetchPaymentByLegibleName(String)
      */
     protected Payment fetchPaymentById(final String paymentId) {
-        return ctpClient.complete(PaymentByIdGet.of(
+        return ctpClient.executeBlocking(PaymentByIdGet.of(
                 Preconditions.checkNotNull(paymentId, "paymentId must not be null!")));
     }
 

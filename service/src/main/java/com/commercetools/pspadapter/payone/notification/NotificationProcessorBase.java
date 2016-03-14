@@ -1,12 +1,12 @@
 package com.commercetools.pspadapter.payone.notification;
 
-import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
@@ -30,14 +30,14 @@ import java.util.Optional;
 public abstract class NotificationProcessorBase implements NotificationProcessor {
     private static final String DEFAULT_SEQUENCE_NUMBER = "0";
 
-    private final BlockingClient client;
+    private final BlockingSphereClient client;
 
     /**
      * Constructor for implementations.
      *
      * @param client the commercetools platform client to update payments
      */
-    protected NotificationProcessorBase(final BlockingClient client) {
+    protected NotificationProcessorBase(final BlockingSphereClient client) {
         this.client = client;
     }
 
@@ -51,7 +51,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
         }
 
         try {
-            client.complete(PaymentUpdateCommand.of(payment, createPaymentUpdates(payment, notification)));
+            client.executeBlocking(PaymentUpdateCommand.of(payment, createPaymentUpdates(payment, notification)));
         } catch (final io.sphere.sdk.client.ConcurrentModificationException e) {
             throw new java.util.ConcurrentModificationException(e);
         }

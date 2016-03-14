@@ -1,12 +1,12 @@
 package com.commercetools.pspadapter.payone.transaction.common;
 
-import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
@@ -22,13 +22,13 @@ import java.time.ZonedDateTime;
  * "Executes" a transaction by setting the status to Failure.
  */
 public class UnsupportedTransactionExecutor implements TransactionExecutor {
-    private final BlockingClient client;
+    private final BlockingSphereClient client;
 
     /**
      * Initializes the executor.
      * @param client the commercetools platform client
      */
-    public UnsupportedTransactionExecutor(final BlockingClient client) {
+    public UnsupportedTransactionExecutor(final BlockingSphereClient client) {
         this.client = client;
     }
 
@@ -47,7 +47,7 @@ public class UnsupportedTransactionExecutor implements TransactionExecutor {
                         CustomFieldKeys.MESSAGE_FIELD, "Transaction type not supported."));
 
         return paymentWithCartLike.withPayment(
-            client.complete(
+            client.executeBlocking(
                 PaymentUpdateCommand.of(payment, ImmutableList.of(changeTransactionState, addInterfaceInteraction))));
     }
 

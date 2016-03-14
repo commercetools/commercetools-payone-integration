@@ -3,7 +3,6 @@ package com.commercetools.pspadapter.payone.notification.common;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
@@ -11,6 +10,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Transactio
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
@@ -44,7 +44,7 @@ public class DefaultNotificationProcessorTest {
             ZonedDateTime.of(LocalDateTime.ofEpochSecond(seconds, 0, ZoneOffset.UTC), ZoneId.of("UTC"));
 
     @Mock
-    private BlockingClient client;
+    private BlockingSphereClient client;
 
     @InjectMocks
     private DefaultNotificationProcessor testee;
@@ -79,7 +79,7 @@ public class DefaultNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).complete(paymentRequestCaptor.capture());
+        verify(client).executeBlocking(paymentRequestCaptor.capture());
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
 

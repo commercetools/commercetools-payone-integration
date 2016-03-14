@@ -12,13 +12,13 @@ import static org.mockito.Mockito.when;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsClient;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
 import org.junit.Before;
@@ -44,7 +44,7 @@ public class NotificationDispatcherTest {
     private static final String dummyInterfaceId = "123";
 
     @Mock
-    private CommercetoolsClient client;
+    private BlockingSphereClient client;
 
     @Mock
     private PropertyProvider propertyProvider;
@@ -63,7 +63,7 @@ public class NotificationDispatcherTest {
 
     @Before
     public void setUp() throws Exception {
-        when(client.complete(any(PaymentQuery.class)))
+        when(client.executeBlocking(any(PaymentQuery.class)))
                 .then(a -> {
                     List arguments = Arrays.asList(a.getArguments());
                     try {

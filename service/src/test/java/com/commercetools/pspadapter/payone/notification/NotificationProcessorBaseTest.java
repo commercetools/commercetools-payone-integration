@@ -5,11 +5,11 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
@@ -36,7 +36,7 @@ public class NotificationProcessorBaseTest {
     public JUnitSoftAssertions softly = new JUnitSoftAssertions();
 
     @Mock
-    private BlockingClient client;
+    private BlockingSphereClient client;
 
     @Mock
     private Payment payment;
@@ -68,14 +68,14 @@ public class NotificationProcessorBaseTest {
         };
 
         final ConcurrentModificationException sdkException = new ConcurrentModificationException();
-        when(client.complete(isA(PaymentUpdateCommand.class))).thenThrow(sdkException);
+        when(client.executeBlocking(isA(PaymentUpdateCommand.class))).thenThrow(sdkException);
 
         // act
         final Throwable throwable =
                 catchThrowable(() -> testee.processTransactionStatusNotification(notification, payment));
 
         // assert
-        verify(client).complete(paymentUpdateCommandArgumentCaptor.capture());
+        verify(client).executeBlocking(paymentUpdateCommandArgumentCaptor.capture());
         softly.assertThat(paymentUpdateCommandArgumentCaptor.getValue().getUpdateActions()).as("update action instance")
                 .isSameAs(updateActions);
 

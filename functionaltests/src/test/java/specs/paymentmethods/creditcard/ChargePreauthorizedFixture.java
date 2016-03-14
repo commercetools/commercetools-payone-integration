@@ -1,6 +1,5 @@
 package specs.paymentmethods.creditcard;
 
-import com.commercetools.pspadapter.payone.domain.ctp.BlockingClient;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.collect.ImmutableList;
@@ -15,6 +14,7 @@ import io.sphere.sdk.carts.commands.updateactions.AddLineItem;
 import io.sphere.sdk.carts.commands.updateactions.AddPayment;
 import io.sphere.sdk.carts.commands.updateactions.SetBillingAddress;
 import io.sphere.sdk.carts.commands.updateactions.SetShippingAddress;
+import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.OrderFromCartDraft;
 import io.sphere.sdk.orders.PaymentState;
@@ -64,13 +64,13 @@ public class ChargePreauthorizedFixture extends BaseFixture {
         final String paymentId = preparePaymentWithPreauthorizedAmountAndOrder(monetaryAmount, paymentMethod);
 
         //get newest payment and add new charge transaction
-        ctpClient().complete(PaymentUpdateCommand.of(fetchPaymentById(paymentId),
-                    ImmutableList.of(
-                            AddTransaction.of(TransactionDraftBuilder
-                                    .of(TransactionType.valueOf(transactionType), monetaryAmount, ZonedDateTime.now())
-                                    .state(TransactionState.PENDING)
-                                    .build())
-                    )
+        ctpClient().executeBlocking(PaymentUpdateCommand.of(fetchPaymentById(paymentId),
+                        ImmutableList.of(
+                                AddTransaction.of(TransactionDraftBuilder
+                                        .of(TransactionType.valueOf(transactionType), monetaryAmount, ZonedDateTime.now())
+                                        .state(TransactionState.PENDING)
+                                        .build())
+                        )
                 )
         );
 
@@ -118,13 +118,13 @@ public class ChargePreauthorizedFixture extends BaseFixture {
                                  CustomFieldKeys.REFERENCE_FIELD, "myGlobalKey")))
                  .build();
 
-         final BlockingClient ctpClient = ctpClient();
-         final Payment payment = ctpClient.complete(PaymentCreateCommand.of(paymentDraft));
+         final BlockingSphereClient ctpClient = ctpClient();
+         final Payment payment = ctpClient.executeBlocking(PaymentCreateCommand.of(paymentDraft));
          //create cart and order with product
-         final Product product = ctpClient.complete(ProductQuery.of()).getResults().get(0);
+         final Product product = ctpClient.executeBlocking(ProductQuery.of()).getResults().get(0);
          final CartDraft cardDraft = CartDraftBuilder.of(Monetary.getCurrency("EUR")).build();
-         final Cart cart = ctpClient.complete(CartUpdateCommand.of(
-                 ctpClient.complete(CartCreateCommand.of(cardDraft)),
+         final Cart cart = ctpClient.executeBlocking(CartUpdateCommand.of(
+                 ctpClient.executeBlocking(CartCreateCommand.of(cardDraft)),
                  ImmutableList.of(
                          AddPayment.of(payment),
                          AddLineItem.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1),
@@ -132,9 +132,9 @@ public class ChargePreauthorizedFixture extends BaseFixture {
                          SetBillingAddress.of(Address.of(CountryCode.DE).withLastName("Test Buyer"))
                  )));
 
-         ctpClient.complete(OrderFromCartCreateCommand.of(OrderFromCartDraft.of(cart, getRandomOrderNumber(), PaymentState.PENDING)));
+         ctpClient.executeBlocking(OrderFromCartCreateCommand.of(OrderFromCartDraft.of(cart, getRandomOrderNumber(), PaymentState.PENDING)));
 
-         ctpClient.complete(PaymentUpdateCommand.of(payment, AddTransaction.of(TransactionDraftBuilder
+         ctpClient.executeBlocking(PaymentUpdateCommand.of(payment, AddTransaction.of(TransactionDraftBuilder
                  .of(TransactionType.AUTHORIZATION, monetaryAmount, ZonedDateTime.now())
                  .state(TransactionState.PENDING)
                  .build())));
