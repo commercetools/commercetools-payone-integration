@@ -26,9 +26,9 @@
     <h3>Charge immediately</h3>
     <p>
         Given the following payments for
-        <em>a Sofortüberweisung account that does <b>not</b> support charges for currencies other than EUR</em>:
+        <em>a bank account that does support Sofortueberweisung and does <b>not</b> support charges for currencies other than EUR</em>:
     </p>
-    <table>
+    <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
             <th c:set="#centAmount">Cent Amount</th>
@@ -49,20 +49,90 @@
         </tr>
     </table>
     <p>
-        Due to difficulties during testing, unfortunately we can not provide an automated test here. The test was carried out
-        manually with the result, that Payment 2 was denied as expected. Payment 1 received the redirect url successfully, but
-        when following the url and acknowledging the payment, we unexpectedly received an <b>appointed/completed</b> notification with
-        <b>sequencenumber 1</b>. The Charge transaction can not be matched because it was processed with sequencenumber 0. This
-        is not a behavior expected from the docs by PAYONE and is also related to the issue for PAYPAL ChargeImmediately.
+        When I request the integration service to handle them I will get the following results:
+    </p>
+    <table c:execute="#result = handlePayment(#paymentName, #requestType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#result.statusCode">Response <br/>Status Code</th>
+            <th c:assertEquals="#result.interactionCount">total # of <br/><em>authorization</em> requests sent</th>
+            <th c:assertEquals="#result.transactionState">Transaction State </th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>200</td>
+            <td>1</td>
+            <td>Pending</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 2</td>
+            <td>200</td>
+            <td>1</td>
+            <td>Failure</td>
+            <td></td>
+        </tr>
+    </table>
+    <p>
+        Since a valid payment for this bank account requires a verification by Sofortueberweisung, the transaction will stay in state Pending
+        as long as we don't follow the received redirect url and verify the payment.
+    </p>
+    <table c:execute="#result = fetchPaymentDetails(#paymentName)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#result.transactionState">Transaction State </th>
+            <th c:assertEquals="#result.responseRedirectUrlStart">redirect url starts with</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>Pending</td>
+            <td>https://www.sofort-ueberweisung.de/payment/start</td>
+            <td></td>
+        </tr>
+    </table>
+    <p>
+        The failed payment <span c:set="#failedPaymentName">Payment 2</span>
+        must have received <span c:assertFalse="isInteractionRedirectPresent(#failedPaymentName)">0</span>
+        responses of type PAYONE_INTERACTION_REDIRECT and its custom field <span c:set="#fieldName">redirectUrl</span>
+        <span c:assertTrue="customStringFieldIsNull(#failedPaymentName, #fieldName)">must be null</span>.
     </p>
     <p>
-        You can see both examples in the commercetools platform:
-        Payment 1 - 9f0a9d65-5200-4aeb-8e4c-d97282250667
-        Payment 2 - adf0ea2d-922f-482b-b36a-e9fb246cee6a
+        If I follow the Sofortueberweisung process for <span c:set="#successfulPayments">Payment 1</span> and
+        <span c:assertTrue="executeRedirectForPayments(#successfulPayments)">verify it successfully</span> with my bank account,
+        I get forwarded to a predefined success url and for each of the payments the following notifications will be received:
     </p>
-    <p>
-        See <a href="https://github.com/commercetools/commercetools-payone-integration/issues/68">issue #68</a>.
-    </p>
+    <ol>
+        <li>(txaction=<b c:set="#txactionAppointed">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)">received</span> -> has no effect, just as a confirmation</li>
+        <li>(txaction=<b c:set="#txactionPaid">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)">received</span>
+            ->  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
+    </ol>
+    <table c:execute="#result = fetchPaymentDetails(#paymentName)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:assertEquals="#result.appointedNotificationCount">total # of <br/><em>appointed/completed</em> notifications</th>
+            <th c:assertEquals="#result.paidNotificationCount">total # of <br/><em>paid/completed</em> notifications</th>
+            <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
+            <th c:assertEquals="#result.amountPaid">Paid Amount</th>
+            <th c:assertEquals="#result.successUrl">url called after successful verification</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>Success</td>
+            <td>1</td>
+            <td>1</td>
+            <td>null</td>
+            <td>4,06 EUR</td>
+            <td>[...]Payment-1-Success</td>
+            <td></td>
+        </tr>
+    </table>
 </div>
+<p>
+    See <a href="https://github.com/commercetools/commercetools-payone-integration/issues/68">issue #68</a>.
+</p>
 </body>
 </html>
