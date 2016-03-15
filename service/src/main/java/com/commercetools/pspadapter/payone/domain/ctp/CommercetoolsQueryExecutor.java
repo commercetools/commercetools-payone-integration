@@ -45,8 +45,11 @@ public class CommercetoolsQueryExecutor {
     }
 
     public PaymentWithCartLike getPaymentWithCartLike(String paymentId, CompletionStage<Payment> paymentFuture)  {
-        final CompletionStage<PagedQueryResult<Order>> orderFuture = client.execute(OrderQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)));
-        final CompletionStage<PagedQueryResult<Cart>> cartFuture = client.execute(CartQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)));
+        final CompletionStage<PagedQueryResult<Order>> orderFuture =
+                client.execute(OrderQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)));
+
+        final CompletionStage<PagedQueryResult<Cart>> cartFuture =
+                client.execute(CartQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)));
 
         final CompletionStage<PaymentWithCartLike> paymentWithCartLikeFuture = paymentFuture.thenCompose(payment ->
             orderFuture.thenCompose(orderResult -> {
@@ -72,21 +75,22 @@ public class CommercetoolsQueryExecutor {
         consumeAllMessages(sinceDate, paymentConsumer, PaymentCreatedMessage.MESSAGE_HINT);
     }
 
-    public void consumePaymentTransactionAddedMessages(final ZonedDateTime sinceDate, final Consumer<Payment> paymentConsumer) {
+    public void consumePaymentTransactionAddedMessages(final ZonedDateTime sinceDate,
+                                                       final Consumer<Payment> paymentConsumer) {
         consumeAllMessages(sinceDate, paymentConsumer, PaymentTransactionAddedMessage.MESSAGE_HINT);
     }
 
-    private <T extends GenericMessageImpl<Payment>> void consumeAllMessages(
-            final ZonedDateTime sinceDate,
-            final Consumer<Payment> paymentConsumer,
-            final MessageDerivateHint<T> messageHint) {
+    private <T extends GenericMessageImpl<Payment>> void consumeAllMessages(final ZonedDateTime sinceDate,
+                                                                            final Consumer<Payment> paymentConsumer,
+                                                                            final MessageDerivateHint<T> messageHint) {
         final MessageQuery baseQuery = MessageQuery.of()
             .withPredicates(m -> m.createdAt().isGreaterThanOrEqualTo(sinceDate))
             .withSort(m -> m.createdAt().sort().asc())
             .withExpansionPaths(MessageExpansionModel::resource)
             .withLimit(500); // Maximum
 
-        long processed = 0, total = 0;
+        long processed = 0;
+        long total = 0;
 
         do {
             Query<T> query = baseQuery
