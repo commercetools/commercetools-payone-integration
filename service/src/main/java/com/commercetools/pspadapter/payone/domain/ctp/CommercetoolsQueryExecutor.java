@@ -4,7 +4,6 @@ import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFound
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.queries.CartQuery;
 import io.sphere.sdk.client.BlockingSphereClient;
-import io.sphere.sdk.client.SphereClientUtils;
 import io.sphere.sdk.messages.GenericMessageImpl;
 import io.sphere.sdk.messages.MessageDerivateHint;
 import io.sphere.sdk.messages.expansion.MessageExpansionModel;
@@ -20,8 +19,11 @@ import io.sphere.sdk.queries.Query;
 
 import java.time.ZonedDateTime;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -30,8 +32,6 @@ import java.util.function.Consumer;
  */
 //TODO: refactor class since it has mixed concerns (maybe MessageConsumer only)
 public class CommercetoolsQueryExecutor {
-    // TODO jw: extract to use the same value as the ServiceFactory
-    private static final long DEFAULT_CTP_CLIENT_TIMEOUT = 10L;
 
     private BlockingSphereClient client;
 
@@ -68,7 +68,18 @@ public class CommercetoolsQueryExecutor {
             }
         ));
 
-        return SphereClientUtils.blockingWait(paymentWithCartLikeFuture, DEFAULT_CTP_CLIENT_TIMEOUT, TimeUnit.SECONDS);
+        //TODO: refactor since BlockingClient is available
+        try {
+            return paymentWithCartLikeFuture
+                .toCompletableFuture()
+                .get(10, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            final Throwable cause =
+                e.getCause() != null && e instanceof ExecutionException
+                    ? e.getCause()
+                    : e;
+            throw cause instanceof RuntimeException? (RuntimeException) cause : new CompletionException(cause);
+        }
     }
 
     public void consumePaymentCreatedMessages(final ZonedDateTime sinceDate, final Consumer<Payment> paymentConsumer) {
