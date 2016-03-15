@@ -6,9 +6,9 @@
     <title>Sofortüberweisung Charge w/o Separate Authorization</title>
 </head>
 <body>
-<h1>Charge via Sofortüberweisung without separate Authorization </h1>
+<h1>Charge via Sofortüberweisung without separate Authorization</h1>
 <p>
-    The integration service allows to capture money from a <a href="https://www.sofort.com">Sofortüberweisung</a> account in a
+    The integration service allows to capture money from a bank account which supports transactions via <a href="https://www.sofort.com">Sofortüberweisung</a> in a
     one step process without initiating a separate authorization before.
 </p>
 <p>
@@ -25,8 +25,8 @@
 <div class="example">
     <h3>Charge immediately</h3>
     <p>
-        Given the following payments for
-        <em>a bank account that does support Sofortueberweisung and does <b>not</b> support charges for currencies other than EUR</em>:
+        Given the following payments for a bank account
+        <em>that does support Sofortueberweisung</em> and <em>does <b>not</b> support charges for currencies other than EUR</em>:
     </p>
     <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
         <tr>
@@ -45,6 +45,18 @@
             <td>Payment 2</td>
             <td>91341</td>
             <td>USD</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>8231</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>123411</td>
+            <td>EUR</td>
             <td></td>
         </tr>
     </table>
@@ -73,10 +85,24 @@
             <td>Failure</td>
             <td></td>
         </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>200</td>
+            <td>1</td>
+            <td>Pending</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>200</td>
+            <td>1</td>
+            <td>Pending</td>
+            <td></td>
+        </tr>
     </table>
     <p>
-        Since a valid payment for this bank account requires a verification by Sofortueberweisung, the transaction will stay in state Pending
-        as long as we don't follow the received redirect url and verify the payment.
+        Since a valid payment for this bank account needs to be verified with Sofortueberweisung, the transaction will stay in state Pending
+        as long as we don't follow the received redirect url and fill in the account information.
     </p>
     <table c:execute="#result = fetchPaymentDetails(#paymentName)">
         <tr>
@@ -91,6 +117,18 @@
             <td>https://www.sofort-ueberweisung.de/payment/start</td>
             <td></td>
         </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>Pending</td>
+            <td>https://www.sofort-ueberweisung.de/payment/start</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>Pending</td>
+            <td>https://www.sofort-ueberweisung.de/payment/start</td>
+            <td></td>
+        </tr>
     </table>
     <p>
         The failed payment <span c:set="#failedPaymentName">Payment 2</span>
@@ -99,8 +137,8 @@
         <span c:assertTrue="customStringFieldIsNull(#failedPaymentName, #fieldName)">must be null</span>.
     </p>
     <p>
-        If I follow the Sofortueberweisung process for <span c:set="#successfulPayments">Payment 1</span> and
-        <span c:assertTrue="executeRedirectForPayments(#successfulPayments)">verify it successfully</span> with my bank account,
+        If I follow the Sofortueberweisung process for <span c:set="#successfulPayments">Payment 1, Payment 3, Payment 4</span> and
+        <span c:assertTrue="executeRedirectForPayments(#successfulPayments)">verify them successfully</span> by entering my bank account information,
         I get forwarded to a predefined success url and for each of the payments the following notifications will be received:
     </p>
     <ol>
@@ -129,10 +167,40 @@
             <td>[...]Payment-1-Success</td>
             <td></td>
         </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>Success</td>
+            <td>1</td>
+            <td>1</td>
+            <td>null</td>
+            <td>82,31 EUR</td>
+            <td>[...]Payment-3-Success</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>Success</td>
+            <td>1</td>
+            <td>1</td>
+            <td>null</td>
+            <td>1.234,11 EUR</td>
+            <td>[...]Payment-4-Success</td>
+            <td></td>
+        </tr>
+        <p>
+            See <a href="https://github.com/commercetools/commercetools-payone-integration/issues/68">issue #68</a>.
+        </p>
     </table>
 </div>
+<h2>Further Details</h2>
+<h3>What happens if the verification fails?</h3>
 <p>
-    See <a href="https://github.com/commercetools/commercetools-payone-integration/issues/68">issue #68</a>.
+    That's out of the Integration Service's scope.<br/>
+    The Integration Service is notified by PAYONE only in case of a successful verification.
+</p>
+<p>
+    The checkout implementation needs to take care of failed verifications - the user will be redirected to
+    the <em>backUrl</em> or the <em>errorUrl</em> specified in the Payment object.
 </p>
 </body>
 </html>

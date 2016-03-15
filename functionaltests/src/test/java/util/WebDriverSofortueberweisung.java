@@ -40,7 +40,7 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
         timeouts.setScriptTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
         final WebClient webClient = getWebClient();
-        webClient.setJavaScriptTimeout(2000);
+        webClient.setJavaScriptTimeout(5000);
         webClient.getOptions().setThrowExceptionOnScriptError(false);
         webClient.getOptions().setPopupBlockerEnabled(true);
 

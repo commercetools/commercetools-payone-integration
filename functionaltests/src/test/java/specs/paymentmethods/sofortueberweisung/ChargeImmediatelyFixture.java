@@ -92,8 +92,8 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                                 .put(CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + (paymentName + " Success").replace(" ", "-"))
                                 .put(CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + (paymentName + " Error").replace(" ", "-"))
                                 .put(CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + (paymentName + " Cancel").replace(" ", "-"))
-                                .put(CustomFieldKeys.IBAN_FIELD, "DE85123456782599100003")
-                                .put(CustomFieldKeys.BIC_FIELD, "TESTTEST")
+                                .put(CustomFieldKeys.IBAN_FIELD, getTestDataSwBankTransferIban())
+                                .put(CustomFieldKeys.BIC_FIELD, getTestDataSwBankTransferBic())
                                 .put(CustomFieldKeys.REFERENCE_FIELD, "myGlobalKey")
                                 .build()))
                 .build();
@@ -164,7 +164,6 @@ public class ChargeImmediatelyFixture extends BaseFixture {
         return ImmutableMap.<String, String>builder()
                 .put("transactionState", getTransactionState(payment, transactionId))
                 .put("responseRedirectUrlStart", responseRedirectUrl.substring(0, urlTrimAt))
-                .put("responseRedirectUrlFull", responseRedirectUrl)
                 .put("successUrl", successUrlForPayment.getOrDefault(paymentName, EMPTY_STRING))
                 .put("amountAuthorized", amountAuthorized)
                 .put("amountPaid", amountPaid)
@@ -185,7 +184,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
 
             if (responseRedirectUrl.isPresent()) {
                 final String successUrl =
-                        webDriver.executeSofortueberweisungRedirect(responseRedirectUrl.get(), getTestData3DsPassword())
+                        webDriver.executeSofortueberweisungRedirect(responseRedirectUrl.get(), getTestDataSwBankTransferIban())
                                 .replace(baseRedirectUrl, "[...]");
 
                 successUrlForPayment.put(paymentName, successUrl);
@@ -194,7 +193,6 @@ public class ChargeImmediatelyFixture extends BaseFixture {
 
         return successUrlForPayment.size() == paymentNamesList.size();
     }
-
 
     public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws InterruptedException, ExecutionException {
         final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));

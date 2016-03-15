@@ -129,8 +129,7 @@ a seperate account is required for each of the transaction types (see [Functiona
 
 > TODO document best practice on how to work in day-to-day development, esp. on how local machine, travis and heroku play together.  
 
-The integration tests of this implementation use a heroku instance of the service. If you are authorized to configure it. 
-the backend can be found at https://dashboard.heroku.com/apps/ct-p1-integration-staging/resources . 
+The integration tests of this implementation use a heroku instance of the service. If you are authorized to configure it the backend can be found at https://dashboard.heroku.com/apps/ct-p1-integration-staging/resources .
 
 Please do not access this instance for playground or experimental reasons as you may risk breaking running automated integration tests. 
 
@@ -144,7 +143,9 @@ Name | Content
 `CT_PAYONE_INTEGRATION_URL` | the URL of the service instance under test
 `TEST_DATA_VISA_CREDIT_CARD_NO_3DS` | the pseudocardpan of an unconfirmed VISA credit card
 `TEST_DATA_VISA_CREDIT_CARD_3DS` | the pseudocardpan of a VISA credit card verified by 3-D Secure
-`TEST_DATA_3_DS_PASSWORD` | the 3DS password of the test card. Payone Test Cards use `12345` 
+`TEST_DATA_3_DS_PASSWORD` | the 3DS password of the test card. Payone Test Cards use `12345`
+`TEST_DATA_SW_BANK_TRANSFER_IBAN` | the IBAN of a test bank account supporting Sofortueberweisung
+`TEST_DATA_SW_BANK_TRANSFER_BIC` | the BIC of a test bank account supporting Sofortueberweisung
 
 > TODO document how to practically acquire the pseudocardpans (from the client API). Can this be automated?
 > TODO why does the 3DS pwd need an evironment variable if a fixed value? --> is a parameter which could change in future
@@ -210,6 +211,8 @@ export CT_PAYONE_INTEGRATION_URL=""
 export TEST_DATA_VISA_CREDIT_CARD_NO_3DS=""
 export TEST_DATA_VISA_CREDIT_CARD_3DS=""
 export TEST_DATA_3_DS_PASSWORD=""
+TEST_DATA_SW_BANK_TRANSFER_IBAN=""
+TEST_DATA_SW_BANK_TRANSFER_BIC=""
 ```
 
 ## Appendix 2: Alternative configuration via properties file
@@ -240,4 +243,6 @@ CT_PAYONE_INTEGRATION_URL=<URL of the integration service instance under test>
 TEST_DATA_VISA_CREDIT_CARD_NO_3DS=<see PAYONE Test data documentation>
 TEST_DATA_VISA_CREDIT_CARD_3DS=<see PAYONE Test data documentation>
 TEST_DATA_3_DS_PASSWORD=<see PAYONE Test data documentation>
+TEST_DATA_SW_BANK_TRANSFER_IBAN=<see PAYONE Test data documentation>
+TEST_DATA_SW_BANK_TRANSFER_BIC=<see PAYONE Test data documentation>
 ```
