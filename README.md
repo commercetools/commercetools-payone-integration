@@ -54,7 +54,8 @@ https://pmi.pay1.de/
 
 The integration service requires - _unless otherwise stated_ - the following environment variables. 
 
-At the end of this README you can find a copy/past shell template that sets the variables.
+At the end of this README you can find a copy/paste shell template that sets the variables. Alternatively you can use
+[a properties file](#appendix-2-alternative-configuration-via-properties-file).
 
 ##### commercetools API client credentials
 
@@ -185,7 +186,7 @@ Please bear in mind that this repository should be free of any IDE specific file
 Just fork it. The MIT License allows you to do anything with the code, commercially or noncommercial. 
 Contributing an Improvement is the better Idea though because you will save maintanance work when not forking. 
 
-## Appendix 1: Shell script template that sets the environment variables:
+## Appendix 1: Shell script template that sets the environment variables
 
 (fill in the values required for your environment)
 
@@ -209,4 +210,34 @@ export CT_PAYONE_INTEGRATION_URL=""
 export TEST_DATA_VISA_CREDIT_CARD_NO_3DS=""
 export TEST_DATA_VISA_CREDIT_CARD_3DS=""
 export TEST_DATA_3_DS_PASSWORD=""
+```
+
+## Appendix 2: Alternative configuration via properties file
+
+Instead of the shell script described above a Java properties file called `gradle.properties` can be put in the project
+root directory to configure the build/test. It will be picked up by Gradle (and is ignored by Git).
+
+```
+# use the Gradle daemon, i.e. re-use the JVM for builds
+org.gradle.daemon=true
+
+# integration service configuration
+
+CT_PROJECT_KEY=<commercetools project key>
+CT_CLIENT_ID=<commercetools client ID>
+CT_CLIENT_SECRET=<commercetools client secret>
+
+PAYONE_KEY=<PAYONE Key>
+PAYONE_MERCHANT_ID=<PAYONE merchant ID>
+PAYONE_MODE=<PAYONE mode (live or test)>
+PAYONE_PORTAL_ID=<PAYONE portal ID>
+PAYONE_SUBACC_ID=<PAYONE subaccount>
+
+# test configuration
+
+CT_PAYONE_INTEGRATION_URL=<URL of the integration service instance under test>
+
+TEST_DATA_VISA_CREDIT_CARD_NO_3DS=<see PAYONE Test data documentation>
+TEST_DATA_VISA_CREDIT_CARD_3DS=<see PAYONE Test data documentation>
+TEST_DATA_3_DS_PASSWORD=<see PAYONE Test data documentation>
 ```
