@@ -20,6 +20,10 @@ public class PayoneConfig {
     private final String mode;
     private final String apiUrl;
     private final String apiVersion;
+    private final String solutionName;
+    private final String solutionVersion;
+    private final String integratorName;
+    private final String integratorVersion;
 
 
     public PayoneConfig(final PropertyProvider propertyProvider) {
@@ -31,6 +35,10 @@ public class PayoneConfig {
         apiVersion = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_API_VERSION);
         final String plainKey = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_KEY);
         keyAsMd5Hash = Hashing.md5().hashString(plainKey, Charsets.UTF_8).toString();
+        solutionName = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SOLUTION_NAME);
+        solutionVersion = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SOLUTION_VERSION);
+        integratorName = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_INTEGRATOR_NAME);
+        integratorVersion = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_INTEGRATOR_VERSION);
     }
 
     public String getApiUrl() {
@@ -58,5 +66,14 @@ public class PayoneConfig {
     }
 
     public String getApiVersion() { return apiVersion; }
+
+    public String getSolutionName() { return solutionName; }
+
+    public String getSolutionVersion() { return solutionVersion; }
+
+    public String getIntegratorName() { return integratorName; }
+
+    public String getIntegratorVersion() { return integratorVersion; }
+
 
 }

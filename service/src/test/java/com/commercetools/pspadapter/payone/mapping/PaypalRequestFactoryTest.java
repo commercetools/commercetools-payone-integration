@@ -67,6 +67,10 @@ public class PaypalRequestFactoryTest {
         softly.assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
         softly.assertThat(result.getMode()).isEqualTo(config.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
+        softly.assertThat(result.getSolutionName()).isEqualTo(config.getSolutionName());
+        softly.assertThat(result.getSolutionVersion()).isEqualTo(config.getSolutionVersion());
+        softly.assertThat(result.getIntegratorName()).isEqualTo(config.getIntegratorName());
+        softly.assertThat(result.getIntegratorVersion()).isEqualTo(config.getIntegratorVersion());
 
         //clearing type
         ClearingType clearingType = ClearingType.getClearingTypeByKey("WALLET-PAYPAL");
@@ -136,6 +140,10 @@ public class PaypalRequestFactoryTest {
         softly.assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
         softly.assertThat(result.getMode()).isEqualTo(config.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
+        softly.assertThat(result.getSolutionName()).isEqualTo(config.getSolutionName());
+        softly.assertThat(result.getSolutionVersion()).isEqualTo(config.getSolutionVersion());
+        softly.assertThat(result.getIntegratorName()).isEqualTo(config.getIntegratorName());
+        softly.assertThat(result.getIntegratorVersion()).isEqualTo(config.getIntegratorVersion());
 
         //clearing type
         ClearingType clearingType = ClearingType.getClearingTypeByKey("WALLET-PAYPAL");

@@ -12,6 +12,11 @@ public class PropertyProvider {
 
     public static final String PAYONE_API_VERSION = "PAYONE_API_VERSION";
 
+    public static final String PAYONE_SOLUTION_NAME = "PAYONE_SOLUTION_NAME";
+    public static final String PAYONE_SOLUTION_VERSION = "PAYONE_SOLUTION_VERSION";
+    public static final String PAYONE_INTEGRATOR_NAME = "PAYONE_INTEGRATOR_NAME";
+    public static final String PAYONE_INTEGRATOR_VERSION = "PAYONE_INTEGRATOR_VERSION";
+
     public static final String PAYONE_API_URL = "PAYONE_API_URL";
     public static final String PAYONE_SUBACC_ID = "PAYONE_SUBACC_ID";
     public static final String PAYONE_MERCHANT_ID = "PAYONE_MERCHANT_ID";
@@ -31,6 +36,11 @@ public class PropertyProvider {
     public PropertyProvider() {
         internalProperties = ImmutableMap.<String, String>builder()
             .put(PAYONE_API_VERSION, "3.9")
+            .put(PAYONE_SOLUTION_NAME, "commercetools-platform")
+            .put(PAYONE_SOLUTION_VERSION, "1")
+            .put(PAYONE_INTEGRATOR_NAME, "commercetools-payone-integration")
+            // TODO set dynamically
+            .put(PAYONE_INTEGRATOR_VERSION, "0.1-SNAPSHOT")
             .build();
     }
 
