@@ -5,37 +5,39 @@
 This software provides an integration between the [commercetools eCommerce platform](http://dev.sphere.io) API
 and the [PAYONE](http://www.payone.de) payment service provider API. 
 
-It is a standalone Microservice that connects the two cloud platforms and provides own helper APIs to checkout
-implementations. 
+It is a standalone Microservice that connects the two cloud platforms and provides own helper APIs to checkout implementations. 
 
-## Resources
+## Documentation
+
+This project is using [Cucumber]() for system tests, which is a kind of "living specification". 
+Therefore the [test definitions and results](http://commercetools.github.io/commercetools-payone-integration/latest/spec/specs/Specs.html) are the most precise documentation of the behavior. 
+They automatically generated, updated and published to the `gh_pages` branch of this project by the [TravicCI continuous integration]() setup. 
+
+## Related Documentation
+
  * commercetools API documentation at http://dev.commercetools.com
  * commercetools JVM SDK Javadoc at http://sphereio.github.io/sphere-jvm-sdk/javadoc/master/index.html
  * commercetools general payment conventions, esp. for the payment type modeling https://github.com/nkuehn/payment-specs
  * PAYONE API documentation https://pmi.pay1.de/merchants/?navi=downloads 
- * The PSP integrations requirements and checkout protocol specification document (sent to you individually for now)
- * Waffle.io board https://waffle.io/commercetools/commercetools-payone-integration
- * Documentation of the integration service http://commercetools.github.io/commercetools-payone-integration/index.html
-   * including [latest "living" specification](http://commercetools.github.io/commercetools-payone-integration/latest/spec/specs/Specs.html)
  
 ## Using the Integration in a project
 
-TODO link to generic tutorial on microservice payment integrations when available
+> TODO link to generic tutorial on how to do payments.
 
-### Required Configuration in commercetools
+### Required Configuration in the commercetools project
 
- * Make sure your project contains the recommended custom types for the payment methods you intend to use as documented here https://github.com/nkuehn/payment-specs
-  * This integration can automatically create them (e.g. used in integration tests of the integration itself), but this is not the recommended production process.
+ * This integration assumes that the [conventional custom types](https://github.com/nkuehn/payment-integration-specifications/tree/master/types) for the payment methods are available in the project. 
+   If they are not found, this service automatically creates them when started. 
  * In the code that creates payments, have a good plan on how to fill the "reference" custom field. 
-   It appears on the customer's account statement and must be unique.  Often the Order Number is used, but this may not always suffice. 
+   It appears on the customer's account statement or the customer must put it into the transfer. 
+   It also must be unique. Often the Order Number is used, but this may not always suffice. 
 
 #### Domain Constraints 
 
- 1. If the PAYONE invoice generation feature or the Klarna payment methods are to be supported, the checkout has to make
-    sure that 
-    `amountPlanned = Sum over all Line Items ( round ( totalPrice.centAmount / quantity ) * quantity ))` 
-    and handle deviations accordingly.  Deviations can especially occur if absolute discounts are applied and there are
-    Line Items with quantity > 1.  On deviations the Line Item Data will not be transferred to PAYONE. 
+ If the PAYONE invoice generation feature or the Klarna payment methods are to be supported, the checkout has to make  sure that 
+ `amountPlanned = Sum over all Line Items ( round ( totalPrice.centAmount / quantity ) * quantity ))` and handle deviations accordingly.  
+ Deviations can especially occur if absolute discounts are applied and there are Line Items with quantity > 1.  
+ On deviations the Line Item Data will not be transferred to PAYONE. 
 
 ### Required Configuration in PAYONE
 
@@ -50,7 +52,7 @@ https://pmi.pay1.de/
 
 > Do not use a merchant account across commercetools projects, you may end up mixing customer accounts (debitorenkonten). 
 
-#### Configuration of the Integration Service itself
+### Configuration of the Integration Service itself
 
 The integration service requires - _unless otherwise stated_ - the following environment variables. 
 
@@ -91,7 +93,7 @@ Name | Content | Default
 `SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 10 minutes like [PaymentInteractionAdded](http://dev.commercetools.com/http-api-projects-messages.html#payment-interaction-added-message) | poll every 30 seconds
 `LONG_TIME_FRAME_SCHEDULED_JOB_CRON` | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 2 days | poll every hour on 5th second
 `PAYONE_MODE` | the mode of operation with PAYONE <ul><li>`"live"` for production mode, (i.e. _actual payments_) or</li><li>`"test"` for test mode</li></ul> | `"test"`  
-`CT_START_FROM_SCRATCH` | :warning: _**Handle with care!**_ If and only if equal, ignoring case, to `"true"` the service will create the custom types it needs. _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. See [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34). | `"false"`
+`CT_START_FROM_SCRATCH` | :warning: _**Handle with care!**_ If and only if equal, ignoring case, to `"true"` the service will create the custom types it needs. _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. If not yet in the project, the Custom Types are created independently of this parameter (but only deleted and recreated if this parameter is set).  Related: [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34). | `"false"`
 
 ### Build
 
@@ -109,16 +111,15 @@ java -jar service/build/libs/commercetools-payone-integration.jar
 
 ### Deploy and Run
 
-TODO docker and (complete) heroku options
+TODO docker
 
-TODO SSL
+TODO availability of the /payone/notification URL to the public or just the payone servers.
 
-TODO availability of the /payone/notification URL to the public or just the payone servers. 
+The integration service itself does not provide SSL connectivity, this must be done by a load balancer / SSL terminator running in front of it (which is recommended in any case). 
 
 ## Test environments
 
-Via the Payone PMI you have access to a full set of test data, which are implemented in the integration tests
-of this integration. 
+Via the Payone PMI you have access to a full set of test data, which are implemented in the integration tests of this integration. 
 
 As a notable exception, testing PayPal payments requires developer sandbox accounts at PayPal (see [Paypal Sandbox Accounts](#paypal-sandbox-accounts)).
 
