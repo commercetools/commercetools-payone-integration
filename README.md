@@ -9,9 +9,9 @@ It is a standalone Microservice that connects the two cloud platforms and provid
 
 ## Documentation
 
-This project is using [Cucumber]() for system tests, which is a kind of "living specification". 
+This project is using [Concordion](http://www.concordion.org) for system tests, which is a kind of "living specification". 
 Therefore the [test definitions and results](http://commercetools.github.io/commercetools-payone-integration/latest/spec/specs/Specs.html) are the most precise documentation of the behavior. 
-They automatically generated, updated and published to the `gh_pages` branch of this project by the [TravicCI continuous integration]() setup. 
+They are automatically generated, updated and published to the `gh_pages` branch of this project by the [TravisCI continuous integration](https://travis-ci.com/commercetools/commercetools-payone-integration) setup. 
 
 ## Related Documentation
 
