@@ -208,15 +208,7 @@ Please use the commercetools custom payment types (per method) from the [method 
 
 All payment methods:
 
-  * _Required_ `reference`: should conventionally be the Order Number (assuming just one payment per Order). 
-     The OrderNumber is only available on the CT Order, but not the CT Cart.
-     Issue at hand: Checkout Implementations vary in respect to whether the Cart is converted into an Order before or after the Order is placed. 
-     Proposed behavior:
-     1. check if the Order is alredy created and has an Order Number. Take that as reference.
-     1. If not: Create an Order Number and store it into a custom field `reference` in the Payment object. 
-        An Integration Configuration determines the Custom _Object_ container and ID from which to get the next Order ID. 
-        The Checkout implementation that creates Payment before Order then needs to assure that the Order ID
-        is taken from the Payment Object if the Order is created after the Payment.   
+  * _Required_ `reference`: Directly taken over from a custom field `reference` of type String. Should be filled by the Order Number in the checkout / solution code.
  
 `DIRECT_DEBIT`*:
   * general:
@@ -344,7 +336,7 @@ It could remain in `Pending` for various reasons.
 
 ### receiving the PAYONE TransactionStatus Notifications and storing them in an Interaction
 
- 1. Find Payment with PAYONE `TXID` in the Payment.interfaceId field AND paymentMethodInfo.paymentInterface = "PAYONE"
+ 1. Find Payment with PAYONE `TXID` in the Payment.interfaceId field AND paymentMethodInfo.paymentInterface = "PAYONE". You can __optionally__ check whether the `reference` fields match and whether the PO `param` field contains the CTP payment ID.   
  2. In none matches, *create one* (checkout error situation).  
    * If an *Order* with CT orderNumber = PAYONE `reference` is found, reference the payment from that
    * If a *Customer*  with CT customerNumber = PAYONE `customerid` is found, reference that customer from the payment. 
