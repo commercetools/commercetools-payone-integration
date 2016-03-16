@@ -205,7 +205,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
             numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
             if (remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(4)
                     || remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(2)) {
-                LOG.info("Waiting for " + txaction + " notifications in ChargedImmediatelyWith3dsFixture takes longer than usual.");
+                LOG.info("Waiting for " + txaction + " notifications in Sofortueberweisung ChargedImmediatelyFixture takes longer than usual.");
             }
         }
 
