@@ -148,8 +148,8 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
 
         final int urlTrimAt = responseRedirectUrl.contains("?") ? responseRedirectUrl.indexOf("?") : 0;
 
-        final long appointedNotificationCount = getInteractionNotificationCountOfAction(payment, "appointed");
-        final long paidNotificationCount = getInteractionNotificationCountOfAction(payment, "paid");
+        final long appointedNotificationCount = getTotalNotificationCountOfAction(payment, "appointed");
+        final long paidNotificationCount = getTotalNotificationCountOfAction(payment, "paid");
 
         final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
@@ -229,6 +229,6 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
 
     public long getInteractionNotificationCountOfAction(final String paymentName, final String txaction) throws ExecutionException {
         Payment payment = fetchPaymentByLegibleName(paymentName);
-        return getInteractionNotificationCountOfAction(payment, txaction);
+        return getTotalNotificationCountOfAction(payment, txaction);
     }
 }

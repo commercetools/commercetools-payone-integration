@@ -165,7 +165,7 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
             throws ExecutionException {
         final String transactionId = getIdOfLastTransaction(payment);
         final Payment updatedPayment = fetchPaymentById(payment.getId());
-        final long appointedNotificationCount = getInteractionNotificationCountOfAction(updatedPayment, txAction);
+        final long appointedNotificationCount = getTotalNotificationCountOfAction(updatedPayment, txAction);
 
         final String amountAuthorized = (updatedPayment.getAmountAuthorized() != null) ?
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(updatedPayment.getAmountAuthorized()) :

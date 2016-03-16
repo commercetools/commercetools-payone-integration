@@ -131,7 +131,7 @@ public class AuthorizationWithout3dsFixture extends BaseFixture {
     public Map<String, String> fetchPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
 
         Payment payment = fetchPaymentByLegibleName(paymentName);
-        long appointedNotificationCount = getInteractionNotificationCountOfAction(payment, "appointed");
+        long appointedNotificationCount = getTotalNotificationCountOfAction(payment, "appointed");
 
         final String transactionId = getIdOfLastTransaction(payment);
         final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
@@ -148,6 +148,6 @@ public class AuthorizationWithout3dsFixture extends BaseFixture {
 
     public long getInteractionNotificationOfActionCount(final String paymentName, final String txaction) throws ExecutionException {
         Payment payment = fetchPaymentByLegibleName(paymentName);
-        return getInteractionNotificationCountOfAction(payment, txaction);
+        return getTotalNotificationCountOfAction(payment, txaction);
     }
 }

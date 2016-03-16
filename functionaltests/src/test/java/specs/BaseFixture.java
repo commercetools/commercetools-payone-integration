@@ -356,7 +356,7 @@ public abstract class BaseFixture {
         final long result = paymentNames.stream().mapToLong(paymentName -> {
             final Payment payment = fetchPaymentByLegibleName(paymentName);
             try {
-                return getInteractionNotificationCountOfAction(payment, txaction);
+                return getTotalNotificationCountOfAction(payment, txaction);
             } catch (final ExecutionException e) {
                 LOG.error("Exception: %s", e);
                 exceptions.add(e);
@@ -371,30 +371,12 @@ public abstract class BaseFixture {
         return result;
     }
 
-    protected long getInteractionNotificationCountOfAction(final Payment payment, final String txaction) throws ExecutionException {
+    protected long getTotalNotificationCountOfAction(final Payment payment, final String txaction) throws ExecutionException {
         final String interactionTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION);
 
         return payment.getInterfaceInteractions().stream()
                 .filter(i -> interactionTypeId.equals(i.getType().getId()))
                 .filter(i -> txaction.equals(i.getFieldAsString(CustomFieldKeys.TX_ACTION_FIELD)))
-                .filter(i -> {
-                    final String notificationField = i.getFieldAsString(CustomFieldKeys.NOTIFICATION_FIELD);
-                    return (notificationField != null) &&
-                            (notificationField.toLowerCase().contains("transactionstatus=completed")
-                                    || notificationField.toLowerCase().contains("transactionstatus=null"));
-                })
-                .count();
-    }
-
-    protected long getInteractionNotificationCountOfAction(final Payment payment,
-                                                           final String txaction,
-                                                           final String ctTransactionId) throws ExecutionException {
-        final String interactionTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION);
-
-        return payment.getInterfaceInteractions().stream()
-                .filter(i -> interactionTypeId.equals(i.getType().getId()))
-                .filter(i -> txaction.equals(i.getFieldAsString(CustomFieldKeys.TX_ACTION_FIELD)))
-                .filter(i -> ctTransactionId.equals(i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))
                 .filter(i -> {
                     final String notificationField = i.getFieldAsString(CustomFieldKeys.NOTIFICATION_FIELD);
                     return (notificationField != null) &&

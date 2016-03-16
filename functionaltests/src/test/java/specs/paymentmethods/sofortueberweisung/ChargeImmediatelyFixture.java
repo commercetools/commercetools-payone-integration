@@ -147,9 +147,8 @@ public class ChargeImmediatelyFixture extends BaseFixture {
         final int urlTrimAt = responseRedirectUrl.contains("?") ? responseRedirectUrl.indexOf("?") : 0;
 
         final long appointedNotificationCount =
-                getInteractionNotificationCountOfAction(payment, "appointed", transactionId);
-
-        final long paidNotificationCount = getInteractionNotificationCountOfAction(payment, "paid", transactionId);
+                getTotalNotificationCountOfAction(payment, "appointed");
+        final long paidNotificationCount = getTotalNotificationCountOfAction(payment, "paid");
 
         final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
