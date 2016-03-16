@@ -90,7 +90,7 @@ public class CreditCardRequestFactoryTest {
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType);
 
         //references
-        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber().get());
+        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber());
         softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
 
         //monetary
@@ -163,7 +163,7 @@ public class CreditCardRequestFactoryTest {
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType);
 
         //references
-        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber().get());
+        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber());
         softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
 
         //urls

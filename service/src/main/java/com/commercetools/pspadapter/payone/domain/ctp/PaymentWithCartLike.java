@@ -5,27 +5,31 @@ import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
-
-import java.util.Optional;
+import io.sphere.sdk.types.CustomFields;
 
 public class PaymentWithCartLike {
     private final Payment payment;
     private final CartLike<?> cartLike;
-    private final Optional<String> orderNumber;
+    private final String orderNumber;
 
     public PaymentWithCartLike(final Payment payment, final Order order) {
-        this(payment, order, Optional.ofNullable(payment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD)));
+        this(payment, order, payment.getCustom());
     }
 
     public PaymentWithCartLike(final Payment payment, final Cart cart) {
 
-        this(payment, cart, Optional.ofNullable(payment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD)));
+        this(payment, cart, payment.getCustom());
     }
 
-    private PaymentWithCartLike(Payment payment, CartLike<?> cartLike, Optional<String> orderNumber) {
+    private PaymentWithCartLike(final Payment payment, final CartLike<?> cartLike, final CustomFields customFields) {
         this.payment = payment;
         this.cartLike = cartLike;
-        this.orderNumber = orderNumber;
+
+        if (customFields != null) {
+            this.orderNumber = customFields.getFieldAsString(CustomFieldKeys.REFERENCE_FIELD);
+        } else {
+            this.orderNumber = null;
+        }
     }
 
     public Payment getPayment() {
@@ -36,11 +40,11 @@ public class PaymentWithCartLike {
         return cartLike;
     }
 
-    public Optional<String> getOrderNumber() {
+    public String getOrderNumber() {
         return orderNumber;
     }
 
     public PaymentWithCartLike withPayment(final Payment payment) {
-        return new PaymentWithCartLike(payment, cartLike, orderNumber);
+        return new PaymentWithCartLike(payment, cartLike, payment.getCustom());
     }
 }
