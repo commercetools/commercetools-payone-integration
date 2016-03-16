@@ -38,7 +38,6 @@ import io.sphere.sdk.types.Type;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
-import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +71,7 @@ public abstract class BaseFixture {
     private static final String TEST_DATA_SW_BANK_TRANSFER_IBAN = "TEST_DATA_SW_BANK_TRANSFER_IBAN";
     private static final String TEST_DATA_SW_BANK_TRANSFER_BIC = "TEST_DATA_SW_BANK_TRANSFER_BIC";
     private static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 1500;
+    private static final int FETCH_PAYMENT_MAX_RETRY_COUNT = 3;
 
     private static final Random randomSource = new Random();
     private BlockingSphereClient ctpClient;
@@ -92,22 +92,7 @@ public abstract class BaseFixture {
         final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(propertyProvider);
         ctpClient = serviceFactory.createCommercetoolsClient();
 
-        resetCommercetoolsPlatform();
-
         typeCache = serviceFactory.createTypeCache(ctpClient);
-    }
-
-    @After
-    public void tearDown() {
-        resetCommercetoolsPlatform();
-    }
-
-    public URL ctPayOneIntegrationBaseUrl() {
-        return ctPayoneIntegrationBaseUrl;
-    }
-
-    public String getPayOneApiUrl() {
-        return "https://api.pay1.de/post-gateway/";
     }
 
     public String getHandlePaymentUrl(final String paymentId) throws MalformedURLException {
@@ -194,21 +179,6 @@ public abstract class BaseFixture {
         return ctpClient;
     }
 
-    protected void resetCommercetoolsPlatform() {
-        // TODO jw: use futures
-        // delete all orders
-        //ctpClient.complete(OrderQuery.of().withLimit(500)).getResults()
-        //        .forEach(order -> ctpClient.complete(OrderDeleteCommand.of(order)));
-
-        // delete all carts
-        //ctpClient.complete(CartQuery.of().withLimit(500)).getResults()
-        //        .forEach(cart -> ctpClient.complete(CartDeleteCommand.of(cart)));
-
-        // delete all payments
-        //ctpClient.complete(PaymentQuery.of().withLimit(500)).getResults()
-        //        .forEach(payment -> ctpClient.complete(PaymentDeleteCommand.of(payment)));
-    }
-
     /**
      * Gets the latest version of the payment via its legible name - a name that exits only in this test context.
      * @param paymentName legible name of the payment
@@ -221,13 +191,57 @@ public abstract class BaseFixture {
 
     /**
      * Gets the latest version of the payment via its ID.
+     * If the payment was fetched before a response/redirect from payone was received,
+     * the payment is refetched from commercetools after a short break.
      * @param paymentId unique ID of the payment
      * @return the payment fetched from the commercetools client, can be null!
      * @see #fetchPaymentByLegibleName(String)
      */
     protected Payment fetchPaymentById(final String paymentId) {
-        return ctpClient.executeBlocking(PaymentByIdGet.of(
-                Preconditions.checkNotNull(paymentId, "paymentId must not be null!")));
+        Preconditions.checkNotNull(paymentId, "paymentId must not be null!");
+
+        Payment payment = ctpClient.executeBlocking(PaymentByIdGet.of( paymentId));
+
+        int retryCount = 0;
+        while (!hasMatchingPayoneInteractions(payment) && retryCount < FETCH_PAYMENT_MAX_RETRY_COUNT) {
+            try {
+                Thread.sleep(TimeUnit.SECONDS.toMillis(3));
+            } catch (InterruptedException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+            }
+
+            payment = ctpClient.executeBlocking(PaymentByIdGet.of( paymentId));
+            retryCount++;
+        }
+
+        return payment;
+    }
+
+    private boolean hasMatchingPayoneInteractions(final Payment payment) {
+        try {
+            final String interactionRequestTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST);
+            final String interactionRedirectTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT);
+            final String interactionResponseTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE);
+
+            Long requestCount = payment.getInterfaceInteractions().stream()
+                    .filter(i -> interactionRequestTypeId.equals(i.getType().getId()))
+                    .count();
+
+            Long responseCount = payment.getInterfaceInteractions().stream()
+                    .filter(i -> interactionRedirectTypeId.equals(i.getType().getId()))
+                    .count();
+
+            Long redirectCount = payment.getInterfaceInteractions().stream()
+                    .filter(i -> interactionResponseTypeId.equals(i.getType().getId()))
+                    .count();
+
+            return requestCount == (responseCount + redirectCount);
+
+        } catch (ExecutionException e) {
+            LOG.error("Error during retrieval of custom types for payone interactions", e);
+        }
+
+        return false;
     }
 
     /**
