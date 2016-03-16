@@ -50,8 +50,6 @@ public class AppointedNotificationProcessorTest {
     private static final ZonedDateTime TXTIME_ZONED_DATE_TIME =
             ZonedDateTime.of(LocalDateTime.ofEpochSecond(seconds, 0, ZoneOffset.UTC), ZoneId.of("UTC"));
 
-    private static final ZonedDateTime TXTIME_PLUS_7_DAYS_ZONED_DATE_TIME = TXTIME_ZONED_DATE_TIME.plusDays(7);
-
     @Mock
     private BlockingSphereClient client;
 
@@ -157,7 +155,7 @@ public class AppointedNotificationProcessorTest {
 
         assertThat(updateActions)
                 .filteredOn(u -> u.getAction().equals("setAuthorization"))
-                .containsOnly(SetAuthorization.of(payment.getAmountPlanned(), TXTIME_PLUS_7_DAYS_ZONED_DATE_TIME));
+                .containsOnly(SetAuthorization.of(payment.getAmountPlanned()));
         assertThat(updateActions)
                 .filteredOn(u -> u.getAction().equals("addTransaction"))
                 .usingElementComparatorOnFields(
@@ -494,7 +492,7 @@ public class AppointedNotificationProcessorTest {
 
         assertThat(updateActions).as("setAuthorization action")
                 .filteredOn(u -> u.getAction().equals("setAuthorization"))
-                .containsOnly(SetAuthorization.of(payment.getAmountPlanned(), TXTIME_PLUS_7_DAYS_ZONED_DATE_TIME));
+                .containsOnly(SetAuthorization.of(payment.getAmountPlanned()));
 
         assertThat(updateActions).as("changeTransactionState action")
                 .filteredOn(u -> u.getAction().equals("changeTransactionState"))

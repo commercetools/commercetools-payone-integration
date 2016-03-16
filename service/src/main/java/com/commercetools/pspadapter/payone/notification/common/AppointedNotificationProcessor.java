@@ -19,10 +19,6 @@ import io.sphere.sdk.payments.commands.updateactions.SetAuthorization;
 import io.sphere.sdk.utils.MoneyImpl;
 
 import javax.money.MonetaryAmount;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,7 +83,7 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
                             listBuilder.add(ChangeTransactionState.of(
                                     notification.getTransactionStatus().getCtTransactionState(), transaction.getId()));
 
-                            listBuilder.add(createSetAuthorizationAction(payment, notification));
+                            listBuilder.add(SetAuthorization.of(payment.getAmountPlanned()));
                         }
 
                         return listBuilder;
@@ -111,7 +107,7 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
 
         final TransactionState ctTransactionState = notification.getTransactionStatus().getCtTransactionState();
         if (ctTransactionState.equals(TransactionState.SUCCESS)) {
-            final SetAuthorization setAuthorizationAction = createSetAuthorizationAction(payment, notification);
+            final SetAuthorization setAuthorizationAction = SetAuthorization.of(payment.getAmountPlanned());
             listBuilder.add(setAuthorizationAction);
         }
 
@@ -133,19 +129,4 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
                 .interactionId(notification.getSequencenumber())
                 .build()));
     }
-
-    private static SetAuthorization createSetAuthorizationAction(final Payment payment,
-                                                                 final Notification notification) {
-        final ZonedDateTime authorizedUntil =
-                ZonedDateTime.of(
-                        LocalDateTime.ofEpochSecond(
-                                Long.parseLong(notification.getTxtime()),
-                                0,
-                                ZoneOffset.UTC),
-                        ZoneId.of("UTC"))
-                .plusDays(7);
-
-        return SetAuthorization.of(payment.getAmountPlanned(), authorizedUntil);
-    }
-
 }
