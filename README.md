@@ -9,9 +9,9 @@ It is a standalone Microservice that connects the two cloud platforms and provid
 
 ## Documentation
 
-This project is using [Concordion](http://www.concordion.org) for system tests, which is a kind of "living specification". 
+This project is using [Cucumber]() for system tests, which is a kind of "living specification". 
 Therefore the [test definitions and results](http://commercetools.github.io/commercetools-payone-integration/latest/spec/specs/Specs.html) are the most precise documentation of the behavior. 
-They are automatically generated, updated and published to the `gh_pages` branch of this project by the [TravisCI continuous integration](https://travis-ci.com/commercetools/commercetools-payone-integration) setup. 
+They automatically generated, updated and published to the `gh_pages` branch of this project by the [TravicCI continuous integration]() setup. 
 
 ## Related Documentation
 
@@ -148,7 +148,20 @@ Name | Content
 `TEST_DATA_SW_BANK_TRANSFER_IBAN` | the IBAN of a test bank account supporting Sofortueberweisung
 `TEST_DATA_SW_BANK_TRANSFER_BIC` | the BIC of a test bank account supporting Sofortueberweisung
 
-> TODO document how to practically acquire the pseudocardpans (from the client API). Can this be automated?
+To get a pseudocardpan for a credit card you can use the PAYONE server API. To do this with the client API please refer to the corresponding documentation.
+With the server API you simply need to send a POST request of type "3dscheck" for example by using a command line tool:
+
+```
+curl --data "request=3dscheck&mid=<PAYONE_MERCHANT_ID>&aid=<PAYONE_SUBACC_ID>&portalid=<PAYONE_PORTAL_ID>&key=<PAYONE_KEY>&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&cardpan=<TEST_DATA_VISA_CREDIT_CARD_3DS>&cardtype=V&cardexpiredate=1710&cardcvc2=123&storecarddata=yes" <url>
+```
+* <url> needs to be replaced by the PAYONE api url. You will find this in the server documentation.
+* You need to replace the values for mid, aid and portalid with the ones you want to use with PAYONE.
+* The value for key needs to be the MD5 encryption result of your PAYONE key.
+* The cardpan will be the test credit card number from TEST_DATA_VISA_CREDIT_CARD_NO_3DS or TEST_DATA_VISA_CREDIT_CARD_3DS. Note that the cardtype needs to be correspondand.
+
+#####  When sending "storecarddata=yes" at the end you will receive the pseudocardpan in the response from PAYONE.
+
+
 > TODO why does the 3DS pwd need an evironment variable if a fixed value? --> is a parameter which could change in future
 
 To run the executable specification invoke the following command line:
