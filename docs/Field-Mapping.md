@@ -85,7 +85,7 @@ WORK IN PROGRESS (only active calls to PO here, no status notifications yet)
 
 | CT payment JSON path | PAYONE Server API field | Who is master? |  Value transform | 
 |---|---|---|---|
-| id | (unused) | CT |  |
+| id | optionally `param` | CT | No transform. For debugging purposes (find the CTP payment if txid / interfaceId are lost or accidentally changed) |
 | version | (unused) | CT |  |
 | customer.obj.id | `customerid` | CT | Use only as fallback to `.customerNumber` if that is not set. Extract first 20 non-dash characters to get a 20char string.  |
 | customer.obj.customerNumber | `customerid` | CT | Log a Warning and ignore if the Number exceeds 20 characters. Do not truncate. |
