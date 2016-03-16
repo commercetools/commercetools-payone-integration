@@ -89,7 +89,7 @@ WORK IN PROGRESS (only active calls to PO here, no status notifications yet)
 | amountPlanned.centAmount | - | CT | Initially set by checkout and not modified any more. `price` from PAYONE notification must not deviate on Notifications. PAYONE value has to be multiplied by 100.  |
 | amountPlanned.currency | - | CT |  |
 | amountAuthorized.centAmount | `amount` | CT / PAYONE | ONLY on CREDIT_CARD payments: Once the Authorization Transaction is in status "Success", copy the amount here.  |
-| authorizedUntil | `txtime` plus seven days | PAYONE | seven days after the txtime value of the `preauthorization` call (not of other transactions!) |
+| authorizedUntil | - | PAYONE | credit card payments are treated as valid seven days after the `txtime` value of the `preauthorization` call (not of other transactions!), but that is not a guarantee. Therefore it was chosen to better leave this field empty.  |
 | amountPaid.centAmount | `receivable` minus `balance` | PAYONE | only if both parameters available |
 | amountRefunded.centAmount | (from transactions) | PAYONE | (Sum of successful Refund Transactions) |
 | paymentMethodInfo.paymentInterface | - | CT | Must be "PAYONE" in CT, otherwise do not handle the Payment at all |
