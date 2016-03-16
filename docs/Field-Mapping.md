@@ -26,17 +26,11 @@
 With PAYONE:
 
  * can a cancellation happen on paypal, same for online bank transfer?
- * verify that there is no difference between authorization and preauthorization in sofortüberweisung. Both directly transfer money. 
-  * sofortüberweisung: can there be a chargeback / cancellation? 
+ * sofortüberweisung: can there be a chargeback / cancellation? 
  * TODO (probably already spoken about): which notify_versions can occur if we use the latest API version? only 7.5?
    * -> klärt Hr. Kuchel intern. 
- * concerning checkout documentation: what's the security feature of the hash? it's just done over the fields that are plaintext in the page and there is no secret in the hash, too. 
-
-Feedback an PAYONE:
- * es wäre extrem hilfreich, wenn die sequencenumber schon in der response vom capture wäre und nicht erst in der notification.
- * es wäre einfacher, wenn eine cancellation (chargeback / rücklastschrift) eine eigene sequencenumber bekäme  
- * ein Beispielablauf, der teilweise bezahlung zeigt (entweder bei vorkasse oder wenn dunning mit zahlung überlappt) wäre hilfreich fürs Verständnis. 
- * doku zu best practices wäre auch hilfreich (z.B. themen wie refund vs. debit). 
+ * concerning checkout documentation: what's the security feature of the hash? 
+   it's just done over the fields that are plaintext in the page and there is no secret in the hash, too. 
 
 # Payment methods covered
 
@@ -61,9 +55,8 @@ See also: [CT Method field convention](https://github.com/nkuehn/payment-integra
 
 BillSAFE has been deprecated by PAYONE and is not supported. 
 
-
 # PAYONE Payment methods characteristics (the missing docs)
- 
+
 WORK IN PROGRESS (only active calls to PO here, no status notifications yet)
  
 | common name |  PAYONE `clearingtype` | PAYONE status notification beahavior (money flow in bold). XXX müsste separat für auth /capture etc sein?  | PO calls with actual money flows | CT Authorization supported (money really reserved)? | Cancelation can happen (=Chargeback) |
