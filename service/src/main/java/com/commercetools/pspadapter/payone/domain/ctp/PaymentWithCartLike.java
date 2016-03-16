@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.domain.ctp;
 
+import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.orders.Order;
@@ -13,11 +14,12 @@ public class PaymentWithCartLike {
     private final Optional<String> orderNumber;
 
     public PaymentWithCartLike(final Payment payment, final Order order) {
-        this(payment, order, Optional.ofNullable(order.getOrderNumber()));
+        this(payment, order, Optional.ofNullable(payment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD)));
     }
 
     public PaymentWithCartLike(final Payment payment, final Cart cart) {
-        this(payment, cart, Optional.empty());
+
+        this(payment, cart, Optional.ofNullable(payment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD)));
     }
 
     private PaymentWithCartLike(Payment payment, CartLike<?> cartLike, Optional<String> orderNumber) {

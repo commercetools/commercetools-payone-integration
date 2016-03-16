@@ -35,7 +35,6 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         WalletPreauthorizationRequest request = new WalletPreauthorizationRequest(getConfig(), clearingSubType);
 
-        //TODO: determine from custom object definition if not present at Order
         paymentWithCartLike.getOrderNumber().ifPresent(request::setReference);
 
         Optional.ofNullable(ctPayment.getAmountPlanned())
