@@ -2,8 +2,10 @@ package specs.paymentmethods.paypal;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
+import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -14,6 +16,7 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
+import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
@@ -68,7 +71,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                                 .put(CustomFieldKeys.SUCCESS_URL_FIELD, successUrl)
                                 .put(CustomFieldKeys.ERROR_URL_FIELD, errorUrl)
                                 .put(CustomFieldKeys.CANCEL_URL_FIELD, cancelUrl)
-                                .put(CustomFieldKeys.REFERENCE_FIELD, "myGlobalKey")
+                                .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")
                                 .build()))
                 .build();
 
@@ -76,16 +79,19 @@ public class ChargeImmediatelyFixture extends BaseFixture {
         final Payment payment = ctpClient.executeBlocking(PaymentCreateCommand.of(paymentDraft));
         registerPaymentWithLegibleName(paymentName, payment);
 
-        createCartAndOrderForPayment(payment, currencyCode);
+        final String orderNumber = createCartAndOrderForPayment(payment, currencyCode);
 
         ctpClient.executeBlocking(PaymentUpdateCommand.of(
                 payment,
-                AddTransaction.of(TransactionDraftBuilder.of(
-                        TransactionType.valueOf(transactionType),
-                        monetaryAmount,
-                        ZonedDateTime.now())
-                        .state(TransactionState.PENDING)
-                        .build())));
+                ImmutableList.<UpdateActionImpl<Payment>>builder()
+                        .add(AddTransaction.of(TransactionDraftBuilder.of(
+                                TransactionType.valueOf(transactionType),
+                                monetaryAmount,
+                                ZonedDateTime.now())
+                                .state(TransactionState.PENDING)
+                                .build()))
+                        .add(SetCustomField.ofObject(CustomFieldKeys.REFERENCE_FIELD, orderNumber))
+                        .build()));
 
         return ImmutableMap.of(
                 "paymentId", payment.getId(),

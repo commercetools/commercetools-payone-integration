@@ -59,8 +59,8 @@ public class CreditCardRequestFactoryTest {
         final Throwable throwable = catchThrowable(() -> factory.createPreauthorizationRequest(new PaymentWithCartLike(payment, order)));
 
         Assertions.assertThat(throwable)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Missing custom fields on payment!");
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("is missing the required custom field");
     }
 
     @Test
@@ -90,7 +90,7 @@ public class CreditCardRequestFactoryTest {
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType);
 
         //references
-        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber().get());
+        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
         softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
 
         //monetary
@@ -163,7 +163,7 @@ public class CreditCardRequestFactoryTest {
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType);
 
         //references
-        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber().get());
+        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
         softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
 
         //urls

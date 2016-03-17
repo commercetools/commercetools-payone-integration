@@ -80,7 +80,7 @@ public class BankTransferRequestFactoryTest {
         softly.assertThat(result.getBic()).isEqualTo(payment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD));
 
         //references
-        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber().get());
+        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
         softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
 
         //monetary

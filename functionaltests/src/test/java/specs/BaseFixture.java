@@ -130,7 +130,7 @@ public abstract class BaseFixture {
         return MoneyImpl.ofCents(centAmount, currencyCode);
     }
 
-    protected void createCartAndOrderForPayment(final Payment payment, final String currencyCode) {
+    protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode) {
         // create cart and order with product
         final Product product = ctpClient.executeBlocking(ProductQuery.of()).getResults().get(0);
 
@@ -145,8 +145,12 @@ public abstract class BaseFixture {
                         SetBillingAddress.of(Address.of(CountryCode.DE).withLastName("Test Buyer"))
                 )));
 
+        final String orderNumber = getRandomOrderNumber();
+
         ctpClient.executeBlocking(OrderFromCartCreateCommand.of(
-                OrderFromCartDraft.of(cart, getRandomOrderNumber(), PaymentState.PENDING)));
+                OrderFromCartDraft.of(cart, orderNumber, PaymentState.PENDING)));
+
+        return orderNumber;
     }
 
     protected String getUnconfirmedVisaPseudoCardPan() {

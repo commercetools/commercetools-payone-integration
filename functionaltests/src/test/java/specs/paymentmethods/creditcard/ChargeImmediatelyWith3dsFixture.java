@@ -6,6 +6,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
+import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -16,6 +17,7 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
+import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
@@ -92,7 +94,7 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
                                 .put(CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8"))
                                 .put(CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8"))
                                 .put(CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8"))
-                                .put(CustomFieldKeys.REFERENCE_FIELD, "myGlobalKey")
+                                .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")
                                 .build()))
                 .build();
 
@@ -100,16 +102,19 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
         final Payment payment = ctpClient.executeBlocking(PaymentCreateCommand.of(paymentDraft));
         registerPaymentWithLegibleName(paymentName, payment);
 
-        createCartAndOrderForPayment(payment, currencyCode);
+        final String orderNumber = createCartAndOrderForPayment(payment, currencyCode);
 
         ctpClient.executeBlocking(PaymentUpdateCommand.of(
                 payment,
-                AddTransaction.of(TransactionDraftBuilder.of(
-                        TransactionType.valueOf(transactionType),
-                        monetaryAmount,
-                        ZonedDateTime.now())
-                        .state(TransactionState.PENDING)
-                        .build())));
+                ImmutableList.<UpdateActionImpl<Payment>>builder()
+                        .add(AddTransaction.of(TransactionDraftBuilder.of(
+                                TransactionType.valueOf(transactionType),
+                                monetaryAmount,
+                                ZonedDateTime.now())
+                                .state(TransactionState.PENDING)
+                                .build()))
+                        .add(SetCustomField.ofObject(CustomFieldKeys.REFERENCE_FIELD, orderNumber))
+                        .build()));
 
         return payment.getId();
     }

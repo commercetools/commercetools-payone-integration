@@ -32,11 +32,12 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
         final Payment ctPayment = paymentWithCartLike.getPayment();
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
 
+        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
+
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         WalletPreauthorizationRequest request = new WalletPreauthorizationRequest(getConfig(), clearingSubType);
 
-        //TODO: determine from custom object definition if not present at Order
-        paymentWithCartLike.getOrderNumber().ifPresent(request::setReference);
+        request.setReference(paymentWithCartLike.getReference());
 
         Optional.ofNullable(ctPayment.getAmountPlanned())
                 .ifPresent(amount -> {
@@ -47,7 +48,6 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
                             .intValue());
                 });
 
-        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
         MappingUtil.mapCustomFieldsFromPayment(request, ctPayment.getCustom());
 
         try {
@@ -80,8 +80,7 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         WalletAuthorizationRequest request = new WalletAuthorizationRequest(getConfig(), clearingSubType);
 
-        //TODO: determine from custom object definition if not present at Order
-        paymentWithCartLike.getOrderNumber().ifPresent(request::setReference);
+        request.setReference(paymentWithCartLike.getReference());
 
         Optional.ofNullable(ctPayment.getAmountPlanned())
                 .ifPresent(amount -> {

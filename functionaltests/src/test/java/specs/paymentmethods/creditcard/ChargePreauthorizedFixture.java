@@ -115,7 +115,7 @@ public class ChargePreauthorizedFixture extends BaseFixture {
                          ImmutableMap.of(
                                  CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan(),
                                  CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage(),
-                                 CustomFieldKeys.REFERENCE_FIELD, "myGlobalKey")))
+                                 CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")))
                  .build();
 
          final BlockingSphereClient ctpClient = ctpClient();
