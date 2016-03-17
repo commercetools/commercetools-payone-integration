@@ -71,7 +71,6 @@ public abstract class BaseFixture {
     private static final String TEST_DATA_SW_BANK_TRANSFER_IBAN = "TEST_DATA_SW_BANK_TRANSFER_IBAN";
     private static final String TEST_DATA_SW_BANK_TRANSFER_BIC = "TEST_DATA_SW_BANK_TRANSFER_BIC";
     private static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 1500;
-    private static final int FETCH_PAYMENT_MAX_RETRY_COUNT = 3;
 
     private static final Random randomSource = new Random();
     private BlockingSphereClient ctpClient;
