@@ -6,6 +6,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
+import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -16,6 +17,7 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
+import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
@@ -62,23 +64,26 @@ public class ChargeImmediatelyWithout3dsFixture extends BaseFixture {
                         ImmutableMap.of(
                                 CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan(),
                                 CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage(),
-                                CustomFieldKeys.REFERENCE_FIELD, "myGlobalKey")))
+                                CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")))
                 .build();
 
         final BlockingSphereClient ctpClient = ctpClient();
         final Payment payment = ctpClient.executeBlocking(PaymentCreateCommand.of(paymentDraft));
         registerPaymentWithLegibleName(paymentName, payment);
 
-        createCartAndOrderForPayment(payment, currencyCode);
+        final String orderNumber = createCartAndOrderForPayment(payment, currencyCode);
 
         ctpClient.executeBlocking(PaymentUpdateCommand.of(
                 payment,
-                AddTransaction.of(TransactionDraftBuilder.of(
-                        TransactionType.valueOf(transactionType),
-                        monetaryAmount,
-                        ZonedDateTime.now())
-                        .state(TransactionState.PENDING)
-                        .build())));
+                ImmutableList.<UpdateActionImpl<Payment>>builder()
+                        .add(AddTransaction.of(TransactionDraftBuilder.of(
+                                TransactionType.valueOf(transactionType),
+                                monetaryAmount,
+                                ZonedDateTime.now())
+                                .state(TransactionState.PENDING)
+                                .build()))
+                        .add(SetCustomField.ofObject(CustomFieldKeys.REFERENCE_FIELD, orderNumber))
+                        .build()));
 
         return payment.getId();
     }
