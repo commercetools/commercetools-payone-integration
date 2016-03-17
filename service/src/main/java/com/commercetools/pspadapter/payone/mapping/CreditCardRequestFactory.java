@@ -38,7 +38,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         final String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
         CreditCardPreauthorizationRequest request = new CreditCardPreauthorizationRequest(getConfig(), pseudocardpan);
 
-        request.setReference(paymentWithCartLike.getOrderNumber());
+        request.setReference(paymentWithCartLike.getReference());
 
         Optional.ofNullable(ctPayment.getAmountPlanned())
                 .ifPresent(amount -> {
@@ -83,7 +83,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         final String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
         CreditCardAuthorizationRequest request = new CreditCardAuthorizationRequest(getConfig(), pseudocardpan);
 
-        request.setReference(paymentWithCartLike.getOrderNumber());
+        request.setReference(paymentWithCartLike.getReference());
 
         Optional.ofNullable(ctPayment.getAmountPlanned())
                 .ifPresent(m -> request.setAmount(MonetaryUtil

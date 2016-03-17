@@ -78,7 +78,7 @@ public class PaypalRequestFactoryTest {
         softly.assertThat(result.getWallettype()).isEqualTo(clearingType.getSubType());
 
         //references
-        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber());
+        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
         softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
 
         //monetary
@@ -151,7 +151,7 @@ public class PaypalRequestFactoryTest {
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType.getPayoneCode());
 
         //references
-        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getOrderNumber());
+        softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
         softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
 
         //monetary

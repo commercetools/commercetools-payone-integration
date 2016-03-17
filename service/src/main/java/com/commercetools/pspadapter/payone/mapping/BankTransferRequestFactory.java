@@ -40,7 +40,7 @@ public class BankTransferRequestFactory extends PayoneRequestFactory {
         request.setIban(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD));
         request.setBic(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD));
 
-        request.setReference(paymentWithCartLike.getOrderNumber());
+        request.setReference(paymentWithCartLike.getReference());
 
         Optional.ofNullable(ctPayment.getAmountPlanned())
                 .ifPresent(amount -> {

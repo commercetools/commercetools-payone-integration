@@ -19,6 +19,7 @@ import io.sphere.sdk.http.HttpStatusCode;
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentMethodInfo;
+import io.sphere.sdk.types.CustomFields;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.io.IOException;
 import java.util.ConcurrentModificationException;
 import java.util.Random;
 import java.util.concurrent.CompletionException;
@@ -61,9 +63,10 @@ public class IntegrationServiceTest
     private IntegrationService testee;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         when(payment.getVersion()).thenReturn(1L);
         when(payment.getPaymentMethodInfo()).thenReturn(payonePaymentMethodInfo);
+        when(payment.getCustom()).thenReturn(customFields("<dummyReference>"));
     }
 
     @Test
@@ -86,11 +89,13 @@ public class IntegrationServiceTest
 
     @Test
     @SuppressWarnings("unchecked")
-    public void returnsStatusCodeOk200InCaseOfSuccessfulConcurrentPaymentHandling() {
+    public void returnsStatusCodeOk200InCaseOfSuccessfulConcurrentPaymentHandling() throws IOException {
         // arrange
         final String paymentId = randomString();
         final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
         final Payment modifiedPayment = mock(Payment.class, "modified payment");
+        when(modifiedPayment.getCustom()).thenReturn(customFields("dummyReferenceValue"));
+
         final PaymentWithCartLike modifiedPaymentWithCartLike = new PaymentWithCartLike(modifiedPayment, UNUSED_CART);
         final PaymentMethodInfo paymentMethodInfo = paymentMethodInfo("PAYONE");
 
@@ -250,6 +255,20 @@ public class IntegrationServiceTest
         return SphereJsonUtils.readObject(
                 "{\"paymentInterface\": \"" + paymentInterface +  "\",\"method\": \"CREDIT_CARD\"}",
                 PaymentMethodInfo.class);
+    }
+
+    private static CustomFields customFields(final String referenceValue) throws IOException {
+        return SphereJsonUtils.readObject(
+                "{\n" +
+                        "        \"type\": {\n" +
+                        "          \"typeId\": \"type\",\n" +
+                        "          \"id\": \"b16889f7-a900-4558-a7db-26ba86a7703e\"\n" +
+                        "        },\n" +
+                        "        \"fields\": {\n" +
+                        "          \"reference\": \"" + referenceValue + "\"\n" +
+                        "        }\n" +
+                        "      }\n",
+                CustomFields.class);
     }
 
     private static String randomString() {

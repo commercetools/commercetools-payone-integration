@@ -8,8 +8,9 @@ import java.util.Optional;
 
 /**
  * Wraps a payment and an order or a cart together
- * and provides easy access to the order number
- * extracted from the custom field {@link com.commercetools.pspadapter.payone.mapping.CustomFieldKeys REFERENCE_FIELD}.
+ * and provides easy access to a reference number (e.g. an order number).
+ * This reference is extracted from the custom field {@link com.commercetools.pspadapter.payone.mapping.CustomFieldKeys REFERENCE_FIELD}
+ * at the payment.
  *
  * @author cneijenhuis
  * @author fhaertig
@@ -18,7 +19,7 @@ import java.util.Optional;
 public class PaymentWithCartLike {
     private final Payment payment;
     private final CartLike<?> cartLike;
-    private final String orderNumber;
+    private final String reference;
 
     /**
      * Creates a wrapper object for a payment and the belonging order/cart.
@@ -28,13 +29,12 @@ public class PaymentWithCartLike {
      * @throws IllegalStateException if the payment is missing the custom field {@link com.commercetools.pspadapter.payone.mapping.CustomFieldKeys REFERENCE_FIELD}
      */
     public PaymentWithCartLike(final Payment payment, final CartLike<?> cartLike) {
-        this.orderNumber = Optional.ofNullable(payment.getCustom())
+        this.reference = Optional.ofNullable(payment.getCustom())
                 .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REFERENCE_FIELD))
                 .orElseThrow(() -> new IllegalStateException(String.format(
                         "Payment with id '%s' is missing the required custom field '%s'",
                         payment.getId(),
                         CustomFieldKeys.REFERENCE_FIELD)));
-
         this.payment = payment;
         this.cartLike = cartLike;
     }
@@ -47,8 +47,8 @@ public class PaymentWithCartLike {
         return cartLike;
     }
 
-    public String getOrderNumber() {
-        return orderNumber;
+    public String getReference() {
+        return reference;
     }
 
     public PaymentWithCartLike withPayment(final Payment payment) {

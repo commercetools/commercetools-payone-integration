@@ -26,7 +26,7 @@ public class PaymentWithCartLikeTest {
 
         PaymentWithCartLike testee = new PaymentWithCartLike(payment, order);
 
-        assertThat(testee.getOrderNumber()).isEqualTo(payment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD));
+        assertThat(testee.getReference()).isEqualTo(payment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD));
         assertThat(testee.getCartLike()).isEqualTo(order);
     }
 
@@ -38,7 +38,7 @@ public class PaymentWithCartLikeTest {
 
         PaymentWithCartLike testee = new PaymentWithCartLike(payment, cart);
 
-        assertThat(testee.getOrderNumber()).isEqualTo(payment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD));
+        assertThat(testee.getReference()).isEqualTo(payment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD));
         assertThat(testee.getCartLike()).isEqualTo(cart);
     }
 
@@ -61,14 +61,14 @@ public class PaymentWithCartLikeTest {
 
         PaymentWithCartLike testee = new PaymentWithCartLike(payment, order);
 
-        assertThat(testee.getOrderNumber()).isEqualTo(payment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD));
+        assertThat(testee.getReference()).isEqualTo(payment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD));
         assertThat(testee.getCartLike()).isEqualTo(order);
 
         Payment newPayment = testHelper.dummyPaymentOneAuthPending20EuroCC();
 
         testee = testee.withPayment(newPayment);
 
-        assertThat(testee.getOrderNumber()).isEqualTo(newPayment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD));
+        assertThat(testee.getReference()).isEqualTo(newPayment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD));
         assertThat(testee.getCartLike()).isEqualTo(order);
     }
 }

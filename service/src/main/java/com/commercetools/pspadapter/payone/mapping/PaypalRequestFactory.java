@@ -37,7 +37,7 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         WalletPreauthorizationRequest request = new WalletPreauthorizationRequest(getConfig(), clearingSubType);
 
-        request.setReference(paymentWithCartLike.getOrderNumber());
+        request.setReference(paymentWithCartLike.getReference());
 
         Optional.ofNullable(ctPayment.getAmountPlanned())
                 .ifPresent(amount -> {
@@ -80,7 +80,7 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         WalletAuthorizationRequest request = new WalletAuthorizationRequest(getConfig(), clearingSubType);
 
-        request.setReference(paymentWithCartLike.getOrderNumber());
+        request.setReference(paymentWithCartLike.getReference());
 
         Optional.ofNullable(ctPayment.getAmountPlanned())
                 .ifPresent(amount -> {
