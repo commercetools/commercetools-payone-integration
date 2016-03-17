@@ -4,6 +4,8 @@ import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
 
+import java.util.Optional;
+
 /**
  * Wraps a payment and an order or a cart together
  * and provides easy access to the order number
@@ -18,15 +20,23 @@ public class PaymentWithCartLike {
     private final CartLike<?> cartLike;
     private final String orderNumber;
 
+    /**
+     * Creates a wrapper object for a payment and the belonging order/cart.
+     *
+     * @param payment the payment object to use
+     * @param cartLike the order or cart which references the payment
+     * @throws IllegalStateException if the payment is missing the custom field {@link com.commercetools.pspadapter.payone.mapping.CustomFieldKeys REFERENCE_FIELD}
+     */
     public PaymentWithCartLike(final Payment payment, final CartLike<?> cartLike) {
+        this.orderNumber = Optional.ofNullable(payment.getCustom())
+                .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REFERENCE_FIELD))
+                .orElseThrow(() -> new IllegalStateException(String.format(
+                        "Payment with id '%s' is missing the required custom field '%s'",
+                        payment.getId(),
+                        CustomFieldKeys.REFERENCE_FIELD)));
+
         this.payment = payment;
         this.cartLike = cartLike;
-
-        if (payment.getCustom() != null) {
-            this.orderNumber = payment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD);
-        } else {
-            this.orderNumber = null;
-        }
     }
 
     public Payment getPayment() {
