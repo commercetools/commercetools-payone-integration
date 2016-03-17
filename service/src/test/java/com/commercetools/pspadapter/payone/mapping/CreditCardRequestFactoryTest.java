@@ -59,8 +59,8 @@ public class CreditCardRequestFactoryTest {
         final Throwable throwable = catchThrowable(() -> factory.createPreauthorizationRequest(new PaymentWithCartLike(payment, order)));
 
         Assertions.assertThat(throwable)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Missing custom fields on payment!");
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("is missing the required custom field");
     }
 
     @Test
