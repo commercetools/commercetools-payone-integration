@@ -29,6 +29,7 @@ import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 
 import java.time.ZonedDateTime;
+import java.util.ConcurrentModificationException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -80,6 +81,12 @@ public class ChargeTransactionExecutor extends IdempotentTransactionExecutor {
     public PaymentWithCartLike retryLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction, CustomFields lastExecutionAttempt) {
         if (lastExecutionAttempt.getFieldAsDateTime(CustomFieldKeys.TIMESTAMP_FIELD).isBefore(ZonedDateTime.now().minusMinutes(5))) {
             return attemptExecution(paymentWithCartLike, transaction);
+        }
+        else {
+            if (lastExecutionAttempt.getFieldAsDateTime(CustomFieldKeys.TIMESTAMP_FIELD).isAfter(ZonedDateTime.now().minusMinutes(1)))
+                throw new ConcurrentModificationException( String.format(
+                        "A processing of payment with ID \"%s\" started during the last 60 seconds and is likely to be finished soon, no need to retry now.",
+                        paymentWithCartLike.getPayment().getId()));
         }
         return paymentWithCartLike;
     }

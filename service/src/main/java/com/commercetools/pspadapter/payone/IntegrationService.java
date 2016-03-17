@@ -83,7 +83,8 @@ public class IntegrationService {
      */
     public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
         try {
-            for (int i = 0; i < 10; i++) {
+            // TODO jw: make configurable or use constants instead of magic numbers at least
+            for (int i = 0; i < 20; i++) {
                 try {
                     final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
                     if (!"PAYONE".equals(payment.getPayment().getPaymentMethodInfo().getPaymentInterface()))

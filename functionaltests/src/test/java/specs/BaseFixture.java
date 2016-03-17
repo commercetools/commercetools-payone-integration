@@ -191,57 +191,13 @@ public abstract class BaseFixture {
 
     /**
      * Gets the latest version of the payment via its ID.
-     * If the payment was fetched before a response/redirect from payone was received,
-     * the payment is refetched from commercetools after a short break.
      * @param paymentId unique ID of the payment
      * @return the payment fetched from the commercetools client, can be null!
      * @see #fetchPaymentByLegibleName(String)
      */
     protected Payment fetchPaymentById(final String paymentId) {
-        Preconditions.checkNotNull(paymentId, "paymentId must not be null!");
-
-        Payment payment = ctpClient.executeBlocking(PaymentByIdGet.of( paymentId));
-
-        int retryCount = 0;
-        while (!hasMatchingPayoneInteractions(payment) && retryCount < FETCH_PAYMENT_MAX_RETRY_COUNT) {
-            try {
-                Thread.sleep(TimeUnit.SECONDS.toMillis(3));
-            } catch (InterruptedException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-            }
-
-            payment = ctpClient.executeBlocking(PaymentByIdGet.of( paymentId));
-            retryCount++;
-        }
-
-        return payment;
-    }
-
-    private boolean hasMatchingPayoneInteractions(final Payment payment) {
-        try {
-            final String interactionRequestTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST);
-            final String interactionRedirectTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT);
-            final String interactionResponseTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE);
-
-            Long requestCount = payment.getInterfaceInteractions().stream()
-                    .filter(i -> interactionRequestTypeId.equals(i.getType().getId()))
-                    .count();
-
-            Long responseCount = payment.getInterfaceInteractions().stream()
-                    .filter(i -> interactionRedirectTypeId.equals(i.getType().getId()))
-                    .count();
-
-            Long redirectCount = payment.getInterfaceInteractions().stream()
-                    .filter(i -> interactionResponseTypeId.equals(i.getType().getId()))
-                    .count();
-
-            return requestCount == (responseCount + redirectCount);
-
-        } catch (ExecutionException e) {
-            LOG.error("Error during retrieval of custom types for payone interactions", e);
-        }
-
-        return false;
+        return ctpClient.executeBlocking(PaymentByIdGet.of(
+                Preconditions.checkNotNull(paymentId, "paymentId must not be null!")));
     }
 
     /**
