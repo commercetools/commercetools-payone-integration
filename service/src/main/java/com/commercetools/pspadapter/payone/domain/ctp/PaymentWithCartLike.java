@@ -1,32 +1,29 @@
 package com.commercetools.pspadapter.payone.domain.ctp;
 
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartLike;
-import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.types.CustomFields;
 
+/**
+ * Wraps a payment and an order or a cart together
+ * and provides easy access to the order number
+ * extracted from the custom field {@link com.commercetools.pspadapter.payone.mapping.CustomFieldKeys REFERENCE_FIELD}.
+ *
+ * @author cneijenhuis
+ * @author fhaertig
+ * @since 14.12.15
+ */
 public class PaymentWithCartLike {
     private final Payment payment;
     private final CartLike<?> cartLike;
     private final String orderNumber;
 
-    public PaymentWithCartLike(final Payment payment, final Order order) {
-        this(payment, order, payment.getCustom());
-    }
-
-    public PaymentWithCartLike(final Payment payment, final Cart cart) {
-
-        this(payment, cart, payment.getCustom());
-    }
-
-    private PaymentWithCartLike(final Payment payment, final CartLike<?> cartLike, final CustomFields customFields) {
+    public PaymentWithCartLike(final Payment payment, final CartLike<?> cartLike) {
         this.payment = payment;
         this.cartLike = cartLike;
 
-        if (customFields != null) {
-            this.orderNumber = customFields.getFieldAsString(CustomFieldKeys.REFERENCE_FIELD);
+        if (payment.getCustom() != null) {
+            this.orderNumber = payment.getCustom().getFieldAsString(CustomFieldKeys.REFERENCE_FIELD);
         } else {
             this.orderNumber = null;
         }
@@ -45,6 +42,6 @@ public class PaymentWithCartLike {
     }
 
     public PaymentWithCartLike withPayment(final Payment payment) {
-        return new PaymentWithCartLike(payment, cartLike, payment.getCustom());
+        return new PaymentWithCartLike(payment, cartLike);
     }
 }

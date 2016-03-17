@@ -1,5 +1,6 @@
 package util;
 
+import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
@@ -23,8 +24,13 @@ public class PaymentTestHelper {
     }
 
     private Order getOrderFromFile(String filePath) throws IOException {
-        final InputStream dummyPaymentJson = getJsonFromFile(filePath);
-        return SphereJsonUtils.readObject(IOUtils.toString(dummyPaymentJson), Order.typeReference());
+        final InputStream dummyOrderJson = getJsonFromFile(filePath);
+        return SphereJsonUtils.readObject(IOUtils.toString(dummyOrderJson), Order.typeReference());
+    }
+
+    private Cart getCartFromFile(String filePath) throws IOException {
+        final InputStream dummyCartJson = getJsonFromFile(filePath);
+        return SphereJsonUtils.readObject(IOUtils.toString(dummyCartJson), Cart.typeReference());
     }
 
     public PagedQueryResult<Payment> getPaymentQueryResultFromFile(String filePath) throws IOException {
@@ -83,6 +89,10 @@ public class PaymentTestHelper {
 
     public Order dummyOrderMapToPayoneRequest() throws Exception {
         return getOrderFromFile("dummyOrderMapToPayoneRequest.json");
+    }
+
+    public Cart dummyCart() throws Exception {
+        return getCartFromFile("dummyCart.json");
     }
 
     public Payment dummyPaymentTwoTransactionsPending() throws Exception {
