@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletAuthorizationRequest;
@@ -73,7 +74,7 @@ public class PaypalRequestFactoryTest {
         softly.assertThat(result.getIntegratorVersion()).isEqualTo(config.getIntegratorVersion());
 
         //clearing type
-        ClearingType clearingType = ClearingType.getClearingTypeByKey("WALLET-PAYPAL");
+        ClearingType clearingType = ClearingType.getClearingTypeByKey(MethodKeys.WALLET_PAYPAL);
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType.getPayoneCode());
         softly.assertThat(result.getWallettype()).isEqualTo(clearingType.getSubType());
 
@@ -146,7 +147,7 @@ public class PaypalRequestFactoryTest {
         softly.assertThat(result.getIntegratorVersion()).isEqualTo(config.getIntegratorVersion());
 
         //clearing type
-        ClearingType clearingType = ClearingType.getClearingTypeByKey("WALLET-PAYPAL");
+        ClearingType clearingType = ClearingType.getClearingTypeByKey(MethodKeys.WALLET_PAYPAL);
         softly.assertThat(result.getWallettype()).isEqualTo(clearingType.getSubType());
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType.getPayoneCode());
 

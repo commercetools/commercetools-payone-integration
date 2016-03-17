@@ -54,6 +54,7 @@ public class IntegrationService {
                 LOG.info(String.format("--> Result body of handle/payments/%s: %s", req.params("id"), paymentHandleResult.body()));
             }
             res.status(paymentHandleResult.statusCode());
+            res.body("");
             return res;
         });
 

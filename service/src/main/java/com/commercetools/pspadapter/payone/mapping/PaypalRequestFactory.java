@@ -16,7 +16,7 @@ import java.util.Optional;
 
 /**
  * @author fhaertig
- * @date 20.01.16
+ * @since 20.01.16
  */
 public class PaypalRequestFactory extends PayoneRequestFactory {
 
@@ -77,6 +77,8 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
         final Payment ctPayment = paymentWithCartLike.getPayment();
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
 
+        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
+
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         WalletAuthorizationRequest request = new WalletAuthorizationRequest(getConfig(), clearingSubType);
 
@@ -91,7 +93,6 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
                             .intValue());
                 });
 
-        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
         MappingUtil.mapCustomFieldsFromPayment(request, ctPayment.getCustom());
 
         try {

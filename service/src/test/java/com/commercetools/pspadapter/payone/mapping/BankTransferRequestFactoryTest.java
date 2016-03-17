@@ -26,7 +26,7 @@ import java.util.Optional;
 
 /**
  * @author fhaertig
- * @date 22.01.16
+ * @since 22.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
 public class BankTransferRequestFactoryTest {
