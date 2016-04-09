@@ -86,7 +86,7 @@ WORK IN PROGRESS (only active calls to PO here, no status notifications yet)
 | customer.obj.dateOfBirth | `birthday` | CT | transform from ISO 8601 format (`YYYY-MM-DD`) to `YYYYMMDD`, i.e. remove the dashes |
 | externalId | (unused, is intended for merchant-internal systems like ERP) | CT |  |
 | interfaceId | `txid` | PAYONE |  |
-| amountPlanned.centAmount | - | CT | Initially set by checkout and not modified any more. `price` from PAYONE notification must not deviate on Notifications. PAYONE value has to be multiplied by 100.  |
+| amountPlanned.centAmount | - | CT | Initially set by checkout and not modified any more. `price` from PAYONE notifications is only checked against the matching transaction amount, not the overall goal described in amountPlanned. |
 | amountPlanned.currency | - | CT |  |
 | amountAuthorized.centAmount | `amount` | CT / PAYONE | ONLY on CREDIT_CARD payments: Once the Authorization Transaction is in status "Success", copy the amount here.  |
 | authorizedUntil | - | PAYONE | credit card payments are treated as valid seven days after the `txtime` value of the `preauthorization` call (not of other transactions!), but that is not a guarantee. Therefore it was chosen to better leave this field empty.  |
@@ -102,8 +102,8 @@ WORK IN PROGRESS (only active calls to PO here, no status notifications yet)
 | transactions\[\*\].timestamp | `txtime` | PAYONE (from status notification) | |
 | transactions\[\*\].type |  |  | (see below for transaction types) |
 | transactions\[\*\].amount.centAmount | `amount` | CT | none |
-| transactions\[\*\].amount.centAmount | `capturemode` = `notcompleted` or `completed` | CT | ONLY on Charge Transactions. If the sum of Charge Transactions icluding the current one equals or exceeds the `amountPlanned` of the payment, then send `completed`, otherwise `notcompleted` Only required for Klarna payment methods.  |
-| transactions\[\*\].amount.currency | `currency` | CT | none, but must not deviate from amountPlanned.centAmount |
+| transactions\[\*\].amount.centAmount | `capturemode` = `notcompleted` or `completed` | CT | ONLY on Charge Transactions: If the sum of Charge Transactions icluding the current one equals or exceeds the `amountPlanned` of the payment, then send `completed`, otherwise `notcompleted` Only required for Klarna payment methods.  |
+| transactions\[\*\].amount.currency | `currency` | CT | none|
 | transactions\[\*\].interactionId | `sequencenumber` | CT / PAYONE | *To be set when doing the PAYONE call, not already when creating the Transaction.* For transaction requests initiating a payment process (CT Authorization or CT Charge w/o CT Authorization) the `sequencenumber` is not required - PAYONE implicitly uses `0`. PAYONE posts transaction status notifications which include the `sequencenumber`. If a CT transaction (CancelAuthorization, Charge or Refund) following the initial CT transaction is added, the integration service must use the `sequencenumber` of the latest notification received from PAYONE and increment it by `1` for the new request it sends to PAYONE. Notifications are stored in the interactions array. *Please, note that PAYONE will use `sequencenumber 0` for transaction status notifications `paid` and `cancelation` related to the initiating PAYONE authorization request (CT Charge w/o CT Authorization), i.e. there will be CT transactions of different type (Charge, Chargeback) with `sequencenumber 0` in the payment.* See below for transaction status notification processing. |
 | transactions\[\*\].state | - | CT / PAYONE | (see below for transaction states) |
 
@@ -118,6 +118,8 @@ Implementation Notes:
    data at all. If the amount needs to be "fixed" to support PAYONE Invoicing or Klarna payment, this is up to the checkout
    implementation. 
  * DO NOT transfer any line item data on `refund`  or `debit` calls. 
+
+> IMPLEMENTATION STATUS: mapping done as possible, EXCLUDING line items and custom line items (see issue #11111)
 
 | CT Cart or Order JSON path | PAYONE Server API | who is Master?  | Value transform |
 |---|---|---|---|
