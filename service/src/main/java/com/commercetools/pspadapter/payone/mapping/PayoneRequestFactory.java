@@ -13,7 +13,7 @@ public abstract class PayoneRequestFactory {
 
     private PayoneConfig config;
 
-    public PayoneConfig getConfig() {
+    public PayoneConfig getPayoneConfig() {
         return config;
     }
 

@@ -4,6 +4,7 @@ import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
+import com.commercetools.pspadapter.payone.util.ClearSecuredValuesSerializer;
 
 /**
  * @author fhaertig
@@ -13,8 +14,10 @@ public class BankTransferAuthorizationRequest extends AuthorizationRequest {
 
     private String onlinebanktransfertype;
 
+    @ClearSecuredValuesSerializer.Apply
     private String iban;
 
+    @ClearSecuredValuesSerializer.Apply
     private String bic;
 
     public BankTransferAuthorizationRequest(final PayoneConfig config, final String onlinebanktransfertype) {

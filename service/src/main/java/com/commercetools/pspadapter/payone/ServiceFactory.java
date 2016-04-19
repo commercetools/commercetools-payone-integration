@@ -86,6 +86,7 @@ public class ServiceFactory {
         final PaymentDispatcher paymentDispatcher = ServiceFactory.createPaymentDispatcher(
                 typeCache,
                 payoneConfig,
+                serviceConfig,
                 commercetoolsClient);
         final NotificationDispatcher notificationDispatcher = ServiceFactory.createNotificationDispatcher(
                 commercetoolsClient, payoneConfig);
@@ -144,7 +145,7 @@ public class ServiceFactory {
 
         return ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(client),
-                createPaymentDispatcher(typeCache, payoneConfig, client),
+                createPaymentDispatcher(typeCache, payoneConfig, serviceConfig, client),
                 createNotificationDispatcher(client, payoneConfig),
                 new CustomTypeBuilder(
                         client,
@@ -178,7 +179,7 @@ public class ServiceFactory {
      * @param client
      * @return
      */
-    public static PaymentDispatcher createPaymentDispatcher(final LoadingCache<String, Type> typeCache, final PayoneConfig config, final BlockingSphereClient client) {
+    public static PaymentDispatcher createPaymentDispatcher(final LoadingCache<String, Type> typeCache, final PayoneConfig config, final ServiceConfig serviceConfig, final BlockingSphereClient client) {
         // TODO jw: use immutable map
         final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
 
@@ -192,7 +193,7 @@ public class ServiceFactory {
         );
 
         for (final PaymentMethod paymentMethod : supportedMethods) {
-            final PayoneRequestFactory requestFactory = createRequestFactory(paymentMethod, config);
+            final PayoneRequestFactory requestFactory = createRequestFactory(paymentMethod, config, serviceConfig);
             final ImmutableMap.Builder<TransactionType, TransactionExecutor> executors = ImmutableMap.builder();
             for (final TransactionType type : paymentMethod.getSupportedTransactionTypes()) {
                 // FIXME jw: shouldn't be nullable anymore when payment method is implemented completely
@@ -229,14 +230,14 @@ public class ServiceFactory {
         return null;
     }
 
-    private static PayoneRequestFactory createRequestFactory(final PaymentMethod method, final PayoneConfig config) {
+    private static PayoneRequestFactory createRequestFactory(final PaymentMethod method, final PayoneConfig payoneConfig, final ServiceConfig serviceConfig) {
         switch(method) {
             case CREDIT_CARD:
-                return new CreditCardRequestFactory(config);
+                return new CreditCardRequestFactory(payoneConfig);
             case WALLET_PAYPAL:
-                return new PaypalRequestFactory(config);
+                return new PaypalRequestFactory(payoneConfig);
             case BANK_TRANSFER_SOFORTUEBERWEISUNG:
-                return new BankTransferRequestFactory(config);
+                return new BankTransferRequestFactory(payoneConfig, serviceConfig);
             default:
                 throw new IllegalArgumentException(String.format("No PayoneRequestFactory could be created for payment method %s", method));
         }

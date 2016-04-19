@@ -1,5 +1,6 @@
-package com.commercetools.pspadapter.payone.domain.payone.model.common;
+package com.commercetools.pspadapter.payone.domain.payone.model.banktransfer;
 
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType.PAYONE_PNT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
 import static org.mockito.Mockito.when;
@@ -14,16 +15,18 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * @author fhaertig
- * @since 11.12.15
+ * @since 19.04.16
  */
 @RunWith(MockitoJUnitRunner.class)
-public class BaseRequestTest {
-    private static final String requestType = "some-request";
+public class BankTransferAuthorizationRequestTest {
+    private static final String onlinebanktransfertype = "test-type";
     private static final String merchantId = "merchant X";
     private static final String portalId = "portal 23";
     private static final String keyMd5Hash = "hashed key";
     private static final String mode = "unit test";
     private static final String apiVersion = "v.1.2.3";
+    private static final String iban = "DE012345";
+    private static final String bic = "NOLADE0";
 
     @Mock
     private PayoneConfig payoneConfig;
@@ -40,28 +43,42 @@ public class BaseRequestTest {
     @Test
     public void createsFullMap() {
         //create with required properties
-        final BaseRequest request = new BaseRequest(payoneConfig, requestType);
+        final BankTransferAuthorizationRequest request = new BankTransferAuthorizationRequest(payoneConfig, onlinebanktransfertype);
+        request.setIban(iban);
+        request.setBic(bic);
 
         assertThat(request.toStringMap(false)).containsOnly(
-                entry("request", requestType),
+                entry("request", "authorization"),
+                entry("onlinebanktransfertype", onlinebanktransfertype),
+                entry("clearingtype", PAYONE_PNT.getPayoneCode()),
                 entry("mid", merchantId),
                 entry("portalid", portalId),
-                entry("key", keyMd5Hash),
                 entry("mode", mode),
-                entry("api_version", apiVersion));
+                entry("api_version", apiVersion),
+                entry("key", keyMd5Hash),
+                entry("iban", iban),
+                entry("bic", bic),
+                entry("amount", 0));
     }
 
     @Test
     public void createsMapWithHiddenSecrets() {
         //create with required properties
-        final BaseRequest request = new BaseRequest(payoneConfig, requestType);
+        final BankTransferAuthorizationRequest request = new BankTransferAuthorizationRequest(payoneConfig, onlinebanktransfertype);
+        request.setIban(iban);
+        request.setBic(bic);
 
         assertThat(request.toStringMap(true)).containsOnly(
-                entry("request", requestType),
+                entry("request", "authorization"),
+                entry("onlinebanktransfertype", onlinebanktransfertype),
+                entry("clearingtype", PAYONE_PNT.getPayoneCode()),
                 entry("mid", merchantId),
                 entry("portalid", portalId),
                 entry("mode", mode),
                 entry("api_version", apiVersion),
-                entry("key", ClearSecuredValuesSerializer.PLACEHOLDER));
+                entry("key", ClearSecuredValuesSerializer.PLACEHOLDER),
+                entry("iban", ClearSecuredValuesSerializer.PLACEHOLDER),
+                entry("bic", ClearSecuredValuesSerializer.PLACEHOLDER),
+                entry("amount", 0));
     }
 }

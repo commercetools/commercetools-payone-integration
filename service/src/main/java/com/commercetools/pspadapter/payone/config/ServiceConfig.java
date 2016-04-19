@@ -15,6 +15,7 @@ public class ServiceConfig {
     private final boolean startFromScratch;
     private final String scheduledJobCronShortTimeFrame;
     private final String scheduledJobCronLongTimeFrame;
+    private final String secureKey;
 
     /**
      * Initializes the configuration.
@@ -38,6 +39,10 @@ public class ServiceConfig {
         startFromScratch = propertyProvider.getProperty(PropertyProvider.CT_START_FROM_SCRATCH)
                 .map(Boolean::valueOf)
                 .orElse(false);
+
+        secureKey = propertyProvider.getProperty(PropertyProvider.SECURE_KEY)
+                .map(String::valueOf)
+                .orElse("");
     }
 
     /**
@@ -90,5 +95,13 @@ public class ServiceConfig {
      */
     public boolean getStartFromScratch() {
         return startFromScratch;
+    }
+
+    /**
+     * Gets the secure key which was used for encrypting data with Blowfish.
+     * @return the secure key as plain text
+     */
+    public String getSecureKey() {
+        return secureKey;
     }
 }

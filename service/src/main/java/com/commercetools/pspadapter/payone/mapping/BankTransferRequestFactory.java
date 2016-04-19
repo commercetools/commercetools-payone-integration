@@ -1,9 +1,13 @@
 package com.commercetools.pspadapter.payone.mapping;
 
+import static com.commercetools.pspadapter.payone.util.BlowfishUtil.decryptHexToString;
+
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
+import com.commercetools.pspadapter.payone.util.BlowfishUtil;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
@@ -21,8 +25,11 @@ public class BankTransferRequestFactory extends PayoneRequestFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(BankTransferRequestFactory.class);
 
-    public BankTransferRequestFactory(final PayoneConfig config) {
-        super(config);
+    private final ServiceConfig serviceConfig;
+
+    public BankTransferRequestFactory(final PayoneConfig payoneConfig, final ServiceConfig serviceConfig) {
+        super(payoneConfig);
+        this.serviceConfig = serviceConfig;
     }
 
     @Override
@@ -35,10 +42,21 @@ public class BankTransferRequestFactory extends PayoneRequestFactory {
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
-        BankTransferAuthorizationRequest request = new BankTransferAuthorizationRequest(getConfig(), clearingSubType);
+        BankTransferAuthorizationRequest request = new BankTransferAuthorizationRequest(getPayoneConfig(), clearingSubType);
 
-        request.setIban(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD));
-        request.setBic(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD));
+
+        final String plainIban;
+        final String plainBic;
+        if (!serviceConfig.getSecureKey().isEmpty()) {
+            plainIban = BlowfishUtil.decryptHexToString(serviceConfig.getSecureKey(), ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD));
+            plainBic = BlowfishUtil.decryptHexToString(serviceConfig.getSecureKey(), ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD));
+        } else {
+            plainIban = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD);
+            plainBic = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD);
+        }
+
+        request.setIban(plainIban);
+        request.setBic(plainBic);
 
         request.setReference(paymentWithCartLike.getReference());
 
