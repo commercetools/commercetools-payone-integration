@@ -1,10 +1,13 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.commercetools.pspadapter.payone.util.ClearSecuredValuesSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -27,6 +30,7 @@ public class BaseRequest implements Serializable {
     /**
      * Configurable key of payment portal
      */
+    @ClearSecuredValuesSerializer.Apply
     private String key;
 
     /**
@@ -70,10 +74,14 @@ public class BaseRequest implements Serializable {
     private String request;
 
     public Map<String, Object> toStringMap(final boolean shouldClearSecurityValues) {
+
+
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         if (shouldClearSecurityValues) {
-            mapper.addMixIn(this.getClass(), MixIn.class);
+            SimpleModule module = new SimpleModule("test", Version.unknownVersion());
+            module.addSerializer(String.class, new ClearSecuredValuesSerializer());
+            mapper.registerModule(module);
         }
 
         return mapper.convertValue(this,
@@ -144,6 +152,16 @@ public class BaseRequest implements Serializable {
     public interface MixIn {
         @JsonIgnore
         String getKey();
+
+        @JsonIgnore
+        String getIban();
+
+        @JsonIgnore
+        String getBic();
+    }
+
+    static class Views {
+        static class Public { }
     }
 
 }
