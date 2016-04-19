@@ -31,6 +31,8 @@ public class PropertyProvider {
     public static final String SHORT_TIME_FRAME_SCHEDULED_JOB_CRON = "SHORT_TIME_FRAME_SCHEDULED_JOB_CRON";
     public static final String LONG_TIME_FRAME_SCHEDULED_JOB_CRON = "LONG_TIME_FRAME_SCHEDULED_JOB_CRON";
 
+    public static final String SECURE_KEY = "SECURE_KEY";
+
     private final ImmutableMap<String, String> internalProperties;
 
     public PropertyProvider() {

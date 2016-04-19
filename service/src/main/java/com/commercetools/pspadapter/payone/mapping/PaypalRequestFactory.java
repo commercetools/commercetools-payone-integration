@@ -35,7 +35,7 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
-        WalletPreauthorizationRequest request = new WalletPreauthorizationRequest(getConfig(), clearingSubType);
+        WalletPreauthorizationRequest request = new WalletPreauthorizationRequest(getPayoneConfig(), clearingSubType);
 
         request.setReference(paymentWithCartLike.getReference());
 
@@ -80,7 +80,7 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
-        WalletAuthorizationRequest request = new WalletAuthorizationRequest(getConfig(), clearingSubType);
+        WalletAuthorizationRequest request = new WalletAuthorizationRequest(getPayoneConfig(), clearingSubType);
 
         request.setReference(paymentWithCartLike.getReference());
 

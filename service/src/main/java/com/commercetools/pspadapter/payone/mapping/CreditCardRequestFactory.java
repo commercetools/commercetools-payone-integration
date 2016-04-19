@@ -36,7 +36,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         final String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
-        CreditCardPreauthorizationRequest request = new CreditCardPreauthorizationRequest(getConfig(), pseudocardpan);
+        CreditCardPreauthorizationRequest request = new CreditCardPreauthorizationRequest(getPayoneConfig(), pseudocardpan);
 
         request.setReference(paymentWithCartLike.getReference());
 
@@ -81,7 +81,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         final String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
-        CreditCardAuthorizationRequest request = new CreditCardAuthorizationRequest(getConfig(), pseudocardpan);
+        CreditCardAuthorizationRequest request = new CreditCardAuthorizationRequest(getPayoneConfig(), pseudocardpan);
 
         request.setReference(paymentWithCartLike.getReference());
 
@@ -120,7 +120,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
 
-        CreditCardCaptureRequest request = new CreditCardCaptureRequest(getConfig());
+        CreditCardCaptureRequest request = new CreditCardCaptureRequest(getPayoneConfig());
 
         request.setTxid(ctPayment.getInterfaceId());
 
