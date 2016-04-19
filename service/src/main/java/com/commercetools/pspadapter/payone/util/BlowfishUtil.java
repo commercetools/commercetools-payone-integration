@@ -7,6 +7,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -26,15 +27,17 @@ public class BlowfishUtil {
     private static final Charset CHARSET_UTF_8 = Charsets.UTF_8;
 
     /**
-     * Decrypts a given byte array encoded in HEX with a given key.
+     * Decrypts a given string encoded in HEX with a given key.
      *
      * @param key the secret key as string which was used to encrypt the data
-     * @param encryptedHexBinary the encrypted data, encoded in HEX
+     * @param encryptedString the encrypted data as String, encoded in HEX
      * @return the decrypted data without padding chars.
      * @throws IllegalArgumentException when the given key is not matching the requirements
      */
-    public static String decryptHexToString(final String key, final byte[] encryptedHexBinary) {
+    public static String decryptHexToString(final String key, final String encryptedString) {
         SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(CHARSET_UTF_8), CRYPT_ALGORITHM);
+
+        byte[] encryptedHexBinary = DatatypeConverter.parseHexBinary(encryptedString);
         try {
             Cipher cipher = Cipher.getInstance(String.format("%s/%s/%s", CRYPT_ALGORITHM, CRYPT_MODE, CRYPT_PADDING));
             cipher.init(Cipher.DECRYPT_MODE, keySpec);

@@ -8,7 +8,6 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.util.BlowfishUtil;
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
@@ -16,7 +15,6 @@ import org.javamoney.moneta.function.MonetaryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.DatatypeConverter;
 import java.util.Optional;
 
 /**
@@ -50,11 +48,8 @@ public class BankTransferRequestFactory extends PayoneRequestFactory {
         final String plainIban;
         final String plainBic;
         if (!serviceConfig.getSecureKey().isEmpty()) {
-            plainIban = decryptHexToString(serviceConfig.getSecureKey(),
-                    DatatypeConverter.parseHexBinary(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD)));
-
-            plainBic = BlowfishUtil.decryptHexToString(serviceConfig.getSecureKey(),
-                    DatatypeConverter.parseHexBinary(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD)));
+            plainIban = BlowfishUtil.decryptHexToString(serviceConfig.getSecureKey(), ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD));
+            plainBic = BlowfishUtil.decryptHexToString(serviceConfig.getSecureKey(), ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD));
         } else {
             plainIban = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD);
             plainBic = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD);
