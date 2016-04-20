@@ -47,7 +47,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class ServiceFactory {
 
-    private static final String SCHEDULED_JOB_KEY = "commercetools-platform-polling-1";
     private static final long DEFAULT_CTP_CLIENT_TIMEOUT = 10;
 
     private final ServiceConfig serviceConfig;
@@ -106,14 +105,12 @@ public class ServiceFactory {
                 CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForShortTimeFramePoll()),
                 ScheduledJobShortTimeframe.class,
                 integrationService,
-                SCHEDULED_JOB_KEY,
                 paymentDispatcher);
 
         ScheduledJobFactory.createScheduledJob(
                 CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForLongTimeFramePoll()),
                 ScheduledJobLongTimeframe.class,
                 integrationService,
-                SCHEDULED_JOB_KEY,
                 paymentDispatcher);
     }
 
