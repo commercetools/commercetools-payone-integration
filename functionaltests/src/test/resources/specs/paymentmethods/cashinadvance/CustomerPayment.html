@@ -68,43 +68,53 @@
             <th c:assertEquals="#result.statusCode">Response <br />Status Code</th>
             <th c:assertEquals="#result.interactionCount">total # of <br /><em>authorization</em> requests sent</th>
             <th c:assertEquals="#result.amountAuthorized">Amount Authorized</th>
-            <th c:assertEquals="#result.amountPayed">Amount Payed</th>
+            <th c:assertEquals="#result.amountPaid">Amount Payed</th>
             <th c:assertEquals="#result.transactionState">Transaction State</th>
         </tr>
         <tr>
             <td class="inputvalue">Payment 1</td>
             <td class="success">200</td>
             <td class="success">0</td>
-            <td class="success">null</td>
-            <td class="success">null</td>
+            <td class="success"></td>
+            <td class="success"></td>
             <td class="success">Pending</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
             <td class="success">200</td>
             <td class="success">0</td>
-            <td class="success">null</td>
-            <td class="success">null</td>
+            <td class="success"></td>
+            <td class="success"></td>
             <td class="success">Pending</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 3</td>
             <td class="success">200</td>
             <td class="success">0</td>
-            <td class="success">null</td>
-            <td class="success">null</td>
+            <td class="success"></td>
+            <td class="success"></td>
             <td class="success">Pending</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 4</td>
             <td class="success">200</td>
             <td class="success">0</td>
-            <td class="success">null</td>
-            <td class="success">null</td>
+            <td class="success"></td>
+            <td class="success"></td>
             <td class="success">Pending</td>
         </tr>
     </table>
-     When I then waiting for the notification (for the payed amount). I will get the following charged results:
+    <p>
+        When I then waiting for the appointed notification <span c:set="#partlySuccessfulPayments">Payment 1, Payment 2, Payment 3, Payment 4</span>.
+    </p>
+    <p>
+        When I then waiting for the notification for <span c:set="#successfulPayments">Payment 1, Payment 3, Payment 4</span>. I will get the following charged results:
+    </p>
+    <ol>
+        <li>(txaction=<b c:set="#txactionAppointed">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#partlySuccessfulPayments, #txactionAppointed)">received</span> -> has no effect, just as a confirmation</li>
+        <li>(txaction=<b c:set="#txactionPaid">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)">received</span>
+            ->  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
+    </ol>
     <table c:execute="#result = fetchPaymentDetails(#paymentName)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
@@ -119,32 +129,32 @@
             <td class="success">Success</td>
             <td class="success">1</td>
             <td class="success">1</td>
-            <td class="success">4.00</td>
-            <td class="success">4.00</td>
+            <td class="success">4,00 EUR</td>
+            <td class="success">4,00 EUR</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
             <td class="success">Pending</td>
             <td class="success">1</td>
             <td class="success">0</td>
-            <td class="success">4.00</td>
-            <td class="success">3.80</td>
+            <td class="success"></td>
+            <td class="success">3,80 EUR</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 3</td>
             <td class="success">Success</td>
             <td class="success">1</td>
             <td class="success">1</td>
-            <td class="success">4.00</td>
-            <td class="success">4.00</td>
+            <td class="success">4,00 EUR</td>
+            <td class="success">4,20 EUR</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 4</td>
             <td class="success">Success</td>
             <td class="success">1</td>
             <td class="success">1</td>
-            <td class="success">4.00</td>
-            <td class="success">4.00</td>
+            <td class="success">4,00 EUR</td>
+            <td class="success">4,00 EUR</td>
         </tr>
     </table>
 </div>

@@ -1,9 +1,29 @@
 package specs.paymentmethods.cashinadvance;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import javax.money.MonetaryAmount;
+import javax.money.format.MonetaryFormats;
+
+import org.apache.http.HttpResponse;
+import org.concordion.integration.junit4.ConcordionRunner;
+import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.payments.Payment;
@@ -18,21 +38,7 @@ import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
-import org.apache.http.HttpResponse;
-import org.concordion.integration.junit4.ConcordionRunner;
-import org.junit.runner.RunWith;
 import specs.BaseFixture;
-
-import javax.money.MonetaryAmount;
-import javax.money.format.MonetaryFormats;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.time.ZonedDateTime;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 /**
  * 
@@ -42,6 +48,8 @@ import java.util.concurrent.ExecutionException;
 @RunWith(ConcordionRunner.class)
 public class CustomerPaymentFixture extends BaseFixture {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CustomerPaymentFixture.class);
+    private static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
     public String  createPayment(
             final String paymentName,
@@ -108,6 +116,33 @@ public class CustomerPaymentFixture extends BaseFixture {
                 .put("version", payment.getVersion().toString()).build();
     }
 
+    public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws InterruptedException, ExecutionException {
+        final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
+
+        long remainingWaitTimeInMillis = PAYONE_NOTIFICATION_TIMEOUT;
+
+        final long sleepDuration = 100L;
+
+        long numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
+        while ((numberOfPaymentsWithNotification != paymentNamesList.size()) && (remainingWaitTimeInMillis > 0L)) {
+            Thread.sleep(sleepDuration);
+            remainingWaitTimeInMillis -= sleepDuration;
+            numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
+            if (remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(4)
+                    || remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(2)) {
+                LOG.info("Waiting for " + txaction + " notifications in Sofortueberweisung ChargedImmediatelyFixture takes longer than usual.");
+            }
+        }
+
+        LOG.info(String.format(
+                "waited %d seconds to receive notifications of type '%s' for payments %s",
+                TimeUnit.MILLISECONDS.toSeconds(PAYONE_NOTIFICATION_TIMEOUT - remainingWaitTimeInMillis),
+                txaction,
+                Arrays.toString(paymentNamesList.stream().map(this::getIdForLegibleName).toArray())));
+
+        return numberOfPaymentsWithNotification == paymentNamesList.size();
+    }
+
     public Map<String, String> fetchPaymentDetails(final String paymentName)
             throws InterruptedException, ExecutionException {
         final Payment payment = fetchPaymentByLegibleName(paymentName);
@@ -120,7 +155,7 @@ public class CustomerPaymentFixture extends BaseFixture {
 
         final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
-                NULL_STRING;
+                BaseFixture.EMPTY_STRING;
 
         final String amountPaid = (payment.getAmountPaid() != null) ?
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountPaid()) :
