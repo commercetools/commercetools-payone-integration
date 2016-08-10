@@ -67,6 +67,7 @@ public class CaptureNotificationProcessorTest {
         notification.setCurrency("EUR");
         notification.setTxtime(millis.toString());
         notification.setSequencenumber("23");
+        notification.setClearingtype("cc");
         notification.setTxaction(NotificationAction.CAPTURE);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
     }
