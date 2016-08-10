@@ -35,4 +35,14 @@ public final class CustomFieldKeys {
 
     public static final String USER_ID_FIELD = "payoneUserId";
     public static final String GENDER_FIELD = "gender";
+
+    public static final String PAID_FROM_NAME_FIELD = "paidFromAccountHolderName";
+    public static final String PAID_FROM_IBAN_FIELD = "paidFromIBAN";
+    public static final String PAID_FROM_BIC_FIELD = "paidFromBIC";
+    public static final String REFUND_TO_NAME_FIELD = "refundToAccountHolderName";
+    public static final String REFUND_TO_IBAN_FIELD = "refundToIBAN";
+    public static final String REFUND_TO_BIC_FIELD = "refundToBIC";
+    public static final String PAY_TO_NAME_FIELD = "payToAccountHolderName";
+    public static final String PAY_TO_IBAN_FIELD = "payToIBAN";
+    public static final String PAY_TO_BIC_FIELD = "payToBIC";
 }

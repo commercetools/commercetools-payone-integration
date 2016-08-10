@@ -13,7 +13,8 @@ import java.util.Map;
 public enum ClearingType {
     PAYONE_CC("CREDIT_CARD", "cc", ""),
     PAYONE_PPE("WALLET-PAYPAL", "wlt", "PPE"),
-    PAYONE_PNT("BANK_TRANSFER-SOFORTUEBERWEISUNG", "sb", "PNT");
+    PAYONE_PNT("BANK_TRANSFER-SOFORTUEBERWEISUNG", "sb", "PNT"),
+    PAYONE_VOR("BANK_TRANSFER-ADVANCE", "vor", "");
 
     private final String key;
     /**
