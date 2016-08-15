@@ -17,7 +17,7 @@ import java.util.Optional;
 /**
  * @author fhaertig
  * @since 22.01.16
- * For all Payment methods that require
+ * For all Payment methods that require IBAN and BIC
  */
 public class BankTransferRequestFactory extends PayoneRequestFactory {
 
