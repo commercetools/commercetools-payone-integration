@@ -2,11 +2,10 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
-import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvancePreautorizationRequest;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
@@ -32,7 +31,7 @@ import static org.mockito.Mockito.when;
 public class PostfinanceCardRequestFactoryTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
-    private PostfinanceCardRequestFactory factory;
+    private BankTransferWithoutIbanBicRequestFactory factory;
 
     @Mock
     private PropertyProvider propertyProvider;
@@ -42,23 +41,20 @@ public class PostfinanceCardRequestFactoryTest {
 
         when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyVal"));
         when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
-        //clear secure key to force unencrypted data
-        when(propertyProvider.getProperty(PropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        factory = new PostfinanceCardRequestFactory(payoneConfig, serviceConfig);
+        factory = new BankTransferWithoutIbanBicRequestFactory(payoneConfig);
 
 
-        Payment payment = payments.dummyPaymentOneAuthPending20EuroVOR();
+        Payment payment = payments.dummyPaymentOneAuthPending20EuroPFC();
         Order order = payments.dummyOrderMapToPayoneRequest();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
-        BankTransferInAdvancePreautorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
+        BankTransferAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
         SoftAssertions softly = new SoftAssertions();
 
         //base values
-        softly.assertThat(result.getRequest()).isEqualTo(RequestType.PREAUTHORIZATION.getType());
+        softly.assertThat(result.getRequest()).isEqualTo(RequestType.AUTHORIZATION.getType());
         softly.assertThat(result.getAid()).isEqualTo(payoneConfig.getSubAccountId());
         softly.assertThat(result.getMid()).isEqualTo(payoneConfig.getMerchantId());
         softly.assertThat(result.getPortalid()).isEqualTo(payoneConfig.getPortalId());

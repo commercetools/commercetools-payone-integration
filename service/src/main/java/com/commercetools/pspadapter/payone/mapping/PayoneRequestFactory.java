@@ -4,6 +4,9 @@ import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import io.sphere.sdk.carts.CartLike;
+import io.sphere.sdk.payments.Payment;
+import org.slf4j.Logger;
 
 /**
  * @author fhaertig
@@ -33,4 +36,31 @@ public abstract class PayoneRequestFactory {
         throw new UnsupportedOperationException("this request type is not supported by this payment method.");
     }
 
+    protected void mapFormPaymentWithCartLike(final AuthorizationRequest request,
+                                              final PaymentWithCartLike paymentWithCartLike,
+                                              final Logger logger) {
+        final Payment ctPayment = paymentWithCartLike.getPayment();
+        final CartLike ctCartLike = paymentWithCartLike.getCartLike();
+
+        MappingUtil.mapCustomFieldsFromPayment(request, ctPayment.getCustom());
+
+
+        try {
+            MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
+        } catch (final IllegalArgumentException ex) {
+            logger.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
+        }
+
+        try {
+            MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
+        } catch (final IllegalArgumentException ex) {
+            logger.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
+        }
+
+        try {
+            MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
+        } catch (final IllegalArgumentException ex) {
+            logger.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
+        }
+    }
 }

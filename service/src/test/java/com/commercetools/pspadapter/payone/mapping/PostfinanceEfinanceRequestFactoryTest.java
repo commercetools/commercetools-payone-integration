@@ -4,9 +4,9 @@ import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
-import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvancePreautorizationRequest;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 public class PostfinanceEfinanceRequestFactoryTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
-    private PostfinanceEfinanceRequestFactory factory;
+    private BankTransferWithoutIbanBicRequestFactory factory;
 
     @Mock
     private PropertyProvider propertyProvider;
@@ -45,13 +45,13 @@ public class PostfinanceEfinanceRequestFactoryTest {
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
         ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        factory = new PostfinanceEfinanceRequestFactory(payoneConfig, serviceConfig);
+        factory = new BankTransferWithoutIbanBicRequestFactory(payoneConfig);
 
-        Payment payment = payments.dummyPaymentOneAuthPending20EuroVOR();
+        Payment payment = payments.dummyPaymentOneAuthPending20EuroPFF();
         Order order = payments.dummyOrderMapToPayoneRequest();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
-        BankTransferInAdvancePreautorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
+        BankTransferAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
         SoftAssertions softly = new SoftAssertions();
 
         //base values
