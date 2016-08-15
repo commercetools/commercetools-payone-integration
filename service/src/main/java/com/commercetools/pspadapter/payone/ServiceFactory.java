@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import com.commercetools.pspadapter.payone.mapping.*;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.SchedulerException;
 
@@ -18,11 +19,6 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMeth
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
-import com.commercetools.pspadapter.payone.mapping.BankTransferRequestFactory;
-import com.commercetools.pspadapter.payone.mapping.BanktTransferInAdvanceRequestFactory;
-import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
-import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
-import com.commercetools.pspadapter.payone.mapping.PaypalRequestFactory;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.common.AppointedNotificationProcessor;
@@ -193,7 +189,9 @@ public class ServiceFactory {
                 PaymentMethod.CREDIT_CARD,
                 PaymentMethod.WALLET_PAYPAL,
                 PaymentMethod.BANK_TRANSFER_SOFORTUEBERWEISUNG,
-                PaymentMethod.BANK_TRANSFER_ADVANCE
+                PaymentMethod.BANK_TRANSFER_ADVANCE,
+                PaymentMethod.BANK_TRANSFER_POSTFINANCE_CARD,
+                PaymentMethod.BANK_TRANSFER_POSTFINANCE_EFINANCE
         );
 
         for (final PaymentMethod paymentMethod : supportedMethods) {
@@ -248,6 +246,9 @@ public class ServiceFactory {
                 return new PaypalRequestFactory(payoneConfig);
             case BANK_TRANSFER_SOFORTUEBERWEISUNG:
                 return new BankTransferRequestFactory(payoneConfig, serviceConfig);
+            case BANK_TRANSFER_POSTFINANCE_CARD:
+            case BANK_TRANSFER_POSTFINANCE_EFINANCE:
+                return new BankTransferWithoutIbanBicRequestFactory(payoneConfig);
             case BANK_TRANSFER_ADVANCE:
                 return new BanktTransferInAdvanceRequestFactory(payoneConfig, serviceConfig);
             default:

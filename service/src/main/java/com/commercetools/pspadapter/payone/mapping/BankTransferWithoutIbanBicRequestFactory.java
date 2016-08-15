@@ -4,6 +4,7 @@ import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
+import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
 import org.javamoney.moneta.function.MonetaryUtil;
 import org.slf4j.Logger;
@@ -26,6 +27,8 @@ public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFacto
     public BankTransferAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
+
+        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         BankTransferAuthorizationRequest request = new BankTransferAuthorizationRequest(getPayoneConfig(), clearingSubType);

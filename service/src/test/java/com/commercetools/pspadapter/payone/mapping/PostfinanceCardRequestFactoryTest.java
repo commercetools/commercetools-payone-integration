@@ -81,10 +81,9 @@ public class PostfinanceCardRequestFactoryTest {
         softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
         //urls
-        //no redirect
-        softly.assertThat(result.getSuccessurl()).isNull();
-        softly.assertThat(result.getErrorurl()).isNull();
-        softly.assertThat(result.getBackurl()).isNull();
+        softly.assertThat(result.getSuccessurl()).isEqualTo("www.test.de/success");
+        softly.assertThat(result.getErrorurl()).isEqualTo("www.test.de/error");
+        softly.assertThat(result.getBackurl()).isEqualTo("www.test.de/cancel");
 
         //billing address data
         Address billingAddress = order.getBillingAddress();
