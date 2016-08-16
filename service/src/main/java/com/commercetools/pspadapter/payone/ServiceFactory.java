@@ -1,5 +1,13 @@
 package com.commercetools.pspadapter.payone;
 
+import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import org.quartz.CronScheduleBuilder;
+import org.quartz.SchedulerException;
+
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
@@ -10,8 +18,9 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMeth
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
-import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.BankTransferRequestFactory;
+import com.commercetools.pspadapter.payone.mapping.BanktTransferInAdvanceRequestFactory;
+import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.PaypalRequestFactory;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
@@ -20,26 +29,22 @@ import com.commercetools.pspadapter.payone.notification.common.AppointedNotifica
 import com.commercetools.pspadapter.payone.notification.common.CaptureNotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.common.DefaultNotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.common.PaidNotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.common.UnderpaidNotificationProcessor;
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.common.DefaultChargeTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.UnsupportedTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.creditcard.AuthorizationTransactionExecutor;
-import com.commercetools.pspadapter.payone.transaction.creditcard.ChargeTransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.paymentinadvance.BankTransferInAdvanceChargeTransactionExecutor;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.SchedulerException;
-
-import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author fhaertig
@@ -165,6 +170,7 @@ public class ServiceFactory {
         builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(client));
         builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(client));
         builder.put(NotificationAction.PAID, new PaidNotificationProcessor(client));
+        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(client));
 
         return new NotificationDispatcher(defaultNotificationProcessor, builder.build(), client, config);
     }
@@ -186,7 +192,8 @@ public class ServiceFactory {
         final ImmutableSet<PaymentMethod> supportedMethods = ImmutableSet.of(
                 PaymentMethod.CREDIT_CARD,
                 PaymentMethod.WALLET_PAYPAL,
-                PaymentMethod.BANK_TRANSFER_SOFORTUEBERWEISUNG
+                PaymentMethod.BANK_TRANSFER_SOFORTUEBERWEISUNG,
+                PaymentMethod.BANK_TRANSFER_ADVANCE
         );
 
         for (final PaymentMethod paymentMethod : supportedMethods) {
@@ -195,7 +202,7 @@ public class ServiceFactory {
             for (final TransactionType type : paymentMethod.getSupportedTransactionTypes()) {
                 // FIXME jw: shouldn't be nullable anymore when payment method is implemented completely
                 final TransactionExecutor executor = Optional
-                            .ofNullable(createTransactionExecutor(type, typeCache, client, requestFactory, postService))
+                            .ofNullable(createTransactionExecutor(type, typeCache, client, requestFactory, postService, paymentMethod))
                             .orElse(defaultExecutor);
 
                 executors.put(type, executor);
@@ -210,7 +217,8 @@ public class ServiceFactory {
             final LoadingCache<String, Type> typeCache,
             final BlockingSphereClient client,
             final PayoneRequestFactory requestFactory,
-            final PayonePostService postService) {
+            final PayonePostService postService,
+            final PaymentMethod paymentMethod) {
 
         switch(transactionType) {
             case AUTHORIZATION:
@@ -218,7 +226,12 @@ public class ServiceFactory {
             case CANCEL_AUTHORIZATION:
                 break;
             case CHARGE:
-                return new ChargeTransactionExecutor(typeCache, requestFactory, postService, client);
+                switch (paymentMethod) {
+                    case BANK_TRANSFER_ADVANCE:
+                        return new BankTransferInAdvanceChargeTransactionExecutor(typeCache, requestFactory, postService, client);
+                    default:
+                        return new DefaultChargeTransactionExecutor(typeCache, requestFactory, postService, client);
+                }
             case REFUND:
                 break;
             case CHARGEBACK:
@@ -235,6 +248,8 @@ public class ServiceFactory {
                 return new PaypalRequestFactory(payoneConfig);
             case BANK_TRANSFER_SOFORTUEBERWEISUNG:
                 return new BankTransferRequestFactory(payoneConfig, serviceConfig);
+            case BANK_TRANSFER_ADVANCE:
+                return new BanktTransferInAdvanceRequestFactory(payoneConfig, serviceConfig);
             default:
                 throw new IllegalArgumentException(String.format("No PayoneRequestFactory could be created for payment method %s", method));
         }

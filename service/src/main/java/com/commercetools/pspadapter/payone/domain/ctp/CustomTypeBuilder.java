@@ -36,6 +36,7 @@ public class CustomTypeBuilder {
     public static final String PAYMENT_CREDIT_CARD = "payment-CREDIT_CARD";
     public static final String PAYMENT_WALLET = "payment-WALLET";
     public static final String PAYMENT_BANK_TRANSFER = "payment-BANK_TRANSFER";
+    public static final String PAYMENT_CASH_ADVANCE = "payment-CASH-ADVANCE";
 
     public static final String PAYONE_INTERACTION_REQUEST = "PAYONE_INTERACTION_REQUEST";
     public static final String PAYONE_INTERACTION_RESPONSE = "PAYONE_INTERACTION_RESPONSE";
@@ -146,6 +147,20 @@ public class CustomTypeBuilder {
                 createSingleLineStringFieldDefinition(CustomFieldKeys.CANCEL_URL_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.IBAN_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.BIC_FIELD, FieldClassifier.OPTIONAL)
+        ));
+
+        createPaymentCustomType(PAYMENT_CASH_ADVANCE, ImmutableList.of(
+                createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.PAID_FROM_NAME_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.PAID_FROM_IBAN_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.PAID_FROM_BIC_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REFUND_TO_NAME_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REFUND_TO_IBAN_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REFUND_TO_BIC_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.PAY_TO_NAME_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.PAY_TO_IBAN_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.PAY_TO_BIC_FIELD, FieldClassifier.OPTIONAL)
         ));
     }
 

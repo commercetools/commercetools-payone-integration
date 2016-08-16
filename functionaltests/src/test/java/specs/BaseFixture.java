@@ -131,6 +131,10 @@ public abstract class BaseFixture {
     }
 
     protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode) {
+        return createCartAndOrderForPayment(payment, currencyCode, "TestBuyer");
+    }
+
+    protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final String buyerLastName) {
         // create cart and order with product
         final Product product = ctpClient.executeBlocking(ProductQuery.of()).getResults().get(0);
 
@@ -142,7 +146,7 @@ public abstract class BaseFixture {
                         AddPayment.of(payment),
                         AddLineItem.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1),
                         SetShippingAddress.of(Address.of(CountryCode.DE)),
-                        SetBillingAddress.of(Address.of(CountryCode.DE).withLastName("Test Buyer"))
+                        SetBillingAddress.of(Address.of(CountryCode.DE).withLastName(buyerLastName))
                 )));
 
         final String orderNumber = getRandomOrderNumber();

@@ -38,7 +38,15 @@ public enum PaymentMethod {
      * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
      */
     BANK_TRANSFER_SOFORTUEBERWEISUNG(MethodKeys.BANK_TRANSFER_SOFORTUEBERWEISUNG,
-                    TransactionType.CHARGE);
+                    TransactionType.CHARGE
+    ),
+
+    /**
+     * @see MethodKeys#BANK_TRANSFER_ADVANCE
+     */
+    BANK_TRANSFER_ADVANCE(MethodKeys.BANK_TRANSFER_ADVANCE,
+                    TransactionType.CHARGE
+    );
 
     private String key;
     private ImmutableSet<TransactionType> supportedTransactionTypes;

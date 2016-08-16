@@ -63,6 +63,10 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_PNT.json");
     }
 
+    public Payment dummyPaymentOneAuthPending20EuroVOR() throws IOException {
+        return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_VOR.json");
+    }
+
     public Payment dummyPaymentOneAuthPending20EuroPendingResponse() throws Exception {
         return getPaymentFromFile("dummyPaymentOneAuthPending20EuroPendingResponse.json");
     }
