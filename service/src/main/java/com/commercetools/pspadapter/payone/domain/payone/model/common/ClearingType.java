@@ -39,7 +39,7 @@ public enum ClearingType {
      * GPY: giropay (DE)
      * EPS: eps – Online-Überweisung (AT)
      * PFF: PostFinance E-Finance (CH)
-     * PFC: PostFinance Card (C
+     * PFC: PostFinance Card (CH)
      * BSV: Billsafe
      * </code>
      * **/

@@ -248,7 +248,7 @@ public class ServiceFactory {
                 return new BankTransferRequestFactory(payoneConfig, serviceConfig);
             case BANK_TRANSFER_POSTFINANCE_CARD:
             case BANK_TRANSFER_POSTFINANCE_EFINANCE:
-                return new BankTransferWithoutIbanBicRequestFactory(payoneConfig);
+                return new PostFinanceBanktransferRequestFactory(payoneConfig);
             case BANK_TRANSFER_ADVANCE:
                 return new BanktTransferInAdvanceRequestFactory(payoneConfig, serviceConfig);
             default:

@@ -14,7 +14,6 @@ import java.util.Optional;
 
 /**
  * Created by mht on 15.08.16.
- * T
  */
 public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFactory {
     public BankTransferWithoutIbanBicRequestFactory(PayoneConfig payoneConfig) {
