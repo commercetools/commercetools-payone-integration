@@ -27,17 +27,13 @@ public class BanktTransferInAdvanceRequestFactory extends PayoneRequestFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(BanktTransferInAdvanceRequestFactory.class);
 
-    private ServiceConfig serviceConfig;
-
-    public BanktTransferInAdvanceRequestFactory(final PayoneConfig payoneConfig, final ServiceConfig serviceConfig) {
+    public BanktTransferInAdvanceRequestFactory(final PayoneConfig payoneConfig ) {
         super(payoneConfig);
-        this.serviceConfig = serviceConfig;
     }
 
     @Override
     public BankTransferInAdvancePreautorizationRequest createPreauthorizationRequest(PaymentWithCartLike paymentWithCartLike) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
-        final CartLike ctCartLike = paymentWithCartLike.getCartLike();
 
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 

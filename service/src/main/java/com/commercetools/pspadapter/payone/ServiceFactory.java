@@ -245,12 +245,12 @@ public class ServiceFactory {
             case WALLET_PAYPAL:
                 return new PaypalRequestFactory(payoneConfig);
             case BANK_TRANSFER_SOFORTUEBERWEISUNG:
-                return new BankTransferWithoutIbanBicRequestFactory(payoneConfig);
+                return new SofortBankTransferRequestFactory(payoneConfig, serviceConfig);
             case BANK_TRANSFER_POSTFINANCE_CARD:
             case BANK_TRANSFER_POSTFINANCE_EFINANCE:
                 return new PostFinanceBanktransferRequestFactory(payoneConfig);
             case BANK_TRANSFER_ADVANCE:
-                return new BanktTransferInAdvanceRequestFactory(payoneConfig, serviceConfig);
+                return new BanktTransferInAdvanceRequestFactory(payoneConfig);
             default:
                 throw new IllegalArgumentException(String.format("No PayoneRequestFactory could be created for payment method %s", method));
         }
