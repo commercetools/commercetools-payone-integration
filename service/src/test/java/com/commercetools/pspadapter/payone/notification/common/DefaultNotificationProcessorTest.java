@@ -2,19 +2,19 @@ package com.commercetools.pspadapter.payone.notification.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static util.UpdatePaymentTestHelper.*;
 
-import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
-import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
+import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
+import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,18 +83,13 @@ public class DefaultNotificationProcessorTest {
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
 
-        final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(
-                CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
-                ImmutableMap.of(
-                        CustomFieldKeys.TIMESTAMP_FIELD, TXTIME_ZONED_DATE_TIME,
-                        CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
-                        CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
-                        CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
+        final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
+        final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
+        final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-        assertThat(updateActions).filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
-                .usingElementComparatorOnFields("fields")
-                .containsOnly(interfaceInteraction);
-        assertThat(updateActions).as("# of update actions").hasSize(1);
+
+        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+        assertThat(updateActions).as("# of update actions").hasSize(3);
     }
 
     private static NotificationAction randomTxAction() {

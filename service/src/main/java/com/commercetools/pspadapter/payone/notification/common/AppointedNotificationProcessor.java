@@ -50,8 +50,7 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
     protected ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
                                                                         final Notification notification) {
         final ImmutableList.Builder<UpdateAction<Payment>> listBuilder = ImmutableList.builder();
-
-        listBuilder.add(createNotificationAddAction(notification));
+        listBuilder.addAll(super.createPaymentUpdates(payment, notification));
 
         final List<Transaction> transactions = payment.getTransactions();
         final String sequenceNumber = toSequenceNumber(notification.getSequencenumber());

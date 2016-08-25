@@ -13,6 +13,8 @@ import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
+import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
+import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
 
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
@@ -72,8 +74,14 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
      * @return an immutable list of update actions which will e.g. add an interfaceInteraction to the payment
      * or apply changes to a corresponding transaction in the payment
      */
-    protected abstract ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
-                                                                                 final Notification notification);
+    protected ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
+                                                                                 final Notification notification) {
+        final ImmutableList.Builder<UpdateAction<Payment>> listBuilder = ImmutableList.builder();
+        listBuilder.add(createNotificationAddAction(notification));
+        listBuilder.add(setStatusInterfaceCode(notification));
+        listBuilder.add(setStatusInterfaceText(notification));
+        return listBuilder.build();
+    }
 
     /**
      * Creates a payment update action to add the given notification as
@@ -90,6 +98,24 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
                         CustomFieldKeys.SEQUENCE_NUMBER_FIELD, toSequenceNumber(notification.getSequencenumber()),
                         CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
                         CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
+    }
+
+    /**
+     * Creates a payment update action to set the latest txaction to StatusInterfaceCode
+     * @param notification the PAYONE notification
+     * @return the update action
+     */
+    protected static SetStatusInterfaceCode setStatusInterfaceCode(final Notification notification) {
+        return SetStatusInterfaceCode.of(notification.getTxaction().toString());
+    }
+
+    /**
+     * Creates a payment update action to set the latest txaction to StatusInterfaceText
+     * @param notification the PAYONE notification
+     * @return the update action
+     */
+    protected static SetStatusInterfaceText setStatusInterfaceText(final Notification notification) {
+        return SetStatusInterfaceText.of(notification.getTxaction().toString());
     }
 
     /**
