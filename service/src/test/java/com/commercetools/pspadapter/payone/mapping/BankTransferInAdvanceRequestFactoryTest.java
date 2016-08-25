@@ -47,8 +47,7 @@ public class BankTransferInAdvanceRequestFactoryTest {
         when(propertyProvider.getProperty(PropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        factory = new BanktTransferInAdvanceRequestFactory(payoneConfig, serviceConfig);
+        factory = new BanktTransferInAdvanceRequestFactory(payoneConfig);
 
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroVOR();
