@@ -245,7 +245,7 @@ public class ServiceFactory {
             case WALLET_PAYPAL:
                 return new PaypalRequestFactory(payoneConfig);
             case BANK_TRANSFER_SOFORTUEBERWEISUNG:
-                return new BankTransferRequestFactory(payoneConfig, serviceConfig);
+                return new BankTransferWithoutIbanBicRequestFactory(payoneConfig);
             case BANK_TRANSFER_POSTFINANCE_CARD:
             case BANK_TRANSFER_POSTFINANCE_EFINANCE:
                 return new PostFinanceBanktransferRequestFactory(payoneConfig);

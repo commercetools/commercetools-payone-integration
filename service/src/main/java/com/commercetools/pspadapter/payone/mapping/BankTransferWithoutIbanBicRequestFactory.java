@@ -45,6 +45,8 @@ public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFacto
 
         mapFormPaymentWithCartLike(request, paymentWithCartLike, LOG);
 
+        //Despite declared as optional in PayOne Server API documentation. the Bankcountry is required
+        request.setBankcountry(request.getCountry());
         return request;
     }
 }

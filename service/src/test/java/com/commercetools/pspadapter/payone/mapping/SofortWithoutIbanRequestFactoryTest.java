@@ -1,8 +1,5 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
@@ -24,15 +21,18 @@ import util.PaymentTestHelper;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+
 /**
  * @author fhaertig
  * @since 22.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
-public class BankTransferRequestFactoryTest {
+public class SofortWithoutIbanRequestFactoryTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
-    private BankTransferRequestFactory factory;
+    private SofortBankTransferRequestFactory factory;
 
     @Mock
     private PropertyProvider propertyProvider;
@@ -47,10 +47,10 @@ public class BankTransferRequestFactoryTest {
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
         ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        factory = new BankTransferRequestFactory(payoneConfig, serviceConfig);
+        factory = new SofortBankTransferRequestFactory(payoneConfig, serviceConfig);
 
 
-        Payment payment = payments.dummyPaymentOneAuthPending20EuroPNT();
+        Payment payment = payments.dummyPaymentOneAuthPending20EuroWithoutIbanPNT();
         Order order = payments.dummyOrderMapToPayoneRequest();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
@@ -75,8 +75,8 @@ public class BankTransferRequestFactoryTest {
         softly.assertThat(result.getOnlinebanktransfertype()).isEqualTo(clearingType.getSubType());
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType.getPayoneCode());
 
-        softly.assertThat(result.getIban()).isEqualTo(payment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD));
-        softly.assertThat(result.getBic()).isEqualTo(payment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD));
+        softly.assertThat(result.getIban()).isNull();
+        softly.assertThat(result.getBic()).isNull();
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
@@ -131,12 +131,9 @@ public class BankTransferRequestFactoryTest {
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
         ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        factory = new BankTransferRequestFactory(payoneConfig, serviceConfig);
+        factory = new SofortBankTransferRequestFactory(payoneConfig, serviceConfig);
 
-        final String testIban = "DE012345";
-        final String testBic = "NOLADE0";
-
-        Payment payment = payments.dummyPaymentOneAuthPending20EuroPNT();
+        Payment payment = payments.dummyPaymentOneAuthPending20EuroWithoutIbanPNT();
         Order order = payments.dummyOrderMapToPayoneRequest();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
@@ -161,8 +158,8 @@ public class BankTransferRequestFactoryTest {
         softly.assertThat(result.getOnlinebanktransfertype()).isEqualTo(clearingType.getSubType());
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType.getPayoneCode());
 
-        softly.assertThat(result.getIban()).isEqualTo(testIban);
-        softly.assertThat(result.getBic()).isEqualTo(testBic);
+        softly.assertThat(result.getIban()).isNull();
+        softly.assertThat(result.getBic()).isNull();
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
