@@ -2,13 +2,11 @@ package com.commercetools.pspadapter.payone.notification.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static util.UpdatePaymentTestHelper.*;
 
-import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
-import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
@@ -19,6 +17,8 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
+import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
+import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -96,26 +96,18 @@ public class CaptureNotificationProcessorTest {
                 .interactionId(notification.getSequencenumber())
                 .build());
 
-        final AddInterfaceInteraction interfaceInteraction =
-                AddInterfaceInteraction.ofTypeKeyAndObjects(
-                        CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
-                        ImmutableMap.of(
-                                CustomFieldKeys.TIMESTAMP_FIELD, timestamp,
-                                CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
-                                CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
-                                CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
+        final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, timestamp);
+        final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
+        final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-        assertThat(updateActions).as("# of payment update actions").hasSize(2);
+        assertThat(updateActions).as("# of payment update actions").hasSize(4);
         assertThat(updateActions).as("added transaction")
                 .filteredOn(u -> u.getAction().equals("addTransaction"))
                 .usingElementComparatorOnFields(
                         "transaction.type", "transaction.amount", "transaction.state", "transaction.timestamp")
                 .containsOnlyOnce(transaction);
 
-        assertThat(updateActions).as("added interaction")
-                .filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
-                .usingElementComparatorOnFields("fields")
-                .containsOnly(interfaceInteraction);
+        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
     }
 
     @Test
@@ -140,26 +132,18 @@ public class CaptureNotificationProcessorTest {
                 .interactionId(notification.getSequencenumber())
                 .build());
 
-        final AddInterfaceInteraction interfaceInteraction =
-                AddInterfaceInteraction.ofTypeKeyAndObjects(
-                        CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
-                        ImmutableMap.of(
-                                CustomFieldKeys.TIMESTAMP_FIELD, timestamp,
-                                CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
-                                CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
-                                CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
+        final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, timestamp);
+        final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
+        final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-        assertThat(updateActions).as("# of payment update actions").hasSize(2);
+        assertThat(updateActions).as("# of payment update actions").hasSize(4);
         assertThat(updateActions).as("added transaction")
                 .filteredOn(u -> u.getAction().equals("addTransaction"))
                 .usingElementComparatorOnFields(
                         "transaction.type", "transaction.amount", "transaction.state", "transaction.timestamp")
                 .containsOnlyOnce(transaction);
 
-        assertThat(updateActions).as("added interaction")
-                .filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
-                .usingElementComparatorOnFields("fields")
-                .containsOnly(interfaceInteraction);
+        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
     }
 
     @Test
@@ -179,20 +163,12 @@ public class CaptureNotificationProcessorTest {
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
 
-        final AddInterfaceInteraction interfaceInteraction =
-                AddInterfaceInteraction.ofTypeKeyAndObjects(
-                        CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
-                        ImmutableMap.of(
-                                CustomFieldKeys.TIMESTAMP_FIELD, timestamp,
-                                CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
-                                CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
-                                CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
+        final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, timestamp);
+        final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
+        final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-        assertThat(updateActions).as("# of payment update actions").hasSize(1);
-        assertThat(updateActions).as("added interaction")
-                .filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
-                .usingElementComparatorOnFields("fields")
-                .containsOnly(interfaceInteraction);
+        assertThat(updateActions).as("# of payment update actions").hasSize(3);
+        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
     }
 
     @Test
@@ -212,19 +188,11 @@ public class CaptureNotificationProcessorTest {
 
         final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
 
-        final AddInterfaceInteraction interfaceInteraction =
-                AddInterfaceInteraction.ofTypeKeyAndObjects(
-                        CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
-                        ImmutableMap.of(
-                                CustomFieldKeys.TIMESTAMP_FIELD, timestamp,
-                                CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
-                                CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
-                                CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
+        final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, timestamp);
+        final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
+        final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-        assertThat(updateActions).as("# of payment update actions").hasSize(1);
-        assertThat(updateActions).as("added interaction")
-                .filteredOn(u -> u.getAction().equals("addInterfaceInteraction"))
-                .usingElementComparatorOnFields("fields")
-                .containsOnly(interfaceInteraction);
+        assertThat(updateActions).as("# of payment update actions").hasSize(3);
+        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
     }
 }
