@@ -1,13 +1,5 @@
 package com.commercetools.pspadapter.payone.transaction.paymentinadvance;
 
-import java.time.ZonedDateTime;
-import java.util.ConcurrentModificationException;
-import java.util.Map;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
@@ -15,11 +7,10 @@ import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneExcept
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
-import com.commercetools.pspadapter.payone.transaction.IdempotentTransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.TransactionBaseExecutor;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.payments.Payment;
@@ -27,21 +18,23 @@ import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
-import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
-import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractionId;
-import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
-import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionTimestamp;
-import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
-import io.sphere.sdk.payments.commands.updateactions.SetInterfaceId;
+import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.ZonedDateTime;
+import java.util.ConcurrentModificationException;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Responsible to create the PayOne Request (PreAuthorization) and check if answer is approved or Error 
  * @author mht@dotsource.de
  *
  */
-public class BankTransferInAdvanceChargeTransactionExecutor extends IdempotentTransactionExecutor {
+public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionBaseExecutor {
     private static final Logger LOG = LoggerFactory.getLogger(BankTransferInAdvanceChargeTransactionExecutor.class);
     private final PayoneRequestFactory requestFactory;
     private final PayonePostService payonePostService;
@@ -127,6 +120,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends IdempotentTr
             if (status.equals("APPROVED")) {
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
+                        setStatusInterfaceCode(response),
                         SetInterfaceId.of(response.get("txid")),
                         ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId()),
                         SetCustomField.ofObject(CustomFieldKeys.PAY_TO_BIC_FIELD, response.get("clearing_bankbic")),
@@ -135,13 +129,15 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends IdempotentTr
                 ));
             } else if (status.equals("ERROR")) {
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
-                    interfaceInteraction,
-                    ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
-                    ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
+                        interfaceInteraction,
+                        setStatusInterfaceCode(response),
+                        ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
+                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                 ));
             } else if (status.equals("PENDING")) {
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
+                        setStatusInterfaceCode(response),
                         SetInterfaceId.of(response.get("txid"))));
             }
 

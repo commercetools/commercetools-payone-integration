@@ -7,7 +7,7 @@ import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneExcept
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
-import com.commercetools.pspadapter.payone.transaction.IdempotentTransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.TransactionBaseExecutor;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -18,13 +18,7 @@ import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
-import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
-import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractionId;
-import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
-import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionTimestamp;
-import io.sphere.sdk.payments.commands.updateactions.SetAuthorization;
-import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
-import io.sphere.sdk.payments.commands.updateactions.SetInterfaceId;
+import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 
@@ -38,7 +32,7 @@ import java.util.Optional;
  * @author mht@dotsource.de
  *
  */
-public class DefaultChargeTransactionExecutor extends IdempotentTransactionExecutor {
+public class DefaultChargeTransactionExecutor extends TransactionBaseExecutor {
     private final PayoneRequestFactory requestFactory;
     private final PayonePostService payonePostService;
     private final BlockingSphereClient client;
@@ -124,6 +118,7 @@ public class DefaultChargeTransactionExecutor extends IdempotentTransactionExecu
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
+                        setStatusInterfaceCode(response),
                         SetInterfaceId.of(response.get("txid")),
                         SetCustomField.ofObject(CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"))));
             } else {
@@ -133,8 +128,10 @@ public class DefaultChargeTransactionExecutor extends IdempotentTransactionExecu
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
 
                 if (status.equals("APPROVED")) {
+
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                             interfaceInteraction,
+                            setStatusInterfaceCode(response),
                             SetInterfaceId.of(response.get("txid")),
                             SetAuthorization.of(updatedPayment.getAmountPlanned()),
                             ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
@@ -142,13 +139,15 @@ public class DefaultChargeTransactionExecutor extends IdempotentTransactionExecu
                     ));
                 } else if (status.equals("ERROR")) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
-                        interfaceInteraction,
-                        ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
-                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
+                            interfaceInteraction,
+                            setStatusInterfaceCode(response),
+                            ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
+                            ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                     ));
                 } else if (status.equals("PENDING")) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                             interfaceInteraction,
+                            setStatusInterfaceCode(response),
                             SetInterfaceId.of(response.get("txid"))));
                 }
             }
