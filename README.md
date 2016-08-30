@@ -111,10 +111,20 @@ java -jar service/build/libs/commercetools-payone-integration.jar
 ```
 
 ### Deploy and Run
-
-TODO docker
-
-TODO availability of the /payone/notification URL to the public or just the payone servers.
+```
+docker run \
+-e CT_CLIENT_ID=xxx \
+-e CT_CLIENT_SECRET=xxx \
+-e CT_PROJECT_KEY=xxx \
+-e PAYONE_AUTH_PASS=xxx \
+-e PAYONE_AUTH_USER=xxx \
+-e PAYONE_KEY=xxx \
+-e PAYONE_MERCHANT_ID=xxx \
+-e PAYONE_MODE=test|live \
+-e PAYONE_PORTAL_ID=xxx \
+-e PAYONE_SUBACC_ID=xxx \
+sphereio/commercetools-payone-integration 
+```
 
 The integration service itself does not provide SSL connectivity, this must be done by a load balancer / SSL terminator running in front of it (which is recommended in any case). 
 
