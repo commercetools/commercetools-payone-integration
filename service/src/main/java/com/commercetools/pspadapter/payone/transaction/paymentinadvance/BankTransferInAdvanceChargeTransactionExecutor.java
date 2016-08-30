@@ -121,6 +121,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
                         setStatusInterfaceCode(response),
+                        setStatusInterfaceText(response),
                         SetInterfaceId.of(response.get("txid")),
                         ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId()),
                         SetCustomField.ofObject(CustomFieldKeys.PAY_TO_BIC_FIELD, response.get("clearing_bankbic")),
@@ -131,6 +132,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
                         setStatusInterfaceCode(response),
+                        setStatusInterfaceText(response),
                         ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
                         ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                 ));
@@ -138,6 +140,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
                         setStatusInterfaceCode(response),
+                        setStatusInterfaceText(response),
                         SetInterfaceId.of(response.get("txid"))));
             }
 

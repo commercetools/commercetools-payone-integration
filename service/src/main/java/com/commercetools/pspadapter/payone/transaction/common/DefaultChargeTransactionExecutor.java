@@ -119,6 +119,7 @@ public class DefaultChargeTransactionExecutor extends TransactionBaseExecutor {
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
                         setStatusInterfaceCode(response),
+                        setStatusInterfaceText(response),
                         SetInterfaceId.of(response.get("txid")),
                         SetCustomField.ofObject(CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"))));
             } else {
@@ -132,6 +133,7 @@ public class DefaultChargeTransactionExecutor extends TransactionBaseExecutor {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                             interfaceInteraction,
                             setStatusInterfaceCode(response),
+                            setStatusInterfaceText(response),
                             SetInterfaceId.of(response.get("txid")),
                             SetAuthorization.of(updatedPayment.getAmountPlanned()),
                             ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
@@ -141,6 +143,7 @@ public class DefaultChargeTransactionExecutor extends TransactionBaseExecutor {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                             interfaceInteraction,
                             setStatusInterfaceCode(response),
+                            setStatusInterfaceText(response),
                             ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
                             ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                     ));
@@ -148,6 +151,7 @@ public class DefaultChargeTransactionExecutor extends TransactionBaseExecutor {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                             interfaceInteraction,
                             setStatusInterfaceCode(response),
+                            setStatusInterfaceText(response),
                             SetInterfaceId.of(response.get("txid"))));
                 }
             }
