@@ -179,14 +179,6 @@ Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the s
 
 To test with Paypal, you need Sandbox Buyer credentials.
 
-For the time being, the following sandbox buyers are used
-- for Paypal Authorization
- * email: nikolaus.kuehn+buyer-1@commercetools.de  
- * password: CT-test$
-- for Paypal ChargeImmediately
- * email: zukfiprz@boximail.com
- * password: CT-test$
-
 ## Contribute Improvements
 
 If you want to add a useful functionality or found a bug please open an issue here to announce and discuss what you
