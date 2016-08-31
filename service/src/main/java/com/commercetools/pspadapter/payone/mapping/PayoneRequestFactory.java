@@ -48,19 +48,19 @@ public abstract class PayoneRequestFactory {
         try {
             MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
         } catch (final IllegalArgumentException ex) {
-            logger.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
+            logger.debug("Could not fully map payment with ID {} {}", paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
         try {
             MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
         } catch (final IllegalArgumentException ex) {
-            logger.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
+            logger.error("Could not fully map payment with ID {} {}", paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
         try {
             MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
         } catch (final IllegalArgumentException ex) {
-            logger.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
+            logger.debug("Could not fully map payment with ID {} {}", paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
     }
 }
