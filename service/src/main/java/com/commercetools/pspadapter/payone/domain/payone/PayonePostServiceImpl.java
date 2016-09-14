@@ -79,7 +79,7 @@ public class PayonePostServiceImpl implements PayonePostService {
         return serverAPIURL;
     }
 
-    public void setServlerAPIURL(String serverAPIURL) {
+    public void setServerAPIURL(String serverAPIURL) {
         this.serverAPIURL = serverAPIURL;
     }
 
