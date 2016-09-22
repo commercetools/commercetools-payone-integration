@@ -13,11 +13,11 @@ import java.util.Map;
  */
 public abstract class TransactionBaseExecutor extends IdempotentTransactionExecutor{
 
-    private final static String STATUS = "status";
-    private final static String ERROR_CODE = "errorcode";
-    private final static String CUSTOMER_MESSAGE = "customermessage";
-    private final static String ERROR_MESSAGE = "errormessage";
-    private final static String ERROR = "ERROR";
+    public final static String STATUS = "status";
+    public final static String ERROR_CODE = "errorcode";
+    public final static String CUSTOMER_MESSAGE = "customermessage";
+    public final static String ERROR_MESSAGE = "errormessage";
+    public final static String ERROR = "ERROR";
 
     public TransactionBaseExecutor(LoadingCache<String, Type> typeCache) {
         super(typeCache);
