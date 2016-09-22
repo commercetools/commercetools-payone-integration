@@ -101,6 +101,10 @@ public class MappingUtil {
                     request.setCustomerid(customerNumber);
                 }
             });
+
+        //customer's locale
+        Optional.ofNullable(customer.getLocale())
+                .ifPresent(locale -> request.setLanguage(locale.getLanguage()));
     }
 
     public static void mapShippingAddressToRequest(final AuthorizationRequest request, final Address shippingAddress) {

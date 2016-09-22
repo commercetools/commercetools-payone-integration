@@ -1,9 +1,5 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import static org.assertj.core.api.ThrowableAssert.catchThrowable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
@@ -12,6 +8,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestTyp
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardCaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
+import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
@@ -26,7 +23,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Optional;
+
+import static org.assertj.core.api.ThrowableAssert.catchThrowable;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 /**
  * @author fhaertig
@@ -68,6 +70,7 @@ public class CreditCardRequestFactoryTest {
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroCC();
         Order order = payments.dummyOrderMapToPayoneRequest();
+        Customer customer = payment.getCustomer().getObj();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         CreditCardPreauthorizationRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
         SoftAssertions softly = new SoftAssertions();
@@ -91,7 +94,9 @@ public class CreditCardRequestFactoryTest {
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
-        softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
+        softly.assertThat(result.getCustomerid()).isEqualTo(customer.getCustomerNumber());
+        softly.assertThat(result.getLanguage())
+                .isEqualTo(Optional.ofNullable(customer.getLocale()).map(Locale::getLanguage).orElse(null));
 
         //monetary
         softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
@@ -141,6 +146,7 @@ public class CreditCardRequestFactoryTest {
     public void createFullAuthorizationRequestFromValidPayment() throws Exception {
         Payment payment = payments.dummyPaymentOneAuthPending20EuroCC();
         Order order = payments.dummyOrderMapToPayoneRequest();
+        Customer customer = payment.getCustomer().getObj();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         CreditCardAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
         SoftAssertions softly = new SoftAssertions();
@@ -164,7 +170,9 @@ public class CreditCardRequestFactoryTest {
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
-        softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
+        softly.assertThat(result.getCustomerid()).isEqualTo(customer.getCustomerNumber());
+        softly.assertThat(result.getLanguage())
+                .isEqualTo(Optional.ofNullable(customer.getLocale()).map(Locale::getLanguage).orElse(null));
 
         //urls
         softly.assertThat(result.getSuccessurl()).isEqualTo("www.test.de/success");

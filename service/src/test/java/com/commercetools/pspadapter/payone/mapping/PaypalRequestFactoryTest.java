@@ -1,8 +1,5 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
@@ -11,6 +8,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingTy
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPreauthorizationRequest;
+import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
@@ -24,7 +22,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Optional;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 /**
  * @author fhaertig
@@ -55,6 +57,7 @@ public class PaypalRequestFactoryTest {
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroPPE();
         Order order = payments.dummyOrderMapToPayoneRequest();
+        Customer customer = payment.getCustomer().getObj();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         WalletPreauthorizationRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
@@ -80,7 +83,9 @@ public class PaypalRequestFactoryTest {
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
-        softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
+        softly.assertThat(result.getCustomerid()).isEqualTo(customer.getCustomerNumber());
+        softly.assertThat(result.getLanguage())
+                .isEqualTo(Optional.ofNullable(customer.getLocale()).map(Locale::getLanguage).orElse(null));
 
         //monetary
         softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
@@ -128,6 +133,7 @@ public class PaypalRequestFactoryTest {
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroPPE();
         Order order = payments.dummyOrderMapToPayoneRequest();
+        Customer customer = payment.getCustomer().getObj();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         WalletAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
@@ -153,7 +159,9 @@ public class PaypalRequestFactoryTest {
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
-        softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
+        softly.assertThat(result.getCustomerid()).isEqualTo(customer.getCustomerNumber());
+        softly.assertThat(result.getLanguage())
+                .isEqualTo(Optional.ofNullable(customer.getLocale()).map(Locale::getLanguage).orElse(null));
 
         //monetary
         softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
