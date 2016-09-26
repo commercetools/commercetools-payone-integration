@@ -24,7 +24,7 @@ public class BasePayonePostServiceImplTest {
     /**
      * Service to execute requests. Instantiated in {@link #setUp()}.
      */
-    PayonePostService payonePostService;
+    protected PayonePostService payonePostService;
 
     /**
      * Mock for properties provider. See {@link #setUp()} for more details.
@@ -35,7 +35,7 @@ public class BasePayonePostServiceImplTest {
     /**
      * Config to fetch default payone gateway URL. Not mocked so far, but may be mocked in future.
      */
-    PayoneConfig payoneConfig;
+    protected PayoneConfig payoneConfig;
 
     /**
      * Setup basic service configuration. By default:<ul>
@@ -58,10 +58,14 @@ public class BasePayonePostServiceImplTest {
      */
     @Before
     public void setUp()  {
-        when(propertyProvider.getProperty(anyString())).thenReturn(Optional.empty());
-        when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_KEY)).thenReturn("testDummyValue");
+        configurePropertyProvider(propertyProvider);
 
         payoneConfig = new PayoneConfig(propertyProvider);
         payonePostService = PayonePostServiceImpl.of(payoneConfig.getApiUrl());
+    }
+
+    protected void configurePropertyProvider(PropertyProvider propertyProvider) {
+        when(propertyProvider.getProperty(anyString())).thenReturn(Optional.empty());
+        when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_KEY)).thenReturn("testDummyValue");
     }
 }

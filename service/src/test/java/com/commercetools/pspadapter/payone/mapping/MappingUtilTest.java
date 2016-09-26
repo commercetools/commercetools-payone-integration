@@ -181,7 +181,7 @@ public class MappingUtilTest {
         // now set flush payment object to null - fetch language from cartLike
         // set properties one-by-one till locale.getLanguage()
         when(paymentWithCartLike.getPayment()).thenReturn(null);
-        when(paymentWithCartLike.getCartLike()).thenReturn(cardLike);
+        when((CartLike)paymentWithCartLike.getCartLike()).thenReturn(cardLike);
         softly.assertThat(getPaymentLanguage(paymentWithCartLike).isPresent()).isFalse();
 
         Locale locale = new Locale("xx");
