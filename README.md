@@ -2,10 +2,39 @@
 
 [![Build Status](https://travis-ci.org/commercetools/commercetools-payone-integration.svg?branch=master)](https://travis-ci.org/commercetools/commercetools-payone-integration)
 
-This software provides an integration between the [commercetools eCommerce platform](http://dev.sphere.io) API
-and the [PAYONE](http://www.payone.de) payment service provider API. 
+This software provides an integration between the [commercetools eCommerce platform](http://dev.commercetools.com) API
+and the [PAYONE](http://www.payone.de) payment service provider (server API). 
 
-It is a standalone Microservice that connects the two cloud platforms and provides own helper APIs to checkout implementations. 
+It is a standalone Microservice that connects the two cloud platforms and provides a small own helper API to force immediate handling of a payment. 
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Documentation](#documentation)
+- [Related Documentation](#related-documentation)
+- [Using the Integration in a project](#using-the-integration-in-a-project)
+  - [Required Configuration in the commercetools project](#required-configuration-in-the-commercetools-project)
+    - [Domain Constraints](#domain-constraints)
+  - [Required Configuration in PAYONE](#required-configuration-in-payone)
+  - [Configuration of the Integration Service itself](#configuration-of-the-integration-service-itself)
+      - [commercetools API client credentials](#commercetools-api-client-credentials)
+      - [PAYONE API client credentials](#payone-api-client-credentials)
+      - [Service configuration parameters](#service-configuration-parameters)
+  - [Build](#build)
+  - [Deploy and Run](#deploy-and-run)
+- [Test environments](#test-environments)
+  - [Development workflow](#development-workflow)
+  - [Functional Tests](#functional-tests)
+  - [Paypal Sandbox Accounts](#paypal-sandbox-accounts)
+- [Contribute Improvements](#contribute-improvements)
+- [Development Notes](#development-notes)
+- [Create a custom version](#create-a-custom-version)
+- [Appendix 1: Shell script template that sets the environment variables](#appendix-1-shell-script-template-that-sets-the-environment-variables)
+- [Appendix 2: Alternative configuration via properties file](#appendix-2-alternative-configuration-via-properties-file)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 ## Documentation
 
@@ -22,7 +51,7 @@ They are automatically generated, updated and published to the `gh_pages` branch
  
 ## Using the Integration in a project
 
-> TODO link to generic tutorial on how to do payments.
+> TODO link to generic tutorial on how to do payments once available.
 
 ### Required Configuration in the commercetools project
 
@@ -170,10 +199,7 @@ curl --data "request=3dscheck&mid=<PAYONE_MERCHANT_ID>&aid=<PAYONE_SUBACC_ID>&po
 * The value for key needs to be the MD5 encryption result of your PAYONE key.
 * The cardpan will be the test credit card number from TEST_DATA_VISA_CREDIT_CARD_NO_3DS or TEST_DATA_VISA_CREDIT_CARD_3DS. Note that the cardtype needs to be correspondand.
 
-#####  When sending "storecarddata=yes" at the end you will receive the pseudocardpan in the response from PAYONE.
-
-
-> TODO why does the 3DS pwd need an evironment variable if a fixed value? --> is a parameter which could change in future
+> NOTE:  When sending "storecarddata=yes" at the end you will receive the pseudocardpan in the response from PAYONE.
 
 To run the executable specification invoke the following command line:
 
@@ -187,7 +213,7 @@ Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the s
 
 ### Paypal Sandbox Accounts
 
-To test with Paypal, you need Sandbox Buyer credentials.
+To test with Paypal, you need own Sandbox Buyer credentials via a developer account. Available from commercetools, too; please contact support. 
 
 ## Contribute Improvements
 

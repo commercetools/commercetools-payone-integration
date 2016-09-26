@@ -2,7 +2,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [TODO: ITEMS TO BE DISCUSSED](#todo-items-to-be-discussed)
+- [To be clarified](#to-be-clarified)
 - [Payment methods covered](#payment-methods-covered)
 - [PAYONE Payment methods characteristics (the missing docs)](#payone-payment-methods-characteristics-the-missing-docs)
 - [API Data Mapping between PAYONE and the commercetools platform](#api-data-mapping-between-payone-and-the-commercetools-platform)
@@ -21,16 +21,12 @@
 
 > for better readability you might want to use a ["wide github"](https://chrome.google.com/webstore/detail/wide-github/kaalofacklcidaampbokdplbklpeldpj) plugin in your Browser
 
-# TODO: ITEMS TO BE DISCUSSED
+# To be clarified
 
 With PAYONE:
 
  * can a cancellation happen on paypal, same for online bank transfer?
  * sofortüberweisung: can there be a chargeback / cancellation? 
- * TODO (probably already spoken about): which notify_versions can occur if we use the latest API version? only 7.5?
-   * -> klärt Hr. Kuchel intern. 
- * concerning checkout documentation: what's the security feature of the hash? 
-   it's just done over the fields that are plaintext in the page and there is no secret in the hash, too. 
 
 # Payment methods covered
 
