@@ -1,16 +1,16 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardAuthorizationRequest;
 import com.neovisionaries.i18n.CountryCode;
+import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.models.Reference;
+import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.types.CustomFields;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +18,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.Locale;
 import java.util.Optional;
+
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
+import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguage;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 /**
  * @author fhaertig
@@ -29,14 +36,30 @@ public class MappingUtilTest {
 
     private static final String dummyValue = "123";
 
+    private SoftAssertions softly;
+
     @Mock
     private PropertyProvider propertyProvider;
 
     @Mock
     private Customer customer;
 
+    @Mock
+    private PaymentWithCartLike paymentWithCartLike;
+
+    @Mock
+    private Payment payment;
+
+    @Mock
+    private CustomFields customFields;
+
+    @Mock
+    private CartLike cardLike;
+
     @Before
     public void setUp() {
+        softly = new SoftAssertions();
+
         when(propertyProvider.getProperty(anyString())).thenReturn(Optional.of(dummyValue));
         when(propertyProvider.getMandatoryNonEmptyProperty(anyString())).thenReturn(dummyValue);
     }
@@ -50,7 +73,6 @@ public class MappingUtilTest {
 
         CreditCardAuthorizationRequest authorizationRequestDE = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
         CreditCardAuthorizationRequest authorizationRequestUS = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
-        SoftAssertions softly = new SoftAssertions();
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestDE, addressDE);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestDE, addressDE);
@@ -72,7 +94,6 @@ public class MappingUtilTest {
                 .withStreetNumber("2");
 
         CreditCardAuthorizationRequest authorizationRequestWithNameNumber = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
-        SoftAssertions softly = new SoftAssertions();
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestWithNameNumber, addressWithNameNumber);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestWithNameNumber, addressWithNameNumber);
@@ -89,7 +110,6 @@ public class MappingUtilTest {
                 .withStreetName("Test Street");
 
         CreditCardAuthorizationRequest authorizationRequestNoNumber = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
-        SoftAssertions softly = new SoftAssertions();
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestNoNumber, addressNoNumber);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestNoNumber, addressNoNumber);
@@ -106,7 +126,6 @@ public class MappingUtilTest {
                 .withStreetNumber("5");
 
         CreditCardAuthorizationRequest authorizationRequestNoName = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
-        SoftAssertions softly = new SoftAssertions();
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestNoName, addressNoName);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestNoName, addressNoName);
@@ -140,5 +159,45 @@ public class MappingUtilTest {
         MappingUtil.mapCustomerToRequest(authorizationRequest, customerReference);
 
         assertThat(authorizationRequest.getCustomerid()).isEqualTo("276829bd6fa3450f9e2a");
+    }
+
+    @Test
+    public void getPaymentLanguageTest() {
+
+        // base cases: null arguments
+        softly.assertThat(getPaymentLanguage(null).isPresent()).isFalse();
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike).isPresent()).isFalse();
+
+        // add properties to payment object one-by-one till valid customFields.getFieldAsString(LANGUAGE_CODE_FIELD)
+        when(paymentWithCartLike.getPayment()).thenReturn(payment);
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike).isPresent()).isFalse();
+
+        when(payment.getCustom()).thenReturn(customFields);
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike).isPresent()).isFalse();
+
+        when(customFields.getFieldAsString(LANGUAGE_CODE_FIELD)).thenReturn("nl");
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike).get()).isEqualTo("nl");
+
+        // now set flush payment object to null - fetch language from cartLike
+        // set properties one-by-one till locale.getLanguage()
+        when(paymentWithCartLike.getPayment()).thenReturn(null);
+        when(paymentWithCartLike.getCartLike()).thenReturn(cardLike);
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike).isPresent()).isFalse();
+
+        Locale locale = new Locale("xx");
+        when(cardLike.getLocale()).thenReturn(locale);
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike).get()).isEqualTo("xx");
+
+        // if both payment and cartLike set - payment value should privilege
+        when(paymentWithCartLike.getPayment()).thenReturn(payment);
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike).get()).isEqualTo("nl");
+
+        // but as soon as payment reference doesn't have proper language at the end -
+        // cartLike language should be fetched
+        when(customFields.getFieldAsString(LANGUAGE_CODE_FIELD)).thenReturn(null);
+        Optional<String> paymentLanguage = getPaymentLanguage(paymentWithCartLike);
+        softly.assertThat(paymentLanguage.get()).isEqualTo("xx");
+
+        softly.assertAll();
     }
 }

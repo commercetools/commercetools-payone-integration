@@ -2,8 +2,8 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureRequest;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
 import org.slf4j.Logger;
@@ -44,7 +44,6 @@ public abstract class PayoneRequestFactory {
 
         MappingUtil.mapCustomFieldsFromPayment(request, ctPayment.getCustom());
 
-
         try {
             MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
         } catch (final IllegalArgumentException ex) {
@@ -62,5 +61,8 @@ public abstract class PayoneRequestFactory {
         } catch (final IllegalArgumentException ex) {
             logger.debug("Could not fully map payment with ID {} {}", paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
+
+        MappingUtil.mapMiscellaneousFromPayment(request, paymentWithCartLike);
     }
+
 }

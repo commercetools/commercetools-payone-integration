@@ -57,7 +57,6 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
     public CreditCardAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
-        final CartLike ctCartLike = paymentWithCartLike.getCartLike();
 
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 

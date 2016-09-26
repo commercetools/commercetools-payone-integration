@@ -1,20 +1,28 @@
 package com.commercetools.pspadapter.payone.mapping;
 
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.neovisionaries.i18n.CountryCode;
+import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.models.Reference;
+import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.types.CustomFields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
 
 /**
  * @author fhaertig
@@ -101,10 +109,6 @@ public class MappingUtil {
                     request.setCustomerid(customerNumber);
                 }
             });
-
-        //customer's locale
-        Optional.ofNullable(customer.getLocale())
-                .ifPresent(locale -> request.setLanguage(locale.getLanguage()));
     }
 
     public static void mapShippingAddressToRequest(final AuthorizationRequest request, final Address shippingAddress) {
@@ -138,5 +142,35 @@ public class MappingUtil {
         request.setSuccessurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.SUCCESS_URL_FIELD));
         request.setErrorurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.ERROR_URL_FIELD));
         request.setBackurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.CANCEL_URL_FIELD));
+    }
+
+    public static void mapMiscellaneousFromPayment(@Nonnull final AuthorizationRequest request,
+                                                   @Nonnull final PaymentWithCartLike paymentWithCartLike) {
+        //customer's locale
+        getPaymentLanguage(paymentWithCartLike).ifPresent(request::setLanguage);
+    }
+
+    /**
+     * Define localization name (ISO 639) from the {@code paymentWithCartLike} in next order:<ul>
+     *     <li>if payment's customFiled <i>languageCode</i> is set - return it's value</li>
+     *     <li>else if cartLike's {@code locale} is set - return {@link Locale#getLanguage()}</li>
+     *     <li>otherwise return {@link Optional#empty()}</li>
+     * </ul>
+     *
+     * @param paymentWithCartLike payment to lookup for locale
+     * @return Optional of 2 characters localization name by ISO 639, or {@link Optional#empty()} if not found.
+     */
+    public static Optional<String> getPaymentLanguage(@Nullable final PaymentWithCartLike paymentWithCartLike) {
+        Optional<PaymentWithCartLike> paymentOptional = Optional.ofNullable(paymentWithCartLike);
+
+        return paymentOptional
+                .map(PaymentWithCartLike::getPayment)
+                .map(Payment::getCustom)
+                .map(customFields -> customFields.getFieldAsString(LANGUAGE_CODE_FIELD))
+                .map(Optional::of)
+                .orElse(paymentOptional
+                    .map(PaymentWithCartLike::getCartLike)
+                    .map(CartLike::getLocale)
+                    .map(Locale::getLanguage));
     }
 }

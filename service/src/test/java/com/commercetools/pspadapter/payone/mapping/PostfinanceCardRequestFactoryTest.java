@@ -19,9 +19,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.Optional;
 
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -78,8 +78,8 @@ public class PostfinanceCardRequestFactoryTest {
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
         softly.assertThat(result.getCustomerid()).isEqualTo(customer.getCustomerNumber());
-        softly.assertThat(result.getLanguage())
-                .isEqualTo(Optional.ofNullable(customer.getLocale()).map(Locale::getLanguage).orElse(null));
+        // language set in payment object
+        softly.assertThat(result.getLanguage()).isEqualTo(payment.getCustom().getFieldAsString(LANGUAGE_CODE_FIELD));
 
         //monetary
         softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());

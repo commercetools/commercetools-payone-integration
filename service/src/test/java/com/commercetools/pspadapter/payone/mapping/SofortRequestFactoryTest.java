@@ -1,8 +1,5 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
@@ -23,8 +20,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.Optional;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 /**
  * @author fhaertig
@@ -84,8 +83,8 @@ public class SofortRequestFactoryTest {
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
         softly.assertThat(result.getCustomerid()).isEqualTo(customer.getCustomerNumber());
-        softly.assertThat(result.getLanguage())
-                .isEqualTo(Optional.ofNullable(customer.getLocale()).map(Locale::getLanguage).orElse(null));
+        // language is skipped in payment object, but set in order object
+        softly.assertThat(result.getLanguage()).isEqualTo(order.getLocale().getLanguage());
 
         //monetary
         softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
