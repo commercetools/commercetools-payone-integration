@@ -192,19 +192,23 @@ To get a pseudocardpan for a credit card you can use the PAYONE server API. To d
 With the server API you simply need to send a POST request of type "3dscheck" for example by using a command line tool:
 
 ```
-curl --data "request=3dscheck&mid=<PAYONE_MERCHANT_ID>&aid=<PAYONE_SUBACC_ID>&portalid=<PAYONE_PORTAL_ID>&key=<MD5_PAYONE_KEY>&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&cardpan=<TEST_DATA_VISA_CREDIT_CARD_3DS>&cardtype=V&cardexpiredate=1710&cardcvc2=123&storecarddata=yes" https://api.pay1.de/post-gateway/
+curl --data "request=3dscheck&mid=<PAYONE_MERCHANT_ID>&aid=<PAYONE_SUBACC_ID>&portalid=<PAYONE_PORTAL_ID>&key=<MD5_PAYONE_KEY>&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>" https://api.pay1.de/post-gateway/
 ```
+
 * <url> needs to be replaced by the PAYONE api url. You will find this in the server documentation.
 * You need to replace the values for mid, aid and portalid with the ones you want to use with PAYONE.
-* The value for `MD5_PAYONE_KEY` needs to be the MD5 encryption result of your PAYONE key (`PAYONE_KEY`).
-* The cardpan will be the test credit card number from `TEST_DATA_VISA_CREDIT_CARD_NO_3DS` or `TEST_DATA_VISA_CREDIT_CARD_3DS`. Note that the cardtype needs to be correspondand.
+* The value for `MD5_PAYONE_KEY` needs to be the MD5 encryption result of your PAYONE key (`PAYONE_KEY`). 
+Use `md5 -qs $PAYONE_KEY` to hash string value to MD5.
+* The `cardpan` must be the value of card number. You may get test data values from [wiki page]( https://wiki.commercetools.de/display/DEV/payone#payone-Creditcard%28canbetestedwithpublicIPonly%29). 
+Don't use `TEST_DATA_VISA_CREDIT_CARD_NO_3DS` or `TEST_DATA_VISA_CREDIT_CARD_3DS` as these values expected to be already pseudocardpan values.
+* Note that the `cardtype` request argument needs to be correspondand: `V` or `M` for _VISA_ and _Master Card_ respectively.
 
 If you have all values above set in [environment variables](#appendix-2-alternative-configuration-via-properties-file), 
 and _md5_ command is available (which is default case on Mac OS X and most of Linux distributions), 
-you may copy-paste and directly execute next line:
+you may copy-paste and directly execute next line (change only `<VISA_CREDIT_CARD_3DS_NUMBER>`):
 
 ```
-curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&cardpan=$TEST_DATA_VISA_CREDIT_CARD_3DS&cardtype=V&cardexpiredate=1710&cardcvc2=123&storecarddata=yes" https://api.pay1.de/post-gateway/
+curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>" https://api.pay1.de/post-gateway/
 ```
 
 > NOTE:  When sending "storecarddata=yes" at the end you will receive the pseudocardpan in the response from PAYONE.
