@@ -139,6 +139,18 @@ Run the JAR:
 java -jar service/build/libs/commercetools-payone-integration.jar
 ```
 
+Run the JAR for debug (port `1044` is variable):
+
+* Listen mode:
+    ```
+    java -agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
+    ```
+
+* Attach mode:
+    ```
+    java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
+    ```
+
 ### Deploy and Run
 ```
 docker run \
