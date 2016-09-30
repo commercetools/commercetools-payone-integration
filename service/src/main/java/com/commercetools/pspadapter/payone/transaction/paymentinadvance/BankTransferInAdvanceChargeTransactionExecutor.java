@@ -76,7 +76,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
     public Optional<CustomFields> findLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
         return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_REQUEST)
             .filter(i -> i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD).equals(transaction.getId()))
-            .reduce((previous, current) -> current); // .findLast()
+            .reduce((previous, current) -> current);
     }
 
     @Override
@@ -102,9 +102,9 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
             PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
                 ImmutableList.of(
                         AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
-                            ImmutableMap.of(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString() /* TODO */,
+                            ImmutableMap.of(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString(),
                                     CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
-                                    CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */)),
+                                    CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now())),
                         ChangeTransactionInteractionId.of(String.valueOf(sequenceNumber), transaction.getId()))
             ));
 
@@ -116,7 +116,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                 ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, SphereJsonUtils.toJsonString(response),
                         CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
-                        CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
+                        CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now()));
 
             if (status.equals("APPROVED")) {
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
@@ -149,9 +149,9 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
         }
         catch (PayoneException pe) {
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, pe.getMessage() /* TODO */,
+                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, pe.getMessage(),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
-                            CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
+                            CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now()));
             return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));
         }
     }

@@ -1,11 +1,40 @@
 # commercetools <-> PAYONE Integration Service
 
-[![Build Status](https://travis-ci.com/commercetools/commercetools-payone-integration.svg?token=BGS8vSNxuriRBqs9Ffzs&branch=master)](https://travis-ci.com/commercetools/commercetools-payone-integration)
+[![Build Status](https://travis-ci.org/commercetools/commercetools-payone-integration.svg?branch=master)](https://travis-ci.org/commercetools/commercetools-payone-integration)
 
-This software provides an integration between the [commercetools eCommerce platform](http://dev.sphere.io) API
-and the [PAYONE](http://www.payone.de) payment service provider API. 
+This software provides an integration between the [commercetools eCommerce platform](http://dev.commercetools.com) API
+and the [PAYONE](http://www.payone.de) payment service provider (server API). 
 
-It is a standalone Microservice that connects the two cloud platforms and provides own helper APIs to checkout implementations. 
+It is a standalone Microservice that connects the two cloud platforms and provides a small own helper API to force immediate handling of a payment. 
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Documentation](#documentation)
+- [Related Documentation](#related-documentation)
+- [Using the Integration in a project](#using-the-integration-in-a-project)
+  - [Required Configuration in the commercetools project](#required-configuration-in-the-commercetools-project)
+    - [Domain Constraints](#domain-constraints)
+  - [Required Configuration in PAYONE](#required-configuration-in-payone)
+  - [Configuration of the Integration Service itself](#configuration-of-the-integration-service-itself)
+      - [commercetools API client credentials](#commercetools-api-client-credentials)
+      - [PAYONE API client credentials](#payone-api-client-credentials)
+      - [Service configuration parameters](#service-configuration-parameters)
+  - [Build](#build)
+  - [Deploy and Run](#deploy-and-run)
+- [Test environments](#test-environments)
+  - [Development workflow](#development-workflow)
+  - [Functional Tests](#functional-tests)
+  - [Paypal Sandbox Accounts](#paypal-sandbox-accounts)
+- [Contribute Improvements](#contribute-improvements)
+- [Development Notes](#development-notes)
+- [Create a custom version](#create-a-custom-version)
+- [Appendix 1: Shell script template that sets the environment variables](#appendix-1-shell-script-template-that-sets-the-environment-variables)
+- [Appendix 2: Alternative configuration via properties file](#appendix-2-alternative-configuration-via-properties-file)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 ## Documentation
 
@@ -22,7 +51,7 @@ They are automatically generated, updated and published to the `gh_pages` branch
  
 ## Using the Integration in a project
 
-> TODO link to generic tutorial on how to do payments.
+> TODO link to generic tutorial on how to do payments once available.
 
 ### Required Configuration in the commercetools project
 
@@ -110,11 +139,33 @@ Run the JAR:
 java -jar service/build/libs/commercetools-payone-integration.jar
 ```
 
+Run the JAR for debug (port `1044` is variable):
+
+* Listen mode:
+    ```
+    java -agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
+    ```
+
+* Attach mode:
+    ```
+    java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
+    ```
+
 ### Deploy and Run
-
-TODO docker
-
-TODO availability of the /payone/notification URL to the public or just the payone servers.
+```
+docker run \
+-e CT_CLIENT_ID=xxx \
+-e CT_CLIENT_SECRET=xxx \
+-e CT_PROJECT_KEY=xxx \
+-e PAYONE_AUTH_PASS=xxx \
+-e PAYONE_AUTH_USER=xxx \
+-e PAYONE_KEY=xxx \
+-e PAYONE_MERCHANT_ID=xxx \
+-e PAYONE_MODE=test|live \
+-e PAYONE_PORTAL_ID=xxx \
+-e PAYONE_SUBACC_ID=xxx \
+sphereio/commercetools-payone-integration 
+```
 
 The integration service itself does not provide SSL connectivity, this must be done by a load balancer / SSL terminator running in front of it (which is recommended in any case). 
 
@@ -153,17 +204,26 @@ To get a pseudocardpan for a credit card you can use the PAYONE server API. To d
 With the server API you simply need to send a POST request of type "3dscheck" for example by using a command line tool:
 
 ```
-curl --data "request=3dscheck&mid=<PAYONE_MERCHANT_ID>&aid=<PAYONE_SUBACC_ID>&portalid=<PAYONE_PORTAL_ID>&key=<PAYONE_KEY>&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&cardpan=<TEST_DATA_VISA_CREDIT_CARD_3DS>&cardtype=V&cardexpiredate=1710&cardcvc2=123&storecarddata=yes" <url>
+curl --data "request=3dscheck&mid=<PAYONE_MERCHANT_ID>&aid=<PAYONE_SUBACC_ID>&portalid=<PAYONE_PORTAL_ID>&key=<MD5_PAYONE_KEY>&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>" https://api.pay1.de/post-gateway/
 ```
+
 * <url> needs to be replaced by the PAYONE api url. You will find this in the server documentation.
 * You need to replace the values for mid, aid and portalid with the ones you want to use with PAYONE.
-* The value for key needs to be the MD5 encryption result of your PAYONE key.
-* The cardpan will be the test credit card number from TEST_DATA_VISA_CREDIT_CARD_NO_3DS or TEST_DATA_VISA_CREDIT_CARD_3DS. Note that the cardtype needs to be correspondand.
+* The value for `MD5_PAYONE_KEY` needs to be the MD5 encryption result of your PAYONE key (`PAYONE_KEY`). 
+Use `md5 -qs $PAYONE_KEY` to hash string value to MD5.
+* The `cardpan` must be the value of card number. You may get test data values from [wiki page]( https://wiki.commercetools.de/display/DEV/payone#payone-Creditcard%28canbetestedwithpublicIPonly%29). 
+Don't use `TEST_DATA_VISA_CREDIT_CARD_NO_3DS` or `TEST_DATA_VISA_CREDIT_CARD_3DS` as these values expected to be already pseudocardpan values.
+* Note that the `cardtype` request argument needs to be correspondand: `V` or `M` for _VISA_ and _Master Card_ respectively.
 
-#####  When sending "storecarddata=yes" at the end you will receive the pseudocardpan in the response from PAYONE.
+If you have all values above set in [environment variables](#appendix-2-alternative-configuration-via-properties-file), 
+and _md5_ command is available (which is default case on Mac OS X and most of Linux distributions), 
+you may copy-paste and directly execute next line (change only `<VISA_CREDIT_CARD_3DS_NUMBER>`):
 
+```
+curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>" https://api.pay1.de/post-gateway/
+```
 
-> TODO why does the 3DS pwd need an evironment variable if a fixed value? --> is a parameter which could change in future
+> NOTE:  When sending "storecarddata=yes" at the end you will receive the pseudocardpan in the response from PAYONE.
 
 To run the executable specification invoke the following command line:
 
@@ -177,15 +237,7 @@ Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the s
 
 ### Paypal Sandbox Accounts
 
-To test with Paypal, you need Sandbox Buyer credentials.
-
-For the time being, the following sandbox buyers are used
-- for Paypal Authorization
- * email: nikolaus.kuehn+buyer-1@commercetools.de  
- * password: CT-test$
-- for Paypal ChargeImmediately
- * email: zukfiprz@boximail.com
- * password: CT-test$
+To test with Paypal, you need own Sandbox Buyer credentials via a developer account. Available from commercetools, too; please contact support. 
 
 ## Contribute Improvements
 
