@@ -66,7 +66,7 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
      * @return JSON string with respective {@code response} key-value entries.
      * @see #exceptionToResponseJsonString(Exception)
      */
-    protected final String responseToJsonString(Map<String, String> response) {
+    protected static String responseToJsonString(Map<String, String> response) {
         return SphereJsonUtils.toJsonString(response);
     }
 
@@ -81,7 +81,7 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
      * @param exception exception which occurred when transaction executed.
      * @return JSON string with key-value entries like in Payone API.
      */
-    protected final String exceptionToResponseJsonString(Exception exception) {
+    protected static String exceptionToResponseJsonString(Exception exception) {
         return responseToJsonString(ImmutableMap.of(
                 STATUS, ResponseStatus.ERROR.getStateCode(),
                 ERROR_CODE, ResponseErrorCode.TRANSACTION_EXCEPTION.getErrorCode(),
