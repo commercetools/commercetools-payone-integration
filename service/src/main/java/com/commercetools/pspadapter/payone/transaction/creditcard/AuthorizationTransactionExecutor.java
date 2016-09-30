@@ -152,7 +152,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
         }
         catch (PayoneException pe) {
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, pe.getMessage() /* TODO */,
+                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(pe),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
             return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));
