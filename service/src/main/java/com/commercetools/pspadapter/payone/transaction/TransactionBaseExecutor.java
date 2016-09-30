@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.transaction;
 
 import com.google.common.cache.LoadingCache;
+import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
 import io.sphere.sdk.types.Type;
@@ -54,5 +55,14 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
             stringBuilder.append(status);
         }
         return SetStatusInterfaceText.of(stringBuilder.toString());
+    }
+
+    /**
+     * Converts {@code Map<String, String>} response value to valid JSON string.
+     * @param response response map to convert
+     * @return JSON string with respective {@code response} key-value entries.
+     */
+    protected final String responseToJsonString(Map<String, String> response) {
+        return SphereJsonUtils.toJsonString(response);
     }
 }

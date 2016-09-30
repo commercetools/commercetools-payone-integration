@@ -13,7 +13,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
-import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
@@ -114,7 +113,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
             final String status = response.get("status");
 
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, SphereJsonUtils.toJsonString(response),
+                ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
                         CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                         CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now()));
 
