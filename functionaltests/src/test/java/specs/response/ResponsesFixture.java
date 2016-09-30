@@ -31,7 +31,7 @@ import java.util.concurrent.ExecutionException;
 @RunWith(ConcordionRunner.class)
 public class ResponsesFixture extends BaseFixture {
 
-    private static final String baseRedirectUrl = "https://www.example.com/sofortueberweisung_charge_immediately/";
+    static final String baseRedirectUrl = "https://www.example.com/sofortueberweisung_charge_immediately/";
 
     public String createPayment(final String paymentName,
                                 final String paymentMethod,
