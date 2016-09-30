@@ -27,17 +27,13 @@ public class BanktTransferInAdvanceRequestFactory extends PayoneRequestFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(BanktTransferInAdvanceRequestFactory.class);
 
-    private ServiceConfig serviceConfig;
-
-    public BanktTransferInAdvanceRequestFactory(final PayoneConfig payoneConfig, final ServiceConfig serviceConfig) {
+    public BanktTransferInAdvanceRequestFactory(final PayoneConfig payoneConfig ) {
         super(payoneConfig);
-        this.serviceConfig = serviceConfig;
     }
 
     @Override
     public BankTransferInAdvancePreautorizationRequest createPreauthorizationRequest(PaymentWithCartLike paymentWithCartLike) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
-        final CartLike ctCartLike = paymentWithCartLike.getCartLike();
 
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
@@ -53,25 +49,7 @@ public class BanktTransferInAdvanceRequestFactory extends PayoneRequestFactory {
                                                     .intValue()));
         request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
 
-        MappingUtil.mapCustomFieldsFromPayment(request, ctPayment.getCustom());
-
-        try {
-            MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
-        } catch (final IllegalArgumentException ex) {
-            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
-        }
-
-        try {
-            MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
-        } catch (final IllegalArgumentException ex) {
-            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
-        }
-
-        try {
-            MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
-        } catch (final IllegalArgumentException ex) {
-            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
-        }
+        mapFormPaymentWithCartLike(request, paymentWithCartLike, LOG);
 
         return request;
     }

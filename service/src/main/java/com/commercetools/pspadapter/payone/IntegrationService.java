@@ -51,15 +51,14 @@ public class IntegrationService {
         Spark.get("/commercetools/handle/payments/:id", (req, res) -> {
             final PaymentHandleResult paymentHandleResult = handlePayment(req.params("id"));
             if (!paymentHandleResult.body().isEmpty()) {
-                LOG.info(String.format("--> Result body of handle/payments/%s: %s", req.params("id"), paymentHandleResult.body()));
+                LOG.debug(String.format("--> Result body of handle/payments/%s: %s", req.params("id"), paymentHandleResult.body()));
             }
             res.status(paymentHandleResult.statusCode());
             return res;
         }, new HandlePaymentResponseTransformer());
 
         Spark.post("/payone/notification", (req, res) -> {
-            // FIXME take care of sensitive data
-            LOG.info("<- Received POST from Payone: " + req.body());
+            LOG.debug("<- Received POST from Payone: " + req.body());
             final Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
 
             try {

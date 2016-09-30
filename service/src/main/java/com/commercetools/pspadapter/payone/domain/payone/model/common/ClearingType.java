@@ -14,6 +14,8 @@ public enum ClearingType {
     PAYONE_CC("CREDIT_CARD", "cc", ""),
     PAYONE_PPE("WALLET-PAYPAL", "wlt", "PPE"),
     PAYONE_PNT("BANK_TRANSFER-SOFORTUEBERWEISUNG", "sb", "PNT"),
+    PAYONE_PFC("BANK_TRANSFER-POSTFINANCE_CARD", "sb", "PFC"),
+    PAYONE_PFF("BANK_TRANSFER-POSTFINANCE_EFINANCE", "sb", "PFF"),
     PAYONE_VOR("BANK_TRANSFER-ADVANCE", "vor", "");
 
     private final String key;
@@ -37,7 +39,7 @@ public enum ClearingType {
      * GPY: giropay (DE)
      * EPS: eps – Online-Überweisung (AT)
      * PFF: PostFinance E-Finance (CH)
-     * PFC: PostFinance Card (C
+     * PFC: PostFinance Card (CH)
      * BSV: Billsafe
      * </code>
      * **/

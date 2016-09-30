@@ -1,16 +1,12 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
-import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvancePreautorizationRequest;
-
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
@@ -25,15 +21,18 @@ import util.PaymentTestHelper;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+
 /**
  * @author mht@dotsource.de
  * 
  */
 @RunWith(MockitoJUnitRunner.class)
-public class BankTransferInAdvanceRequestFactoryTest {
+public class PostfinanceEfinanceRequestFactoryTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
-    private BanktTransferInAdvanceRequestFactory factory;
+    private BankTransferWithoutIbanBicRequestFactory factory;
 
     @Mock
     private PropertyProvider propertyProvider;
@@ -43,22 +42,20 @@ public class BankTransferInAdvanceRequestFactoryTest {
 
         when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyVal"));
         when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
-        //clear secure key to force unencrypted data
-        when(propertyProvider.getProperty(PropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        factory = new BanktTransferInAdvanceRequestFactory(payoneConfig);
+        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
+        factory = new BankTransferWithoutIbanBicRequestFactory(payoneConfig);
 
-
-        Payment payment = payments.dummyPaymentOneAuthPending20EuroVOR();
+        Payment payment = payments.dummyPaymentOneAuthPending20EuroPFF();
         Order order = payments.dummyOrderMapToPayoneRequest();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
-        BankTransferInAdvancePreautorizationRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
+        BankTransferAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
         SoftAssertions softly = new SoftAssertions();
 
         //base values
-        softly.assertThat(result.getRequest()).isEqualTo(RequestType.PREAUTHORIZATION.getType());
+        softly.assertThat(result.getRequest()).isEqualTo(RequestType.AUTHORIZATION.getType());
         softly.assertThat(result.getAid()).isEqualTo(payoneConfig.getSubAccountId());
         softly.assertThat(result.getMid()).isEqualTo(payoneConfig.getMerchantId());
         softly.assertThat(result.getPortalid()).isEqualTo(payoneConfig.getPortalId());
@@ -71,7 +68,7 @@ public class BankTransferInAdvanceRequestFactoryTest {
         softly.assertThat(result.getIntegratorVersion()).isEqualTo(payoneConfig.getIntegratorVersion());
 
         //clearing type
-        ClearingType clearingType = ClearingType.getClearingTypeByKey("BANK_TRANSFER-ADVANCE");
+        ClearingType clearingType = ClearingType.getClearingTypeByKey("BANK_TRANSFER-POSTFINANCE_EFINANCE");
         
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType.getPayoneCode());
 
@@ -85,10 +82,9 @@ public class BankTransferInAdvanceRequestFactoryTest {
         softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
         //urls
-        //no redirect
-        softly.assertThat(result.getSuccessurl()).isNull();
-        softly.assertThat(result.getErrorurl()).isNull();
-        softly.assertThat(result.getBackurl()).isNull();
+        softly.assertThat(result.getSuccessurl()).isEqualTo("www.test.de/success");
+        softly.assertThat(result.getErrorurl()).isEqualTo("www.test.de/error");
+        softly.assertThat(result.getBackurl()).isEqualTo("www.test.de/cancel");
 
         //billing address data
         Address billingAddress = order.getBillingAddress();

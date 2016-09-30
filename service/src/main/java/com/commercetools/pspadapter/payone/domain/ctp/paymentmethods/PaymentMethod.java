@@ -46,6 +46,20 @@ public enum PaymentMethod {
      */
     BANK_TRANSFER_ADVANCE(MethodKeys.BANK_TRANSFER_ADVANCE,
                     TransactionType.CHARGE
+    ),
+
+    /**
+     * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
+     */
+    BANK_TRANSFER_POSTFINANCE_EFINANCE(MethodKeys.BANK_TRANSFER_POSTFINANCE_EFINANCE,
+            TransactionType.CHARGE
+    ),
+
+    /**
+     * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
+     */
+    BANK_TRANSFER_POSTFINANCE_CARD(MethodKeys.BANK_TRANSFER_POSTFINANCE_CARD,
+            TransactionType.CHARGE
     );
 
     private String key;

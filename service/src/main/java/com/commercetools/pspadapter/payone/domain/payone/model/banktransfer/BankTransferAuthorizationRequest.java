@@ -14,6 +14,8 @@ public class BankTransferAuthorizationRequest extends AuthorizationRequest {
 
     private String onlinebanktransfertype;
 
+    private String bankcountry;
+
     @ClearSecuredValuesSerializer.Apply
     private String iban;
 
@@ -38,6 +40,15 @@ public class BankTransferAuthorizationRequest extends AuthorizationRequest {
     public void setOnlinebanktransfertype(final String onlinebanktransfertype) {
         this.onlinebanktransfertype = onlinebanktransfertype;
     }
+
+    public String getBankcountry() {
+        return bankcountry;
+    }
+
+    public void setBankcountry(String bankcountry) {
+        this.bankcountry = bankcountry;
+    }
+
 
     public String getIban() {
         return iban;

@@ -17,6 +17,12 @@
     It will store information about such a request as an interface interaction of type
     <em>PAYONE_INTERACTION_REQUEST</em>.
 </p>
+<p>
+    Since Change 2.85 of Payone 2016-07-26:
+</p>
+    <blockquote>
+    IBAN / BIC / bankcode / bankaccount can be omitted for SOFORTBanking (OBT/PNT) on API-level as they are returned from SOFORT and saved by PAYONE (for later upcoming SEPA-credits in case of refund).
+    </blockquote>
 <h3>Common Setup</h3>
 <ul>
     <li>payment.paymentMethodInfo.method: <span c:set="#paymentMethod">BANK_TRANSFER-SOFORTUEBERWEISUNG</span></li>
@@ -28,17 +34,21 @@
         Given the following payments for a bank account
         <em>that does support Sofortueberweisung</em> and <em>does <b>not</b> support charges for currencies other than EUR</em>:
     </p>
-    <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
+    <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode, #iban, #bic)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
             <th c:set="#centAmount">Cent Amount</th>
             <th c:set="#currencyCode">Currency Code</th>
+            <th c:set="#iban">IBAN</th>
+            <th c:set="#bic">BIC</th>
             <th c:echo="#paymentId">Payment ID (for information only)</th>
         </tr>
         <tr>
             <td>Payment 1</td>
             <td>406</td>
             <td>EUR</td>
+            <td>DE00123456782599100003</td>
+            <td>TESTTEST</td>
             <td></td>
         </tr>
         <tr>
@@ -46,17 +56,23 @@
             <td>91341</td>
             <td>USD</td>
             <td></td>
+            <td></td>
+            <td></td>
         </tr>
         <tr>
             <td>Payment 3</td>
             <td>8231</td>
             <td>EUR</td>
             <td></td>
+            <td></td>
+            <td></td>
         </tr>
         <tr>
             <td>Payment 4</td>
             <td>123411</td>
             <td>EUR</td>
+            <td></td>
+            <td></td>
             <td></td>
         </tr>
     </table>

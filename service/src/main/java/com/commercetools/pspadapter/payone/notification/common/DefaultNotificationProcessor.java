@@ -29,11 +29,4 @@ public class DefaultNotificationProcessor extends NotificationProcessorBase {
     protected boolean canProcess(final Notification notification) {
         return true;
     }
-
-    @Override
-    protected ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
-                                                                        final Notification notification) {
-        final UpdateAction<Payment> notificationAddAction = createNotificationAddAction(notification);
-        return ImmutableList.of(notificationAddAction);
-    }
 }

@@ -74,7 +74,9 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                                 final String paymentMethod,
                                 final String transactionType,
                                 final String centAmount,
-                                final String currencyCode) throws ExecutionException, InterruptedException, UnsupportedEncodingException {
+                                final String currencyCode,
+                                final String iban,
+                                final String bic) throws ExecutionException, InterruptedException, UnsupportedEncodingException {
 
 
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
@@ -92,8 +94,8 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                                 .put(CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + (paymentName + " Success").replace(" ", "-"))
                                 .put(CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + (paymentName + " Error").replace(" ", "-"))
                                 .put(CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + (paymentName + " Cancel").replace(" ", "-"))
-                                .put(CustomFieldKeys.IBAN_FIELD, getTestDataSwBankTransferIban())
-                                .put(CustomFieldKeys.BIC_FIELD, getTestDataSwBankTransferBic())
+                                .put(CustomFieldKeys.IBAN_FIELD, iban)
+                                .put(CustomFieldKeys.BIC_FIELD, bic)
                                 .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")
                                 .build()))
                 .build();

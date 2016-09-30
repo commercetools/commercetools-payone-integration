@@ -49,25 +49,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
                             .intValue());
                 });
 
-        MappingUtil.mapCustomFieldsFromPayment(request, ctPayment.getCustom());
-
-        try {
-            MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
-        } catch (final IllegalArgumentException ex) {
-            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
-        }
-
-        try {
-            MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
-        } catch (final IllegalArgumentException ex) {
-            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
-        }
-
-        try {
-            MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
-        } catch (final IllegalArgumentException ex) {
-            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
-        }
+        mapFormPaymentWithCartLike(request, paymentWithCartLike, LOG);
 
         return request;
     }
@@ -92,25 +74,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
                                                     .intValue()));
         request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
 
-        MappingUtil.mapCustomFieldsFromPayment(request, ctPayment.getCustom());
-
-        try {
-            MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
-        } catch (final IllegalArgumentException ex) {
-            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
-        }
-
-        try {
-            MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
-        } catch (final IllegalArgumentException ex) {
-            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
-        }
-
-        try {
-            MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
-        } catch (final IllegalArgumentException ex) {
-            LOG.warn("Could not fully map payment with ID " + paymentWithCartLike.getPayment().getId(), ex.getMessage());
-        }
+        mapFormPaymentWithCartLike(request, paymentWithCartLike, LOG);
 
         return request;
     }

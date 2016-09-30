@@ -44,14 +44,14 @@ public class PayonePostServiceImpl implements PayonePostService {
     @Override
     public Map<String, String> executePost(final BaseRequest baseRequest) throws PayoneException {
 
-        LOG.info("-> Payone POST request parameters: " + baseRequest.toStringMap(true).toString());
-
         try {
             String serverResponse = Unirest.post(this.serverAPIURL)
                     .fields(baseRequest.toStringMap(false))
                     .asString().getBody();
-
-            LOG.info("Payone POST response: " + serverResponse);
+            if (serverResponse.contains("status=ERROR")) {
+                LOG.error("-> Payone POST request parameters: " + baseRequest.toStringMap(true).toString());
+                LOG.error("Payone POST response: " + serverResponse);
+            }
             return buildMapFromResultParams(serverResponse);
         } catch (UnirestException | UnsupportedEncodingException e) {
             throw new PayoneException("Payone POST request failed. Cause: " + e.getMessage(), e);
