@@ -11,8 +11,11 @@ import static org.junit.Assert.assertThat;
 
 public class TransactionBaseExecutorTest {
 
+    /**
+     * Test {@code TransactionBaseExecutor#responseToJsonString} maps all input key-values to the result.
+     */
     @Test
-    public void responseToJsonString_mapsAllValuesFromResponse() throws Exception {
+    public void responseToJsonString() throws Exception {
         String jsonString = TransactionBaseExecutor.responseToJsonString(ImmutableMap.of(
                 "woot", "hack",
                 "foo", "bar",
@@ -27,15 +30,20 @@ public class TransactionBaseExecutorTest {
         assertThat(node.get("foo").asText(), is("bar"));
         assertThat(node.get("errorcode").asText(), is("00123"));
 
-        // check no any other fields are added
+        // check no any other (default) fields are added
         assertThat(node.has(ERROR_MESSAGE), is(false));
         assertThat(node.has(CUSTOMER_MESSAGE), is(false));
         assertThat(node.has("redirecturl"), is(false));
         assertThat(node.has("txid"), is(false));
     }
 
+    /**
+     * Test {@code TransactionBaseExecutor.exceptionToResponseJsonString} for any exception returns standard Payone API
+     * error fields set (status, errorcode, errormessage, customermessage)
+     * @throws Exception
+     */
     @Test
-    public void exceptionToResponseJsonString_containsPayoneApiNodes() throws Exception {
+    public void exceptionToResponseJsonString() throws Exception {
         final String TEST_ERROR_MESSAGE = "TEST MESSAGE WOOT";
         String jsonString = TransactionBaseExecutor.exceptionToResponseJsonString(new Exception(TEST_ERROR_MESSAGE));
 

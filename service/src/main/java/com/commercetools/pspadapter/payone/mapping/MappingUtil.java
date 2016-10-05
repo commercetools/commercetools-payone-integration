@@ -151,14 +151,14 @@ public class MappingUtil {
     }
 
     /**
-     * Define localization name (ISO 639) from the {@code paymentWithCartLike} in next order:<ul>
-     *     <li>if payment's customFiled <i>languageCode</i> is set - return it's value</li>
+     * Define localization name (ISO 639) from the {@code paymentWithCartLike} in the next order:<ul>
+     *     <li>if payment's custom filed <i>languageCode</i> is set - return this value</li>
      *     <li>else if cartLike's {@code locale} is set - return {@link Locale#getLanguage()}</li>
      *     <li>otherwise return {@link Optional#empty()}</li>
      * </ul>
      *
      * @param paymentWithCartLike payment to lookup for locale
-     * @return Optional of 2 characters localization name by ISO 639, or {@link Optional#empty()} if not found.
+     * @return Optional String of 2 characters localization name by ISO 639, or {@link Optional#empty()} if not found.
      */
     public static Optional<String> getPaymentLanguage(@Nullable final PaymentWithCartLike paymentWithCartLike) {
         Optional<PaymentWithCartLike> paymentOptional = Optional.ofNullable(paymentWithCartLike);

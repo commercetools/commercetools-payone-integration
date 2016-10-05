@@ -108,7 +108,7 @@ public class JsonResponseFixture extends BaseFixture {
     }
 
     /**
-     * Returns
+     * Returns {@link JsonNode} with key-value String map from Payone response.
      * @param paymentName previously created payment name from HTML template
      * @return complete {@link JsonNode} with expected fields from Payone API (errorcode, errormessage, customermessage)
      * @throws ExecutionException

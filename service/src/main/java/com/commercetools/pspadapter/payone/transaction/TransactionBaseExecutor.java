@@ -61,8 +61,8 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
     }
 
     /**
-     * Converts {@code Map<String, String>} response value to valid JSON string.
-     * @param response response map to convert
+     * Converts {@code Map<String, String>} response to a string with a JSON value.
+     * @param response Response map to convert to a JSON String
      * @return JSON string with respective {@code response} key-value entries.
      * @see #exceptionToResponseJsonString(Exception)
      */
@@ -71,15 +71,18 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
     }
 
     /**
-     * In case an error occurred on service side, but not in Payone, we simulate same response structure,
-     * as described in <i>TECHNICAL REFERENCE PAYONE Platform Channel Server API, Version 2.77</i>:<ul>
+     * In case an error occurred on commercetools service side, but not in Payone, we simulate same response structure,
+     * as described in <a href="https://sphere.atlassian.net/wiki/display/CDL/Payone?preview=%2F87326868%2F106102867%2FPAYONE_Platform_Server_API_EN_v2.77.pdf">
+     *     TECHNICAL REFERENCE PAYONE Platform Channel Server API, Version 2.77</a>:<ul>
      *     <li><b>status</b>: ERROR</li>
      *     <li><b>errorcode</b>: {@link ResponseErrorCode#TRANSACTION_EXCEPTION}</li>
      *     <li><b>errormessage</b>: {@code exception.getMessage()} value</li>
-     *     <li><b>customermessage</b>: Neutral English message to display to customer on a page.</li>
+     *     <li><b>customermessage</b>: Neutral English message (without technical info)
+     *     to display for a customer on a page.</li>
      * </ul>
      * @param exception exception which occurred when transaction executed.
-     * @return JSON string with key-value entries like in Payone API.
+     * @return JSON string with key-value entries following Payone API.
+     * @see #responseToJsonString(Map)
      */
     protected static String exceptionToResponseJsonString(Exception exception) {
         return responseToJsonString(ImmutableMap.of(
