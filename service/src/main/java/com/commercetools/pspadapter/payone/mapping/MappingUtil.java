@@ -168,9 +168,9 @@ public class MappingUtil {
                 .map(Payment::getCustom)
                 .map(customFields -> customFields.getFieldAsString(LANGUAGE_CODE_FIELD))
                 .map(Optional::of)
-                .orElse(paymentOptional
-                    .map(PaymentWithCartLike::getCartLike)
-                    .map(CartLike::getLocale)
-                    .map(Locale::getLanguage));
+                .orElseGet(() -> paymentOptional
+                                    .map(PaymentWithCartLike::getCartLike)
+                                    .map(CartLike::getLocale)
+                                    .map(Locale::getLanguage));
     }
 }
