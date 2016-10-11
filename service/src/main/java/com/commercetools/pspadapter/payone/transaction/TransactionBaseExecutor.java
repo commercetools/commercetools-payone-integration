@@ -11,17 +11,15 @@ import io.sphere.sdk.types.Type;
 
 import java.util.Map;
 
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
+
 /**
  * @author mht@dotsource.de
  * Common base class responsible for default paymentupdateactions
  */
 public abstract class TransactionBaseExecutor extends IdempotentTransactionExecutor{
 
-    public final static String STATUS = "status";
-    public final static String ERROR_CODE = "errorcode";
-    public final static String CUSTOMER_MESSAGE = "customermessage";
-    public final static String ERROR_MESSAGE = "errormessage";
-    public final static String ERROR = "ERROR";
+    public static final String ERROR = "ERROR";
 
     public TransactionBaseExecutor(LoadingCache<String, Type> typeCache) {
         super(typeCache);
