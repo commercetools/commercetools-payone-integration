@@ -21,6 +21,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.concurrent.ExecutionException;
 
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
+
 /**
  * Test Payone integration service sets "response" custom field for executed transactions as a valid JSON string
  * with values returned from payment provider.
@@ -86,10 +88,10 @@ public class CtpJsonResponseFixture extends BasePaymentFixture {
     public MultiValueResult handleErrorJsonResponse(final String paymentName) throws ExecutionException, IOException {
         JsonNode jsonNode = handleJsonResponse(paymentName);
         return MultiValueResult.multiValueResult()
-                .with("status", jsonNode.get("status").textValue())
-                .with("errorcode", jsonNode.get("errorcode").intValue())
-                .with("errormessage", jsonNode.get("errormessage").textValue())
-                .with("customermessage", jsonNode.get("customermessage").textValue());
+                .with(STATUS, jsonNode.get(STATUS).textValue())
+                .with(ERROR_CODE, jsonNode.get(ERROR_CODE).intValue())
+                .with(ERROR_MESSAGE, jsonNode.get(ERROR_MESSAGE).textValue())
+                .with(CUSTOMER_MESSAGE, jsonNode.get(CUSTOMER_MESSAGE).textValue());
     }
 
     /**
@@ -107,8 +109,8 @@ public class CtpJsonResponseFixture extends BasePaymentFixture {
         URL redirectUrl = new URL(responseNode.get("redirecturl").asText());
 
         return MultiValueResult.multiValueResult()
-                .with("status", responseNode.get("status").asText())
+                .with(STATUS, responseNode.get(STATUS).asText())
                 .with("redirectUrlAuthority", redirectUrl.getProtocol() + "://" + redirectUrl.getAuthority())
-                .with("txidIsSet", !responseNode.get("txid").asText().isEmpty());
+                .with("txidIsSet", !responseNode.get(TXID).asText().isEmpty());
     }
 }

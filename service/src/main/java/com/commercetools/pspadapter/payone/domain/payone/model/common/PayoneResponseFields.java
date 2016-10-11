@@ -10,6 +10,8 @@ public final class PayoneResponseFields {
     public static final String CUSTOMER_MESSAGE = "customermessage";
     public static final String ERROR_MESSAGE = "errormessage";
 
+    public static final String TXID = "txid";
+
     private PayoneResponseFields() {
     }
 }
