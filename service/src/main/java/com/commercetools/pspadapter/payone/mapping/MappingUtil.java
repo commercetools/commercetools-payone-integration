@@ -144,8 +144,8 @@ public class MappingUtil {
         request.setBackurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.CANCEL_URL_FIELD));
     }
 
-    public static void mapMiscellaneousFromPayment(@Nonnull final AuthorizationRequest request,
-                                                   @Nonnull final PaymentWithCartLike paymentWithCartLike) {
+    public static void mapFromPayment(@Nonnull final AuthorizationRequest request,
+                                      @Nonnull final PaymentWithCartLike paymentWithCartLike) {
         //customer's locale
         getPaymentLanguage(paymentWithCartLike).ifPresent(request::setLanguage);
     }

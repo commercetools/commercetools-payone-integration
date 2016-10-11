@@ -62,7 +62,7 @@ public abstract class PayoneRequestFactory {
             logger.debug("Could not fully map payment with ID {} {}", paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
-        MappingUtil.mapMiscellaneousFromPayment(request, paymentWithCartLike);
+        MappingUtil.mapFromPayment(request, paymentWithCartLike);
     }
 
 }
