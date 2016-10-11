@@ -7,11 +7,7 @@ import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.google.common.collect.*;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
@@ -100,6 +96,15 @@ public abstract class BaseFixture {
                 ctPayoneIntegrationBaseUrl.getHost(),
                 ctPayoneIntegrationBaseUrl.getPort(),
                 "/commercetools/handle/payments/" + paymentId)
+                .toExternalForm();
+    }
+
+    public String getHealthUrl() throws MalformedURLException {
+        return new URL(
+                ctPayoneIntegrationBaseUrl.getProtocol(),
+                ctPayoneIntegrationBaseUrl.getHost(),
+                ctPayoneIntegrationBaseUrl.getPort(),
+                "/health")
                 .toExternalForm();
     }
 
