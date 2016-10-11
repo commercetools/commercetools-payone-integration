@@ -91,20 +91,23 @@ public abstract class BaseFixture {
     }
 
     public String getHandlePaymentUrl(final String paymentId) throws MalformedURLException {
-        return new URL(
-                ctPayoneIntegrationBaseUrl.getProtocol(),
-                ctPayoneIntegrationBaseUrl.getHost(),
-                ctPayoneIntegrationBaseUrl.getPort(),
-                "/commercetools/handle/payments/" + paymentId)
-                .toExternalForm();
+        return getServiceUrl("/commercetools/handle/payments/" + paymentId);
+    }
+
+    public String getNotificationUrl() throws MalformedURLException {
+        return getServiceUrl("/payone/notification");
     }
 
     public String getHealthUrl() throws MalformedURLException {
+        return getServiceUrl("/health");
+    }
+
+    final String getServiceUrl(String suffix) throws MalformedURLException {
         return new URL(
                 ctPayoneIntegrationBaseUrl.getProtocol(),
                 ctPayoneIntegrationBaseUrl.getHost(),
                 ctPayoneIntegrationBaseUrl.getPort(),
-                "/health")
+                suffix)
                 .toExternalForm();
     }
 

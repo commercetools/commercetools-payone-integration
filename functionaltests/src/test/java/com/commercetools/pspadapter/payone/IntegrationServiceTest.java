@@ -2,7 +2,6 @@ package com.commercetools.pspadapter.payone;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.Test;
@@ -37,17 +36,5 @@ public class IntegrationServiceTest extends BaseIntegrationServiceTest {
         httpResponse = HttpClientBuilder.create().build().execute( request );
         assertThat("Response Code must be 404", httpResponse.getStatusLine().getStatusCode(),
                 is(HttpStatus.NOT_FOUND_404));
-    }
-
-    /**
-     * For now only tests /payone/notification returns 400 for empty request.
-     */
-    @Test
-    public void testNotificationUrlResponse() throws Exception {
-        HttpPost httpPost = new HttpPost(BASE_URL_WITH_PORT() + NOTIFICATION_REQUEST);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute( httpPost );
-
-        assertThat("Response Code must be 400", httpResponse.getStatusLine().getStatusCode(),
-                is(HttpStatus.BAD_REQUEST_400));
     }
 }
