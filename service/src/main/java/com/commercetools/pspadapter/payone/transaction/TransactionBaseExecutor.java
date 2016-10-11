@@ -88,6 +88,6 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
                 STATUS, ResponseStatus.ERROR.getStateCode(),
                 ERROR_CODE, ResponseErrorCode.TRANSACTION_EXCEPTION.getErrorCode(),
                 ERROR_MESSAGE, "Integration Service Exception: " + exception.getMessage(),
-                CUSTOMER_MESSAGE, "An error occurred while processing this transaction"));
+                CUSTOMER_MESSAGE, "Error on payment transaction processing."));
     }
 }
