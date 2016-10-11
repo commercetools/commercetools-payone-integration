@@ -89,7 +89,7 @@ public class CtpJsonResponseFixture extends BasePaymentFixture {
         JsonNode jsonNode = handleJsonResponse(paymentName);
         return MultiValueResult.multiValueResult()
                 .with(STATUS, jsonNode.get(STATUS).textValue())
-                .with(ERROR_CODE, jsonNode.get(ERROR_CODE).intValue())
+                .with(ERROR_CODE, jsonNode.get(ERROR_CODE).textValue())
                 .with(ERROR_MESSAGE, jsonNode.get(ERROR_MESSAGE).textValue())
                 .with(CUSTOMER_MESSAGE, jsonNode.get(CUSTOMER_MESSAGE).textValue());
     }
