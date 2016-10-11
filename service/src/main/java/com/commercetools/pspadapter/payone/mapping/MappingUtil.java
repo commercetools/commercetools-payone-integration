@@ -15,7 +15,6 @@ import io.sphere.sdk.types.CustomFields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -142,12 +141,6 @@ public class MappingUtil {
         request.setSuccessurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.SUCCESS_URL_FIELD));
         request.setErrorurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.ERROR_URL_FIELD));
         request.setBackurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.CANCEL_URL_FIELD));
-    }
-
-    public static void mapFromPayment(@Nonnull final AuthorizationRequest request,
-                                      @Nonnull final PaymentWithCartLike paymentWithCartLike) {
-        //customer's locale
-        getPaymentLanguage(paymentWithCartLike).ifPresent(request::setLanguage);
     }
 
     /**

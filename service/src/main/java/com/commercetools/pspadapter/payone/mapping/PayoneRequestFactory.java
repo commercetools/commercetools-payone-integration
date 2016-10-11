@@ -62,7 +62,8 @@ public abstract class PayoneRequestFactory {
             logger.debug("Could not fully map payment with ID {} {}", paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
-        MappingUtil.mapFromPayment(request, paymentWithCartLike);
+        //customer's locale, if set in custom field or cartLike
+        MappingUtil.getPaymentLanguage(paymentWithCartLike).ifPresent(request::setLanguage);
     }
 
 }
