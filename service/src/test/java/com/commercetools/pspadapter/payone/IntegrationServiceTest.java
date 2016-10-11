@@ -206,7 +206,7 @@ public class IntegrationServiceTest
 
         // assert
         assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.INTERNAL_SERVER_ERROR_500));
-        assertThat(paymentHandleResult.body(), containsString("An error occured during communication with the commercetools platform"));
+        assertThat(paymentHandleResult.body(), containsString("An error occurred during communication with the commercetools platform"));
         assertThat(paymentHandleResult.body(), containsString(exceptionMessage));
     }
 

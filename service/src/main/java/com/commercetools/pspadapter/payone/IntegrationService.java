@@ -8,6 +8,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import io.sphere.sdk.client.ErrorResponseException;
 import io.sphere.sdk.client.NotFoundException;
 import io.sphere.sdk.http.HttpStatusCode;
 import io.sphere.sdk.json.SphereJsonUtils;
@@ -63,13 +64,13 @@ public class IntegrationService {
 
         Spark.post("/payone/notification", (req, res) -> {
             LOG.debug("<- Received POST from Payone: " + req.body());
-            final Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
-
             try {
+                final Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
                 notificationDispatcher.dispatchNotification(notification);
-            } catch (RuntimeException ex) {
+            } catch (Exception e) {
+                LOG.error("Payone notification handling error. Request body: " + req.body(), e);
                 res.status(400);
-                return ex.getMessage();
+                return e.getMessage();
             }
             res.status(200);
             return "TSOK";
@@ -101,8 +102,7 @@ public class IntegrationService {
             for (int i = 0; i < 20; i++) {
                 try {
                     final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
-                    if (!"PAYONE".equals(payment.getPayment().getPaymentMethodInfo().getPaymentInterface()))
-                    {
+                    if (!"PAYONE".equals(payment.getPayment().getPaymentMethodInfo().getPaymentInterface())) {
                         return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
                     }
 
@@ -121,8 +121,11 @@ public class IntegrationService {
             String.format("Could not process payment with ID \"%s\", cause: %s", paymentId, e.getMessage());
 
             return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
+        } catch (final ErrorResponseException e) {
+            LOG.debug("An Error Response from commercetools platform", e);
+            return new PaymentHandleResult(e.getStatusCode(), e.getMessage());
         } catch (final CompletionException e) {
-            return logCauseMessageInResponse("An error occured during communication with the commercetools platform: " + e.getMessage());
+            return logCauseMessageInResponse("An error occurred during communication with the commercetools platform: " + e.getMessage());
         } catch (final RuntimeException e) {
             // TODO clarify if we should use localized message
             return logThrowableInResponse(e);
