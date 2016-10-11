@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link href="../../concordion.css" rel="stylesheet" type="text/css"/>
+    <title>Interface Interaction Responses</title>
+</head>
+<body>
+<h1>Interface Interaction JSON Responses</h1>
+Test that we get correct &quot;response&quot; field in Payment#interfaceInteractions#fields#response:
+it should be a valid JSON.
+<div class="example">
+    <h3>Forcing different responses JSON strings</h3>
+    <p>
+    <ul>
+        <li>payment.paymentMethodInfo.method: <span c:set="#creditCardpaymentMethod">CREDIT_CARD</span></li>
+        <li>payment.transactions[0].type: <span c:set="#transactionType">AUTHORIZATION</span></li>
+    </ul>
+        Given the following payments for <strong>Credit Card</strong>:
+    </p>
+    <table c:execute="#paymentId = createCardPayment(#paymentName, #creditCardpaymentMethod, #transactionType, #centAmount, #currencyCode, #languageCode)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#centAmount">Cent Amount</th>
+            <th c:set="#currencyCode">Currency Code</th>
+            <th c:set="#languageCode">Language Code</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>0</td>
+            <td>EUR</td>
+            <td>de</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 2</td>
+            <td>407</td>
+            <td>USD</td>
+            <td>en</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <p>
+    <ul>
+        <li>payment.paymentMethodInfo.method: <span c:set="#paypalPaymentMethod">WALLET-PAYPAL</span></li>
+        <li>payment.transactions[0].type: <span c:set="#transactionType">AUTHORIZATION</span></li>
+    </ul>
+        Given the following payments for <strong>PayPal</strong>:
+    </p>
+
+    <table c:execute="#paymentId = createWalletPayment(#paymentName, #paypalPaymentMethod, #transactionType, #centAmount, #currencyCode, #languageCode)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#centAmount">Cent Amount</th>
+            <th c:set="#currencyCode">Currency Code</th>
+            <th c:set="#languageCode">Language Code</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>0</td>
+            <td>EUR</td>
+            <td>nl</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>666</td>
+            <td>EUR</td>
+            <td>en</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <hr/>
+
+    <p><h3>Testing JSON responses</h3></p>
+
+    <p>
+        Read following values from <strong>ERROR</strong> JSON responses:
+    <ul>
+        <li><span>status</span></li>
+        <li><span>errorcode</span></li>
+        <li><span>errormessage</span></li>
+        <li><span>customermessage</span></li>
+    </ul>
+    </p>
+    <table c:execute="#responseNode = handleErrorJsonResponse(#paymentName)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#responseNode.status">Status</th>
+            <th c:assertEquals="#responseNode.errorcode">Error Code</th>
+            <th c:assertEquals="#responseNode.errormessage">Error Message</th>
+            <th c:assertEquals="#responseNode.customermessage">Customer Error (localised)</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>ERROR</td>
+            <td>1016</td>
+            <td>Parameter {amount} faulty or missing</td>
+            <td>Bei der Bearbeitung dieser Transaktion ist ein Fehler aufgetreten (Falsche Parameter).</td>
+        </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>ERROR</td>
+            <td>1016</td>
+            <td>Parameter {amount} faulty or missing</td>
+            <td>Er is bij de bewerking van deze transactie een fout opgetreden (verkeerde parameters).</td>
+        </tr>
+    </table>
+
+    <p>
+        Read following values from <strong>SUCCESS</strong> JSON response:
+    </p>
+    <table c:execute="#response = handleSuccessJsonResponse(#paymentName)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#response.status">Status</th>
+            <th c:assertEquals="#response.redirectUrlAuthority">Redirect URL (protocol + host only)</th>
+            <th c:assertTrue="#response.txidIsSet">txid is set</th>
+        </tr>
+        <tr>
+            <td>Payment 2</td>
+            <td>REDIRECT</td>
+            <td>https://secure.pay1.de</td>
+            <td>true</td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>REDIRECT</td>
+            <td>https://www.sandbox.paypal.com</td>
+            <td>true</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

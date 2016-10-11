@@ -25,13 +25,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static specs.response.BasePaymentFixture.baseRedirectUrl;
+
 /**
  * @author mht@dotsource.de
  */
 @RunWith(ConcordionRunner.class)
 public class ResponsesFixture extends BaseFixture {
-
-    private static final String baseRedirectUrl = "https://www.example.com/sofortueberweisung_charge_immediately/";
 
     public String createPayment(final String paymentName,
                                 final String paymentMethod,

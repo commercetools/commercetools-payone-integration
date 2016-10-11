@@ -15,4 +15,8 @@ public enum ResponseStatus {
     ResponseStatus(final String stateCode) {
         this.stateCode = stateCode;
     }
+
+    public String getStateCode() {
+        return stateCode;
+    }
 }

@@ -7,6 +7,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
+import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author mht@dotsource.de
- * 
+ *
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PostfinanceEfinanceRequestFactoryTest {
@@ -49,6 +50,7 @@ public class PostfinanceEfinanceRequestFactoryTest {
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroPFF();
         Order order = payments.dummyOrderMapToPayoneRequest();
+        Customer customer = payment.getCustomer().getObj();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
         BankTransferAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
@@ -69,13 +71,15 @@ public class PostfinanceEfinanceRequestFactoryTest {
 
         //clearing type
         ClearingType clearingType = ClearingType.getClearingTypeByKey("BANK_TRANSFER-POSTFINANCE_EFINANCE");
-        
+
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType.getPayoneCode());
 
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
-        softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
+        softly.assertThat(result.getCustomerid()).isEqualTo(customer.getCustomerNumber());
+        // language is skipped in payment object, but set in order object
+        softly.assertThat(result.getLanguage()).isEqualTo(order.getLocale().getLanguage());
 
         //monetary
         softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());

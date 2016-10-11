@@ -112,7 +112,7 @@ public class DefaultChargeTransactionExecutor extends TransactionBaseExecutor {
             final String status = response.get("status");
             if (status.equals("REDIRECT")) {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT,
-                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, response.toString() /* TODO */,
+                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
                             CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
@@ -124,7 +124,7 @@ public class DefaultChargeTransactionExecutor extends TransactionBaseExecutor {
                         SetCustomField.ofObject(CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"))));
             } else {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, response.toString() /* TODO */,
+                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
 
@@ -160,7 +160,7 @@ public class DefaultChargeTransactionExecutor extends TransactionBaseExecutor {
         }
         catch (PayoneException pe) {
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, pe.getMessage() /* TODO */,
+                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(pe),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
             return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));

@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Responsible to create the PayOne Request (PreAuthorization) and check if answer is approved or Error 
+ * Responsible to create the PayOne Request (PreAuthorization) and check if answer is approved or Error
  * @author mht@dotsource.de
  *
  */
@@ -111,9 +111,9 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
             final Map<String, String> response = payonePostService.executePost(request);
 
             final String status = response.get("status");
-            
+
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, response.toString(),
+                ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
                         CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                         CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now()));
 
@@ -148,7 +148,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
         }
         catch (PayoneException pe) {
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, pe.getMessage(),
+                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(pe),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now()));
             return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));
