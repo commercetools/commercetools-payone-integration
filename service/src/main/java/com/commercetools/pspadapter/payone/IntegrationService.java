@@ -16,6 +16,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
+import spark.Route;
 import spark.Spark;
 
 import javax.annotation.Nonnull;
@@ -76,16 +77,19 @@ public class IntegrationService {
             return "TSOK";
         });
 
-        Spark.get("/health", (req, res) -> {
-            // This is temporary jerry-rig for load balancer to check connection with the service itself.
-            // For now it just returns JSON response {"status":200}
-            // It should be expanded to more real health-checker service, which really performs PAYONE status check.
-            // But don't forget, a load balancer may call this URL very often (like 1 per sec),
-            // so don't make this request processor heavy.
+        // This is a temporary jerry-rig for the load balancer to check connection with the service itself.
+        // For now it just returns a JSON response {"status":200}
+        // It should be expanded to a more real health-checker service, which really performs PAYONE status check.
+        // But don't forget, a load balancer may call this URL very often (like 1 per sec),
+        // so don't make this request processor heavy, or implement is as independent background service.
+        Route healthRoute = (req, res) -> {
             res.status(HttpStatusCode.OK_200);
             res.type(ContentType.APPLICATION_JSON.getMimeType());
             return ImmutableMap.of("status", HttpStatus.OK_200);
-        }, SphereJsonUtils::toJsonString);
+        };
+
+        Spark.get("/health", healthRoute, SphereJsonUtils::toJsonString);
+        Spark.get("/health/", healthRoute, SphereJsonUtils::toJsonString);
 
         Spark.awaitInitialization();
     }
