@@ -10,6 +10,7 @@ import io.sphere.sdk.payments.PaymentDraftBuilder;
 import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.concordion.api.FullOGNL;
+import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 
@@ -18,7 +19,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -83,8 +83,13 @@ public class CtpJsonResponseFixture extends BasePaymentFixture {
      * @throws ExecutionException
      * @throws IOException
      */
-    public JsonNode handleErrorJsonResponse(final String paymentName) throws ExecutionException, IOException {
-        return handleJsonResponse(paymentName);
+    public MultiValueResult handleErrorJsonResponse(final String paymentName) throws ExecutionException, IOException {
+        JsonNode jsonNode = handleJsonResponse(paymentName);
+        return MultiValueResult.multiValueResult()
+                .with("status", jsonNode.get("status").textValue())
+                .with("errorcode", jsonNode.get("errorcode").intValue())
+                .with("errormessage", jsonNode.get("errormessage").textValue())
+                .with("customermessage", jsonNode.get("customermessage").textValue());
     }
 
     /**
@@ -95,18 +100,15 @@ public class CtpJsonResponseFixture extends BasePaymentFixture {
      *     <li><i>redirectUrlAuthority</i>: expected partial URI (protocol + hostname)</li>
      *     <li><i>txidIsSet</i>: boolean value, <b>true</b> if <i>txid</i> exists and not empty in JSON response </li>
      * </ul>
-     * @throws ExecutionException
-     * @throws IOException
      */
-    public Map<String, Object> handleSuccessJsonResponse(final String paymentName) throws ExecutionException, IOException {
+    public MultiValueResult handleSuccessJsonResponse(final String paymentName) throws ExecutionException, IOException {
         JsonNode responseNode = handleJsonResponse(paymentName);
 
         URL redirectUrl = new URL(responseNode.get("redirecturl").asText());
 
-        return ImmutableMap.of(
-                "status", responseNode.get("status").asText(),
-                "redirectUrlAuthority", redirectUrl.getProtocol() + "://" + redirectUrl.getAuthority(),
-                "txidIsSet", !responseNode.get("txid").asText().isEmpty()
-        );
+        return MultiValueResult.multiValueResult()
+                .with("status", responseNode.get("status").asText())
+                .with("redirectUrlAuthority", redirectUrl.getProtocol() + "://" + redirectUrl.getAuthority())
+                .with("txidIsSet", !responseNode.get("txid").asText().isEmpty());
     }
 }
