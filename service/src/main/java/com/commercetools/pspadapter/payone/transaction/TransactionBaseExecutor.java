@@ -69,8 +69,9 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
     }
 
     /**
-     * In case an error occurred on commercetools service side, but not in Payone, we simulate same response structure,
-     * as described in <a href="https://sphere.atlassian.net/wiki/display/CDL/Payone?preview=%2F87326868%2F106102867%2FPAYONE_Platform_Server_API_EN_v2.77.pdf">
+     * In case of communication errors with Payone payment URL/Server (timeout, authorisation, wrong server URL ...),
+     * we simulate same response structure, as described in
+     * <a href="https://sphere.atlassian.net/wiki/display/CDL/Payone?preview=%2F87326868%2F106102867%2FPAYONE_Platform_Server_API_EN_v2.77.pdf">
      *     TECHNICAL REFERENCE PAYONE Platform Channel Server API, Version 2.77</a>:<ul>
      *     <li><b>status</b>: ERROR</li>
      *     <li><b>errorcode</b>: {@link ResponseErrorCode#TRANSACTION_EXCEPTION}</li>
