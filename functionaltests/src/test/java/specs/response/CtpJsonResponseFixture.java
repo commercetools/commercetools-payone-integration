@@ -31,7 +31,7 @@ import java.util.concurrent.ExecutionException;
  */
 @RunWith(ConcordionRunner.class)
 @FullOGNL
-public class JsonResponseFixture extends BasePaymentFixture {
+public class CtpJsonResponseFixture extends BasePaymentFixture {
 
     public String createCardPayment(String paymentName,
                                     String paymentMethod,
