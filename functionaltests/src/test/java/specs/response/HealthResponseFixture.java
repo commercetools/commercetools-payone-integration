@@ -15,8 +15,11 @@ import org.junit.runner.RunWith;
 @RunWith(ConcordionRunner.class)
 public class HealthResponseFixture extends BasePaymentFixture {
 
-    public MultiValueResult handleHealthResponse() throws Exception {
+    public String getUrl() throws Exception {
+        return getHealthUrl();
+    }
 
+    public MultiValueResult handleHealthResponse() throws Exception {
         final HttpResponse httpResponse = Request.Get(getHealthUrl())
                 .connectTimeout(200)
                 .execute()
