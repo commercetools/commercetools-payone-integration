@@ -7,11 +7,7 @@ import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.google.common.collect.*;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
@@ -70,7 +66,7 @@ public abstract class BaseFixture {
     private static final String TEST_DATA_3_DS_PASSWORD = "TEST_DATA_3_DS_PASSWORD";
     private static final String TEST_DATA_SW_BANK_TRANSFER_IBAN = "TEST_DATA_SW_BANK_TRANSFER_IBAN";
     private static final String TEST_DATA_SW_BANK_TRANSFER_BIC = "TEST_DATA_SW_BANK_TRANSFER_BIC";
-    private static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 1500;
+    private static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 5000; // @akovalenko 14.10.16: extended from 1.5 sec to 5 sec
 
     private static final Random randomSource = new Random();
     private BlockingSphereClient ctpClient;
