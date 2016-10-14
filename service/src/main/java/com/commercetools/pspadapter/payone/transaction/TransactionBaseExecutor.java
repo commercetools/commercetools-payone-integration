@@ -11,17 +11,15 @@ import io.sphere.sdk.types.Type;
 
 import java.util.Map;
 
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
+
 /**
  * @author mht@dotsource.de
  * Common base class responsible for default paymentupdateactions
  */
 public abstract class TransactionBaseExecutor extends IdempotentTransactionExecutor{
 
-    public final static String STATUS = "status";
-    public final static String ERROR_CODE = "errorcode";
-    public final static String CUSTOMER_MESSAGE = "customermessage";
-    public final static String ERROR_MESSAGE = "errormessage";
-    public final static String ERROR = "ERROR";
+    public static final String ERROR = "ERROR";
 
     public TransactionBaseExecutor(LoadingCache<String, Type> typeCache) {
         super(typeCache);
@@ -71,8 +69,9 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
     }
 
     /**
-     * In case an error occurred on commercetools service side, but not in Payone, we simulate same response structure,
-     * as described in <a href="https://sphere.atlassian.net/wiki/display/CDL/Payone?preview=%2F87326868%2F106102867%2FPAYONE_Platform_Server_API_EN_v2.77.pdf">
+     * In case of communication errors with Payone payment URL/Server (timeout, authorisation, wrong server URL ...),
+     * we simulate same response structure, as described in
+     * <a href="https://sphere.atlassian.net/wiki/display/CDL/Payone?preview=%2F87326868%2F106102867%2FPAYONE_Platform_Server_API_EN_v2.77.pdf">
      *     TECHNICAL REFERENCE PAYONE Platform Channel Server API, Version 2.77</a>:<ul>
      *     <li><b>status</b>: ERROR</li>
      *     <li><b>errorcode</b>: {@link ResponseErrorCode#TRANSACTION_EXCEPTION}</li>
@@ -89,6 +88,6 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
                 STATUS, ResponseStatus.ERROR.getStateCode(),
                 ERROR_CODE, ResponseErrorCode.TRANSACTION_EXCEPTION.getErrorCode(),
                 ERROR_MESSAGE, "Integration Service Exception: " + exception.getMessage(),
-                CUSTOMER_MESSAGE, "An error occurred while processing this transaction"));
+                CUSTOMER_MESSAGE, "Error on payment transaction processing."));
     }
 }

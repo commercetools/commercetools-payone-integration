@@ -10,6 +10,7 @@ import io.sphere.sdk.payments.PaymentDraftBuilder;
 import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.concordion.api.FullOGNL;
+import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 
@@ -18,8 +19,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
 
 /**
  * Test Payone integration service sets "response" custom field for executed transactions as a valid JSON string
@@ -31,7 +33,7 @@ import java.util.concurrent.ExecutionException;
  */
 @RunWith(ConcordionRunner.class)
 @FullOGNL
-public class JsonResponseFixture extends BasePaymentFixture {
+public class CtpJsonResponseFixture extends BasePaymentFixture {
 
     public String createCardPayment(String paymentName,
                                     String paymentMethod,
@@ -83,8 +85,13 @@ public class JsonResponseFixture extends BasePaymentFixture {
      * @throws ExecutionException
      * @throws IOException
      */
-    public JsonNode handleErrorJsonResponse(final String paymentName) throws ExecutionException, IOException {
-        return handleJsonResponse(paymentName);
+    public MultiValueResult handleErrorJsonResponse(final String paymentName) throws ExecutionException, IOException {
+        JsonNode jsonNode = handleJsonResponse(paymentName);
+        return MultiValueResult.multiValueResult()
+                .with(STATUS, jsonNode.get(STATUS).textValue())
+                .with(ERROR_CODE, jsonNode.get(ERROR_CODE).textValue())
+                .with(ERROR_MESSAGE, jsonNode.get(ERROR_MESSAGE).textValue())
+                .with(CUSTOMER_MESSAGE, jsonNode.get(CUSTOMER_MESSAGE).textValue());
     }
 
     /**
@@ -95,18 +102,15 @@ public class JsonResponseFixture extends BasePaymentFixture {
      *     <li><i>redirectUrlAuthority</i>: expected partial URI (protocol + hostname)</li>
      *     <li><i>txidIsSet</i>: boolean value, <b>true</b> if <i>txid</i> exists and not empty in JSON response </li>
      * </ul>
-     * @throws ExecutionException
-     * @throws IOException
      */
-    public Map<String, Object> handleSuccessJsonResponse(final String paymentName) throws ExecutionException, IOException {
+    public MultiValueResult handleSuccessJsonResponse(final String paymentName) throws ExecutionException, IOException {
         JsonNode responseNode = handleJsonResponse(paymentName);
 
         URL redirectUrl = new URL(responseNode.get("redirecturl").asText());
 
-        return ImmutableMap.of(
-                "status", responseNode.get("status").asText(),
-                "redirectUrlAuthority", redirectUrl.getProtocol() + "://" + redirectUrl.getAuthority(),
-                "txidIsSet", !responseNode.get("txid").asText().isEmpty()
-        );
+        return MultiValueResult.multiValueResult()
+                .with(STATUS, responseNode.get(STATUS).asText())
+                .with("redirectUrlAuthority", redirectUrl.getProtocol() + "://" + redirectUrl.getAuthority())
+                .with("txidIsSet", !responseNode.get(TXID).asText().isEmpty());
     }
 }

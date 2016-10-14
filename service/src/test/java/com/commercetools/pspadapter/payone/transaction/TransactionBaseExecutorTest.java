@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
-import static com.commercetools.pspadapter.payone.transaction.TransactionBaseExecutor.*;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
