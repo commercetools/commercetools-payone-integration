@@ -69,6 +69,14 @@ public class IntegrationService {
                 final Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
                 notificationDispatcher.dispatchNotification(notification);
             } catch (Exception e) {
+                // Potential issues for this exception are:
+                // 1. req.body is mal-formed hence can't by parsed by Notification.fromKeyValueString
+                // 2. Invalid access secret values in the request (account id, key, portal id etc)
+                // 3. ConcurrentModificationException in case the respective payment could not be updated
+                //    after two attempts due to concurrent modifications; a later retry might be successful
+                // 4. Execution timeout, if sphere client has not responded in time
+                // 5. unknown notification type
+                // Any other unexpected error.
                 LOG.error("Payone notification handling error. Request body: " + req.body(), e);
                 res.status(400);
                 return e.getMessage();
