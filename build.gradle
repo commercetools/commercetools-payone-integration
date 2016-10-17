@@ -13,7 +13,7 @@ plugins {
 }
 
 def depVersions = [
-        commercetoolsSdkJvm: '1.3.0',
+        commercetoolsSdkJvm: '1.0.0-RC3',
         guava: '19.0',
         hamcrest: '1.3',
         jUnit: '4.12',
@@ -102,22 +102,32 @@ void assertExecutableSpecRequirements(Project project, Test test) {
     test.systemProperties['concordion.output.dir'] = project.reporting.baseDir.getAbsolutePath() + "/spec"
     test.systemProperties['concordion.run.threadCount'] = '2.5C' // 2.5 * number of cores
 
-    def propertiesToMap = ['CT_PROJECT_KEY',
-                           'CT_CLIENT_ID',
-                           'CT_CLIENT_SECRET',
-                           'CT_PAYONE_INTEGRATION_URL',
+    test.environment 'CT_PROJECT_KEY', project.hasProperty('CT_PROJECT_KEY') ? project.CT_PROJECT_KEY : System.getenv('CT_PROJECT_KEY')
+    assertValueIsNotNullOrEmpty('CT_PROJECT_KEY', test.getEnvironment())
 
-                           'TEST_DATA_VISA_CREDIT_CARD_NO_3DS',
-                           'TEST_DATA_VISA_CREDIT_CARD_3DS',
-                           'TEST_DATA_3_DS_PASSWORD',
-                           'TEST_DATA_SW_BANK_TRANSFER_IBAN',
-                           'TEST_DATA_SW_BANK_TRANSFER_BIC'
-    ]
+    test.environment 'CT_CLIENT_ID', project.hasProperty('CT_CLIENT_ID') ? project.CT_CLIENT_ID : System.getenv('CT_CLIENT_ID')
+    assertValueIsNotNullOrEmpty('CT_CLIENT_ID', test.getEnvironment())
 
-    propertiesToMap.each { propertyKey ->
-        test.environment propertyKey, project.hasProperty(propertyKey) ? project[propertyKey] : System.getenv(propertyKey)
-        assertValueIsNotNullOrEmpty(propertyKey, test.getEnvironment())
-    }
+    test.environment 'CT_CLIENT_SECRET', project.hasProperty('CT_CLIENT_SECRET') ? project.CT_CLIENT_SECRET : System.getenv('CT_CLIENT_SECRET')
+    assertValueIsNotNullOrEmpty('CT_CLIENT_SECRET', test.getEnvironment())
+
+    test.environment 'CT_PAYONE_INTEGRATION_URL', project.hasProperty('CT_PAYONE_INTEGRATION_URL') ? project.CT_PAYONE_INTEGRATION_URL : System.getenv('CT_PAYONE_INTEGRATION_URL')
+    assertValueIsNotNullOrEmpty('CT_PAYONE_INTEGRATION_URL', test.getEnvironment())
+
+    test.environment 'TEST_DATA_VISA_CREDIT_CARD_NO_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_NO_3DS') ? project.TEST_DATA_VISA_CREDIT_CARD_NO_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_NO_3DS')
+    assertValueIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_NO_3DS', test.getEnvironment())
+
+    test.environment 'TEST_DATA_VISA_CREDIT_CARD_3DS', project.hasProperty('TEST_DATA_VISA_CREDIT_CARD_3DS') ? project.TEST_DATA_VISA_CREDIT_CARD_3DS : System.getenv('TEST_DATA_VISA_CREDIT_CARD_3DS')
+    assertValueIsNotNullOrEmpty('TEST_DATA_VISA_CREDIT_CARD_3DS', test.getEnvironment())
+
+    test.environment 'TEST_DATA_3_DS_PASSWORD', project.hasProperty('TEST_DATA_3_DS_PASSWORD') ? project.TEST_DATA_3_DS_PASSWORD : System.getenv('TEST_DATA_3_DS_PASSWORD')
+    assertValueIsNotNullOrEmpty('TEST_DATA_3_DS_PASSWORD', test.getEnvironment())
+
+    test.environment 'TEST_DATA_SW_BANK_TRANSFER_IBAN', project.hasProperty('TEST_DATA_SW_BANK_TRANSFER_IBAN') ? project.TEST_DATA_SW_BANK_TRANSFER_IBAN : System.getenv('TEST_DATA_SW_BANK_TRANSFER_IBAN')
+    assertValueIsNotNullOrEmpty('TEST_DATA_SW_BANK_TRANSFER_IBAN', test.getEnvironment())
+
+    test.environment 'TEST_DATA_SW_BANK_TRANSFER_BIC', project.hasProperty('TEST_DATA_SW_BANK_TRANSFER_BIC') ? project.TEST_DATA_SW_BANK_TRANSFER_BIC : System.getenv('TEST_DATA_SW_BANK_TRANSFER_BIC')
+    assertValueIsNotNullOrEmpty('TEST_DATA_SW_BANK_TRANSFER_BIC', test.getEnvironment())
 }
 
 project(":functionaltests") {

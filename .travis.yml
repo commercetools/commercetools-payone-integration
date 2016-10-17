@@ -1,31 +1,35 @@
+# https://docs.travis-ci.com/user/languages/java
 language: java
+
 jdk:
   - oraclejdk8
+
 before_cache:
-  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+
 cache:
   directories:
-  - $HOME/.gradle/caches/
-  - $HOME/.gradle/wrapper/
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
 env:
   global:
-  - COMMIT=${TRAVIS_COMMIT::8}
-  - secure: rIp0p8uRrhIBlykY/f6BlI2BAGbecMkbaWXzI7NmNAM0C6IAXkCU1NS0ns5EB+rjGqifGNhwcYRoH/zEt7rEKqxb7EaLdgZIkD/T+B3VOcT3ZtcTOv73sSN7AMoKyEfoez+hBK1C+whz5AU18/MFdDe9nHLaN1h0Ho4ao/P7LrRXOxNDwGwkoQBrdpjcNtxS1w8sZR5Cpj0M0NEFmT2SjKhPBFOaTpedEODTVrYukM2mSxACOD9gw8zT7Mn/FU6z7nm0tVkUfxtZw6LZrmIMtLRMyy+SvpUTsbXWyp5fcnuTcUK7Tm8kTj6p3nenq3UZkhyYJjbqcJbQ5a0Rsqkb7o1aY7slLDvsy8JuFTUCBJX1esTBJP1GUaFOWDgWwwBTs2LCZP032dBSy6guO0J8YFxjtSlLcithn9E7y9dfbqsBLxOD0hh9TYd8Gy/SFSUEKQlDyxksT/XEyav90F4KaDMta5iUST27L9at5jxHJEPDt7mgF1lsLbYGd2+JO4GHqGqg3weQz27ahzIp6PSYgEZ+SASeDUCL6fxxx8k5PPhZB/AXPYTnb7mzpmNZDG2dd6fBJQBrqtgfus93CcrB8U3710j6tJ/PKICtljHeblNt29L++F/isShGsNY+ituyO8JCw0RR2P/R15T8wZdXWX4/TooNPYJzEEFUakel/C4=
+    secure: cZ0FItWJEGTacfRoYy+Rh9y0QYQEOY3praKn/yLFoj8UdIYBUIZQyK2mDNBOck9EGCK1qt4cTTYpPE28xrmaRdClNg0WHnMwX/8qcyHghaMxnN0YDxYmQLPbfd/fK/D1fmbdB/2PF3GfEUNLBaMjh5t674ocIfyEDFGJN5b8ADizbfgwbE7Xw2PmLjNl5sEh3g77c4P++DxTjSm06NpbBNahv+SE2gMfU80WBaEG8Yo5mFhuQqu5j+cb5EZXT9ndKRpB8hhXVghIRpEeuv0tSJKVvtv3/chsXMC00zAM41V0MXO9Rfjr4fIzJg7hK6Q+Jb/d5RZBJODqzhKlLQo9fw3f8RWteFMn9SvvrA7dfytacLsSCFJU/+mg7Z1WV6rywa119nusQV7Y07KY9z6Z4jUBgYwjPVkESMDH2OOegqbUgQQMCrxZggVqEH1DecwZrgAMxL66XUVb/2pzcqen93Ti3IzhFPTHKtkvnF/OQ0sLxme5xu7yYSH7hFPYG75CGG4HRknr9HuMhE/A5Esgf+prYSiAix6NFmSPczKGMBxG3Mh3sJHl7DvMaDfCbArZUWC3Id6wy5A40dBdDZ9p7q7cLz2yduPrfzggKeX7g/WzpHr+7H9CrGcDfE/JeN+rio2BSzzrft6oqBBDxyedznW05dxSbFKxYv+VqSU/Yco=
+
+# skip the default install step which would call ./gradlew assemble
 install: /bin/true
+
 script:
   - ./gradlew clean ciBuild
+
 deploy:
   provider: heroku
   api_key:
-    secure: UMAIfJ95lRYBGDkIKmuT09MPtmlw3+nzt7rX9kUT23dlf6GpGqaTy2OvVnYehQVqt32U5+IdrRgSD/swiahUcVW/njWoUmITlAbgoJ40zv2ipwIjkzEAiowIpNJYGpRSXrOedk2zbWJQuo54W6x4IT/NG5k2Qz6EunWhszKiNRIWkMFsZcKNLKgg7CY6Fm0GU5CulDNbHmzIuL7CDXcSZb7iGcx8Q73kkS7wRBL2aNDMpxG2Zj9veJWxA18LPD4Tf95owRW95rV2w3OheyB4K1ZpJsl4TmTlRzICngs9QcFRPgcY865RxLvCo9gWn3UwQymEDealgAHBVFGgK5/SsZcziss7U2rw+kHA1MawOZkVXvi9LuG19VuFlltCqz7I0G4qmKffIJprJR3KVTUz9TIJk8ckv+kfSYVbtGcigUDP+RpX7ULyonQhjjHW51xEqtOvuihOodckzlzy6H13n8oRltEZelb4A+rGuNyPXWUMqYkdnl/dvvYdWelFZiNEHLFjWqUz8C5NelzWhHyTqdTE0XPfT478h+i/aw+bjLuA35sv0YDROF922DXrXJmr7veiAxbjevQHyPQjbMymzgESW65q3yyCWWZzt/3RsfD33ghWW/CPv7poGhOW09aa92lHhoAmc44meiNfkO5WJTo6G8Mo7VfWdXDwpLjJnUM=
-  app: ct-payone-integration-staging
+    secure: Nr8wB7M7gGyVis86Lt5yrBRYg1U+hv4x4kP5yGG46G957ewU63qWto9//AOSiAtsJ6PKb6Ydvsqg6V1KZa1RDX37Wo9Ljm+G6DedHqZFbWHtiKgeaYqmVFiYoLmatmAysK0eTRclP91x8FnohdWXM53OHi+SMBrhCFmSlpxTuD1DQK8ChvzmlYcWIgNf6RU5CCDYB8EdsXBJjBAid+p7+meCs75Z+Odz3+fzI1SKUBgjzPbCi5wOF28sQ+lNPgcZBBj1zRucWkQMecS0gTaCWX2+kSGdawBjsOVZF8GyCiscFPQqym/LbUUXxJ7FEDXHYbGXN2RGXF/9R0sLm4RrlyoM4ki75/IDNRJxU67Vc47DYuqzu5HN6ftk9gi+2cfQbnV7Iy3JkndJpP5XwbJ5UOuL/w7xsDzTge2Ac30c7rjO2NFATGY4jk231BjbF5b50T1Q66xt/74aIoWAECVGsBKQ7hiYx+yYPt8AbhMJucrtc+h+nt4SEKNH3mBTOHvFyG+daUIo3i7CcFnTDAcQgmVrFLUdBGZq+CGHiYqjKQ1AYrVXEcfMdK2xybHEOVRa9wWVkLnUVtqQljSBweSZCdopg96FntQtYP3DUIeDDm6NAbRutkyG2ehL7C+TmkbY/HHfx0lBOTMKSqLIz4nrSUXXjU0+zldrGVVmaYRBEPY=
+  app: ct-p1-integration-staging
   on:
     repo: commercetools/commercetools-payone-integration
     branch: master
+
 after_deploy:
-  - eval "$(ssh-agent -s)" #start the ssh agent
-  - chmod 600 .travis/deploy_key.pem # this key should have push access
-  - ssh-add .travis/deploy_key.pem
-  - ./gradlew --continue --info :functionaltests:cleanTest publishGhPages || travis_terminate 1
-  - ./travis-build.sh || travis_terminate 1
+  - ./gradlew --continue -i :functionaltests:cleanTest :functionaltests:testSpec publishGhPages || travis_terminate 1
