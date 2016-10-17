@@ -1,6 +1,6 @@
 language: java
 jdk:
-- oraclejdk8
+  - oraclejdk8
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -13,7 +13,7 @@ env:
   - COMMIT=${TRAVIS_COMMIT::8}
 install: /bin/true
 script:
-- ./gradlew clean ciBuild
+  - ./gradlew clean ciBuild
 deploy:
   provider: heroku
   api_key:
@@ -23,5 +23,6 @@ deploy:
     repo: commercetools/commercetools-payone-integration
     branch: master
 after_deploy:
-- ./gradlew --continue --info :functionaltests:cleanTest :functionaltests:testSpec publishGhPages || travis_terminate 1
-- ./travis-build.sh || travis_terminate 1
+  - eval "$(ssh-agent -s)" #start the ssh agent
+  - ./gradlew --continue --info :functionaltests:cleanTest publishGhPages || travis_terminate 1
+  - ./travis-build.sh || travis_terminate 1
