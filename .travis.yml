@@ -1,6 +1,8 @@
 language: java
 jdk:
-- oraclejdk8
+  - oraclejdk8
+services:
+  - docker
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -23,5 +25,5 @@ deploy:
     repo: commercetools/commercetools-payone-integration
     branch: master
 after_deploy:
-- ./gradlew --continue --debug :functionaltests:cleanTest :functionaltests:testSpec publishGhPages || travis_terminate 1
+- ./gradlew --continue --info :functionaltests:cleanTest :functionaltests:testSpec publishGhPages || travis_terminate 1
 - ./travis-build.sh || travis_terminate 1
