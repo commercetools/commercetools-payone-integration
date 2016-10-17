@@ -11,7 +11,6 @@ cache:
 env:
   global:
   - COMMIT=${TRAVIS_COMMIT::8}
-  - secure: Iqza2lZc3+HtnWVCpK+PwtPGRfUdaOa2P54+3eb06jwtCMwm4cwKPrl9NbL9upgkv1upotlwlKNRUWE1qds8q8AEuNM33ELuDoWJfcjWDvn0Bo2mSgfs2U494hlBKMO+2W9nHMtfagnJpo720pNqtO/mt4+guwsxJRefzWSjCNL4Uxmnq6lrE2FK9JJ+tVZlPVCdFlftaSJS03VgFjdcKKqAhzvQvpW9McuhOykyVYY6ysvK7n6gLmXDA6jTOUqWrsX1AOXFilJhxLm8XqxS6/Qb46TthZjPI6qK7133Arsa9VrWCo0+CnJvFy5eh/mLLRKCk2k9Cu51codDxADVYiMyksEMYpFVImfI1TQfDJLMmu8KkXT5n2vRtCNFdEJKnC6XlZ2h9vB7ZIRh2pG3OG8laIYdrTyN7fcw+5n+US2A/jnX61+hMej67h+ovh/qOrbB1wkI8ZxkpmZcp2oi9CGGSrTLlujpvWW7BsSw5YszhmJ5a5gFBbqJeyDe2oRjPjj6XYNXng0y75eBPB5OH560p8CTysgiRdN0ioI46QgOIAQ0bR8+y5+cOTgZyosPKxpjfkeOWp6hCVPja4Njql8jgv4afg/d6PdTbEbxfQKUpaOsWfVhY+3DjhnpSzMPAzq7ypQNPNpPWbH90FEyuzpjrynUf4HI9aiYxUgx+Og=
 install: /bin/true
 script:
 - ./gradlew clean ciBuild
@@ -24,5 +23,5 @@ deploy:
     repo: commercetools/commercetools-payone-integration
     branch: master
 after_deploy:
-- ./gradlew --continue --info :functionaltests:cleanTest      publishGhPages || travis_terminate 1
+- ./gradlew --continue --info :functionaltests:cleanTest :functionaltests:testSpec publishGhPages || travis_terminate 1
 - ./travis-build.sh || travis_terminate 1
