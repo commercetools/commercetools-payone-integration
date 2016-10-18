@@ -14,8 +14,8 @@ It is a standalone Microservice that connects the two cloud platforms and provid
 - [Documentation](#documentation)
 - [Related Documentation](#related-documentation)
 - [Docker images](#docker-images)
-- [Tags](#tags)
-- [Release Tag](#release-tag)
+  - [Tags](#tags)
+  - [Release Tag](#release-tag)
 - [Using the Integration in a project](#using-the-integration-in-a-project)
   - [Required Configuration in the commercetools project](#required-configuration-in-the-commercetools-project)
     - [Domain Constraints](#domain-constraints)
@@ -56,7 +56,7 @@ They are automatically generated, updated and published to the `gh_pages` branch
 
 On each push to the remote github repository, a Docker image is build by travis CI.
 
-## Tags
+### Tags
 
 Every image has the following tags:
 - short git commit SHA (first 8 chars), e.g. `11be0178`
@@ -65,7 +65,7 @@ Every image has the following tags:
 
 https://hub.docker.com/r/sphereio/commercetools-payone-integration/tags/
 
-## Release Tag
+### Release Tag
 
 To create a release tag for a Docker image, a new git commit tag has to be created manually.
 
