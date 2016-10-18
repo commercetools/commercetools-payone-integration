@@ -60,13 +60,13 @@ public abstract class BaseFixture {
     protected static final String EMPTY_STRING = "";
     protected static final String NULL_STRING = "null";
     protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(8);
+    protected static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 5000; // @akovalenko 14.10.16: extended from 1.5 sec to 5 sec
 
     private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
     private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_3DS";
     private static final String TEST_DATA_3_DS_PASSWORD = "TEST_DATA_3_DS_PASSWORD";
     private static final String TEST_DATA_SW_BANK_TRANSFER_IBAN = "TEST_DATA_SW_BANK_TRANSFER_IBAN";
     private static final String TEST_DATA_SW_BANK_TRANSFER_BIC = "TEST_DATA_SW_BANK_TRANSFER_BIC";
-    private static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 5000; // @akovalenko 14.10.16: extended from 1.5 sec to 5 sec
 
     private static final Random randomSource = new Random();
     private BlockingSphereClient ctpClient;

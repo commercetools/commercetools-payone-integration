@@ -16,7 +16,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
-import spark.Route;
 import spark.Spark;
 
 import javax.annotation.Nonnull;
@@ -90,13 +89,11 @@ public class IntegrationService {
         // It should be expanded to a more real health-checker service, which really performs PAYONE status check.
         // But don't forget, a load balancer may call this URL very often (like 1 per sec),
         // so don't make this request processor heavy, or implement is as independent background service.
-        Route healthRoute = (req, res) -> {
+        Spark.get("/health", (req, res) -> {
             res.status(HttpStatusCode.OK_200);
             res.type(ContentType.APPLICATION_JSON.getMimeType());
             return ImmutableMap.of("status", HttpStatus.OK_200);
-        };
-
-        Spark.get("/health", healthRoute, SphereJsonUtils::toJsonString);
+        }, SphereJsonUtils::toJsonString);
 
         Spark.awaitInitialization();
     }
