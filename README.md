@@ -47,7 +47,28 @@ They are automatically generated, updated and published to the `gh_pages` branch
  * commercetools API documentation at http://dev.commercetools.com
  * commercetools JVM SDK Javadoc at http://sphereio.github.io/sphere-jvm-sdk/javadoc/master/index.html
  * commercetools general payment conventions, esp. for the payment type modeling https://github.com/nkuehn/payment-specs
- * PAYONE API documentation https://pmi.pay1.de/merchants/?navi=downloads 
+ * PAYONE API documentation https://pmi.pay1.de/merchants/?navi=downloads
+
+## Docker images
+
+On each push to the remote github repository, a Docker image is build by travis CI.
+
+## Tags
+
+Every image has the following tags:
+- short git commit SHA (first 8 chars), e.g. `11be0178`
+- tag containing the travis build number, e.g. `travis-17`
+- `latest` (if `master` branch) or `branch-name` (if not `master` branch)
+
+## Release Tag
+
+To create a release tag for a Docker image, a new git commit tag has to be created manually.
+
+This will trigger a new Docker build by travis CI, as described before, but will create an additional Docker tag using the value of the git tag. The git release tag can be created via command line or github UI ("Draft new Release" https://github.com/commercetools/commercetools-payone-integration/releases)
+
+```bash
+git tag -a v1.0.1 -m "Minor text adjustments."
+```
  
 ## Using the Integration in a project
 
@@ -151,7 +172,7 @@ Run the JAR for debug (port `1044` is variable):
     java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
     ```
 
-### Deploy and Run
+### Run
 ```
 docker run \
 -e CT_CLIENT_ID=xxx \
