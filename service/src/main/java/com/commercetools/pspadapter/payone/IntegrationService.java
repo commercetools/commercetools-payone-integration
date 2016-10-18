@@ -97,7 +97,6 @@ public class IntegrationService {
         };
 
         Spark.get("/health", healthRoute, SphereJsonUtils::toJsonString);
-        Spark.get("/health/", healthRoute, SphereJsonUtils::toJsonString);
 
         Spark.awaitInitialization();
     }
