@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link href="../../concordion.css" rel="stylesheet" type="text/css"/>
+    <title>Response from /health URL</title>
+</head>
+<body onload="document.getElementById('urlAnchor').href=document.getElementById('urlSpan').innerText">
+<h1>Response from <code>/health</code> URL</h1>
+Test we get correct response status, mime-type and message from
+<a id="urlAnchor" target="_blank"><b><span c:echo="getUrl()" id="urlSpan"></span></b></a> URL.
+<div class="example">
+    <table c:execute="#result = handleHealthResponse()">
+        <tr>
+            <th c:assertEquals="#result.statusCode">Status Code</th>
+            <th c:assertEquals="#result.mimeType">Mime Type</th>
+            <th c:assertEquals="#result.bodyStatus">Body status({&quot;status&quot;:200})</th>
+        </tr>
+        <tr>
+            <td>200</td>
+            <td>application/json</td>
+            <td>200</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

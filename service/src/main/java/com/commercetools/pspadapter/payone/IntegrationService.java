@@ -7,10 +7,15 @@ import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFound
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
+import io.sphere.sdk.client.ErrorResponseException;
 import io.sphere.sdk.client.NotFoundException;
 import io.sphere.sdk.http.HttpStatusCode;
+import io.sphere.sdk.json.SphereJsonUtils;
+import org.apache.http.entity.ContentType;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.http.HttpStatus;
 import spark.Spark;
 
 import javax.annotation.Nonnull;
@@ -59,17 +64,36 @@ public class IntegrationService {
 
         Spark.post("/payone/notification", (req, res) -> {
             LOG.debug("<- Received POST from Payone: " + req.body());
-            final Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
-
             try {
+                final Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
                 notificationDispatcher.dispatchNotification(notification);
-            } catch (RuntimeException ex) {
+            } catch (Exception e) {
+                // Potential issues for this exception are:
+                // 1. req.body is mal-formed hence can't by parsed by Notification.fromKeyValueString
+                // 2. Invalid access secret values in the request (account id, key, portal id etc)
+                // 3. ConcurrentModificationException in case the respective payment could not be updated
+                //    after two attempts due to concurrent modifications; a later retry might be successful
+                // 4. Execution timeout, if sphere client has not responded in time
+                // 5. unknown notification type
+                // Any other unexpected error.
+                LOG.error("Payone notification handling error. Request body: " + req.body(), e);
                 res.status(400);
-                return ex.getMessage();
+                return e.getMessage();
             }
             res.status(200);
             return "TSOK";
         });
+
+        // This is a temporary jerry-rig for the load balancer to check connection with the service itself.
+        // For now it just returns a JSON response {"status":200}
+        // It should be expanded to a more real health-checker service, which really performs PAYONE status check.
+        // But don't forget, a load balancer may call this URL very often (like 1 per sec),
+        // so don't make this request processor heavy, or implement is as independent background service.
+        Spark.get("/health", (req, res) -> {
+            res.status(HttpStatusCode.OK_200);
+            res.type(ContentType.APPLICATION_JSON.getMimeType());
+            return ImmutableMap.of("status", HttpStatus.OK_200);
+        }, SphereJsonUtils::toJsonString);
 
         Spark.awaitInitialization();
     }
@@ -86,8 +110,7 @@ public class IntegrationService {
             for (int i = 0; i < 20; i++) {
                 try {
                     final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
-                    if (!"PAYONE".equals(payment.getPayment().getPaymentMethodInfo().getPaymentInterface()))
-                    {
+                    if (!"PAYONE".equals(payment.getPayment().getPaymentMethodInfo().getPaymentInterface())) {
                         return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
                     }
 
@@ -106,8 +129,11 @@ public class IntegrationService {
             String.format("Could not process payment with ID \"%s\", cause: %s", paymentId, e.getMessage());
 
             return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
+        } catch (final ErrorResponseException e) {
+            LOG.debug("An Error Response from commercetools platform", e);
+            return new PaymentHandleResult(e.getStatusCode(), e.getMessage());
         } catch (final CompletionException e) {
-            return logCauseMessageInResponse("An error occured during communication with the commercetools platform: " + e.getMessage());
+            return logCauseMessageInResponse("An error occurred during communication with the commercetools platform: " + e.getMessage());
         } catch (final RuntimeException e) {
             // TODO clarify if we should use localized message
             return logThrowableInResponse(e);
