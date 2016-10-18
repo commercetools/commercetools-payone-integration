@@ -13,6 +13,9 @@ It is a standalone Microservice that connects the two cloud platforms and provid
 
 - [Documentation](#documentation)
 - [Related Documentation](#related-documentation)
+- [Docker images](#docker-images)
+- [Tags](#tags)
+- [Release Tag](#release-tag)
 - [Using the Integration in a project](#using-the-integration-in-a-project)
   - [Required Configuration in the commercetools project](#required-configuration-in-the-commercetools-project)
     - [Domain Constraints](#domain-constraints)
@@ -22,7 +25,7 @@ It is a standalone Microservice that connects the two cloud platforms and provid
       - [PAYONE API client credentials](#payone-api-client-credentials)
       - [Service configuration parameters](#service-configuration-parameters)
   - [Build](#build)
-  - [Deploy and Run](#deploy-and-run)
+  - [Run](#run)
 - [Test environments](#test-environments)
   - [Development workflow](#development-workflow)
   - [Functional Tests](#functional-tests)
