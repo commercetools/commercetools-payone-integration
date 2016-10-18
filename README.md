@@ -60,6 +60,8 @@ Every image has the following tags:
 - tag containing the travis build number, e.g. `travis-17`
 - `latest` (if `master` branch) or `branch-name` (if not `master` branch)
 
+https://hub.docker.com/r/sphereio/commercetools-payone-integration/tags/
+
 ## Release Tag
 
 To create a release tag for a Docker image, a new git commit tag has to be created manually.
