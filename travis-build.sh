@@ -3,7 +3,7 @@
 set -e
 
 export REPO="sphereio/commercetools-payone-integration"
-export TAG=`if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "latest"; else echo ${TRAVIS_BRANCH/\//-} ; fi`
+export DOCKER_TAG=`if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "latest"; else echo ${TRAVIS_BRANCH/\//-} ; fi`
 
 echo "Building service jar file including all dependencies."
 ./gradlew stage
@@ -13,8 +13,8 @@ docker build -t "${REPO}:${COMMIT}" .
 
 docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}"
 
-echo "Adding additional tag '${REPO}:${TAG}' to already built Docker image '${REPO}:${COMMIT}'."
-docker tag $REPO:$COMMIT $REPO:$TAG
+echo "Adding additional tag '${REPO}:${DOCKER_TAG}' to already built Docker image '${REPO}:${COMMIT}'."
+docker tag $REPO:$COMMIT $REPO:$DOCKER_TAG
 echo "Adding additional tag '${REPO}:travis-${TRAVIS_BUILD_NUMBER}' to already built Docker image '${REPO}:${COMMIT}'."
 docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
 if [ "$TRAVIS_TAG" ]; then
