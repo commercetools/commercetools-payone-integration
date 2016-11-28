@@ -11,6 +11,7 @@ import java.util.Optional;
 public class PropertyProvider {
 
     public static final String PAYONE_API_VERSION = "PAYONE_API_VERSION";
+    public static final String PAYONE_REQUEST_ENCODING = "PAYONE_REQUEST_ENCODING";
 
     public static final String PAYONE_SOLUTION_NAME = "PAYONE_SOLUTION_NAME";
     public static final String PAYONE_SOLUTION_VERSION = "PAYONE_SOLUTION_VERSION";
@@ -38,6 +39,7 @@ public class PropertyProvider {
     public PropertyProvider() {
         internalProperties = ImmutableMap.<String, String>builder()
             .put(PAYONE_API_VERSION, "3.9")
+            .put(PAYONE_REQUEST_ENCODING, "UTF-8")
             .put(PAYONE_SOLUTION_NAME, "commercetools-platform")
             .put(PAYONE_SOLUTION_VERSION, "1")
             .put(PAYONE_INTEGRATOR_NAME, "commercetools-payone-integration")

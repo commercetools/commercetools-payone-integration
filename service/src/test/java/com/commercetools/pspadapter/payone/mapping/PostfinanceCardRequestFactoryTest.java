@@ -64,6 +64,7 @@ public class PostfinanceCardRequestFactoryTest {
         softly.assertThat(result.getKey()).isEqualTo(payoneConfig.getKeyAsMd5Hash());
         softly.assertThat(result.getMode()).isEqualTo(payoneConfig.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(payoneConfig.getApiVersion());
+        softly.assertThat(result.getEncoding()).isEqualTo(payoneConfig.getEncoding());
         softly.assertThat(result.getSolutionName()).isEqualTo(payoneConfig.getSolutionName());
         softly.assertThat(result.getSolutionVersion()).isEqualTo(payoneConfig.getSolutionVersion());
         softly.assertThat(result.getIntegratorName()).isEqualTo(payoneConfig.getIntegratorName());

@@ -71,6 +71,7 @@ public class PaypalRequestFactoryTest {
         softly.assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
         softly.assertThat(result.getMode()).isEqualTo(config.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
+        softly.assertThat(result.getEncoding()).isEqualTo(config.getEncoding());
         softly.assertThat(result.getSolutionName()).isEqualTo(config.getSolutionName());
         softly.assertThat(result.getSolutionVersion()).isEqualTo(config.getSolutionVersion());
         softly.assertThat(result.getIntegratorName()).isEqualTo(config.getIntegratorName());
@@ -147,6 +148,7 @@ public class PaypalRequestFactoryTest {
         softly.assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
         softly.assertThat(result.getMode()).isEqualTo(config.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
+        softly.assertThat(result.getEncoding()).isEqualTo(config.getEncoding());
         softly.assertThat(result.getSolutionName()).isEqualTo(config.getSolutionName());
         softly.assertThat(result.getSolutionVersion()).isEqualTo(config.getSolutionVersion());
         softly.assertThat(result.getIntegratorName()).isEqualTo(config.getIntegratorName());

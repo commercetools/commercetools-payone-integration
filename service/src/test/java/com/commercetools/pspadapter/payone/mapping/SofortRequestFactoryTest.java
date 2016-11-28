@@ -63,6 +63,7 @@ public class SofortRequestFactoryTest {
         softly.assertThat(result.getRequest()).isEqualTo(RequestType.AUTHORIZATION.getType());
         softly.assertThat(result.getAid()).isEqualTo(payoneConfig.getSubAccountId());
         softly.assertThat(result.getMid()).isEqualTo(payoneConfig.getMerchantId());
+        softly.assertThat(result.getEncoding()).isEqualTo(payoneConfig.getEncoding());
         softly.assertThat(result.getPortalid()).isEqualTo(payoneConfig.getPortalId());
         softly.assertThat(result.getKey()).isEqualTo(payoneConfig.getKeyAsMd5Hash());
         softly.assertThat(result.getMode()).isEqualTo(payoneConfig.getMode());
@@ -155,6 +156,7 @@ public class SofortRequestFactoryTest {
         softly.assertThat(result.getKey()).isEqualTo(payoneConfig.getKeyAsMd5Hash());
         softly.assertThat(result.getMode()).isEqualTo(payoneConfig.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(payoneConfig.getApiVersion());
+        softly.assertThat(result.getEncoding()).isEqualTo(payoneConfig.getEncoding());
         softly.assertThat(result.getSolutionName()).isEqualTo(payoneConfig.getSolutionName());
         softly.assertThat(result.getSolutionVersion()).isEqualTo(payoneConfig.getSolutionVersion());
         softly.assertThat(result.getIntegratorName()).isEqualTo(payoneConfig.getIntegratorName());
