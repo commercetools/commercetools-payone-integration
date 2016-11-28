@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class BaseRequest implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     /**
      * ID of the merchant
@@ -43,6 +43,12 @@ public class BaseRequest implements Serializable {
      */
     @JsonProperty("api_version")
     private String apiVersion;
+
+    /**
+     * {@code ISO 8859-1} or {@code UTF-8}. Default for our implementation is {@code UTF-8},
+     * default for Payone is {@code ISO 8859-1}.
+     */
+    private String encoding;
 
     /**
      * Payone api version
@@ -94,6 +100,7 @@ public class BaseRequest implements Serializable {
         this.mode = config.getMode();
         this.portalid = config.getPortalId();
         this.apiVersion = config.getApiVersion();
+        this.encoding = config.getEncoding();
         this.request = requestType;
         this.solutionName = config.getSolutionName();
         this.solutionVersion = config.getSolutionVersion();
@@ -127,6 +134,10 @@ public class BaseRequest implements Serializable {
 
     public String getApiVersion() {
         return apiVersion;
+    }
+
+    public String getEncoding() {
+        return encoding;
     }
 
     public String getSolutionName() {
