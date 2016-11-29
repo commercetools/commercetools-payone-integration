@@ -69,7 +69,11 @@ https://hub.docker.com/r/sphereio/commercetools-payone-integration/tags/
 
 To create a release tag for a Docker image, a new git commit tag has to be created manually.
 
-This will trigger a new Docker build by travis CI, as described before, but will create an additional Docker tag using the value of the git tag. The git release tag can be created via command line or github UI ("Draft new Release" https://github.com/commercetools/commercetools-payone-integration/releases)
+This will trigger a new Docker build by travis CI and will create two additional Docker tags:
+- git tag value, e.g. `v1.0.1`
+- `production`
+
+The git release tag can be created via command line or github UI ("Draft new Release" https://github.com/commercetools/commercetools-payone-integration/releases)
 
 ```bash
 git tag -a v1.0.1 -m "Minor text adjustments."

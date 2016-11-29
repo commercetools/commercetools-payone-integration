@@ -20,6 +20,8 @@ docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
 if [ "$TRAVIS_TAG" ]; then
   echo "Adding additional tag '${REPO}:${TRAVIS_TAG}' to already built Docker image '${REPO}:${COMMIT}'."
   docker tag $REPO:$COMMIT $REPO:${TRAVIS_TAG};
+  echo "Adding additional tag '${REPO}:production' to already built Docker image '${REPO}:${COMMIT}'."
+  docker tag $REPO:$COMMIT $REPO:production;
 fi
 echo "Pushing Docker images to repository '${REPO}' (all local tags are pushed)."
 docker push $REPO
