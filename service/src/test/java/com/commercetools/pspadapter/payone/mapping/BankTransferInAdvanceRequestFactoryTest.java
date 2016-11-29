@@ -27,7 +27,7 @@ import java.util.Optional;
 
 /**
  * @author mht@dotsource.de
- * 
+ *
  */
 @RunWith(MockitoJUnitRunner.class)
 public class BankTransferInAdvanceRequestFactoryTest {
@@ -65,6 +65,7 @@ public class BankTransferInAdvanceRequestFactoryTest {
         softly.assertThat(result.getKey()).isEqualTo(payoneConfig.getKeyAsMd5Hash());
         softly.assertThat(result.getMode()).isEqualTo(payoneConfig.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(payoneConfig.getApiVersion());
+        softly.assertThat(result.getEncoding()).isEqualTo(payoneConfig.getEncoding());
         softly.assertThat(result.getSolutionName()).isEqualTo(payoneConfig.getSolutionName());
         softly.assertThat(result.getSolutionVersion()).isEqualTo(payoneConfig.getSolutionVersion());
         softly.assertThat(result.getIntegratorName()).isEqualTo(payoneConfig.getIntegratorName());
@@ -72,7 +73,7 @@ public class BankTransferInAdvanceRequestFactoryTest {
 
         //clearing type
         ClearingType clearingType = ClearingType.getClearingTypeByKey("BANK_TRANSFER-ADVANCE");
-        
+
         softly.assertThat(result.getClearingtype()).isEqualTo(clearingType.getPayoneCode());
 
 

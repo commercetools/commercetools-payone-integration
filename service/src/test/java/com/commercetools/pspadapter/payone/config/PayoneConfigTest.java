@@ -1,10 +1,5 @@
 package com.commercetools.pspadapter.payone.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.ThrowableAssert.catchThrowable;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import org.junit.Before;
@@ -14,6 +9,11 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.ThrowableAssert.catchThrowable;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 /**
  * @author fhaertig
@@ -101,6 +101,19 @@ public class PayoneConfigTest {
     @Test
     public void throwsInCaseOfMissingApiVersion() {
         assertThatThrowsInCaseOfMissingOrEmptyProperty(PropertyProvider.PAYONE_API_VERSION);
+    }
+
+    @Test
+    public void getsEncoding() {
+        when(propertyProvider.getProperty(PropertyProvider.PAYONE_REQUEST_ENCODING)).thenReturn(Optional.of("ISO 8859-1"));
+        assertThat(new PayoneConfig(propertyProvider).getEncoding()).isEqualTo("ISO 8859-1");
+    }
+
+    @Test
+    public void defaultsToTestInCaseOfMissingEncoding() {
+        when(propertyProvider.getProperty(PropertyProvider.PAYONE_REQUEST_ENCODING)).thenReturn(Optional.empty());
+        assertThat(new PayoneConfig(propertyProvider).getEncoding()).isEqualTo(PayoneConfig.DEFAULT_PAYONE_REQUEST_ENCODING);
+        assertThat(PayoneConfig.DEFAULT_PAYONE_REQUEST_ENCODING).isEqualTo("UTF-8");
     }
 
     @Test

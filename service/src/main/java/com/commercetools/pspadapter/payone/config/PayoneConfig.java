@@ -11,6 +11,7 @@ public class PayoneConfig {
 
     public static final String DEFAULT_PAYONE_API_URL = "https://api.pay1.de/post-gateway/";
     public static final String DEFAULT_PAYONE_MODE = "test";
+    public static final String DEFAULT_PAYONE_REQUEST_ENCODING = "UTF-8";
 
     //assure that properties don't change once service started
     private final String subAccountId;
@@ -20,6 +21,7 @@ public class PayoneConfig {
     private final String mode;
     private final String apiUrl;
     private final String apiVersion;
+    private final String encoding;
     private final String solutionName;
     private final String solutionVersion;
     private final String integratorName;
@@ -33,6 +35,7 @@ public class PayoneConfig {
         mode = propertyProvider.getProperty(PropertyProvider.PAYONE_MODE).orElse(DEFAULT_PAYONE_MODE);
         apiUrl = propertyProvider.getProperty(PropertyProvider.PAYONE_API_URL).orElse(DEFAULT_PAYONE_API_URL);
         apiVersion = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_API_VERSION);
+        encoding = propertyProvider.getProperty(PropertyProvider.PAYONE_REQUEST_ENCODING).orElse(DEFAULT_PAYONE_REQUEST_ENCODING);
         final String plainKey = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_KEY);
         keyAsMd5Hash = Hashing.md5().hashString(plainKey, Charsets.UTF_8).toString();
         solutionName = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SOLUTION_NAME);
@@ -66,6 +69,8 @@ public class PayoneConfig {
     }
 
     public String getApiVersion() { return apiVersion; }
+
+    public String getEncoding() { return encoding; }
 
     public String getSolutionName() { return solutionName; }
 
