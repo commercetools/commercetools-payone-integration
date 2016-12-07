@@ -3,7 +3,9 @@
 set -e
 
 export REPO="sphereio/commercetools-payone-integration"
-export DOCKER_TAG=`if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "latest"; else echo ${TRAVIS_BRANCH//\//-} ; fi`
+export DOCKER_TAG=`if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "latest"; else echo ${TRAVIS_BRANCH} | sed -e 's/#//g' -e 's/\\/-/g' ; fi`
+# where sed -e 's/#//g' -e 's/\\/-/g' is: remove [ # ] and replace [ \ -> - ] in the branch name
+
 
 echo "Building service jar file including all dependencies."
 ./gradlew stage
