@@ -30,7 +30,7 @@ import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.DefaultChargeTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.UnsupportedTransactionExecutor;
-import com.commercetools.pspadapter.payone.transaction.creditcard.AuthorizationTransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.AuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.paymentinadvance.BankTransferInAdvanceChargeTransactionExecutor;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
@@ -218,11 +218,9 @@ public class ServiceFactory {
             final PayonePostService postService,
             final PaymentMethod paymentMethod) {
 
-        switch(transactionType) {
+        switch (transactionType) {
             case AUTHORIZATION:
                 return new AuthorizationTransactionExecutor(typeCache, requestFactory, postService, client);
-            case CANCEL_AUTHORIZATION:
-                break;
             case CHARGE:
                 switch (paymentMethod) {
                     case BANK_TRANSFER_ADVANCE:
@@ -230,6 +228,8 @@ public class ServiceFactory {
                     default:
                         return new DefaultChargeTransactionExecutor(typeCache, requestFactory, postService, client);
                 }
+            case CANCEL_AUTHORIZATION:
+                break;
             case REFUND:
                 break;
             case CHARGEBACK:
