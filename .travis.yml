@@ -15,7 +15,7 @@ env:
   - COMMIT=${TRAVIS_COMMIT::8}
 install: /bin/true
 script:
-- ./gradlew clean ciBuild
+  - ./gradlew clean ciBuild
 deploy:
   provider: heroku
   api_key:
@@ -25,5 +25,5 @@ deploy:
     repo: commercetools/commercetools-payone-integration
     all_branches: true
 after_deploy:
-- ./gradlew --continue --info :functionaltests:cleanTest :functionaltests:testSpec publishGhPages || travis_terminate 1
-- ./travis-build.sh || travis_terminate 1
+  - ./gradlew --continue --info :functionaltests:cleanTest :functionaltests:testSpec publishGhPages || travis_terminate 1
+  - ./travis-build.sh || travis_terminate 1
