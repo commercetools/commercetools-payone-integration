@@ -2,6 +2,8 @@
 
 set -e
 
+export PRODUCTION_TAG="production"
+
 export DOCKER_TAG=`if [[ "$TRAVIS_BRANCH" = "master" && "$TRAVIS_PULL_REQUEST" = "false" ]] || [[ "$TRAVIS_TAG" ]] ; \
   then echo "latest" ; \
   else echo "wip-${TRAVIS_BRANCH}" | sed -e 's/#//g' -e 's/\\\\/-/g' ; fi`
