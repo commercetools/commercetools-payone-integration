@@ -230,7 +230,13 @@ Name | Content
 `TEST_DATA_SW_BANK_TRANSFER_IBAN` | the IBAN of a test bank account supporting Sofortueberweisung
 `TEST_DATA_SW_BANK_TRANSFER_BIC` | the BIC of a test bank account supporting Sofortueberweisung
 
-To get a pseudocardpan for a credit card you can use the PAYONE server API. To do this with the client API please refer to the corresponding documentation.
+> **NOTE**: pseudocardpans are used to be expired after some period of time, 
+> so you should update them from time to time in local and Travis build settings.
+> 
+> Could we obtain a new "fresh" pseudocardpan for every build?
+
+To get a pseudocardpan for a credit card you can use the PAYONE server API. 
+To do this with the client API please refer to the corresponding documentation.
 With the server API you simply need to send a POST request of type "3dscheck" for example by using a command line tool:
 
 ```
@@ -245,9 +251,9 @@ Use `md5 -qs $PAYONE_KEY` to hash string value to MD5.
 Don't use `TEST_DATA_VISA_CREDIT_CARD_NO_3DS` or `TEST_DATA_VISA_CREDIT_CARD_3DS` as these values expected to be already pseudocardpan values.
 * Note that the `cardtype` request argument needs to be correspondand: `V` or `M` for _VISA_ and _Master Card_ respectively.
 
-If you have all values above set in [environment variables](#appendix-2-alternative-configuration-via-properties-file), 
-and _md5_ command is available (which is default case on Mac OS X and most of Linux distributions), 
-you may copy-paste and directly execute next line (change only `<VISA_CREDIT_CARD_3DS_NUMBER>`):
+If you have all the values above set in [environment variables](#appendix-2-alternative-configuration-via-properties-file), 
+and _md5_ command is available (which is default case on Mac OS X and most of the Linux distributions), 
+you may copy-paste and directly execute the next line (change only `<VISA_CREDIT_CARD_3DS_NUMBER>`):
 
 ```
 curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>" https://api.pay1.de/post-gateway/
