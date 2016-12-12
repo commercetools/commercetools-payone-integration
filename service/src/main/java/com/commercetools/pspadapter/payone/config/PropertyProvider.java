@@ -44,7 +44,7 @@ public class PropertyProvider {
             .put(PAYONE_SOLUTION_VERSION, "1")
             .put(PAYONE_INTEGRATOR_NAME, "commercetools-payone-integration")
             // TODO set dynamically
-            .put(PAYONE_INTEGRATOR_VERSION, "0.1-SNAPSHOT")
+            .put(PAYONE_INTEGRATOR_VERSION, "1.1.0-SNAPSHOT")
             .build();
     }
 
