@@ -16,14 +16,11 @@ import org.apache.http.entity.ContentType;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
-import spark.Redirect;
 import spark.Spark;
 
 import javax.annotation.Nonnull;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletionException;
-
-import static spark.Spark.redirect;
 
 /**
  * @author fhaertig
@@ -55,8 +52,6 @@ public class IntegrationService {
         createCustomTypes();
 
         Spark.port(port());
-
-        redirect.any("/", "/health", Redirect.Status.MOVED_PERMANENTLY);
 
         // This is a temporary jerry-rig for the load balancer to check connection with the service itself.
         // For now it just returns a JSON response {"status":200}
