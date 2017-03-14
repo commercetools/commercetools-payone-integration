@@ -131,7 +131,7 @@ public abstract class BaseFixture {
                 .returnResponse();
     }
 
-    protected String getConfigurationParameter(final String configParameterName) {
+    protected static String getConfigurationParameter(final String configParameterName) {
         final String envVariable = System.getenv(configParameterName);
         if (!Strings.isNullOrEmpty(envVariable)) {
             return envVariable;
@@ -185,7 +185,7 @@ public abstract class BaseFixture {
      * (see {@link #getTestDataVisaCreditCardNo3Ds()}).
      * Since Concordion is multi-threading - use synchronized lazy initialization.
      */
-    synchronized protected String getUnconfirmedVisaPseudoCardPan()  {
+    synchronized static protected String getUnconfirmedVisaPseudoCardPan()  {
 
       //curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>"
 
@@ -234,44 +234,44 @@ public abstract class BaseFixture {
       return PSEUDO_CARD_PAN;
     }
 
-    protected String getTestDataVisaCreditCardNo3Ds() {
+    protected static String getTestDataVisaCreditCardNo3Ds() {
       return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
     }
 
-    protected String getTestData3DsPassword() {
+    protected static String getTestData3DsPassword() {
         return getConfigurationParameter(TEST_DATA_3_DS_PASSWORD);
     }
 
-    protected String getVerifiedVisaPseudoCardPan() {
+    protected static String getVerifiedVisaPseudoCardPan() {
         return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_3_DS);
     }
 
-    protected String getTestDataSwBankTransferIban() {
+    protected static String getTestDataSwBankTransferIban() {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_IBAN);
     }
 
-    protected String getTestDataSwBankTransferBic() {
+    protected static String getTestDataSwBankTransferBic() {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_BIC);
     }
 
-    private String getTestDataPayoneMerchantId() {
+    private static String getTestDataPayoneMerchantId() {
         return getConfigurationParameter(TEST_DATA_PAYONE_MERCHANT_ID);
     }
 
-    private String getTestDataPayoneSubaccId() {
+    private static String getTestDataPayoneSubaccId() {
         return getConfigurationParameter(TEST_DATA_PAYONE_SUBACC_ID);
     }
 
-    private String getTestDataPayonePortalId() {
+    private static String getTestDataPayonePortalId() {
         return getConfigurationParameter(TEST_DATA_PAYONE_PORTAL_ID);
     }
 
-    private String getTestDataPayoneKey() {
+    private static String getTestDataPayoneKey() {
         return getConfigurationParameter(TEST_DATA_PAYONE_KEY);
     }
 
 
-    protected String getRandomOrderNumber() {
+    protected static String getRandomOrderNumber() {
         return String.valueOf(randomSource.nextInt() + System.currentTimeMillis());
     }
 
