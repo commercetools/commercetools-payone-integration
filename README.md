@@ -212,23 +212,32 @@ a seperate account is required for each of the transaction types (see [Functiona
 
 > TODO document best practice on how to work in day-to-day development, esp. on how local machine, travis and heroku play together.  
 
-The integration tests of this implementation use a heroku instance of the service. If you are authorized to configure it the backend can be found at https://dashboard.heroku.com/apps/ct-p1-integration-staging/resources .
+The integration tests of this implementation use a heroku instance of the service. If you are authorized to configure 
+it the backend can be found at https://dashboard.heroku.com/apps/ct-p1-integration-staging/resources .
 
-Please do not access this instance for playground or experimental reasons as you may risk breaking running automated integration tests. 
+Please do not access this instance for playground or experimental reasons as you may risk breaking running automated 
+integration tests. 
 
 ### Functional Tests
 
 The executable specification (using [Concordion](http://concordion.org/)) requires the following environment variables
 in addition to the [commercetools API client credentials](#commercetools-api-client-credentials):
 
-Name | Content
----- | -------
-`CT_PAYONE_INTEGRATION_URL` | the URL of the service instance under test
-`TEST_DATA_VISA_CREDIT_CARD_NO_3DS` | the pseudocardpan of an unconfirmed VISA credit card
-`TEST_DATA_VISA_CREDIT_CARD_3DS` | the pseudocardpan of a VISA credit card verified by 3-D Secure
-`TEST_DATA_3_DS_PASSWORD` | the 3DS password of the test card. Payone Test Cards use `12345`
-`TEST_DATA_SW_BANK_TRANSFER_IBAN` | the IBAN of a test bank account supporting Sofortueberweisung
-`TEST_DATA_SW_BANK_TRANSFER_BIC` | the BIC of a test bank account supporting Sofortueberweisung
+
+<table>
+  <tr><th>Name</th><th>Content</th></tr>
+  <tr><td><code>CT_PAYONE_INTEGRATION_URL</code></td>           <td>the URL of the service instance under test</td></tr>
+  <tr><td><code>TEST_DATA_VISA_CREDIT_CARD_NO_3DS</code></td>   <td>test simple VISA credit card number (don't use real credit card)</td></tr>
+  <tr><td><code>TEST_DATA_VISA_CREDIT_CARD_3DS</code></td>      <td>test 3-D secured VISA credit card number (dont' use real credit card)</td></tr>
+  <tr><td><code>TEST_DATA_3_DS_PASSWORD</code></td>             <td>the 3DS password of the test card. Payone Test Cards use <code>12345</code></td></tr>
+  <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_IBAN</code></td>     <td>the IBAN of a test bank account supporting Sofortueberweisung</td></tr>
+  <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_BIC</code></td>      <td>the BIC of a test bank account supporting Sofortueberweisung</td></tr>
+  <tr><td><code>TEST_DATA_PAYONE_MERCHANT_ID</code></td>        <td rowspan="4">Payone credentials for pseudocartpan generating. <br/>
+                                                                                <b>Ensurethese values are the same for Travis (local) test and Heroku deployed service!</b></td></tr>
+  <tr><td><code>TEST_DATA_PAYONE_SUBACC_ID</code></td></tr>
+  <tr><td><code>TEST_DATA_PAYONE_PORTAL_ID</code></td></tr>
+  <tr><td><code>TEST_DATA_PAYONE_KEY</code></td></tr>
+</table> 
 
 To get a pseudocardpan for a credit card you can use the PAYONE server API. To do this with the client API please refer to the corresponding documentation.
 With the server API you simply need to send a POST request of type "3dscheck" for example by using a command line tool:

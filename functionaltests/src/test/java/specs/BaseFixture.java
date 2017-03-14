@@ -52,7 +52,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -179,18 +178,18 @@ public abstract class BaseFixture {
         return orderNumber;
     }
 
+    private static String PSEUDO_CARD_PAN;
+
     /**
+     * Fetch new or get cached pseudocardpan from Payone service based on supplied test VISA card number
+     * (see {@link #getTestDataVisaCreditCardNo3Ds()}).
      * Since Concordion is multi-threading - use synchronized lazy initialization.
      */
-    private static AtomicReference<String> PSEUDO_CARD_PAN = new AtomicReference<>(null);
-
-    protected String getUnconfirmedVisaPseudoCardPan()  {
+    synchronized protected String getUnconfirmedVisaPseudoCardPan()  {
 
       //curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>"
 
-      String res = PSEUDO_CARD_PAN.get();
-
-      if (res == null) {
+      if (PSEUDO_CARD_PAN == null) {
         String cardPanResponse = null;
         try {
           cardPanResponse = Unirest.post("https://api.pay1.de/post-gateway/")
@@ -222,10 +221,8 @@ public abstract class BaseFixture {
         Matcher m = p.matcher(cardPanResponse);
 
         if (m.matches()) {
-          res = m.group(1); // 132
-          if(!PSEUDO_CARD_PAN.compareAndSet(null, res)) {
-            return PSEUDO_CARD_PAN.get();
-          }
+            assert PSEUDO_CARD_PAN == null : "PSEUDO_CARD_PAN multiple initialization";
+            PSEUDO_CARD_PAN = m.group(1);
         } else {
           String error = String.format("Unexpected pseudocardpan response: %s", cardPanResponse);
           LOG.error(error);
@@ -233,7 +230,7 @@ public abstract class BaseFixture {
         }
       }
 
-      return res;
+      return PSEUDO_CARD_PAN;
     }
 
     protected String getTestDataVisaCreditCardNo3Ds() {
