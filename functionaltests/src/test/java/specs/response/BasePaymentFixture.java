@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-import static io.sphere.sdk.payments.TransactionState.SUCCESS;
+import static io.sphere.sdk.payments.TransactionState.FAILURE;
 
 /**
  * Base class to create and handle test payments for Payone.
@@ -128,14 +128,21 @@ public class BasePaymentFixture extends BaseFixture {
                 .orElse(new TextNode("ERROR in payment transaction result: response JSON node not found"));
     }
 
-    protected void validatePaymentsAreSuccess(final List<String> paymentNamesList) throws IllegalStateException {
+    /**
+     * Check all the payments from {@code paymentNamesList} have non-FAILURE status. If at least one is failed -
+     * {@link IllegalStateException} is thrown.
+     * @param paymentNamesList names of payments to check
+     * @throws IllegalStateException if some payments are failed.
+     */
+    protected void validatePaymentsNotFailed(final List<String> paymentNamesList) throws IllegalStateException {
+        // since fetchPaymentByLegibleName() is a slow blocking operation - make the stream parallel
         paymentNamesList.parallelStream().forEach(paymentName ->{
             Payment payment = fetchPaymentByLegibleName(paymentName);
             List<Transaction> transactions = payment.getTransactions();
             TransactionState lastTransactionState = transactions.size() > 0 ? transactions.get(transactions.size() - 1).getState() : null;
-            if (!SUCCESS.equals(lastTransactionState)) {
-                String errorMessage = String.format("Payment [%s] transaction expected to be [SUCCESS], but was [%s], payment status is [%s]",
-                        payment.getId(), lastTransactionState, payment.getPaymentStatus().getInterfaceCode());
+            if (FAILURE.equals(lastTransactionState)) {
+                String errorMessage = String.format("Payment [%s] transaction is FAILURE, payment status is [%s]",
+                        payment.getId(), payment.getPaymentStatus().getInterfaceCode());
                 LOG.error(errorMessage);
                 throw new IllegalStateException(errorMessage);
             }

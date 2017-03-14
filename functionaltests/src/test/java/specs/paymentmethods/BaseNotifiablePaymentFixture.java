@@ -19,31 +19,40 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
 
     /**
      * Check the payments are created successfully and wait for theirs update notifications from Payone.
-     * @param paymentNames
+     * @param paymentNames payments to check
      * @param txaction action name to wait
      * @return <b>true</b> if waited successfully for all notifications from {@code paymentNames} list
-     * @throws Exception
      */
     public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws Exception {
         final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 
-        validatePaymentsAreSuccess(paymentNamesList);
+        validatePaymentsNotFailed(paymentNamesList);
+
+        final long timeout = PAYONE_NOTIFICATION_TIMEOUT;
 
         LOG.info("Start waiting {} seconds for {} notifications in {} test:",
-                TimeUnit.MILLISECONDS.toSeconds(PAYONE_NOTIFICATION_TIMEOUT), paymentNamesList.size(), getClass().getSimpleName());
+                TimeUnit.MILLISECONDS.toSeconds(timeout), paymentNamesList.size(), getClass().getSimpleName());
 
-        NotificationTimeoutWaiter timer = new NotificationTimeoutWaiter(PAYONE_NOTIFICATION_TIMEOUT, RETRY_DELAY);
+        NotificationTimeoutWaiter timer = new NotificationTimeoutWaiter(timeout, RETRY_DELAY);
 
         Long numberOfPaymentsWithAppointedNotification = timer.start(
                 () -> countPaymentsWithNotificationOfAction(paymentNamesList, txaction),
                 num -> num == paymentNamesList.size());
 
-        LOG.info("waited {} seconds to receive notifications for payments {} in {} test",
+        boolean success = numberOfPaymentsWithAppointedNotification == paymentNamesList.size();
+
+        String logMessage = String.format("waited %d seconds to receive notifications for payments %s in %s test",
                 TimeUnit.MILLISECONDS.toSeconds(timer.getLastDuration()),
                 Arrays.toString(paymentNamesList.stream().map(this::getIdForLegibleName).toArray()),
-                this.getClass().getSimpleName());
+                getClass().getSimpleName());
 
-        return numberOfPaymentsWithAppointedNotification == paymentNamesList.size();
+        if (success) {
+            LOG.info("Successfully " + logMessage);
+        } else {
+            LOG.error("Failure " + logMessage);
+        }
+
+        return success;
     }
 
 }
