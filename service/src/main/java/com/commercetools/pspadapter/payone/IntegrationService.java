@@ -53,6 +53,17 @@ public class IntegrationService {
 
         Spark.port(port());
 
+        // This is a temporary jerry-rig for the load balancer to check connection with the service itself.
+        // For now it just returns a JSON response {"status":200}
+        // It should be expanded to a more real health-checker service, which really performs PAYONE status check.
+        // But don't forget, a load balancer may call this URL very often (like 1 per sec),
+        // so don't make this request processor heavy, or implement is as independent background service.
+        Spark.get("/health", (req, res) -> {
+            res.status(HttpStatusCode.OK_200);
+            res.type(ContentType.APPLICATION_JSON.getMimeType());
+            return ImmutableMap.of("status", HttpStatus.OK_200);
+        }, SphereJsonUtils::toJsonString);
+
         Spark.get("/commercetools/handle/payments/:id", (req, res) -> {
             final PaymentHandleResult paymentHandleResult = handlePayment(req.params("id"));
             if (!paymentHandleResult.body().isEmpty()) {
@@ -83,17 +94,6 @@ public class IntegrationService {
             res.status(200);
             return "TSOK";
         });
-
-        // This is a temporary jerry-rig for the load balancer to check connection with the service itself.
-        // For now it just returns a JSON response {"status":200}
-        // It should be expanded to a more real health-checker service, which really performs PAYONE status check.
-        // But don't forget, a load balancer may call this URL very often (like 1 per sec),
-        // so don't make this request processor heavy, or implement is as independent background service.
-        Spark.get("/health", (req, res) -> {
-            res.status(HttpStatusCode.OK_200);
-            res.type(ContentType.APPLICATION_JSON.getMimeType());
-            return ImmutableMap.of("status", HttpStatus.OK_200);
-        }, SphereJsonUtils::toJsonString);
 
         Spark.awaitInitialization();
     }
