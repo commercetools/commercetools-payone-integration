@@ -15,6 +15,8 @@ import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
 
 import javax.money.MonetaryAmount;
@@ -22,13 +24,18 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
+
+import static io.sphere.sdk.payments.TransactionState.SUCCESS;
 
 /**
  * Base class to create and handle test payments for Payone.
  */
 public class BasePaymentFixture extends BaseFixture {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BasePaymentFixture.class);
 
     public static final String baseRedirectUrl = "https://www.example.com/sofortueberweisung_charge_immediately/";
 
@@ -119,6 +126,20 @@ public class BasePaymentFixture extends BaseFixture {
                 .findFirst()
                 .map(SphereJsonUtils::parse)
                 .orElse(new TextNode("ERROR in payment transaction result: response JSON node not found"));
+    }
+
+    protected void validatePaymentsAreSuccess(final List<String> paymentNamesList) throws IllegalStateException {
+        paymentNamesList.parallelStream().forEach(paymentName ->{
+            Payment payment = fetchPaymentByLegibleName(paymentName);
+            List<Transaction> transactions = payment.getTransactions();
+            TransactionState lastTransactionState = transactions.size() > 0 ? transactions.get(transactions.size() - 1).getState() : null;
+            if (!SUCCESS.equals(lastTransactionState)) {
+                String errorMessage = String.format("Payment [%s] transaction expected to be [SUCCESS], but was [%s], payment status is [%s]",
+                        payment.getId(), lastTransactionState, payment.getPaymentStatus().getInterfaceCode());
+                LOG.error(errorMessage);
+                throw new IllegalStateException(errorMessage);
+            }
+        });
     }
 
     /**

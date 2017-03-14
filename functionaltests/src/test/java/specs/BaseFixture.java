@@ -6,6 +6,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.*;
@@ -67,8 +68,12 @@ public abstract class BaseFixture {
 
     protected static final String EMPTY_STRING = "";
     protected static final String NULL_STRING = "null";
-    protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(8);
+    protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(9);
+    protected static final long RETRY_DELAY = TimeUnit.SECONDS.toMillis(15);
+
     protected static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 5000; // @akovalenko 14.10.16: extended from 1.5 sec to 5 sec
+
+    protected static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
     private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
     private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_3DS";
@@ -407,15 +412,15 @@ public abstract class BaseFixture {
 
     }
 
-    protected long countPaymentsWithNotificationOfAction(final ImmutableList<String> paymentNames, final String txaction) throws ExecutionException {
-        final List<ExecutionException> exceptions = Lists.newArrayList();
+    protected long countPaymentsWithNotificationOfAction(final ImmutableList<String> paymentNames, final String txaction) {
+        final List<RuntimeException> exceptions = Lists.newArrayList();
         final long result = paymentNames.stream().mapToLong(paymentName -> {
             final Payment payment = fetchPaymentByLegibleName(paymentName);
             try {
                 return getTotalNotificationCountOfAction(payment, txaction);
             } catch (final ExecutionException e) {
                 LOG.error("Exception: %s", e);
-                exceptions.add(e);
+                exceptions.add(new RuntimeException(e));
                 return 0L;
             }
         }).filter(notifications -> notifications > 0L).count();
