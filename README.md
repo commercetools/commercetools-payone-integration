@@ -274,6 +274,22 @@ The tests take a fairly long time to run as they have to wait for the Payone not
 
 Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the specification) has changed.
 
+#### Publishing functional tests results
+
+The build results are published to [`gh-pages`](https://github.com/commercetools/commercetools-payone-integration/tree/gh-pages) branch of the repo.
+Then you are able to review the tests results in the page [Specs page](http://commercetools.github.io/commercetools-payone-integration/latest/spec/specs/Specs.html)
+and [Tests page](http://commercetools.github.io/commercetools-payone-integration/latest/tests/index.html).
+
+**Note:** 
+  - the branch `gh-pages` must be created on the remote before publishing, 
+    otherwise the plugin won't be able to push the results!
+    
+  - for Travis build `githubPages.repoUri` must be in HTTPS format and `$GH_TOKEN` must be set to GitHub token 
+    with push permission
+  
+  - we should replace the plugin with newer version, see [this issue](https://github.com/commercetools/commercetools-payone-integration/issues/135)
+    for more details 
+
 ### Paypal Sandbox Accounts
 
 To test with Paypal, you need own Sandbox Buyer credentials via a developer account. Available from commercetools, too; please contact support. 

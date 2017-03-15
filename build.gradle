@@ -9,7 +9,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.ajoberstar.github-pages' version '1.3.2'
+    id 'org.ajoberstar.github-pages' version '1.6.0'
 }
 
 def depVersions = [
@@ -160,13 +160,15 @@ project(":functionaltests") {
     }
 }
 
+// Publish build results to github pages settings:
+
 def staticPages = project.copySpec {
     from 'ghpages'
 }
 
 def generatedPages = project.copySpec {
-    into 'latest/spec'
-    from 'functionaltests/build/reports/spec'
+    into 'latest/'
+    from 'functionaltests/build/reports/'
 }
 
 githubPages {
@@ -180,6 +182,12 @@ githubPages {
     pages {
         into '.'
         with staticPages, generatedPages
+    }
+}
+
+publishGhPages  {
+    doLast {
+        println "Published results to http://commercetools.github.io/commercetools-payone-integration/latest/spec/specs/Specs.html"
     }
 }
 
