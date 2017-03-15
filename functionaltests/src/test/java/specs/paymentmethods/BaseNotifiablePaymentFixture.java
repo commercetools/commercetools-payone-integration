@@ -30,8 +30,8 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
 
         final long timeout = PAYONE_NOTIFICATION_TIMEOUT;
 
-        LOG.info("Start waiting {} seconds for {} notifications in {} test:",
-                TimeUnit.MILLISECONDS.toSeconds(timeout), paymentNamesList.size(), getClass().getSimpleName());
+        LOG.info("Start waiting {} seconds for {} notifications of action [{}] in [{}] test:",
+                TimeUnit.MILLISECONDS.toSeconds(timeout), paymentNamesList.size(), txaction, getClass().getSimpleName());
 
         NotificationTimeoutWaiter timer = new NotificationTimeoutWaiter(timeout, RETRY_DELAY);
 
@@ -41,8 +41,10 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
 
         boolean success = numberOfPaymentsWithAppointedNotification == paymentNamesList.size();
 
-        String logMessage = String.format("waited %d seconds to receive notifications for payments %s in %s test",
+        String logMessage = String.format("waited %d seconds to receive %d/%d notifications of action [%s] for payments %s in %s test",
                 TimeUnit.MILLISECONDS.toSeconds(timer.getLastDuration()),
+                numberOfPaymentsWithAppointedNotification, paymentNamesList.size(),
+                txaction,
                 Arrays.toString(paymentNamesList.stream().map(this::getIdForLegibleName).toArray()),
                 getClass().getSimpleName());
 

@@ -12,11 +12,14 @@ import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
 import specs.paymentmethods.BaseNotifiablePaymentFixture;
 import util.WebDriverSofortueberweisung;
@@ -28,6 +31,9 @@ import java.io.UnsupportedEncodingException;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * @author fhaertig
@@ -41,6 +47,8 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
     private WebDriverSofortueberweisung webDriver;
 
     private Map<String, String> successUrlForPayment;
+
+    private static Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyFixture.class);
 
     @Before
     public void setUp() {
@@ -116,7 +124,7 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountPaid()) :
                 BaseFixture.EMPTY_STRING;
 
-        return ImmutableMap.<String, String> builder()
+        return ImmutableMap.<String, String>builder()
                 .put("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
                 .put("interactionCount", getInteractionRequestCountOverAllTransactions(payment, requestType))
                 .put("transactionState", getTransactionState(payment, transactionId))
@@ -167,17 +175,16 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
 
         paymentNamesList.forEach(paymentName -> {
             final Payment payment = fetchPaymentByLegibleName(paymentName);
-            final Optional<String> responseRedirectUrl = Optional.ofNullable(payment.getCustom())
-                    .flatMap(customFields ->
-                            Optional.ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)));
-
-            if (responseRedirectUrl.isPresent()) {
-                final String successUrl =
-                        webDriver.executeSofortueberweisungRedirect(responseRedirectUrl.get(), getTestDataSwBankTransferIban())
-                                .replace(baseRedirectUrl, "[...]");
-
-                successUrlForPayment.put(paymentName, successUrl);
+            try {
+                Optional.ofNullable(payment.getCustom())
+                        .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
+                        .map(redirectCustomField -> webDriver.executeSofortueberweisungRedirect(redirectCustomField, getTestDataSwBankTransferIban())
+                                .replace(baseRedirectUrl, "[...]"))
+                        .ifPresent(successUrl -> successUrlForPayment.put(paymentName, successUrl));
+            } catch (Exception e) {
+                LOG.error("Error executing redirect for Sofortüberweisung Charge Immediate fixture", e);
             }
+
         });
 
         return successUrlForPayment.size() == paymentNamesList.size();
@@ -185,7 +192,18 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
 
     @Override
     public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws Exception {
-        // we keep this overriding just to easily see which test methods are run in this fixture
+        // validate the payments were successfully processed in previous executeRedirectForPayments() call.
+        // otherwise return false instantly
+        String unconfirmedPayments = stream(thePaymentNamesSplitter.split(paymentNames).spliterator(), false)
+                .filter(paymentName -> !successUrlForPayment.containsKey(paymentName))
+                .collect(Collectors.joining(", "));
+
+        if (StringUtils.isNotBlank(unconfirmedPayments)) {
+            LOG.error("[{}] payments are not re-directed - the notifications [{}] won't come",
+                    unconfirmedPayments, txaction);
+            return false;
+        }
+
         return super.receivedNotificationOfActionFor(paymentNames, txaction);
     }
 
