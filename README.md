@@ -239,7 +239,13 @@ in addition to the [commercetools API client credentials](#commercetools-api-cli
   <tr><td><code>TEST_DATA_PAYONE_KEY</code></td></tr>
 </table> 
 
-To get a pseudocardpan for a credit card you can use the PAYONE server API. To do this with the client API please refer to the corresponding documentation.
+You could find the values above in the encrypted [`travis-build/`](/travis-build) directory.
+
+**Note**: it's important to update `travis-build/` settings every time you change the build settings on the server. 
+It's even better to update first in the file, then on the Travis web page.
+
+The pseudocardpan for VISA without 3DS secure is fetched at runtime for specified `TEST_DATA_VISA_CREDIT_CARD_NO_3DS`
+card number using PAYONE server API. To do this with the client API please refer to the corresponding documentation.
 With the server API you simply need to send a POST request of type "3dscheck" for example by using a command line tool:
 
 ```
