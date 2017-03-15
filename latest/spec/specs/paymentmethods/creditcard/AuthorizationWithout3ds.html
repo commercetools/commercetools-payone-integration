@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?><html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+    <head><style>* {
+  font-family: Arial;
+}
+body {
+  padding: 32px;  
+}
+pre {
+  padding: 6px 28px 6px 28px;
+  background-color: #E8EEF7;
+}
+pre, pre *, code, code *, kbd {
+  font-family: Courier New, Courier;
+  font-size: 10pt;
+}
+h1, h1 * {
+  font-size: 24pt;	
+}
+p, td, th, li, .breadcrumbs {
+  font-size: 10pt;
+}
+p, li {
+  line-height: 140%;
+  max-width: 720px;
+}
+table {
+  border-collapse: collapse;
+  empty-cells: show;
+  margin: 8px 0px 8px 0px;
+}
+th, td {
+  border: 1px solid black;
+  padding: 3px;
+}
+td {
+  background-color: white;
+  vertical-align: top;
+}
+th {
+  background-color: #C3D9FF;
+}
+li {
+  margin-top: 6px;
+  margin-bottom: 6px; 
+}
+
+.example {
+  padding: 6px 16px 6px 16px;
+  border: 1px solid #C3D9FF;
+  margin: 6px 0px 28px 0px;
+  background-color: #F5F9FD;
+}
+.example h3 {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  font-size: 12pt;
+}
+
+p.success {
+  padding: 2px;
+}
+.success, .success * {
+  background-color: #afa !important;
+}
+.success pre {
+  background-color: #bbffbb;
+}
+.failure, .failure * {
+  background-color: #ffb0b0;
+  padding: 1px;
+}
+.failure .expected {
+  text-decoration: line-through;
+  color: #bb5050;
+}
+.ignored, .ignored * {
+  background-color: #f0f0f0 !important;	
+}
+
+ins {
+  text-decoration: none;	
+}
+
+.exceptionMessage {
+  background-color: #fdd;
+  font-family: Courier New, Courier, Monospace;
+  font-size: 10pt;
+  display: block;
+  font-weight: normal;
+  padding: 4px;
+  text-decoration: none !important;
+}
+.stackTrace, .stackTrace * {
+  font-weight: normal;
+}
+.stackTrace {
+  display: none;
+  padding: 1px 4px 4px 4px;
+  background-color: #fdd;
+  border-top: 1px dotted black;
+}
+.stackTraceExceptionMessage {
+  display: block;
+  font-family: Courier New, Courier, Monospace;
+  font-size: 8pt;
+  white-space: wrap;
+  padding: 1px 0px 1px 0px;
+}
+.stackTraceEntry {
+  white-space: nowrap;
+  font-family: Courier New, Courier, Monospace;
+  display: block;
+  font-size: 8pt;
+  padding: 1px 0px 1px 32px;
+}
+.stackTraceButton {
+  font-size: 8pt;
+  margin: 2px 8px 2px 0px;
+  font-weight: normal;
+  font-family: Arial;
+}
+
+.special {
+  font-style: italic;
+}
+.missing, .missing * {
+  background-color: #ff9999;
+  color:#bb5050;
+  text-decoration: line-through;
+}
+.surplus, .surplus * {
+  background-color: #ff9999;
+}
+.footer {
+  text-align: right;
+  margin-top: 40px;
+  font-size: 8pt;
+  width: 100%;
+  color: #999;
+}
+.footer .testTime {
+  padding: 2px 10px 0px 0px;
+}
+
+.idea {
+  font-size: 9pt;
+  color: #888;
+  font-style: italic;	
+}
+.tight li {
+  margin-top: 1px;
+  margin-bottom: 1px; 
+}
+.commentary {
+  float: right;
+  width: 200px;
+  background-color: #ffffd0;
+  padding:8px;
+  border: 3px solid #eeeeb0;	 
+  margin: 10px 0px 10px 10px;	 
+}
+.commentary, .commentary * {
+  font-size: 8pt;
+}
+</style><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta charset="UTF-8" />
+        <link href="../../../concordion.css" rel="stylesheet" type="text/css" />
+        <title>Authorization</title>
+    <link type="text/css" rel="stylesheet" href="../../../inputstyle.css" /></head>
+    <body><span class="breadcrumbs"><a href="../../Specs.html">commercetools - PAYONE - Integration Service</a> &gt; <a href="../Paymentmethods.html">Payment Methods</a> &gt; <a href="Creditcard.html">Credit Card Payments</a> &gt;</span>
+        <h1>Credit Card Authorization</h1>
+        <p>
+            The integration service allows to reserve an amount of money to be charged later on.
+        </p>
+        <p>
+            It will do so by sending a <em c:set="#requestType" class="inputvalue">preauthorization</em> request to the PAYONE platform.
+            <br />
+            It will store information about such a request as an interface interaction of type
+            <em>PAYONE_INTERACTION_REQUEST</em>.
+        </p>
+        <h2>Examples</h2>
+        <h3>Common Setup</h3>
+        <ul>
+            <li>payment.paymentMethodInfo.method: <span c:set="#paymentMethod" class="inputvalue">CREDIT_CARD</span></li>
+            <li>payment.transactions[0].type: <span c:set="#transactionType" class="inputvalue">AUTHORIZATION</span></li>
+        </ul>
+        <div class="example">
+            <h3>Authorization (without 3-D Secure)</h3>
+            <p>
+                Given the following payments for
+                <em>a credit card that does <b>not</b> support charges for currencies other than EUR and without 3-D Secure verification</em>:
+            </p>
+            <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:set="#centAmount">Cent Amount</th>
+                    <th c:set="#currencyCode">Currency Code</th>
+                    <th c:echo="#paymentId">Payment ID (for information only)</th>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 1</td>
+                    <td class="inputvalue">2000</td>
+                    <td class="inputvalue">EUR</td>
+                    <td>ab7ac08c-5680-42bc-8ba7-bb9b18b004e8</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 2</td>
+                    <td class="inputvalue">123498</td>
+                    <td class="inputvalue">USD</td>
+                    <td>fa6597b9-e021-4394-a709-b735ced444d1</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 3</td>
+                    <td class="inputvalue">4711</td>
+                    <td class="inputvalue">EUR</td>
+                    <td>99c69165-e487-4925-a855-e82785727559</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 4</td>
+                    <td class="inputvalue">270713</td>
+                    <td class="inputvalue">EUR</td>
+                    <td>8d093efc-072b-48bb-b0eb-b78bac6ea763</td>
+                </tr>
+            </table>
+            <p>
+                When I request the integration service to handle them I will get the following results:
+            </p>
+            <table c:execute="#result = handlePayment(#paymentName, #requestType)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:assertEquals="#result.statusCode">Response Status Code</th>
+                    <th c:assertEquals="#result.interactionCount">total # of <em>preauthorization</em> requests sent</th>
+                    <th c:echo="#result.transactionState">Transaction State </th>
+                    <th c:echo="#result.version">Version (for information only)</th>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 1</td>
+                    <td class="success">200</td>
+                    <td class="success">1</td>
+                    <td>Success</td>
+                    <td>12</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 2</td>
+                    <td class="success">200</td>
+                    <td class="success">1</td>
+                    <td>Failure</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 3</td>
+                    <td class="success">200</td>
+                    <td class="success">1</td>
+                    <td>Success</td>
+                    <td>12</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 4</td>
+                    <td class="success">200</td>
+                    <td class="success">1</td>
+                    <td>Success</td>
+                    <td>12</td>
+                </tr>
+            </table>
+            <p>
+                A successful request and a response status code 20X does not mean that the transaction is in state Success.
+            </p>
+            <p c:execute="#receivedAllNotifications = receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)">
+                After a certain amount of time the Integration Service will have
+                <span c:assertTrue="#receivedAllNotifications" class="success">processed a notification from PAYONE</span>
+                with the txaction <b c:set="#txactionAppointed" class="inputvalue">appointed</b> and the transactionstatus <b>completed</b> (or <b>null</b>)
+                for each of the payments <span c:set="#successfulPayments" class="inputvalue">Payment 1, Payment 3, Payment 4</span>.
+                The transaction state and the authorized amount should be set correctly not later than now.
+            </p>
+            <table c:execute="#result = fetchPaymentDetails(#paymentName)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:assertEquals="#result.notificationCount">total # of <em>appointed/completed</em> notifications</th>
+                    <th c:assertEquals="#result.transactionState">Transaction State</th>
+                    <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
+                    <th c:echo="#result.version">Version (for information only)</th>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 1</td>
+                    <td class="success">1</td>
+                    <td class="success">Success</td>
+                    <td class="success">20,00 EUR</td>
+                    <td>15</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 3</td>
+                    <td class="success">1</td>
+                    <td class="success">Success</td>
+                    <td class="success">47,11 EUR</td>
+                    <td>15</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 4</td>
+                    <td class="success">1</td>
+                    <td class="success">Success</td>
+                    <td class="success">2.707,13 EUR</td>
+                    <td>15</td>
+                </tr>
+            </table>
+            <p>
+                The failed payment <span c:set="#failedPaymentName" class="inputvalue">Payment 2</span>
+                must have received <span c:assertEquals="getInteractionNotificationOfActionCount(#failedPaymentName, #txactionAppointed)" class="success">0</span> notifications.
+            </p>
+            <p>
+                The service ensures idempotence, hence when I request it to handle the same payments again then I
+                will get the same results as before, especially the total number of <em>preauthorization</em> requests sent
+                per payment must not change:
+            </p>
+            <table c:execute="#result = handlePayment(#paymentName, #requestType)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:assertEquals="#result.statusCode">Response Status Code</th>
+                    <th c:assertEquals="#result.interactionCount">total # of <em>preauthorization</em> requests sent</th>
+                    <th c:assertEquals="#result.transactionState">Transaction State</th>
+                    <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
+                    <th c:echo="#result.version">Version (for information only)</th>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 1</td>
+                    <td class="success">200</td>
+                    <td class="success">1</td>
+                    <td class="success">Success</td>
+                    <td class="success">20,00 EUR</td>
+                    <td>15</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 2</td>
+                    <td class="success">200</td>
+                    <td class="success">1</td>
+                    <td class="success">Failure</td>
+                    <td class="success"> </td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 3</td>
+                    <td class="success">200</td>
+                    <td class="success">1</td>
+                    <td class="success">Success</td>
+                    <td class="success">47,11 EUR</td>
+                    <td>15</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 4</td>
+                    <td class="success">200</td>
+                    <td class="success">1</td>
+                    <td class="success">Success</td>
+                    <td class="success">2.707,13 EUR</td>
+                    <td>15</td>
+                </tr>
+            </table>
+        </div>
+    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 374618 ms on 15-Mar-2017 at 13:29:22 UTC</div></div></body>
+</html>
