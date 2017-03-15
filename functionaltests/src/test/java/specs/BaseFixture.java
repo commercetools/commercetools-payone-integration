@@ -70,6 +70,7 @@ public abstract class BaseFixture {
     protected static final String NULL_STRING = "null";
     protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(15);
     protected static final long RETRY_DELAY = TimeUnit.SECONDS.toMillis(15);
+    protected static final long INTERMEDIATE_REPORT_DELAY = TimeUnit.MINUTES.toMillis(3);
 
     protected static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 5000; // @akovalenko 14.10.16: extended from 1.5 sec to 5 sec
 
