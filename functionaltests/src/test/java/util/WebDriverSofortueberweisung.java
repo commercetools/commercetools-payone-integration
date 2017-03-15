@@ -1,8 +1,6 @@
 package util;
 
 
-import static org.openqa.selenium.support.ui.ExpectedConditions.not;
-
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -15,6 +13,8 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.concurrent.TimeUnit;
+
+import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 
 /**
  * @author fhaertig
@@ -63,7 +63,7 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
 
 
     private void selectAccount() {
-        final WebElement senderAccountInput = findElement(By.id("TransactionsSessionSenderAccountNumber23456789"));
+        final WebElement senderAccountInput = findElement(By.id("MultipaysSessionSenderAccountNumberTechnical23456789"));
         final WebElement submitButton = findElement(By.cssSelector("button[type=submit]"));
 
         senderAccountInput.click();
@@ -87,7 +87,7 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
      * @return the URL the browser was redirected to after submitting the {@code password}
      */
     public String executeSofortueberweisungRedirect(final String url, final String userid) {
-        final Wait<WebDriver> wait = new WebDriverWait(this, 10);
+        final Wait<WebDriver> wait = new WebDriverWait(this, 20);
 
         navigate().to(url);
 
