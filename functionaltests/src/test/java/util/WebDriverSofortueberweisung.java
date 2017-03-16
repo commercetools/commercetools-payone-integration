@@ -15,6 +15,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.util.concurrent.TimeUnit;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
+import static util.constant.WebDriverCommon.CSS_SELECTOR_SUBMIT;
+import static util.constant.WebDriverSofortueberweisungConstants.*;
 
 /**
  * @author fhaertig
@@ -51,9 +53,9 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
     }
 
     private void doLogin(final String userid) {
-        final WebElement useridInput = findElement(By.id("BackendFormLOGINNAMEUSERID"));
-        final WebElement pinInput = findElement(By.id("BackendFormUSERPIN"));
-        final WebElement submitButton = findElement(By.cssSelector("button[type=submit]"));
+        final WebElement useridInput = findElement(By.id(SU_LOGIN_NAME_ID));
+        final WebElement pinInput = findElement(By.id(SU_USER_PIN_ID));
+        final WebElement submitButton = findElement(By.cssSelector(CSS_SELECTOR_SUBMIT));
 
         useridInput.clear();
         useridInput.sendKeys(userid);
@@ -63,16 +65,16 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
 
 
     private void selectAccount() {
-        final WebElement senderAccountInput = findElement(By.id("MultipaysSessionSenderAccountNumberTechnical23456789"));
-        final WebElement submitButton = findElement(By.cssSelector("button[type=submit]"));
+        final WebElement senderAccountInput = findElement(By.id(SU_TEST_ACCOUNT_RADIO_BUTTON));
+        final WebElement submitButton = findElement(By.cssSelector(CSS_SELECTOR_SUBMIT));
 
         senderAccountInput.click();
         submitButton.click();
     }
 
     private void provideTan() {
-        final WebElement tanInput = findElement(By.id("BackendFormTan"));
-        final WebElement submitButton = findElement(By.cssSelector("button[type=submit]"));
+        final WebElement tanInput = findElement(By.id(SU_BACKEND_FORM_TAN));
+        final WebElement submitButton = findElement(By.cssSelector(CSS_SELECTOR_SUBMIT));
 
         tanInput.sendKeys(tan);
         submitButton.click();
@@ -93,15 +95,15 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
 
         doLogin(userid);
 
-        wait.until(ExpectedConditions.urlContains("select_account"));
+        wait.until(ExpectedConditions.urlContains(SU_URL_SELECT_ACCOUNT_PATTERN));
 
         selectAccount();
 
-        wait.until(ExpectedConditions.urlContains("provide_tan"));
+        wait.until(ExpectedConditions.urlContains(SU_URL_PROVIDE_TAN_PATTERN));
 
         provideTan();
 
-        wait.until(not(ExpectedConditions.urlContains("pay1")));
+        wait.until(not(ExpectedConditions.urlContains(SU_URL_PAY_1_PATTERN)));
 
         return getCurrentUrl();
     }
