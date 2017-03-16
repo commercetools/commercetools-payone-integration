@@ -215,7 +215,7 @@ a seperate account is required for each of the transaction types (see [Functiona
 > TODO document best practice on how to work in day-to-day development, esp. on how local machine, travis and heroku play together.  
 
 The integration tests of this implementation use a heroku instance of the service. If you are authorized to configure 
-it the backend can be found at https://dashboard.heroku.com/apps/ct-p1-integration-staging/resources .
+it the backend can be found at https://dashboard.heroku.com/apps/ct-payone-integration-staging/resources .
 
 Please do not access this instance for playground or experimental reasons as you may risk breaking running automated 
 integration tests. 
