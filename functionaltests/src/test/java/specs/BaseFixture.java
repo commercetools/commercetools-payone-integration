@@ -72,7 +72,8 @@ public abstract class BaseFixture {
     protected static final long RETRY_DELAY = TimeUnit.SECONDS.toMillis(15);
     protected static final long INTERMEDIATE_REPORT_DELAY = TimeUnit.MINUTES.toMillis(3);
 
-    protected static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 15000; // @akovalenko 14.10.16: extended from 1.5 sec to 5 sec
+    // looks like heroku may have some lags, so we use 15 seconds to avoid false test fails because of timeouts
+    protected static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 15000;
 
     protected static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
