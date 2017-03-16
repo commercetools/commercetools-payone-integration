@@ -208,25 +208,25 @@ ins {
                     <td class="inputvalue">Payment 1</td>
                     <td class="inputvalue">406</td>
                     <td class="inputvalue">EUR</td>
-                    <td>8f9bde40-ed7e-4b21-af1c-34e1822bfb1c</td>
+                    <td>7f51b642-3439-4581-9385-c4bdfb3825c1</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
                     <td class="inputvalue">91341</td>
                     <td class="inputvalue">USD</td>
-                    <td>678541e1-d94d-4d31-a4a5-0bc33cbe322a</td>
+                    <td>8c3bed46-50de-4a4d-b6f4-a6d864ff2d49</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
                     <td class="inputvalue">6113</td>
                     <td class="inputvalue">EUR</td>
-                    <td>1d321b33-f9f7-4695-9804-03760dac5241</td>
+                    <td>bdb1ff9f-2e80-4418-831a-3eaeac199007</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
                     <td class="inputvalue">111283</td>
                     <td class="inputvalue">EUR</td>
-                    <td>3f4be01e-e551-4c2a-b074-c3e417cfc9a7</td>
+                    <td>653b0682-32a5-4615-a33a-b8db3fbf6941</td>
                 </tr>
             </table>
             <p>
@@ -242,40 +242,31 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
-                    <td class="failure"><del class="expected">200</del>
-<ins class="actual">500</ins></td>
-                    <td class="failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
+                    <td class="success">200</td>
+                    <td class="success">1</td>
                     <td class="success">Pending</td>
-                    <td>3</td>
+                    <td>10</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
-                    <td class="failure"><del class="expected">200</del>
-<ins class="actual">500</ins></td>
-                    <td class="failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
-                    <td class="failure"><del class="expected">Failure</del>
-<ins class="actual">Pending</ins></td>
-                    <td>3</td>
+                    <td class="success">200</td>
+                    <td class="success">1</td>
+                    <td class="success">Failure</td>
+                    <td>10</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
-                    <td class="failure"><del class="expected">200</del>
-<ins class="actual">500</ins></td>
-                    <td class="failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
+                    <td class="success">200</td>
+                    <td class="success">1</td>
                     <td class="success">Pending</td>
-                    <td>3</td>
+                    <td>10</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
-                    <td class="failure"><del class="expected">200</del>
-<ins class="actual">500</ins></td>
-                    <td class="failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
+                    <td class="success">200</td>
+                    <td class="success">1</td>
                     <td class="success">Pending</td>
-                    <td>3</td>
+                    <td>10</td>
                 </tr>
             </table>
             <p>
@@ -292,23 +283,20 @@ ins {
                 <tr>
                     <td class="inputvalue">Payment 1</td>
                     <td class="success">Pending</td>
-                    <td class="failure"><del class="expected">https://secure.pay1.de/3ds/redirect.php</del>
-<ins class="actual"> </ins></td>
-                    <td>3</td>
+                    <td class="success">https://secure.pay1.de/3ds/redirect.php</td>
+                    <td>10</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
                     <td class="success">Pending</td>
-                    <td class="failure"><del class="expected">https://secure.pay1.de/3ds/redirect.php</del>
-<ins class="actual"> </ins></td>
-                    <td>3</td>
+                    <td class="success">https://secure.pay1.de/3ds/redirect.php</td>
+                    <td>10</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
                     <td class="success">Pending</td>
-                    <td class="failure"><del class="expected">https://secure.pay1.de/3ds/redirect.php</del>
-<ins class="actual"> </ins></td>
-                    <td>3</td>
+                    <td class="success">https://secure.pay1.de/3ds/redirect.php</td>
+                    <td>10</td>
                 </tr>
             </table>
             <p>
@@ -319,15 +307,12 @@ ins {
             </p>
             <p>
                 If I follow the 3-D Secure process for <span c:set="#successfulPayments" class="inputvalue">Payment 1, Payment 3, Payment 4</span> and
-                <span c:assertTrue="executeRedirectForPayments(#successfulPayments)" class="failure"><del class="expected">verify them successfully</del>
-<ins class="actual">== false</ins></span> with this credit card,
+                <span c:assertTrue="executeRedirectForPayments(#successfulPayments)" class="success">verify them successfully</span> with this credit card,
                 I get forwarded to a predefined success url and for each of the payments the following notifications will be received:
             </p>
             <ol>
-                <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="failure"><del class="expected">received</del>
-<ins class="actual">== false</ins></span> -&gt; has no effect, just as a confirmation</li>
-                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)" class="failure"><del class="expected">received</del>
-<ins class="actual">== false</ins></span>
+                <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="success">received</span> -&gt; has no effect, just as a confirmation</li>
+                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)" class="success">received</span>
                     -&gt;  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
             </ol>
             <table c:execute="#result = fetchPaymentDetails(#paymentName)">
@@ -343,48 +328,33 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
-                    <td class="failure"><del class="expected">Success</del>
-<ins class="actual">Pending</ins></td>
-                    <td class="failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
-                    <td class="failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
+                    <td class="success">Success</td>
+                    <td class="success">1</td>
+                    <td class="success">1</td>
                     <td class="success">null</td>
-                    <td class="failure"><del class="expected">4,06 EUR</del>
-<ins class="actual"> </ins></td>
-                    <td class="failure"><del class="expected">[...]Payment+1+Success</del>
-<ins class="actual"> </ins></td>
-                    <td>3</td>
+                    <td class="success">4,06 EUR</td>
+                    <td class="success">[...]Payment+1+Success</td>
+                    <td>18</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
-                    <td class="failure"><del class="expected">Success</del>
-<ins class="actual">Pending</ins></td>
-                    <td class="failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
-                    <td class="failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
+                    <td class="success">Success</td>
+                    <td class="success">1</td>
+                    <td class="success">1</td>
                     <td class="success">null</td>
-                    <td class="failure"><del class="expected">61,13 EUR</del>
-<ins class="actual"> </ins></td>
-                    <td class="failure"><del class="expected">[...]Payment+3+Success</del>
-<ins class="actual"> </ins></td>
-                    <td>3</td>
+                    <td class="success">61,13 EUR</td>
+                    <td class="success">[...]Payment+3+Success</td>
+                    <td>18</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
-                    <td class="failure"><del class="expected">Success</del>
-<ins class="actual">Pending</ins></td>
-                    <td class="failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
-                    <td class="failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
+                    <td class="success">Success</td>
+                    <td class="success">1</td>
+                    <td class="success">1</td>
                     <td class="success">null</td>
-                    <td class="failure"><del class="expected">1.112,83 EUR</del>
-<ins class="actual"> </ins></td>
-                    <td class="failure"><del class="expected">[...]Payment+4+Success</del>
-<ins class="actual"> </ins></td>
-                    <td>3</td>
+                    <td class="success">1.112,83 EUR</td>
+                    <td class="success">[...]Payment+4+Success</td>
+                    <td>18</td>
                 </tr>
             </table>
         </div>
@@ -398,5 +368,5 @@ ins {
             The checkout implementation needs to take care of failed verifications - the user will be redirected to
             the <em>errorUrl</em> specified in the Payment object.
         </p>
-    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 1813678 ms on 16-Mar-2017 at 13:51:57 UTC</div></div></body>
+    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 670639 ms on 16-Mar-2017 at 14:10:39 UTC</div></div></body>
 </html>
