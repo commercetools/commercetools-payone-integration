@@ -29,6 +29,8 @@ It is a standalone Microservice that connects the two cloud platforms and provid
 - [Test environments](#test-environments)
   - [Development workflow](#development-workflow)
   - [Functional Tests](#functional-tests)
+    - [Publishing functional tests results](#publishing-functional-tests-results)
+    - [Known functional tests issues](#known-functional-tests-issues)
   - [Paypal Sandbox Accounts](#paypal-sandbox-accounts)
 - [Contribute Improvements](#contribute-improvements)
 - [Development Notes](#development-notes)
@@ -223,7 +225,6 @@ integration tests.
 The executable specification (using [Concordion](http://concordion.org/)) requires the following environment variables
 in addition to the [commercetools API client credentials](#commercetools-api-client-credentials):
 
-
 <table>
   <tr><th>Name</th><th>Content</th></tr>
   <tr><td><code>CT_PAYONE_INTEGRATION_URL</code></td>           <td>the URL of the service instance under test</td></tr>
@@ -284,7 +285,7 @@ Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the s
 
 The build results are published to [`gh-pages`](https://github.com/commercetools/commercetools-payone-integration/tree/gh-pages) branch of the repo.
 Then you are able to review the tests results in the page [Specs page](http://commercetools.github.io/commercetools-payone-integration/latest/spec/specs/Specs.html)
-and [Tests page](http://commercetools.github.io/commercetools-payone-integration/latest/tests/index.html).
+and [Tests page](http://commercetools.github.io/commercetools-payone-integration/latest/tests/).
 
 **Note:** 
   - the branch `gh-pages` must be created on the remote before publishing, 
@@ -295,6 +296,14 @@ and [Tests page](http://commercetools.github.io/commercetools-payone-integration
   
   - we should replace the plugin with newer version, see [this issue](https://github.com/commercetools/commercetools-payone-integration/issues/135)
     for more details 
+
+#### Known functional tests issues
+
+  - Some tests are waiting for payment update notification for payments which are already failed. 
+    These cases should be reported and avoided (fail-fast approach).
+  
+  - Web-driver (selenium) tests which are navigating to web-pages (Sofortüberweisung, 3ds secure verification) may fail 
+    because of wrong HTML elements names, if the service providers update theirs sites.
 
 ### Paypal Sandbox Accounts
 

@@ -163,18 +163,19 @@ project(":functionaltests") {
 // Publish build results to github pages settings:
 
 def staticPages = project.copySpec {
-    from 'ghpages'
+    from 'ghpages/' // static content - root index.html page
 }
 
 def generatedPages = project.copySpec {
     into 'latest/'
-    from 'functionaltests/build/reports/'
+    from 'functionaltests/build/reports/' // test results: both Concordion and loging console outputs
 }
 
 githubPages {
     repoUri = 'https://github.com/commercetools/commercetools-payone-integration.git'
 
     credentials {
+        // with GitHub token only HTTPS protocol should be used as a repo Uri
         username = System.getenv('GH_TOKEN')
         password = ''
     }
@@ -187,7 +188,7 @@ githubPages {
 
 publishGhPages  {
     doLast {
-        println "Published results to http://commercetools.github.io/commercetools-payone-integration/latest/spec/specs/Specs.html"
+        println "Published results to http://commercetools.github.io/commercetools-payone-integration/"
     }
 }
 
