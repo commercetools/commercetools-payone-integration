@@ -1,24 +1,23 @@
 package com.commercetools.pspadapter.payone.notification;
 
+import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
 import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
-import io.sphere.sdk.payments.commands.PaymentCreateCommand;
-import io.sphere.sdk.payments.queries.PaymentQuery;
-import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.utils.MoneyImpl;
 
 import javax.money.MonetaryAmount;
 import java.util.ConcurrentModificationException;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
+import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlocking;
 
 /**
  * @author fhaertig
@@ -28,17 +27,17 @@ public class NotificationDispatcher {
 
     private final NotificationProcessor defaultProcessor;
     private final ImmutableMap<NotificationAction, NotificationProcessor> processors;
-    private final BlockingSphereClient client;
+    private final ServiceFactory serviceFactory;
     private final PayoneConfig config;
 
     public NotificationDispatcher(
             final NotificationProcessor defaultProcessor,
             final ImmutableMap<NotificationAction, NotificationProcessor> processors,
-            final BlockingSphereClient client,
+            final ServiceFactory serviceFactory,
             final PayoneConfig config) {
         this.defaultProcessor = defaultProcessor;
         this.processors = processors;
-        this.client = client;
+        this.serviceFactory = serviceFactory;
         this.config = config;
     }
 
@@ -46,10 +45,9 @@ public class NotificationDispatcher {
      * Dispatches the {@code notification} to a notification processor
      *
      * @param notification a PAYONE transaction status notification
-     *
      * @throws ConcurrentModificationException in case the respective payment could not be updated due to concurrent
      *                                         modifications; a retry at a later time might be successful
-     * @throws RuntimeException in case of an unexpected (and probably unrecoverable) error
+     * @throws RuntimeException                in case of an unexpected (and probably unrecoverable) error
      */
     public void dispatchNotification(final Notification notification) {
         validateSecrets(notification);
@@ -88,21 +86,17 @@ public class NotificationDispatcher {
 
     private void dispatchNotificationToProcessor(final Notification notification,
                                                  final NotificationProcessor notificationProcessor) {
-        final Payment payment = getPaymentByInterfaceId(notification.getTxid())
-                .orElseGet(() -> {
+
+        Payment payment = executeBlocking(serviceFactory.getPaymentService()
+                    .getByPaymentMethodAndInterfaceId(serviceFactory.getPayoneInterfaceName(), notification.getTxid())
+                .thenComposeAsync(optionalPayment -> optionalPayment
+                        .map(CompletableFuture::completedFuture)
+                        .orElseGet(() -> {
                     PaymentDraft paymentDraft = createNewPaymentDraftFromNotification(notification);
-                    return client.executeBlocking(PaymentCreateCommand.of(paymentDraft));
-                });
+                    return serviceFactory.getPaymentService().createPayment(paymentDraft).toCompletableFuture();
+                })));
 
         notificationProcessor.processTransactionStatusNotification(notification, payment);
-    }
-
-    private Optional<Payment> getPaymentByInterfaceId(final String interfaceId) {
-        final PagedQueryResult<Payment> queryResult = client.executeBlocking(
-                PaymentQuery.of()
-                        .withPredicates(p -> p.interfaceId().is(interfaceId))
-                        .plusPredicates(p -> p.paymentMethodInfo().paymentInterface().is("PAYONE")));
-        return queryResult.head();
     }
 
     private PaymentDraft createNewPaymentDraftFromNotification(final Notification notification) {
@@ -114,7 +108,7 @@ public class NotificationDispatcher {
                 .paymentMethodInfo(
                         PaymentMethodInfoBuilder
                                 .of()
-                                .paymentInterface("PAYONE")
+                                .paymentInterface(serviceFactory.getPayoneInterfaceName())
                                 .method(clearingType.getKey())
                                 .build())
                 .build();

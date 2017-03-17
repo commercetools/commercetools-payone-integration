@@ -1,20 +1,21 @@
 package com.commercetools.pspadapter.payone.notification;
 
+import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
-import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
@@ -24,6 +25,8 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Optional;
 
+import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlocking;
+
 /**
  * Base for notification processor implementations.
  *
@@ -32,15 +35,15 @@ import java.util.Optional;
 public abstract class NotificationProcessorBase implements NotificationProcessor {
     private static final String DEFAULT_SEQUENCE_NUMBER = "0";
 
-    private final BlockingSphereClient client;
+    private final ServiceFactory serviceFactory;
 
     /**
      * Constructor for implementations.
      *
-     * @param client the commercetools platform client to update payments
+     * @param serviceFactory the services factory for commercetools platform API
      */
-    protected NotificationProcessorBase(final BlockingSphereClient client) {
-        this.client = client;
+    protected NotificationProcessorBase(final ServiceFactory serviceFactory) {
+        this.serviceFactory = serviceFactory;
     }
 
     @Override
@@ -53,7 +56,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
         }
 
         try {
-            client.executeBlocking(PaymentUpdateCommand.of(payment, createPaymentUpdates(payment, notification)));
+            executeBlocking(serviceFactory.getPaymentService().updatePayment(payment, createPaymentUpdates(payment, notification)));
         } catch (final io.sphere.sdk.client.ConcurrentModificationException e) {
             throw new java.util.ConcurrentModificationException(e);
         }

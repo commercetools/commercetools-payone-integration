@@ -105,7 +105,7 @@ public abstract class BaseFixture {
 
         //only for creation of test data
         final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(propertyProvider);
-        ctpClient = serviceFactory.createCommercetoolsClient();
+        ctpClient = serviceFactory.getBlockingCommercetoolsClient();
 
         typeCache = serviceFactory.createTypeCache(ctpClient);
     }

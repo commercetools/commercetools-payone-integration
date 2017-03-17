@@ -1,11 +1,11 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
+import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
 import com.google.common.collect.ImmutableList;
-import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
@@ -35,10 +35,10 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
     /**
      * Initializes a new instance.
      *
-     * @param client the commercetools platform client to update payments
+     * @param serviceFactory the services factory for commercetools platform API
      */
-    public AppointedNotificationProcessor(final BlockingSphereClient client) {
-        super(client);
+    public AppointedNotificationProcessor(ServiceFactory serviceFactory) {
+        super(serviceFactory);
     }
 
     @Override

@@ -36,16 +36,19 @@ public class IntegrationService {
     private final PaymentDispatcher paymentDispatcher;
     private final CustomTypeBuilder typeBuilder;
     private final NotificationDispatcher notificationDispatcher;
+    private final String payoneInterfaceName;
 
     IntegrationService(
             final CustomTypeBuilder typeBuilder,
             final CommercetoolsQueryExecutor commercetoolsQueryExecutor,
             final PaymentDispatcher paymentDispatcher,
-            final NotificationDispatcher notificationDispatcher) {
+            final NotificationDispatcher notificationDispatcher,
+            final String payoneInterfaceName) {
         this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
         this.paymentDispatcher = paymentDispatcher;
         this.typeBuilder = typeBuilder;
         this.notificationDispatcher = notificationDispatcher;
+        this.payoneInterfaceName = payoneInterfaceName;
     }
 
     public void start() {
@@ -110,7 +113,7 @@ public class IntegrationService {
             for (int i = 0; i < 20; i++) {
                 try {
                     final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
-                    if (!"PAYONE".equals(payment.getPayment().getPaymentMethodInfo().getPaymentInterface())) {
+                    if (!payoneInterfaceName.equals(payment.getPayment().getPaymentMethodInfo().getPaymentInterface())) {
                         return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
                     }
 

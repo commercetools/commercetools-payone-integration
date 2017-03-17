@@ -1,14 +1,5 @@
 package com.commercetools.pspadapter.payone;
 
-import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import com.commercetools.pspadapter.payone.mapping.*;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.SchedulerException;
-
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
@@ -19,28 +10,37 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMeth
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
+import com.commercetools.pspadapter.payone.mapping.*;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
-import com.commercetools.pspadapter.payone.notification.common.AppointedNotificationProcessor;
-import com.commercetools.pspadapter.payone.notification.common.CaptureNotificationProcessor;
-import com.commercetools.pspadapter.payone.notification.common.DefaultNotificationProcessor;
-import com.commercetools.pspadapter.payone.notification.common.PaidNotificationProcessor;
-import com.commercetools.pspadapter.payone.notification.common.UnderpaidNotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.common.*;
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.DefaultChargeTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.UnsupportedTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.creditcard.AuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.paymentinadvance.BankTransferInAdvanceChargeTransactionExecutor;
+import com.commercetools.service.OrderService;
+import com.commercetools.service.OrderServiceImpl;
+import com.commercetools.service.PaymentService;
+import com.commercetools.service.PaymentServiceImpl;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.SchedulerException;
+
+import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
 
 /**
  * @author fhaertig
@@ -52,6 +52,13 @@ public class ServiceFactory {
 
     private final ServiceConfig serviceConfig;
     private final PropertyProvider propertyProvider;
+    private static final String PAYONE_INTERFACE_NAME = PAYONE;
+
+    private BlockingSphereClient blockingSphereClient = null;
+
+    private PaymentService paymentService = null;
+
+    private OrderService orderService = null;
 
     private ServiceFactory(final PropertyProvider propertyProvider) {
         this.propertyProvider = propertyProvider;
@@ -81,7 +88,7 @@ public class ServiceFactory {
         final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
         final PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
         final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(propertyProvider);
-        final BlockingSphereClient commercetoolsClient = serviceFactory.createCommercetoolsClient();
+        final BlockingSphereClient commercetoolsClient = serviceFactory.getBlockingCommercetoolsClient();
         final LoadingCache<String, Type> typeCache = serviceFactory.createTypeCache(commercetoolsClient);
         final PaymentDispatcher paymentDispatcher = ServiceFactory.createPaymentDispatcher(
                 typeCache,
@@ -89,7 +96,7 @@ public class ServiceFactory {
                 serviceConfig,
                 commercetoolsClient);
         final NotificationDispatcher notificationDispatcher = ServiceFactory.createNotificationDispatcher(
-                commercetoolsClient, payoneConfig);
+                serviceFactory, payoneConfig);
 
         final IntegrationService integrationService = ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(commercetoolsClient),
@@ -116,19 +123,45 @@ public class ServiceFactory {
     }
 
     /**
-     * FIXME return shared instance
      * Creates a new commercetools client instance.
      * @return the client
      */
-    public BlockingSphereClient createCommercetoolsClient() {
-        final SphereClientFactory sphereClientFactory = SphereClientFactory.of();
-        return BlockingSphereClient.of(
-                sphereClientFactory.createClient(
-                        serviceConfig.getCtProjectKey(),
-                        serviceConfig.getCtClientId(),
-                        serviceConfig.getCtClientSecret()),
-                DEFAULT_CTP_CLIENT_TIMEOUT,
-                TimeUnit.SECONDS);
+    synchronized
+    public BlockingSphereClient getBlockingCommercetoolsClient() {
+        if (blockingSphereClient == null) {
+            final SphereClientFactory sphereClientFactory = SphereClientFactory.of();
+            blockingSphereClient = BlockingSphereClient.of(
+                    sphereClientFactory.createClient(
+                            serviceConfig.getCtProjectKey(),
+                            serviceConfig.getCtClientId(),
+                            serviceConfig.getCtClientSecret()),
+                    DEFAULT_CTP_CLIENT_TIMEOUT,
+                    TimeUnit.SECONDS);
+        }
+
+        return blockingSphereClient;
+    }
+
+    synchronized
+    public PaymentService getPaymentService() {
+        if (paymentService == null) {
+            paymentService = new PaymentServiceImpl(getBlockingCommercetoolsClient());
+        }
+
+        return paymentService;
+    }
+
+    synchronized
+    public OrderService getOrderService() {
+        if (orderService == null) {
+            orderService = new OrderServiceImpl(getBlockingCommercetoolsClient());
+        }
+
+        return  orderService;
+    }
+
+    public String getPayoneInterfaceName() {
+        return PAYONE_INTERFACE_NAME;
     }
 
     // FIXME return shared instance
@@ -137,14 +170,14 @@ public class ServiceFactory {
     }
 
     public IntegrationService createService() {
-        final BlockingSphereClient client = createCommercetoolsClient();
+        final BlockingSphereClient client = getBlockingCommercetoolsClient();
         final LoadingCache<String, Type> typeCache = createTypeCache(client);
         final PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
 
         return ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(client),
                 createPaymentDispatcher(typeCache, payoneConfig, serviceConfig, client),
-                createNotificationDispatcher(client, payoneConfig),
+                createNotificationDispatcher(this, payoneConfig),
                 new CustomTypeBuilder(
                         client,
                         CustomTypeBuilder.PermissionToStartFromScratch.fromBoolean(serviceConfig.getStartFromScratch())));
@@ -156,19 +189,20 @@ public class ServiceFactory {
             final PaymentDispatcher paymentDispatcher,
             final NotificationDispatcher notificationDispatcher,
             final CustomTypeBuilder customTypeBuilder) {
-        return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, notificationDispatcher);
+        return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, notificationDispatcher, PAYONE);
     }
 
-    public static NotificationDispatcher createNotificationDispatcher(final BlockingSphereClient client, final PayoneConfig config) {
-        final NotificationProcessor defaultNotificationProcessor = new DefaultNotificationProcessor(client);
+    public static NotificationDispatcher createNotificationDispatcher(final ServiceFactory serviceFactory,
+                                                                      final PayoneConfig config) {
+        final NotificationProcessor defaultNotificationProcessor = new DefaultNotificationProcessor(serviceFactory);
 
         final ImmutableMap.Builder<NotificationAction, NotificationProcessor> builder = ImmutableMap.builder();
-        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(client));
-        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(client));
-        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(client));
-        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(client));
+        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(serviceFactory));
+        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(serviceFactory));
+        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(serviceFactory));
+        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(serviceFactory));
 
-        return new NotificationDispatcher(defaultNotificationProcessor, builder.build(), client, config);
+        return new NotificationDispatcher(defaultNotificationProcessor, builder.build(), serviceFactory, config);
     }
 
     /**
