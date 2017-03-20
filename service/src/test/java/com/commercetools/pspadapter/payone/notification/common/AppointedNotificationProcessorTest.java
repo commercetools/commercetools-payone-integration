@@ -1,30 +1,21 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static util.UpdatePaymentTestHelper.*;
-
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
-import io.sphere.sdk.client.BlockingSphereClient;
+import com.commercetools.pspadapter.payone.notification.BaseNotificationProcessorTest;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.TransactionDraftBuilder;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
-import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import util.PaymentTestHelper;
 
 import javax.money.MonetaryAmount;
 import java.time.LocalDateTime;
@@ -32,33 +23,31 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.when;
+import static util.UpdatePaymentTestHelper.*;
 
 /**
  * @author fhaertig
  * @since 11.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
-public class AppointedNotificationProcessorTest {
+public class AppointedNotificationProcessorTest extends BaseNotificationProcessorTest {
 
     private static final Integer seconds = 1450365542;
     private static final ZonedDateTime TXTIME_ZONED_DATE_TIME =
             ZonedDateTime.of(LocalDateTime.ofEpochSecond(seconds, 0, ZoneOffset.UTC), ZoneId.of("UTC"));
 
-    @Mock
-    private BlockingSphereClient client;
-
     @InjectMocks
-    private AppointedNotificationProcessor testee;
-
-    @Captor
-    private ArgumentCaptor<PaymentUpdateCommand> paymentRequestCaptor;
-
-    private final PaymentTestHelper testHelper = new PaymentTestHelper();
-
-    private Notification notification;
+    protected AppointedNotificationProcessor testee;
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
+
         notification = new Notification();
         notification.setPrice("20.00");
         notification.setBalance("0.00");
@@ -68,6 +57,9 @@ public class AppointedNotificationProcessorTest {
         notification.setSequencenumber("0");
         notification.setTxaction(NotificationAction.APPOINTED);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
+
+        when(serviceFactory.getPaymentService()).thenReturn(paymentService);
+        when(paymentService.updatePayment(anyObject(), anyObject())).thenReturn(CompletableFuture.completedFuture(null));
     }
 
     @Test
@@ -82,9 +74,7 @@ public class AppointedNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
-
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         final AddTransaction transaction = AddTransaction.of(
@@ -121,9 +111,7 @@ public class AppointedNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
-
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
@@ -165,9 +153,7 @@ public class AppointedNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
-
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         final AddTransaction transaction = AddTransaction.of(
@@ -205,9 +191,7 @@ public class AppointedNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
-
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
@@ -247,9 +231,7 @@ public class AppointedNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
-
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
@@ -288,9 +270,7 @@ public class AppointedNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
-
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
@@ -330,9 +310,8 @@ public class AppointedNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
@@ -359,9 +338,8 @@ public class AppointedNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
@@ -386,9 +364,8 @@ public class AppointedNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
@@ -408,9 +385,8 @@ public class AppointedNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
@@ -441,9 +417,8 @@ public class AppointedNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
@@ -463,9 +438,8 @@ public class AppointedNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);

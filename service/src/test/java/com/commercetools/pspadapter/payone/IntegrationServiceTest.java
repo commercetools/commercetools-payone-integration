@@ -1,14 +1,5 @@
 package com.commercetools.pspadapter.payone;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
@@ -23,7 +14,6 @@ import io.sphere.sdk.types.CustomFields;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -32,6 +22,13 @@ import java.io.IOException;
 import java.util.ConcurrentModificationException;
 import java.util.Random;
 import java.util.concurrent.CompletionException;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Jan Wolter
@@ -42,7 +39,7 @@ public class IntegrationServiceTest
 
     private static final Random random = new Random();
 
-    private static final PaymentMethodInfo payonePaymentMethodInfo = paymentMethodInfo("PAYONE");
+    private static final PaymentMethodInfo payonePaymentMethodInfo = paymentMethodInfo("TestIntegrationServicePaymentMethodName");
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
@@ -59,11 +56,13 @@ public class IntegrationServiceTest
     @Mock
     private Payment payment;
 
-    @InjectMocks
     private IntegrationService testee;
 
     @Before
     public void setUp() throws IOException {
+        // the last argument in the constructor is a String, that's why we can't use @InjectMocks for this instantiation
+        testee = new IntegrationService(customTypeBuilder, commercetoolsQueryExecutor, paymentDispatcher, null, payonePaymentMethodInfo.getPaymentInterface());
+
         when(payment.getVersion()).thenReturn(1L);
         when(payment.getPaymentMethodInfo()).thenReturn(payonePaymentMethodInfo);
         when(payment.getCustom()).thenReturn(customFields("<dummyReference>"));
@@ -97,7 +96,7 @@ public class IntegrationServiceTest
         when(modifiedPayment.getCustom()).thenReturn(customFields("dummyReferenceValue"));
 
         final PaymentWithCartLike modifiedPaymentWithCartLike = new PaymentWithCartLike(modifiedPayment, UNUSED_CART);
-        final PaymentMethodInfo paymentMethodInfo = paymentMethodInfo("PAYONE");
+        final PaymentMethodInfo paymentMethodInfo = paymentMethodInfo("TestIntegrationServicePaymentMethodName");
 
         when(payment.getPaymentMethodInfo()).thenReturn(paymentMethodInfo);
         when(modifiedPayment.getPaymentMethodInfo()).thenReturn(paymentMethodInfo);
@@ -177,7 +176,7 @@ public class IntegrationServiceTest
         // arrange
         final String paymentId = randomString();
         final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
-        final PaymentMethodInfo paymentMethodInfo = paymentMethodInfo("other than PAYONE");
+        final PaymentMethodInfo paymentMethodInfo = paymentMethodInfo("other than TestIntegrationServicePaymentMethodName");
 
         when(payment.getPaymentMethodInfo()).thenReturn(paymentMethodInfo);
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);

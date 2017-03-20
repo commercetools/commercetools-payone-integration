@@ -1,20 +1,18 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
-import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
+import com.commercetools.pspadapter.payone.notification.BaseNotificationProcessorTest;
+import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
 import io.sphere.sdk.commands.UpdateAction;
-import io.sphere.sdk.payments.*;
+import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.TransactionDraftBuilder;
+import io.sphere.sdk.payments.TransactionState;
+import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
 import io.sphere.sdk.utils.MoneyImpl;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.money.MonetaryAmount;
 import java.time.LocalDateTime;
@@ -27,44 +25,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static util.UpdatePaymentTestHelper.*;
 
 /**
- * @author Jan Wolter
+ * Basic properties and methods for chargeable notifications tests (capture, paid etc)
  */
-@RunWith(MockitoJUnitRunner.class)
-public class CaptureNotificationProcessorTest extends BaseChargedNotificationProcessorTest {
+public class BaseChargedNotificationProcessorTest extends BaseNotificationProcessorTest {
 
-    private static final Integer millis = 1450365542;
-    private static final ZonedDateTime timestamp =
-        ZonedDateTime.of(LocalDateTime.ofEpochSecond(millis, 0, ZoneOffset.UTC), ZoneId.of("UTC"));
+    protected static final Integer millis = 1450365542;
 
-    @InjectMocks
-    private CaptureNotificationProcessor testee;
+    protected static final ZonedDateTime timestamp =
+            ZonedDateTime.of(LocalDateTime.ofEpochSecond(millis, 0, ZoneOffset.UTC), ZoneId.of("UTC"));
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        notification = new Notification();
-        notification.setPrice("20.00");
-        notification.setCurrency("EUR");
-        notification.setTxtime(millis.toString());
-        notification.setSequencenumber("23");
-        notification.setClearingtype("cc");
-        notification.setTxaction(NotificationAction.CAPTURE);
-        notification.setTransactionStatus(TransactionStatus.COMPLETED);
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending() throws Exception {
-        super.processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending(testee);
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void processingCompletedNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending() throws Exception {
+    protected void processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending(NotificationProcessorBase testee)
+            throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneAuthPending20EuroCC();
         payment.getTransactions().clear();
+
+        notification.setTransactionStatus(TransactionStatus.PENDING);
 
         // act
         testee.processTransactionStatusNotification(notification, payment);
@@ -93,20 +69,13 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
     }
 
-    @Test
-    @SuppressWarnings("unchecked")
-    public void processingPendingNotificationForPendingChargeTransactionDoesNotChangeState() throws Exception {
-        super.processingPendingNotificationForPendingChargeTransactionDoesNotChangeState(testee);
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void processingCompletedNotificationForPendingChargeTransactionDoesNotChangeState() throws Exception {
+    protected void processingPendingNotificationForPendingChargeTransactionDoesNotChangeState(NotificationProcessorBase testee)
+            throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneChargePending20Euro();
-        final Transaction chargeTransaction = payment.getTransactions().get(0);
 
-        notification.setSequencenumber(chargeTransaction.getInteractionId());
+        notification.setSequencenumber(payment.getTransactions().get(0).getInteractionId());
+        notification.setTransactionStatus(TransactionStatus.PENDING);
 
         // act
         testee.processTransactionStatusNotification(notification, payment);
