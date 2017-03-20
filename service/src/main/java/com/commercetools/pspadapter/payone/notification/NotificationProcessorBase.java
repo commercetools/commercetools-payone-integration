@@ -4,16 +4,22 @@ import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
+import com.commercetools.pspadapter.payone.mapping.order.PaymentToOrderStateMapper;
+import com.commercetools.service.OrderService;
+import com.commercetools.service.PaymentService;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.commands.UpdateAction;
+import io.sphere.sdk.orders.Order;
+import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +30,8 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlocking;
 
@@ -34,6 +42,8 @@ import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlo
  */
 public abstract class NotificationProcessorBase implements NotificationProcessor {
     private static final String DEFAULT_SEQUENCE_NUMBER = "0";
+
+    private static final Logger LOG = LoggerFactory.getLogger(NotificationProcessorBase.class);
 
     private final ServiceFactory serviceFactory;
 
@@ -56,14 +66,35 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
         }
 
         try {
-            executeBlocking(serviceFactory.getPaymentService().updatePayment(payment, createPaymentUpdates(payment, notification)));
+
+            CompletionStage<Order> fullCompletionStage = getPaymentService().updatePayment(payment, createPaymentUpdates(payment, notification))
+                    .thenComposeAsync(updatedPayment ->
+                            getOrderService().getOrderByPaymentId(updatedPayment.getId())
+                                             .thenComposeAsync(order -> updateOrderIfExists(order.orElse(null), updatedPayment)));
+
+            executeBlocking(fullCompletionStage);
+
         } catch (final io.sphere.sdk.client.ConcurrentModificationException e) {
             throw new java.util.ConcurrentModificationException(e);
         }
     }
 
+    private CompletionStage<Order> updateOrderIfExists(Order order, Payment updatedPayment) {
+        if (order != null) {
+            PaymentState newPaymentState = getPaymentToOrderStateMapper().mapPaymentToOrderState(updatedPayment);
+            if (ObjectUtils.compare(newPaymentState, order.getPaymentState()) != 0) {
+                return getOrderService().updateOrderPaymentState(order, newPaymentState);
+            }
+        } else {
+            LOG.error("Payment [{}] is updated, but respective order is not found!", updatedPayment.getId());
+        }
+
+        return CompletableFuture.completedFuture(order);
+    }
+
     /**
      * Returns whether the provided PAYONE {@code notification} can be processed by this instance.
+     *
      * @param notification a PAYONE notification
      * @return whether the {@code notification} can be processed
      */
@@ -72,13 +103,13 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
     /**
      * Generates a list of update actions which can be applied to the payment in one step.
      *
-     * @param payment the payment to which the updates may apply
+     * @param payment      the payment to which the updates may apply
      * @param notification the notification to process
      * @return an immutable list of update actions which will e.g. add an interfaceInteraction to the payment
      * or apply changes to a corresponding transaction in the payment
      */
     protected ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
-                                                                                 final Notification notification) {
+                                                                        final Notification notification) {
         final ImmutableList.Builder<UpdateAction<Payment>> listBuilder = ImmutableList.builder();
         listBuilder.add(createNotificationAddAction(notification));
         listBuilder.add(setStatusInterfaceCode(notification));
@@ -160,5 +191,17 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
     @Nonnull
     protected static String toSequenceNumber(final String sequenceNumber) {
         return MoreObjects.firstNonNull(sequenceNumber, DEFAULT_SEQUENCE_NUMBER);
+    }
+
+    protected final PaymentService getPaymentService() {
+        return serviceFactory.getPaymentService();
+    }
+
+    protected final OrderService getOrderService() {
+        return serviceFactory.getOrderService();
+    }
+
+    protected final PaymentToOrderStateMapper getPaymentToOrderStateMapper() {
+        return serviceFactory.getPaymentToOrderStateMapper();
     }
 }

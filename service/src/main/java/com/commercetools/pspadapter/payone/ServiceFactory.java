@@ -11,6 +11,8 @@ import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.mapping.*;
+import com.commercetools.pspadapter.payone.mapping.order.DefaultPaymentToOrderStateMapper;
+import com.commercetools.pspadapter.payone.mapping.order.PaymentToOrderStateMapper;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.common.*;
@@ -59,6 +61,8 @@ public class ServiceFactory {
     private PaymentService paymentService = null;
 
     private OrderService orderService = null;
+
+    private PaymentToOrderStateMapper paymentToOrderStateMapper = null;
 
     private ServiceFactory(final PropertyProvider propertyProvider) {
         this.propertyProvider = propertyProvider;
@@ -158,6 +162,14 @@ public class ServiceFactory {
         }
 
         return  orderService;
+    }
+
+    synchronized
+    public PaymentToOrderStateMapper getPaymentToOrderStateMapper() {
+        if (paymentToOrderStateMapper == null) {
+            paymentToOrderStateMapper = new DefaultPaymentToOrderStateMapper();
+        }
+        return paymentToOrderStateMapper;
     }
 
     public String getPayoneInterfaceName() {
