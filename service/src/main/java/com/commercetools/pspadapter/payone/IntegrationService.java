@@ -13,9 +13,9 @@ import io.sphere.sdk.client.NotFoundException;
 import io.sphere.sdk.http.HttpStatusCode;
 import io.sphere.sdk.json.SphereJsonUtils;
 import org.apache.http.entity.ContentType;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.Spark;
 
 import javax.annotation.Nonnull;
@@ -28,7 +28,7 @@ import java.util.concurrent.CompletionException;
  */
 public class IntegrationService {
 
-    public static final Logger LOG = LogManager.getLogger(IntegrationService.class);
+    public static final Logger LOG = LoggerFactory.getLogger(IntegrationService.class);
 
     public static final String HEROKU_ASSIGNED_PORT = "PORT";
 
@@ -70,14 +70,14 @@ public class IntegrationService {
         Spark.get("/commercetools/handle/payments/:id", (req, res) -> {
             final PaymentHandleResult paymentHandleResult = handlePayment(req.params("id"));
             if (!paymentHandleResult.body().isEmpty()) {
-                LOG.debug(String.format("--> Result body of handle/payments/%s: %s", req.params("id"), paymentHandleResult.body()));
+                LOG.debug("--> Result body of handle/payments/{}: {}", req.params("id"), paymentHandleResult.body());
             }
             res.status(paymentHandleResult.statusCode());
             return res;
         }, new HandlePaymentResponseTransformer());
 
         Spark.post("/payone/notification", (req, res) -> {
-            LOG.debug("<- Received POST from Payone: " + req.body());
+            LOG.debug("<- Received POST from Payone: {}", req.body());
             try {
                 final Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
                 notificationDispatcher.dispatchNotification(notification);
@@ -90,7 +90,7 @@ public class IntegrationService {
                 // 4. Execution timeout, if sphere client has not responded in time
                 // 5. unknown notification type
                 // Any other unexpected error.
-                LOG.error("Payone notification handling error. Request body: " + req.body(), e);
+                LOG.error("Payone notification handling error. Request body: {}", req.body(), e);
                 res.status(400);
                 return e.getMessage();
             }
@@ -113,7 +113,9 @@ public class IntegrationService {
             for (int i = 0; i < 20; i++) {
                 try {
                     final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
-                    if (!payoneInterfaceName.equals(payment.getPayment().getPaymentMethodInfo().getPaymentInterface())) {
+                    String paymentInterface = payment.getPayment().getPaymentMethodInfo().getPaymentInterface();
+                    if (!payoneInterfaceName.equals(paymentInterface)) {
+                        LOG.warn("Wrong payment interface name: expected [{}], found [{}]", payoneInterfaceName, paymentInterface);
                         return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
                     }
 
@@ -145,7 +147,7 @@ public class IntegrationService {
 
 
     private PaymentHandleResult logThrowableInResponse(final Throwable throwable) {
-        LOG.debug(throwable);
+        LOG.debug("Error in response: ", throwable);
         // TODO jw: we probably need to differentiate depending on the exception type
         return logCauseMessageInResponse(String.format("Sorry, but you hit us between the eyes. Cause: %s", throwable.getMessage()));
     }
