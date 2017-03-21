@@ -197,28 +197,28 @@ ins {
             <td class="inputvalue">400</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">Payer</td>
-            <td>8bb58ea9-d6bf-478e-a5e8-9aca4ee4f6d1</td>
+            <td>642fee7d-3797-464c-a964-aed8fad4bd59</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
             <td class="inputvalue">400</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">Underpayer</td>
-            <td>5548ab7c-7653-4572-90b2-0666276dbca6</td>
+            <td>f390b4a4-e711-45df-a4fe-b0b9dde7b93d</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 3</td>
             <td class="inputvalue">400</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">Overpayer</td>
-            <td>3ee6534c-a737-47c7-82a5-13342fd4c6a6</td>
+            <td>a530d5e3-28b9-4e5d-83c6-c208ff51c976</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 4</td>
             <td class="inputvalue">400</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">Splitpayer</td>
-            <td>b8ddcd80-e21a-457d-9cfa-86f80e64fe69</td>
+            <td>67908822-54ed-4411-b664-e80791484dbe</td>
         </tr>
     </table>
     <p>
@@ -274,7 +274,8 @@ ins {
     </p>
     <ol>
         <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#partlySuccessfulPayments, #txactionAppointed)" class="success">received</span> -&gt; has no effect, just as a confirmation</li>
-        <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)" class="success">received</span>
+        <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)" class="failure"><del class="expected">received</del>
+<ins class="actual">== false</ins></span>
             -&gt;  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
     </ol>
     <table c:execute="#result = fetchPaymentDetails(#paymentName)">
@@ -288,11 +289,14 @@ ins {
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 1</td>
-            <td class="success success">Success</td>
+            <td class="success failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
             <td class="success success">1</td>
-            <td class="success success">1</td>
+            <td class="success failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
             <td class="success success"> </td>
-            <td class="success success">4,00 EUR</td>
+            <td class="success failure"><del class="expected">4,00 EUR</del>
+<ins class="actual"> </ins></td>
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 2</td>
@@ -300,25 +304,32 @@ ins {
             <td class="success success">1</td>
             <td class="success success">0</td>
             <td class="success success"> </td>
-            <td class="success success">3,80 EUR</td>
+            <td class="success failure"><del class="expected">3,80 EUR</del>
+<ins class="actual"> </ins></td>
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 3</td>
-            <td class="success success">Success</td>
+            <td class="success failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
             <td class="success success">1</td>
-            <td class="success success">1</td>
+            <td class="success failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
             <td class="success success"> </td>
-            <td class="success success">4,20 EUR</td>
+            <td class="success failure"><del class="expected">4,20 EUR</del>
+<ins class="actual"> </ins></td>
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 4</td>
-            <td class="success success">Success</td>
+            <td class="success failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
             <td class="success success">1</td>
-            <td class="success success">1</td>
+            <td class="success failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
             <td class="success success"> </td>
-            <td class="success success">4,00 EUR</td>
+            <td class="success failure"><del class="expected">4,00 EUR</del>
+<ins class="actual"> </ins></td>
         </tr>
     </table>
 </div>
-<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 759922 ms on 20-Mar-2017 at 10:30:45 UTC</div></div></body>
+<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 1196732 ms on 21-Mar-2017 at 13:34:11 UTC</div></div></body>
 </html>
