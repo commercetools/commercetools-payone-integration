@@ -57,9 +57,6 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         notification.setSequencenumber("0");
         notification.setTxaction(NotificationAction.APPOINTED);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
-
-        when(serviceFactory.getPaymentService()).thenReturn(paymentService);
-        when(paymentService.updatePayment(anyObject(), anyObject())).thenReturn(CompletableFuture.completedFuture(null));
     }
 
     @Test
