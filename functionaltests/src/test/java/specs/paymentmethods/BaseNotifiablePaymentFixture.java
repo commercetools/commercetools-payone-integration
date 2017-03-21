@@ -44,9 +44,10 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
         Long numberOfPaymentsWithAppointedNotification = timer.start(
                 () -> countPaymentsWithNotificationOfAction(paymentNamesList, txaction),
                 num -> num == notificationsToWait,
-                num -> LOG.info("Intermediate report: waited {}/{} sec, received {}/{} notifications in test [{}]",
+                num -> LOG.info("Intermediate report: waited {}/{} sec, received {}/{} notifications of action [{}] in test [{}]",
                         msecToSec(timer.getCurrentDuration()), msecToSec(timer.getTimeoutDuration()),
                         num, notificationsToWait,
+                        txaction,
                         simpleClassName));
 
         boolean success = numberOfPaymentsWithAppointedNotification == notificationsToWait;
