@@ -5,6 +5,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
 import com.commercetools.pspadapter.payone.notification.BaseNotificationProcessorTest;
 import io.sphere.sdk.commands.UpdateAction;
+import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.TransactionDraftBuilder;
 import io.sphere.sdk.payments.TransactionState;
@@ -23,10 +24,9 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static util.UpdatePaymentTestHelper.*;
 
@@ -44,6 +44,9 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     @InjectMocks
     protected AppointedNotificationProcessor testee;
 
+    // Payone "appointed" is used to be mapped to CTP "pending" state
+    private static final PaymentState ORDER_PAYMENT_STATE = PaymentState.PENDING;
+
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -57,6 +60,9 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         notification.setSequencenumber("0");
         notification.setTxaction(NotificationAction.APPOINTED);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
+
+        when(paymentToOrderStateMapper.mapPaymentToOrderState(any(Payment.class)))
+                .thenReturn(ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -95,6 +101,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
                 .containsOnlyOnce(transaction);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(4);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -135,6 +143,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
                 .containsOnlyOnce(transaction);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(5);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -174,6 +184,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
                 .containsOnlyOnce(transaction);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(4);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -212,6 +224,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
                 .containsOnlyOnce(transaction);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(4);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -252,6 +266,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
                 .containsOnlyOnce(transaction);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(4);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -291,6 +307,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
                 .containsOnlyOnce(transaction);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(4);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -320,6 +338,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
                                 payment.getTransactions().get(0).getId()));
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(4);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -348,6 +368,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
                                 payment.getTransactions().get(0).getId()));
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(4);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -370,6 +392,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
 
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(3);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -401,6 +425,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         assertThat(updateActions).as("# of update actions").hasSize(5);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -423,6 +449,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
 
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(3);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -443,5 +471,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
 
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(3);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 }

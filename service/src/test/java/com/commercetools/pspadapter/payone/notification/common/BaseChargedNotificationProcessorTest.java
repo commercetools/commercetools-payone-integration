@@ -4,6 +4,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Transactio
 import com.commercetools.pspadapter.payone.notification.BaseNotificationProcessorTest;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
 import io.sphere.sdk.commands.UpdateAction;
+import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.TransactionDraftBuilder;
 import io.sphere.sdk.payments.TransactionState;
@@ -34,7 +35,8 @@ public class BaseChargedNotificationProcessorTest extends BaseNotificationProces
     protected static final ZonedDateTime timestamp =
             ZonedDateTime.of(LocalDateTime.ofEpochSecond(millis, 0, ZoneOffset.UTC), ZoneId.of("UTC"));
 
-    protected void processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending(NotificationProcessorBase testee)
+    protected void processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending(NotificationProcessorBase testee,
+                                                                                                             PaymentState expectedPaymentState)
             throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneAuthPending20EuroCC();
@@ -67,9 +69,12 @@ public class BaseChargedNotificationProcessorTest extends BaseNotificationProces
                 .containsOnlyOnce(transaction);
 
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+
+        verifyUpdateOrderActions(payment, expectedPaymentState);
     }
 
-    protected void processingPendingNotificationForPendingChargeTransactionDoesNotChangeState(NotificationProcessorBase testee)
+    protected void processingPendingNotificationForPendingChargeTransactionDoesNotChangeState(NotificationProcessorBase testee,
+                                                                                              PaymentState expectedPaymentState)
             throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneChargePending20Euro();
@@ -89,5 +94,6 @@ public class BaseChargedNotificationProcessorTest extends BaseNotificationProces
 
         assertThat(updateActions).as("# of payment update actions").hasSize(3);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+        verifyUpdateOrderActions(payment, expectedPaymentState);
     }
 }

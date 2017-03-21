@@ -4,6 +4,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
 import io.sphere.sdk.commands.UpdateAction;
+import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.utils.MoneyImpl;
@@ -17,6 +18,8 @@ import javax.money.MonetaryAmount;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 import static util.UpdatePaymentTestHelper.*;
 
 /**
@@ -27,6 +30,9 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
 
     @InjectMocks
     private PaidNotificationProcessor testee;
+
+    // Payone "paid" is mapped to CTP "paid" state
+    private static final PaymentState ORDER_PAYMENT_STATE = PaymentState.PAID;
 
     @Before
     public void setUp() throws Exception {
@@ -39,12 +45,15 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
         notification.setSequencenumber("23");
         notification.setTxaction(NotificationAction.PAID);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
+
+        when(paymentToOrderStateMapper.mapPaymentToOrderState(any(Payment.class)))
+                .thenReturn(ORDER_PAYMENT_STATE);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending() throws Exception {
-        super.processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending(testee);
+        super.processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending(testee, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -87,12 +96,14 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void processingPendingNotificationForPendingChargeTransactionDoesNotChangeState() throws Exception {
-        super.processingPendingNotificationForPendingChargeTransactionDoesNotChangeState(testee);
+        super.processingPendingNotificationForPendingChargeTransactionDoesNotChangeState(testee, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -127,6 +138,8 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
                 .containsOnly(SetAmountPaid.of(MoneyImpl.of(notification.getPrice(), notification.getCurrency())));
 
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -152,6 +165,8 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
 
         assertThat(updateActions).as("# of payment update actions").hasSize(3);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -177,5 +192,7 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
 
         assertThat(updateActions).as("# of payment update actions").hasSize(3);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 }

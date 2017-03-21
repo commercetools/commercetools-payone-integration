@@ -66,11 +66,10 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
         }
 
         try {
-
+            // 1. update payment
             CompletionStage<Order> fullCompletionStage = getPaymentService().updatePayment(payment, createPaymentUpdates(payment, notification))
-                    .thenComposeAsync(updatedPayment ->
-                            getOrderService().getOrderByPaymentId(updatedPayment.getId())
-                                             .thenComposeAsync(order -> updateOrderIfExists(order.orElse(null), updatedPayment)));
+                    // 2. when payment is updated - try to find and updated respective Order.paymentState
+                    .thenComposeAsync(this::tryToUpdateOrderByPayment);
 
             executeBlocking(fullCompletionStage);
 
@@ -79,6 +78,27 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
         }
     }
 
+    /**
+     * Fetch an order with respective payment id and try to update that order.
+     *
+     * @param updatedPayment <b>non-null</b> new updated payment instance.
+     * @return completion stage with nullable updated {@link Order}
+     */
+    private CompletionStage<Order> tryToUpdateOrderByPayment(Payment updatedPayment) {
+        return getOrderService().getOrderByPaymentId(updatedPayment.getId())
+                .thenComposeAsync(order -> updateOrderIfExists(order.orElse(null), updatedPayment));
+    }
+
+    /**
+     * If the {@code order} is not null and it's payment status is different from the new one - update it,
+     * otherwise - skip updating.
+     *
+     * @param order          <b>nullable</b> order to update state. If <b>null</b> - the update is skipped,
+     *                       but the incident is reported.
+     * @param updatedPayment <b>non-null</b> instance of the updated payment
+     * @return a {@link CompletionStage} with <b>nullable</b> updated {@link Order} instance. If incoming order is null
+     * or update is not required - the returned stage is completed and contains the same instance.
+     */
     private CompletionStage<Order> updateOrderIfExists(Order order, Payment updatedPayment) {
         if (order != null) {
             PaymentState newPaymentState = getPaymentToOrderStateMapper().mapPaymentToOrderState(updatedPayment);
