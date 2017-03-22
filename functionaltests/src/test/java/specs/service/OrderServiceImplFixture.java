@@ -40,7 +40,6 @@ public class OrderServiceImplFixture extends BaseFixture {
 
     private OrderService orderService;
 
-
     @Before
     public void setUp() throws Exception {
         super.initializeCommercetoolsClient();
