@@ -24,6 +24,7 @@ import io.sphere.sdk.carts.commands.updateactions.SetBillingAddress;
 import io.sphere.sdk.carts.commands.updateactions.SetShippingAddress;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.models.Address;
+import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.OrderFromCartDraft;
 import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.orders.commands.OrderFromCartCreateCommand;
@@ -162,7 +163,16 @@ public abstract class BaseFixture {
         return createCartAndOrderForPayment(payment, currencyCode, "TestBuyer");
     }
 
+    protected Order createAndGetOrder(Payment payment, String currencyCode) {
+        return createAndGetOrder(payment, currencyCode, "TestBuyer");
+    }
+
     protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final String buyerLastName) {
+        Order order = createAndGetOrder(payment, currencyCode, buyerLastName);
+        return order.getOrderNumber();
+    }
+
+    protected Order createAndGetOrder(Payment payment, String currencyCode, String buyerLastName) {
         // create cart and order with product
         final Product product = ctpClient.executeBlocking(ProductQuery.of()).getResults().get(0);
 
@@ -179,10 +189,8 @@ public abstract class BaseFixture {
 
         final String orderNumber = getRandomOrderNumber();
 
-        ctpClient.executeBlocking(OrderFromCartCreateCommand.of(
+        return ctpClient.executeBlocking(OrderFromCartCreateCommand.of(
                 OrderFromCartDraft.of(cart, orderNumber, PaymentState.PENDING)));
-
-        return orderNumber;
     }
 
     private static String PSEUDO_CARD_PAN;
