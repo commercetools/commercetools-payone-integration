@@ -24,7 +24,7 @@ public interface OrderService {
     /**
      * Update the order's payment state.
      * <p>
-     * <b>Note:</b> Besides the {@link Order#getPaymentState()} is optional, Sphere API doesn't accept <b>null</b> as
+     * <b>Note:</b> Besides the {@link Order#getPaymentState()} is optional, CTP API doesn't accept <b>null</b> as
      * a value for for change payment status, thus the field can't be reset to empty value once it was set.
      *
      * @param order           <b>non-null</b> {@link Order} to update
