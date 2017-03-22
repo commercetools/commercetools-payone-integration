@@ -19,7 +19,6 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
-import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,17 +91,22 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
     /**
      * If the {@code order} is not null and it's payment status is different from the new one - update it,
      * otherwise - skip updating.
+     * <p>
+     * If a new payment status can't be mapped to the order's payment state - the value is left unchanged.
      *
      * @param order          <b>nullable</b> order to update state. If <b>null</b> - the update is skipped,
      *                       but the incident is reported.
      * @param updatedPayment <b>non-null</b> instance of the updated payment
      * @return a {@link CompletionStage} with <b>nullable</b> updated {@link Order} instance. If incoming order is null
-     * or update is not required - the returned stage is completed and contains the same instance.
+     * or new payment state is undefined, or update is not required - the returned stage is completed and contains
+     * the same instance.
      */
     private CompletionStage<Order> updateOrderIfExists(Order order, Payment updatedPayment) {
         if (order != null) {
             PaymentState newPaymentState = getPaymentToOrderStateMapper().mapPaymentToOrderState(updatedPayment);
-            if (ObjectUtils.compare(newPaymentState, order.getPaymentState()) != 0) {
+
+            // skip update for undefined or unchanged payment state
+            if (newPaymentState != null && !newPaymentState.equals(order.getPaymentState())) {
                 return getOrderService().updateOrderPaymentState(order, newPaymentState);
             }
         } else {
@@ -118,7 +122,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
      * @param notification a PAYONE notification
      * @return whether the {@code notification} can be processed
      */
-    protected abstract boolean canProcess(final Notification notification);
+    protected abstract boolean canProcess(Notification notification);
 
     /**
      * Generates a list of update actions which can be applied to the payment in one step.

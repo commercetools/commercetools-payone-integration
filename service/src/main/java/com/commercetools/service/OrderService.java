@@ -23,8 +23,12 @@ public interface OrderService {
 
     /**
      * Update the order's payment state.
-     * @param order <b>non-null</b> {@link Order} to update
-     * @param newPaymentState <b>nullable</b> {@link PaymentState} to set to the order
+     * <p>
+     * <b>Note:</b> Besides the {@link Order#getPaymentState()} is optional, Sphere API doesn't accept <b>null</b> as
+     * a value for for change payment status, thus the field can't be reset to empty value once it was set.
+     *
+     * @param order           <b>non-null</b> {@link Order} to update
+     * @param newPaymentState <b>non-null</b> {@link PaymentState} to set to the order
      * @return new {@link CompletionStage<Order>} with the updated order reference.
      */
     CompletionStage<Order> updateOrderPaymentState(Order order, PaymentState newPaymentState);
