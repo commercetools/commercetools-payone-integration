@@ -13,6 +13,7 @@ import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
+import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 import specs.BaseFixture;
@@ -23,7 +24,6 @@ import javax.money.format.MonetaryFormats;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -77,7 +77,7 @@ public class AuthorizationWithout3dsFixture extends BaseNotifiablePaymentFixture
         return payment.getId();
     }
 
-    public Map<String, String> handlePayment(final String paymentName,
+    public MultiValueResult handlePayment(final String paymentName,
                                              final String requestType) throws ExecutionException, IOException {
         final HttpResponse response = requestToHandlePaymentByLegibleName(paymentName);
         final Payment payment = fetchPaymentByLegibleName(paymentName);
@@ -87,13 +87,12 @@ public class AuthorizationWithout3dsFixture extends BaseNotifiablePaymentFixture
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
                 BaseFixture.EMPTY_STRING;
 
-        return ImmutableMap.<String, String> builder()
-                .put("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
-                .put("interactionCount", getInteractionRequestCount(payment, transactionId, requestType))
-                .put("transactionState", getTransactionState(payment, transactionId))
-                .put("amountAuthorized", amountAuthorized)
-                .put("version", payment.getVersion().toString())
-                .build();
+        return MultiValueResult.multiValueResult()
+                .with("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
+                .with("interactionCount", getInteractionRequestCount(payment, transactionId, requestType))
+                .with("transactionState", getTransactionState(payment, transactionId))
+                .with("amountAuthorized", amountAuthorized)
+                .with("version", payment.getVersion().toString());
     }
 
     @Override
@@ -102,7 +101,7 @@ public class AuthorizationWithout3dsFixture extends BaseNotifiablePaymentFixture
         return super.receivedNotificationOfActionFor(paymentNames, txaction);
     }
 
-    public Map<String, String> fetchPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
+    public MultiValueResult fetchPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
 
         Payment payment = fetchPaymentByLegibleName(paymentName);
         long appointedNotificationCount = getTotalNotificationCountOfAction(payment, "appointed");
@@ -112,12 +111,11 @@ public class AuthorizationWithout3dsFixture extends BaseNotifiablePaymentFixture
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
                 BaseFixture.EMPTY_STRING;
 
-        return ImmutableMap.<String, String> builder()
-                .put("notificationCount", Long.toString(appointedNotificationCount))
-                .put("transactionState", getTransactionState(payment, transactionId))
-                .put("amountAuthorized", amountAuthorized)
-                .put("version", payment.getVersion().toString())
-                .build();
+        return MultiValueResult.multiValueResult()
+                .with("notificationCount", Long.toString(appointedNotificationCount))
+                .with("transactionState", getTransactionState(payment, transactionId))
+                .with("amountAuthorized", amountAuthorized)
+                .with("version", payment.getVersion().toString());
     }
 
     public long getInteractionNotificationOfActionCount(final String paymentName, final String txaction) throws ExecutionException {
