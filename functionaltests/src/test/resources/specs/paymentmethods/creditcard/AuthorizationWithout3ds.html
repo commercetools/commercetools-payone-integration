@@ -191,6 +191,32 @@
                     <td></td>
                 </tr>
             </table>
+
+            <h3>Verify Order#paymentState</h3>
+            <p>For <b>appointed</b> payments it expected to be <b>Pending</b>,
+                for failed <i>Payment 1</i> - unchanged (null)</p>
+            <table c:execute="#orderPaymentState = fetchOrderPaymentState(#paymentName)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:assertEquals="#orderPaymentState">Order Payment State</th>
+                </tr>
+                <tr>
+                    <td>Payment 1</td>
+                    <td>Pending</td>
+                </tr>
+                <tr>
+                    <td>Payment 2</td>
+                    <td>(null)</td>
+                </tr>
+                <tr>
+                    <td>Payment 3</td>
+                    <td>Pending</td>
+                </tr>
+                <tr>
+                    <td>Payment 4</td>
+                    <td>Pending</td>
+                </tr>
+            </table>
         </div>
     </body>
 </html>
