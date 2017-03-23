@@ -6,13 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
-import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.PaymentDraft;
-import io.sphere.sdk.payments.PaymentDraftBuilder;
-import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
-import io.sphere.sdk.payments.TransactionDraftBuilder;
-import io.sphere.sdk.payments.TransactionState;
-import io.sphere.sdk.payments.TransactionType;
+import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
@@ -26,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
+import specs.response.BasePaymentFixture;
 import util.WebDriver3ds;
 
 import javax.money.MonetaryAmount;
@@ -44,7 +39,7 @@ import java.util.concurrent.ExecutionException;
  * @since 10.12.15
  */
 @RunWith(ConcordionRunner.class)
-public class AuthorizationWith3dsFixture extends BaseFixture {
+public class AuthorizationWith3dsFixture extends BasePaymentFixture {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationWith3dsFixture.class);
 
@@ -53,7 +48,8 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
     private WebDriver3ds webDriver;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         webDriver = new WebDriver3ds();
     }
 
@@ -183,6 +179,10 @@ public class AuthorizationWith3dsFixture extends BaseFixture {
                 .put("amountAuthorized", amountAuthorized)
                 .put("version", updatedPayment.getVersion().toString())
                 .build();
+    }
+
+    public String fetchOrderPaymentState(final String paymentName) {
+        return CreditCardFixtureUtil.fetchOrderPaymentState(orderService, getIdForLegibleName(paymentName));
     }
 
 

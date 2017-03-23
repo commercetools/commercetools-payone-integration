@@ -2,14 +2,10 @@ package specs.paymentmethods.creditcard;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.commercetools.service.OrderService;
-import com.commercetools.service.OrderServiceImpl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
-import io.sphere.sdk.orders.Order;
-import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
@@ -19,7 +15,6 @@ import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
 import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
-import org.junit.Before;
 import org.junit.runner.RunWith;
 import specs.BaseFixture;
 import specs.paymentmethods.BaseNotifiablePaymentFixture;
@@ -31,24 +26,12 @@ import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
-import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlocking;
-import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
-
 /**
  * @author fhaertig
  * @since 10.12.15
  */
 @RunWith(ConcordionRunner.class)
 public class AuthorizationWithout3dsFixture extends BaseNotifiablePaymentFixture {
-
-    private OrderService orderService;
-
-    @Before
-    public void setUp() throws Exception {
-        super.initializeCommercetoolsClient();
-        orderService = new OrderServiceImpl(ctpClient());
-    }
 
     public String createPayment(
             final String paymentName,
@@ -136,11 +119,7 @@ public class AuthorizationWithout3dsFixture extends BaseNotifiablePaymentFixture
     }
 
     public String fetchOrderPaymentState(final String paymentName) throws InterruptedException, ExecutionException {
-        final String paymentId = getIdForLegibleName(paymentName);
-        Order order = executeBlocking(orderService.getOrderByPaymentId(paymentId))
-                .orElseThrow(() -> new RuntimeException(format("Order for payment [%s]/[%s] not found", paymentName, paymentId)));
-
-        return ofNullable(order.getPaymentState()).map(PaymentState::toSphereName).orElse(null);
+        return CreditCardFixtureUtil.fetchOrderPaymentState(orderService, getIdForLegibleName(paymentName));
     }
 
     public long getInteractionNotificationOfActionCount(final String paymentName, final String txaction) throws ExecutionException {
