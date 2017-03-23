@@ -84,6 +84,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
      * @return completion stage with nullable updated {@link Order}
      */
     private CompletionStage<Order> tryToUpdateOrderByPayment(Payment updatedPayment) {
+        LOG.info("tryToUpdateOrderByPayment {}", updatedPayment.getId());
         return getOrderService().getOrderByPaymentId(updatedPayment.getId())
                 .thenComposeAsync(order -> updateOrderIfExists(order.orElse(null), updatedPayment));
     }
@@ -102,11 +103,16 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
      * the same instance.
      */
     private CompletionStage<Order> updateOrderIfExists(Order order, Payment updatedPayment) {
+        LOG.info("updateOrderIfExists, order [{}], payment [{}], payment status [{}]",
+                order != null ? order.getId() : "null", updatedPayment.getId(), updatedPayment.getPaymentStatus());
         if (order != null) {
             PaymentState newPaymentState = getPaymentToOrderStateMapper().mapPaymentToOrderState(updatedPayment);
 
+            LOG.info("updateOrderIfExists, newPaymentState is [{}]", newPaymentState);
+
             // skip update for undefined or unchanged payment state
             if (newPaymentState != null && !newPaymentState.equals(order.getPaymentState())) {
+                LOG.info("updateOrderIfExists, SET newPaymentState [{}]", newPaymentState);
                 return getOrderService().updateOrderPaymentState(order, newPaymentState);
             }
         } else {
