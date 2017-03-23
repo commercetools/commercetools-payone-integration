@@ -123,6 +123,10 @@ public class ChargeImmediatelyWithout3dsFixture extends BaseNotifiablePaymentFix
                 .build();
     }
 
+    public String fetchOrderPaymentState(final String paymentName) throws InterruptedException, ExecutionException {
+        return CreditCardFixtureUtil.fetchOrderPaymentState(orderService, getIdForLegibleName(paymentName));
+    }
+
     @Override
     public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws Exception {
         // we keep this overriding just to easily see which test methods are run in this fixture

@@ -44,7 +44,8 @@ public class ChargeImmediatelyWith3dsFixture extends BaseNotifiablePaymentFixtur
     private Map<String, String> successUrlForPayment;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         webDriver = new WebDriver3ds();
         successUrlForPayment = new HashMap<>();
     }
@@ -180,6 +181,9 @@ public class ChargeImmediatelyWith3dsFixture extends BaseNotifiablePaymentFixtur
         return successUrlForPayment.size() == paymentNamesList.size();
     }
 
+    public String fetchOrderPaymentState(final String paymentName) throws InterruptedException, ExecutionException {
+        return CreditCardFixtureUtil.fetchOrderPaymentState(orderService, getIdForLegibleName(paymentName));
+    }
 
     public boolean isInteractionRedirectPresent(final String paymentName) throws ExecutionException {
         Payment payment = fetchPaymentByLegibleName(paymentName);
