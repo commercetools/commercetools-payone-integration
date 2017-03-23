@@ -60,7 +60,7 @@
         </tr>
     </table>
     <p>
-     When I request the integration service to handle them I get the following Results: 
+     When I request the integration service to handle them I get the following Results:
     </p>
     <table c:execute="#result = handlePayment(#paymentName, #requestType)">
         <tr>
@@ -155,6 +155,32 @@
             <td class="success">1</td>
             <td class="success"></td>
             <td class="success">4,00 EUR</td>
+        </tr>
+    </table>
+
+    <h3>Verify Order#paymentState</h3>
+    <p>For <b>paid</b> payments it expected to be <b>Paid</b>,
+        for failed <i>Payment 2</i> - unchanged (null)</p>
+    <table c:execute="#orderPaymentState = fetchOrderPaymentState(#paymentName)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#orderPaymentState">Order Payment State</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>Paid</td>
+        </tr>
+        <tr>
+            <td>Payment 2</td>
+            <td>(null)</td>
+        </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>Paid</td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>Paid</td>
         </tr>
     </table>
 </div>

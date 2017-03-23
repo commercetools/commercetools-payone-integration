@@ -20,7 +20,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
-import specs.response.BasePaymentFixture;
+import specs.paymentmethods.BaseNotifiablePaymentFixture;
 import util.WebDriver3ds;
 
 import javax.money.MonetaryAmount;
@@ -39,7 +39,7 @@ import java.util.concurrent.ExecutionException;
  * @since 10.12.15
  */
 @RunWith(ConcordionRunner.class)
-public class AuthorizationWith3dsFixture extends BasePaymentFixture {
+public class AuthorizationWith3dsFixture extends BaseNotifiablePaymentFixture {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationWith3dsFixture.class);
 
@@ -181,8 +181,10 @@ public class AuthorizationWith3dsFixture extends BasePaymentFixture {
                 .build();
     }
 
+    @Override
     public String fetchOrderPaymentState(final String paymentName) {
-        return CreditCardFixtureUtil.fetchOrderPaymentState(orderService, getIdForLegibleName(paymentName));
+        // we keep this overriding just to easily see which test methods are run in this fixture
+        return super.fetchOrderPaymentState(getIdForLegibleName(paymentName));
     }
 
 

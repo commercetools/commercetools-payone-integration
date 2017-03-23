@@ -207,6 +207,12 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
         return super.receivedNotificationOfActionFor(paymentNames, txaction);
     }
 
+    @Override
+    public String fetchOrderPaymentState(final String paymentName) {
+        // we keep this overriding just to easily see which test methods are run in this fixture
+        return super.fetchOrderPaymentState(getIdForLegibleName(paymentName));
+    }
+
     public boolean isInteractionRedirectPresent(final String paymentName) throws ExecutionException {
         Payment payment = fetchPaymentByLegibleName(paymentName);
         final String transactionId = getIdOfLastTransaction(payment);

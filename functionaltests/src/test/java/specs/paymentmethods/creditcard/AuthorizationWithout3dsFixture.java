@@ -101,6 +101,12 @@ public class AuthorizationWithout3dsFixture extends BaseNotifiablePaymentFixture
         return super.receivedNotificationOfActionFor(paymentNames, txaction);
     }
 
+    @Override
+    public String fetchOrderPaymentState(final String paymentName) {
+        // we keep this overriding just to easily see which test methods are run in this fixture
+        return super.fetchOrderPaymentState(getIdForLegibleName(paymentName));
+    }
+
     public MultiValueResult fetchPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
 
         Payment payment = fetchPaymentByLegibleName(paymentName);
@@ -116,10 +122,6 @@ public class AuthorizationWithout3dsFixture extends BaseNotifiablePaymentFixture
                 .with("transactionState", getTransactionState(payment, transactionId))
                 .with("amountAuthorized", amountAuthorized)
                 .with("version", payment.getVersion().toString());
-    }
-
-    public String fetchOrderPaymentState(final String paymentName) throws InterruptedException, ExecutionException {
-        return CreditCardFixtureUtil.fetchOrderPaymentState(orderService, getIdForLegibleName(paymentName));
     }
 
     public long getInteractionNotificationOfActionCount(final String paymentName, final String txaction) throws ExecutionException {
