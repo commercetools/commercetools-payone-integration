@@ -57,7 +57,7 @@ Here is a chart of mapping values:
 </tr>
 <tr>
   <td>debit</td>
-  <td></td>
+  <td><i>debit</i> in Payone means <i>money back</i></td>
 </tr>
 <tr>
   <td>reminder</td>
@@ -79,7 +79,9 @@ Here is a chart of mapping values:
 </tr>
 </table>
 
-**Note**: CTP value `BalanceDue` and `CreditOwed` are not mapped so far because they look unclear.
+**Note**: 
+  - CTP value `BalanceDue` and `CreditOwed` are not mapped so far because they look unclear.
+  - some payone values are unexpected or not activated, thus have no mapping and the payment status is left unchanged.
 
 Read _PAYONE_Platform_Server_API_EN_v2.77.pdf_ for more info about payment update events.
 
