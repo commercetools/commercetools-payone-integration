@@ -45,13 +45,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
+import javax.money.format.MonetaryAmountFormat;
+import javax.money.format.MonetaryFormats;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -66,6 +65,7 @@ import static java.util.regex.Pattern.DOTALL;
  */
 public abstract class BaseFixture {
     private static final Logger LOG = LoggerFactory.getLogger(BaseFixture.class);
+    protected final MonetaryAmountFormat currencyFormatterDe = MonetaryFormats.getAmountFormat(Locale.GERMANY);
 
     protected static final String EMPTY_STRING = "";
     protected static final String NULL_STRING = "null";

@@ -13,12 +13,11 @@ Test that order service works as expected
     <li>PAYONE request type: <span c:set="#requestType">preauthorization</span></li>
 </ul>
 <div class="example">
-    <h3>Create payment and respective orders</h3>
-    <h3>Authorization (without 3-D Secure)</h3>
-    <p>
-        Given the following payments for
-        <em>a credit card that does <b>not</b> support charges for currencies other than EUR and without 3-D Secure verification</em>:
-    </p>
+    <h2>Create payment and respective orders</h2>
+    <h2>Authorization (without 3-D Secure)</h2>
+    <h3>
+        Given the following payments for a credit card</em>:
+    </h3>
     <table c:execute="#paymentResult = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
@@ -48,10 +47,10 @@ Test that order service works as expected
             <td></td>
         </tr>
     </table>
-    <p>
+    <h3>
         Verify the payment and order objects were created and orders have <span c:set="#orderPaymentStatus">PENDING</span>
         payment status.
-    </p>
+    </h3>
     <table c:execute="#handlePaymentAndOrderResult = handlePaymentAndOrder(#paymentName, #requestType)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
@@ -80,7 +79,7 @@ Test that order service works as expected
         </tr>
     </table>
 
-    <p>Try to set status <span c:set="#orderPaymentStatus">BALANCE_DUE</span></p>
+    <h3>Try to set status <span c:set="#orderPaymentStatus">BALANCE_DUE</span></h3>
     <table c:execute="#orderStateBallancedDue = updateOrderPaymentState(#paymentName, #orderPaymentStatus)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
@@ -99,7 +98,7 @@ Test that order service works as expected
         </tr>
     </table>
 
-    <p>Try to set status <span c:set="#orderPaymentStatus">PENDING</span></p>
+    <h3>Try to set status <span c:set="#orderPaymentStatus">PENDING</span></h3>
     <table c:execute="#orderStateBallancedDue = updateOrderPaymentState(#paymentName, #orderPaymentStatus)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
@@ -118,7 +117,7 @@ Test that order service works as expected
         </tr>
     </table>
 
-    <p>Try to set status <span c:set="#orderPaymentStatus">FAILED</span></p>
+    <h3>Try to set status <span c:set="#orderPaymentStatus">FAILED</span></h3>
     <table c:execute="#orderStateBallancedDue = updateOrderPaymentState(#paymentName, #orderPaymentStatus)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
@@ -137,7 +136,7 @@ Test that order service works as expected
         </tr>
     </table>
 
-    <p>Try to set status <span c:set="#orderPaymentStatus">CREDIT_OWED</span></p>
+    <h3>Try to set status <span c:set="#orderPaymentStatus">CREDIT_OWED</span></h3>
     <table c:execute="#orderStateBallancedDue = updateOrderPaymentState(#paymentName, #orderPaymentStatus)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
@@ -156,7 +155,7 @@ Test that order service works as expected
         </tr>
     </table>
 
-    <p>Try to set status <span c:set="#orderPaymentStatus">PAID</span></p>
+    <h3>Try to set status <span c:set="#orderPaymentStatus">PAID</span></h3>
     <table c:execute="#orderStateBallancedDue = updateOrderPaymentState(#paymentName, #orderPaymentStatus)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
@@ -175,8 +174,8 @@ Test that order service works as expected
         </tr>
     </table>
 
-    <p>Try to set status <em><span c:set="#orderPaymentStatus">null</span></em>: we expect <code>CompletionException</code>
-        caused by <code>NullPointerException</code> from the <code>OrderServiceImpl</code></p>
+    <h3>Try to set status <em><span c:set="#orderPaymentStatus">null</span></em>: we expect <code>CompletionException</code>
+        caused by <code>NullPointerException</code> from the <code>OrderServiceImpl</code></h3>
     <table c:execute="#exception = updateOrderPaymentState_forNull(#paymentName)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
