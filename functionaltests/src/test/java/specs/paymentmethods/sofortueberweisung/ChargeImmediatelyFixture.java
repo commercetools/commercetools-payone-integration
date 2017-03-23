@@ -51,7 +51,8 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
     private static Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyFixture.class);
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         webDriver = new WebDriverSofortueberweisung("12345", "12345");
         successUrlForPayment = new HashMap<>();
     }
