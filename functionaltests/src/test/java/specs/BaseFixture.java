@@ -160,19 +160,32 @@ public abstract class BaseFixture {
     }
 
     protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode) {
-        return createCartAndOrderForPayment(payment, currencyCode, "TestBuyer");
+        return createCartAndOrderForPayment(payment, currencyCode, "TestBuyer", null);
     }
 
-    protected Order createAndGetOrder(Payment payment, String currencyCode) {
-        return createAndGetOrder(payment, currencyCode, "TestBuyer");
+    protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final PaymentState paymentState) {
+        return createCartAndOrderForPayment(payment, currencyCode, "TestBuyer", paymentState);
     }
 
     protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final String buyerLastName) {
-        Order order = createAndGetOrder(payment, currencyCode, buyerLastName);
+        return createCartAndOrderForPayment(payment, currencyCode, buyerLastName, null);
+    }
+
+    protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final String buyerLastName,
+                                                  final PaymentState paymentState) {
+        Order order = createAndGetOrder(payment, currencyCode, buyerLastName, paymentState);
         return order.getOrderNumber();
     }
 
-    protected Order createAndGetOrder(Payment payment, String currencyCode, String buyerLastName) {
+    protected Order createAndGetOrder(Payment payment, String currencyCode) {
+        return createAndGetOrder(payment, currencyCode, "TestBuyer", null);
+    }
+
+    protected Order createAndGetOrder(Payment payment, String currencyCode, PaymentState paymentState) {
+        return createAndGetOrder(payment, currencyCode, "TestBuyer", paymentState);
+    }
+
+    protected Order createAndGetOrder(Payment payment, String currencyCode, String buyerLastName, PaymentState paymentState) {
         // create cart and order with product
         final Product product = ctpClient.executeBlocking(ProductQuery.of()).getResults().get(0);
 
@@ -190,7 +203,7 @@ public abstract class BaseFixture {
         final String orderNumber = getRandomOrderNumber();
 
         return ctpClient.executeBlocking(OrderFromCartCreateCommand.of(
-                OrderFromCartDraft.of(cart, orderNumber, PaymentState.PENDING)));
+                OrderFromCartDraft.of(cart, orderNumber, paymentState)));
     }
 
     private static String PSEUDO_CARD_PAN;

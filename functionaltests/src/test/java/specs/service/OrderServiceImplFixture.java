@@ -111,7 +111,7 @@ public class OrderServiceImplFixture extends BaseFixture {
                 .with("amountAuthorized", amountAuthorized)
                 .with("centAmount", order.map(Order::getTotalPrice).map(MonetaryAmount::getNumber).map(NumberValue::intValue).orElse(-666))
                 .with("currencyCode", order.map(Order::getTotalPrice).map(MonetaryAmount::getCurrency).map(CurrencyUnit::getCurrencyCode).orElse("ERR"))
-                .with("paymentState", order.map(Order::getPaymentState).map(PaymentState::toString).orElse("UNDEFINED"));
+                .with("paymentState", order.map(Order::getPaymentState).map(PaymentState::toString).orElse(null));
     }
 
     public MultiValueResult updateOrderPaymentState(final String paymentName, final String paymentStateName) {
