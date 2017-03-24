@@ -4,10 +4,14 @@ import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.*;
+import com.google.common.hash.Hashing;
+import com.mashape.unirest.http.Unirest;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
@@ -49,6 +53,11 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static java.util.regex.Pattern.DOTALL;
 
 /**
  * @author fhaertig
@@ -59,14 +68,25 @@ public abstract class BaseFixture {
 
     protected static final String EMPTY_STRING = "";
     protected static final String NULL_STRING = "null";
-    protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(8);
-    protected static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 5000; // @akovalenko 14.10.16: extended from 1.5 sec to 5 sec
+    protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(15);
+    protected static final long RETRY_DELAY = TimeUnit.SECONDS.toMillis(15);
+    protected static final long INTERMEDIATE_REPORT_DELAY = TimeUnit.MINUTES.toMillis(3);
+
+    // looks like heroku may have some lags, so we use 15 seconds to avoid false test fails because of timeouts
+    protected static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 15000;
+
+    protected static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
     private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
     private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_3DS";
     private static final String TEST_DATA_3_DS_PASSWORD = "TEST_DATA_3_DS_PASSWORD";
     private static final String TEST_DATA_SW_BANK_TRANSFER_IBAN = "TEST_DATA_SW_BANK_TRANSFER_IBAN";
     private static final String TEST_DATA_SW_BANK_TRANSFER_BIC = "TEST_DATA_SW_BANK_TRANSFER_BIC";
+
+    private static final String TEST_DATA_PAYONE_MERCHANT_ID = "TEST_DATA_PAYONE_MERCHANT_ID";
+    private static final String TEST_DATA_PAYONE_SUBACC_ID = "TEST_DATA_PAYONE_SUBACC_ID";
+    private static final String TEST_DATA_PAYONE_PORTAL_ID = "TEST_DATA_PAYONE_PORTAL_ID";
+    private static final String TEST_DATA_PAYONE_KEY = "TEST_DATA_PAYONE_KEY";
 
     private static final Random randomSource = new Random();
     private BlockingSphereClient ctpClient;
@@ -118,7 +138,7 @@ public abstract class BaseFixture {
                 .returnResponse();
     }
 
-    protected String getConfigurationParameter(final String configParameterName) {
+    protected static String getConfigurationParameter(final String configParameterName) {
         final String envVariable = System.getenv(configParameterName);
         if (!Strings.isNullOrEmpty(envVariable)) {
             return envVariable;
@@ -165,28 +185,101 @@ public abstract class BaseFixture {
         return orderNumber;
     }
 
-    protected String getUnconfirmedVisaPseudoCardPan() {
-        return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
+    private static String PSEUDO_CARD_PAN;
+
+    /**
+     * Fetch new or get cached pseudocardpan from Payone service based on supplied test VISA card number
+     * (see {@link #getTestDataVisaCreditCardNo3Ds()}).
+     * <p>
+     * Why <i>synchronized</i>: the card pan is fetched over HTTP POST request from pay1.de site and the operation
+     * might be slow, so we cache the value. But our tests run concurrently, so to avoid double HTTP request
+     * to pay1.de we use synchronized: the access to the method is blocked till the response from pay1.de, but it is
+     * blocked once, all other get access will be fast (when {@code PSEUDO_CARD_PAN} is set).
+     */
+    synchronized static protected String getUnconfirmedVisaPseudoCardPan()  {
+
+      //curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>"
+
+      if (PSEUDO_CARD_PAN == null) {
+        String cardPanResponse = null;
+        try {
+          cardPanResponse = Unirest.post("https://api.pay1.de/post-gateway/")
+              .fields(ImmutableMap.<String, Object>builder()
+                  .put("request", "3dscheck")
+                  .put("mid", getTestDataPayoneMerchantId())
+                  .put("aid", getTestDataPayoneSubaccId())
+                  .put("portalid", getTestDataPayonePortalId())
+                  .put("key", Hashing.md5().hashString(getTestDataPayoneKey(), Charsets.UTF_8).toString())
+                  .put("mode", "test")
+                  .put("api_version", "3.9")
+                  .put("amount", "2")
+                  .put("currency", "EUR")
+                  .put("clearingtype", "cc")
+                  .put("exiturl", "http://www.example.com")
+                  .put("storecarddata", "yes")
+                  .put("cardexpiredate", "2512")
+                  .put("cardcvc2", "123")
+                  .put("cardtype", "V")
+                  .put("cardpan", getTestDataVisaCreditCardNo3Ds())
+                  .build())
+              .asString().getBody();
+        } catch (Throwable e) {
+          throw new RuntimeException("Error on pseudocardpan fetch", e);
+        }
+
+        Pattern p = Pattern.compile("^.*pseudocardpan\\s*=\\s*(\\d+).*$", CASE_INSENSITIVE | DOTALL);
+        Matcher m = p.matcher(cardPanResponse);
+
+        if (m.matches()) {
+            assert PSEUDO_CARD_PAN == null : "PSEUDO_CARD_PAN multiple initialization";
+            PSEUDO_CARD_PAN = m.group(1);
+            LOG.info("Pseudocardpan fetched successfully");
+        } else {
+          throw new RuntimeException(String.format("Unexpected pseudocardpan response: %s", cardPanResponse));
+        }
+      }
+
+      return PSEUDO_CARD_PAN;
     }
 
-    protected String getTestData3DsPassword() {
+    protected static String getTestDataVisaCreditCardNo3Ds() {
+      return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
+    }
+
+    protected static String getTestData3DsPassword() {
         return getConfigurationParameter(TEST_DATA_3_DS_PASSWORD);
     }
 
-    protected String getVerifiedVisaPseudoCardPan() {
+    protected static String getVerifiedVisaPseudoCardPan() {
         return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_3_DS);
     }
 
-    protected String getTestDataSwBankTransferIban() {
+    protected static String getTestDataSwBankTransferIban() {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_IBAN);
     }
 
-    protected String getTestDataSwBankTransferBic() {
+    protected static String getTestDataSwBankTransferBic() {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_BIC);
     }
 
+    private static String getTestDataPayoneMerchantId() {
+        return getConfigurationParameter(TEST_DATA_PAYONE_MERCHANT_ID);
+    }
 
-    protected String getRandomOrderNumber() {
+    private static String getTestDataPayoneSubaccId() {
+        return getConfigurationParameter(TEST_DATA_PAYONE_SUBACC_ID);
+    }
+
+    private static String getTestDataPayonePortalId() {
+        return getConfigurationParameter(TEST_DATA_PAYONE_PORTAL_ID);
+    }
+
+    private static String getTestDataPayoneKey() {
+        return getConfigurationParameter(TEST_DATA_PAYONE_KEY);
+    }
+
+
+    protected static String getRandomOrderNumber() {
         return String.valueOf(randomSource.nextInt() + System.currentTimeMillis());
     }
 
@@ -322,15 +415,15 @@ public abstract class BaseFixture {
 
     }
 
-    protected long countPaymentsWithNotificationOfAction(final ImmutableList<String> paymentNames, final String txaction) throws ExecutionException {
-        final List<ExecutionException> exceptions = Lists.newArrayList();
+    protected long countPaymentsWithNotificationOfAction(final ImmutableList<String> paymentNames, final String txaction) {
+        final List<RuntimeException> exceptions = Lists.newArrayList();
         final long result = paymentNames.stream().mapToLong(paymentName -> {
             final Payment payment = fetchPaymentByLegibleName(paymentName);
             try {
                 return getTotalNotificationCountOfAction(payment, txaction);
             } catch (final ExecutionException e) {
                 LOG.error("Exception: %s", e);
-                exceptions.add(e);
+                exceptions.add(new RuntimeException(e));
                 return 0L;
             }
         }).filter(notifications -> notifications > 0L).count();

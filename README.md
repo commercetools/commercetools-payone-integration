@@ -29,6 +29,8 @@ It is a standalone Microservice that connects the two cloud platforms and provid
 - [Test environments](#test-environments)
   - [Development workflow](#development-workflow)
   - [Functional Tests](#functional-tests)
+    - [Publishing functional tests results](#publishing-functional-tests-results)
+    - [Known functional tests issues](#known-functional-tests-issues)
   - [Paypal Sandbox Accounts](#paypal-sandbox-accounts)
 - [Contribute Improvements](#contribute-improvements)
 - [Development Notes](#development-notes)
@@ -212,25 +214,39 @@ a seperate account is required for each of the transaction types (see [Functiona
 
 > TODO document best practice on how to work in day-to-day development, esp. on how local machine, travis and heroku play together.  
 
-The integration tests of this implementation use a heroku instance of the service. If you are authorized to configure it the backend can be found at https://dashboard.heroku.com/apps/ct-p1-integration-staging/resources .
+The integration tests of this implementation use a heroku instance of the service. If you are authorized to configure 
+it the backend can be found at https://dashboard.heroku.com/apps/ct-payone-integration-staging/resources .
 
-Please do not access this instance for playground or experimental reasons as you may risk breaking running automated integration tests. 
+Please do not access this instance for playground or experimental reasons as you may risk breaking running automated 
+integration tests. 
 
 ### Functional Tests
 
 The executable specification (using [Concordion](http://concordion.org/)) requires the following environment variables
 in addition to the [commercetools API client credentials](#commercetools-api-client-credentials):
 
-Name | Content
----- | -------
-`CT_PAYONE_INTEGRATION_URL` | the URL of the service instance under test
-`TEST_DATA_VISA_CREDIT_CARD_NO_3DS` | the pseudocardpan of an unconfirmed VISA credit card
-`TEST_DATA_VISA_CREDIT_CARD_3DS` | the pseudocardpan of a VISA credit card verified by 3-D Secure
-`TEST_DATA_3_DS_PASSWORD` | the 3DS password of the test card. Payone Test Cards use `12345`
-`TEST_DATA_SW_BANK_TRANSFER_IBAN` | the IBAN of a test bank account supporting Sofortueberweisung
-`TEST_DATA_SW_BANK_TRANSFER_BIC` | the BIC of a test bank account supporting Sofortueberweisung
+<table>
+  <tr><th>Name</th><th>Content</th></tr>
+  <tr><td><code>CT_PAYONE_INTEGRATION_URL</code></td>           <td>the URL of the service instance under test</td></tr>
+  <tr><td><code>TEST_DATA_VISA_CREDIT_CARD_NO_3DS</code></td>   <td>test simple VISA credit card number (don't use real credit card)</td></tr>
+  <tr><td><code>TEST_DATA_VISA_CREDIT_CARD_3DS</code></td>      <td>test 3-D secured VISA credit card number (dont' use real credit card)</td></tr>
+  <tr><td><code>TEST_DATA_3_DS_PASSWORD</code></td>             <td>the 3DS password of the test card. Payone Test Cards use <code>12345</code></td></tr>
+  <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_IBAN</code></td>     <td>the IBAN of a test bank account supporting Sofortueberweisung</td></tr>
+  <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_BIC</code></td>      <td>the BIC of a test bank account supporting Sofortueberweisung</td></tr>
+  <tr><td><code>TEST_DATA_PAYONE_MERCHANT_ID</code></td>        <td rowspan="4">Payone credentials for pseudocartpan generating. <br/>
+                                                                                <b>Ensure these values are the same for Travis (local) test and Heroku deployed service!</b></td></tr>
+  <tr><td><code>TEST_DATA_PAYONE_SUBACC_ID</code></td></tr>
+  <tr><td><code>TEST_DATA_PAYONE_PORTAL_ID</code></td></tr>
+  <tr><td><code>TEST_DATA_PAYONE_KEY</code></td></tr>
+</table> 
 
-To get a pseudocardpan for a credit card you can use the PAYONE server API. To do this with the client API please refer to the corresponding documentation.
+You could find the values above in the encrypted [`travis-build/`](/travis-build) directory.
+
+**Note**: it's important to update  [`travis-build/`](/travis-build) settings every time you change the build settings 
+in Travis config. Even better update first the file, then on the Travis web page.
+
+The pseudocardpan for VISA without 3DS secure is fetched at runtime for specified `TEST_DATA_VISA_CREDIT_CARD_NO_3DS`
+card number using PAYONE server API. To do this with the client API please refer to the corresponding Payone API documentation.
 With the server API you simply need to send a POST request of type "3dscheck" for example by using a command line tool:
 
 ```
@@ -264,6 +280,28 @@ To run the executable specification invoke the following command line:
 The tests take a fairly long time to run as they have to wait for the Payone notification calls to arrive.
 
 Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the specification) has changed.
+
+#### Publishing functional tests results
+
+The build results are published to [`gh-pages`](https://github.com/commercetools/commercetools-payone-integration/tree/gh-pages) branch of the repo.
+Then you are able to review the tests results in [Test results page](http://commercetools.github.io/commercetools-payone-integration/).
+
+**Note:** 
+  - github pages are overridden by any build of any branch, so in 
+  
+  - for Travis build `githubPages.repoUri` must be in HTTPS format and `$GH_TOKEN` must be set to GitHub token 
+    with push permission
+  
+  - we should replace the plugin with newer version, see [this issue](https://github.com/commercetools/commercetools-payone-integration/issues/135)
+    for more details 
+
+#### Known functional tests issues
+
+  - Some tests are waiting for payment update notification for payments which are already failed. 
+    These cases should be reported and avoided (fail-fast approach).
+  
+  - Web-driver (selenium) tests which are navigating to web-pages (Sofortüberweisung, 3ds secure verification) may fail 
+    because of wrong HTML elements names, if the service providers change html structure of their sites.
 
 ### Paypal Sandbox Accounts
 

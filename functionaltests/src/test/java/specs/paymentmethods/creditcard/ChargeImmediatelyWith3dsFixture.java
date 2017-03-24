@@ -2,18 +2,11 @@ package specs.paymentmethods.creditcard;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
-import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.PaymentDraft;
-import io.sphere.sdk.payments.PaymentDraftBuilder;
-import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
-import io.sphere.sdk.payments.TransactionDraftBuilder;
-import io.sphere.sdk.payments.TransactionState;
-import io.sphere.sdk.payments.TransactionType;
+import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
@@ -24,9 +17,8 @@ import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
+import specs.paymentmethods.BaseNotifiablePaymentFixture;
 import util.WebDriver3ds;
 
 import javax.money.MonetaryAmount;
@@ -35,26 +27,17 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author fhaertig
  * @since 20.01.16
  */
 @RunWith(ConcordionRunner.class)
-public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
-    private static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
+public class ChargeImmediatelyWith3dsFixture extends BaseNotifiablePaymentFixture {
 
     private static final String baseRedirectUrl = "https://example.com/creditcard_charge_immediately_with_verification/";
-
-    private static final Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyWith3dsFixture.class);
 
     private WebDriver3ds webDriver;
 
@@ -205,31 +188,10 @@ public class ChargeImmediatelyWith3dsFixture extends BaseFixture {
         return getInteractionRedirect(payment, transactionId).isPresent();
     }
 
-    public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws InterruptedException, ExecutionException {
-        final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
-
-        long remainingWaitTimeInMillis = PAYONE_NOTIFICATION_TIMEOUT;
-
-        final long sleepDuration = 100L;
-
-        long numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
-        while ((numberOfPaymentsWithNotification != paymentNamesList.size()) && (remainingWaitTimeInMillis > 0L)) {
-            Thread.sleep(sleepDuration);
-            remainingWaitTimeInMillis -= sleepDuration;
-            numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
-            if (remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(4)
-                    || remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(2)) {
-                LOG.info("Waiting for " + txaction + " notifications in ChargedImmediatelyWith3dsFixture takes longer than usual.");
-            }
-        }
-
-        LOG.info(String.format(
-                "waited %d seconds to receive notifications of type '%s' for payments %s",
-                TimeUnit.MILLISECONDS.toSeconds(PAYONE_NOTIFICATION_TIMEOUT - remainingWaitTimeInMillis),
-                txaction,
-                Arrays.toString(paymentNamesList.stream().map(this::getIdForLegibleName).toArray())));
-
-        return numberOfPaymentsWithNotification == paymentNamesList.size();
+    @Override
+    public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws Exception {
+        // we keep this overriding just to easily see which test methods are run in this fixture
+        return super.receivedNotificationOfActionFor(paymentNames, txaction);
     }
 
     public long getInteractionNotificationCountOfAction(final String paymentName, final String txaction) throws ExecutionException {

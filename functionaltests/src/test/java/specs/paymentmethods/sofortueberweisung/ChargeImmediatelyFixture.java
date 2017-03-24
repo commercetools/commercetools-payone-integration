@@ -2,23 +2,17 @@ package specs.paymentmethods.sofortueberweisung;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
-import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.PaymentDraft;
-import io.sphere.sdk.payments.PaymentDraftBuilder;
-import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
-import io.sphere.sdk.payments.TransactionDraftBuilder;
-import io.sphere.sdk.payments.TransactionState;
-import io.sphere.sdk.payments.TransactionType;
+import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.After;
@@ -27,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
+import specs.paymentmethods.BaseNotifiablePaymentFixture;
 import util.WebDriverSofortueberweisung;
 
 import javax.money.MonetaryAmount;
@@ -34,30 +29,26 @@ import javax.money.format.MonetaryFormats;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * @author fhaertig
  * @since 22.01.16
  */
 @RunWith(ConcordionRunner.class)
-public class ChargeImmediatelyFixture extends BaseFixture {
-    private static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
+public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
 
     private static final String baseRedirectUrl = "https://www.example.com/sofortueberweisung_charge_immediately/";
-
-    private static final Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyFixture.class);
 
     private WebDriverSofortueberweisung webDriver;
 
     private Map<String, String> successUrlForPayment;
+
+    private static Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyFixture.class);
 
     @Before
     public void setUp() {
@@ -133,7 +124,7 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                 MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountPaid()) :
                 BaseFixture.EMPTY_STRING;
 
-        return ImmutableMap.<String, String> builder()
+        return ImmutableMap.<String, String>builder()
                 .put("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
                 .put("interactionCount", getInteractionRequestCountOverAllTransactions(payment, requestType))
                 .put("transactionState", getTransactionState(payment, transactionId))
@@ -184,47 +175,36 @@ public class ChargeImmediatelyFixture extends BaseFixture {
 
         paymentNamesList.forEach(paymentName -> {
             final Payment payment = fetchPaymentByLegibleName(paymentName);
-            final Optional<String> responseRedirectUrl = Optional.ofNullable(payment.getCustom())
-                    .flatMap(customFields ->
-                            Optional.ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)));
-
-            if (responseRedirectUrl.isPresent()) {
-                final String successUrl =
-                        webDriver.executeSofortueberweisungRedirect(responseRedirectUrl.get(), getTestDataSwBankTransferIban())
-                                .replace(baseRedirectUrl, "[...]");
-
-                successUrlForPayment.put(paymentName, successUrl);
+            try {
+                Optional.ofNullable(payment.getCustom())
+                        .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
+                        .map(redirectCustomField -> webDriver.executeSofortueberweisungRedirect(redirectCustomField, getTestDataSwBankTransferIban())
+                                .replace(baseRedirectUrl, "[...]"))
+                        .ifPresent(successUrl -> successUrlForPayment.put(paymentName, successUrl));
+            } catch (Exception e) {
+                LOG.error("Error executing redirect for Sofortüberweisung Charge Immediate fixture", e);
             }
+
         });
 
         return successUrlForPayment.size() == paymentNamesList.size();
     }
 
-    public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws InterruptedException, ExecutionException {
-        final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
+    @Override
+    public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws Exception {
+        // validate the payments were successfully processed in previous executeRedirectForPayments() call.
+        // otherwise return false instantly
+        String unconfirmedPayments = stream(thePaymentNamesSplitter.split(paymentNames).spliterator(), false)
+                .filter(paymentName -> !successUrlForPayment.containsKey(paymentName))
+                .collect(Collectors.joining(", "));
 
-        long remainingWaitTimeInMillis = PAYONE_NOTIFICATION_TIMEOUT;
-
-        final long sleepDuration = 100L;
-
-        long numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
-        while ((numberOfPaymentsWithNotification != paymentNamesList.size()) && (remainingWaitTimeInMillis > 0L)) {
-            Thread.sleep(sleepDuration);
-            remainingWaitTimeInMillis -= sleepDuration;
-            numberOfPaymentsWithNotification = countPaymentsWithNotificationOfAction(paymentNamesList, txaction);
-            if (remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(4)
-                    || remainingWaitTimeInMillis == TimeUnit.MINUTES.toMillis(2)) {
-                LOG.info("Waiting for " + txaction + " notifications in Sofortueberweisung ChargedImmediatelyFixture takes longer than usual.");
-            }
+        if (StringUtils.isNotBlank(unconfirmedPayments)) {
+            LOG.error("[{}] payments are not re-directed - the notifications [{}] won't come",
+                    unconfirmedPayments, txaction);
+            return false;
         }
 
-        LOG.info(String.format(
-                "waited %d seconds to receive notifications of type '%s' for payments %s",
-                TimeUnit.MILLISECONDS.toSeconds(PAYONE_NOTIFICATION_TIMEOUT - remainingWaitTimeInMillis),
-                txaction,
-                Arrays.toString(paymentNamesList.stream().map(this::getIdForLegibleName).toArray())));
-
-        return numberOfPaymentsWithNotification == paymentNamesList.size();
+        return super.receivedNotificationOfActionFor(paymentNames, txaction);
     }
 
     public boolean isInteractionRedirectPresent(final String paymentName) throws ExecutionException {
