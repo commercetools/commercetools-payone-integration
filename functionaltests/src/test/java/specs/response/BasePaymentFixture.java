@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import static io.sphere.sdk.payments.TransactionState.FAILURE;
+import static java.lang.String.format;
 
 /**
  * Base class to create and handle test payments for Payone.
@@ -141,10 +142,8 @@ public class BasePaymentFixture extends BaseFixture {
             List<Transaction> transactions = payment.getTransactions();
             TransactionState lastTransactionState = transactions.size() > 0 ? transactions.get(transactions.size() - 1).getState() : null;
             if (FAILURE.equals(lastTransactionState)) {
-                String errorMessage = String.format("Payment [%s] transaction is FAILURE, payment status is [%s]",
-                        payment.getId(), payment.getPaymentStatus().getInterfaceCode());
-                LOG.error(errorMessage);
-                throw new IllegalStateException(errorMessage);
+                throw new IllegalStateException(format("Payment [%s] transaction is FAILURE, payment status is [%s]",
+                        payment.getId(), payment.getPaymentStatus().getInterfaceCode()));
             }
         });
     }

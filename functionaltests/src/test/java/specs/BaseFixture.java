@@ -220,7 +220,6 @@ public abstract class BaseFixture {
                   .build())
               .asString().getBody();
         } catch (Throwable e) {
-          LOG.error("Exception in fetching pseudocardpan: ", e);
           throw new RuntimeException("Exception in fetching pseudocardpan", e);
         }
 
@@ -232,9 +231,7 @@ public abstract class BaseFixture {
             PSEUDO_CARD_PAN = m.group(1);
             LOG.info("Fetched pseudocardpan {}", PSEUDO_CARD_PAN);
         } else {
-          String error = String.format("Unexpected pseudocardpan response: %s", cardPanResponse);
-          LOG.error(error);
-          throw new RuntimeException(error);
+          throw new RuntimeException(String.format("Unexpected pseudocardpan response: %s", cardPanResponse));
         }
       }
 
