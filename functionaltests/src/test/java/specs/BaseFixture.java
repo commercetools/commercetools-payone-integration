@@ -233,7 +233,7 @@ public abstract class BaseFixture {
         if (m.matches()) {
             assert PSEUDO_CARD_PAN == null : "PSEUDO_CARD_PAN multiple initialization";
             PSEUDO_CARD_PAN = m.group(1);
-            LOG.info("Fetched pseudocardpan {}", PSEUDO_CARD_PAN);
+            LOG.info("Pseudocardpan fetched successfully");
         } else {
           throw new RuntimeException(String.format("Unexpected pseudocardpan response: %s", cardPanResponse));
         }
