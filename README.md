@@ -234,7 +234,7 @@ in addition to the [commercetools API client credentials](#commercetools-api-cli
   <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_IBAN</code></td>     <td>the IBAN of a test bank account supporting Sofortueberweisung</td></tr>
   <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_BIC</code></td>      <td>the BIC of a test bank account supporting Sofortueberweisung</td></tr>
   <tr><td><code>TEST_DATA_PAYONE_MERCHANT_ID</code></td>        <td rowspan="4">Payone credentials for pseudocartpan generating. <br/>
-                                                                                <b>Ensurethese values are the same for Travis (local) test and Heroku deployed service!</b></td></tr>
+                                                                                <b>Ensure these values are the same for Travis (local) test and Heroku deployed service!</b></td></tr>
   <tr><td><code>TEST_DATA_PAYONE_SUBACC_ID</code></td></tr>
   <tr><td><code>TEST_DATA_PAYONE_PORTAL_ID</code></td></tr>
   <tr><td><code>TEST_DATA_PAYONE_KEY</code></td></tr>
@@ -242,11 +242,11 @@ in addition to the [commercetools API client credentials](#commercetools-api-cli
 
 You could find the values above in the encrypted [`travis-build/`](/travis-build) directory.
 
-**Note**: it's important to update `travis-build/` settings every time you change the build settings on the server. 
-It's even better to update first in the file, then on the Travis web page.
+**Note**: it's important to update  [`travis-build/`](/travis-build) settings every time you change the build settings 
+in Travis config. Even better update first the file, then on the Travis web page.
 
 The pseudocardpan for VISA without 3DS secure is fetched at runtime for specified `TEST_DATA_VISA_CREDIT_CARD_NO_3DS`
-card number using PAYONE server API. To do this with the client API please refer to the corresponding documentation.
+card number using PAYONE server API. To do this with the client API please refer to the corresponding Payone API documentation.
 With the server API you simply need to send a POST request of type "3dscheck" for example by using a command line tool:
 
 ```
@@ -284,13 +284,11 @@ Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the s
 #### Publishing functional tests results
 
 The build results are published to [`gh-pages`](https://github.com/commercetools/commercetools-payone-integration/tree/gh-pages) branch of the repo.
-Then you are able to review the tests results in the page [Specs page](http://commercetools.github.io/commercetools-payone-integration/latest/spec/specs/Specs.html)
-and [Tests page](http://commercetools.github.io/commercetools-payone-integration/latest/tests/).
+Then you are able to review the tests results in [Test results page](http://commercetools.github.io/commercetools-payone-integration/).
 
 **Note:** 
-  - the branch `gh-pages` must be created on the remote before publishing, 
-    otherwise the plugin won't be able to push the results!
-    
+  - github pages are overridden by any build of any branch, so in 
+  
   - for Travis build `githubPages.repoUri` must be in HTTPS format and `$GH_TOKEN` must be set to GitHub token 
     with push permission
   
@@ -303,7 +301,7 @@ and [Tests page](http://commercetools.github.io/commercetools-payone-integration
     These cases should be reported and avoided (fail-fast approach).
   
   - Web-driver (selenium) tests which are navigating to web-pages (Sofortüberweisung, 3ds secure verification) may fail 
-    because of wrong HTML elements names, if the service providers update theirs sites.
+    because of wrong HTML elements names, if the service providers change html structure of their sites.
 
 ### Paypal Sandbox Accounts
 
