@@ -220,7 +220,7 @@ public abstract class BaseFixture {
                   .build())
               .asString().getBody();
         } catch (Throwable e) {
-          throw new RuntimeException("Exception in fetching pseudocardpan", e);
+          throw new RuntimeException("Error on pseudocardpan fetch", e);
         }
 
         Pattern p = Pattern.compile("^.*pseudocardpan\\s*=\\s*(\\d+).*$", CASE_INSENSITIVE | DOTALL);
