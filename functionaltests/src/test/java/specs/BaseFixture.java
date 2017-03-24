@@ -190,7 +190,11 @@ public abstract class BaseFixture {
     /**
      * Fetch new or get cached pseudocardpan from Payone service based on supplied test VISA card number
      * (see {@link #getTestDataVisaCreditCardNo3Ds()}).
-     * Since Concordion is multi-threading - use synchronized lazy initialization.
+     * <p>
+     * Why <i>synchronized</i>: the card pan is fetched over HTTP POST request from pay1.de site and the operation
+     * might be slow, so we cache the value. But our tests run concurrently, so to avoid double HTTP request
+     * to pay1.de we use synchronized: the access to the method is blocked till the response from pay1.de, but it is
+     * blocked once, all other get access will be fast (when {@code PSEUDO_CARD_PAN} is set).
      */
     synchronized static protected String getUnconfirmedVisaPseudoCardPan()  {
 
