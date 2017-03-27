@@ -211,7 +211,11 @@ public abstract class BaseFixture {
     /**
      * Fetch new or get cached pseudocardpan from Payone service based on supplied test VISA card number
      * (see {@link #getTestDataVisaCreditCardNo3Ds()}).
-     * Since Concordion is multi-threading - use synchronized lazy initialization.
+     * <p>
+     * Why <i>synchronized</i>: the card pan is fetched over HTTP POST request from pay1.de site and the operation
+     * might be slow, so we cache the value. But our tests run concurrently, so to avoid double HTTP request
+     * to pay1.de we use synchronized: the access to the method is blocked till the response from pay1.de, but it is
+     * blocked once, all other get access will be fast (when {@code PSEUDO_CARD_PAN} is set).
      */
     synchronized static protected String getUnconfirmedVisaPseudoCardPan()  {
 
@@ -241,8 +245,7 @@ public abstract class BaseFixture {
                   .build())
               .asString().getBody();
         } catch (Throwable e) {
-          LOG.error("Exception in fetching pseudocardpan: ", e);
-          throw new RuntimeException("Exception in fetching pseudocardpan", e);
+          throw new RuntimeException("Error on pseudocardpan fetch", e);
         }
 
         Pattern p = Pattern.compile("^.*pseudocardpan\\s*=\\s*(\\d+).*$", CASE_INSENSITIVE | DOTALL);
@@ -251,11 +254,9 @@ public abstract class BaseFixture {
         if (m.matches()) {
             assert PSEUDO_CARD_PAN == null : "PSEUDO_CARD_PAN multiple initialization";
             PSEUDO_CARD_PAN = m.group(1);
-            LOG.info("Fetched pseudocardpan {}", PSEUDO_CARD_PAN);
+            LOG.info("Pseudocardpan fetched successfully");
         } else {
-          String error = String.format("Unexpected pseudocardpan response: %s", cardPanResponse);
-          LOG.error(error);
-          throw new RuntimeException(error);
+          throw new RuntimeException(String.format("Unexpected pseudocardpan response: %s", cardPanResponse));
         }
       }
 
