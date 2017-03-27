@@ -93,7 +93,7 @@ project(":service") {
  *
  * @throws GradleException if any required system property or environment variable is undefined or empty
  */
-void assertExecutableSpecRequirements(Project project, Test test) {
+void assertExecutableSpecRequirementsForTests(Project project, Test test) {
     test.systemProperties['concordion.extensions'] =
             'org.concordion.ext.inputstyle.InputStyleExtension,' +
             'org.concordion.ext.runtotals.RunTotalsExtension,' +
@@ -144,7 +144,7 @@ project(":functionaltests") {
     }
 
     test.doFirst {
-        assertExecutableSpecRequirements(project, test)
+        assertExecutableSpecRequirementsForTests(project, test)
     }
 
     task testSpec(type: Test) {
@@ -156,7 +156,7 @@ project(":functionaltests") {
     }
 
     testSpec.doFirst {
-        assertExecutableSpecRequirements(project, testSpec)
+        assertExecutableSpecRequirementsForTests(project, testSpec)
     }
 }
 
