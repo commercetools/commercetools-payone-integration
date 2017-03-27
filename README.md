@@ -132,14 +132,13 @@ Can be found in [Commercetools Merchant Center](https://admin.sphere.io/).
 
 ##### PAYONE API client credentials
 
-All required. 
-
-Name | Content
----- | -------
-`PAYONE_PORTAL_ID` | Payment portal ID
-`PAYONE_KEY` | Payment portal key
-`PAYONE_MERCHANT_ID` | Merchant account ID
-`PAYONE_SUBACC_ID` | Subaccount ID
+Name                 | Content             | Required  |
+---------------------|---------------------|-----------|
+`PAYONE_PORTAL_ID`   | Payment portal ID   | **Yes**   |
+`PAYONE_KEY`         | Payment portal key  | **Yes**   |
+`PAYONE_MERCHANT_ID` | Merchant account ID | **Yes**   |
+`PAYONE_SUBACC_ID`   | Subaccount ID       | **Yes**   |
+`PAYONE_MODE`        | Payment mode        | **No**    |
 
 Can be found in the [PAYONE Merchant Interface](https://pmi.pay1.de/).
 
@@ -189,8 +188,6 @@ docker run \
 -e CT_CLIENT_ID=xxx \
 -e CT_CLIENT_SECRET=xxx \
 -e CT_PROJECT_KEY=xxx \
--e PAYONE_AUTH_PASS=xxx \
--e PAYONE_AUTH_USER=xxx \
 -e PAYONE_KEY=xxx \
 -e PAYONE_MERCHANT_ID=xxx \
 -e PAYONE_MODE=test|live \
