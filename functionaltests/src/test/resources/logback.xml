@@ -1,0 +1,16 @@
+<configuration>
+    <!-- These logback settings used not by tests engine (JUnit or any else), but by run classes.
+         The main point of these settings is too skip over-flooding logs from sphere and netty clients. -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- Use "test" prefix to distinct tested classes and testing framework logs -->
+            <pattern>test: %highlight([%-5level]) %d{HH:mm:ss} %cyan(%logger{20}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.gargoylesoftware.htmlunit" level="ERROR"/>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
