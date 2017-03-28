@@ -197,7 +197,7 @@ The integration service itself does not provide SSL connectivity, this must be d
  
 #### Local run for development and tests
 
-  In the [`/build.gradle`](#/build.gradle) script the [_application_](https://docs.gradle.org/current/userguide/application_plugin.html)
+  In the [`/build.gradle`](/build.gradle) script the [_application_](https://docs.gradle.org/current/userguide/application_plugin.html)
   plugin is applied 
   thus `gradle run` task could be used for local run and debug 
   (for example, in Intellij IDEA you could _Run/Debug_ the gradle task `run` from the tasks list).
