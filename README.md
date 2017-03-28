@@ -7,6 +7,10 @@ and the [PAYONE](http://www.payone.de) payment service provider (server API).
 
 It is a standalone Microservice that connects the two cloud platforms and provides a small own helper API to force immediate handling of a payment. 
 
+<!-- 
+     npm install -g doctoc
+     doctoc README.md 
+     -->
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
@@ -26,6 +30,8 @@ It is a standalone Microservice that connects the two cloud platforms and provid
       - [Service configuration parameters](#service-configuration-parameters)
   - [Build](#build)
   - [Run](#run)
+    - [Docker run](#docker-run)
+    - [Local run for development and tests](#local-run-for-development-and-tests)
 - [Test environments](#test-environments)
   - [Development workflow](#development-workflow)
   - [Functional Tests](#functional-tests)
@@ -170,19 +176,10 @@ Run the JAR:
 java -jar service/build/libs/commercetools-payone-integration.jar
 ```
 
-Run the JAR for debug (port `1044` is variable):
-
-* Listen mode:
-    ```
-    java -agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
-    ```
-
-* Attach mode:
-    ```
-    java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
-    ```
-
 ### Run
+
+#### Docker run
+
 ```
 docker run \
 -e CT_CLIENT_ID=xxx \
@@ -196,7 +193,30 @@ docker run \
 sphereio/commercetools-payone-integration 
 ```
 
-The integration service itself does not provide SSL connectivity, this must be done by a load balancer / SSL terminator running in front of it (which is recommended in any case). 
+The integration service itself does not provide SSL connectivity, this must be done by a load balancer / SSL terminator running in front of it (which is recommended in any case).
+ 
+#### Local run for development and tests
+
+  In the [`/build.gradle`](#/build.gradle) script the [_application_](https://docs.gradle.org/current/userguide/application_plugin.html)
+  plugin is applied 
+  thus `gradle run` task could be used for local run and debug 
+  (for example, in Intellij IDEA you could _Run/Debug_ the gradle task `run` from the tasks list).
+  
+  In the script this `run` task is configured to convert the required runtime values from the local gradle settings 
+(`~/.gradle/gradle.properties`) to java runtime properties (`-Dkey=value` arguments). 
+This allows to skip manually set-up environment variables for the service run.
+
+  To run the built jar from command line in debug mode use (port `1044` is variable): 
+
+  * Listen mode:
+      ```
+      java -agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
+      ```
+
+  * Attach mode:
+      ```
+      java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
+      ```
 
 ## Test environments
 
