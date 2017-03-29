@@ -135,10 +135,7 @@ public class ServiceFactory {
         if (blockingSphereClient == null) {
             final SphereClientFactory sphereClientFactory = SphereClientFactory.of();
             blockingSphereClient = BlockingSphereClient.of(
-                    sphereClientFactory.createClient(
-                            serviceConfig.getCtProjectKey(),
-                            serviceConfig.getCtClientId(),
-                            serviceConfig.getCtClientSecret()),
+                    sphereClientFactory.createClient(serviceConfig.getSphereClientConfig()),
                     DEFAULT_CTP_CLIENT_TIMEOUT,
                     TimeUnit.SECONDS);
         }
@@ -161,7 +158,7 @@ public class ServiceFactory {
             orderService = new OrderServiceImpl(getBlockingCommercetoolsClient());
         }
 
-        return  orderService;
+        return orderService;
     }
 
     synchronized
@@ -179,20 +176,6 @@ public class ServiceFactory {
     // FIXME return shared instance
     public LoadingCache<String, Type> createTypeCache(final BlockingSphereClient client) {
         return CacheBuilder.newBuilder().build(new TypeCacheLoader(client));
-    }
-
-    public IntegrationService createService() {
-        final BlockingSphereClient client = getBlockingCommercetoolsClient();
-        final LoadingCache<String, Type> typeCache = createTypeCache(client);
-        final PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-
-        return ServiceFactory.createService(
-                new CommercetoolsQueryExecutor(client),
-                createPaymentDispatcher(typeCache, payoneConfig, serviceConfig, client),
-                createNotificationDispatcher(this, payoneConfig),
-                new CustomTypeBuilder(
-                        client,
-                        CustomTypeBuilder.PermissionToStartFromScratch.fromBoolean(serviceConfig.getStartFromScratch())));
     }
 
     // FIXME get rid of this static method
@@ -246,8 +229,8 @@ public class ServiceFactory {
             for (final TransactionType type : paymentMethod.getSupportedTransactionTypes()) {
                 // FIXME jw: shouldn't be nullable anymore when payment method is implemented completely
                 final TransactionExecutor executor = Optional
-                            .ofNullable(createTransactionExecutor(type, typeCache, client, requestFactory, postService, paymentMethod))
-                            .orElse(defaultExecutor);
+                        .ofNullable(createTransactionExecutor(type, typeCache, client, requestFactory, postService, paymentMethod))
+                        .orElse(defaultExecutor);
 
                 executors.put(type, executor);
             }
@@ -264,7 +247,7 @@ public class ServiceFactory {
             final PayonePostService postService,
             final PaymentMethod paymentMethod) {
 
-        switch(transactionType) {
+        switch (transactionType) {
             case AUTHORIZATION:
                 return new AuthorizationTransactionExecutor(typeCache, requestFactory, postService, client);
             case CANCEL_AUTHORIZATION:
@@ -285,7 +268,7 @@ public class ServiceFactory {
     }
 
     private static PayoneRequestFactory createRequestFactory(final PaymentMethod method, final PayoneConfig payoneConfig, final ServiceConfig serviceConfig) {
-        switch(method) {
+        switch (method) {
             case CREDIT_CARD:
                 return new CreditCardRequestFactory(payoneConfig);
             case WALLET_PAYPAL:

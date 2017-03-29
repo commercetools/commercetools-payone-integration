@@ -1,5 +1,7 @@
 package com.commercetools.pspadapter.payone.config;
 
+import io.sphere.sdk.client.SphereClientConfig;
+
 /**
  * Provides the configuration of the integration service.
  *
@@ -9,9 +11,7 @@ package com.commercetools.pspadapter.payone.config;
  */
 public class ServiceConfig {
 
-    private final String ctProjectKey;
-    private final String ctClientId;
-    private final String ctClientSecret;
+    private final SphereClientConfig sphereClientConfig;
     private final boolean startFromScratch;
     private final String scheduledJobCronShortTimeFrame;
     private final String scheduledJobCronLongTimeFrame;
@@ -21,13 +21,16 @@ public class ServiceConfig {
      * Initializes the configuration.
      *
      * @param propertyProvider to get the parameters from
-     *
      * @throws IllegalStateException if a mandatory parameter is undefined or empty
      */
     public ServiceConfig(final PropertyProvider propertyProvider) {
-        ctProjectKey = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY);
-        ctClientId  = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID);
-        ctClientSecret = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET);
+
+        sphereClientConfig = SphereClientConfig.of(
+                propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY),
+                propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID),
+                propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET)
+        );
+
         scheduledJobCronShortTimeFrame =
                 propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON)
                         .map(String::valueOf)
@@ -45,28 +48,8 @@ public class ServiceConfig {
                 .orElse("");
     }
 
-    /**
-     * Gets the commercetools project key.
-     * @return the key of the commercetools project to connect with
-     */
-    public String getCtProjectKey() {
-        return ctProjectKey;
-    }
-
-    /**
-     * Gets the commercetools client ID.
-     * @return the client ID of the commercetools project to connect with
-     */
-    public String getCtClientId() {
-        return ctClientId;
-    }
-
-    /**
-     * Gets the commercetools client secret.
-     * @return the client password for the commercetools project to connect with
-     */
-    public String getCtClientSecret() {
-        return ctClientSecret;
+    public SphereClientConfig getSphereClientConfig() {
+        return sphereClientConfig;
     }
 
     /**

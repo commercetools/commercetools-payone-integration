@@ -1,10 +1,5 @@
 package com.commercetools.pspadapter.payone.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.ThrowableAssert.catchThrowable;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +7,11 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.ThrowableAssert.catchThrowable;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 /**
  * @author fhaertig
@@ -34,7 +34,7 @@ public class ServiceConfigTest {
     @Test
     public void getsCtProjectKey() {
         when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY)).thenReturn("project X");
-        assertThat(new ServiceConfig(propertyProvider).getCtProjectKey()).isEqualTo("project X");
+        assertThat(new ServiceConfig(propertyProvider).getSphereClientConfig().getProjectKey()).isEqualTo("project X");
     }
 
     @Test
@@ -45,7 +45,7 @@ public class ServiceConfigTest {
     @Test
     public void getsCtClientId() {
         when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID)).thenReturn("id X");
-        assertThat(new ServiceConfig(propertyProvider).getCtClientId()).isEqualTo("id X");
+        assertThat(new ServiceConfig(propertyProvider).getSphereClientConfig().getClientId()).isEqualTo("id X");
     }
 
     @Test
@@ -56,7 +56,7 @@ public class ServiceConfigTest {
     @Test
     public void getsCtClientSecret() {
         when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET)).thenReturn("secret X");
-        assertThat(new ServiceConfig(propertyProvider).getCtClientSecret()).isEqualTo("secret X");
+        assertThat(new ServiceConfig(propertyProvider).getSphereClientConfig().getClientSecret()).isEqualTo("secret X");
     }
 
     @Test
