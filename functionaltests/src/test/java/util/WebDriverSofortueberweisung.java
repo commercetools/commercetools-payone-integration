@@ -31,7 +31,7 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
     private final String tan;
 
     public WebDriverSofortueberweisung(final String pin, final String tan) {
-        super(BrowserVersion.FIREFOX_38, true);
+        super(BrowserVersion.FIREFOX_45, true);
 
         this.pin = pin;
         this.tan = tan;
