@@ -53,7 +53,6 @@ public class ServiceFactory {
     private static final long DEFAULT_CTP_CLIENT_TIMEOUT = 10;
 
     private final ServiceConfig serviceConfig;
-    private final PropertyProvider propertyProvider;
     private static final String PAYONE_INTERFACE_NAME = PAYONE;
 
     private BlockingSphereClient blockingSphereClient = null;
@@ -64,26 +63,17 @@ public class ServiceFactory {
 
     private PaymentToOrderStateMapper paymentToOrderStateMapper = null;
 
-    private ServiceFactory(final PropertyProvider propertyProvider) {
-        this.propertyProvider = propertyProvider;
-        this.serviceConfig = new ServiceConfig(propertyProvider);
-    }
-
-    /**
-     * Creates a new service factory initialized with a default {@link PropertyProvider}.
-     * @return the new factory instance, never null
-     */
-    public static ServiceFactory create() {
-        return ServiceFactory.withPropertiesFrom(new PropertyProvider());
+    private ServiceFactory(final ServiceConfig serviceConfig) {
+        this.serviceConfig = serviceConfig;
     }
 
     /**
      * Creates a new service factory initialized with the provided {@code propertyProvider}.
-     * @param propertyProvider provides the configuration parameters
+     * @param serviceConfig provides the service configuration parameters
      * @return the new service factory instance, never null
      */
-    public static ServiceFactory withPropertiesFrom(final PropertyProvider propertyProvider) {
-        return new ServiceFactory(propertyProvider);
+    public static ServiceFactory withPropertiesFrom(final ServiceConfig serviceConfig) {
+        return new ServiceFactory(serviceConfig);
     }
 
     public static void main(String [] args) throws SchedulerException, MalformedURLException {
@@ -91,7 +81,8 @@ public class ServiceFactory {
         // FIXME get rid of this (by using instance methods...)
         final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
         final PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(propertyProvider);
+        final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(serviceConfig);
+
         final BlockingSphereClient commercetoolsClient = serviceFactory.getBlockingCommercetoolsClient();
         final LoadingCache<String, Type> typeCache = serviceFactory.createTypeCache(commercetoolsClient);
         final PaymentDispatcher paymentDispatcher = ServiceFactory.createPaymentDispatcher(
@@ -99,6 +90,7 @@ public class ServiceFactory {
                 payoneConfig,
                 serviceConfig,
                 commercetoolsClient);
+
         final NotificationDispatcher notificationDispatcher = ServiceFactory.createNotificationDispatcher(
                 serviceFactory, payoneConfig);
 

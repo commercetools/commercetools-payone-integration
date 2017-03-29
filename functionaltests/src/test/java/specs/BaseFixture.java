@@ -2,6 +2,7 @@ package specs;
 
 import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.base.Charsets;
@@ -105,7 +106,7 @@ public abstract class BaseFixture {
                 new URL(propertyProvider.getMandatoryNonEmptyProperty("CT_PAYONE_INTEGRATION_URL"));
 
         //only for creation of test data
-        final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(propertyProvider);
+        final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(new ServiceConfig(propertyProvider));
         ctpClient = serviceFactory.getBlockingCommercetoolsClient();
 
         typeCache = serviceFactory.createTypeCache(ctpClient);
