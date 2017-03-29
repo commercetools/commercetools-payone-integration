@@ -1,19 +1,12 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.util.BlowfishUtil;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
-import org.javamoney.moneta.function.MonetaryUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import spark.utils.StringUtils;
-
-import java.util.Optional;
 
 /**
  * @author fhaertig
@@ -22,12 +15,10 @@ import java.util.Optional;
  */
 public class SofortBankTransferRequestFactory extends BankTransferWithoutIbanBicRequestFactory {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SofortBankTransferRequestFactory.class);
-
     private final ServiceConfig serviceConfig;
 
-    public SofortBankTransferRequestFactory(final PayoneConfig payoneConfig, final ServiceConfig serviceConfig) {
-        super(payoneConfig);
+    public SofortBankTransferRequestFactory(final ServiceConfig serviceConfig) {
+        super(serviceConfig.getPayoneConfig());
         this.serviceConfig = serviceConfig;
     }
 

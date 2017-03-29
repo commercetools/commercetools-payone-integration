@@ -76,25 +76,26 @@ public class ServiceFactory {
         return new ServiceFactory(serviceConfig);
     }
 
-    public static void main(String [] args) throws SchedulerException, MalformedURLException {
+    public static void main(String[] args) throws SchedulerException, MalformedURLException {
+
         final PropertyProvider propertyProvider = new PropertyProvider();
-        // FIXME get rid of this (by using instance methods...)
+
         final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        final PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(serviceConfig);
+
+        final ServiceFactory serviceFactory = withPropertiesFrom(serviceConfig);
 
         final BlockingSphereClient commercetoolsClient = serviceFactory.getBlockingCommercetoolsClient();
+
         final LoadingCache<String, Type> typeCache = serviceFactory.createTypeCache(commercetoolsClient);
-        final PaymentDispatcher paymentDispatcher = ServiceFactory.createPaymentDispatcher(
+        final PaymentDispatcher paymentDispatcher = createPaymentDispatcher(
                 typeCache,
-                payoneConfig,
                 serviceConfig,
                 commercetoolsClient);
 
-        final NotificationDispatcher notificationDispatcher = ServiceFactory.createNotificationDispatcher(
-                serviceFactory, payoneConfig);
+        final NotificationDispatcher notificationDispatcher = createNotificationDispatcher(serviceFactory,
+                serviceConfig.getPayoneConfig());
 
-        final IntegrationService integrationService = ServiceFactory.createService(
+        final IntegrationService integrationService = createService(
                 new CommercetoolsQueryExecutor(commercetoolsClient),
                 paymentDispatcher,
                 notificationDispatcher,
@@ -195,16 +196,15 @@ public class ServiceFactory {
     /**
      * TODO transform into instance method
      * @param typeCache
-     * @param config
      * @param client
      * @return
      */
-    public static PaymentDispatcher createPaymentDispatcher(final LoadingCache<String, Type> typeCache, final PayoneConfig config, final ServiceConfig serviceConfig, final BlockingSphereClient client) {
+    public static PaymentDispatcher createPaymentDispatcher(final LoadingCache<String, Type> typeCache, final ServiceConfig serviceConfig, final BlockingSphereClient client) {
         // TODO jw: use immutable map
         final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
 
         final TransactionExecutor defaultExecutor = new UnsupportedTransactionExecutor(client);
-        final PayonePostServiceImpl postService = PayonePostServiceImpl.of(config.getApiUrl());
+        final PayonePostServiceImpl postService = PayonePostServiceImpl.of(serviceConfig.getPayoneConfig().getApiUrl());
 
         final ImmutableSet<PaymentMethod> supportedMethods = ImmutableSet.of(
                 PaymentMethod.CREDIT_CARD,
@@ -216,7 +216,7 @@ public class ServiceFactory {
         );
 
         for (final PaymentMethod paymentMethod : supportedMethods) {
-            final PayoneRequestFactory requestFactory = createRequestFactory(paymentMethod, config, serviceConfig);
+            final PayoneRequestFactory requestFactory = createRequestFactory(paymentMethod, serviceConfig);
             final ImmutableMap.Builder<TransactionType, TransactionExecutor> executors = ImmutableMap.builder();
             for (final TransactionType type : paymentMethod.getSupportedTransactionTypes()) {
                 // FIXME jw: shouldn't be nullable anymore when payment method is implemented completely
@@ -259,19 +259,19 @@ public class ServiceFactory {
         return null;
     }
 
-    private static PayoneRequestFactory createRequestFactory(final PaymentMethod method, final PayoneConfig payoneConfig, final ServiceConfig serviceConfig) {
+    private static PayoneRequestFactory createRequestFactory(final PaymentMethod method, final ServiceConfig serviceConfig) {
         switch (method) {
             case CREDIT_CARD:
-                return new CreditCardRequestFactory(payoneConfig);
+                return new CreditCardRequestFactory(serviceConfig.getPayoneConfig());
             case WALLET_PAYPAL:
-                return new PaypalRequestFactory(payoneConfig);
+                return new PaypalRequestFactory(serviceConfig.getPayoneConfig());
             case BANK_TRANSFER_SOFORTUEBERWEISUNG:
-                return new SofortBankTransferRequestFactory(payoneConfig, serviceConfig);
+                return new SofortBankTransferRequestFactory(serviceConfig);
             case BANK_TRANSFER_POSTFINANCE_CARD:
             case BANK_TRANSFER_POSTFINANCE_EFINANCE:
-                return new PostFinanceBanktransferRequestFactory(payoneConfig);
+                return new PostFinanceBanktransferRequestFactory(serviceConfig.getPayoneConfig());
             case BANK_TRANSFER_ADVANCE:
-                return new BanktTransferInAdvanceRequestFactory(payoneConfig);
+                return new BanktTransferInAdvanceRequestFactory(serviceConfig.getPayoneConfig());
             default:
                 throw new IllegalArgumentException(String.format("No PayoneRequestFactory could be created for payment method %s", method));
         }

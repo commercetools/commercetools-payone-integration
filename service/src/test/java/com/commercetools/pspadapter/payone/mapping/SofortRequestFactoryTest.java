@@ -48,7 +48,7 @@ public class SofortRequestFactoryTest {
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
         ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        factory = new SofortBankTransferRequestFactory(payoneConfig, serviceConfig);
+        factory = new SofortBankTransferRequestFactory(serviceConfig);
 
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroPNT();
@@ -136,7 +136,7 @@ public class SofortRequestFactoryTest {
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
         ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        factory = new SofortBankTransferRequestFactory(payoneConfig, serviceConfig);
+        factory = new SofortBankTransferRequestFactory(serviceConfig);
 
         final String testIban = "DE012345";
         final String testBic = "NOLADE0";

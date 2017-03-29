@@ -48,7 +48,7 @@ public class SofortWithoutIbanRequestFactoryTest {
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
         ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        factory = new SofortBankTransferRequestFactory(payoneConfig, serviceConfig);
+        factory = new SofortBankTransferRequestFactory(serviceConfig);
 
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroWithoutIbanPNT();
@@ -136,7 +136,7 @@ public class SofortWithoutIbanRequestFactoryTest {
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
         ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        factory = new SofortBankTransferRequestFactory(payoneConfig, serviceConfig);
+        factory = new SofortBankTransferRequestFactory(serviceConfig);
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroWithoutIbanPNT();
         Order order = payments.dummyOrderMapToPayoneRequest();

@@ -12,6 +12,9 @@ import io.sphere.sdk.client.SphereClientConfig;
 public class ServiceConfig {
 
     private final SphereClientConfig sphereClientConfig;
+
+    private final PayoneConfig payoneConfig;
+
     private final boolean startFromScratch;
     private final String scheduledJobCronShortTimeFrame;
     private final String scheduledJobCronLongTimeFrame;
@@ -30,6 +33,8 @@ public class ServiceConfig {
                 propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID),
                 propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET)
         );
+
+        payoneConfig = new PayoneConfig(propertyProvider);
 
         scheduledJobCronShortTimeFrame =
                 propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON)
@@ -50,6 +55,10 @@ public class ServiceConfig {
 
     public SphereClientConfig getSphereClientConfig() {
         return sphereClientConfig;
+    }
+
+    public PayoneConfig getPayoneConfig() {
+        return payoneConfig;
     }
 
     /**
