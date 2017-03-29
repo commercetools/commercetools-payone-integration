@@ -182,7 +182,7 @@ static void assertExecutableSpecRequirementsForTests(Project project, Test test)
 
     propertiesToMap.each { propertyKey ->
         test.environment propertyKey, project.hasProperty(propertyKey) ? project[propertyKey] : System.getenv(propertyKey)
-        assertValueIsNotNullOrEmpty(propertyKey, test.getEnvironment())
+        assertMapValueIsNotNullOrEmpty(propertyKey, test.getEnvironment())
     }
 }
 
@@ -262,7 +262,7 @@ publishGhPages  {
  *
  * @throws GradleException if the value is undefined or empty
  */
-static void assertValueIsNotNullOrEmpty(String key, Map<String, Object> map) {
+static void assertMapValueIsNotNullOrEmpty(String key, Map<String, Object> map) {
     assertValueIsNotNullOrEmpty(key, map.get(key))
 }
 
