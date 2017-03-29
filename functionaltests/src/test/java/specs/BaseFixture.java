@@ -110,7 +110,6 @@ public abstract class BaseFixture {
     private BiMap<String, String> payments = HashBiMap.create();
 
 
-    // FIXME use BeforeClass
     @BeforeClass
     static public void initializeCommercetoolsClient() throws MalformedURLException {
         final PropertyProvider propertyProvider = new PropertyProvider();
