@@ -100,10 +100,13 @@ project(":service") {
         dependsOn ':service:convertGradlePropertiesToJvmArgs'
     }
 
-    task convertGradlePropertiesToJvmArgs {
+    task convertGradlePropertiesToJvmArgs (type:Task) {
         description 'Convert the gradle build properties (set in ~/.gradle/gradle.properties) ' +
                     'to JVM runtime properties (-Dkey=value arguments)'
-        applicationDefaultJvmArgs = assertAndGetServiceProperties(project)
+
+        doLast {
+            applicationDefaultJvmArgs = assertAndGetServiceProperties(project)
+        }
     }
 }
 
