@@ -42,7 +42,6 @@ public class OrderServiceImplFixture extends BaseFixture {
 
     @Before
     public void setUp() throws Exception {
-        super.initializeCommercetoolsClient();
         orderService = new OrderServiceImpl(this.ctpClient());
     }
 

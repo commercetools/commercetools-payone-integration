@@ -47,7 +47,6 @@ public class BasePaymentFixture extends BaseFixture {
 
     @Before
     public void setUp() throws Exception {
-        super.initializeCommercetoolsClient();
         orderService = new OrderServiceImpl(ctpClient());
     }
 
