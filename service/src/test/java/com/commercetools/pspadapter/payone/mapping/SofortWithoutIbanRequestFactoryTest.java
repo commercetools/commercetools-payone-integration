@@ -47,7 +47,7 @@ public class SofortWithoutIbanRequestFactoryTest {
         when(propertyProvider.getProperty(PropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
+        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider, payoneConfig);
         factory = new SofortBankTransferRequestFactory(serviceConfig);
 
 
@@ -135,7 +135,7 @@ public class SofortWithoutIbanRequestFactoryTest {
         when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyValue");
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
+        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider, payoneConfig);
         factory = new SofortBankTransferRequestFactory(serviceConfig);
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroWithoutIbanPNT();

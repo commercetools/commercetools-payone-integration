@@ -25,6 +25,9 @@ public class ServiceConfigTest {
     @Mock
     private PropertyProvider propertyProvider;
 
+    @Mock
+    private PayoneConfig payoneConfig;
+
     @Before
     public void setUp() {
         when(propertyProvider.getProperty(anyString())).thenReturn(Optional.of(dummyValue));
@@ -34,7 +37,7 @@ public class ServiceConfigTest {
     @Test
     public void getsCtProjectKey() {
         when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY)).thenReturn("project X");
-        assertThat(new ServiceConfig(propertyProvider).getSphereClientConfig().getProjectKey()).isEqualTo("project X");
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).getSphereClientConfig().getProjectKey()).isEqualTo("project X");
     }
 
     @Test
@@ -45,7 +48,7 @@ public class ServiceConfigTest {
     @Test
     public void getsCtClientId() {
         when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID)).thenReturn("id X");
-        assertThat(new ServiceConfig(propertyProvider).getSphereClientConfig().getClientId()).isEqualTo("id X");
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).getSphereClientConfig().getClientId()).isEqualTo("id X");
     }
 
     @Test
@@ -56,14 +59,14 @@ public class ServiceConfigTest {
     @Test
     public void getsCtClientSecret() {
         when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET)).thenReturn("secret X");
-        assertThat(new ServiceConfig(propertyProvider).getSphereClientConfig().getClientSecret()).isEqualTo("secret X");
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).getSphereClientConfig().getClientSecret()).isEqualTo("secret X");
     }
 
     @Test
     public void getsScheduledJobCronForShortTimeFramePoll() {
         when(propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON))
                 .thenReturn(Optional.of("short cron"));
-        assertThat(new ServiceConfig(propertyProvider).getScheduledJobCronForShortTimeFramePoll())
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).getScheduledJobCronForShortTimeFramePoll())
                 .isEqualTo("short cron");
     }
 
@@ -71,7 +74,7 @@ public class ServiceConfigTest {
     public void getsDefaultScheduledJobCronForShortTimeFramePollIfPropertyIsNotProvided() {
         when(propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON))
                 .thenReturn(Optional.empty());
-        assertThat(new ServiceConfig(propertyProvider).getScheduledJobCronForShortTimeFramePoll())
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).getScheduledJobCronForShortTimeFramePoll())
                 .isEqualTo("0/30 * * * * ? *");
     }
 
@@ -79,7 +82,7 @@ public class ServiceConfigTest {
     public void getsScheduledJobCronForLongTimeFramePoll() {
         when(propertyProvider.getProperty(PropertyProvider.LONG_TIME_FRAME_SCHEDULED_JOB_CRON))
                 .thenReturn(Optional.of("long cron"));
-        assertThat(new ServiceConfig(propertyProvider).getScheduledJobCronForLongTimeFramePoll())
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).getScheduledJobCronForLongTimeFramePoll())
                 .isEqualTo("long cron");
     }
 
@@ -87,7 +90,7 @@ public class ServiceConfigTest {
     public void getsDefaultScheduledJobCronForLongTimeFramePollIfPropertyIsNotProvided() {
         when(propertyProvider.getProperty(PropertyProvider.LONG_TIME_FRAME_SCHEDULED_JOB_CRON))
                 .thenReturn(Optional.empty());
-        assertThat(new ServiceConfig(propertyProvider).getScheduledJobCronForLongTimeFramePoll())
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).getScheduledJobCronForLongTimeFramePoll())
                 .isEqualTo("5 0 0/1 * * ? *");
     }
 
@@ -100,7 +103,7 @@ public class ServiceConfigTest {
         final IllegalStateException illegalStateException = new IllegalStateException();
         when(propertyProvider.getMandatoryNonEmptyProperty(propertyName)).thenThrow(illegalStateException);
 
-        final Throwable throwable = catchThrowable(() -> new ServiceConfig(propertyProvider));
+        final Throwable throwable = catchThrowable(() -> new ServiceConfig(propertyProvider, payoneConfig));
 
         assertThat(throwable).isSameAs(illegalStateException);
     }

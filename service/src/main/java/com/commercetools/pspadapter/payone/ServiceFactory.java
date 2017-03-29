@@ -80,7 +80,7 @@ public class ServiceFactory {
 
         final PropertyProvider propertyProvider = new PropertyProvider();
 
-        final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
+        final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider, new PayoneConfig(propertyProvider));
 
         final ServiceFactory serviceFactory = withPropertiesFrom(serviceConfig);
 

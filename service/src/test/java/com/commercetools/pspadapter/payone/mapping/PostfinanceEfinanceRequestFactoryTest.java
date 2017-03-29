@@ -2,7 +2,6 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
@@ -45,7 +44,6 @@ public class PostfinanceEfinanceRequestFactoryTest {
         when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
 
         PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
         factory = new BankTransferWithoutIbanBicRequestFactory(payoneConfig);
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroPFF();

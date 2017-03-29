@@ -26,29 +26,29 @@ public class ServiceConfig {
      * @param propertyProvider to get the parameters from
      * @throws IllegalStateException if a mandatory parameter is undefined or empty
      */
-    public ServiceConfig(final PropertyProvider propertyProvider) {
+    public ServiceConfig(final PropertyProvider propertyProvider, final PayoneConfig payoneConfig) {
 
-        sphereClientConfig = SphereClientConfig.of(
+        this.sphereClientConfig = SphereClientConfig.of(
                 propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY),
                 propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID),
                 propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET)
         );
 
-        payoneConfig = new PayoneConfig(propertyProvider);
+        this.payoneConfig = payoneConfig;
 
-        scheduledJobCronShortTimeFrame =
+        this.scheduledJobCronShortTimeFrame =
                 propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON)
                         .map(String::valueOf)
                         .orElse("0/30 * * * * ? *");
-        scheduledJobCronLongTimeFrame =
+        this.scheduledJobCronLongTimeFrame =
                 propertyProvider.getProperty(PropertyProvider.LONG_TIME_FRAME_SCHEDULED_JOB_CRON)
                         .map(String::valueOf)
                         .orElse("5 0 0/1 * * ? *");
-        startFromScratch = propertyProvider.getProperty(PropertyProvider.CT_START_FROM_SCRATCH)
+        this.startFromScratch = propertyProvider.getProperty(PropertyProvider.CT_START_FROM_SCRATCH)
                 .map(Boolean::valueOf)
                 .orElse(false);
 
-        secureKey = propertyProvider.getProperty(PropertyProvider.SECURE_KEY)
+        this.secureKey = propertyProvider.getProperty(PropertyProvider.SECURE_KEY)
                 .map(String::valueOf)
                 .orElse("");
     }
