@@ -97,16 +97,19 @@ project(":service") {
     }
 
     run {
-        doFirst {
-            // convert the gradle build properties (set in ~/.gradle/gradle.properties) to
-            applicationDefaultJvmArgs = assertAndGetServiceProperties(project)
-        }
+        dependsOn ':service:convertGradlePropertiesToJvmArgs'
+    }
+
+    task convertGradlePropertiesToJvmArgs {
+        description 'Convert the gradle build properties (set in ~/.gradle/gradle.properties) ' +
+                    'to JVM runtime properties (-Dkey=value arguments)'
+        applicationDefaultJvmArgs = assertAndGetServiceProperties(project)
     }
 }
 
 /**
- * Convert the list of required properties from gradle build properties to java runtime properties
- * (supplied as <b>-Dkey=value</b> arguments).
+ * Convert the list of required properties from gradle build properties or environment variables
+ * to java runtime properties (supplied as <b>-Dkey=value</b> arguments).
  * <p>
  * The function tries to find a property value from the {@code project} properties and then from environment variables.
  * If neither of them exists - throw an exception (fail-fast)
