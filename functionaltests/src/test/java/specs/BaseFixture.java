@@ -1,15 +1,14 @@
 package specs;
 
-import com.commercetools.pspadapter.payone.ServiceFactory;
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
+import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.*;
 import com.google.common.hash.Hashing;
@@ -25,6 +24,7 @@ import io.sphere.sdk.carts.commands.updateactions.AddPayment;
 import io.sphere.sdk.carts.commands.updateactions.SetBillingAddress;
 import io.sphere.sdk.carts.commands.updateactions.SetShippingAddress;
 import io.sphere.sdk.client.BlockingSphereClient;
+import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.OrderFromCartDraft;
@@ -41,7 +41,7 @@ import io.sphere.sdk.types.Type;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +52,7 @@ import javax.money.format.MonetaryFormats;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +64,7 @@ import static java.util.regex.Pattern.DOTALL;
 
 /**
  * @author fhaertig
- * @since  10.12.15
+ * @since 10.12.15
  */
 public abstract class BaseFixture {
     private static final Logger LOG = LoggerFactory.getLogger(BaseFixture.class);
@@ -77,6 +78,8 @@ public abstract class BaseFixture {
 
     // looks like heroku may have some lags, so we use 15 seconds to avoid false test fails because of timeouts
     protected static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 15000;
+
+    protected static final Duration CTP_REQUEST_TIMEOUT = Duration.ofMinutes(2);
 
     protected static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
@@ -92,25 +95,37 @@ public abstract class BaseFixture {
     private static final String TEST_DATA_PAYONE_KEY = "TEST_DATA_PAYONE_KEY";
 
     private static final Random randomSource = new Random();
-    private BlockingSphereClient ctpClient;
-    private URL ctPayoneIntegrationBaseUrl;
-    private LoadingCache<String, Type> typeCache;
 
-    /** maps legible payment names to payment IDs (and vice versa)*/
+    /**
+     * Only for creation of test data
+     */
+    private static BlockingSphereClient ctpClient;
+
+    private static URL ctPayoneIntegrationBaseUrl;
+    private static LoadingCache<String, Type> typeCache;
+
+    /**
+     * maps legible payment names to payment IDs (and vice versa)
+     */
     private BiMap<String, String> payments = HashBiMap.create();
 
+
     // FIXME use BeforeClass
-    @Before
-    public void initializeCommercetoolsClient() throws MalformedURLException {
+    @BeforeClass
+    static public void initializeCommercetoolsClient() throws MalformedURLException {
         final PropertyProvider propertyProvider = new PropertyProvider();
         ctPayoneIntegrationBaseUrl =
                 new URL(propertyProvider.getMandatoryNonEmptyProperty("CT_PAYONE_INTEGRATION_URL"));
 
-        //only for creation of test data
-        final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(new ServiceConfig(propertyProvider, new PayoneConfig(propertyProvider)));
-        ctpClient = serviceFactory.getBlockingCommercetoolsClient();
+        ctpClient = BlockingSphereClient.of(
+                SphereClientFactory.of().createClient(
+                        propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY),
+                        propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID),
+                        propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET)),
+                CTP_REQUEST_TIMEOUT
+        );
 
-        typeCache = serviceFactory.createTypeCache(ctpClient);
+        typeCache = CacheBuilder.newBuilder().build(new TypeCacheLoader(ctpClient));
     }
 
     public String getHandlePaymentUrl(final String paymentId) throws MalformedURLException {
@@ -219,7 +234,7 @@ public abstract class BaseFixture {
      * to pay1.de we use synchronized: the access to the method is blocked till the response from pay1.de, but it is
      * blocked once, all other get access will be fast (when {@code PSEUDO_CARD_PAN} is set).
      */
-    synchronized static protected String getUnconfirmedVisaPseudoCardPan()  {
+    synchronized static protected String getUnconfirmedVisaPseudoCardPan() {
 
       //curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>"
 
@@ -266,7 +281,7 @@ public abstract class BaseFixture {
     }
 
     protected static String getTestDataVisaCreditCardNo3Ds() {
-      return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
+        return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
     }
 
     protected static String getTestData3DsPassword() {
@@ -351,8 +366,8 @@ public abstract class BaseFixture {
                 .filter(i -> transactionId.equals(i.getId()))
                 .findFirst();
 
-        final TransactionState transactionState = transaction.isPresent()? transaction.get().getState() : null;
-        return transactionState != null? transactionState.toSphereName() : "<UNKNOWN>";
+        final TransactionState transactionState = transaction.isPresent() ? transaction.get().getState() : null;
+        return transactionState != null ? transactionState.toSphereName() : "<UNKNOWN>";
     }
 
     public String getIdOfLastTransactionByPaymentId(final String paymentId) {
@@ -425,7 +440,7 @@ public abstract class BaseFixture {
     }
 
     protected Optional<CustomFields> getInteractionRedirect(final Payment payment,
-                                            final String transactionId) throws ExecutionException {
+                                                            final String transactionId) throws ExecutionException {
         final String interactionTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT);
         return payment.getInterfaceInteractions().stream()
                 .filter(i -> interactionTypeId.equals(i.getType().getId()))
