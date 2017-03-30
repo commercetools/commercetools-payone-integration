@@ -456,6 +456,21 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     @Test
     @SuppressWarnings("unchecked")
     public void mapsAppointedCompletedToSuccessfulAuthorizationTransaction() throws Exception {
+        Payment payment = mapsAppointedCompleteToSuccessfulAuthorizationTransactionWireframe();
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
+    }
+
+    @Test
+    public void orderServiceIsNotCalledWhenIsUpdateOrderPaymentStateFalse() throws Exception {
+        // this test is similar to #mapsAppointedCompletedToSuccessfulAuthorizationTransaction(),
+        // but #isUpdateOrderPaymentState() is false, so update order actions should be skipped
+        when(serviceConfig.isUpdateOrderPaymentState()).thenReturn(false);
+
+        mapsAppointedCompleteToSuccessfulAuthorizationTransactionWireframe();
+        verifyUpdateOrderActionsNotCalled();
+    }
+
+    private Payment mapsAppointedCompleteToSuccessfulAuthorizationTransactionWireframe() throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentAuthSuccess();
 
@@ -471,7 +486,6 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
 
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(3);
-
-        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
+        return payment;
     }
 }

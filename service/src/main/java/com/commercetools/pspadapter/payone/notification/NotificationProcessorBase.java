@@ -90,7 +90,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
      */
     private CompletionStage<Order> tryToUpdateOrderByPayment(Payment updatedPayment) {
         if (serviceConfig.isUpdateOrderPaymentState()) {
-            getOrderService().getOrderByPaymentId(updatedPayment.getId())
+            return getOrderService().getOrderByPaymentId(updatedPayment.getId())
                     .thenComposeAsync(order -> updateOrderIfExists(order.orElse(null), updatedPayment));
         }
 
