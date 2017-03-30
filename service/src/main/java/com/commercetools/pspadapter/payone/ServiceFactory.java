@@ -52,23 +52,30 @@ public class ServiceFactory {
 
     private static final long DEFAULT_CTP_CLIENT_TIMEOUT = 10;
 
-    private final ServiceConfig serviceConfig;
     private static final String PAYONE_INTERFACE_NAME = PAYONE;
 
-    private BlockingSphereClient blockingSphereClient = null;
+    private final ServiceConfig serviceConfig;
 
-    private PaymentService paymentService = null;
+    private final BlockingSphereClient blockingSphereClient;
 
-    private OrderService orderService = null;
+    private final PaymentService paymentService;
 
-    private PaymentToOrderStateMapper paymentToOrderStateMapper = null;
+    private final OrderService orderService;
+
+    private final PaymentToOrderStateMapper paymentToOrderStateMapper;
 
     private ServiceFactory(final ServiceConfig serviceConfig) {
         this.serviceConfig = serviceConfig;
+
+        this.blockingSphereClient = createBlockingSphereClient();
+        this.paymentService = createPaymentService();
+        this.orderService = createOrderService();
+        this.paymentToOrderStateMapper = createPaymentToOrderStateMapper();
     }
 
     /**
      * Creates a new service factory initialized with the provided {@code propertyProvider}.
+     *
      * @param serviceConfig provides the service configuration parameters
      * @return the new service factory instance, never null
      */
@@ -92,8 +99,9 @@ public class ServiceFactory {
                 serviceConfig,
                 commercetoolsClient);
 
+
         final NotificationDispatcher notificationDispatcher = createNotificationDispatcher(serviceFactory,
-                serviceConfig.getPayoneConfig());
+                serviceConfig.getPayoneConfig(), serviceConfig);
 
         final IntegrationService integrationService = createService(
                 new CommercetoolsQueryExecutor(commercetoolsClient),
@@ -119,46 +127,39 @@ public class ServiceFactory {
                 paymentDispatcher);
     }
 
-    /**
-     * Creates a new commercetools client instance.
-     * @return the client
-     */
-    synchronized
-    public BlockingSphereClient getBlockingCommercetoolsClient() {
-        if (blockingSphereClient == null) {
-            final SphereClientFactory sphereClientFactory = SphereClientFactory.of();
-            blockingSphereClient = BlockingSphereClient.of(
-                    sphereClientFactory.createClient(serviceConfig.getSphereClientConfig()),
-                    DEFAULT_CTP_CLIENT_TIMEOUT,
-                    TimeUnit.SECONDS);
-        }
+    protected BlockingSphereClient createBlockingSphereClient() {
+        return BlockingSphereClient.of(
+                SphereClientFactory.of().createClient(serviceConfig.getSphereClientConfig()),
+                DEFAULT_CTP_CLIENT_TIMEOUT,
+                TimeUnit.SECONDS);
+    }
 
+
+    protected PaymentService createPaymentService() {
+        return new PaymentServiceImpl(getBlockingCommercetoolsClient());
+    }
+
+    public BlockingSphereClient getBlockingCommercetoolsClient() {
         return blockingSphereClient;
     }
 
-    synchronized
-    public PaymentService getPaymentService() {
-        if (paymentService == null) {
-            paymentService = new PaymentServiceImpl(getBlockingCommercetoolsClient());
-        }
+    protected OrderService createOrderService() {
+        return new OrderServiceImpl(getBlockingCommercetoolsClient());
+    }
 
+    protected PaymentToOrderStateMapper createPaymentToOrderStateMapper() {
+        return new DefaultPaymentToOrderStateMapper();
+    }
+
+    public PaymentService getPaymentService() {
         return paymentService;
     }
 
-    synchronized
     public OrderService getOrderService() {
-        if (orderService == null) {
-            orderService = new OrderServiceImpl(getBlockingCommercetoolsClient());
-        }
-
         return orderService;
     }
 
-    synchronized
     public PaymentToOrderStateMapper getPaymentToOrderStateMapper() {
-        if (paymentToOrderStateMapper == null) {
-            paymentToOrderStateMapper = new DefaultPaymentToOrderStateMapper();
-        }
         return paymentToOrderStateMapper;
     }
 
@@ -181,20 +182,22 @@ public class ServiceFactory {
     }
 
     public static NotificationDispatcher createNotificationDispatcher(final ServiceFactory serviceFactory,
-                                                                      final PayoneConfig config) {
-        final NotificationProcessor defaultNotificationProcessor = new DefaultNotificationProcessor(serviceFactory);
+                                                                      final PayoneConfig config,
+                                                                      final ServiceConfig serviceConfig) {
+        final NotificationProcessor defaultNotificationProcessor = new DefaultNotificationProcessor(serviceFactory, serviceConfig);
 
         final ImmutableMap.Builder<NotificationAction, NotificationProcessor> builder = ImmutableMap.builder();
-        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(serviceFactory));
-        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(serviceFactory));
-        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(serviceFactory));
-        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(serviceFactory));
+        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(serviceFactory, serviceConfig));
+        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(serviceFactory, serviceConfig));
+        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(serviceFactory, serviceConfig));
+        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(serviceFactory, serviceConfig));
 
         return new NotificationDispatcher(defaultNotificationProcessor, builder.build(), serviceFactory, config);
     }
 
     /**
      * TODO transform into instance method
+     *
      * @param typeCache
      * @param client
      * @return

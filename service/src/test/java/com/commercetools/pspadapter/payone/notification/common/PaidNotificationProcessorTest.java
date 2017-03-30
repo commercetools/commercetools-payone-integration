@@ -109,6 +109,22 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
     @Test
     @SuppressWarnings("unchecked")
     public void processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccess() throws Exception {
+        final Payment payment = processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccessWireframe();
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
+    }
+
+    @Test
+    public void orderServiceIsNotCalledWhenIsUpdateOrderPaymentStateFalse() throws Exception {
+        // this test is similar to #processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccess(),
+        // but #isUpdateOrderPaymentState() is false, so update order actions should be skipped
+        when(serviceConfig.isUpdateOrderPaymentState()).thenReturn(false);
+
+        processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccessWireframe();
+        verifyUpdateOrderActionsNotCalled();
+    }
+
+    private Payment processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccessWireframe() throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneChargePending20Euro();
         final Transaction chargeTransaction = payment.getTransactions().get(0);
@@ -138,8 +154,7 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
                 .containsOnly(SetAmountPaid.of(MoneyImpl.of(notification.getPrice(), notification.getCurrency())));
 
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
-
-        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
+        return payment;
     }
 
     @Test

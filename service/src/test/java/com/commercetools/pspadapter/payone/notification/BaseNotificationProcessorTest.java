@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.notification;
 
 import com.commercetools.pspadapter.payone.ServiceFactory;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.mapping.order.PaymentToOrderStateMapper;
 import com.commercetools.service.OrderService;
@@ -21,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +38,9 @@ public class BaseNotificationProcessorTest {
 
     @Mock
     protected ServiceFactory serviceFactory;
+
+    @Mock
+    protected ServiceConfig serviceConfig;
 
     @Mock
     protected Order orderToUpdate;
@@ -66,6 +71,8 @@ public class BaseNotificationProcessorTest {
                 .then(answer -> CompletableFuture.completedFuture(orderUpdated));
 
         when(serviceFactory.getPaymentToOrderStateMapper()).thenReturn(paymentToOrderStateMapper);
+
+        when(serviceConfig.isUpdateOrderPaymentState()).thenReturn(true);
     }
 
     protected List<? extends UpdateAction<Payment>> updatePaymentAndGetUpdateActions(Payment payment) {
@@ -96,6 +103,11 @@ public class BaseNotificationProcessorTest {
         assertThat(orderUpdateCaptor.getValue()).isSameAs(orderToUpdate);
         // verify the orderService.updateOrderPaymentState() is called with expected PaymentState
         assertThat(paymentStateCaptor.getValue()).isEqualTo(expectedPaymentState);
+    }
+
+    protected void verifyUpdateOrderActionsNotCalled() {
+        verify(orderService, never()).getOrderByPaymentId(anyString());
+        verify(orderService, never()).updateOrderPaymentState(anyObject(), anyObject());
     }
 
 

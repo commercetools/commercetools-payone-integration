@@ -99,6 +99,27 @@ public class ServiceConfigTest {
         assertThatThrowsInCaseOfMissingOrEmptyProperty(PropertyProvider.CT_CLIENT_SECRET);
     }
 
+    @Test
+    public void getsIsUpdateOrderPaymentState() {
+        when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("true"));
+        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(true);
+
+        when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("TRUE"));
+        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(true);
+
+        when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("false"));
+        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(false);
+
+        when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("FALSE"));
+        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(false);
+
+        when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of(""));
+        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(false);
+
+        when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.empty());
+        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(false);
+    }
+
     private void assertThatThrowsInCaseOfMissingOrEmptyProperty(final String propertyName) {
         final IllegalStateException illegalStateException = new IllegalStateException();
         when(propertyProvider.getMandatoryNonEmptyProperty(propertyName)).thenThrow(illegalStateException);
