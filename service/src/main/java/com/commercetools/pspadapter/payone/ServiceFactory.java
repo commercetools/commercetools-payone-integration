@@ -99,7 +99,6 @@ public class ServiceFactory {
                 serviceConfig,
                 commercetoolsClient);
 
-
         final NotificationDispatcher notificationDispatcher = createNotificationDispatcher(serviceFactory,
                 serviceConfig.getPayoneConfig(), serviceConfig);
 

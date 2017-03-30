@@ -102,22 +102,22 @@ public class ServiceConfigTest {
     @Test
     public void getsIsUpdateOrderPaymentState() {
         when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("true"));
-        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(true);
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).isUpdateOrderPaymentState()).isEqualTo(true);
 
         when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("TRUE"));
-        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(true);
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).isUpdateOrderPaymentState()).isEqualTo(true);
 
         when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("false"));
-        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(false);
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).isUpdateOrderPaymentState()).isEqualTo(false);
 
         when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("FALSE"));
-        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(false);
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).isUpdateOrderPaymentState()).isEqualTo(false);
 
         when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of(""));
-        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(false);
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).isUpdateOrderPaymentState()).isEqualTo(false);
 
         when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.empty());
-        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(false);
+        assertThat(new ServiceConfig(propertyProvider, payoneConfig).isUpdateOrderPaymentState()).isEqualTo(false);
     }
 
     private void assertThatThrowsInCaseOfMissingOrEmptyProperty(final String propertyName) {
