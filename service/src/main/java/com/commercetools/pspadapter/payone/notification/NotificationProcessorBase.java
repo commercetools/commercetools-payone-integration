@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.notification;
 
 import com.commercetools.pspadapter.payone.ServiceFactory;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
@@ -46,13 +47,16 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
 
     private final ServiceFactory serviceFactory;
 
+    private final ServiceConfig serviceConfig;
+
     /**
      * Constructor for implementations.
      *
      * @param serviceFactory the services factory for commercetools platform API
      */
-    protected NotificationProcessorBase(final ServiceFactory serviceFactory) {
+    protected NotificationProcessorBase(final ServiceFactory serviceFactory, final ServiceConfig serviceConfig) {
         this.serviceFactory = serviceFactory;
+        this.serviceConfig = serviceConfig;
     }
 
     @Override
@@ -67,7 +71,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
         try {
             // 1. update payment
             CompletionStage<Order> fullCompletionStage = getPaymentService().updatePayment(payment, createPaymentUpdates(payment, notification))
-                    // 2. when payment is updated - try to find and updated respective Order.paymentState
+                    // 2. try to find and updated respective Order.paymentState if required
                     .thenComposeAsync(this::tryToUpdateOrderByPayment);
 
             executeBlocking(fullCompletionStage);
@@ -78,14 +82,19 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
     }
 
     /**
-     * Fetch an order with respective payment id and try to update that order.
+     * If {@link #serviceConfig#isUpdateOrderPaymentState()} is <b>true</b> - fetch an order with respective payment id
+     * and try to update that order. If <b>false</b> - return completed stage with <b>null</b> value.
      *
      * @param updatedPayment <b>non-null</b> new updated payment instance.
-     * @return completion stage with nullable updated {@link Order}
+     * @return completion stage with nullable updated {@link Order} if was updated.
      */
     private CompletionStage<Order> tryToUpdateOrderByPayment(Payment updatedPayment) {
-        return getOrderService().getOrderByPaymentId(updatedPayment.getId())
-                .thenComposeAsync(order -> updateOrderIfExists(order.orElse(null), updatedPayment));
+        if (serviceConfig.isUpdateOrderPaymentState()) {
+            getOrderService().getOrderByPaymentId(updatedPayment.getId())
+                    .thenComposeAsync(order -> updateOrderIfExists(order.orElse(null), updatedPayment));
+        }
+
+        return CompletableFuture.completedFuture(null);
     }
 
     /**

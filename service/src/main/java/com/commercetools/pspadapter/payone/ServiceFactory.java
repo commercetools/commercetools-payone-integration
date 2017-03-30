@@ -106,7 +106,7 @@ public class ServiceFactory {
                 serviceConfig,
                 commercetoolsClient);
         final NotificationDispatcher notificationDispatcher = ServiceFactory.createNotificationDispatcher(
-                serviceFactory, payoneConfig);
+                serviceFactory, payoneConfig, serviceConfig);
 
         final IntegrationService integrationService = ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(commercetoolsClient),
@@ -187,7 +187,7 @@ public class ServiceFactory {
         return ServiceFactory.createService(
                 new CommercetoolsQueryExecutor(client),
                 createPaymentDispatcher(typeCache, payoneConfig, serviceConfig, client),
-                createNotificationDispatcher(this, payoneConfig),
+                createNotificationDispatcher(this, payoneConfig, serviceConfig),
                 new CustomTypeBuilder(
                         client,
                         CustomTypeBuilder.PermissionToStartFromScratch.fromBoolean(serviceConfig.getStartFromScratch())));
@@ -203,14 +203,15 @@ public class ServiceFactory {
     }
 
     public static NotificationDispatcher createNotificationDispatcher(final ServiceFactory serviceFactory,
-                                                                      final PayoneConfig config) {
-        final NotificationProcessor defaultNotificationProcessor = new DefaultNotificationProcessor(serviceFactory);
+                                                                      final PayoneConfig config,
+                                                                      final ServiceConfig serviceConfig) {
+        final NotificationProcessor defaultNotificationProcessor = new DefaultNotificationProcessor(serviceFactory, serviceConfig);
 
         final ImmutableMap.Builder<NotificationAction, NotificationProcessor> builder = ImmutableMap.builder();
-        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(serviceFactory));
-        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(serviceFactory));
-        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(serviceFactory));
-        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(serviceFactory));
+        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(serviceFactory, serviceConfig));
+        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(serviceFactory, serviceConfig));
+        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(serviceFactory, serviceConfig));
+        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(serviceFactory, serviceConfig));
 
         return new NotificationDispatcher(defaultNotificationProcessor, builder.build(), serviceFactory, config);
     }

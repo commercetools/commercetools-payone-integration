@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
 import com.commercetools.pspadapter.payone.ServiceFactory;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
@@ -30,8 +31,8 @@ public class CaptureNotificationProcessor extends NotificationProcessorBase {
      *
      * @param serviceFactory the services factory for commercetools platform API
      */
-    public CaptureNotificationProcessor(ServiceFactory serviceFactory) {
-        super(serviceFactory);
+    public CaptureNotificationProcessor(ServiceFactory serviceFactory, ServiceConfig serviceConfig) {
+        super(serviceFactory, serviceConfig);
     }
 
         @Override

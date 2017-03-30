@@ -34,6 +34,8 @@ public class PropertyProvider {
 
     public static final String SECURE_KEY = "SECURE_KEY";
 
+    public static final String UPDATE_ORDER_PAYMENT_STATE = "UPDATE_ORDER_PAYMENT_STATE";
+
     private final ImmutableMap<String, String> internalProperties;
 
     public PropertyProvider() {
