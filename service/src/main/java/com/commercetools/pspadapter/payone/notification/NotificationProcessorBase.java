@@ -116,7 +116,9 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
                 return getOrderService().updateOrderPaymentState(order, newPaymentState);
             }
         } else {
-            LOG.error("Payment [{}] is updated, but respective order is not found!", updatedPayment.getId());
+            // This may happen when Payone sends the notification faster then user was redirected back to the shop
+            // and the order has not been created yet.
+            LOG.info("Payment [{}] is updated, but respective order is not found!", updatedPayment.getId());
         }
 
         return CompletableFuture.completedFuture(order);
