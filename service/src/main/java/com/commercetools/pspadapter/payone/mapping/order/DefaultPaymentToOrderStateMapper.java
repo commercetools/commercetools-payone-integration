@@ -20,10 +20,7 @@ import static java.util.Optional.ofNullable;
  */
 public class DefaultPaymentToOrderStateMapper implements PaymentToOrderStateMapper {
 
-    private static final Map<String, PaymentState> MAP;
-
-    static {
-        MAP = ImmutableMap.<String, PaymentState>builder()
+    private static final Map<String, PaymentState> MAP = ImmutableMap.<String, PaymentState>builder()
                 .put(NotificationAction.APPOINTED.getTxActionCode(),    PaymentState.PENDING)
                 .put(NotificationAction.UNDERPAID.getTxActionCode(),    PaymentState.PENDING)
 
@@ -35,7 +32,7 @@ public class DefaultPaymentToOrderStateMapper implements PaymentToOrderStateMapp
                 .put(NotificationAction.CANCELATION.getTxActionCode(),  PaymentState.FAILED)
 
                 .build();
-    }
+
 
     @Override
     public PaymentState mapPaymentToOrderState(Payment payment) {
