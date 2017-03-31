@@ -24,6 +24,7 @@ import io.sphere.sdk.carts.commands.updateactions.SetBillingAddress;
 import io.sphere.sdk.carts.commands.updateactions.SetShippingAddress;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.models.Address;
+import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.OrderFromCartDraft;
 import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.orders.commands.OrderFromCartCreateCommand;
@@ -44,13 +45,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
+import javax.money.format.MonetaryAmountFormat;
+import javax.money.format.MonetaryFormats;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -65,6 +65,7 @@ import static java.util.regex.Pattern.DOTALL;
  */
 public abstract class BaseFixture {
     private static final Logger LOG = LoggerFactory.getLogger(BaseFixture.class);
+    protected final MonetaryAmountFormat currencyFormatterDe = MonetaryFormats.getAmountFormat(Locale.GERMANY);
 
     protected static final String EMPTY_STRING = "";
     protected static final String NULL_STRING = "null";
@@ -105,7 +106,7 @@ public abstract class BaseFixture {
 
         //only for creation of test data
         final ServiceFactory serviceFactory = ServiceFactory.withPropertiesFrom(propertyProvider);
-        ctpClient = serviceFactory.createCommercetoolsClient();
+        ctpClient = serviceFactory.getBlockingCommercetoolsClient();
 
         typeCache = serviceFactory.createTypeCache(ctpClient);
     }
@@ -159,10 +160,32 @@ public abstract class BaseFixture {
     }
 
     protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode) {
-        return createCartAndOrderForPayment(payment, currencyCode, "TestBuyer");
+        return createCartAndOrderForPayment(payment, currencyCode, "TestBuyer", null);
+    }
+
+    protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final PaymentState paymentState) {
+        return createCartAndOrderForPayment(payment, currencyCode, "TestBuyer", paymentState);
     }
 
     protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final String buyerLastName) {
+        return createCartAndOrderForPayment(payment, currencyCode, buyerLastName, null);
+    }
+
+    protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final String buyerLastName,
+                                                  final PaymentState paymentState) {
+        Order order = createAndGetOrder(payment, currencyCode, buyerLastName, paymentState);
+        return order.getOrderNumber();
+    }
+
+    protected Order createAndGetOrder(Payment payment, String currencyCode) {
+        return createAndGetOrder(payment, currencyCode, "TestBuyer", null);
+    }
+
+    protected Order createAndGetOrder(Payment payment, String currencyCode, PaymentState paymentState) {
+        return createAndGetOrder(payment, currencyCode, "TestBuyer", paymentState);
+    }
+
+    protected Order createAndGetOrder(Payment payment, String currencyCode, String buyerLastName, PaymentState paymentState) {
         // create cart and order with product
         final Product product = ctpClient.executeBlocking(ProductQuery.of()).getResults().get(0);
 
@@ -179,10 +202,8 @@ public abstract class BaseFixture {
 
         final String orderNumber = getRandomOrderNumber();
 
-        ctpClient.executeBlocking(OrderFromCartCreateCommand.of(
-                OrderFromCartDraft.of(cart, orderNumber, PaymentState.PENDING)));
-
-        return orderNumber;
+        return ctpClient.executeBlocking(OrderFromCartCreateCommand.of(
+                OrderFromCartDraft.of(cart, orderNumber, paymentState)));
     }
 
     private static String PSEUDO_CARD_PAN;

@@ -5,6 +5,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.commercetools.pspadapter.payone.transaction.TransactionBaseExecutor;
@@ -117,7 +118,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
                         CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                         CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now()));
 
-            if (status.equals("APPROVED")) {
+            if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
                         setStatusInterfaceCode(response),
@@ -128,7 +129,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
                         SetCustomField.ofObject(CustomFieldKeys.PAY_TO_IBAN_FIELD, response.get("clearing_bankiban")),
                         SetCustomField.ofObject(CustomFieldKeys.PAY_TO_NAME_FIELD, response.get("clearing_bankaccountholder"))
                 ));
-            } else if (status.equals("ERROR")) {
+            } else if (ResponseStatus.ERROR.getStateCode().equals(status)) {
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
                         setStatusInterfaceCode(response),
@@ -136,7 +137,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
                         ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
                         ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                 ));
-            } else if (status.equals("PENDING")) {
+            } else if (ResponseStatus.PENDING.getStateCode().equals(status)) {
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
                         setStatusInterfaceCode(response),

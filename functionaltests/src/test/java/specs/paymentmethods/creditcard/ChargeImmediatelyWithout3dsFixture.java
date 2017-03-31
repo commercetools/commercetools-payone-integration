@@ -129,6 +129,12 @@ public class ChargeImmediatelyWithout3dsFixture extends BaseNotifiablePaymentFix
         return super.receivedNotificationOfActionFor(paymentNames, txaction);
     }
 
+    @Override
+    public String fetchOrderPaymentState(final String paymentName) {
+        // we keep this overriding just to easily see which test methods are run in this fixture
+        return super.fetchOrderPaymentState(getIdForLegibleName(paymentName));
+    }
+
     public long getInteractionNotificationCountOfAction(final String paymentName, final String txaction) throws ExecutionException {
         Payment payment = fetchPaymentByLegibleName(paymentName);
         return getTotalNotificationCountOfAction(payment, txaction);

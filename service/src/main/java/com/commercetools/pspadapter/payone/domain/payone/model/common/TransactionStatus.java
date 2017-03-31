@@ -36,4 +36,9 @@ public enum TransactionStatus {
     public TransactionState getCtTransactionState() {
         return ctTransactionState;
     }
+
+    @Override
+    public String toString() {
+        return payoneCode;
+    }
 }

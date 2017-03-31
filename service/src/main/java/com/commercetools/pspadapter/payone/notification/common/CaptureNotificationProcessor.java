@@ -1,11 +1,12 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
+import com.commercetools.pspadapter.payone.ServiceFactory;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
 import com.google.common.collect.ImmutableList;
-import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
@@ -28,13 +29,13 @@ public class CaptureNotificationProcessor extends NotificationProcessorBase {
     /**
      * Initializes a new instance.
      *
-     * @param client the client for the commercetools platform API
+     * @param serviceFactory the services factory for commercetools platform API
      */
-    public CaptureNotificationProcessor(final BlockingSphereClient client) {
-        super(client);
+    public CaptureNotificationProcessor(ServiceFactory serviceFactory, ServiceConfig serviceConfig) {
+        super(serviceFactory, serviceConfig);
     }
 
-    @Override
+        @Override
     protected boolean canProcess(final Notification notification) {
         return NotificationAction.CAPTURE.equals(notification.getTxaction());
     }
@@ -54,7 +55,7 @@ public class CaptureNotificationProcessor extends NotificationProcessorBase {
                     final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
 
                     //For all payment methods that use PayOne preauthorization and capture but only one CTP-charge
-                    //we must not create a second charge transaction 
+                    //we must not create a second charge transaction
                     //at the moment that is only "BANK_TRANSFER_ADVANCE"
                     if (ClearingType.PAYONE_VOR != ClearingType.getClearingTypeByCode(notification.getClearingtype())) {
                     listBuilder.add(AddTransaction.of(TransactionDraftBuilder.of(TransactionType.CHARGE, amount)

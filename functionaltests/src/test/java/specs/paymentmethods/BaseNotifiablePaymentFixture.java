@@ -1,6 +1,8 @@
 package specs.paymentmethods;
 
 import com.google.common.collect.ImmutableList;
+import io.sphere.sdk.orders.Order;
+import io.sphere.sdk.orders.PaymentState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import specs.NotificationTimeoutWaiter;
@@ -8,6 +10,9 @@ import specs.response.BasePaymentFixture;
 
 import java.util.concurrent.TimeUnit;
 
+import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlocking;
+import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 
 public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
@@ -44,9 +49,10 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
         Long numberOfPaymentsWithAppointedNotification = timer.start(
                 () -> countPaymentsWithNotificationOfAction(paymentNamesList, txaction),
                 num -> num == notificationsToWait,
-                num -> LOG.info("Intermediate report: waited {}/{} sec, received {}/{} notifications in test [{}]",
+                num -> LOG.info("Intermediate report: waited {}/{} sec, received {}/{} notifications of action [{}] in test [{}]",
                         msecToSec(timer.getCurrentDuration()), msecToSec(timer.getTimeoutDuration()),
                         num, notificationsToWait,
+                        txaction,
                         simpleClassName));
 
         boolean success = numberOfPaymentsWithAppointedNotification == notificationsToWait;
@@ -70,6 +76,13 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
 
     private static long msecToSec(long msec) {
         return TimeUnit.MILLISECONDS.toSeconds(msec);
+    }
+
+    public String fetchOrderPaymentState(String paymentId) {
+        Order order = executeBlocking(orderService.getOrderByPaymentId(paymentId))
+                .orElseThrow(() -> new RuntimeException(format("Order for payment [%s] not found", paymentId)));
+
+        return ofNullable(order.getPaymentState()).map(PaymentState::toSphereName).orElse(null);
     }
 
 }

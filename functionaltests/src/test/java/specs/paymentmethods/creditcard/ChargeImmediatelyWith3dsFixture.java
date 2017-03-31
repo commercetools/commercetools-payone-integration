@@ -44,7 +44,8 @@ public class ChargeImmediatelyWith3dsFixture extends BaseNotifiablePaymentFixtur
     private Map<String, String> successUrlForPayment;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         webDriver = new WebDriver3ds();
         successUrlForPayment = new HashMap<>();
     }
@@ -180,7 +181,6 @@ public class ChargeImmediatelyWith3dsFixture extends BaseNotifiablePaymentFixtur
         return successUrlForPayment.size() == paymentNamesList.size();
     }
 
-
     public boolean isInteractionRedirectPresent(final String paymentName) throws ExecutionException {
         Payment payment = fetchPaymentByLegibleName(paymentName);
         final String transactionId = getIdOfLastTransaction(payment);
@@ -192,6 +192,12 @@ public class ChargeImmediatelyWith3dsFixture extends BaseNotifiablePaymentFixtur
     public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws Exception {
         // we keep this overriding just to easily see which test methods are run in this fixture
         return super.receivedNotificationOfActionFor(paymentNames, txaction);
+    }
+
+    @Override
+    public String fetchOrderPaymentState(final String paymentName) {
+        // we keep this overriding just to easily see which test methods are run in this fixture
+        return super.fetchOrderPaymentState(getIdForLegibleName(paymentName));
     }
 
     public long getInteractionNotificationCountOfAction(final String paymentName, final String txaction) throws ExecutionException {

@@ -1,26 +1,17 @@
 package com.commercetools.pspadapter.payone.notification;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.ThrowableAssert.catchThrowable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-
+import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
+import com.commercetools.service.PaymentServiceImpl;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
-import io.sphere.sdk.client.BlockingSphereClient;
-import io.sphere.sdk.payments.queries.PaymentQuery;
-import io.sphere.sdk.queries.PagedQueryResult;
+import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.PaymentDraft;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,10 +19,16 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
-import java.util.Arrays;
 import java.util.ConcurrentModificationException;
-import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
+import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.ThrowableAssert.catchThrowable;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.*;
 
 /**
  * @author fhaertig
@@ -44,7 +41,10 @@ public class NotificationDispatcherTest {
     private static final String dummyInterfaceId = "123";
 
     @Mock
-    private BlockingSphereClient client;
+    private ServiceFactory serviceFactory;
+
+    @Mock
+    private PaymentServiceImpl paymentServiceImpl;
 
     @Mock
     private PropertyProvider propertyProvider;
@@ -63,29 +63,34 @@ public class NotificationDispatcherTest {
 
     @Before
     public void setUp() throws Exception {
-        when(client.executeBlocking(any(PaymentQuery.class)))
+        when(serviceFactory.getPayoneInterfaceName()).thenReturn(PAYONE);
+        when(serviceFactory.getPaymentService()).thenReturn(paymentServiceImpl);
+
+        when(paymentServiceImpl.getByPaymentMethodAndInterfaceId(anyString(), anyString()))
                 .then(a -> {
-                    List arguments = Arrays.asList(a.getArguments());
-                    try {
-                        //client is asked to get matching payments
-                        if (((PaymentQuery) arguments.get(0)).predicates()
-                                .stream()
-                                .filter(f -> f.equals(dummyInterfaceId))
-                                .findFirst().isPresent()) {
-                            return testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json");
-                        } else {
-                            return PagedQueryResult.empty();
-                        }
-                    } catch (ClassCastException ex) {
-                        //client is asked to create payment
-                        if (arguments.get(0).toString().contains("interfaceId=123"))
-                        {
-                            return testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head().get();
-                        } else {
-                            return testHelper.dummyPaymentCreatedByNotification();
-                        }
-                    }
+
+                    String interfaceId = a.getArgumentAt(1, String.class);
+                    Optional<Payment> payment = dummyInterfaceId.equals(interfaceId)
+                            ? testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head()
+                            : Optional.empty();
+
+                    return CompletableFuture.completedFuture(payment);
                 });
+
+        when(paymentServiceImpl.createPayment(anyObject())).then(
+                answer -> {
+                    PaymentDraft draft = answer.getArgumentAt(0, PaymentDraft.class);
+                    Payment payment = dummyInterfaceId.equals(draft.getInterfaceId())
+                            ? testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head().get()
+                            : testHelper.dummyPaymentCreatedByNotification();
+
+                    return CompletableFuture.completedFuture(payment);
+                }
+        );
+
+        when(paymentServiceImpl.updatePayment(anyObject(), anyList())).then(
+                a -> CompletableFuture.completedFuture(testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head().get())
+        );
 
         when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyConfigValue"));
         when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyConfigValue");
@@ -113,7 +118,7 @@ public class NotificationDispatcherTest {
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
         final NotificationDispatcher dispatcher =
-                new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
+                new NotificationDispatcher(defaultNotificationProcessor, processors, serviceFactory, config);
 
         // act
         dispatcher.dispatchNotification(notification);
@@ -142,7 +147,7 @@ public class NotificationDispatcherTest {
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
         final NotificationDispatcher dispatcher =
-                new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
+                new NotificationDispatcher(defaultNotificationProcessor, processors, serviceFactory, config);
 
         doThrow(new ConcurrentModificationException("payment modified concurrently")) // 1st try throws
                 .doNothing() // will succeed from 2nd try on
@@ -168,7 +173,7 @@ public class NotificationDispatcherTest {
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
         final NotificationDispatcher dispatcher =
-                new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
+                new NotificationDispatcher(defaultNotificationProcessor, processors, serviceFactory, config);
 
         // act
         final Throwable throwable = catchThrowable(() -> dispatcher.dispatchNotification(notification));
@@ -199,7 +204,7 @@ public class NotificationDispatcherTest {
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
         final NotificationDispatcher dispatcher =
-                new NotificationDispatcher(defaultNotificationProcessor, processors, client, config);
+                new NotificationDispatcher(defaultNotificationProcessor, processors, serviceFactory, config);
 
         // act
         dispatcher.dispatchNotification(notification);

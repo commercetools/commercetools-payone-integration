@@ -2,6 +2,8 @@ package specs.response;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
+import com.commercetools.service.OrderService;
+import com.commercetools.service.OrderServiceImpl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.collect.ImmutableList;
@@ -15,6 +17,7 @@ import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
+import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
@@ -39,6 +42,14 @@ public class BasePaymentFixture extends BaseFixture {
     private static final Logger LOG = LoggerFactory.getLogger(BasePaymentFixture.class);
 
     public static final String baseRedirectUrl = "https://www.example.com/sofortueberweisung_charge_immediately/";
+
+    protected OrderService orderService;
+
+    @Before
+    public void setUp() throws Exception {
+        super.initializeCommercetoolsClient();
+        orderService = new OrderServiceImpl(ctpClient());
+    }
 
     /**
      * Creates credit card payment (PAYMENT_CREDIT_CARD) and saves it to commercetools service. Also created payment is

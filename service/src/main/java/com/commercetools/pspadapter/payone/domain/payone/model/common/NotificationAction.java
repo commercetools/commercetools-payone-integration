@@ -32,4 +32,9 @@ public enum NotificationAction implements Serializable {
     public String getTxActionCode() {
         return txActionCode;
     }
+
+    @Override
+    public String toString() {
+        return txActionCode;
+    }
 }

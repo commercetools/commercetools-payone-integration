@@ -152,10 +152,14 @@ All optional.
 Name | Content | Default
 ---- | ------- | --------
 `SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 10 minutes like [PaymentInteractionAdded](http://dev.commercetools.com/http-api-projects-messages.html#payment-interaction-added-message) | poll every 30 seconds
-`LONG_TIME_FRAME_SCHEDULED_JOB_CRON` | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 2 days | poll every hour on 5th second
-`PAYONE_MODE` | the mode of operation with PAYONE <ul><li>`"live"` for production mode, (i.e. _actual payments_) or</li><li>`"test"` for test mode</li></ul> | `"test"`  
-`CT_START_FROM_SCRATCH` | :warning: _**Handle with care!**_ If and only if equal, ignoring case, to `"true"` the service will create the custom types it needs. _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. If not yet in the project, the Custom Types are created independently of this parameter (but only deleted and recreated if this parameter is set).  Related: [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34). | `"false"`
-`SECURE_KEY` | if provided and not empty, the value is used as the key for decrypting data from fields "IBAN" and "BIC" for payments with CustomType "PAYMENT_BANK_TRANSFER". The data must be the result of a Blowfish ECB encryption with said key and encoded in HEX. | "" (empty String)
+`LONG_TIME_FRAME_SCHEDULED_JOB_CRON`  | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 2 days | poll every hour on 5th second
+`PAYONE_MODE`                         | the mode of operation with PAYONE <ul><li>`"live"` for production mode, (i.e. _actual payments_) or</li><li>`"test"` for test mode</li></ul> | `"test"`  
+`CT_START_FROM_SCRATCH`               | :warning: _**Handle with care!**_ If and only if equal, ignoring case, to `"true"` the service will create the custom types it needs. _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. If not yet in the project, the Custom Types are created independently of this parameter (but only deleted and recreated if this parameter is set).  Related: [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34). | `"false"`
+`SECURE_KEY`                          | if provided and not empty, the value is used as the key for decrypting data from fields "IBAN" and "BIC" for payments with CustomType "PAYMENT_BANK_TRANSFER". The data must be the result of a Blowfish ECB encryption with said key and encoded in HEX. | "" (empty String)
+`UPDATE_ORDER_PAYMENT_STATE`          | if _true_ - `Order#paymentState` will be updated when payment status notification is received from Payone. By default the order's state remains unchanged. | "false" 
+
+**Note**: for integration tests `UPDATE_ORDER_PAYMENT_STATE` is expected to be **`true`**, 
+so explicitly setup it in the Heroku environment.
 
 ### Build
 
@@ -222,6 +226,33 @@ integration tests.
 
 ### Functional Tests
 
+You could find the values for Heroku test service and Travis functional tests in the encrypted [`travis-build/`](/travis-build) directory.
+
+**Note**: it's important to update  [`travis-build/`](/travis-build) settings every time you change the build settings 
+in Travis config. Even better update first the file, then on the Travis web page.
+
+#### Heroku setup
+
+The test service run it Heroku expected to have the next values:
+
+<table>
+  <tr><th>Name</th><th>Content</th></tr>
+  <tr><td><code>CT_CLIENT_ID</code></td>                <td rowspan="3">Should be adjusted with Travis setup below</td></tr>
+  <tr><td><code>CT_CLIENT_SECRET</code></td>            </tr>
+  <tr><td><code>CT_PROJECT_KEY</code></td>              </tr>
+  <tr><td><code>CT_START_FROM_SCRATCH</code></td>       <td>false</td></tr>
+  <tr><td><code>PAYONE_KEY</code></td>                  <td rowspan="4">Should be adjusted with Travis setup below</td></tr>
+  <tr><td><code>PAYONE_MERCHANT_ID</code></td>          </tr>
+  <tr><td><code>PAYONE_PORTAL_ID</code></td>            </tr>
+  <tr><td><code>PAYONE_SUBACC_ID</code></td>            </tr>
+  <tr><td><code>PAYONE_MODE</code></td>                 <td>test</td></tr>
+  <tr><td><code>UPDATE_ORDER_PAYMENT_STATE</code></td>  <td>true</td></tr>
+</table> 
+
+Scheduler values are optional: this feature is not covered by the tests
+
+#### Travis setup
+
 The executable specification (using [Concordion](http://concordion.org/)) requires the following environment variables
 in addition to the [commercetools API client credentials](#commercetools-api-client-credentials):
 
@@ -239,11 +270,6 @@ in addition to the [commercetools API client credentials](#commercetools-api-cli
   <tr><td><code>TEST_DATA_PAYONE_PORTAL_ID</code></td></tr>
   <tr><td><code>TEST_DATA_PAYONE_KEY</code></td></tr>
 </table> 
-
-You could find the values above in the encrypted [`travis-build/`](/travis-build) directory.
-
-**Note**: it's important to update  [`travis-build/`](/travis-build) settings every time you change the build settings 
-in Travis config. Even better update first the file, then on the Travis web page.
 
 The pseudocardpan for VISA without 3DS secure is fetched at runtime for specified `TEST_DATA_VISA_CREDIT_CARD_NO_3DS`
 card number using PAYONE server API. To do this with the client API please refer to the corresponding Payone API documentation.
