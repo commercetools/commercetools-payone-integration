@@ -114,6 +114,21 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
     @Test
     @SuppressWarnings("unchecked")
     public void processingCompletedNotificationForPendingChargeTransactionDoesNotChangeState() throws Exception {
+        final Payment payment = processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe();
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
+    }
+
+    @Test
+    public void orderServiceIsNotCalledWhenIsUpdateOrderPaymentStateFalse() throws Exception {
+        // this test is similar to #processingCompletedNotificationForPendingChargeTransactionDoesNotChangeState(),
+        // but #isUpdateOrderPaymentState() is false, so update order actions should be skipped
+        when(serviceConfig.isUpdateOrderPaymentState()).thenReturn(false);
+
+        processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe();
+        verifyUpdateOrderActionsNotCalled();
+    }
+
+    private Payment processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe() throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneChargePending20Euro();
         final Transaction chargeTransaction = payment.getTransactions().get(0);
@@ -132,7 +147,6 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
 
         assertThat(updateActions).as("# of payment update actions").hasSize(3);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
-
-        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
+        return payment;
     }
 }

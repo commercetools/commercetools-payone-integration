@@ -1,5 +1,7 @@
 package com.commercetools.pspadapter.payone.config;
 
+import io.sphere.sdk.orders.Order;
+
 /**
  * Provides the configuration of the integration service.
  *
@@ -16,6 +18,7 @@ public class ServiceConfig {
     private final String scheduledJobCronShortTimeFrame;
     private final String scheduledJobCronLongTimeFrame;
     private final String secureKey;
+    private final boolean updateOrderPaymentState;
 
     /**
      * Initializes the configuration.
@@ -43,6 +46,11 @@ public class ServiceConfig {
         secureKey = propertyProvider.getProperty(PropertyProvider.SECURE_KEY)
                 .map(String::valueOf)
                 .orElse("");
+
+        updateOrderPaymentState = propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)
+                                .map(String::trim)
+                                .map(Boolean::valueOf)
+                                .orElse(false);
     }
 
     /**
@@ -103,5 +111,17 @@ public class ServiceConfig {
      */
     public String getSecureKey() {
         return secureKey;
+    }
+
+    /**
+     * If <b>true</b> - when processing Payone notification (update payment status) {@link Order#getPaymentState()},
+     * linked to the payment, should be update also. Otherwise leave the order payment state unchanged.
+     * <p>
+     * By default it is <b>false</b>
+     * @return <b>true</b> if environment the property {@link PropertyProvider#UPDATE_ORDER_PAYMENT_STATE} is a string
+     * <i>true</i> case insensitive, <b>false</b> otherwise.
+     */
+    public boolean isUpdateOrderPaymentState() {
+        return updateOrderPaymentState;
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.money.MonetaryAmount;
 
 import com.commercetools.pspadapter.payone.ServiceFactory;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
@@ -31,8 +32,8 @@ public class UnderpaidNotificationProcessor extends NotificationProcessorBase {
      *
      * @param serviceFactory the services factory for commercetools platform API
      */
-    public UnderpaidNotificationProcessor(ServiceFactory serviceFactory) {
-        super(serviceFactory);
+    public UnderpaidNotificationProcessor(ServiceFactory serviceFactory, ServiceConfig serviceConfig) {
+        super(serviceFactory, serviceConfig);
     }
 
     @Override
