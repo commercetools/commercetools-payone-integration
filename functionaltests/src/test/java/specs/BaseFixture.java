@@ -208,6 +208,8 @@ public abstract class BaseFixture {
 
     private static String PSEUDO_CARD_PAN;
 
+    private static String PSEUDO_CARD_PAN_3DS;
+
     /**
      * Fetch new or get cached pseudocardpan from Payone service based on supplied test VISA card number
      * (see {@link #getTestDataVisaCreditCardNo3Ds()}).
@@ -216,12 +218,55 @@ public abstract class BaseFixture {
      * might be slow, so we cache the value. But our tests run concurrently, so to avoid double HTTP request
      * to pay1.de we use synchronized: the access to the method is blocked till the response from pay1.de, but it is
      * blocked once, all other get access will be fast (when {@code PSEUDO_CARD_PAN} is set).
+     *
+     * @see #getVerifiedVisaPseudoCardPan()
      */
-    synchronized static protected String getUnconfirmedVisaPseudoCardPan()  {
-
-      //curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>"
-
+    synchronized static protected String getUnconfirmedVisaPseudoCardPan() {
       if (PSEUDO_CARD_PAN == null) {
+          String fetchedPseudoCardPan = fetchPseudoCardPan(getTestDataVisaCreditCardNo3Ds());
+          // TODO: remove the assert and logging if the future if everything goes fine
+          assert PSEUDO_CARD_PAN == null : "PSEUDO_CARD_PAN multiple initialization";
+          PSEUDO_CARD_PAN = fetchedPseudoCardPan;
+          LOG.info("Unconfirmed pseudocardpan fetched successfully");
+      }
+
+      return PSEUDO_CARD_PAN;
+    }
+
+    /**
+     * Fetch new or get cached pseudocardpan from Payone service based on supplied test VISA with 3DS check card number
+     * (see {@link #getTestVisaCreditCard3Ds()}).
+     * <p>
+     *
+     * @see #getUnconfirmedVisaPseudoCardPan()
+     */
+    synchronized protected static String getVerifiedVisaPseudoCardPan() {
+        if (PSEUDO_CARD_PAN_3DS == null) {
+            String fetchedPseudoCardPan = fetchPseudoCardPan(getTestVisaCreditCard3Ds());
+            // TODO: remove the assert and logging if the future if everything goes fine
+            assert PSEUDO_CARD_PAN_3DS == null : "PSEUDO_CARD_PAN_3DS multiple initialization";
+            PSEUDO_CARD_PAN_3DS = fetchedPseudoCardPan;
+            LOG.info("3DS pseudocardpan fetched successfully");
+        }
+
+        return PSEUDO_CARD_PAN_3DS;
+    }
+
+    /**
+     * Request a new pseudocardpan for {@code cardPan} Visa number.
+     * <p>
+     * <b>Note:</b> Pseudocardpan is a unique number for every merchant ID, thus ensure you tested service and these
+     * integration tests use the same payone merchant credentials, like {@link #getTestDataPayoneMerchantId()}.
+     * Verify your {@code PAYONE_MERCHANT_ID} and {@code TEST_DATA_PAYONE_MERCHANT_ID} for both applications if
+     * you get "pseudocardpan is not found" response from Payone.
+     *
+     * @param cardPan Visa card number (expected to be test Visa number from Payone)
+     * @return pseudocardpan string, registered in Payone merchant center
+     * @throws RuntimeException if the response from Payone can't be parsed
+     */
+    private static String fetchPseudoCardPan(String cardPan) {
+        //curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>"
+
         String cardPanResponse = null;
         try {
           cardPanResponse = Unirest.post("https://api.pay1.de/post-gateway/")
@@ -241,7 +286,7 @@ public abstract class BaseFixture {
                   .put("cardexpiredate", "2512")
                   .put("cardcvc2", "123")
                   .put("cardtype", "V")
-                  .put("cardpan", getTestDataVisaCreditCardNo3Ds())
+                  .put("cardpan", cardPan)
                   .build())
               .asString().getBody();
         } catch (Throwable e) {
@@ -251,28 +296,23 @@ public abstract class BaseFixture {
         Pattern p = Pattern.compile("^.*pseudocardpan\\s*=\\s*(\\d+).*$", CASE_INSENSITIVE | DOTALL);
         Matcher m = p.matcher(cardPanResponse);
 
-        if (m.matches()) {
-            assert PSEUDO_CARD_PAN == null : "PSEUDO_CARD_PAN multiple initialization";
-            PSEUDO_CARD_PAN = m.group(1);
-            LOG.info("Pseudocardpan fetched successfully");
-        } else {
+        if (!m.matches()) {
           throw new RuntimeException(String.format("Unexpected pseudocardpan response: %s", cardPanResponse));
         }
-      }
 
-      return PSEUDO_CARD_PAN;
+        return m.group(1);
     }
 
-    protected static String getTestDataVisaCreditCardNo3Ds() {
-      return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
+    private static String getTestDataVisaCreditCardNo3Ds() {
+        return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
+    }
+
+    private static String getTestVisaCreditCard3Ds() {
+        return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_3_DS);
     }
 
     protected static String getTestData3DsPassword() {
         return getConfigurationParameter(TEST_DATA_3_DS_PASSWORD);
-    }
-
-    protected static String getVerifiedVisaPseudoCardPan() {
-        return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_3_DS);
     }
 
     protected static String getTestDataSwBankTransferIban() {
