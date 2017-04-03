@@ -36,6 +36,8 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -43,6 +45,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
+import static java.lang.String.format;
 
 /**
  * @author fhaertig
@@ -53,6 +56,8 @@ public class ServiceFactory {
     private static final long DEFAULT_CTP_CLIENT_TIMEOUT = 10;
 
     private static final String PAYONE_INTERFACE_NAME = PAYONE;
+
+    private static final Logger LOG = LoggerFactory.getLogger(ServiceFactory.class);
 
     private final ServiceConfig serviceConfig;
 
@@ -113,13 +118,21 @@ public class ServiceFactory {
 
         integrationService.start();
 
-        ScheduledJobFactory.createScheduledJob(
+        ScheduledJobFactory scheduledJobFactory = new ScheduledJobFactory();
+
+        scheduledJobFactory.setAllScheduledItemsStartedListener(() -> {
+                    LOG.info(format("%n%1$s%nPayone Integration Service is STARTED%n%1$s",
+                            "============================================================"));
+                }
+        );
+
+        scheduledJobFactory.createScheduledJob(
                 CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForShortTimeFramePoll()),
                 ScheduledJobShortTimeframe.class,
                 integrationService,
                 paymentDispatcher);
 
-        ScheduledJobFactory.createScheduledJob(
+        scheduledJobFactory.createScheduledJob(
                 CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForLongTimeFramePoll()),
                 ScheduledJobLongTimeframe.class,
                 integrationService,
@@ -275,7 +288,7 @@ public class ServiceFactory {
             case BANK_TRANSFER_ADVANCE:
                 return new BanktTransferInAdvanceRequestFactory(serviceConfig.getPayoneConfig());
             default:
-                throw new IllegalArgumentException(String.format("No PayoneRequestFactory could be created for payment method %s", method));
+                throw new IllegalArgumentException(format("No PayoneRequestFactory could be created for payment method %s", method));
         }
     }
 }
