@@ -18,12 +18,7 @@ import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.queries.Query;
 
 import java.time.ZonedDateTime;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 /**
@@ -114,7 +109,7 @@ public class CommercetoolsQueryExecutor {
                     .filter(msg -> msg.getResource().getObj() != null)
                     .forEach(msg -> paymentConsumer.accept(msg.getResource().getObj()));
 
-            processed = result.getOffset() + result.size();
+            processed = result.getOffset() + result.getCount();
             total = result.getTotal();
         } while (processed < total);
     }
