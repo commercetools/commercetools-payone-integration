@@ -1,10 +1,5 @@
 package com.commercetools.pspadapter.payone.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.ThrowableAssert.catchThrowable;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +7,11 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.ThrowableAssert.catchThrowable;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 /**
  * @author fhaertig
@@ -94,6 +94,27 @@ public class ServiceConfigTest {
     @Test
     public void throwsInCaseOfMissingCtClientSecret() {
         assertThatThrowsInCaseOfMissingOrEmptyProperty(PropertyProvider.CT_CLIENT_SECRET);
+    }
+
+    @Test
+    public void getsIsUpdateOrderPaymentState() {
+        when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("true"));
+        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(true);
+
+        when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("TRUE"));
+        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(true);
+
+        when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("false"));
+        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(false);
+
+        when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("FALSE"));
+        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(false);
+
+        when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of(""));
+        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(false);
+
+        when(propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.empty());
+        assertThat(new ServiceConfig(propertyProvider).isUpdateOrderPaymentState()).isEqualTo(false);
     }
 
     private void assertThatThrowsInCaseOfMissingOrEmptyProperty(final String propertyName) {

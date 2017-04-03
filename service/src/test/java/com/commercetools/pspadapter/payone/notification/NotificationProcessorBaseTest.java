@@ -19,7 +19,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
@@ -52,7 +51,7 @@ public class NotificationProcessorBaseTest extends BaseNotificationProcessorTest
 
         final ImmutableList<UpdateAction<Payment>> updateActions = ImmutableList.of(SetCustomer.of(null));
 
-        final NotificationProcessorBase testee = new NotificationProcessorBase(serviceFactory) {
+        final NotificationProcessorBase testee = new NotificationProcessorBase(serviceFactory, serviceConfig) {
             @Override
             protected boolean canProcess(final Notification notification) {
                 return true;
@@ -75,8 +74,11 @@ public class NotificationProcessorBaseTest extends BaseNotificationProcessorTest
         // assert
         verify(paymentService).updatePayment(paymentRequestPayment.capture(), paymentRequestUpdatesCaptor.capture());
 
-        final Payment updatePayment = paymentRequestPayment.getValue();
-        assertThat(updatePayment).isEqualTo(payment);
+        // order service methods should not be called
+        // because serviceConfig.isUpdateOrderPaymentState() expected to be "false" by default
+        verifyUpdateOrderActionsNotCalled();
+
+        softly.assertThat(paymentRequestPayment.getValue()).isEqualTo(payment);
 
         softly.assertThat(paymentRequestUpdatesCaptor.getValue()).as("update action instance")
                 .isSameAs(updateActions);

@@ -6,7 +6,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Transactio
 import com.commercetools.pspadapter.payone.notification.BaseNotificationProcessorTest;
 import com.google.common.collect.Lists;
 import io.sphere.sdk.commands.UpdateAction;
-import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
@@ -25,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static io.sphere.sdk.orders.PaymentState.CREDIT_OWED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -43,9 +43,6 @@ public class DefaultNotificationProcessorTest extends BaseNotificationProcessorT
     @InjectMocks
     private DefaultNotificationProcessor testee;
 
-    // unknown Payone actions are mapped to CTP null state
-    // in this case
-    private static final PaymentState ORDER_PAYMENT_STATE = null;
 
     @Before
     public void setUp() throws Exception {
@@ -61,8 +58,9 @@ public class DefaultNotificationProcessorTest extends BaseNotificationProcessorT
         notification.setTxaction(randomTxAction());
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
+        // just test any value
         when(paymentToOrderStateMapper.mapPaymentToOrderState(any(Payment.class)))
-                .thenReturn(ORDER_PAYMENT_STATE);
+                .thenReturn(CREDIT_OWED);
     }
 
     @Test
@@ -85,7 +83,8 @@ public class DefaultNotificationProcessorTest extends BaseNotificationProcessorT
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         assertThat(updateActions).as("# of update actions").hasSize(3);
 
-        // updating order is not expected
+        // test value from #setUp() is injected
+        verifyUpdateOrderActions(payment, CREDIT_OWED);
     }
 
     private static NotificationAction randomTxAction() {
