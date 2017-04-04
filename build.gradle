@@ -253,8 +253,15 @@ githubPages {
 }
 
 publishGhPages  {
+    doFirst {
+        // print warning message if github pages plugin credentials are empty
+        if (!githubPages.credentials.username?.trim()) {
+            logger.warn("\n[WARNING] Github-pages credentials are empty, publishing the tests results may be skipped\n")
+        }
+    }
+
     doLast {
-        println "Published results to http://commercetools.github.io/commercetools-payone-integration/"
+        println "\nPublished results to http://commercetools.github.io/commercetools-payone-integration/\n"
     }
 }
 
