@@ -1,6 +1,6 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
+import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.util.BlowfishUtil;
@@ -15,11 +15,14 @@ import spark.utils.StringUtils;
  */
 public class SofortBankTransferRequestFactory extends BankTransferWithoutIbanBicRequestFactory {
 
-    private final ServiceConfig serviceConfig;
+    /**
+     * Optional (may be empty string, but not null) key for {@link BlowfishUtil} IBAN/BIC encrypting.
+     */
+    private final String secureKey;
 
-    public SofortBankTransferRequestFactory(final ServiceConfig serviceConfig) {
-        super(serviceConfig.getPayoneConfig());
-        this.serviceConfig = serviceConfig;
+    public SofortBankTransferRequestFactory(final PayoneConfig config, final String secureKey) {
+        super(config);
+        this.secureKey = secureKey != null ? secureKey : "";
     }
 
     @Override
@@ -31,8 +34,8 @@ public class SofortBankTransferRequestFactory extends BankTransferWithoutIbanBic
 
         if (StringUtils.isNotEmpty(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD))) {
             final String plainIban;
-            if (!serviceConfig.getSecureKey().isEmpty()) {
-                plainIban = BlowfishUtil.decryptHexToString(serviceConfig.getSecureKey(), ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD));
+            if (!secureKey.isEmpty()) {
+                plainIban = BlowfishUtil.decryptHexToString(secureKey, ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD));
             } else {
                 plainIban = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD);
             }
@@ -41,8 +44,8 @@ public class SofortBankTransferRequestFactory extends BankTransferWithoutIbanBic
 
         if (StringUtils.isNotEmpty(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD))) {
             final String plainBic;
-            if (!serviceConfig.getSecureKey().isEmpty()) {
-                plainBic = BlowfishUtil.decryptHexToString(serviceConfig.getSecureKey(), ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD));
+            if (!secureKey.isEmpty()) {
+                plainBic = BlowfishUtil.decryptHexToString(secureKey, ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD));
             } else {
                 plainBic = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD);
             }

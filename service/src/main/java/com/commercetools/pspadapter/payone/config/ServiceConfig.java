@@ -102,7 +102,7 @@ public class ServiceConfig {
     /**
      * Gets the secure key which was used for encrypting data with Blowfish.
      *
-     * @return the secure key as plain text
+     * @return non-null secure key as plain text. Empty string if not defined.
      */
     public String getSecureKey() {
         return secureKey;

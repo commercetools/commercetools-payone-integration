@@ -38,7 +38,7 @@ public class IntegrationService {
     private final NotificationDispatcher notificationDispatcher;
     private final String payoneInterfaceName;
 
-    IntegrationService(
+    public IntegrationService(
             final CustomTypeBuilder typeBuilder,
             final CommercetoolsQueryExecutor commercetoolsQueryExecutor,
             final PaymentDispatcher paymentDispatcher,

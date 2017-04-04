@@ -1,7 +1,5 @@
 package com.commercetools.pspadapter.payone;
 
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
@@ -31,20 +29,15 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.client.BlockingSphereClient;
+import io.sphere.sdk.client.SphereClient;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.SchedulerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
 import static java.lang.String.format;
 
 /**
@@ -55,112 +48,38 @@ public class ServiceFactory {
 
     private static final long DEFAULT_CTP_CLIENT_TIMEOUT = 10;
 
-    private static final String PAYONE_INTERFACE_NAME = PAYONE;
-
-    private static final Logger LOG = LoggerFactory.getLogger(ServiceFactory.class);
-
     private final ServiceConfig serviceConfig;
-
     private final BlockingSphereClient blockingSphereClient;
-
     private final PaymentService paymentService;
-
     private final OrderService orderService;
-
+    private final PaymentDispatcher paymentDispatcher;
+    private final NotificationDispatcher notificationDispatcher;
+    private final CustomTypeBuilder customTypeBuilder;
+    private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
     private final PaymentToOrderStateMapper paymentToOrderStateMapper;
+    private final String payoneInterfaceName;
 
-    private ServiceFactory(final ServiceConfig serviceConfig) {
+    public ServiceFactory(final ServiceConfig serviceConfig, String payoneInterfaceName) {
+        this.payoneInterfaceName = payoneInterfaceName;
         this.serviceConfig = serviceConfig;
-
-        this.blockingSphereClient = createBlockingSphereClient();
-        this.paymentService = createPaymentService();
-        this.orderService = createOrderService();
         this.paymentToOrderStateMapper = createPaymentToOrderStateMapper();
+
+        this.blockingSphereClient = createBlockingSphereClient(serviceConfig);
+
+        this.paymentService = createPaymentService(blockingSphereClient);
+        this.orderService = createOrderService(blockingSphereClient);
+        this.paymentDispatcher = createPaymentDispatcher(serviceConfig, createTypeCache(blockingSphereClient), blockingSphereClient);
+        this.notificationDispatcher = createNotificationDispatcher(serviceConfig);
+        this.commercetoolsQueryExecutor = new CommercetoolsQueryExecutor(blockingSphereClient);
+        this.customTypeBuilder = createCustomTypeBuilder(blockingSphereClient, serviceConfig.getStartFromScratch());
     }
 
-    /**
-     * Creates a new service factory initialized with the provided {@code propertyProvider}.
-     *
-     * @param serviceConfig provides the service configuration parameters
-     * @return the new service factory instance, never null
-     */
-    public static ServiceFactory withPropertiesFrom(final ServiceConfig serviceConfig) {
-        return new ServiceFactory(serviceConfig);
-    }
-
-    public static void main(String[] args) throws SchedulerException, MalformedURLException {
-
-        final PropertyProvider propertyProvider = new PropertyProvider();
-
-        final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider, new PayoneConfig(propertyProvider));
-
-        final ServiceFactory serviceFactory = withPropertiesFrom(serviceConfig);
-
-        final BlockingSphereClient commercetoolsClient = serviceFactory.getBlockingCommercetoolsClient();
-
-        final LoadingCache<String, Type> typeCache = serviceFactory.createTypeCache(commercetoolsClient);
-        final PaymentDispatcher paymentDispatcher = createPaymentDispatcher(
-                typeCache,
-                serviceConfig,
-                commercetoolsClient);
-
-        final NotificationDispatcher notificationDispatcher = createNotificationDispatcher(serviceFactory,
-                serviceConfig.getPayoneConfig(), serviceConfig);
-
-        final IntegrationService integrationService = createService(
-                new CommercetoolsQueryExecutor(commercetoolsClient),
-                paymentDispatcher,
-                notificationDispatcher,
-                new CustomTypeBuilder(
-                        commercetoolsClient,
-                        CustomTypeBuilder.PermissionToStartFromScratch.fromBoolean(
-                                serviceConfig.getStartFromScratch())));
-
-        integrationService.start();
-
-        ScheduledJobFactory scheduledJobFactory = new ScheduledJobFactory();
-
-        scheduledJobFactory.setAllScheduledItemsStartedListener(() -> {
-                    LOG.info(format("%n%1$s%nPayone Integration Service is STARTED%n%1$s",
-                            "============================================================"));
-                }
-        );
-
-        scheduledJobFactory.createScheduledJob(
-                CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForShortTimeFramePoll()),
-                ScheduledJobShortTimeframe.class,
-                integrationService,
-                paymentDispatcher);
-
-        scheduledJobFactory.createScheduledJob(
-                CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForLongTimeFramePoll()),
-                ScheduledJobLongTimeframe.class,
-                integrationService,
-                paymentDispatcher);
-    }
-
-    protected BlockingSphereClient createBlockingSphereClient() {
-        return BlockingSphereClient.of(
-                SphereClientFactory.of().createClient(serviceConfig.getSphereClientConfig()),
-                DEFAULT_CTP_CLIENT_TIMEOUT,
-                TimeUnit.SECONDS);
-    }
-
-
-    protected PaymentService createPaymentService() {
-        return new PaymentServiceImpl(getBlockingCommercetoolsClient());
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Public getters
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public BlockingSphereClient getBlockingCommercetoolsClient() {
         return blockingSphereClient;
-    }
-
-    protected OrderService createOrderService() {
-        return new OrderServiceImpl(getBlockingCommercetoolsClient());
-    }
-
-    protected PaymentToOrderStateMapper createPaymentToOrderStateMapper() {
-        return new DefaultPaymentToOrderStateMapper();
     }
 
     public PaymentService getPaymentService() {
@@ -176,46 +95,68 @@ public class ServiceFactory {
     }
 
     public String getPayoneInterfaceName() {
-        return PAYONE_INTERFACE_NAME;
+        return payoneInterfaceName;
     }
 
-    // FIXME return shared instance
-    public LoadingCache<String, Type> createTypeCache(final BlockingSphereClient client) {
+    public PaymentDispatcher getPaymentDispatcher() {
+        return paymentDispatcher;
+    }
+
+    public NotificationDispatcher getNotificationDispatcher() {
+        return notificationDispatcher;
+    }
+
+    public CommercetoolsQueryExecutor getCommercetoolsQueryExecutor() {
+        return commercetoolsQueryExecutor;
+    }
+
+    public CustomTypeBuilder getCustomTypeBuilder() {
+        return customTypeBuilder;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Encapsulated Factory Creators
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected BlockingSphereClient createBlockingSphereClient(ServiceConfig serviceConfig) {
+        return BlockingSphereClient.of(
+                SphereClientFactory.of().createClient(serviceConfig.getSphereClientConfig()),
+                DEFAULT_CTP_CLIENT_TIMEOUT,
+                TimeUnit.SECONDS);
+    }
+
+    protected PaymentService createPaymentService(SphereClient sphereClient) {
+        return new PaymentServiceImpl(sphereClient);
+    }
+
+    protected OrderService createOrderService(SphereClient sphereClient) {
+        return new OrderServiceImpl(sphereClient);
+    }
+
+    protected PaymentToOrderStateMapper createPaymentToOrderStateMapper() {
+        return new DefaultPaymentToOrderStateMapper();
+    }
+
+    protected LoadingCache<String, Type> createTypeCache(final BlockingSphereClient client) {
         return CacheBuilder.newBuilder().build(new TypeCacheLoader(client));
     }
 
-    // FIXME get rid of this static method
-    private static IntegrationService createService(
-            final CommercetoolsQueryExecutor queryExecutor,
-            final PaymentDispatcher paymentDispatcher,
-            final NotificationDispatcher notificationDispatcher,
-            final CustomTypeBuilder customTypeBuilder) {
-        return new IntegrationService(customTypeBuilder, queryExecutor, paymentDispatcher, notificationDispatcher, PAYONE);
-    }
-
-    public static NotificationDispatcher createNotificationDispatcher(final ServiceFactory serviceFactory,
-                                                                      final PayoneConfig config,
-                                                                      final ServiceConfig serviceConfig) {
-        final NotificationProcessor defaultNotificationProcessor = new DefaultNotificationProcessor(serviceFactory, serviceConfig);
+    protected NotificationDispatcher createNotificationDispatcher(ServiceConfig serviceConfig) {
+        final NotificationProcessor defaultNotificationProcessor = new DefaultNotificationProcessor(this, serviceConfig);
 
         final ImmutableMap.Builder<NotificationAction, NotificationProcessor> builder = ImmutableMap.builder();
-        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(serviceFactory, serviceConfig));
-        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(serviceFactory, serviceConfig));
-        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(serviceFactory, serviceConfig));
-        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(serviceFactory, serviceConfig));
+        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(this, serviceConfig));
+        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(this, serviceConfig));
+        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(this, serviceConfig));
+        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(this, serviceConfig));
 
-        return new NotificationDispatcher(defaultNotificationProcessor, builder.build(), serviceFactory, config);
+        return new NotificationDispatcher(defaultNotificationProcessor, builder.build(), this, serviceConfig.getPayoneConfig());
     }
 
-    /**
-     * TODO transform into instance method
-     *
-     * @param typeCache
-     * @param client
-     * @return
-     */
-    public static PaymentDispatcher createPaymentDispatcher(final LoadingCache<String, Type> typeCache, final ServiceConfig serviceConfig, final BlockingSphereClient client) {
-        // TODO jw: use immutable map
+    protected PaymentDispatcher createPaymentDispatcher(final ServiceConfig serviceConfig,
+                                                        final LoadingCache<String, Type> typeCache,
+                                                        final BlockingSphereClient client) {
+
         final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
 
         final TransactionExecutor defaultExecutor = new UnsupportedTransactionExecutor(client);
@@ -243,10 +184,10 @@ public class ServiceFactory {
             }
             methodDispatcherMap.put(paymentMethod, new PaymentMethodDispatcher(defaultExecutor, executors.build()));
         }
-        return new PaymentDispatcher(methodDispatcherMap);
+        return new PaymentDispatcher(methodDispatcherMap, getPayoneInterfaceName());
     }
 
-    private static TransactionExecutor createTransactionExecutor(
+    protected TransactionExecutor createTransactionExecutor(
             final TransactionType transactionType,
             final LoadingCache<String, Type> typeCache,
             final BlockingSphereClient client,
@@ -274,14 +215,14 @@ public class ServiceFactory {
         return null;
     }
 
-    private static PayoneRequestFactory createRequestFactory(final PaymentMethod method, final ServiceConfig serviceConfig) {
+    protected PayoneRequestFactory createRequestFactory(final PaymentMethod method, final ServiceConfig serviceConfig) {
         switch (method) {
             case CREDIT_CARD:
                 return new CreditCardRequestFactory(serviceConfig.getPayoneConfig());
             case WALLET_PAYPAL:
                 return new PaypalRequestFactory(serviceConfig.getPayoneConfig());
             case BANK_TRANSFER_SOFORTUEBERWEISUNG:
-                return new SofortBankTransferRequestFactory(serviceConfig);
+                return new SofortBankTransferRequestFactory(serviceConfig.getPayoneConfig(), serviceConfig.getSecureKey());
             case BANK_TRANSFER_POSTFINANCE_CARD:
             case BANK_TRANSFER_POSTFINANCE_EFINANCE:
                 return new PostFinanceBanktransferRequestFactory(serviceConfig.getPayoneConfig());
@@ -290,5 +231,10 @@ public class ServiceFactory {
             default:
                 throw new IllegalArgumentException(format("No PayoneRequestFactory could be created for payment method %s", method));
         }
+    }
+
+    protected CustomTypeBuilder createCustomTypeBuilder(BlockingSphereClient blockingSphereClient, boolean startFromScratch) {
+        return new CustomTypeBuilder(blockingSphereClient,
+                CustomTypeBuilder.PermissionToStartFromScratch.fromBoolean(startFromScratch));
     }
 }
