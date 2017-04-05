@@ -35,6 +35,9 @@ It is a standalone Microservice that connects the two cloud platforms and provid
 - [Test environments](#test-environments)
   - [Development workflow](#development-workflow)
   - [Functional Tests](#functional-tests)
+    - [Heroku setup](#heroku-setup)
+    - [Known Heroku issues](#known-heroku-issues)
+    - [Travis setup](#travis-setup)
     - [Publishing functional tests results](#publishing-functional-tests-results)
     - [Known functional tests issues](#known-functional-tests-issues)
   - [Paypal Sandbox Accounts](#paypal-sandbox-accounts)
@@ -266,7 +269,21 @@ The test service run it Heroku expected to have the next values:
   <tr><td><code>UPDATE_ORDER_PAYMENT_STATE</code></td>  <td>true</td></tr>
 </table> 
 
-Scheduler values are optional: this feature is not covered by the tests
+Scheduler values are optional: this feature is not covered by the tests.
+
+#### Known Heroku issues
+
+  Some times Heroku environment has problems, so the functional tests might be unstable. To check Heroku issues use:
+
+  - Heroku CLI commands:
+    - `heroku apps:errors`
+    - `heroku status`
+    - `heroku logs --tail`
+
+  - Heroku web-page https://status.heroku.com/
+
+  As an example of the potential issues see ["Increased rate of "H10 App Crashed" errors"](https://status.heroku.com/incidents/1091)
+  incident report, which caused  inconsistent _Socket Timeout_, _503 Service unavailable_ and other connection errors.
 
 #### Travis setup
 
