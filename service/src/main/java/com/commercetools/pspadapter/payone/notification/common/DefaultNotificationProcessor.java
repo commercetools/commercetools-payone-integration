@@ -1,6 +1,5 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
-import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
