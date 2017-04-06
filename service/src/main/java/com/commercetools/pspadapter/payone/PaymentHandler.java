@@ -69,24 +69,25 @@ public class PaymentHandler {
             return new PaymentHandleResult(HttpStatusCode.ACCEPTED_202);
 
         } catch (final NotFoundException | NoCartLikeFoundException e) {
-            return handleNotFoundException(paymentId, e);
+            return handleNotFoundException(paymentId);
         } catch (final ErrorResponseException e) {
-            return errorResponseHandler(e);
+            return errorResponseHandler(e, paymentId);
         } catch (final CompletionException e) {
-            return completionExceptionHandler(e);
+            return completionExceptionHandler(e, paymentId);
         } catch (final Exception e) {
-            return logThrowableInResponse(e);
+            return logThrowableInResponse(e, paymentId);
         }
     }
 
-    private PaymentHandleResult handleNotFoundException(@Nonnull String paymentId, RuntimeException e) {
-        final String body = format("Could not process payment with ID [%s], cause: %s", paymentId, e.getMessage());
+    private PaymentHandleResult handleNotFoundException(@Nonnull String paymentId) {
+        final String body = format("Could not process payment with ID [%s]: order or cart not found", paymentId);
         return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
     }
 
-    private PaymentHandleResult errorResponseHandler(ErrorResponseException e) {
+    private PaymentHandleResult errorResponseHandler(@Nonnull ErrorResponseException e, @Nonnull String paymentId) {
         logger.warn("An Error Response from commercetools platform", e);
-        return new PaymentHandleResult(e.getStatusCode(), e.getMessage());
+        return new PaymentHandleResult(e.getStatusCode(),
+                format("An Error Response from commercetools platform when processing payment [%s]. Try again later.", paymentId));
     }
 
     /**
@@ -94,15 +95,16 @@ public class PaymentHandler {
      * @param e Exception to report
      * @return {@link PaymentHandleResult} with 500 status and message which refers to the logs.
      */
-    private PaymentHandleResult completionExceptionHandler(CompletionException e) {
+    private PaymentHandleResult completionExceptionHandler(@Nonnull CompletionException e, @Nonnull String paymentId) {
         String causeMessage = ofNullable(e.getCause()).map(Throwable::toString).orElse("null");
         logger.error("Completion exception error: {}\nCause: {}", e.toString(), causeMessage);
         return new PaymentHandleResult(INTERNAL_SERVER_ERROR_500,
-                "An error occurred during communication with the commercetools platform, see the service logs");
+                format("An error occurred during communication with the commercetools platform when processing [%s] payment. See the service logs", paymentId));
     }
 
-    private PaymentHandleResult logThrowableInResponse(Throwable throwable) {
+    private PaymentHandleResult logThrowableInResponse(@Nonnull Throwable throwable, @Nonnull String paymentId) {
         logger.error("Error in response: ", throwable);
-        return new PaymentHandleResult(INTERNAL_SERVER_ERROR_500, "Unexpected error. See the service logs");
+        return new PaymentHandleResult(INTERNAL_SERVER_ERROR_500,
+                format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId));
     }
 }

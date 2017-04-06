@@ -1,9 +1,9 @@
 package com.commercetools;
 
-import com.commercetools.pspadapter.payone.IntegrationService;
-import com.commercetools.pspadapter.payone.ServiceFactory;
+import com.commercetools.pspadapter.payone.*;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
+import org.quartz.CronScheduleBuilder;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,23 +27,21 @@ public class Main {
 
         // TODO: finalize schedulers
 
-//        ScheduledJobFactory scheduledJobFactory = new ScheduledJobFactory();
-//
+        ScheduledJobFactory scheduledJobFactory = new ScheduledJobFactory();
+
 //        scheduledJobFactory.setAllScheduledItemsStartedListener(() ->
 //                LOG.info(format("%n%1$s%nPayone Integration Service is STARTED%n%1$s",
 //                "============================================================"))
 //        );
 
-//        scheduledJobFactory.createScheduledJob(
-//                CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForShortTimeFramePoll()),
-//                ScheduledJobShortTimeframe.class,
-//                integrationService,
-//                serviceFactory.getPaymentDispatcher());
-//
-//        scheduledJobFactory.createScheduledJob(
-//                CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForLongTimeFramePoll()),
-//                ScheduledJobLongTimeframe.class,
-//                integrationService,
-//                serviceFactory.getPaymentDispatcher());
+        scheduledJobFactory.createScheduledJob(
+                CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForShortTimeFramePoll()),
+                ScheduledJobShortTimeframe.class,
+                integrationService);
+
+        scheduledJobFactory.createScheduledJob(
+                CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForLongTimeFramePoll()),
+                ScheduledJobLongTimeframe.class,
+                integrationService);
     }
 }

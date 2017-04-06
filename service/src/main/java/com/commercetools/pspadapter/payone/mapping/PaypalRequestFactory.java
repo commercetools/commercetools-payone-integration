@@ -30,7 +30,6 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
     public WalletPreauthorizationRequest createPreauthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
-        final CartLike ctCartLike = paymentWithCartLike.getCartLike();
 
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
@@ -57,7 +56,6 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
     public WalletAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
-        final CartLike ctCartLike = paymentWithCartLike.getCartLike();
 
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
