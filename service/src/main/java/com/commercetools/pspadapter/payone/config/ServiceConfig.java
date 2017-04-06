@@ -1,7 +1,13 @@
 package com.commercetools.pspadapter.payone.config;
 
-import io.sphere.sdk.client.SphereClientConfig;
+import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import io.sphere.sdk.orders.Order;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
 
 /**
  * Provides the configuration of the integration service.
@@ -12,15 +18,11 @@ import io.sphere.sdk.orders.Order;
  */
 public class ServiceConfig {
 
-    private final SphereClientConfig sphereClientConfig;
 
-    private final PayoneConfig payoneConfig;
+    private final List<String> tenants;
 
-    private final boolean startFromScratch;
     private final String scheduledJobCronShortTimeFrame;
     private final String scheduledJobCronLongTimeFrame;
-    private final String secureKey;
-    private final boolean updateOrderPaymentState;
 
     /**
      * Initializes the configuration.
@@ -28,15 +30,9 @@ public class ServiceConfig {
      * @param propertyProvider to get the parameters from
      * @throws IllegalStateException if a mandatory parameter is undefined or empty
      */
-    public ServiceConfig(final PropertyProvider propertyProvider, final PayoneConfig payoneConfig) {
+    public ServiceConfig(final PropertyProvider propertyProvider/*, final PayoneConfig payoneConfig*/) {
 
-        this.sphereClientConfig = SphereClientConfig.of(
-                propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY),
-                propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID),
-                propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET)
-        );
-
-        this.payoneConfig = payoneConfig;
+        this.tenants = getMandatoryTenantNames(propertyProvider);
 
         this.scheduledJobCronShortTimeFrame =
                 propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON)
@@ -46,26 +42,13 @@ public class ServiceConfig {
                 propertyProvider.getProperty(PropertyProvider.LONG_TIME_FRAME_SCHEDULED_JOB_CRON)
                         .map(String::valueOf)
                         .orElse("5 0 0/1 * * ? *");
-        this.startFromScratch = propertyProvider.getProperty(PropertyProvider.CT_START_FROM_SCRATCH)
-                .map(Boolean::valueOf)
-                .orElse(false);
-
-        this.secureKey = propertyProvider.getProperty(PropertyProvider.SECURE_KEY)
-                .map(String::valueOf)
-                .orElse("");
-
-        updateOrderPaymentState = propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)
-                .map(String::trim)
-                .map(Boolean::valueOf)
-                .orElse(false);
     }
 
-    public SphereClientConfig getSphereClientConfig() {
-        return sphereClientConfig;
-    }
-
-    public PayoneConfig getPayoneConfig() {
-        return payoneConfig;
+    /**
+     * @return Non-empty list of tenant names, specified in {@code TENANTS} configuration property.
+     */
+    public List<String> getTenants() {
+        return tenants;
     }
 
     /**
@@ -90,34 +73,15 @@ public class ServiceConfig {
         return scheduledJobCronLongTimeFrame;
     }
 
-    /**
-     * Gets the flag indicating whether the service shall reset the commerctools project at start up.
-     *
-     * @return whether the commercetools project shall be reset
-     */
-    public boolean getStartFromScratch() {
-        return startFromScratch;
-    }
+    private List<String> getMandatoryTenantNames(PropertyProvider propertyProvider) {
+        String tenantsList = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.TENANTS);
+        List<String> result = asList(tenantsList.trim().split("\\s*(,|;)\\s*"));
 
-    /**
-     * Gets the secure key which was used for encrypting data with Blowfish.
-     *
-     * @return non-null secure key as plain text. Empty string if not defined.
-     */
-    public String getSecureKey() {
-        return secureKey;
-    }
+        if (result.size() < 1 || result.stream().anyMatch(StringUtils::isBlank)) {
+            throw new IllegalArgumentException(format("Tenants list is invalid, pls check \"%s\" variable",
+                    PropertyProvider.TENANTS));
+        }
 
-    /**
-     * If <b>true</b> - when processing Payone notification (update payment status) {@link Order#getPaymentState()},
-     * linked to the payment, should be update also. Otherwise leave the order payment state unchanged.
-     * <p>
-     * By default it is <b>false</b>
-     *
-     * @return <b>true</b> if environment the property {@link PropertyProvider#UPDATE_ORDER_PAYMENT_STATE} is a string
-     * <i>true</i> case insensitive, <b>false</b> otherwise.
-     */
-    public boolean isUpdateOrderPaymentState() {
-        return updateOrderPaymentState;
+        return result;
     }
 }

@@ -1,15 +1,10 @@
 package com.commercetools.pspadapter.payone;
 
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
-import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
-import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
+import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import io.sphere.sdk.client.ErrorResponseException;
-import io.sphere.sdk.client.NotFoundException;
 import io.sphere.sdk.http.HttpStatusCode;
 import io.sphere.sdk.json.SphereJsonUtils;
 import org.apache.http.entity.ContentType;
@@ -17,10 +12,9 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Spark;
+import spark.utils.CollectionUtils;
 
-import javax.annotation.Nonnull;
-import java.util.ConcurrentModificationException;
-import java.util.concurrent.CompletionException;
+import java.util.List;
 
 /**
  * @author fhaertig
@@ -32,28 +26,28 @@ public class IntegrationService {
 
     public static final String HEROKU_ASSIGNED_PORT = "PORT";
 
-    private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
-    private final PaymentDispatcher paymentDispatcher;
-    private final CustomTypeBuilder typeBuilder;
-    private final NotificationDispatcher notificationDispatcher;
-    private final String payoneInterfaceName;
+    private final List<TenantFactory> tenantFactories;
 
-    public IntegrationService(
-            final CustomTypeBuilder typeBuilder,
-            final CommercetoolsQueryExecutor commercetoolsQueryExecutor,
-            final PaymentDispatcher paymentDispatcher,
-            final NotificationDispatcher notificationDispatcher,
-            final String payoneInterfaceName) {
-        this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
-        this.paymentDispatcher = paymentDispatcher;
-        this.typeBuilder = typeBuilder;
-        this.notificationDispatcher = notificationDispatcher;
-        this.payoneInterfaceName = payoneInterfaceName;
+    public IntegrationService(final List<TenantFactory> tenantFactories) {
+        if (CollectionUtils.isEmpty(tenantFactories)) {
+            throw new IllegalArgumentException("Tenants list must be non-empty");
+        }
+
+        this.tenantFactories = tenantFactories;
     }
 
     public void start() {
-        createCustomTypes();
 
+        initSparkService();
+
+        for (TenantFactory tenantFactory : tenantFactories) {
+            initTenantServiceResources(tenantFactory);
+        }
+
+        Spark.awaitInitialization();
+    }
+
+    private void initSparkService() {
         Spark.port(port());
 
         // This is a temporary jerry-rig for the load balancer to check connection with the service itself.
@@ -66,9 +60,19 @@ public class IntegrationService {
             res.type(ContentType.APPLICATION_JSON.getMimeType());
             return ImmutableMap.of("status", HttpStatus.OK_200);
         }, SphereJsonUtils::toJsonString);
+    }
 
-        Spark.get("/commercetools/handle/payments/:id", (req, res) -> {
-            final PaymentHandleResult paymentHandleResult = handlePayment(req.params("id"));
+    private static void initTenantServiceResources(TenantFactory tenantFactory) {
+
+        // create custom types
+        tenantFactory.getCustomTypeBuilder().run();
+
+        PaymentHandler paymentHandler = tenantFactory.getPaymentHandler();
+        NotificationDispatcher notificationDispatcher = tenantFactory.getNotificationDispatcher();
+
+        // register payment handler URL
+        Spark.get(tenantFactory.getPaymentHandlerUrl(), (req, res) -> {
+            final PaymentHandleResult paymentHandleResult = paymentHandler.handlePayment(req.params("id"));
             if (!paymentHandleResult.body().isEmpty()) {
                 LOG.debug("--> Result body of handle/payments/{}: {}", req.params("id"), paymentHandleResult.body());
             }
@@ -76,7 +80,8 @@ public class IntegrationService {
             return res;
         }, new HandlePaymentResponseTransformer());
 
-        Spark.post("/payone/notification", (req, res) -> {
+        // register Payone notifications URL
+        Spark.post(tenantFactory.getPayoneNotificationUrl(), (req, res) -> {
             LOG.debug("<- Received POST from Payone: {}", req.body());
             try {
                 final Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
@@ -97,70 +102,6 @@ public class IntegrationService {
             res.status(200);
             return "TSOK";
         });
-
-        Spark.awaitInitialization();
-    }
-
-    /**
-     * Tries to handle the payment with the provided ID.
-     *
-     * @param paymentId identifies the payment to be processed
-     * @return the result of handling the payment
-     */
-    public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
-        try {
-            // TODO jw: make configurable or use constants instead of magic numbers at least
-            for (int i = 0; i < 20; i++) {
-                try {
-                    final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
-                    String paymentInterface = payment.getPayment().getPaymentMethodInfo().getPaymentInterface();
-                    if (!payoneInterfaceName.equals(paymentInterface)) {
-                        LOG.warn("Wrong payment interface name: expected [{}], found [{}]", payoneInterfaceName, paymentInterface);
-                        return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
-                    }
-
-                    final PaymentWithCartLike result = paymentDispatcher.dispatchPayment(payment);
-                    return new PaymentHandleResult(HttpStatusCode.OK_200);
-                } catch (final ConcurrentModificationException cme) {
-                    Thread.sleep(100);
-                }
-            }
-            return new PaymentHandleResult(HttpStatusCode.ACCEPTED_202);
-        } catch (final InterruptedException e) {
-            return logThrowableInResponse(e);
-        } catch (final NotFoundException | NoCartLikeFoundException e) {
-            // TODO clarify if we should use localized message
-            final String body =
-            String.format("Could not process payment with ID \"%s\", cause: %s", paymentId, e.getMessage());
-
-            return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
-        } catch (final ErrorResponseException e) {
-            LOG.debug("An Error Response from commercetools platform", e);
-            return new PaymentHandleResult(e.getStatusCode(), e.getMessage());
-        } catch (final CompletionException e) {
-            return logCauseMessageInResponse("An error occurred during communication with the commercetools platform: " + e.getMessage());
-        } catch (final RuntimeException e) {
-            // TODO clarify if we should use localized message
-            return logThrowableInResponse(e);
-        }
-    }
-
-
-    private PaymentHandleResult logThrowableInResponse(final Throwable throwable) {
-        LOG.debug("Error in response: ", throwable);
-        // TODO jw: we probably need to differentiate depending on the exception type
-        return logCauseMessageInResponse(String.format("Sorry, but you hit us between the eyes. Cause: %s", throwable.getMessage()));
-    }
-
-    private PaymentHandleResult logCauseMessageInResponse(final String message) {
-        LOG.error(message);
-        return new PaymentHandleResult(
-                HttpStatusCode.INTERNAL_SERVER_ERROR_500,
-                message);
-    }
-
-    private void createCustomTypes() {
-        typeBuilder.run();
     }
 
     public void stop() {
@@ -175,9 +116,5 @@ public class IntegrationService {
 
         final String systemProperty = System.getProperty(HEROKU_ASSIGNED_PORT, "8080");
         return Integer.parseInt(systemProperty);
-    }
-
-    public CommercetoolsQueryExecutor getCommercetoolsQueryExecutor() {
-        return commercetoolsQueryExecutor;
     }
 }

@@ -1,17 +1,13 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
-import com.commercetools.pspadapter.payone.ServiceFactory;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
+import com.commercetools.pspadapter.tenant.TenantConfig;
+import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.google.common.collect.ImmutableList;
 import io.sphere.sdk.commands.UpdateAction;
-import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.Transaction;
-import io.sphere.sdk.payments.TransactionDraftBuilder;
-import io.sphere.sdk.payments.TransactionState;
-import io.sphere.sdk.payments.TransactionType;
+import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 import io.sphere.sdk.payments.commands.updateactions.SetAmountPaid;
@@ -31,8 +27,8 @@ public class PaidNotificationProcessor extends NotificationProcessorBase {
      *
      * @param serviceFactory the services factory for commercetools platform API
      */
-    public PaidNotificationProcessor(ServiceFactory serviceFactory, ServiceConfig serviceConfig) {
-        super(serviceFactory, serviceConfig);
+    public PaidNotificationProcessor(TenantFactory serviceFactory, TenantConfig tenantConfig) {
+        super(serviceFactory, tenantConfig);
     }
 
     @Override

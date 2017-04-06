@@ -1,10 +1,10 @@
 package com.commercetools.pspadapter.payone.notification;
 
-import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
+import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Payment;
@@ -27,17 +27,17 @@ public class NotificationDispatcher {
 
     private final NotificationProcessor defaultProcessor;
     private final ImmutableMap<NotificationAction, NotificationProcessor> processors;
-    private final ServiceFactory serviceFactory;
+    private final TenantFactory tenantFactory;
     private final PayoneConfig config;
 
     public NotificationDispatcher(
             final NotificationProcessor defaultProcessor,
             final ImmutableMap<NotificationAction, NotificationProcessor> processors,
-            final ServiceFactory serviceFactory,
+            final TenantFactory tenantFactory,
             final PayoneConfig config) {
         this.defaultProcessor = defaultProcessor;
         this.processors = processors;
-        this.serviceFactory = serviceFactory;
+        this.tenantFactory = tenantFactory;
         this.config = config;
     }
 
@@ -87,13 +87,13 @@ public class NotificationDispatcher {
     private void dispatchNotificationToProcessor(final Notification notification,
                                                  final NotificationProcessor notificationProcessor) {
 
-        Payment payment = executeBlocking(serviceFactory.getPaymentService()
-                    .getByPaymentMethodAndInterfaceId(serviceFactory.getPayoneInterfaceName(), notification.getTxid())
+        Payment payment = executeBlocking(tenantFactory.getPaymentService()
+                    .getByPaymentMethodAndInterfaceId(tenantFactory.getPayoneInterfaceName(), notification.getTxid())
                 .thenComposeAsync(optionalPayment -> optionalPayment
                         .map(CompletableFuture::completedFuture)
                         .orElseGet(() -> {
                     PaymentDraft paymentDraft = createNewPaymentDraftFromNotification(notification);
-                    return serviceFactory.getPaymentService().createPayment(paymentDraft).toCompletableFuture();
+                    return tenantFactory.getPaymentService().createPayment(paymentDraft).toCompletableFuture();
                 })));
 
         notificationProcessor.processTransactionStatusNotification(notification, payment);
@@ -108,7 +108,7 @@ public class NotificationDispatcher {
                 .paymentMethodInfo(
                         PaymentMethodInfoBuilder
                                 .of()
-                                .paymentInterface(serviceFactory.getPayoneInterfaceName())
+                                .paymentInterface(tenantFactory.getPayoneInterfaceName())
                                 .method(clearingType.getKey())
                                 .build())
                 .build();

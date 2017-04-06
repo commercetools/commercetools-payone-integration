@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.config;
 
+import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 
@@ -28,20 +29,23 @@ public class PayoneConfig {
     private final String integratorVersion;
 
 
-    public PayoneConfig(final PropertyProvider propertyProvider) {
-        subAccountId = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SUBACC_ID);
-        merchantId = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_MERCHANT_ID);
-        portalId = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_PORTAL_ID);
-        mode = propertyProvider.getProperty(PropertyProvider.PAYONE_MODE).orElse(DEFAULT_PAYONE_MODE);
-        apiUrl = propertyProvider.getProperty(PropertyProvider.PAYONE_API_URL).orElse(DEFAULT_PAYONE_API_URL);
-        apiVersion = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_API_VERSION);
-        encoding = propertyProvider.getProperty(PropertyProvider.PAYONE_REQUEST_ENCODING).orElse(DEFAULT_PAYONE_REQUEST_ENCODING);
-        final String plainKey = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_KEY);
+    public PayoneConfig(final TenantPropertyProvider tenantPropertyProvider) {
+        // read app common properties
+        apiUrl = tenantPropertyProvider.getPropertyProvider().getProperty(PropertyProvider.PAYONE_API_URL).orElse(DEFAULT_PAYONE_API_URL);
+        apiVersion = tenantPropertyProvider.getPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_API_VERSION);
+        encoding = tenantPropertyProvider.getPropertyProvider().getProperty(PropertyProvider.PAYONE_REQUEST_ENCODING).orElse(DEFAULT_PAYONE_REQUEST_ENCODING);
+        solutionName = tenantPropertyProvider.getPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SOLUTION_NAME);
+        solutionVersion = tenantPropertyProvider.getPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SOLUTION_VERSION);
+        integratorName = tenantPropertyProvider.getPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_INTEGRATOR_NAME);
+        integratorVersion = tenantPropertyProvider.getPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_INTEGRATOR_VERSION);
+
+        // read tenant specific properties
+        subAccountId = tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.PAYONE_SUBACC_ID);
+        merchantId = tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.PAYONE_MERCHANT_ID);
+        portalId = tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.PAYONE_PORTAL_ID);
+        mode = tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.PAYONE_MODE).orElse(DEFAULT_PAYONE_MODE);
+        final String plainKey = tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.PAYONE_KEY);
         keyAsMd5Hash = Hashing.md5().hashString(plainKey, Charsets.UTF_8).toString();
-        solutionName = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SOLUTION_NAME);
-        solutionVersion = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SOLUTION_VERSION);
-        integratorName = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_INTEGRATOR_NAME);
-        integratorVersion = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_INTEGRATOR_VERSION);
     }
 
     public String getApiUrl() {

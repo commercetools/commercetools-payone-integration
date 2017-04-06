@@ -24,18 +24,17 @@ public abstract class ScheduledJob implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledJob.class);
 
-    public static final String SERVICE_KEY = "INTEGRATIONSERVICE";
+    public static final String COMMERCETOOLS_QUERY_EXECUTOR = "INTEGRATIONSERVICE";
     public static final String DISPATCHER_KEY = "DISPATCHERSUPPLIER";
 
     @Override
     public void execute(final JobExecutionContext context) throws JobExecutionException {
         JobDataMap dataMap = context.getMergedJobDataMap();
-        IntegrationService service = (IntegrationService) dataMap.get(SERVICE_KEY);
+        CommercetoolsQueryExecutor queryExecutor = (CommercetoolsQueryExecutor) dataMap.get(COMMERCETOOLS_QUERY_EXECUTOR);
 
         final PaymentDispatcher paymentDispatcher = (PaymentDispatcher) dataMap.get(DISPATCHER_KEY);
         final ZonedDateTime sinceDate = getSinceDateTime();
 
-        final CommercetoolsQueryExecutor queryExecutor = service.getCommercetoolsQueryExecutor();
         final Consumer<Payment> paymentConsumer = payment -> {
             try {
                 final PaymentWithCartLike paymentWithCartLike = queryExecutor.getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
