@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.mapping;
 
+import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
@@ -7,7 +8,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingTy
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPreauthorizationRequest;
-import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
@@ -17,7 +17,6 @@ import org.javamoney.moneta.function.MonetaryUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
@@ -25,29 +24,23 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 
 /**
  * @author fhaertig
  * @since 20.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PaypalRequestFactoryTest {
+public class PaypalRequestFactoryTest extends BaseTenantPropertyTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
     private PaypalRequestFactory factory;
 
-    @Mock
-    private TenantPropertyProvider tenantPropertyProvider;
 
     private PayoneConfig config;
 
     @Before
-    public void setUp() {
-        when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyValue"));
-        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyValue");
-
+    public void setUp() throws Exception {
+        super.setUp();
         config = new PayoneConfig(tenantPropertyProvider);
         factory = new PaypalRequestFactory(config);
     }

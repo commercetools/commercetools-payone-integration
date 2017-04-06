@@ -1,9 +1,9 @@
 package com.commercetools.pspadapter.payone.mapping;
 
+import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardAuthorizationRequest;
-import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.customers.Customer;
@@ -24,7 +24,6 @@ import java.util.Optional;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguage;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
@@ -32,14 +31,11 @@ import static org.mockito.Mockito.when;
  * @since 18.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
-public class MappingUtilTest {
+public class MappingUtilTest extends BaseTenantPropertyTest {
 
     private static final String dummyValue = "123";
 
     private SoftAssertions softly;
-
-    @Mock
-    private TenantPropertyProvider tenantPropertyProvider;
 
     @Mock
     private Customer customer;
@@ -57,11 +53,9 @@ public class MappingUtilTest {
     private CartLike cardLike;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         softly = new SoftAssertions();
-
-        when(tenantPropertyProvider.getTenantProperty(anyString())).thenReturn(Optional.of(dummyValue));
-        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(anyString())).thenReturn(dummyValue);
     }
 
     @Test

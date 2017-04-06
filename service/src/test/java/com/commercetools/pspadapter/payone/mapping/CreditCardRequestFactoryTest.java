@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.mapping;
 
+import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
@@ -7,7 +8,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestTyp
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardCaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
-import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
@@ -18,7 +18,6 @@ import org.javamoney.moneta.function.MonetaryUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
@@ -35,18 +34,20 @@ import static org.mockito.Mockito.when;
  * @since 14.12.15
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CreditCardRequestFactoryTest {
+public class CreditCardRequestFactoryTest extends BaseTenantPropertyTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
     private CreditCardRequestFactory factory;
 
-    @Mock
-    private TenantPropertyProvider tenantPropertyProvider;
-
     private PayoneConfig config;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
+        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyVal"));
+        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
+
+        when(tenantPropertyProvider.getPropertyProvider()).thenReturn(propertyProvider);
         when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyValue"));
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyValue");
 

@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.notification;
 
+import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
@@ -36,7 +37,7 @@ import static org.mockito.Mockito.*;
  * @since 05.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
-public class NotificationDispatcherTest {
+public class NotificationDispatcherTest extends BaseTenantPropertyTest {
 
     private static final String dummyInterfaceId = "123";
 
@@ -45,9 +46,6 @@ public class NotificationDispatcherTest {
 
     @Mock
     private PaymentServiceImpl paymentServiceImpl;
-
-    @Mock
-    private TenantPropertyProvider tenantPropertyProvider;
 
     @Mock
     private NotificationProcessor defaultNotificationProcessor;
@@ -63,6 +61,8 @@ public class NotificationDispatcherTest {
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
+
         when(tenantFactory.getPayoneInterfaceName()).thenReturn(PAYONE);
         when(tenantFactory.getPaymentService()).thenReturn(paymentServiceImpl);
 

@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.mapping;
 
+import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
@@ -11,9 +12,9 @@ import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 import org.assertj.core.api.SoftAssertions;
 import org.javamoney.moneta.function.MonetaryUtil;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
@@ -28,17 +29,22 @@ import static org.mockito.Mockito.when;
  *
  */
 @RunWith(MockitoJUnitRunner.class)
-public class BankTransferInAdvanceRequestFactoryTest {
+public class BankTransferInAdvanceRequestFactoryTest extends BaseTenantPropertyTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
     private BanktTransferInAdvanceRequestFactory factory;
 
-    @Mock
-    private TenantPropertyProvider tenantPropertyProvider;
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
     @Test
     public void createFullAuthorizationRequestFromValidPayment() throws Exception {
+        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyVal"));
+        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
 
+        when(tenantPropertyProvider.getPropertyProvider()).thenReturn(propertyProvider);
         when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyVal"));
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
         //clear secure key to force unencrypted data

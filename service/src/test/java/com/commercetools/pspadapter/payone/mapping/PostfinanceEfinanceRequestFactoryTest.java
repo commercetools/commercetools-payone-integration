@@ -1,20 +1,20 @@
 package com.commercetools.pspadapter.payone.mapping;
 
+import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
-import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 import org.assertj.core.api.SoftAssertions;
 import org.javamoney.moneta.function.MonetaryUtil;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
@@ -29,13 +29,15 @@ import static org.mockito.Mockito.when;
  *
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PostfinanceEfinanceRequestFactoryTest {
+public class PostfinanceEfinanceRequestFactoryTest extends BaseTenantPropertyTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
     private BankTransferWithoutIbanBicRequestFactory factory;
 
-    @Mock
-    private TenantPropertyProvider tenantPropertyProvider;
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
     @Test
     public void createFullAuthorizationRequestFromValidPayment() throws Exception {
