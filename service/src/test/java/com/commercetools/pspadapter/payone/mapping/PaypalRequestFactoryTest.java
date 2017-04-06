@@ -1,13 +1,13 @@
 package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPreauthorizationRequest;
+import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
@@ -39,16 +39,16 @@ public class PaypalRequestFactoryTest {
     private PaypalRequestFactory factory;
 
     @Mock
-    private PropertyProvider propertyProvider;
+    private TenantPropertyProvider tenantPropertyProvider;
 
     private PayoneConfig config;
 
     @Before
     public void setUp() {
-        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyValue"));
-        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyValue");
+        when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyValue"));
+        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyValue");
 
-        config = new PayoneConfig(propertyProvider);
+        config = new PayoneConfig(tenantPropertyProvider);
         factory = new PaypalRequestFactory(config);
     }
 

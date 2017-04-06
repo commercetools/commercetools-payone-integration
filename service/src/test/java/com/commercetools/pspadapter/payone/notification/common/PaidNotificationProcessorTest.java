@@ -118,7 +118,7 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
     public void orderServiceIsNotCalledWhenIsUpdateOrderPaymentStateFalse() throws Exception {
         // this test is similar to #processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccess(),
         // but #isUpdateOrderPaymentState() is false, so update order actions should be skipped
-        when(serviceConfig.isUpdateOrderPaymentState()).thenReturn(false);
+        when(tenantConfig.isUpdateOrderPaymentState()).thenReturn(false);
 
         processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccessWireframe();
         verifyUpdateOrderActionsNotCalled();

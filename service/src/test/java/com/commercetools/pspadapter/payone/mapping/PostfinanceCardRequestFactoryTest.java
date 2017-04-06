@@ -1,11 +1,11 @@
 package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
+import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
@@ -36,15 +36,15 @@ public class PostfinanceCardRequestFactoryTest {
     private BankTransferWithoutIbanBicRequestFactory factory;
 
     @Mock
-    private PropertyProvider propertyProvider;
+    private TenantPropertyProvider tenantPropertyProvider;
 
     @Test
     public void createFullAuthorizationRequestFromValidPayment() throws Exception {
 
-        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyVal"));
-        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
+        when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyVal"));
+        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
 
-        PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
+        PayoneConfig payoneConfig = new PayoneConfig(tenantPropertyProvider);
         factory = new BankTransferWithoutIbanBicRequestFactory(payoneConfig);
 
 

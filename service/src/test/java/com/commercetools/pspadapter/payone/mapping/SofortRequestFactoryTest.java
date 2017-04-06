@@ -1,12 +1,12 @@
 package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
+import com.commercetools.pspadapter.tenant.TenantConfig;
+import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
@@ -36,19 +36,19 @@ public class SofortRequestFactoryTest {
     private SofortBankTransferRequestFactory factory;
 
     @Mock
-    private PropertyProvider propertyProvider;
+    private TenantPropertyProvider tenantPropertyProvider;
 
     @Test
     public void createFullAuthorizationRequestFromValidPayment() throws Exception {
 
-        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyVal"));
-        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
+        when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyVal"));
+        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
         //clear secure key to force unencrypted data
-        when(propertyProvider.getProperty(PropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
+        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
 
-        PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider, payoneConfig);
-        factory = new SofortBankTransferRequestFactory(serviceConfig.getPayoneConfig(), serviceConfig.getSecureKey());
+        PayoneConfig payoneConfig = new PayoneConfig(tenantPropertyProvider);
+        TenantConfig tenantConfig = new TenantConfig(tenantPropertyProvider, payoneConfig);
+        factory = new SofortBankTransferRequestFactory(payoneConfig, tenantConfig.getSecureKey());
 
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroPNT();
@@ -131,12 +131,12 @@ public class SofortRequestFactoryTest {
     @Test
     public void createFullAuthorizationRequestFromValidPaymentWithEncryptedBankData() throws Exception {
 
-        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyValue"));
-        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyValue");
+        when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyValue"));
+        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyValue");
 
-        PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider, payoneConfig);
-        factory = new SofortBankTransferRequestFactory(serviceConfig.getPayoneConfig(), serviceConfig.getSecureKey());
+        PayoneConfig payoneConfig = new PayoneConfig(tenantPropertyProvider);
+        TenantConfig tenantConfig = new TenantConfig(tenantPropertyProvider, payoneConfig);
+        factory = new SofortBankTransferRequestFactory(tenantConfig.getPayoneConfig(), tenantConfig.getSecureKey());
 
         final String testIban = "DE012345";
         final String testBic = "NOLADE0";

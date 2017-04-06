@@ -1,11 +1,11 @@
 package com.commercetools.pspadapter.payone.notification;
 
-import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
+import com.commercetools.pspadapter.tenant.TenantFactory;
+import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import com.commercetools.service.PaymentServiceImpl;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
@@ -41,13 +41,13 @@ public class NotificationDispatcherTest {
     private static final String dummyInterfaceId = "123";
 
     @Mock
-    private ServiceFactory serviceFactory;
+    private TenantFactory tenantFactory;
 
     @Mock
     private PaymentServiceImpl paymentServiceImpl;
 
     @Mock
-    private PropertyProvider propertyProvider;
+    private TenantPropertyProvider tenantPropertyProvider;
 
     @Mock
     private NotificationProcessor defaultNotificationProcessor;
@@ -63,8 +63,8 @@ public class NotificationDispatcherTest {
 
     @Before
     public void setUp() throws Exception {
-        when(serviceFactory.getPayoneInterfaceName()).thenReturn(PAYONE);
-        when(serviceFactory.getPaymentService()).thenReturn(paymentServiceImpl);
+        when(tenantFactory.getPayoneInterfaceName()).thenReturn(PAYONE);
+        when(tenantFactory.getPaymentService()).thenReturn(paymentServiceImpl);
 
         when(paymentServiceImpl.getByPaymentMethodAndInterfaceId(anyString(), anyString()))
                 .then(a -> {
@@ -92,10 +92,10 @@ public class NotificationDispatcherTest {
                 a -> CompletableFuture.completedFuture(testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head().get())
         );
 
-        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyConfigValue"));
-        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyConfigValue");
+        when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyConfigValue"));
+        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyConfigValue");
 
-        config = new PayoneConfig(propertyProvider);
+        config = new PayoneConfig(tenantPropertyProvider);
 
         processors = ImmutableMap.of(NotificationAction.APPOINTED, specificNotificationProcessor);
     }
@@ -118,7 +118,7 @@ public class NotificationDispatcherTest {
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
         final NotificationDispatcher dispatcher =
-                new NotificationDispatcher(defaultNotificationProcessor, processors, serviceFactory, config);
+                new NotificationDispatcher(defaultNotificationProcessor, processors, tenantFactory, config);
 
         // act
         dispatcher.dispatchNotification(notification);
@@ -147,7 +147,7 @@ public class NotificationDispatcherTest {
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
         final NotificationDispatcher dispatcher =
-                new NotificationDispatcher(defaultNotificationProcessor, processors, serviceFactory, config);
+                new NotificationDispatcher(defaultNotificationProcessor, processors, tenantFactory, config);
 
         doThrow(new ConcurrentModificationException("payment modified concurrently")) // 1st try throws
                 .doNothing() // will succeed from 2nd try on
@@ -173,7 +173,7 @@ public class NotificationDispatcherTest {
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
         final NotificationDispatcher dispatcher =
-                new NotificationDispatcher(defaultNotificationProcessor, processors, serviceFactory, config);
+                new NotificationDispatcher(defaultNotificationProcessor, processors, tenantFactory, config);
 
         // act
         final Throwable throwable = catchThrowable(() -> dispatcher.dispatchNotification(notification));
@@ -204,7 +204,7 @@ public class NotificationDispatcherTest {
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
 
         final NotificationDispatcher dispatcher =
-                new NotificationDispatcher(defaultNotificationProcessor, processors, serviceFactory, config);
+                new NotificationDispatcher(defaultNotificationProcessor, processors, tenantFactory, config);
 
         // act
         dispatcher.dispatchNotification(notification);

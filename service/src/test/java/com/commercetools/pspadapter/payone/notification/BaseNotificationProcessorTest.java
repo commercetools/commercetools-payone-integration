@@ -1,9 +1,9 @@
 package com.commercetools.pspadapter.payone.notification;
 
-import com.commercetools.pspadapter.payone.ServiceFactory;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.mapping.order.PaymentToOrderStateMapper;
+import com.commercetools.pspadapter.tenant.TenantConfig;
+import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.commercetools.service.OrderService;
 import com.commercetools.service.PaymentService;
 import io.sphere.sdk.commands.UpdateAction;
@@ -21,10 +21,10 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class BaseNotificationProcessorTest {
     @Mock
@@ -37,10 +37,10 @@ public class BaseNotificationProcessorTest {
     protected PaymentToOrderStateMapper paymentToOrderStateMapper;
 
     @Mock
-    protected ServiceFactory serviceFactory;
+    protected TenantFactory tenantFactory;
 
     @Mock
-    protected ServiceConfig serviceConfig;
+    protected TenantConfig tenantConfig;
 
     @Mock
     protected Order orderToUpdate;
@@ -60,19 +60,19 @@ public class BaseNotificationProcessorTest {
 
     @Before
     public void setUp() throws Exception {
-        when(serviceFactory.getPaymentService()).thenReturn(paymentService);
+        when(tenantFactory.getPaymentService()).thenReturn(paymentService);
         when(paymentService.updatePayment(any(Payment.class), anyObject()))
                 .then(answer -> CompletableFuture.completedFuture(answer.getArgumentAt(0, Payment.class)));
 
-        when(serviceFactory.getOrderService()).thenReturn(orderService);
+        when(tenantFactory.getOrderService()).thenReturn(orderService);
         when(orderService.getOrderByPaymentId(anyString()))
                 .then(answer -> CompletableFuture.completedFuture(Optional.of(orderToUpdate)));
         when(orderService.updateOrderPaymentState(any(Order.class), any(PaymentState.class)))
                 .then(answer -> CompletableFuture.completedFuture(orderUpdated));
 
-        when(serviceFactory.getPaymentToOrderStateMapper()).thenReturn(paymentToOrderStateMapper);
+        when(tenantFactory.getPaymentToOrderStateMapper()).thenReturn(paymentToOrderStateMapper);
 
-        when(serviceConfig.isUpdateOrderPaymentState()).thenReturn(true);
+        when(tenantConfig.isUpdateOrderPaymentState()).thenReturn(true);
     }
 
     protected List<? extends UpdateAction<Payment>> updatePaymentAndGetUpdateActions(Payment payment) {

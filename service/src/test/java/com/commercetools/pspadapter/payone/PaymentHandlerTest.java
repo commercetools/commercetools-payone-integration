@@ -1,7 +1,6 @@
 package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
-import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
 import io.sphere.sdk.carts.Cart;
@@ -33,7 +32,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Jan Wolter
  */
-public class IntegrationServiceTest
+public class PaymentHandlerTest
 {
     private static final Cart UNUSED_CART = null;
 
@@ -44,8 +43,8 @@ public class IntegrationServiceTest
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
-    @Mock
-    private CustomTypeBuilder customTypeBuilder;
+//    @Mock
+//    private CustomTypeBuilder customTypeBuilder;
 
     @Mock
     private CommercetoolsQueryExecutor commercetoolsQueryExecutor;
@@ -56,12 +55,12 @@ public class IntegrationServiceTest
     @Mock
     private Payment payment;
 
-    private IntegrationService testee;
+    private PaymentHandler testee;
 
     @Before
     public void setUp() throws IOException {
         // the last argument in the constructor is a String, that's why we can't use @InjectMocks for this instantiation
-        testee = new IntegrationService(customTypeBuilder, commercetoolsQueryExecutor, paymentDispatcher, null, payonePaymentMethodInfo.getPaymentInterface());
+        testee = new PaymentHandler("TestIntegrationServicePaymentMethodName", "testTenantName", commercetoolsQueryExecutor, paymentDispatcher);
 
         when(payment.getVersion()).thenReturn(1L);
         when(payment.getPaymentMethodInfo()).thenReturn(payonePaymentMethodInfo);
