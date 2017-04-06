@@ -4,6 +4,7 @@ import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
+import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -83,6 +84,8 @@ public abstract class BaseFixture {
 
     protected static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
+    private static final String CT_PAYONE_INTEGRATION_URL = "CT_PAYONE_INTEGRATION_URL";
+
     private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
     private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_3DS";
     private static final String TEST_DATA_3_DS_PASSWORD = "TEST_DATA_3_DS_PASSWORD";
@@ -114,13 +117,13 @@ public abstract class BaseFixture {
     static public void initializeCommercetoolsClient() throws MalformedURLException {
         final PropertyProvider propertyProvider = new PropertyProvider();
         ctPayoneIntegrationBaseUrl =
-                new URL(propertyProvider.getMandatoryNonEmptyProperty("CT_PAYONE_INTEGRATION_URL"));
+                new URL(propertyProvider.getMandatoryNonEmptyProperty(CT_PAYONE_INTEGRATION_URL));
 
         ctpClient = BlockingSphereClient.of(
                 SphereClientFactory.of().createClient(
-                        propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY),
-                        propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID),
-                        propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET)),
+                        propertyProvider.getMandatoryNonEmptyProperty(TenantPropertyProvider.CT_PROJECT_KEY),
+                        propertyProvider.getMandatoryNonEmptyProperty(TenantPropertyProvider.CT_CLIENT_ID),
+                        propertyProvider.getMandatoryNonEmptyProperty(TenantPropertyProvider.CT_CLIENT_SECRET)),
                 CTP_REQUEST_TIMEOUT
         );
 
