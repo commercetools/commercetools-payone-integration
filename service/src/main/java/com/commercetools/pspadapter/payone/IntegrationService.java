@@ -97,7 +97,7 @@ public class IntegrationService {
                 // Any other unexpected error.
                 LOG.error("Payone notification handling error. Request body: {}", req.body(), e);
                 res.status(400);
-                return e.getMessage();
+                return "Payone notification handling error. See the logs. Requested body: " + req.body();
             }
             res.status(200);
             return "TSOK";
