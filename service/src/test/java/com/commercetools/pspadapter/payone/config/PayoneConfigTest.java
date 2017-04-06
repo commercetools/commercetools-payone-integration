@@ -23,16 +23,27 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class PayoneConfigTest {
 
-    private static final String dummyValue = "123";
+    private static final IllegalStateException illegalStateException = new IllegalStateException();
+
+    private static final String commonDummyValue = "123";
+
+    private static final String tenantDummyValue = "456";
 
     @Mock
     private TenantPropertyProvider tenantPropertyProvider;
 
+    @Mock
+    private PropertyProvider propertyProvider;
+
     @Before
     public void setUp() {
-        when(tenantPropertyProvider.getTenantProperty(anyString())).thenReturn(Optional.of(dummyValue));
-        when(tenantPropertyProvider.getTenantProperty(PropertyProvider.PAYONE_API_URL)).thenReturn(Optional.of("http://te.st"));
-        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(anyString())).thenReturn(dummyValue);
+        when(propertyProvider.getProperty(anyString())).thenReturn(Optional.of(commonDummyValue));
+        when(propertyProvider.getProperty(PropertyProvider.PAYONE_API_URL)).thenReturn(Optional.of("http://te.st"));
+        when(propertyProvider.getMandatoryNonEmptyProperty(anyString())).thenReturn(commonDummyValue);
+
+        when(tenantPropertyProvider.getPropertyProvider()).thenReturn(propertyProvider);
+        when(tenantPropertyProvider.getTenantProperty(anyString())).thenReturn(Optional.of(tenantDummyValue));
+        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(anyString())).thenReturn(tenantDummyValue);
     }
 
     @Test
@@ -43,7 +54,7 @@ public class PayoneConfigTest {
 
     @Test
     public void throwsInCaseOfMissingSubAccountId() {
-        assertThatThrowsInCaseOfMissingOrEmptyProperty(TenantPropertyProvider.PAYONE_SUBACC_ID);
+        assertThatThrowsInCaseOfMissingOrEmptyTenantProperty(TenantPropertyProvider.PAYONE_SUBACC_ID);
     }
 
     @Test
@@ -54,7 +65,7 @@ public class PayoneConfigTest {
 
     @Test
     public void throwsInCaseOfMissingMerchantId() {
-        assertThatThrowsInCaseOfMissingOrEmptyProperty(TenantPropertyProvider.PAYONE_MERCHANT_ID);
+        assertThatThrowsInCaseOfMissingOrEmptyTenantProperty(TenantPropertyProvider.PAYONE_MERCHANT_ID);
     }
 
     @Test
@@ -66,7 +77,7 @@ public class PayoneConfigTest {
 
     @Test
     public void throwsInCaseOfMissingKey() {
-        assertThatThrowsInCaseOfMissingOrEmptyProperty(TenantPropertyProvider.PAYONE_KEY);
+        assertThatThrowsInCaseOfMissingOrEmptyTenantProperty(TenantPropertyProvider.PAYONE_KEY);
     }
 
     @Test
@@ -77,7 +88,7 @@ public class PayoneConfigTest {
 
     @Test
     public void throwsInCaseOfMissingPortalId() {
-        assertThatThrowsInCaseOfMissingOrEmptyProperty(TenantPropertyProvider.PAYONE_PORTAL_ID);
+        assertThatThrowsInCaseOfMissingOrEmptyTenantProperty(TenantPropertyProvider.PAYONE_PORTAL_ID);
     }
 
     @Test
@@ -95,7 +106,7 @@ public class PayoneConfigTest {
 
     @Test
     public void getsApiVersion() {
-        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(PropertyProvider.PAYONE_API_VERSION)).thenReturn("v1.0");
+        when(propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_API_VERSION)).thenReturn("v1.0");
         assertThat(new PayoneConfig(tenantPropertyProvider).getApiVersion()).isEqualTo("v1.0");
     }
 
@@ -106,35 +117,41 @@ public class PayoneConfigTest {
 
     @Test
     public void getsEncoding() {
-        when(tenantPropertyProvider.getTenantProperty(PropertyProvider.PAYONE_REQUEST_ENCODING)).thenReturn(Optional.of("ISO 8859-1"));
+        when(propertyProvider.getProperty(PropertyProvider.PAYONE_REQUEST_ENCODING)).thenReturn(Optional.of("ISO 8859-1"));
         assertThat(new PayoneConfig(tenantPropertyProvider).getEncoding()).isEqualTo("ISO 8859-1");
     }
 
     @Test
     public void defaultsToTestInCaseOfMissingEncoding() {
-        when(tenantPropertyProvider.getTenantProperty(PropertyProvider.PAYONE_REQUEST_ENCODING)).thenReturn(Optional.empty());
+        when(propertyProvider.getProperty(PropertyProvider.PAYONE_REQUEST_ENCODING)).thenReturn(Optional.empty());
         assertThat(new PayoneConfig(tenantPropertyProvider).getEncoding()).isEqualTo(PayoneConfig.DEFAULT_PAYONE_REQUEST_ENCODING);
         assertThat(PayoneConfig.DEFAULT_PAYONE_REQUEST_ENCODING).isEqualTo("UTF-8");
     }
 
     @Test
     public void getsPayoneApiUrl() {
-        when(tenantPropertyProvider.getTenantProperty(PropertyProvider.PAYONE_API_URL)).thenReturn(Optional.of("http://he.re/we/go"));
+        when(propertyProvider.getProperty(PropertyProvider.PAYONE_API_URL)).thenReturn(Optional.of("http://he.re/we/go"));
         assertThat(new PayoneConfig(tenantPropertyProvider).getApiUrl()).isEqualTo("http://he.re/we/go");
     }
 
     @Test
     public void defaultsToPayoneUrlInCaseOfMissingApiUrl() {
-        when(tenantPropertyProvider.getTenantProperty(PropertyProvider.PAYONE_API_URL)).thenReturn(Optional.empty());
+        when(propertyProvider.getProperty(PropertyProvider.PAYONE_API_URL)).thenReturn(Optional.empty());
         assertThat(new PayoneConfig(tenantPropertyProvider).getApiUrl()).isEqualTo(PayoneConfig.DEFAULT_PAYONE_API_URL);
     }
 
     private void assertThatThrowsInCaseOfMissingOrEmptyProperty(final String propertyName) {
-        final IllegalStateException illegalStateException = new IllegalStateException();
+        when(propertyProvider.getMandatoryNonEmptyProperty(propertyName)).thenThrow(illegalStateException);
+        assertThatThrows();
+    }
+
+    private void assertThatThrowsInCaseOfMissingOrEmptyTenantProperty(final String propertyName) {
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(propertyName)).thenThrow(illegalStateException);
+        assertThatThrows();
+    }
 
+    private void assertThatThrows() {
         final Throwable throwable = catchThrowable(() -> new PayoneConfig(tenantPropertyProvider));
-
         assertThat(throwable).isSameAs(illegalStateException);
     }
 }

@@ -36,33 +36,6 @@ public class ServiceConfigTest {
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(anyString())).thenReturn(dummyValue);
     }
 
-    @Test
-    public void getsCtProjectKey() {
-        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.CT_PROJECT_KEY)).thenReturn("project X");
-        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getSphereClientConfig().getProjectKey()).isEqualTo("project X");
-    }
-
-    @Test
-    public void throwsInCaseOfMissingCtProjectKey() {
-        assertThatThrowsInCaseOfMissingOrEmptyProperty(TenantPropertyProvider.CT_PROJECT_KEY);
-    }
-
-    @Test
-    public void getsCtClientId() {
-        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.CT_CLIENT_ID)).thenReturn("id X");
-        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getSphereClientConfig().getClientId()).isEqualTo("id X");
-    }
-
-    @Test
-    public void throwsInCaseOfMissingCtClientId() {
-        assertThatThrowsInCaseOfMissingOrEmptyProperty(TenantPropertyProvider.CT_CLIENT_ID);
-    }
-
-    @Test
-    public void getsCtClientSecret() {
-        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.CT_CLIENT_SECRET)).thenReturn("secret X");
-        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getSphereClientConfig().getClientSecret()).isEqualTo("secret X");
-    }
 
     @Test
     public void getsScheduledJobCronForShortTimeFramePoll() {
@@ -104,38 +77,5 @@ public class ServiceConfigTest {
 //                .isEqualTo("5 0 0/1 * * ? *");
     }
 
-    @Test
-    public void throwsInCaseOfMissingCtClientSecret() {
-        assertThatThrowsInCaseOfMissingOrEmptyProperty(TenantPropertyProvider.CT_CLIENT_SECRET);
-    }
 
-    @Test
-    public void getsIsUpdateOrderPaymentState() {
-        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("true"));
-        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).isUpdateOrderPaymentState()).isEqualTo(true);
-
-        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("TRUE"));
-        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).isUpdateOrderPaymentState()).isEqualTo(true);
-
-        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("false"));
-        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).isUpdateOrderPaymentState()).isEqualTo(false);
-
-        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of("FALSE"));
-        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).isUpdateOrderPaymentState()).isEqualTo(false);
-
-        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.of(""));
-        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).isUpdateOrderPaymentState()).isEqualTo(false);
-
-        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.UPDATE_ORDER_PAYMENT_STATE)).thenReturn(Optional.empty());
-        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).isUpdateOrderPaymentState()).isEqualTo(false);
-    }
-
-    private void assertThatThrowsInCaseOfMissingOrEmptyProperty(final String propertyName) {
-        final IllegalStateException illegalStateException = new IllegalStateException();
-        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(propertyName)).thenThrow(illegalStateException);
-
-        final Throwable throwable = catchThrowable(() -> new TenantConfig(tenantPropertyProvider, payoneConfig));
-
-        assertThat(throwable).isSameAs(illegalStateException);
-    }
 }
