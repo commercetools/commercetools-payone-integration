@@ -1,7 +1,5 @@
 package com.commercetools.pspadapter.payone.config;
 
-import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
-import io.sphere.sdk.orders.Order;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -30,7 +28,7 @@ public class ServiceConfig {
      * @param propertyProvider to get the parameters from
      * @throws IllegalStateException if a mandatory parameter is undefined or empty
      */
-    public ServiceConfig(final PropertyProvider propertyProvider/*, final PayoneConfig payoneConfig*/) {
+    public ServiceConfig(final PropertyProvider propertyProvider) {
 
         this.tenants = getMandatoryTenantNames(propertyProvider);
 
