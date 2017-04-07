@@ -8,6 +8,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobDetail;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,6 +26,8 @@ public class ScheduledJobFactoryTest {
 
     private ScheduledJobFactory scheduledJobFactory;
 
+    private static Logger LOG = LoggerFactory.getLogger(ScheduledJobFactoryTest.class);
+
     @Before
     public void setUp() throws Exception {
         scheduledJobFactory = new ScheduledJobFactory();
@@ -34,24 +38,28 @@ public class ScheduledJobFactoryTest {
         scheduledJobFactory.shutdown(false);
     }
 
-    @Test(timeout=70000)
-    public void jobIsExecuted4TimesInMinute() throws Exception {
+    @Test(timeout=40000)
+    public void jobIsExecuted3TimesIn30Second() throws Exception {
         when(integrationService.getTenantFactories()).thenReturn(Collections.emptyList());
 
-        // schedule to execute every 15 seconds and wait 60 seconds
+        // schedule to execute every 10 seconds and wait about 30 seconds
         JobDetail scheduledJob = scheduledJobFactory.createScheduledJob(
-                CronScheduleBuilder.cronSchedule("0/15 * * * * ? *"),
+                CronScheduleBuilder.cronSchedule("0/10 * * * * ? *"),
                 ScheduledJobShortTimeframe.class,
                 integrationService);
 
-        Thread.sleep(62000); // +2 second gap to avoid the test fail on short time lags
+        LOG.info("Wait 30 seconds to allow the job execute");
 
-        // verify the job called integrationService.getTenantFactories() 4 or 5 times in 1 minute
-        verify(integrationService, atLeast(4)).getTenantFactories();
+        Thread.sleep(32000); // +2 second gap to avoid the test fail on short time lags
 
-        // 5 times is possible when the job is started at 14, 29, 44 or 59 seconds,
-        // then 2 seconds gap above will make one additional overlap on 15, 30, 45 or 00 seconds
-        verify(integrationService, atMost(5)).getTenantFactories();
+        LOG.info("Waited 30 seconds");
+
+        // verify the job called integrationService.getTenantFactories() 3 or 4 times in 30 seconds
+        verify(integrationService, atLeast(3)).getTenantFactories();
+
+        // 4 times is possible when the job is started at 09, 19, ..., 59 seconds,
+        // then 2 seconds gap above will make one additional overlapped call at 40, 50, ..., 30 seconds
+        verify(integrationService, atMost(4)).getTenantFactories();
 
         scheduledJobFactory.deleteScheduledJob(scheduledJob.getKey());
     }
@@ -79,11 +87,12 @@ public class ScheduledJobFactoryTest {
             }
         });
 
-        // wait at most DELAY_START_IN_SECONDS to start 2 scheduled jobs
+        final int waitTimeout = DELAY_START_IN_SECONDS + 1;
+        LOG.info("Wait at most {} to start 2 scheduled jobs", waitTimeout);
         while (!allJobsRun.get()) {
             // +1 second to avoid lags effect
             synchronized (this) {
-                this.wait((DELAY_START_IN_SECONDS + 1) * 1000);
+                this.wait((waitTimeout) * 1000);
             }
         }
 
