@@ -1,6 +1,5 @@
 package com.commercetools.pspadapter.payone;
 
-import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.listeners.SchedulerListenerSupport;
@@ -48,12 +47,10 @@ public class ScheduledJobFactory {
     public void createScheduledJob(
             final CronScheduleBuilder cronScheduleBuilder,
             final Class<? extends ScheduledJob> jobClass,
-            final CommercetoolsQueryExecutor commercetoolsQueryExecutor,
-            final PaymentDispatcher paymentDispatcher) throws SchedulerException {
+            final IntegrationService integrationService) throws SchedulerException {
 
         JobDataMap dataMap = new JobDataMap();
-        dataMap.put(ScheduledJob.COMMERCETOOLS_QUERY_EXECUTOR, commercetoolsQueryExecutor);
-        dataMap.put(ScheduledJob.DISPATCHER_KEY, paymentDispatcher);
+        dataMap.put(ScheduledJob.INTEGRATION_SERVICE, integrationService);
 
         Trigger trigger = TriggerBuilder
                 .newTrigger()

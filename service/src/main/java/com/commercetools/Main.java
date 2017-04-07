@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 
+import static java.lang.String.format;
+
 public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
@@ -20,19 +22,14 @@ public class Main {
         final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
 
         final IntegrationService integrationService = ServiceFactory.createIntegrationService(propertyProvider, serviceConfig);
-
         integrationService.start();
-
-        LOG.error("SCHEDULERS ARE NOT STARTED");
-
-        // TODO: finalize schedulers
 
         ScheduledJobFactory scheduledJobFactory = new ScheduledJobFactory();
 
-//        scheduledJobFactory.setAllScheduledItemsStartedListener(() ->
-//                LOG.info(format("%n%1$s%nPayone Integration Service is STARTED%n%1$s",
-//                "============================================================"))
-//        );
+        scheduledJobFactory.setAllScheduledItemsStartedListener(() ->
+                LOG.info(format("%n%1$s%nPayone Integration Service is STARTED%n%1$s",
+                "============================================================"))
+        );
 
         scheduledJobFactory.createScheduledJob(
                 CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForShortTimeFramePoll()),

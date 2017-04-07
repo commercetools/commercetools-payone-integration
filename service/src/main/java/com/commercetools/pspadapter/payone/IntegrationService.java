@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import spark.Spark;
 import spark.utils.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,6 +35,13 @@ public class IntegrationService {
         }
 
         this.tenantFactories = tenantFactories;
+    }
+
+    /**
+     * @return Unmodifiable view of tenant factories list which are used for the service run.
+     */
+    public List<TenantFactory> getTenantFactories() {
+        return Collections.unmodifiableList(tenantFactories);
     }
 
     public void start() {
