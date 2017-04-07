@@ -75,7 +75,7 @@ public class ScheduledJobTest {
         job.execute(jobExecutionContext);
 
         // verify the job called consumePaymentCreatedMessages and consumePaymentTransactionAddedMessages
-        // for both tenant executors called from factories
+        // for both tenant executors called from factories with expected zonedDateTime
 
         verify(commercetoolsQueryExecutorOne).consumePaymentCreatedMessages(eq(zonedDateTime), any());
         verify(commercetoolsQueryExecutorOne).consumePaymentTransactionAddedMessages(eq(zonedDateTime), any());

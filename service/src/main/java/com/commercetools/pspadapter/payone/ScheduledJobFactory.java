@@ -18,7 +18,7 @@ public class ScheduledJobFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(IntegrationService.class);
 
-    private static final int DELAY_START_IN_SECONDS = 5;
+    static final int DELAY_START_IN_SECONDS = 5;
 
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
@@ -44,7 +44,7 @@ public class ScheduledJobFactory {
         scheduler = new StdSchedulerFactory().getScheduler();
     }
 
-    public void createScheduledJob(
+    public JobDetail createScheduledJob(
             final CronScheduleBuilder cronScheduleBuilder,
             final Class<? extends ScheduledJob> jobClass,
             final IntegrationService integrationService) throws SchedulerException {
@@ -61,9 +61,12 @@ public class ScheduledJobFactory {
         scheduledItemsCount++;
         scheduler.startDelayed(DELAY_START_IN_SECONDS);
 
-        Date date = scheduler.scheduleJob(JobBuilder.newJob(jobClass).build(), trigger);
+        JobDetail jobDetail = JobBuilder.newJob(jobClass).build();
+        Date date = scheduler.scheduleJob(jobDetail, trigger);
 
         LOG.info("Starting scheduled job '{}' at {}", jobClass.getSimpleName(), DATE_FORMATTER.format(date));
+
+        return jobDetail;
     }
 
     /**
@@ -82,6 +85,20 @@ public class ScheduledJobFactory {
             scheduler.getListenerManager().removeSchedulerListener(schedulerStartedListener);
             schedulerStartedListener = null;
         }
+    }
+
+    /**
+     * So far expected to be used only in the tests.
+     */
+    void shutdown(boolean waitForJobsToComplete) throws SchedulerException {
+        scheduler.shutdown(waitForJobsToComplete);
+    }
+
+    /**
+     * So far expected to be used only in the tests.
+     */
+    boolean deleteScheduledJob(JobKey jobKey) throws SchedulerException {
+        return scheduler.deleteJob(jobKey);
     }
 
     /**
