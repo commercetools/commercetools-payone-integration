@@ -60,6 +60,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.DOTALL;
 
@@ -86,6 +87,7 @@ public abstract class BaseFixture {
 
     private static final String CT_PAYONE_INTEGRATION_URL = "CT_PAYONE_INTEGRATION_URL";
 
+    private static final String TEST_DATA_TENANT_NAME = "TEST_DATA_TENANT_NAME";
     private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
     private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_3DS";
     private static final String TEST_DATA_3_DS_PASSWORD = "TEST_DATA_3_DS_PASSWORD";
@@ -131,11 +133,11 @@ public abstract class BaseFixture {
     }
 
     public String getHandlePaymentUrl(final String paymentId) throws MalformedURLException {
-        return getServiceUrl("/commercetools/handle/payments/" + paymentId);
+        return getServiceUrl(format("/%s/commercetools/handle/payments/%s", getTenantName(), paymentId));
     }
 
     public String getNotificationUrl() throws MalformedURLException {
-        return getServiceUrl("/payone/notification");
+        return getServiceUrl(format("/%s/payone/notification", getTenantName()));
     }
 
     public String getHealthUrl() throws MalformedURLException {
@@ -169,7 +171,7 @@ public abstract class BaseFixture {
             return sysProperty;
         }
 
-        throw new RuntimeException(String.format(
+        throw new RuntimeException(format(
                 "Environment variable required for configuration must not be null or empty: %s",
                 configParameterName));
     }
@@ -316,10 +318,14 @@ public abstract class BaseFixture {
         Matcher m = p.matcher(cardPanResponse);
 
         if (!m.matches()) {
-          throw new RuntimeException(String.format("Unexpected pseudocardpan response: %s", cardPanResponse));
+          throw new RuntimeException(format("Unexpected pseudocardpan response: %s", cardPanResponse));
         }
 
         return m.group(1);
+    }
+
+    private static String getTenantName() {
+        return getConfigurationParameter(TEST_DATA_TENANT_NAME);
     }
 
     private static String getTestDataVisaCreditCardNo3Ds() {
@@ -430,11 +436,11 @@ public abstract class BaseFixture {
 
     protected void registerPaymentWithLegibleName(final String paymentName, final Payment payment) {
         Preconditions.checkState(!payments.containsKey(paymentName),
-                String.format("Legible payment name '%s' already in use for ID '%s'.",
+                format("Legible payment name '%s' already in use for ID '%s'.",
                         paymentName, payments.get(paymentName)));
 
         Preconditions.checkState(!payments.containsValue(payment.getId()),
-                String.format("Payment with ID '%s' already known as '%s' instead of '%s'",
+                format("Payment with ID '%s' already known as '%s' instead of '%s'",
                         payment.getId(), payments.inverse().get(payment.getId()), paymentName));
 
         payments.put(paymentName, payment.getId());
@@ -442,7 +448,7 @@ public abstract class BaseFixture {
 
     protected HttpResponse requestToHandlePaymentByLegibleName(final String paymentName) throws IOException {
         Preconditions.checkState(payments.containsKey(paymentName),
-                String.format("Legible payment name '%s' not mapped to any payment ID.", paymentName));
+                format("Legible payment name '%s' not mapped to any payment ID.", paymentName));
 
         return Request.Get(getHandlePaymentUrl(payments.get(paymentName)))
                 .connectTimeout(INTEGRATION_SERVICE_REQUEST_TIMEOUT)
