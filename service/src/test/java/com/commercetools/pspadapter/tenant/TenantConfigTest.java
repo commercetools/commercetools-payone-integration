@@ -110,7 +110,11 @@ public class TenantConfigTest {
         when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.CT_START_FROM_SCRATCH)).thenReturn(Optional.of("FALSE"));
         assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getStartFromScratch()).isEqualTo(false);
 
+        // It's important that this property is FALSE by default!!!
         when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.CT_START_FROM_SCRATCH)).thenReturn(Optional.of(""));
+        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getStartFromScratch()).isEqualTo(false);
+
+        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.CT_START_FROM_SCRATCH)).thenReturn(Optional.of("some-unexpected-value"));
         assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getStartFromScratch()).isEqualTo(false);
 
         when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.CT_START_FROM_SCRATCH)).thenReturn(Optional.empty());
