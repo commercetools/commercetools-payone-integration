@@ -10,7 +10,7 @@ public class NotificationResponseFixture extends BasePaymentFixture {
 
     public int handleEmptyNotificationResponse() throws Exception {
         final HttpResponse httpResponse = Request.Post(getNotificationUrl())
-                .connectTimeout(200)
+                .connectTimeout(SIMPLE_REQUEST_TIMEOUT)
                 .execute()
                 .returnResponse();
 

@@ -13,7 +13,7 @@ public class ResponseForBadPaymentsFixture extends BasePaymentFixture {
 
     public int handleBadPaymentResponses(String paymentId) throws Exception {
         return Request.Get(getHandlePaymentUrl(paymentId))
-                .connectTimeout(200)
+                .connectTimeout(SIMPLE_REQUEST_TIMEOUT)
                 .execute()
                 .returnResponse()
                 .getStatusLine()

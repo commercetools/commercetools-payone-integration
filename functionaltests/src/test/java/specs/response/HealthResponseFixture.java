@@ -21,7 +21,7 @@ public class HealthResponseFixture extends BasePaymentFixture {
 
     public MultiValueResult handleHealthResponse() throws Exception {
         final HttpResponse httpResponse = Request.Get(getHealthUrl())
-                .connectTimeout(INTEGRATION_SERVICE_REQUEST_TIMEOUT)
+                .connectTimeout(SIMPLE_REQUEST_TIMEOUT)
                 .execute()
                 .returnResponse();
 

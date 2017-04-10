@@ -78,8 +78,11 @@ public abstract class BaseFixture {
     protected static final long RETRY_DELAY = TimeUnit.SECONDS.toMillis(15);
     protected static final long INTERMEDIATE_REPORT_DELAY = TimeUnit.MINUTES.toMillis(3);
 
-    // looks like heroku may have some lags, so we use 15 seconds to avoid false test fails because of timeouts
-    protected static final int INTEGRATION_SERVICE_REQUEST_TIMEOUT = 15000;
+    // looks like heroku may have some lags, so we use 10 seconds to avoid false test fails because of timeouts
+    protected static final int REQUEST_TIMEOUT = 10000;
+
+    // timeout for simple requests, like health or malformed id, where heavy processing is not expected
+    protected static final int SIMPLE_REQUEST_TIMEOUT = 2000;
 
     protected static final Duration CTP_REQUEST_TIMEOUT = Duration.ofMinutes(2);
 
@@ -155,7 +158,7 @@ public abstract class BaseFixture {
 
     public HttpResponse sendGetRequestToUrl(final String url) throws IOException {
         return Request.Get(url)
-                .connectTimeout(INTEGRATION_SERVICE_REQUEST_TIMEOUT)
+                .connectTimeout(REQUEST_TIMEOUT)
                 .execute()
                 .returnResponse();
     }
@@ -451,7 +454,7 @@ public abstract class BaseFixture {
                 format("Legible payment name '%s' not mapped to any payment ID.", paymentName));
 
         return Request.Get(getHandlePaymentUrl(payments.get(paymentName)))
-                .connectTimeout(INTEGRATION_SERVICE_REQUEST_TIMEOUT)
+                .connectTimeout(REQUEST_TIMEOUT)
                 .execute()
                 .returnResponse();
     }
