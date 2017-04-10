@@ -136,11 +136,19 @@ public abstract class BaseFixture {
     }
 
     public String getHandlePaymentUrl(final String paymentId) throws MalformedURLException {
-        return getServiceUrl(format("/%s/commercetools/handle/payments/%s", getTenantName(), paymentId));
+        return getServiceUrl(getHandlePaymentPath(paymentId));
+    }
+
+    public String getHandlePaymentPath(String paymentId) {
+        return format("/%s/commercetools/handle/payments/%s", getTenantName(), paymentId);
     }
 
     public String getNotificationUrl() throws MalformedURLException {
-        return getServiceUrl(format("/%s/payone/notification", getTenantName()));
+        return getServiceUrl(getNotificationPath());
+    }
+
+    public String getNotificationPath() {
+        return format("/%s/payone/notification", getTenantName());
     }
 
     public String getHealthUrl() throws MalformedURLException {

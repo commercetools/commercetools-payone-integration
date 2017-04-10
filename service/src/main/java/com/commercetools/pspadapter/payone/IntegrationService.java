@@ -85,7 +85,7 @@ public class IntegrationService {
         Spark.get(paymentHandlerUrl, (req, res) -> {
             final PaymentHandleResult paymentHandleResult = paymentHandler.handlePayment(req.params("id"));
             if (!paymentHandleResult.body().isEmpty()) {
-                LOG.debug("--> Result body of handle/payments/{}: {}", req.params("id"), paymentHandleResult.body());
+                LOG.debug("--> Result body of ${getTenantName()}/commercetools/handle/payments/{}: {}", req.params("id"), paymentHandleResult.body());
             }
             res.status(paymentHandleResult.statusCode());
             return res;
