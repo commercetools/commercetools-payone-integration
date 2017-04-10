@@ -63,6 +63,7 @@ public class IntegrationService {
         // It should be expanded to a more real health-checker service, which really performs PAYONE status check.
         // But don't forget, a load balancer may call this URL very often (like 1 per sec),
         // so don't make this request processor heavy, or implement is as independent background service.
+        LOG.info("Register /health URL");
         Spark.get("/health", (req, res) -> {
             res.status(HttpStatusCode.OK_200);
             res.type(ContentType.APPLICATION_JSON.getMimeType());
@@ -79,7 +80,9 @@ public class IntegrationService {
         NotificationDispatcher notificationDispatcher = tenantFactory.getNotificationDispatcher();
 
         // register payment handler URL
-        Spark.get(tenantFactory.getPaymentHandlerUrl(), (req, res) -> {
+        String paymentHandlerUrl = tenantFactory.getPaymentHandlerUrl();
+        LOG.info("Register payment handler URL {}", paymentHandlerUrl);
+        Spark.get(paymentHandlerUrl, (req, res) -> {
             final PaymentHandleResult paymentHandleResult = paymentHandler.handlePayment(req.params("id"));
             if (!paymentHandleResult.body().isEmpty()) {
                 LOG.debug("--> Result body of handle/payments/{}: {}", req.params("id"), paymentHandleResult.body());
@@ -89,7 +92,9 @@ public class IntegrationService {
         }, new HandlePaymentResponseTransformer());
 
         // register Payone notifications URL
-        Spark.post(tenantFactory.getPayoneNotificationUrl(), (req, res) -> {
+        String payoneNotificationUrl = tenantFactory.getPayoneNotificationUrl();
+        LOG.info("Register payone notification URL {}", payoneNotificationUrl);
+        Spark.post(payoneNotificationUrl, (req, res) -> {
             LOG.debug("<- Received POST from Payone: {}", req.body());
             try {
                 final Notification notification = Notification.fromKeyValueString(req.body(), "\r?\n?&");
