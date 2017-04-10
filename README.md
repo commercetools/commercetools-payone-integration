@@ -117,7 +117,7 @@ https://pmi.pay1.de/
    automated testing, demo systems etc.)
  * Set the hashing algorithm to "md5 oder sha2-384 (für Migration)" ("advanced" tab in the portal config)
  * Put the notification listener URL of where you will deploy the microservice into "Transaction Status URL" in the 
-   "advanced" tab of the portal. The value typically is https://{your-service-instance.example.com}/payone/notification .  
+   "advanced" tab of the portal. The value typically is https://{your-service-instance.example.com}/{tenant-name}/payone/notification .  
  * Configure the "riskcheck" settings as intended (esp. 3Dsecure)
 
 > Do not use a merchant account across commercetools projects, you may end up mixing customer accounts (debitorenkonten). 
