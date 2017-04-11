@@ -71,12 +71,21 @@ public class ServiceConfig {
         return scheduledJobCronLongTimeFrame;
     }
 
+    /**
+     * Split comma or semicolon separated list of the tenants names.
+     * <p>
+     * All trailing/leading whitespaces are ignored.
+     * @param propertyProvider property provider which supplies {@link PropertyProvider#TENANTS} value.
+     * @return non-null non-empty list of tenants.
+     * @throws IllegalStateException if the property can't be parsed or the parsed list is empty, or one of the values
+     * is empty (e.g., list of "a, , b").
+     */
     private List<String> getMandatoryTenantNames(PropertyProvider propertyProvider) {
         String tenantsList = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.TENANTS);
         List<String> result = asList(tenantsList.trim().split("\\s*(,|;)\\s*"));
 
         if (result.size() < 1 || result.stream().anyMatch(StringUtils::isBlank)) {
-            throw new IllegalArgumentException(format("Tenants list is invalid, pls check \"%s\" variable",
+            throw new IllegalStateException(format("Tenants list is invalid, pls check \"%s\" variable",
                     PropertyProvider.TENANTS));
         }
 
