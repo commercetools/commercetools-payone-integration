@@ -87,6 +87,8 @@ public abstract class BaseFixture {
 
     protected static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
+    protected static final PropertyProvider propertyProvider = new PropertyProvider();
+
     // Environment variables names
     protected static final String TEST_DATA_CT_PAYONE_INTEGRATION_URL = "TEST_DATA_CT_PAYONE_INTEGRATION_URL";
 
@@ -117,9 +119,9 @@ public abstract class BaseFixture {
      * Only for creation of test data
      */
     private static BlockingSphereClient ctpClient;
+    private static LoadingCache<String, Type> typeCache;
 
     private static URL ctPayoneIntegrationBaseUrl;
-    private static LoadingCache<String, Type> typeCache;
 
     /**
      * maps legible payment names to payment IDs (and vice versa)
@@ -129,7 +131,6 @@ public abstract class BaseFixture {
 
     @BeforeClass
     static public void initializeCommercetoolsClient() throws MalformedURLException {
-        final PropertyProvider propertyProvider = new PropertyProvider();
         ctPayoneIntegrationBaseUrl =
                 new URL(propertyProvider.getMandatoryNonEmptyProperty(TEST_DATA_CT_PAYONE_INTEGRATION_URL));
 
@@ -393,6 +394,10 @@ public abstract class BaseFixture {
         return ctpClient;
     }
 
+    public LoadingCache<String, Type> getTypeCache() {
+        return typeCache;
+    }
+
     /**
      * Gets the latest version of the payment via its legible name - a name that exits only in this test context.
      * @param paymentName legible name of the payment
@@ -421,7 +426,7 @@ public abstract class BaseFixture {
      * @throws ExecutionException if a checked exception was thrown while loading the value.
      */
     protected String typeIdFromTypeName(final String typeName) throws ExecutionException {
-        return typeCache.get(typeName).getId();
+        return getTypeCache().get(typeName).getId();
     }
 
     public String getTransactionStateByPaymentId(final String paymentId, final String transactionId) {
