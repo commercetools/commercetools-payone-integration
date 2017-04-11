@@ -10,10 +10,6 @@ import specs.multitenancy.BaseTenant2Fixture;
 @RunWith(ConcordionRunner.class)
 public class Authorization2Fixture extends BaseTenant2Fixture {
 
-    public String ctProject2Key() {
-        return project2Key;
-    }
-
     public MultiValueResult createPayment(
             final String paymentName,
             final String paymentMethod,

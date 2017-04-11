@@ -17,6 +17,8 @@ import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
+import model.HandlePaymentResult;
+import org.apache.http.HttpResponse;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +65,7 @@ public class BasePaymentFixture extends BaseFixture {
      * @param languageCode 2 letters ISO 639 code
      * @return String id of created payment.
      */
-    protected String createAndSaveCardPayment(String paymentName,
+    protected Payment createAndSaveCardPayment(String paymentName,
                                               String paymentMethod,
                                               String transactionType,
                                               String centAmount,
@@ -82,15 +84,11 @@ public class BasePaymentFixture extends BaseFixture {
                         ImmutableMap.<String, Object>builder()
                                 .put(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, pseudocardpan)
                                 .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, languageCode)
-                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8"))
-                                .put(CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8"))
-                                .put(CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8"))
                                 .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")
                                 .build()))
                 .build();
 
-        Payment payment = createPaymentFromDraft(paymentName, paymentDraft, transactionType);
-        return payment.getId();
+        return createPaymentCartOrderFromDraft(paymentName, paymentDraft, transactionType);
     }
 
     public Payment createAndSavePaypalPayment(
@@ -152,7 +150,7 @@ public class BasePaymentFixture extends BaseFixture {
      * @param transactionType see {@link TransactionType}
      * @return Instance of created and saved payment object
      */
-    protected Payment createPaymentFromDraft(String paymentName, PaymentDraft paymentDraft, String transactionType) {
+    protected Payment createPaymentCartOrderFromDraft(String paymentName, PaymentDraft paymentDraft, String transactionType) {
         final BlockingSphereClient ctpClient = ctpClient();
         final Payment payment = ctpClient.executeBlocking(PaymentCreateCommand.of(paymentDraft));
 
@@ -182,6 +180,7 @@ public class BasePaymentFixture extends BaseFixture {
      */
     protected JsonNode handleJsonResponse(final String paymentName) throws ExecutionException, IOException {
         return handlePaymentByName(paymentName)
+                .getPayment()
                 .getInterfaceInteractions()
                 .stream()
                 .map(customFields -> customFields.getFieldAsString("response"))
@@ -213,11 +212,12 @@ public class BasePaymentFixture extends BaseFixture {
     /**
      * Process payment on Payone service.
      * @param paymentName Previously used unique payment name
-     * @return processed payment object
+     * @return {@link HandlePaymentResult} with HTTP handle response and processed payment object
      */
-    protected Payment handlePaymentByName(final String paymentName) throws ExecutionException, IOException {
-        requestToHandlePaymentByLegibleName(paymentName);
-        return fetchPaymentByLegibleName(paymentName);
+    protected HandlePaymentResult handlePaymentByName(final String paymentName) throws ExecutionException, IOException {
+        HttpResponse httpResponse = requestToHandlePaymentByLegibleName(paymentName);
+        Payment payment = fetchPaymentByLegibleName(paymentName);
+        return new HandlePaymentResult(httpResponse, payment);
     }
 
 }

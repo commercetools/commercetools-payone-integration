@@ -25,7 +25,8 @@ public class I18nPayoneResponseFixture extends BasePaymentFixture {
                                   String currencyCode,
                                   String languageCode) throws Exception {
 
-        return createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, languageCode);
+        return createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, languageCode)
+                .getId();
     }
 
     public Map<String, Object> handleErrorJsonResponse(final String paymentName) throws ExecutionException, IOException {

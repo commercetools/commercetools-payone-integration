@@ -41,6 +41,13 @@ abstract public class BaseTenant2Fixture extends BasePaymentFixture {
         typeCache2 = CacheBuilder.newBuilder().build(new TypeCacheLoader(ctpClient2));
     }
 
+    /**
+     * @return Second tenant project key
+     */
+    public String ctProject2Key() {
+        return project2Key;
+    }
+
     @Override
     protected BlockingSphereClient ctpClient() {
         return ctpClient2;
