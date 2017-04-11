@@ -28,6 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
@@ -90,6 +91,57 @@ public class BasePaymentFixture extends BaseFixture {
 
         Payment payment = createPaymentFromDraft(paymentName, paymentDraft, transactionType);
         return payment.getId();
+    }
+
+    public Payment createAndSavePaypalPayment(
+            final String paymentName,
+            final String paymentMethod,
+            final String transactionType,
+            final String centAmount,
+            final String currencyCode) throws Exception {
+
+        final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
+
+        final String redirectUrl = "https://example.com/paypal_authorization/";
+
+        final String successUrl = redirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8");
+        final String errorUrl = redirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8");
+        final String cancelUrl = redirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8");
+
+        final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
+                .paymentMethodInfo(PaymentMethodInfoBuilder.of()
+                        .method(paymentMethod)
+                        .paymentInterface("PAYONE")
+                        .build())
+                .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
+                        CustomTypeBuilder.PAYMENT_WALLET,
+                        ImmutableMap.<String, Object>builder()
+                                .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage())
+                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, successUrl)
+                                .put(CustomFieldKeys.ERROR_URL_FIELD, errorUrl)
+                                .put(CustomFieldKeys.CANCEL_URL_FIELD, cancelUrl)
+                                .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")
+                                .build()))
+                .build();
+
+        Payment payment = ctpClient().executeBlocking(PaymentCreateCommand.of(paymentDraft));
+        registerPaymentWithLegibleName(paymentName, payment);
+
+        final String orderNumber = createCartAndOrderForPayment(payment, currencyCode);
+
+        ctpClient().executeBlocking(PaymentUpdateCommand.of(
+                payment,
+                ImmutableList.<UpdateActionImpl<Payment>>builder()
+                        .add(AddTransaction.of(TransactionDraftBuilder.of(
+                                TransactionType.valueOf(transactionType),
+                                monetaryAmount,
+                                ZonedDateTime.now())
+                                .state(TransactionState.PENDING)
+                                .build()))
+                        .add(SetCustomField.ofObject(CustomFieldKeys.REFERENCE_FIELD, orderNumber))
+                        .build()));
+
+        return payment;
     }
 
     /**
@@ -163,7 +215,7 @@ public class BasePaymentFixture extends BaseFixture {
      * @param paymentName Previously used unique payment name
      * @return processed payment object
      */
-    private Payment handlePaymentByName(final String paymentName) throws ExecutionException, IOException {
+    protected Payment handlePaymentByName(final String paymentName) throws ExecutionException, IOException {
         requestToHandlePaymentByLegibleName(paymentName);
         return fetchPaymentByLegibleName(paymentName);
     }

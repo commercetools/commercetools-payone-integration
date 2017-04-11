@@ -88,25 +88,30 @@ public abstract class BaseFixture {
     protected static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
 
     // Environment variables names
-    private static final String TEST_DATA_CT_PAYONE_INTEGRATION_URL = "TEST_DATA_CT_PAYONE_INTEGRATION_URL";
+    protected static final String TEST_DATA_CT_PAYONE_INTEGRATION_URL = "TEST_DATA_CT_PAYONE_INTEGRATION_URL";
 
-    private static final String TEST_DATA_TENANT_NAME = "TEST_DATA_TENANT_NAME";
-    private static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
-    private static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_3DS";
-    private static final String TEST_DATA_3_DS_PASSWORD = "TEST_DATA_3_DS_PASSWORD";
-    private static final String TEST_DATA_SW_BANK_TRANSFER_IBAN = "TEST_DATA_SW_BANK_TRANSFER_IBAN";
-    private static final String TEST_DATA_SW_BANK_TRANSFER_BIC = "TEST_DATA_SW_BANK_TRANSFER_BIC";
+    protected static final String TEST_DATA_TENANT_NAME = "TEST_DATA_TENANT_NAME";
+    protected static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
+    protected static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_3DS";
+    protected static final String TEST_DATA_3_DS_PASSWORD = "TEST_DATA_3_DS_PASSWORD";
+    protected static final String TEST_DATA_SW_BANK_TRANSFER_IBAN = "TEST_DATA_SW_BANK_TRANSFER_IBAN";
+    protected static final String TEST_DATA_SW_BANK_TRANSFER_BIC = "TEST_DATA_SW_BANK_TRANSFER_BIC";
 
-    private static final String TEST_DATA_PAYONE_MERCHANT_ID = "TEST_DATA_PAYONE_MERCHANT_ID";
-    private static final String TEST_DATA_PAYONE_SUBACC_ID = "TEST_DATA_PAYONE_SUBACC_ID";
-    private static final String TEST_DATA_PAYONE_PORTAL_ID = "TEST_DATA_PAYONE_PORTAL_ID";
-    private static final String TEST_DATA_PAYONE_KEY = "TEST_DATA_PAYONE_KEY";
+    protected static final String TEST_DATA_PAYONE_MERCHANT_ID = "TEST_DATA_PAYONE_MERCHANT_ID";
+    protected static final String TEST_DATA_PAYONE_SUBACC_ID = "TEST_DATA_PAYONE_SUBACC_ID";
+    protected static final String TEST_DATA_PAYONE_PORTAL_ID = "TEST_DATA_PAYONE_PORTAL_ID";
+    protected static final String TEST_DATA_PAYONE_KEY = "TEST_DATA_PAYONE_KEY";
 
-    private static final String TEST_DATA_CT_PROJECT_KEY = "TEST_DATA_CT_PROJECT_KEY";
-    private static final String TEST_DATA_CT_CLIENT_ID = "TEST_DATA_CT_CLIENT_ID";
-    private static final String TEST_DATA_CT_CLIENT_SECRET = "TEST_DATA_CT_CLIENT_SECRET";
+    protected static final String TEST_DATA_CT_PROJECT_KEY = "TEST_DATA_CT_PROJECT_KEY";
+    protected static final String TEST_DATA_CT_CLIENT_ID = "TEST_DATA_CT_CLIENT_ID";
+    protected static final String TEST_DATA_CT_CLIENT_SECRET = "TEST_DATA_CT_CLIENT_SECRET";
 
-    private static final Random randomSource = new Random();
+    protected static final String TEST_DATA_TENANT_NAME_2="TEST_DATA_TENANT_NAME_2";
+    protected static final String TEST_DATA_CT_PROJECT_KEY_2="TEST_DATA_CT_PROJECT_KEY_2";
+    protected static final String TEST_DATA_CT_CLIENT_ID_2="TEST_DATA_CT_CLIENT_ID_2";
+    protected static final String TEST_DATA_CT_CLIENT_SECRET_2="TEST_DATA_CT_CLIENT_SECRET_2";
+
+    protected static final Random randomSource = new Random();
 
     /**
      * Only for creation of test data
@@ -223,12 +228,12 @@ public abstract class BaseFixture {
 
     protected Order createAndGetOrder(Payment payment, String currencyCode, String buyerLastName, PaymentState paymentState) {
         // create cart and order with product
-        final Product product = ctpClient.executeBlocking(ProductQuery.of()).getResults().get(0);
+        final Product product = ctpClient().executeBlocking(ProductQuery.of()).getResults().get(0);
 
         final CartDraft cardDraft = CartDraftBuilder.of(Monetary.getCurrency(currencyCode)).build();
 
-        final Cart cart = ctpClient.executeBlocking(CartUpdateCommand.of(
-                ctpClient.executeBlocking(CartCreateCommand.of(cardDraft)),
+        final Cart cart = ctpClient().executeBlocking(CartUpdateCommand.of(
+                ctpClient().executeBlocking(CartCreateCommand.of(cardDraft)),
                 ImmutableList.of(
                         AddPayment.of(payment),
                         AddLineItem.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1),
@@ -238,7 +243,7 @@ public abstract class BaseFixture {
 
         final String orderNumber = getRandomOrderNumber();
 
-        return ctpClient.executeBlocking(OrderFromCartCreateCommand.of(
+        return ctpClient().executeBlocking(OrderFromCartCreateCommand.of(
                 OrderFromCartDraft.of(cart, orderNumber, paymentState)));
     }
 
@@ -339,7 +344,7 @@ public abstract class BaseFixture {
         return m.group(1);
     }
 
-    private static String getTenantName() {
+    public String getTenantName() {
         return getConfigurationParameter(TEST_DATA_TENANT_NAME);
     }
 
@@ -405,7 +410,7 @@ public abstract class BaseFixture {
      * @see #fetchPaymentByLegibleName(String)
      */
     protected Payment fetchPaymentById(final String paymentId) {
-        return ctpClient.executeBlocking(PaymentByIdGet.of(
+        return ctpClient().executeBlocking(PaymentByIdGet.of(
                 Preconditions.checkNotNull(paymentId, "paymentId must not be null!")));
     }
 
