@@ -72,7 +72,7 @@ public class BasePaymentFixture extends BaseFixture {
                                               String currencyCode,
                                               String languageCode) throws ExecutionException, InterruptedException, UnsupportedEncodingException {
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
-        final String pseudocardpan = getVerifiedVisaPseudoCardPan();
+        final String pseudocardpan = getUnconfirmedVisaPseudoCardPan();
 
         final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
                 .paymentMethodInfo(PaymentMethodInfoBuilder.of()

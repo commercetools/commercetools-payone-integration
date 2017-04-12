@@ -108,10 +108,7 @@ public abstract class BaseFixture {
     protected static final String TEST_DATA_CT_CLIENT_ID = "TEST_DATA_CT_CLIENT_ID";
     protected static final String TEST_DATA_CT_CLIENT_SECRET = "TEST_DATA_CT_CLIENT_SECRET";
 
-    protected static final String TEST_DATA_TENANT_NAME_2="TEST_DATA_TENANT_NAME_2";
-    protected static final String TEST_DATA_CT_PROJECT_KEY_2="TEST_DATA_CT_PROJECT_KEY_2";
-    protected static final String TEST_DATA_CT_CLIENT_ID_2="TEST_DATA_CT_CLIENT_ID_2";
-    protected static final String TEST_DATA_CT_CLIENT_SECRET_2="TEST_DATA_CT_CLIENT_SECRET_2";
+    // other TEST_DATA_ variables see in BaseTenant2Fixture
 
     protected static final Random randomSource = new Random();
 
@@ -263,9 +260,13 @@ public abstract class BaseFixture {
      *
      * @see #getVerifiedVisaPseudoCardPan()
      */
-    synchronized static protected String getUnconfirmedVisaPseudoCardPan() {
+    synchronized protected String getUnconfirmedVisaPseudoCardPan() {
       if (PSEUDO_CARD_PAN == null) {
-          String fetchedPseudoCardPan = fetchPseudoCardPan(getTestDataVisaCreditCardNo3Ds());
+          String fetchedPseudoCardPan = fetchPseudoCardPan(getTestDataVisaCreditCardNo3Ds(),
+                                                            getTestDataPayoneMerchantId(),
+                                                            getTestDataPayoneSubaccId(),
+                                                            getTestDataPayonePortalId(),
+                                                            getTestDataPayoneKey());
           // TODO: remove the assert and logging if the future if everything goes fine
           assert PSEUDO_CARD_PAN == null : "PSEUDO_CARD_PAN multiple initialization";
           PSEUDO_CARD_PAN = fetchedPseudoCardPan;
@@ -282,9 +283,13 @@ public abstract class BaseFixture {
      *
      * @see #getUnconfirmedVisaPseudoCardPan()
      */
-    synchronized protected static String getVerifiedVisaPseudoCardPan() {
+    synchronized protected String getVerifiedVisaPseudoCardPan() {
         if (PSEUDO_CARD_PAN_3DS == null) {
-            String fetchedPseudoCardPan = fetchPseudoCardPan(getTestVisaCreditCard3Ds());
+            String fetchedPseudoCardPan = fetchPseudoCardPan(getTestVisaCreditCard3Ds(),
+                                                            getTestDataPayoneMerchantId(),
+                                                            getTestDataPayoneSubaccId(),
+                                                            getTestDataPayonePortalId(),
+                                                            getTestDataPayoneKey());
             // TODO: remove the assert and logging if the future if everything goes fine
             assert PSEUDO_CARD_PAN_3DS == null : "PSEUDO_CARD_PAN_3DS multiple initialization";
             PSEUDO_CARD_PAN_3DS = fetchedPseudoCardPan;
@@ -306,18 +311,18 @@ public abstract class BaseFixture {
      * @return pseudocardpan string, registered in Payone merchant center
      * @throws RuntimeException if the response from Payone can't be parsed
      */
-    private static String fetchPseudoCardPan(String cardPan) {
+    protected String fetchPseudoCardPan(String cardPan, String mid, String aid, String pid, String key) {
         //curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>"
 
         String cardPanResponse = null;
         try {
-          cardPanResponse = Unirest.post("https://api.pay1.de/post-gateway/")
+            cardPanResponse = Unirest.post("https://api.pay1.de/post-gateway/")
               .fields(ImmutableMap.<String, Object>builder()
                   .put("request", "3dscheck")
-                  .put("mid", getTestDataPayoneMerchantId())
-                  .put("aid", getTestDataPayoneSubaccId())
-                  .put("portalid", getTestDataPayonePortalId())
-                  .put("key", Hashing.md5().hashString(getTestDataPayoneKey(), Charsets.UTF_8).toString())
+                  .put("mid", mid)
+                  .put("aid", aid)
+                  .put("portalid", pid)
+                  .put("key", Hashing.md5().hashString(key, Charsets.UTF_8).toString())
                   .put("mode", "test")
                   .put("api_version", "3.9")
                   .put("amount", "2")
@@ -349,11 +354,11 @@ public abstract class BaseFixture {
         return getConfigurationParameter(TEST_DATA_TENANT_NAME);
     }
 
-    private static String getTestDataVisaCreditCardNo3Ds() {
+    protected static String getTestDataVisaCreditCardNo3Ds() {
         return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
     }
 
-    private static String getTestVisaCreditCard3Ds() {
+    protected static String getTestVisaCreditCard3Ds() {
         return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_3_DS);
     }
 
@@ -369,22 +374,21 @@ public abstract class BaseFixture {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_BIC);
     }
 
-    private static String getTestDataPayoneMerchantId() {
+    protected String getTestDataPayoneMerchantId() {
         return getConfigurationParameter(TEST_DATA_PAYONE_MERCHANT_ID);
     }
 
-    private static String getTestDataPayoneSubaccId() {
+    protected String getTestDataPayoneSubaccId() {
         return getConfigurationParameter(TEST_DATA_PAYONE_SUBACC_ID);
     }
 
-    private static String getTestDataPayonePortalId() {
+    protected String getTestDataPayonePortalId() {
         return getConfigurationParameter(TEST_DATA_PAYONE_PORTAL_ID);
     }
 
-    private static String getTestDataPayoneKey() {
+    protected String getTestDataPayoneKey() {
         return getConfigurationParameter(TEST_DATA_PAYONE_KEY);
     }
-
 
     protected static String getRandomOrderNumber() {
         return String.valueOf(randomSource.nextInt() + System.currentTimeMillis());
