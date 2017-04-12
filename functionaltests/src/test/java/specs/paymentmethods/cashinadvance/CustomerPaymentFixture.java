@@ -107,6 +107,12 @@ public class CustomerPaymentFixture extends BaseNotifiablePaymentFixture {
     }
 
     @Override
+    public boolean receivedNextNotificationOfActionFor(String paymentNames, String txaction, String prevTxaction) throws Exception {
+        // we keep this overriding just to easily see which test methods are run in this fixture
+        return super.receivedNextNotificationOfActionFor(paymentNames, txaction, prevTxaction);
+    }
+
+    @Override
     public String fetchOrderPaymentState(final String paymentName) {
         // we keep this overriding just to easily see which test methods are run in this fixture
         return super.fetchOrderPaymentState(getIdForLegibleName(paymentName));

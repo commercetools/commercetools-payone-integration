@@ -150,7 +150,7 @@
             </p>
             <ol>
                 <li>(txaction=<b c:set="#txactionAppointed">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)">received</span> -> has no effect, just as a confirmation</li>
-                <li>(txaction=<b c:set="#txactionPaid">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)">received</span>
+                <li>(txaction=<b c:set="#txactionPaid">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)">received</span>
                     ->  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
             </ol>
             <table c:execute="#result = fetchPaymentDetails(#paymentName)">

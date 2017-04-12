@@ -11,14 +11,14 @@ import io.sphere.sdk.payments.queries.PaymentByIdGet;
 import io.sphere.sdk.types.Type;
 import org.junit.BeforeClass;
 import specs.BaseFixture;
-import specs.response.BasePaymentFixture;
+import specs.paymentmethods.BaseNotifiablePaymentFixture;
 
 import java.net.MalformedURLException;
 
 /**
  * Base class for second tenant payments tests. It overrides CTP client, type cache map, own tenant name.
  */
-abstract public class BaseTenant2Fixture extends BasePaymentFixture {
+abstract public class BaseTenant2Fixture extends BaseNotifiablePaymentFixture {
 
     private static BlockingSphereClient ctpClient2;
 

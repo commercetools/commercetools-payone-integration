@@ -73,7 +73,7 @@ public abstract class BaseFixture {
 
     protected static final String EMPTY_STRING = "";
     protected static final String NULL_STRING = "null";
-    protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(15);
+    protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(10);
     protected static final long RETRY_DELAY = TimeUnit.SECONDS.toMillis(15);
     protected static final long INTERMEDIATE_REPORT_DELAY = TimeUnit.MINUTES.toMillis(3);
 
@@ -85,7 +85,7 @@ public abstract class BaseFixture {
 
     protected static final Duration CTP_REQUEST_TIMEOUT = Duration.ofMinutes(2);
 
-    protected static final Splitter thePaymentNamesSplitter = Splitter.on(", ");
+    protected static final Splitter thePaymentNamesSplitter = Splitter.on(",").trimResults().omitEmptyStrings();
 
     protected static final PropertyProvider propertyProvider = new PropertyProvider();
 
@@ -526,7 +526,7 @@ public abstract class BaseFixture {
 
     }
 
-    protected long countPaymentsWithNotificationOfAction(final ImmutableList<String> paymentNames, final String txaction) {
+    protected long countPaymentsWithNotificationOfAction(final List<String> paymentNames, final String txaction) {
         final List<RuntimeException> exceptions = Lists.newArrayList();
         final long result = paymentNames.stream().mapToLong(paymentName -> {
             final Payment payment = fetchPaymentByLegibleName(paymentName);

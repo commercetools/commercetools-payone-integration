@@ -1,34 +1,46 @@
-package specs.paymentmethods.creditcard;
+package specs.multitenancy.creditcard;
 
 import io.sphere.sdk.payments.Payment;
+import model.HandlePaymentResult;
 import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
+import specs.BaseFixture;
+import specs.multitenancy.BaseTenant2Fixture;
 
+import javax.money.format.MonetaryFormats;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
- * @author Jan Wolter
+ * Test CreditCard payment handling and notifications on second tenant.
  */
 @RunWith(ConcordionRunner.class)
-public class ChargeImmediatelyWithout3dsFixture extends BaseCreditCardChargeFixture {
+public class ChargeImmediatelyWithout3ds2Fixture extends BaseTenant2Fixture {
 
     public String createPayment(final String paymentName,
                                 final String paymentMethod,
                                 final String transactionType,
                                 final String centAmount,
                                 final String currencyCode) throws Exception {
-
         Payment payment = createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, Locale.ENGLISH.getLanguage());
         return payment.getId();
     }
 
-    @Override
-    public MultiValueResult handlePayment(final String paymentName,
-                                          final String requestType) throws Exception {
-        return super.handlePayment(paymentName, requestType);
+    public MultiValueResult handlePayment(final String paymentName) throws ExecutionException, IOException {
+        HandlePaymentResult handlePaymentResult = handlePaymentByName(paymentName);
+        final String transactionId = getIdOfLastTransaction(handlePaymentResult.getPayment());
+
+        final String amountPlanned = (handlePaymentResult.getPayment().getAmountPlanned() != null) ?
+                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(handlePaymentResult.getPayment().getAmountPlanned()) :
+                BaseFixture.EMPTY_STRING;
+
+        return MultiValueResult.multiValueResult()
+                .with("statusCode", Integer.toString(handlePaymentResult.getHttpResponse().getStatusLine().getStatusCode()))
+                .with("transactionState", getTransactionState(handlePaymentResult.getPayment(), transactionId))
+                .with("amountPlanned", amountPlanned);
     }
 
     public Map<String, String> fetchPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
@@ -39,6 +51,12 @@ public class ChargeImmediatelyWithout3dsFixture extends BaseCreditCardChargeFixt
     public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws Exception {
         // we keep this overriding just to easily see which test methods are run in this fixture
         return super.receivedNotificationOfActionFor(paymentNames, txaction);
+    }
+
+    @Override
+    public boolean receivedNextNotificationOfActionFor(String paymentNames, String txaction, String prevTxaction) throws Exception {
+        // we keep this overriding just to easily see which test methods are run in this fixture
+        return super.receivedNextNotificationOfActionFor(paymentNames, txaction, prevTxaction);
     }
 
     @Override
