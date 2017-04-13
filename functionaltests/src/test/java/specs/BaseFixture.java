@@ -73,7 +73,7 @@ public abstract class BaseFixture {
 
     protected static final String EMPTY_STRING = "";
     protected static final String NULL_STRING = "null";
-    protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(10);
+    protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(15);
     protected static final long RETRY_DELAY = TimeUnit.SECONDS.toMillis(15);
     protected static final long INTERMEDIATE_REPORT_DELAY = TimeUnit.MINUTES.toMillis(3);
 
