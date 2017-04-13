@@ -22,8 +22,6 @@ import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.ZonedDateTime;
 import java.util.ConcurrentModificationException;
@@ -36,7 +34,7 @@ import java.util.Optional;
  *
  */
 public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionBaseExecutor {
-    private static final Logger LOG = LoggerFactory.getLogger(BankTransferInAdvanceChargeTransactionExecutor.class);
+
     private final PayoneRequestFactory requestFactory;
     private final PayonePostService payonePostService;
     private final BlockingSphereClient client;

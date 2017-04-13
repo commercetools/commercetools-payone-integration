@@ -1,16 +1,18 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
+import com.commercetools.pspadapter.tenant.TenantConfig;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author mht@dotsource.de
  */
 public class PostFinanceBanktransferRequestFactory extends BankTransferWithoutIbanBicRequestFactory {
 
-    public PostFinanceBanktransferRequestFactory(PayoneConfig payoneConfig) {
-        super(payoneConfig);
+    public PostFinanceBanktransferRequestFactory(@Nonnull TenantConfig tenantConfig) {
+        super(tenantConfig);
     }
 
     @Override

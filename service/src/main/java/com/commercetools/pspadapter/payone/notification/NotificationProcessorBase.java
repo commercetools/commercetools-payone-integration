@@ -34,6 +34,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlocking;
+import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createLoggerName;
 
 /**
  * Base for notification processor implementations.
@@ -43,7 +44,7 @@ import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlo
 public abstract class NotificationProcessorBase implements NotificationProcessor {
     private static final String DEFAULT_SEQUENCE_NUMBER = "0";
 
-    private static final Logger LOG = LoggerFactory.getLogger(NotificationProcessorBase.class);
+    private final Logger logger;
 
     private final TenantFactory tenantFactory;
 
@@ -57,6 +58,8 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
     protected NotificationProcessorBase(final TenantFactory tenantFactory, final TenantConfig tenantConfig) {
         this.tenantFactory = tenantFactory;
         this.tenantConfig = tenantConfig;
+
+        this.logger = LoggerFactory.getLogger(createLoggerName(this.getClass(), tenantConfig.getName()));
     }
 
     @Override
@@ -115,7 +118,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
             PaymentState newPaymentState = getPaymentToOrderStateMapper().mapPaymentToOrderState(updatedPayment);
 
             if (newPaymentState == null && updatedPayment.getPaymentStatus() != null) {
-                LOG.warn("Payment [{}] has paymentStatus [{}] which can't be mapped to Order#paymentState. "
+                logger.warn("Payment [{}] has paymentStatus [{}] which can't be mapped to Order#paymentState. "
                                 + "The order's state remains unchanged.",
                         updatedPayment.getId(), updatedPayment.getPaymentStatus().getInterfaceCode());
             }
@@ -127,7 +130,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
         } else {
             // This may happen when Payone sends the notification faster then user was redirected back to the shop
             // and the order has not been created yet.
-            LOG.info("Payment [{}] is updated, but respective order is not found!", updatedPayment.getId());
+            logger.info("Payment [{}] is updated, but respective order is not found!", updatedPayment.getId());
         }
 
         return CompletableFuture.completedFuture(order);

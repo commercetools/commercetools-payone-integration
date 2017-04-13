@@ -1,7 +1,6 @@
 package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.BaseTenantPropertyTest;
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
@@ -36,13 +35,10 @@ public class PaypalRequestFactoryTest extends BaseTenantPropertyTest {
     private PaypalRequestFactory factory;
 
 
-    private PayoneConfig config;
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        config = new PayoneConfig(tenantPropertyProvider);
-        factory = new PaypalRequestFactory(config);
+        factory = new PaypalRequestFactory(tenantConfig);
     }
 
     @Test
@@ -58,17 +54,17 @@ public class PaypalRequestFactoryTest extends BaseTenantPropertyTest {
 
         //base values
         softly.assertThat(result.getRequest()).isEqualTo(RequestType.PREAUTHORIZATION.getType());
-        softly.assertThat(result.getAid()).isEqualTo(config.getSubAccountId());
-        softly.assertThat(result.getMid()).isEqualTo(config.getMerchantId());
-        softly.assertThat(result.getPortalid()).isEqualTo(config.getPortalId());
-        softly.assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
-        softly.assertThat(result.getMode()).isEqualTo(config.getMode());
-        softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
-        softly.assertThat(result.getEncoding()).isEqualTo(config.getEncoding());
-        softly.assertThat(result.getSolutionName()).isEqualTo(config.getSolutionName());
-        softly.assertThat(result.getSolutionVersion()).isEqualTo(config.getSolutionVersion());
-        softly.assertThat(result.getIntegratorName()).isEqualTo(config.getIntegratorName());
-        softly.assertThat(result.getIntegratorVersion()).isEqualTo(config.getIntegratorVersion());
+        softly.assertThat(result.getAid()).isEqualTo(payoneConfig.getSubAccountId());
+        softly.assertThat(result.getMid()).isEqualTo(payoneConfig.getMerchantId());
+        softly.assertThat(result.getPortalid()).isEqualTo(payoneConfig.getPortalId());
+        softly.assertThat(result.getKey()).isEqualTo(payoneConfig.getKeyAsMd5Hash());
+        softly.assertThat(result.getMode()).isEqualTo(payoneConfig.getMode());
+        softly.assertThat(result.getApiVersion()).isEqualTo(payoneConfig.getApiVersion());
+        softly.assertThat(result.getEncoding()).isEqualTo(payoneConfig.getEncoding());
+        softly.assertThat(result.getSolutionName()).isEqualTo(payoneConfig.getSolutionName());
+        softly.assertThat(result.getSolutionVersion()).isEqualTo(payoneConfig.getSolutionVersion());
+        softly.assertThat(result.getIntegratorName()).isEqualTo(payoneConfig.getIntegratorName());
+        softly.assertThat(result.getIntegratorVersion()).isEqualTo(payoneConfig.getIntegratorVersion());
 
         //clearing type
         ClearingType clearingType = ClearingType.getClearingTypeByKey(MethodKeys.WALLET_PAYPAL);
@@ -135,17 +131,17 @@ public class PaypalRequestFactoryTest extends BaseTenantPropertyTest {
 
         //base values
         softly.assertThat(result.getRequest()).isEqualTo(RequestType.AUTHORIZATION.getType());
-        softly.assertThat(result.getAid()).isEqualTo(config.getSubAccountId());
-        softly.assertThat(result.getMid()).isEqualTo(config.getMerchantId());
-        softly.assertThat(result.getPortalid()).isEqualTo(config.getPortalId());
-        softly.assertThat(result.getKey()).isEqualTo(config.getKeyAsMd5Hash());
-        softly.assertThat(result.getMode()).isEqualTo(config.getMode());
-        softly.assertThat(result.getApiVersion()).isEqualTo(config.getApiVersion());
-        softly.assertThat(result.getEncoding()).isEqualTo(config.getEncoding());
-        softly.assertThat(result.getSolutionName()).isEqualTo(config.getSolutionName());
-        softly.assertThat(result.getSolutionVersion()).isEqualTo(config.getSolutionVersion());
-        softly.assertThat(result.getIntegratorName()).isEqualTo(config.getIntegratorName());
-        softly.assertThat(result.getIntegratorVersion()).isEqualTo(config.getIntegratorVersion());
+        softly.assertThat(result.getAid()).isEqualTo(payoneConfig.getSubAccountId());
+        softly.assertThat(result.getMid()).isEqualTo(payoneConfig.getMerchantId());
+        softly.assertThat(result.getPortalid()).isEqualTo(payoneConfig.getPortalId());
+        softly.assertThat(result.getKey()).isEqualTo(payoneConfig.getKeyAsMd5Hash());
+        softly.assertThat(result.getMode()).isEqualTo(payoneConfig.getMode());
+        softly.assertThat(result.getApiVersion()).isEqualTo(payoneConfig.getApiVersion());
+        softly.assertThat(result.getEncoding()).isEqualTo(payoneConfig.getEncoding());
+        softly.assertThat(result.getSolutionName()).isEqualTo(payoneConfig.getSolutionName());
+        softly.assertThat(result.getSolutionVersion()).isEqualTo(payoneConfig.getSolutionVersion());
+        softly.assertThat(result.getIntegratorName()).isEqualTo(payoneConfig.getIntegratorName());
+        softly.assertThat(result.getIntegratorVersion()).isEqualTo(payoneConfig.getIntegratorVersion());
 
         //clearing type
         ClearingType clearingType = ClearingType.getClearingTypeByKey(MethodKeys.WALLET_PAYPAL);

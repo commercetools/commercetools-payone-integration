@@ -1,17 +1,15 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPreauthorizationRequest;
+import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.google.common.base.Preconditions;
-import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
 import org.javamoney.moneta.function.MonetaryUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 
 /**
@@ -20,10 +18,8 @@ import java.util.Optional;
  */
 public class PaypalRequestFactory extends PayoneRequestFactory {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PaypalRequestFactory.class);
-
-    public PaypalRequestFactory(final PayoneConfig config) {
-        super(config);
+    public PaypalRequestFactory(@Nonnull TenantConfig tenantConfig) {
+        super(tenantConfig);
     }
 
     @Override
@@ -47,7 +43,7 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
                             .intValue());
                 });
 
-        mapFormPaymentWithCartLike(request, paymentWithCartLike, LOG);
+        mapFormPaymentWithCartLike(request, paymentWithCartLike);
 
         return request;
     }
@@ -73,7 +69,7 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
                             .intValue());
                 });
 
-        mapFormPaymentWithCartLike(request, paymentWithCartLike, LOG);
+        mapFormPaymentWithCartLike(request, paymentWithCartLike);
 
         return request;
     }

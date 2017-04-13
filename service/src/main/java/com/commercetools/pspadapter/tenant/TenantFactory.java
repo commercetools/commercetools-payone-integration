@@ -35,6 +35,7 @@ import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
 
+import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Optional;
@@ -244,19 +245,19 @@ public class TenantFactory {
         return null;
     }
 
-    protected PayoneRequestFactory createRequestFactory(final PaymentMethod method, final TenantConfig tenantConfig) {
+    protected PayoneRequestFactory createRequestFactory(@Nonnull PaymentMethod method, @Nonnull TenantConfig tenantConfig) {
         switch (method) {
             case CREDIT_CARD:
-                return new CreditCardRequestFactory(tenantConfig.getPayoneConfig());
+                return new CreditCardRequestFactory(tenantConfig);
             case WALLET_PAYPAL:
-                return new PaypalRequestFactory(tenantConfig.getPayoneConfig());
+                return new PaypalRequestFactory(tenantConfig);
             case BANK_TRANSFER_SOFORTUEBERWEISUNG:
-                return new SofortBankTransferRequestFactory(tenantConfig.getPayoneConfig(), tenantConfig.getSecureKey());
+                return new SofortBankTransferRequestFactory(tenantConfig);
             case BANK_TRANSFER_POSTFINANCE_CARD:
             case BANK_TRANSFER_POSTFINANCE_EFINANCE:
-                return new PostFinanceBanktransferRequestFactory(tenantConfig.getPayoneConfig());
+                return new PostFinanceBanktransferRequestFactory(tenantConfig);
             case BANK_TRANSFER_ADVANCE:
-                return new BanktTransferInAdvanceRequestFactory(tenantConfig.getPayoneConfig());
+                return new BanktTransferInAdvanceRequestFactory(tenantConfig);
             default:
                 throw new IllegalArgumentException(format("No PayoneRequestFactory could be created for payment method %s", method));
         }

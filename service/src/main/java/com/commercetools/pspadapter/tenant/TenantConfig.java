@@ -3,6 +3,8 @@ package com.commercetools.pspadapter.tenant;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import io.sphere.sdk.client.SphereClientConfig;
 
+import javax.annotation.Nonnull;
+
 import static com.commercetools.pspadapter.tenant.TenantPropertyProvider.*;
 
 public class TenantConfig {
@@ -19,7 +21,7 @@ public class TenantConfig {
 
     private final SphereClientConfig sphereClientConfig;
 
-    public TenantConfig(TenantPropertyProvider tenantPropertyProvider, PayoneConfig payoneConfig) {
+    public TenantConfig(@Nonnull TenantPropertyProvider tenantPropertyProvider, @Nonnull PayoneConfig payoneConfig) {
         this.name = tenantPropertyProvider.getTenantName();
 
         this.sphereClientConfig = SphereClientConfig.of(
@@ -47,6 +49,7 @@ public class TenantConfig {
         return name;
     }
 
+    @Nonnull
     public PayoneConfig getPayoneConfig() {
         return payoneConfig;
     }

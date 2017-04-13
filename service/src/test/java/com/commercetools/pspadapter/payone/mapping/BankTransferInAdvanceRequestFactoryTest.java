@@ -1,7 +1,6 @@
 package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.BaseTenantPropertyTest;
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
@@ -50,8 +49,7 @@ public class BankTransferInAdvanceRequestFactoryTest extends BaseTenantPropertyT
         //clear secure key to force unencrypted data
         when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
 
-        PayoneConfig payoneConfig = new PayoneConfig(tenantPropertyProvider);
-        factory = new BanktTransferInAdvanceRequestFactory(payoneConfig);
+        factory = new BanktTransferInAdvanceRequestFactory(tenantConfig);
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroVOR();
         Order order = payments.dummyOrderMapToPayoneRequest();

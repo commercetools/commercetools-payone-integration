@@ -49,10 +49,7 @@ public class SofortRequestFactoryTest extends BaseTenantPropertyTest {
         //clear secure key to force unencrypted data
         when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
 
-        PayoneConfig payoneConfig = new PayoneConfig(tenantPropertyProvider);
-        TenantConfig tenantConfig = new TenantConfig(tenantPropertyProvider, payoneConfig);
-        factory = new SofortBankTransferRequestFactory(payoneConfig, tenantConfig.getSecureKey());
-
+        factory = new SofortBankTransferRequestFactory(tenantConfig);
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroPNT();
         Order order = payments.dummyOrderMapToPayoneRequest();
@@ -139,7 +136,7 @@ public class SofortRequestFactoryTest extends BaseTenantPropertyTest {
 
         PayoneConfig payoneConfig = new PayoneConfig(tenantPropertyProvider);
         TenantConfig tenantConfig = new TenantConfig(tenantPropertyProvider, payoneConfig);
-        factory = new SofortBankTransferRequestFactory(tenantConfig.getPayoneConfig(), tenantConfig.getSecureKey());
+        factory = new SofortBankTransferRequestFactory(tenantConfig);
 
         final String testIban = "DE012345";
         final String testBic = "NOLADE0";

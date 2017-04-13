@@ -51,7 +51,7 @@ public class SofortWithoutIbanRequestFactoryTest extends BaseTenantPropertyTest 
 
         PayoneConfig payoneConfig = new PayoneConfig(tenantPropertyProvider);
         TenantConfig tenantConfig = new TenantConfig(tenantPropertyProvider, payoneConfig);
-        factory = new SofortBankTransferRequestFactory(tenantConfig.getPayoneConfig(), tenantConfig.getSecureKey());
+        factory = new SofortBankTransferRequestFactory(tenantConfig);
 
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroWithoutIbanPNT();
@@ -139,7 +139,7 @@ public class SofortWithoutIbanRequestFactoryTest extends BaseTenantPropertyTest 
 
         PayoneConfig payoneConfig = new PayoneConfig(tenantPropertyProvider);
         TenantConfig tenantConfig = new TenantConfig(tenantPropertyProvider, payoneConfig);
-        factory = new SofortBankTransferRequestFactory(tenantConfig.getPayoneConfig(), tenantConfig.getSecureKey());
+        factory = new SofortBankTransferRequestFactory(tenantConfig);
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroWithoutIbanPNT();
         Order order = payments.dummyOrderMapToPayoneRequest();

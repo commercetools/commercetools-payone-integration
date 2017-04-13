@@ -1,12 +1,14 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.util.BlowfishUtil;
+import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
 import spark.utils.StringUtils;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author fhaertig
@@ -18,11 +20,12 @@ public class SofortBankTransferRequestFactory extends BankTransferWithoutIbanBic
     /**
      * Optional (may be empty string, but not null) key for {@link BlowfishUtil} IBAN/BIC encrypting.
      */
+    @Nonnull
     private final String secureKey;
 
-    public SofortBankTransferRequestFactory(final PayoneConfig config, final String secureKey) {
-        super(config);
-        this.secureKey = secureKey != null ? secureKey : "";
+    public SofortBankTransferRequestFactory(@Nonnull TenantConfig tenantConfig) {
+        super(tenantConfig);
+        this.secureKey = tenantConfig.getSecureKey() != null ? tenantConfig.getSecureKey() : "";
     }
 
     @Override

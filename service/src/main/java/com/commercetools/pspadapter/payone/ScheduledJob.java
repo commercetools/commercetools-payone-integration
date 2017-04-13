@@ -16,6 +16,8 @@ import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.LOG_PREFIX;
+
 /**
  * @author fhaertig
  * @since 07.12.15
@@ -43,11 +45,14 @@ public abstract class ScheduledJob implements Job {
                     final PaymentWithCartLike paymentWithCartLike = queryExecutor.getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
                     paymentDispatcher.accept(paymentWithCartLike);
                 } catch (final NoCartLikeFoundException ex) {
-                    LOG.debug("[tenant {}] Could not dispatch payment with ID \"{}\": {}", tenantFactory.getTenantName(),  payment.getId(), ex.getMessage());
+                    LOG.debug(LOG_PREFIX + " Could not dispatch payment with ID \"{}\": {}",
+                            tenantFactory.getTenantName(),  payment.getId(), ex.getMessage());
                 } catch (final ConcurrentModificationException ex) {
-                    LOG.info("[tenant {}] Could not dispatch payment with ID \"{}\": The payment is currently processed by someone else.", tenantFactory.getTenantName(), payment.getId());
+                    LOG.info(LOG_PREFIX + " Could not dispatch payment with ID \"{}\": The payment is currently processed by someone else.",
+                            tenantFactory.getTenantName(), payment.getId());
                 } catch (final Throwable ex) {
-                    LOG.error("[tenant {}] Error dispatching payment with ID \"{}\"", tenantFactory.getTenantName(), payment.getId(), ex);
+                    LOG.error(LOG_PREFIX + " Error dispatching payment with ID \"{}\"",
+                            tenantFactory.getTenantName(), payment.getId(), ex);
                 }
             };
 

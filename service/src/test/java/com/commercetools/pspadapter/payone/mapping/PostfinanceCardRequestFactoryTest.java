@@ -1,7 +1,6 @@
 package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.BaseTenantPropertyTest;
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
@@ -46,8 +45,7 @@ public class PostfinanceCardRequestFactoryTest extends BaseTenantPropertyTest {
         when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyVal"));
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
 
-        PayoneConfig payoneConfig = new PayoneConfig(tenantPropertyProvider);
-        factory = new BankTransferWithoutIbanBicRequestFactory(payoneConfig);
+        factory = new BankTransferWithoutIbanBicRequestFactory(tenantConfig);
 
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroPFC();
