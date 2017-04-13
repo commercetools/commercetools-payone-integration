@@ -82,11 +82,16 @@ abstract public class BaseTenant2Fixture extends BaseNotifiablePaymentFixture {
     @Override
     synchronized protected String getUnconfirmedVisaPseudoCardPan() {
         if (PSEUDO_CARD_PAN2 == null) {
-            PSEUDO_CARD_PAN2 = fetchPseudoCardPan(getTestDataVisaCreditCardNo3Ds(),
-                                                    getTestDataPayoneMerchantId(),
-                                                    getTestDataPayoneSubaccId(),
-                                                    getTestDataPayonePortalId(),
-                                                    getTestDataPayoneKey());
+            String s = fetchPseudoCardPan(getTestDataVisaCreditCardNo3Ds(),
+                    getTestDataPayoneMerchantId(),
+                    getTestDataPayoneSubaccId(),
+                    getTestDataPayonePortalId(),
+                    getTestDataPayoneKey());
+
+            // TODO: remove the assert and logging if the future if everything goes fine
+            assert PSEUDO_CARD_PAN2 == null : "PSEUDO_CARD_PAN2 multiple initialization";
+
+            PSEUDO_CARD_PAN2 = s;
             LOG.info("Second tenant unconfirmed pseudocardpan fetched successfully");
         }
         return PSEUDO_CARD_PAN2;
@@ -103,7 +108,7 @@ abstract public class BaseTenant2Fixture extends BaseNotifiablePaymentFixture {
     }
 
     @Override
-    protected String getTestDataPayonePortalId() {
+    public String getTestDataPayonePortalId() {
         return getConfigurationParameter(TEST_DATA_PAYONE_PORTAL_ID_2);
     }
 

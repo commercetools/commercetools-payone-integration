@@ -382,7 +382,7 @@ public abstract class BaseFixture {
         return getConfigurationParameter(TEST_DATA_PAYONE_SUBACC_ID);
     }
 
-    protected String getTestDataPayonePortalId() {
+    public   String getTestDataPayonePortalId() {
         return getConfigurationParameter(TEST_DATA_PAYONE_PORTAL_ID);
     }
 
