@@ -26,7 +26,6 @@ import specs.BaseFixture;
 
 import javax.money.MonetaryAmount;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -34,6 +33,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys.CREDIT_CARD;
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys.WALLET_PAYPAL;
 import static io.sphere.sdk.payments.TransactionState.FAILURE;
 import static java.lang.String.format;
 
@@ -70,7 +71,7 @@ public class BasePaymentFixture extends BaseFixture {
                                               String transactionType,
                                               String centAmount,
                                               String currencyCode,
-                                              String languageCode) throws ExecutionException, InterruptedException, UnsupportedEncodingException {
+                                              String languageCode) throws Exception {
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
         final String pseudocardpan = getUnconfirmedVisaPseudoCardPan();
 
@@ -89,6 +90,26 @@ public class BasePaymentFixture extends BaseFixture {
                 .build();
 
         return createPaymentCartOrderFromDraft(paymentName, paymentDraft, transactionType);
+    }
+
+    protected Payment createAndSaveCardPayment(String paymentName,
+                                               String paymentMethod,
+                                               String transactionType,
+                                               String centAmount,
+                                               String currencyCode) throws Exception {
+        return createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, Locale.ENGLISH.getLanguage());
+    }
+
+    protected Payment createAndSavePayment(String paymentName,
+                                           String paymentMethod,
+                                           String transactionType,
+                                           String centAmount,
+                                           String currencyCode) throws Exception {
+        switch (paymentMethod) {
+            case CREDIT_CARD: return createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
+            case WALLET_PAYPAL: return createAndSavePaypalPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
+            default: throw new IllegalArgumentException(format("Payment method [%s] is not implemented", paymentMethod));
+        }
     }
 
     public Payment createAndSavePaypalPayment(

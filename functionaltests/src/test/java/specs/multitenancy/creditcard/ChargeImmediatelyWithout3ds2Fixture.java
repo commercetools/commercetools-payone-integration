@@ -25,7 +25,7 @@ public class ChargeImmediatelyWithout3ds2Fixture extends BaseTenant2Fixture {
                                 final String transactionType,
                                 final String centAmount,
                                 final String currencyCode) throws Exception {
-        Payment payment = createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, Locale.ENGLISH.getLanguage());
+        Payment payment = createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
         return payment.getId();
     }
 
