@@ -43,11 +43,11 @@ public abstract class ScheduledJob implements Job {
                     final PaymentWithCartLike paymentWithCartLike = queryExecutor.getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
                     paymentDispatcher.accept(paymentWithCartLike);
                 } catch (final NoCartLikeFoundException ex) {
-                    LOG.debug("Could not dispatch payment with ID \"{}\": {}", payment.getId(), ex.getMessage());
+                    LOG.debug("[tenant {}] Could not dispatch payment with ID \"{}\": {}", tenantFactory.getTenantName(),  payment.getId(), ex.getMessage());
                 } catch (final ConcurrentModificationException ex) {
-                    LOG.info("Could not dispatch payment with ID \"{}\": The payment is currently processed by someone else.", payment.getId());
+                    LOG.info("[tenant {}] Could not dispatch payment with ID \"{}\": The payment is currently processed by someone else.", tenantFactory.getTenantName(), payment.getId());
                 } catch (final Throwable ex) {
-                    LOG.error("Error dispatching payment with ID \"{}\"", payment.getId(), ex);
+                    LOG.error("[tenant {}] Error dispatching payment with ID \"{}\"", tenantFactory.getTenantName(), payment.getId(), ex);
                 }
             };
 

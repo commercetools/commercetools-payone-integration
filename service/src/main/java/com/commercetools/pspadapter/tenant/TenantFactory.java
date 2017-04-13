@@ -47,6 +47,8 @@ public class TenantFactory {
 
     private final String payoneInterfaceName;
 
+    private final String tenantName;
+
     private final String urlPrefix;
 
     private final BlockingSphereClient blockingSphereClient;
@@ -66,7 +68,9 @@ public class TenantFactory {
     public TenantFactory(String payoneInterfaceName, TenantConfig tenantConfig) {
         this.payoneInterfaceName = payoneInterfaceName;
 
-        this.urlPrefix = "/" + tenantConfig.getName();
+        this.tenantName = tenantConfig.getName();
+
+        this.urlPrefix = "/" + tenantName;
 
         this.paymentToOrderStateMapper = createPaymentToOrderStateMapper();
 
@@ -89,6 +93,10 @@ public class TenantFactory {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Public getters
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public String getTenantName() {
+        return tenantName;
+    }
 
     public String getPayoneInterfaceName() {
         return payoneInterfaceName;

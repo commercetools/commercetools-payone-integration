@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class PayonePostServiceImpl implements PayonePostService {
 
-    private static Logger LOG = LoggerFactory.getLogger(PayonePostServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PayonePostServiceImpl.class);
     private static final String ENCODING_UTF8 = "UTF-8";
 
     private String serverAPIURL;

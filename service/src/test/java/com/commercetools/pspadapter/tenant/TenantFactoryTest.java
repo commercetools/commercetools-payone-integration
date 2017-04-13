@@ -32,6 +32,11 @@ public class TenantFactoryTest {
     }
 
     @Test
+    public void getsTenantName() throws Exception {
+        assertThat(factory.getTenantName()).isEqualTo("testTenantName");
+    }
+
+    @Test
     public void getsPayoneInterfaceName() throws Exception {
         assertThat(factory.getPayoneInterfaceName()).isEqualTo("testPayoneInterfaceName");
     }
