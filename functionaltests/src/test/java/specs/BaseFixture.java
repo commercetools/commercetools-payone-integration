@@ -98,6 +98,8 @@ public abstract class BaseFixture {
     protected static final String TEST_DATA_3_DS_PASSWORD = "TEST_DATA_3_DS_PASSWORD";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_IBAN = "TEST_DATA_SW_BANK_TRANSFER_IBAN";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_BIC = "TEST_DATA_SW_BANK_TRANSFER_BIC";
+    protected static final String TEST_DATA_SW_BANK_TRANSFER_PIN = "TEST_DATA_SW_BANK_TRANSFER_PIN";
+    protected static final String TEST_DATA_SW_BANK_TRANSFER_TAN = "TEST_DATA_SW_BANK_TRANSFER_TAN";
 
     protected static final String TEST_DATA_PAYONE_MERCHANT_ID = "TEST_DATA_PAYONE_MERCHANT_ID";
     protected static final String TEST_DATA_PAYONE_SUBACC_ID = "TEST_DATA_PAYONE_SUBACC_ID";
@@ -375,6 +377,14 @@ public abstract class BaseFixture {
 
     protected static String getTestDataSwBankTransferBic() {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_BIC);
+    }
+
+    protected static String getTestDataSwBankTransferPin() {
+        return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_PIN);
+    }
+
+    protected static String getTestDataSwBankTransferTan() {
+        return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_TAN);
     }
 
     protected String getTestDataPayoneMerchantId() {
