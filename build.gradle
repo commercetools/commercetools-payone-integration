@@ -128,7 +128,7 @@ project(":service") {
  */
 static List<String> assertAndGetServiceProperties(Project project) {
     // a list of mandatory runtime properties
-    def propertiesToMap = [
+    def mandatoryPropertiesToMap = [
                            'TENANTS',
                            'HEROKUTENANT_CT_PROJECT_KEY',
                            'HEROKUTENANT_CT_CLIENT_ID',
@@ -138,13 +138,47 @@ static List<String> assertAndGetServiceProperties(Project project) {
                            'HEROKUTENANT_PAYONE_PORTAL_ID',
                            'HEROKUTENANT_PAYONE_SUBACC_ID',
                            'HEROKUTENANT_PAYONE_KEY',
-                           'HEROKUTENANT_PAYONE_MODE',
+                           'HEROKUTENANT_PAYONE_MODE'
     ]
 
-    return propertiesToMap.collect { propertyKey ->
-        def propertyValue = project.hasProperty(propertyKey) ? (String)project[propertyKey] : System.getenv(propertyKey)
+    def optionalPropertiesToMap = [
+            'HEROKU_SECOND_TENANT_CT_PROJECT_KEY',
+            'HEROKU_SECOND_TENANT_CT_CLIENT_ID',
+            'HEROKU_SECOND_TENANT_CT_CLIENT_SECRET',
+
+            'HEROKU_SECOND_TENANT_PAYONE_MERCHANT_ID',
+            'HEROKU_SECOND_TENANT_PAYONE_PORTAL_ID',
+            'HEROKU_SECOND_TENANT_PAYONE_SUBACC_ID',
+            'HEROKU_SECOND_TENANT_PAYONE_KEY',
+            'HEROKU_SECOND_TENANT_PAYONE_MODE'
+    ]
+
+    def mandatoryProperties = mandatoryPropertiesToMap.collect { propertyKey ->
+        def propertyValue = findValueByName(project, propertyKey)
         return "-D${propertyKey}=${assertValueIsNotNullOrEmpty(propertyKey, propertyValue)}"
     }
+
+    def optionalProperties = optionalPropertiesToMap.collect { propertyKey ->
+        def propertyValue = findValueByName(project, propertyKey)
+        if (propertyValue != null) {
+            return "-D${propertyKey}=${propertyValue}"
+        }
+        return null
+    }.grep() // filter null (empty) properties
+
+
+    return mandatoryProperties + optionalProperties
+}
+
+/**
+ * Try to find a property value by name/key in the project properties (e.g. gradle runtime arguments) or
+ * environment variables. If property not found - <b>null</b> is returned.
+ * @param project project (aka map) where to search the property
+ * @param propertyKey property name/key
+ * @return property value or <b>null</b> if not found.
+ */
+static String findValueByName(Project project, String propertyKey) {
+    return project.hasProperty(propertyKey) ? (String) project[propertyKey] : System.getenv(propertyKey)
 }
 
 /**
@@ -199,7 +233,7 @@ static void assertExecutableSpecRequirementsForTests(Project project, Test test)
     ]
 
     propertiesToMap.each { propertyKey ->
-        test.environment propertyKey, project.hasProperty(propertyKey) ? project[propertyKey] : System.getenv(propertyKey)
+        test.environment propertyKey, findValueByName(project, propertyKey)
         assertMapValueIsNotNullOrEmpty(propertyKey, test.getEnvironment())
     }
 }
