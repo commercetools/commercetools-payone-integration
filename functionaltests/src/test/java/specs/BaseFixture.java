@@ -260,19 +260,20 @@ public abstract class BaseFixture {
      *
      * @see #getVerifiedVisaPseudoCardPan()
      */
-    synchronized protected String getUnconfirmedVisaPseudoCardPan() {
-      if (PSEUDO_CARD_PAN == null) {
-          String fetchedPseudoCardPan = fetchPseudoCardPan(getTestDataVisaCreditCardNo3Ds(),
-                                                            getTestDataPayoneMerchantId(),
-                                                            getTestDataPayoneSubaccId(),
-                                                            getTestDataPayonePortalId(),
-                                                            getTestDataPayoneKey());
-          // TODO: remove the assert and logging if the future if everything goes fine
-          assert PSEUDO_CARD_PAN == null : "PSEUDO_CARD_PAN multiple initialization";
-          PSEUDO_CARD_PAN = fetchedPseudoCardPan;
-          LOG.info("Unconfirmed pseudocardpan fetched successfully");
-      }
-
+    protected String getUnconfirmedVisaPseudoCardPan() {
+        synchronized (BaseFixture.class) {
+            if (PSEUDO_CARD_PAN == null) {
+                String fetchedPseudoCardPan = fetchPseudoCardPan(getTestDataVisaCreditCardNo3Ds(),
+                        getTestDataPayoneMerchantId(),
+                        getTestDataPayoneSubaccId(),
+                        getTestDataPayonePortalId(),
+                        getTestDataPayoneKey());
+                // TODO: remove the assert and logging if the future if everything goes fine
+                assert PSEUDO_CARD_PAN == null : "PSEUDO_CARD_PAN multiple initialization";
+                PSEUDO_CARD_PAN = fetchedPseudoCardPan;
+                LOG.info("Unconfirmed pseudocardpan fetched successfully");
+            }
+        }
       return PSEUDO_CARD_PAN;
     }
 
@@ -283,17 +284,19 @@ public abstract class BaseFixture {
      *
      * @see #getUnconfirmedVisaPseudoCardPan()
      */
-    synchronized protected String getVerifiedVisaPseudoCardPan() {
-        if (PSEUDO_CARD_PAN_3DS == null) {
-            String fetchedPseudoCardPan = fetchPseudoCardPan(getTestVisaCreditCard3Ds(),
-                                                            getTestDataPayoneMerchantId(),
-                                                            getTestDataPayoneSubaccId(),
-                                                            getTestDataPayonePortalId(),
-                                                            getTestDataPayoneKey());
-            // TODO: remove the assert and logging if the future if everything goes fine
-            assert PSEUDO_CARD_PAN_3DS == null : "PSEUDO_CARD_PAN_3DS multiple initialization";
-            PSEUDO_CARD_PAN_3DS = fetchedPseudoCardPan;
-            LOG.info("3DS pseudocardpan fetched successfully");
+    protected String getVerifiedVisaPseudoCardPan() {
+        synchronized (BaseFixture.class) {
+            if (PSEUDO_CARD_PAN_3DS == null) {
+                String fetchedPseudoCardPan = fetchPseudoCardPan(getTestVisaCreditCard3Ds(),
+                        getTestDataPayoneMerchantId(),
+                        getTestDataPayoneSubaccId(),
+                        getTestDataPayonePortalId(),
+                        getTestDataPayoneKey());
+                // TODO: remove the assert and logging if the future if everything goes fine
+                assert PSEUDO_CARD_PAN_3DS == null : "PSEUDO_CARD_PAN_3DS multiple initialization";
+                PSEUDO_CARD_PAN_3DS = fetchedPseudoCardPan;
+                LOG.info("3DS pseudocardpan fetched successfully");
+            }
         }
 
         return PSEUDO_CARD_PAN_3DS;

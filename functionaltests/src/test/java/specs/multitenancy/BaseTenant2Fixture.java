@@ -24,10 +24,10 @@ abstract public class BaseTenant2Fixture extends BaseNotifiablePaymentFixture {
 
     private static Logger LOG = LoggerFactory.getLogger(BaseTenant2Fixture.class);
 
-    protected static final String TEST_DATA_TENANT_NAME_2="TEST_DATA_TENANT_NAME_2";
-    protected static final String TEST_DATA_CT_PROJECT_KEY_2="TEST_DATA_CT_PROJECT_KEY_2";
-    protected static final String TEST_DATA_CT_CLIENT_ID_2="TEST_DATA_CT_CLIENT_ID_2";
-    protected static final String TEST_DATA_CT_CLIENT_SECRET_2="TEST_DATA_CT_CLIENT_SECRET_2";
+    protected static final String TEST_DATA_TENANT_NAME_2 = "TEST_DATA_TENANT_NAME_2";
+    protected static final String TEST_DATA_CT_PROJECT_KEY_2 = "TEST_DATA_CT_PROJECT_KEY_2";
+    protected static final String TEST_DATA_CT_CLIENT_ID_2 = "TEST_DATA_CT_CLIENT_ID_2";
+    protected static final String TEST_DATA_CT_CLIENT_SECRET_2 = "TEST_DATA_CT_CLIENT_SECRET_2";
 
     protected static final String TEST_DATA_PAYONE_MERCHANT_ID_2 = "TEST_DATA_PAYONE_MERCHANT_ID_2";
     protected static final String TEST_DATA_PAYONE_SUBACC_ID_2 = "TEST_DATA_PAYONE_SUBACC_ID_2";
@@ -80,20 +80,23 @@ abstract public class BaseTenant2Fixture extends BaseNotifiablePaymentFixture {
     private static String PSEUDO_CARD_PAN2;
 
     @Override
-    synchronized protected String getUnconfirmedVisaPseudoCardPan() {
-        if (PSEUDO_CARD_PAN2 == null) {
-            String s = fetchPseudoCardPan(getTestDataVisaCreditCardNo3Ds(),
-                    getTestDataPayoneMerchantId(),
-                    getTestDataPayoneSubaccId(),
-                    getTestDataPayonePortalId(),
-                    getTestDataPayoneKey());
+    protected String getUnconfirmedVisaPseudoCardPan() {
+        synchronized (BaseTenant2Fixture.class) {
+            if (PSEUDO_CARD_PAN2 == null) {
+                String s = fetchPseudoCardPan(getTestDataVisaCreditCardNo3Ds(),
+                        getTestDataPayoneMerchantId(),
+                        getTestDataPayoneSubaccId(),
+                        getTestDataPayonePortalId(),
+                        getTestDataPayoneKey());
 
-            // TODO: remove the assert and logging if the future if everything goes fine
-            assert PSEUDO_CARD_PAN2 == null : "PSEUDO_CARD_PAN2 multiple initialization";
+                // TODO: remove the assert and logging if the future if everything goes fine
+                assert PSEUDO_CARD_PAN2 == null : "PSEUDO_CARD_PAN2 multiple initialization";
 
-            PSEUDO_CARD_PAN2 = s;
-            LOG.info("Second tenant unconfirmed pseudocardpan fetched successfully");
+                PSEUDO_CARD_PAN2 = s;
+                LOG.info("Second tenant unconfirmed pseudocardpan fetched successfully");
+            }
         }
+
         return PSEUDO_CARD_PAN2;
     }
 
