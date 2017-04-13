@@ -143,24 +143,7 @@ public class BasePaymentFixture extends BaseFixture {
                                 .build()))
                 .build();
 
-        Payment payment = ctpClient().executeBlocking(PaymentCreateCommand.of(paymentDraft));
-        registerPaymentWithLegibleName(paymentName, payment);
-
-        final String orderNumber = createCartAndOrderForPayment(payment, currencyCode);
-
-        ctpClient().executeBlocking(PaymentUpdateCommand.of(
-                payment,
-                ImmutableList.<UpdateActionImpl<Payment>>builder()
-                        .add(AddTransaction.of(TransactionDraftBuilder.of(
-                                TransactionType.valueOf(transactionType),
-                                monetaryAmount,
-                                ZonedDateTime.now())
-                                .state(TransactionState.PENDING)
-                                .build()))
-                        .add(SetCustomField.ofObject(CustomFieldKeys.REFERENCE_FIELD, orderNumber))
-                        .build()));
-
-        return payment;
+        return createPaymentCartOrderFromDraft(paymentName, paymentDraft, transactionType);
     }
 
     public Payment createAndSaveBankTransferAdvancedPayment(
