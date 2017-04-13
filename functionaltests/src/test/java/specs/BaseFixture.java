@@ -394,7 +394,7 @@ public abstract class BaseFixture {
     }
 
     protected static String getRandomOrderNumber() {
-        return String.valueOf(randomSource.nextInt() + System.currentTimeMillis());
+        return String.valueOf(randomSource.nextInt() + System.nanoTime());
     }
 
     protected BlockingSphereClient ctpClient() {
