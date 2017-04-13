@@ -4,10 +4,10 @@ import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import specs.response.BasePaymentFixture;
+import specs.multitenancy.BaseTenant2Fixture;
 
 @RunWith(ConcordionRunner.class)
-public class ScheduledJobShortFixture extends BasePaymentFixture {
+public class ScheduledJobShort2Fixture extends BaseTenant2Fixture {
 
     private static ScheduledJobFixtureHelper helper;
 
@@ -30,8 +30,8 @@ public class ScheduledJobShortFixture extends BasePaymentFixture {
         return ScheduledJobFixtureHelper.waitSecondsTimeout();
     }
 
+
     public MultiValueResult verifyPaymentIsHandled(String paymentName) throws Exception {
         return helper.verifyPaymentIsHandled(paymentName);
     }
-
 }

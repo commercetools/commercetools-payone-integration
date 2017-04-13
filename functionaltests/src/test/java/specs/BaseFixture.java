@@ -69,10 +69,13 @@ import static java.util.regex.Pattern.DOTALL;
  */
 public abstract class BaseFixture {
     private static final Logger LOG = LoggerFactory.getLogger(BaseFixture.class);
+
     protected final MonetaryAmountFormat currencyFormatterDe = MonetaryFormats.getAmountFormat(Locale.GERMANY);
 
     protected static final String EMPTY_STRING = "";
     protected static final String NULL_STRING = "null";
+    public static final String BUYER_LAST_NAME = "TestBuyer";
+
     protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(15);
     protected static final long RETRY_DELAY = TimeUnit.SECONDS.toMillis(15);
     protected static final long INTERMEDIATE_REPORT_DELAY = TimeUnit.MINUTES.toMillis(3);
@@ -201,11 +204,11 @@ public abstract class BaseFixture {
     }
 
     protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode) {
-        return createCartAndOrderForPayment(payment, currencyCode, "TestBuyer", null);
+        return createCartAndOrderForPayment(payment, currencyCode, BUYER_LAST_NAME, null);
     }
 
     protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final PaymentState paymentState) {
-        return createCartAndOrderForPayment(payment, currencyCode, "TestBuyer", paymentState);
+        return createCartAndOrderForPayment(payment, currencyCode, BUYER_LAST_NAME, paymentState);
     }
 
     protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final String buyerLastName) {
@@ -219,11 +222,11 @@ public abstract class BaseFixture {
     }
 
     protected Order createAndGetOrder(Payment payment, String currencyCode) {
-        return createAndGetOrder(payment, currencyCode, "TestBuyer", null);
+        return createAndGetOrder(payment, currencyCode, BUYER_LAST_NAME, null);
     }
 
     protected Order createAndGetOrder(Payment payment, String currencyCode, PaymentState paymentState) {
-        return createAndGetOrder(payment, currencyCode, "TestBuyer", paymentState);
+        return createAndGetOrder(payment, currencyCode, BUYER_LAST_NAME, paymentState);
     }
 
     protected Order createAndGetOrder(Payment payment, String currencyCode, String buyerLastName, PaymentState paymentState) {
@@ -231,6 +234,10 @@ public abstract class BaseFixture {
         final Product product = ctpClient().executeBlocking(ProductQuery.of()).getResults().get(0);
 
         final CartDraft cardDraft = CartDraftBuilder.of(Monetary.getCurrency(currencyCode)).build();
+
+        if (buyerLastName == null) {
+            buyerLastName = BUYER_LAST_NAME;
+        }
 
         final Cart cart = ctpClient().executeBlocking(CartUpdateCommand.of(
                 ctpClient().executeBlocking(CartCreateCommand.of(cardDraft)),
@@ -421,7 +428,7 @@ public abstract class BaseFixture {
      * @return the payment fetched from the commercetools client, can be null!
      * @see #fetchPaymentById(String)
      */
-    protected Payment fetchPaymentByLegibleName(final String paymentName) {
+    public Payment fetchPaymentByLegibleName(final String paymentName) {
         return fetchPaymentById(payments.get(paymentName));
     }
 

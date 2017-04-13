@@ -33,8 +33,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys.CREDIT_CARD;
-import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys.WALLET_PAYPAL;
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys.*;
 import static io.sphere.sdk.payments.TransactionState.FAILURE;
 import static java.lang.String.format;
 
@@ -66,7 +65,7 @@ public class BasePaymentFixture extends BaseFixture {
      * @param languageCode 2 letters ISO 639 code
      * @return String id of created payment.
      */
-    protected Payment createAndSaveCardPayment(String paymentName,
+    public Payment createAndSaveCardPayment(String paymentName,
                                               String paymentMethod,
                                               String transactionType,
                                               String centAmount,
@@ -92,7 +91,7 @@ public class BasePaymentFixture extends BaseFixture {
         return createPaymentCartOrderFromDraft(paymentName, paymentDraft, transactionType);
     }
 
-    protected Payment createAndSaveCardPayment(String paymentName,
+    public Payment createAndSaveCardPayment(String paymentName,
                                                String paymentMethod,
                                                String transactionType,
                                                String centAmount,
@@ -100,7 +99,7 @@ public class BasePaymentFixture extends BaseFixture {
         return createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, Locale.ENGLISH.getLanguage());
     }
 
-    protected Payment createAndSavePayment(String paymentName,
+    public Payment createAndSavePayment(String paymentName,
                                            String paymentMethod,
                                            String transactionType,
                                            String centAmount,
@@ -108,6 +107,7 @@ public class BasePaymentFixture extends BaseFixture {
         switch (paymentMethod) {
             case CREDIT_CARD: return createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
             case WALLET_PAYPAL: return createAndSavePaypalPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
+            case BANK_TRANSFER_ADVANCE: return createAndSaveBankTransferAdvancedPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
             default: throw new IllegalArgumentException(format("Payment method [%s] is not implemented", paymentMethod));
         }
     }
@@ -163,6 +163,41 @@ public class BasePaymentFixture extends BaseFixture {
         return payment;
     }
 
+    public Payment createAndSaveBankTransferAdvancedPayment(
+            final String paymentName,
+            final String paymentMethod,
+            final String transactionType,
+            final String centAmount,
+            final String currencyCode) throws Exception {
+        return createAndSaveBankTransferAdvancedPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, BUYER_LAST_NAME);
+    }
+
+    public Payment createAndSaveBankTransferAdvancedPayment(
+            final String paymentName,
+            final String paymentMethod,
+            final String transactionType,
+            final String centAmount,
+            final String currencyCode,
+            final String buyerLastName) throws Exception {
+
+        final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
+
+        final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
+                .paymentMethodInfo(PaymentMethodInfoBuilder.of()
+                        .method(paymentMethod)
+                        .paymentInterface("PAYONE")
+                        .build())
+                .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
+                        CustomTypeBuilder.PAYMENT_CASH_ADVANCE,
+                        ImmutableMap.<String, Object>builder()
+                                .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage())
+                                .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")
+                                .build()))
+                .build();
+
+        return createPaymentCartOrderFromDraft(paymentName, paymentDraft, transactionType, buyerLastName);
+    }
+
     /**
      * Creates and saves payment from supplied draft. The method may be reused for different payment methods and types
      * as soon as they are already set in {@code paymentDraft}.
@@ -171,13 +206,13 @@ public class BasePaymentFixture extends BaseFixture {
      * @param transactionType see {@link TransactionType}
      * @return Instance of created and saved payment object
      */
-    protected Payment createPaymentCartOrderFromDraft(String paymentName, PaymentDraft paymentDraft, String transactionType) {
+    protected Payment createPaymentCartOrderFromDraft(String paymentName, PaymentDraft paymentDraft, String transactionType, String buyerLastName) {
         final BlockingSphereClient ctpClient = ctpClient();
         final Payment payment = ctpClient.executeBlocking(PaymentCreateCommand.of(paymentDraft));
 
         registerPaymentWithLegibleName(paymentName, payment);
 
-        final String orderNumber = createCartAndOrderForPayment(payment, paymentDraft.getAmountPlanned().getCurrency().getCurrencyCode());
+        final String orderNumber = createCartAndOrderForPayment(payment, paymentDraft.getAmountPlanned().getCurrency().getCurrencyCode(), buyerLastName);
 
         ctpClient.executeBlocking(PaymentUpdateCommand.of(
                 payment,
@@ -192,6 +227,10 @@ public class BasePaymentFixture extends BaseFixture {
                         .build()));
 
         return payment;
+    }
+
+    protected Payment createPaymentCartOrderFromDraft(String paymentName, PaymentDraft paymentDraft, String transactionType) {
+        return createPaymentCartOrderFromDraft(paymentName, paymentDraft, transactionType, BUYER_LAST_NAME);
     }
 
     /**
