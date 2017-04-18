@@ -22,8 +22,9 @@
       - [Publishing functional tests results](#publishing-functional-tests-results)
       - [Known functional tests issues](#known-functional-tests-issues)
     - [Paypal Sandbox Accounts](#paypal-sandbox-accounts)
-  - [Appendix 1: Shell script template that sets the environment variables](#appendix-1-shell-script-template-that-sets-the-environment-variables)
-  - [Appendix 2: Alternative configuration via properties file](#appendix-2-alternative-configuration-via-properties-file)
+  - [Appendix 1: Shell script template that sets the environment variables to run the service:](#appendix-1-shell-script-template-that-sets-the-environment-variables-to-run-the-service)
+  - [Appendix 2: Shell script template that sets the environment variables to run the Integration Tests](#appendix-2-shell-script-template-that-sets-the-environment-variables-to-run-the-integration-tests)
+    - [Appendix 3: Alternative configuration via properties file](#appendix-3-alternative-configuration-via-properties-file)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -49,19 +50,20 @@ have in mind.  Then fork the project somewhere or in GitHub and create a pull re
 ## Documentation
 
 This project is using [Concordion](http://www.concordion.org) for system tests, which is a kind of "living specification". 
-Therefore the [test definitions and results](http://commercetools.github.io/commercetools-payone-integration/latest/spec/specs/Specs.html) are the most precise documentation of the behavior. 
+Therefore the [test definitions and results](http://commercetools.github.io/commercetools-payone-integration/) are the most precise documentation of the behavior. 
 They are automatically generated, updated and published to the `gh_pages` branch of this project by the [TravisCI continuous integration](https://travis-ci.com/commercetools/commercetools-payone-integration) setup. 
 
 ## Docker images
 
 On each push to the remote github repository, a Docker image is build by travis CI.
+See [travis-build.sh](/travis-build.sh)
 
 ### Tags
 
 Every image has the following tags:
 - short git commit SHA (first 8 chars), e.g. `11be0178`
 - tag containing the travis build number, e.g. `travis-17`
-- `latest` (if `master` branch) or `branch-name` (if not `master` branch)
+- `latest` (if `master` branch) or `wip-branch-name` (if not `master` branch)
 
 https://hub.docker.com/r/sphereio/commercetools-payone-integration/tags/
 
@@ -73,33 +75,26 @@ This will trigger a new Docker build by travis CI and will create two additional
 - git tag value, e.g. `v1.0.1`
 - `production`
 
-The git release tag can be created via command line or github UI ("Draft new Release" https://github.com/commercetools/commercetools-payone-integration/releases)
+The git release tag can be created via command line or github UI ([Draft new Release](https://github.com/commercetools/commercetools-payone-integration/releases))
 
 ```bash
 git tag -a v1.0.1 -m "Minor text adjustments."
 ```
  
-**Note**: for integration tests `UPDATE_ORDER_PAYMENT_STATE` is expected to be **`true`**, 
-so explicitly setup it in the Heroku environment.
-
 ### Build
 
-The Integration is built as a "fat jar" that can be directly started via  the `java -jar` command. The jar is built as follows:
+The Integration is built as a "fat jar" that can be directly started via  the `java -jar` command. 
+The jar is built and run as follows:
 
 ```
 ./gradlew stage
-```
-
-Run the JAR:
-
-```
 java -jar service/build/libs/commercetools-payone-integration.jar
 ```
 
 ### Run
 
 At the end of this README you can find a copy/paste shell template that sets the variables. Alternatively you can use
-[a properties file](#appendix-2-alternative-configuration-via-properties-file).
+[configuration via properties file](#appendix-3-alternative-configuration-via-properties-file)
 
 The integration service itself does not provide SSL connectivity, this must be done by a load balancer / SSL terminator 
 running in front of it (which is recommended in any case).
@@ -112,10 +107,10 @@ running in front of it (which is recommended in any case).
   (for example, in Intellij IDEA you could _Run/Debug_ the gradle task `run` from the tasks list).
   
   In the script this `run` task is configured to convert the required runtime values from the local gradle settings 
-(`~/.gradle/gradle.properties`) to java runtime properties (`-Dkey=value` arguments). 
+(`gradle.properties`) to java runtime properties (`-Dkey=value` arguments). 
 This allows to skip manually set-up environment variables for the service run.
 
-  To run the built jar from command line in debug mode use (port `1044` is variable): 
+  If you wish to build/run/debug the app from command line use the next commands (port `1044` is variable): 
 
   * Listen mode:
       ```
@@ -126,6 +121,13 @@ This allows to skip manually set-up environment variables for the service run.
       ```
       java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
       ```
+      
+**Note**: if the mandatory environment variables are not exported beforehand you should export them before `java` command,
+for instance like this:
+```
+ source .service.sh && java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
+```
+where `.service.sh` is a file with secret variables like described in [Appendix 1: Shell script template that sets the environment variables to run the service:](#appendix-1-shell-script-template-that-sets-the-environment-variables-to-run-the-service)
 
 ## Test environments
 
@@ -133,8 +135,8 @@ Via the Payone PMI you have access to a full set of test data, which are impleme
 
 As a notable exception, testing PayPal payments requires developer sandbox accounts at PayPal (see [Paypal Sandbox Accounts](#paypal-sandbox-accounts)).
 
-:warning: Due to PayPal's complex and restrictive browser session handling and the parallel execution of tests (necessary due to PAYONE's notifications which take up to 7 minutes per transaction)
-a seperate account is required for each of the transaction types (see [Functional Tests configuration](#functional-tests)).
+**Warning**: Due to PayPal's complex and restrictive browser session handling and the parallel execution of tests (necessary due to PAYONE's notifications which take up to 7 minutes per transaction)
+a separate account is required for each of the transaction types (see [Functional Tests configuration](#functional-tests)).
 
 ### Development workflow
 
@@ -151,27 +153,45 @@ integration tests.
 You could find the values for Heroku test service and Travis functional tests in the encrypted [`travis-build/`](/travis-build) directory.
 
 **Note**: it's important to update  [`travis-build/`](/travis-build) settings every time you change the build settings 
-in Travis config. Even better update first the file, then on the Travis web page.
+in Travis or Heroku config. _Even better update first the file, then Travis and Heroku settings pages_.
 
 #### Heroku setup
 
-The test service run it Heroku expected to have the next values:
+The test service run in Heroku expects to have the next values:
 
 <table>
   <tr><th>Name</th><th>Content</th></tr>
-  <tr><td><code>CT_CLIENT_ID</code></td>                <td rowspan="3">Should be adjusted with Travis setup below</td></tr>
-  <tr><td><code>CT_CLIENT_SECRET</code></td>            </tr>
-  <tr><td><code>CT_PROJECT_KEY</code></td>              </tr>
-  <tr><td><code>CT_START_FROM_SCRATCH</code></td>       <td>false</td></tr>
-  <tr><td><code>PAYONE_KEY</code></td>                  <td rowspan="4">Should be adjusted with Travis setup below</td></tr>
-  <tr><td><code>PAYONE_MERCHANT_ID</code></td>          </tr>
-  <tr><td><code>PAYONE_PORTAL_ID</code></td>            </tr>
-  <tr><td><code>PAYONE_SUBACC_ID</code></td>            </tr>
-  <tr><td><code>PAYONE_MODE</code></td>                 <td>test</td></tr>
-  <tr><td><code>UPDATE_ORDER_PAYMENT_STATE</code></td>  <td>true</td></tr>
+  <tr><td><code>LONG_TIME_FRAME_SCHEDULED_JOB_CRON</code></td>               <td>3 3 3 * * ? *</td></tr>
+  <tr><td><code>SHORT_TIME_FRAME_SCHEDULED_JOB_CRON</code></td>              <td>0/30 * * * * ? *</td></tr>
+  <tr><td><code>TENANTS</code></td>                                          <td>HEROKU_FIRST_TENANT, HEROKU_SECOND_TENANT</td>
+  <tr><td><code>HEROKU_FIRST_TENANT_CT_CLIENT_ID</code></td>                 <td rowspan="6">Should be adjusted with Travis setup below</td></tr>
+  <tr><td><code>HEROKU_SECOND_TENANT_CT_CLIENT_ID</code></td>                </tr>
+  <tr><td><code>HEROKU_FIRST_TENANT_CT_CLIENT_SECRET</code></td>             </tr>
+  <tr><td><code>HEROKU_SECOND_TENANT_CT_CLIENT_SECRET</code></td>            </tr>
+  <tr><td><code>HEROKU_FIRST_TENANT_CT_PROJECT_KEY</code></td>               </tr>
+  <tr><td><code>HEROKU_SECOND_TENANT_CT_PROJECT_KEY</code></td>              </tr>
+  <tr><td><code>HEROKU_FIRST_TENANT_CT_START_FROM_SCRATCH</code></td>        <td>false</td></tr>
+  <tr><td><code>HEROKU_SECOND_TENANT_CT_START_FROM_SCRATCH</code></td>       <td>false</td></tr>
+  <tr><td><code>HEROKU_FIRST_TENANT_PAYONE_KEY</code></td>                   <td rowspan="8">Should be adjusted with Travis setup below</td></tr>
+  <tr><td><code>HEROKU_SECOND_TENANT_PAYONE_KEY</code></td>                  </tr>
+  <tr><td><code>HEROKU_FIRST_TENANT_PAYONE_MERCHANT_ID</code></td>           </tr>
+  <tr><td><code>HEROKU_SECOND_TENANT_PAYONE_MERCHANT_ID</code></td>          </tr>
+  <tr><td><code>HEROKU_FIRST_TENANT_PAYONE_PORTAL_ID</code></td>             </tr>
+  <tr><td><code>HEROKU_SECOND_TENANT_PAYONE_PORTAL_ID</code></td>            </tr>
+  <tr><td><code>HEROKU_FIRST_TENANT_PAYONE_SUBACC_ID</code></td>             </tr>
+  <tr><td><code>HEROKU_SECOND_TENANT_PAYONE_SUBACC_ID</code></td>            </tr>
+  <tr><td><code>HEROKU_FIRST_TENANT_PAYONE_MODE</code></td>                  <td>test</td></tr>
+  <tr><td><code>HEROKU_SECOND_TENANT_PAYONE_MODE</code></td>                 <td>test</td></tr>
+  <tr><td><code>HEROKU_FIRST_TENANT_UPDATE_ORDER_PAYMENT_STATE</code></td>   <td><b>true</b></td></tr>
+  <tr><td><code>HEROKU_SECOND_TENANT_UPDATE_ORDER_PAYMENT_STATE</code></td>  <td><b>false</b></td></tr>
 </table> 
 
-Scheduler values are optional: this feature is not covered by the tests.
+**Note**: 
+  * `*_UPDATE_ORDER_PAYMENT_STATE` have different values, 
+    thus the first tenant updates order state when the second one - **should not**.
+  * the Integration tests validate only short scheduled job, e.g, from `SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` 
+    (the test creates payments without explicit handle call, then waits 30 seconds and validates the payments are handled, 
+    see `ScheduledJobFactoryTest` for more details) 
 
 #### Known Heroku issues
 
@@ -189,22 +209,43 @@ Scheduler values are optional: this feature is not covered by the tests.
 
 #### Travis setup
 
-The executable specification (using [Concordion](http://concordion.org/)) requires the following environment variables
-in addition to the [commercetools API client credentials](#commercetools-api-client-credentials):
+The executable specification (using [Concordion](http://concordion.org/)) requires the following environment variables:
 
 <table>
   <tr><th>Name</th><th>Content</th></tr>
-  <tr><td><code>CT_PAYONE_INTEGRATION_URL</code></td>           <td>the URL of the service instance under test</td></tr>
-  <tr><td><code>TEST_DATA_VISA_CREDIT_CARD_NO_3DS</code></td>   <td>test simple VISA credit card number (don't use real credit card)</td></tr>
-  <tr><td><code>TEST_DATA_VISA_CREDIT_CARD_3DS</code></td>      <td>test 3-D secured VISA credit card number (dont' use real credit card)</td></tr>
-  <tr><td><code>TEST_DATA_3_DS_PASSWORD</code></td>             <td>the 3DS password of the test card. Payone Test Cards use <code>12345</code></td></tr>
-  <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_IBAN</code></td>     <td>the IBAN of a test bank account supporting Sofortueberweisung</td></tr>
-  <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_BIC</code></td>      <td>the BIC of a test bank account supporting Sofortueberweisung</td></tr>
-  <tr><td><code>TEST_DATA_PAYONE_MERCHANT_ID</code></td>        <td rowspan="4">Payone credentials for pseudocartpan generating. <br/>
+  <tr><td><code>TEST_DATA_CT_PAYONE_INTEGRATION_URL</code></td>  <td>the URL of the service instance under test</td></tr>
+  <tr><td><code>TEST_DATA_TENANT_NAME</code></td>                <td>name of the first tenant, `HEROKU_FIRST_TENANT` like in Heroku settings</td></tr>
+  <tr><td><code>TEST_DATA_VISA_CREDIT_CARD_NO_3DS</code></td>    <td>test simple VISA credit card number (don't use real credit card)</td></tr>
+  <tr><td><code>TEST_DATA_VISA_CREDIT_CARD_3DS</code></td>       <td>test 3-D secured VISA credit card number (dont' use real credit card)</td></tr>
+  <tr><td><code>TEST_DATA_3_DS_PASSWORD</code></td>              <td>the 3DS password of the test card. Payone Test Cards use <code>12345</code></td></tr>
+  <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_IBAN</code></td>      <td>the IBAN of a test bank account supporting Sofortueberweisung</td></tr>
+  <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_BIC</code></td>       <td>the BIC of a test bank account supporting Sofortueberweisung</td></tr>
+  <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_PIN</code></td>       <td rowspan="2">Sofortüberweisung test credentials to verify the payment in Selenium tests</td></tr>
+  <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_TAN</code></td>       </tr>
+  <tr><td><code>TEST_DATA_PAYONE_MERCHANT_ID</code></td>         <td rowspan="4">Payone credentials for pseudocartpan generating. <br/>
                                                                                 <b>Ensure these values are the same for Travis (local) test and Heroku deployed service!</b></td></tr>
   <tr><td><code>TEST_DATA_PAYONE_SUBACC_ID</code></td></tr>
   <tr><td><code>TEST_DATA_PAYONE_PORTAL_ID</code></td></tr>
   <tr><td><code>TEST_DATA_PAYONE_KEY</code></td></tr>
+  
+  <tr><td><code>TEST_DATA_CT_PROJECT_KEY</code></td>             <td rowspan="3">commercetools platform credentials<br/>
+                                                                                 <b>Ensure these values are the same for Travis (local) test and Heroku deployed service!</b></td></tr>
+  <tr><td><code>TEST_DATA_CT_CLIENT_ID</code></td>
+  <tr><td><code>TEST_DATA_CT_CLIENT_SECRET</code></td>
+
+  <tr><td><code>TEST_DATA_TENANT_NAME_2</code></td>              <td rowspan="8">Payone and commercetools platform settings for testing the second tenant<br/>
+                                                                                 <b>Ensure these values are the same for Travis (local) test and Heroku deployed service!</b></td></tr></td></tr>
+  <tr><td><code>TEST_DATA_CT_PROJECT_KEY_2</code></td>           </tr>
+  <tr><td><code>TEST_DATA_CT_CLIENT_ID_2</code></td>             </tr>
+  <tr><td><code>TEST_DATA_CT_CLIENT_SECRET_2</code></td>         </tr>
+  <tr><td><code>TEST_DATA_PAYONE_MERCHANT_ID_2</code></td>       </tr>
+  <tr><td><code>TEST_DATA_PAYONE_SUBACC_ID_2</code></td>         </tr>
+  <tr><td><code>TEST_DATA_PAYONE_PORTAL_ID_2</code></td>         </tr>
+  <tr><td><code>TEST_DATA_PAYONE_KEY_2</code></td>               </tr>
+
+  <tr><td><code>GH_TOKEN</code></td>                            <td>To publish build reports</td></tr>
+  <tr><td><code>DOCKER_PASSWORD</code></td>                     <td rowspan="2">To publish built docker images</td></tr>
+  <tr><td><code>DOCKER_USERNAME</code></td></tr>
 </table> 
 
 The pseudocardpan for VISA is fetched at runtime for specified `TEST_DATA_VISA_CREDIT_CARD_NO_3DS`/`TEST_DATA_VISA_CREDIT_CARD_3DS`
@@ -220,9 +261,11 @@ curl --data "request=3dscheck&mid=<PAYONE_MERCHANT_ID>&aid=<PAYONE_SUBACC_ID>&po
 * The value for `MD5_PAYONE_KEY` needs to be the MD5 encryption result of your PAYONE key (`PAYONE_KEY`). 
 Use `md5 -qs $PAYONE_KEY` to hash string value to MD5.
 * The `cardpan` must be the value of card number. You may get test data values from [wiki page]( https://wiki.commercetools.de/display/DEV/payone#payone-Creditcard%28canbetestedwithpublicIPonly%29).
-* Note that the `cardtype` request argument needs to be correspondand: `V` or `M` for _VISA_ and _Master Card_ respectively.
+* Note that the `cardtype` request argument needs to be corresponding: `V` or `M` for _VISA_ and _Master Card_ respectively.
+* Each tenant generates own pseudocardpan number for the same test card number, because the pseudocardpan numbers are 
+  specific for each Payone portal.
 
-If you have all values above set in [environment variables](#appendix-2-alternative-configuration-via-properties-file), 
+If you have all values above set in [environment variables](#appendix-2-shell-script-template-that-sets-the-environment-variables-to-run-the-integration-tests), 
 and _md5_ command is available (which is default case on Mac OS X and most of Linux distributions), 
 you may copy-paste and directly execute next line (change only `<VISA_CREDIT_CARD_3DS_NUMBER>`):
 
@@ -230,9 +273,7 @@ you may copy-paste and directly execute next line (change only `<VISA_CREDIT_CAR
 curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_NUMBER>" https://api.pay1.de/post-gateway/
 ```
 
-> NOTE:  When sending "storecarddata=yes" at the end you will receive the pseudocardpan in the response from PAYONE.
-
-To run the executable specification invoke the following command line:
+To run the integration tests locally  - invoke the following command line:
 
 ```
 ./gradlew :functionaltests:cleanTest :functionaltests:testSpec
@@ -248,7 +289,7 @@ The build results are published to [`gh-pages`](https://github.com/commercetools
 Then you are able to review the tests results in [Test results page](http://commercetools.github.io/commercetools-payone-integration/).
 
 **Note:** 
-  - github pages are overridden by any build of any branch, so in 
+  - github pages are overridden by any build of any branch, so after sequential build of different branches only the latest results are available. 
   
   - for Travis build `githubPages.repoUri` must be in HTTPS format and `$GH_TOKEN` must be set to GitHub token 
     with push permission
@@ -258,72 +299,135 @@ Then you are able to review the tests results in [Test results page](http://comm
 
 #### Known functional tests issues
 
-  - Some tests are waiting for payment update notification for payments which are already failed. 
+  - Some tests may be waiting for payment update notification for payments which are already failed. 
     These cases should be reported and avoided (fail-fast approach).
   
   - Web-driver (selenium) tests which are navigating to web-pages (Sofortüberweisung, 3ds secure verification) may fail 
-    because of wrong HTML elements names, if the service providers change html structure of their sites.
+    because of wrong HTML elements names, if the service providers change html structure of their sites. These cases
+    require fixed on demand.
 
 ### Paypal Sandbox Accounts
 
-To test with Paypal, you need own Sandbox Buyer credentials via a developer account. Available from commercetools, too; please contact support. 
+To test with Paypal, you need own Sandbox Buyer credentials via a developer account.
 
-## Appendix 1: Shell script template that sets the environment variables
+## Appendix 1: Shell script template that sets the environment variables to run the service:
 
 (fill in the values required for your environment)
 
 ```
 #!/bin/sh
-export CT_PROJECT_KEY=""
-export CT_CLIENT_ID=""
-export CT_CLIENT_SECRET=""
-export CT_START_FROM_SCRATCH="false"
-
-export PAYONE_KEY=""
-export PAYONE_MERCHANT_ID=""
-export PAYONE_MODE=""
-export PAYONE_PORTAL_ID=""
-export PAYONE_SUBACC_ID=""
-
-# from here on only test related
-
-export CT_PAYONE_INTEGRATION_URL=""
-
-export TEST_DATA_VISA_CREDIT_CARD_NO_3DS=""
-export TEST_DATA_VISA_CREDIT_CARD_3DS=""
-export TEST_DATA_3_DS_PASSWORD=""
-export TEST_DATA_SW_BANK_TRANSFER_IBAN=""
-export TEST_DATA_SW_BANK_TRANSFER_BIC=""
+export TENANTS=FIRST_TENANT
+export FIRST_TENANT_PAYONE_KEY=
+export FIRST_TENANT_PAYONE_MERCHANT_ID=
+export FIRST_TENANT_PAYONE_PORTAL_ID=
+export FIRST_TENANT_PAYONE_SUBACC_ID=
+export FIRST_TENANT_PAYONE_MODE=test
+export FIRST_TENANT_UPDATE_ORDER_PAYMENT_STATE=true
+export FIRST_TENANT_CT_PROJECT_KEY=
+export FIRST_TENANT_CT_CLIENT_ID=XXX
+export FIRST_TENANT_CT_CLIENT_SECRET=
+export FIRST_TENANT_CT_START_FROM_SCRATCH=false
 ```
 
-## Appendix 2: Alternative configuration via properties file
+## Appendix 2: Shell script template that sets the environment variables to run the Integration Tests
+
+```
+#!/bin/sh
+export TEST_DATA_CT_PAYONE_INTEGRATION_URL=https://ct-payone-integration-staging.herokuapp.com
+
+export TEST_DATA_TENANT_NAME=HEROKU_FIRST_TENANT
+export TEST_DATA_VISA_CREDIT_CARD_NO_3DS=
+export TEST_DATA_VISA_CREDIT_CARD_3DS=
+export TEST_DATA_3_DS_PASSWORD=
+export TEST_DATA_SW_BANK_TRANSFER_IBAN=
+export TEST_DATA_SW_BANK_TRANSFER_BIC=
+export TEST_DATA_SW_BANK_TRANSFER_PIN=
+export TEST_DATA_SW_BANK_TRANSFER_TAN=
+
+export TEST_DATA_PAYONE_MERCHANT_ID=
+export TEST_DATA_PAYONE_SUBACC_ID=
+export TEST_DATA_PAYONE_PORTAL_ID=
+export TEST_DATA_PAYONE_KEY=
+export TEST_DATA_CT_PROJECT_KEY=
+export TEST_DATA_CT_CLIENT_ID=
+export TEST_DATA_CT_CLIENT_SECRET=
+
+export TEST_DATA_TENANT_NAME_2=HEROKU_SECOND_TENANT
+export TEST_DATA_CT_PROJECT_KEY_2=
+export TEST_DATA_CT_CLIENT_ID_2=
+export TEST_DATA_CT_CLIENT_SECRET_2=
+export TEST_DATA_PAYONE_MERCHANT_ID_2=
+export TEST_DATA_PAYONE_SUBACC_ID_2=
+export TEST_DATA_PAYONE_PORTAL_ID_2=
+export TEST_DATA_PAYONE_KEY_2=
+```
+
+### Appendix 3: Alternative configuration via properties file
 
 Instead of the shell script described above a Java properties file called `gradle.properties` can be put in the project
 root directory to configure the build/test. It will be picked up by Gradle (and is ignored by Git).
 
+Alternatively you could use common gradle properties file in users directory `~/.gradle/gradle.properties`.
+
 ```
-# use the Gradle daemon, i.e. re-use the JVM for builds
-org.gradle.daemon=true
+# service config, like https://dashboard.heroku.com/apps/ct-payone-integration-staging/
 
-# integration service configuration
+TENANTS=HEROKU_FIRST_TENANT
+#TENANTS=HEROKU_FIRST_TENANT, HEROKU_SECOND_TENANT
+HEROKU_FIRST_TENANT_PAYONE_KEY=
+HEROKU_FIRST_TENANT_PAYONE_MERCHANT_ID=
+HEROKU_FIRST_TENANT_PAYONE_PORTAL_ID=
+HEROKU_FIRST_TENANT_PAYONE_SUBACC_ID=
+HEROKU_FIRST_TENANT_PAYONE_MODE=test
+HEROKU_FIRST_TENANT_UPDATE_ORDER_PAYMENT_STATE=true
+HEROKU_FIRST_TENANT_CT_PROJECT_KEY=
+HEROKU_FIRST_TENANT_CT_CLIENT_ID=
+HEROKU_FIRST_TENANT_CT_CLIENT_SECRET=
+HEROKU_FIRST_TENANT_CT_START_FROM_SCRATCH=false
 
-CT_PROJECT_KEY=<commercetools project key>
-CT_CLIENT_ID=<commercetools client ID>
-CT_CLIENT_SECRET=<commercetools client secret>
+HEROKU_SECOND_TENANT_PAYONE_KEY=
+HEROKU_SECOND_TENANT_PAYONE_MERCHANT_ID=
+HEROKU_SECOND_TENANT_PAYONE_PORTAL_ID=
+HEROKU_SECOND_TENANT_PAYONE_SUBACC_ID=
+HEROKU_SECOND_TENANT_PAYONE_MODE=test
+HEROKU_SECOND_TENANT_UPDATE_ORDER_PAYMENT_STATE=false
+HEROKU_SECOND_TENANT_CT_PROJECT_KEY=
+HEROKU_SECOND_TENANT_CT_CLIENT_ID=
+HEROKU_SECOND_TENANT_CT_CLIENT_SECRET=
+HEROKU_SECOND_TENANT_CT_START_FROM_SCRATCH=false
 
-PAYONE_KEY=<PAYONE Key>
-PAYONE_MERCHANT_ID=<PAYONE merchant ID>
-PAYONE_MODE=<PAYONE mode (live or test)>
-PAYONE_PORTAL_ID=<PAYONE portal ID>
-PAYONE_SUBACC_ID=<PAYONE subaccount>
+# END OF service config, like https://dashboard.heroku.com/apps/ct-payone-integration-staging/
 
-# test configuration
+# TRAVIS build variables
 
-CT_PAYONE_INTEGRATION_URL=<URL of the integration service instance under test>
+TEST_DATA_CT_PAYONE_INTEGRATION_URL=https://ct-payone-integration-staging.herokuapp.com
+#TEST_DATA_CT_PAYONE_INTEGRATION_URL=http://localhost:8080
 
-TEST_DATA_VISA_CREDIT_CARD_NO_3DS=<see PAYONE Test data documentation>
-TEST_DATA_VISA_CREDIT_CARD_3DS=<see PAYONE Test data documentation>
-TEST_DATA_3_DS_PASSWORD=<see PAYONE Test data documentation>
-TEST_DATA_SW_BANK_TRANSFER_IBAN=<see PAYONE Test data documentation>
-TEST_DATA_SW_BANK_TRANSFER_BIC=<see PAYONE Test data documentation>
+TEST_DATA_TENANT_NAME=HEROKU_FIRST_TENANT
+TEST_DATA_VISA_CREDIT_CARD_NO_3DS=
+TEST_DATA_VISA_CREDIT_CARD_3DS=
+TEST_DATA_3_DS_PASSWORD=
+TEST_DATA_SW_BANK_TRANSFER_IBAN=
+TEST_DATA_SW_BANK_TRANSFER_BIC=
+TEST_DATA_SW_BANK_TRANSFER_PIN=
+TEST_DATA_SW_BANK_TRANSFER_TAN=
+
+TEST_DATA_PAYONE_MERCHANT_ID=
+TEST_DATA_PAYONE_SUBACC_ID=
+TEST_DATA_PAYONE_PORTAL_ID=
+TEST_DATA_PAYONE_KEY=
+TEST_DATA_CT_PROJECT_KEY=
+TEST_DATA_CT_CLIENT_ID=
+TEST_DATA_CT_CLIENT_SECRET=
+
+TEST_DATA_TENANT_NAME_2=HEROKU_SECOND_TENANT
+TEST_DATA_CT_PROJECT_KEY_2=
+TEST_DATA_CT_CLIENT_ID_2=
+TEST_DATA_CT_CLIENT_SECRET_2=
+TEST_DATA_PAYONE_MERCHANT_ID_2=
+TEST_DATA_PAYONE_SUBACC_ID_2=
+TEST_DATA_PAYONE_PORTAL_ID_2=
+TEST_DATA_PAYONE_KEY_2=
+
+# END OF TRAVIS build variables
 ```
