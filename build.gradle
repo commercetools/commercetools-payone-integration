@@ -105,17 +105,17 @@ project(":service") {
                     'to JVM runtime properties (-Dkey=value arguments)'
 
         doLast {
-            applicationDefaultJvmArgs = assertAndGetServiceProperties(project)
+            applicationDefaultJvmArgs = getServiceProperties(project)
         }
     }
 }
 
 /**
- * Convert the list of required properties from gradle build properties or environment variables
- * to java runtime properties (supplied as <b>-Dkey=value</b> arguments).
+ * Convert the list of application specific properties from gradle build properties (<i>~/.gradle/gradle.properties</i>)
+ * or environment variables to java runtime properties (supplied as <b>-Dkey=value</b> arguments).
  * <p>
  * The function tries to find a property value from the {@code project} properties and then from environment variables.
- * If neither of them exists - throw an exception (fail-fast)
+ * If neither of them exists - the property mapping is skipped.
  * <p>
  *     Opposite to {@link #assertExecutableSpecRequirementsForTests(org.gradle.api.Project, org.gradle.api.tasks.testing.Test)}
  *     this function is used for the service runtime.
@@ -123,51 +123,42 @@ project(":service") {
  * @param project gradle project from which to take the properties
  * @return a list of java runtime argument in <i>-Dkey=value</i> syntax.
  *
- * @throws GradleException if any required system property or environment variable is undefined or empty
  * @see #assertExecutableSpecRequirementsForTests(org.gradle.api.Project, org.gradle.api.tasks.testing.Test)
  */
-static List<String> assertAndGetServiceProperties(Project project) {
-    // a list of mandatory runtime properties
-    def mandatoryPropertiesToMap = [
+static List<String> getServiceProperties(Project project) {
+    def propertiesToMap = [
                            'TENANTS',
-                           'HEROKUTENANT_CT_PROJECT_KEY',
-                           'HEROKUTENANT_CT_CLIENT_ID',
-                           'HEROKUTENANT_CT_CLIENT_SECRET',
+                           'HEROKU_FIRST_TENANT_CT_PROJECT_KEY',
+                           'HEROKU_FIRST_TENANT_CT_CLIENT_ID',
+                           'HEROKU_FIRST_TENANT_CT_CLIENT_SECRET',
 
-                           'HEROKUTENANT_PAYONE_MERCHANT_ID',
-                           'HEROKUTENANT_PAYONE_PORTAL_ID',
-                           'HEROKUTENANT_PAYONE_SUBACC_ID',
-                           'HEROKUTENANT_PAYONE_KEY',
-                           'HEROKUTENANT_PAYONE_MODE'
+                           'HEROKU_FIRST_TENANT_PAYONE_MERCHANT_ID',
+                           'HEROKU_FIRST_TENANT_PAYONE_PORTAL_ID',
+                           'HEROKU_FIRST_TENANT_PAYONE_SUBACC_ID',
+                           'HEROKU_FIRST_TENANT_PAYONE_KEY',
+                           'HEROKU_FIRST_TENANT_PAYONE_MODE',
+
+                           'HEROKU_SECOND_TENANT_CT_PROJECT_KEY',
+                           'HEROKU_SECOND_TENANT_CT_CLIENT_ID',
+                           'HEROKU_SECOND_TENANT_CT_CLIENT_SECRET',
+
+                           'HEROKU_SECOND_TENANT_PAYONE_MERCHANT_ID',
+                           'HEROKU_SECOND_TENANT_PAYONE_PORTAL_ID',
+                           'HEROKU_SECOND_TENANT_PAYONE_SUBACC_ID',
+                           'HEROKU_SECOND_TENANT_PAYONE_KEY',
+                           'HEROKU_SECOND_TENANT_PAYONE_MODE'
     ]
 
-    def optionalPropertiesToMap = [
-            'HEROKU_SECOND_TENANT_CT_PROJECT_KEY',
-            'HEROKU_SECOND_TENANT_CT_CLIENT_ID',
-            'HEROKU_SECOND_TENANT_CT_CLIENT_SECRET',
-
-            'HEROKU_SECOND_TENANT_PAYONE_MERCHANT_ID',
-            'HEROKU_SECOND_TENANT_PAYONE_PORTAL_ID',
-            'HEROKU_SECOND_TENANT_PAYONE_SUBACC_ID',
-            'HEROKU_SECOND_TENANT_PAYONE_KEY',
-            'HEROKU_SECOND_TENANT_PAYONE_MODE'
-    ]
-
-    def mandatoryProperties = mandatoryPropertiesToMap.collect { propertyKey ->
-        def propertyValue = findValueByName(project, propertyKey)
-        return "-D${propertyKey}=${assertValueIsNotNullOrEmpty(propertyKey, propertyValue)}"
-    }
-
-    def optionalProperties = optionalPropertiesToMap.collect { propertyKey ->
+    def mappedProperties = propertiesToMap.collect { propertyKey ->
         def propertyValue = findValueByName(project, propertyKey)
         if (propertyValue != null) {
             return "-D${propertyKey}=${propertyValue}"
         }
         return null
-    }.grep() // filter null (empty) properties
+    }.grep() // filter out null (empty) properties
 
 
-    return mandatoryProperties + optionalProperties
+    return mappedProperties
 }
 
 /**
@@ -184,14 +175,14 @@ static String findValueByName(Project project, String propertyKey) {
 /**
  * Asserts that system properties and environment variables required for running the executable specification are set.
  * <p>
- *     Opposite to {@link #assertAndGetServiceProperties(org.gradle.api.Project)} this function is used for
+ *     Opposite to {@link #getServiceProperties(org.gradle.api.Project)} this function is used for
  *     functional tests.
  *
  * @param project the project
  * @param test the test task to assert the configuration for
  *
  * @throws GradleException if any required system property or environment variable is undefined or empty
- * @see #assertAndGetServiceProperties(org.gradle.api.Project)
+ * @see #getServiceProperties(org.gradle.api.Project)
  */
 static void assertExecutableSpecRequirementsForTests(Project project, Test test) {
     test.systemProperties['concordion.extensions'] =
