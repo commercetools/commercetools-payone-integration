@@ -114,8 +114,11 @@ project(":service") {
  * Convert the list of application specific properties from gradle build properties (<i>~/.gradle/gradle.properties</i>)
  * or environment variables to java runtime properties (supplied as <b>-Dkey=value</b> arguments).
  * <p>
- * The function tries to find a property value from the {@code project} properties and then from environment variables.
- * If neither of them exists - the property mapping is skipped.
+ *     The function tries to find a property value from the {@code project} properties and then from environment variables.
+ *     If neither of them exists - the property mapping is skipped.
+ * <p>
+ *     Also this function tries to parse {@code TENANTS} property and later maps <b>all</b> available values which have
+ *     property name starting string with tenant name.
  * <p>
  *     Opposite to {@link #assertExecutableSpecRequirementsForTests(org.gradle.api.Project, org.gradle.api.tasks.testing.Test)}
  *     this function is used for the service runtime.
@@ -126,30 +129,27 @@ project(":service") {
  * @see #assertExecutableSpecRequirementsForTests(org.gradle.api.Project, org.gradle.api.tasks.testing.Test)
  */
 static List<String> getServiceProperties(Project project) {
-    def propertiesToMap = [
-                           'TENANTS',
-                           'HEROKU_FIRST_TENANT_CT_PROJECT_KEY',
-                           'HEROKU_FIRST_TENANT_CT_CLIENT_ID',
-                           'HEROKU_FIRST_TENANT_CT_CLIENT_SECRET',
-
-                           'HEROKU_FIRST_TENANT_PAYONE_MERCHANT_ID',
-                           'HEROKU_FIRST_TENANT_PAYONE_PORTAL_ID',
-                           'HEROKU_FIRST_TENANT_PAYONE_SUBACC_ID',
-                           'HEROKU_FIRST_TENANT_PAYONE_KEY',
-                           'HEROKU_FIRST_TENANT_PAYONE_MODE',
-
-                           'HEROKU_SECOND_TENANT_CT_PROJECT_KEY',
-                           'HEROKU_SECOND_TENANT_CT_CLIENT_ID',
-                           'HEROKU_SECOND_TENANT_CT_CLIENT_SECRET',
-
-                           'HEROKU_SECOND_TENANT_PAYONE_MERCHANT_ID',
-                           'HEROKU_SECOND_TENANT_PAYONE_PORTAL_ID',
-                           'HEROKU_SECOND_TENANT_PAYONE_SUBACC_ID',
-                           'HEROKU_SECOND_TENANT_PAYONE_KEY',
-                           'HEROKU_SECOND_TENANT_PAYONE_MODE'
+    def commonProperties = [
+            'TENANTS',
+            'LONG_TIME_FRAME_SCHEDULED_JOB_CRON',
+            'SHORT_TIME_FRAME_SCHEDULED_JOB_CRON'
     ]
 
-    def mappedProperties = propertiesToMap.collect { propertyKey ->
+    def tenantsString = findValueByName(project, 'TENANTS')?.trim()
+
+    // try to map all tenant-specific properties (e.g., prefixed by tenant name) from project.properties or System.getenv() set
+    if (tenantsString) {
+        def tenantsList = tenantsString.split("\\s*,\\s*") // split and trim
+
+        // merge and filter all properties prefixed by a tenant name
+        def tenantsProperties = (project.properties.keySet() + System.getenv().keySet()).findAll { property ->
+            tenantsList.any {tenantName -> property.startsWith(tenantName)}
+        }
+
+        commonProperties.addAll(tenantsProperties)
+    }
+
+    def mappedCommonProperties = commonProperties.collect { propertyKey ->
         def propertyValue = findValueByName(project, propertyKey)
         if (propertyValue != null) {
             return "-D${propertyKey}=${propertyValue}"
@@ -157,8 +157,7 @@ static List<String> getServiceProperties(Project project) {
         return null
     }.grep() // filter out null (empty) properties
 
-
-    return mappedProperties
+    return mappedCommonProperties
 }
 
 /**
