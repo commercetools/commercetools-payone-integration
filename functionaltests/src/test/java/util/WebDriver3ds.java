@@ -28,7 +28,7 @@ public class WebDriver3ds extends HtmlUnitDriver {
     private static final int DEFAULT_TIMEOUT = 5;
 
     public WebDriver3ds() {
-        super(BrowserVersion.FIREFOX_38, true);
+        super(BrowserVersion.FIREFOX_45, true);
 
         final Timeouts timeouts = manage().timeouts();
         timeouts.implicitlyWait(DEFAULT_TIMEOUT, TimeUnit.SECONDS);

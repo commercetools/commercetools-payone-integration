@@ -18,13 +18,13 @@ def depVersions = [
         hamcrest: '1.3',
         jUnit: '4.12',
         moneta: '1.0',
-        slf4jLog4j: '1.7.13'
+        slf4jLogbackClassic: '1.2.2',
+        slf4jLog4j: '1.7.25'
 ]
 
 allprojects {
     group = 'com.commercetools'
-    // NOTE: please also change the version in com.commercetools.pspadapter.payone.config.PropertyProvider when changing the version
-    version = '1.1.0'
+    version = '1.1.0' // this version is used in shadowJar.manifest.Implementation-Version and then at runtime as getImplementationVersion()
 
     tasks.withType(JavaCompile) {
         options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
@@ -36,6 +36,7 @@ subprojects {
     apply plugin: 'java'
 
     sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
 
     repositories {
         mavenCentral()
@@ -46,12 +47,11 @@ subprojects {
         compile "com.commercetools.sdk.jvm.core:commercetools-java-client:$depVersions.commercetoolsSdkJvm"
         compile "com.commercetools.sdk.jvm.core:commercetools-models:$depVersions.commercetoolsSdkJvm"
         compile "org.javamoney:moneta:$depVersions.moneta"
-        compile "org.slf4j:slf4j-log4j12:$depVersions.slf4jLog4j"
+        compile "ch.qos.logback:logback-classic:$depVersions.slf4jLogbackClassic"
 
         testCompile "junit:junit:$depVersions.jUnit"
         testCompile "org.hamcrest:hamcrest-core:$depVersions.hamcrest"
         testCompile "org.hamcrest:hamcrest-library:$depVersions.hamcrest"
-
     }
 
 }
@@ -62,6 +62,10 @@ task wrapper(type: Wrapper) {
 
 project(":service") {
     apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'application' // allow "run" task to build and run the app
+
+    // required property for application plugin
+    mainClassName = 'com.commercetools.pspadapter.payone.ServiceFactory'
 
     dependencies {
         compile 'com.mashape.unirest:unirest-java:1.4.7'
@@ -80,20 +84,80 @@ project(":service") {
     shadowJar {
         archiveName = "commercetools-payone-integration.jar"
         manifest {
-            attributes 'Main-Class': 'com.commercetools.pspadapter.payone.ServiceFactory'
+            attributes 'Main-Class': project.mainClassName
+
+            // set version to define at runtime using getImplementationVersion()
+            attributes 'Implementation-Title': rootProject.name
+            attributes 'Implementation-Version': allprojects.version
+        }
+
+        doLast {
+            println "Packaged JAR to ${destinationDir}/${archiveName}"
+        }
+    }
+
+    run {
+        dependsOn ':service:convertGradlePropertiesToJvmArgs'
+    }
+
+    task convertGradlePropertiesToJvmArgs (type:Task) {
+        description 'Convert the gradle build properties (set in ~/.gradle/gradle.properties) ' +
+                    'to JVM runtime properties (-Dkey=value arguments)'
+
+        doLast {
+            applicationDefaultJvmArgs = assertAndGetServiceProperties(project)
         }
     }
 }
 
 /**
+ * Convert the list of required properties from gradle build properties or environment variables
+ * to java runtime properties (supplied as <b>-Dkey=value</b> arguments).
+ * <p>
+ * The function tries to find a property value from the {@code project} properties and then from environment variables.
+ * If neither of them exists - throw an exception (fail-fast)
+ * <p>
+ *     Opposite to {@link #assertExecutableSpecRequirementsForTests(org.gradle.api.Project, org.gradle.api.tasks.testing.Test)}
+ *     this function is used for the service runtime.
+ *
+ * @param project gradle project from which to take the properties
+ * @return a list of java runtime argument in <i>-Dkey=value</i> syntax.
+ *
+ * @throws GradleException if any required system property or environment variable is undefined or empty
+ * @see #assertExecutableSpecRequirementsForTests(org.gradle.api.Project, org.gradle.api.tasks.testing.Test)
+ */
+static List<String> assertAndGetServiceProperties(Project project) {
+    // a list of mandatory runtime properties
+    def propertiesToMap = ['CT_PROJECT_KEY',
+                           'CT_CLIENT_ID',
+                           'CT_CLIENT_SECRET',
+
+                           'PAYONE_MERCHANT_ID',
+                           'PAYONE_PORTAL_ID',
+                           'PAYONE_SUBACC_ID',
+                           'PAYONE_KEY',
+                           'PAYONE_MODE'
+    ]
+
+    return propertiesToMap.collect { propertyKey ->
+        def propertyValue = project.hasProperty(propertyKey) ? (String)project[propertyKey] : System.getenv(propertyKey)
+        return "-D${propertyKey}=${assertValueIsNotNullOrEmpty(propertyKey, propertyValue)}"
+    }
+}
+
+/**
  * Asserts that system properties and environment variables required for running the executable specification are set.
+ * <p>
+ *     Opposite to {@link #assertAndGetServiceProperties(org.gradle.api.Project)} this function is used for
+ *     functional tests.
  *
  * @param project the project
  * @param test the test task to assert the configuration for
  *
  * @throws GradleException if any required system property or environment variable is undefined or empty
+ * @see #assertAndGetServiceProperties(org.gradle.api.Project)
  */
-void assertExecutableSpecRequirements(Project project, Test test) {
+static void assertExecutableSpecRequirementsForTests(Project project, Test test) {
     test.systemProperties['concordion.extensions'] =
             'org.concordion.ext.inputstyle.InputStyleExtension,' +
             'org.concordion.ext.runtotals.RunTotalsExtension,' +
@@ -121,7 +185,7 @@ void assertExecutableSpecRequirements(Project project, Test test) {
 
     propertiesToMap.each { propertyKey ->
         test.environment propertyKey, project.hasProperty(propertyKey) ? project[propertyKey] : System.getenv(propertyKey)
-        assertValueIsNotNullOrEmpty(propertyKey, test.getEnvironment())
+        assertMapValueIsNotNullOrEmpty(propertyKey, test.getEnvironment())
     }
 }
 
@@ -135,6 +199,8 @@ project(":functionaltests") {
         testCompile 'org.concordion:concordion-parallel-run-extension:1.0.1'
         testCompile 'org.seleniumhq.selenium:selenium-java:2.53.1'
 
+        // the selenium dependency above has default Log4j logger, thus we have to bridge it to our slf4j settings
+        testCompile "org.slf4j:log4j-over-slf4j:$depVersions.slf4jLog4j"
     }
 
     compileJava.dependsOn ':service:jar'
@@ -144,7 +210,7 @@ project(":functionaltests") {
     }
 
     test.doFirst {
-        assertExecutableSpecRequirements(project, test)
+        assertExecutableSpecRequirementsForTests(project, test)
     }
 
     task testSpec(type: Test) {
@@ -156,7 +222,7 @@ project(":functionaltests") {
     }
 
     testSpec.doFirst {
-        assertExecutableSpecRequirements(project, testSpec)
+        assertExecutableSpecRequirementsForTests(project, testSpec)
     }
 }
 
@@ -199,11 +265,23 @@ publishGhPages  {
  *
  * @throws GradleException if the value is undefined or empty
  */
-void assertValueIsNotNullOrEmpty(String key, Map<String, Object> map) {
-    def property = map.get(key)
+static void assertMapValueIsNotNullOrEmpty(String key, Map<String, Object> map) {
+    assertValueIsNotNullOrEmpty(key, map.get(key))
+}
+
+/**
+ * Asserts that the property is non-null and non-empty value.
+ * @param key      property name to show in case of exception
+ * @param property a property to verify
+ *
+ * @throws GradleException if the value is undefined or empty
+ */
+static String assertValueIsNotNullOrEmpty(String key, String property) {
     if ((property == null) || property.isEmpty()) {
         throw new GradleException('Property or environment variable ' + key + ' must not be null or empty.')
     }
+
+    return property
 }
 
 task stage {

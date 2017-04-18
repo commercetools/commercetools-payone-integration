@@ -5,8 +5,6 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMeth
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
 import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.payments.PaymentMethodInfo;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 
 import java.util.Map;
 import java.util.Optional;
@@ -15,8 +13,6 @@ import java.util.function.Consumer;
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
 
 public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
-
-    private static final Logger LOG = LogManager.getLogger(PaymentDispatcher.class);
 
     private final Map<PaymentMethod, PaymentMethodDispatcher> methodDispatcher;
 

@@ -1,3 +1,11 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Mapping payment statuses to order payment state](#mapping-payment-statuses-to-order-payment-state)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Mapping payment statuses to order payment state
 
 When the service receives a notification from Payone about changing status of a payment we should update also 
