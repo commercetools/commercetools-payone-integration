@@ -86,6 +86,9 @@ Name               | Content
 ------------------ | -----------------
 `TENANTS`          | comma or semicolon separated list of tenant names. At least one name is required. Whitespaces are ignored.
 
+**Note**: the tenant names are used as a part of URI, thus use only characters allowed for path part of an URI. 
+We strongly recommend not to use special or Unicode characters and limit the set with `[a-Z0-9_-]`
+
 ##### Mandatory commercetools API client credentials
 
 All these properties must be set for every tenant name described in `TENANTS` property above.
@@ -102,8 +105,8 @@ Can be found in [Commercetools Admin Center](https://admin.commercetools.com/).
 
 All these properties must be set for every tenant name described in `TENANTS` property above.
 
-Name                 | Content             | Required  |
----------------------|---------------------|-----------|
+Name                         | Content             | Required  |
+-----------------------------|---------------------|-----------|
 `TENANT1_PAYONE_PORTAL_ID`   | Payment portal ID   | **Yes**   |
 `TENANT1_PAYONE_KEY`         | Payment portal key  | **Yes**   |
 `TENANT1_PAYONE_MERCHANT_ID` | Merchant account ID | **Yes**   |
@@ -150,18 +153,18 @@ Starting from version 2 a single service instance may be use for multiple tenant
 merchants or suppliers. The next configuration properties are required for this:
 
   * set mandatory `TENANTS` property as described in _[Mandatory common properties](#mandatory-common-properties)_ section above.
-  * setup Commercetools and Payone properties for each specific tenant name, for example, if one has `TENANTS=FOO, BAR`,
-    then he should explicitly set `FOO_CT_PROJECT_KEY`, `BAR_CT_PROJECT_KEY`, `FOO_PAYONE_PORTAL_ID`, 
-    `BAR_PAYONE_PORTAL_ID` and so on.
+  * setup Commercetools and Payone properties for each specific tenant name, for example, if one has `TENANTS=BOOTS, BIKES`,
+    then he should explicitly set `BOOTS_CT_PROJECT_KEY`, `BIKES_CT_PROJECT_KEY`, `BOOTS_PAYONE_PORTAL_ID`, 
+    `BIKES_PAYONE_PORTAL_ID` and so on.
 
 When the service is started it initializes separate URL handlers for all specified tenants:
   * Handle payments:
-    * GET <code>https://{your-service-instance.example.com}/**FOO**/commercetools/handle/payments/_payment-uuid_</code>
-    * GET <code>https://{your-service-instance.example.com}/**BAR**/commercetools/handle/payments/_payment-uuid_</code> 
+    * GET <code>https://{your-service-instance.example.com}/**BOOTS**/commercetools/handle/payments/_payment-uuid_</code>
+    * GET <code>https://{your-service-instance.example.com}/**BIKES**/commercetools/handle/payments/_payment-uuid_</code> 
    
   * Listen Payone Notifications:
-    * POST <code>https://{your-service-instance.example.com}/**FOO**/payone/notification</code>
-    * POST <code>https://{your-service-instance.example.com}/**BAR**/payone/notification</code>
+    * POST <code>https://{your-service-instance.example.com}/**BOOTS**/payone/notification</code>
+    * POST <code>https://{your-service-instance.example.com}/**BIKES**/payone/notification</code>
 
 ### Scheduled tasks
 
