@@ -207,16 +207,44 @@
             See <a href="https://github.com/commercetools/commercetools-payone-integration/issues/68">issue #68</a>.
         </p>
     </table>
+
+    <h3>Verify Order#paymentState</h3>
+    <p>For <b>paid</b> payments it expected to be <b>Paid</b>,
+        for failed <i>Payment 2</i> - unchanged (null)</p>
+    <table c:execute="#orderPaymentState = fetchOrderPaymentState(#paymentName)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#orderPaymentState">Order Payment State</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>Paid</td>
+        </tr>
+        <tr>
+            <td>Payment 2</td>
+            <td>(null)</td>
+        </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>Paid</td>
+        </tr>
+        <tr>
+            <td>Payment 4</td>
+            <td>Paid</td>
+        </tr>
+    </table>
+
 </div>
 <h2>Further Details</h2>
 <h3>What happens if the verification fails?</h3>
-<p>
-    That's out of the Integration Service's scope.<br/>
-    The Integration Service is notified by PAYONE only in case of a successful verification.
-</p>
-<p>
-    The checkout implementation needs to take care of failed verifications - the user will be redirected to
-    the <em>backUrl</em> or the <em>errorUrl</em> specified in the Payment object.
-</p>
+
+<ol>
+    <li>Check the name of the input fields in <code>WebDriverSofortueberweisung/WebDriverSofortueberweisungConstants</code>.
+        If the Sofortüberweisung site changes the elements names - the test should be updated.</li>
+    <li>Check potential issues during the payments creation. The payments won't be notified about status change once
+        they are failed!</li>
+    <li>The checkout implementation needs to take care of failed verifications - the user will be redirected to
+        the <em>backUrl</em> or the <em>errorUrl</em> specified in the Payment object</li>
+</ol>
 </body>
 </html>

@@ -2,7 +2,13 @@ package com.commercetools.pspadapter.payone.config;
 
 import com.google.common.collect.ImmutableMap;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
+
+import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
 
 /**
  * @author fhaertig
@@ -34,37 +40,53 @@ public class PropertyProvider {
 
     public static final String SECURE_KEY = "SECURE_KEY";
 
+    public static final String UPDATE_ORDER_PAYMENT_STATE = "UPDATE_ORDER_PAYMENT_STATE";
+
     private final ImmutableMap<String, String> internalProperties;
 
     public PropertyProvider() {
+        String implementationVersion = ofNullable(getClass().getPackage().getImplementationVersion()).orElse("DEBUG-VERSION");
         internalProperties = ImmutableMap.<String, String>builder()
-            .put(PAYONE_API_VERSION, "3.9")
-            .put(PAYONE_REQUEST_ENCODING, "UTF-8")
-            .put(PAYONE_SOLUTION_NAME, "commercetools-platform")
-            .put(PAYONE_SOLUTION_VERSION, "1")
-            .put(PAYONE_INTEGRATOR_NAME, "commercetools-payone-integration")
-            // TODO set dynamically
-            .put(PAYONE_INTEGRATOR_VERSION, "1.1.0-SNAPSHOT")
-            .build();
+                .put(PAYONE_API_VERSION, "3.9")
+                .put(PAYONE_REQUEST_ENCODING, "UTF-8")
+                .put(PAYONE_SOLUTION_NAME, "commercetools-platform")
+                .put(PAYONE_SOLUTION_VERSION, "1")
+                .put(PAYONE_INTEGRATOR_NAME, "commercetools-payone-integration")
+                .put(PAYONE_INTEGRATOR_VERSION, implementationVersion)
+                .build();
     }
 
     /**
-     * Gets an optional property.
+     * Try to get a property by name in the next order:<ul>
+     *     <li>fetch from runtime properties (<i>-D</i> java arguments) using {@link System#getProperty(String)}</li>
+     *     <li>fetch from environment variables using {@link System#getenv(String)}</li>
+     *     <li>fetch from hardcoded {@link #internalProperties} map.</li>
+     * </ul>
+     * <p>
+     *     If neither of them exists - empty {@link Optional} is returned.
+     *
      * @param propertyName the name of the requested property, must not be null
      * @return the property, an empty Optional if not present; empty values are treated as present
      */
     public Optional<String> getProperty(final String propertyName) {
-        final Optional<String> internalProperty = Optional.ofNullable(internalProperties.get(propertyName));
-        if (internalProperty.isPresent()) {
-            return internalProperty;
-        }
+        return getFirstValuableProperty(asList(
+                () -> System.getProperty(propertyName),
+                () -> System.getenv(propertyName),
+                () -> internalProperties.get(propertyName)
+        ));
+    }
 
-        final Optional<String> environmentValue = Optional.ofNullable(System.getenv(propertyName));
-        return environmentValue;
+    private static <T> Optional<T> getFirstValuableProperty(List<Supplier<T>> propertyValueSupplier) {
+        return ofNullable(propertyValueSupplier.stream()
+                .map(Supplier::get)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null));
     }
 
     /**
      * Gets a mandatory non-empty property.
+     *
      * @param propertyName the name of the requested property, must not be null
      * @return the property value
      * @throws IllegalStateException if the property isn't defined or empty

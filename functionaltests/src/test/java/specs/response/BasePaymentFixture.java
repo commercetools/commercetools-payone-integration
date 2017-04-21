@@ -2,6 +2,8 @@ package specs.response;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
+import com.commercetools.service.OrderService;
+import com.commercetools.service.OrderServiceImpl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.collect.ImmutableList;
@@ -15,6 +17,9 @@ import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
+import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
 
 import javax.money.MonetaryAmount;
@@ -22,15 +27,29 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
+
+import static io.sphere.sdk.payments.TransactionState.FAILURE;
+import static java.lang.String.format;
 
 /**
  * Base class to create and handle test payments for Payone.
  */
 public class BasePaymentFixture extends BaseFixture {
 
+    private static final Logger LOG = LoggerFactory.getLogger(BasePaymentFixture.class);
+
     public static final String baseRedirectUrl = "https://www.example.com/sofortueberweisung_charge_immediately/";
+
+    protected OrderService orderService;
+
+    @Before
+    public void setUp() throws Exception {
+        super.initializeCommercetoolsClient();
+        orderService = new OrderServiceImpl(ctpClient());
+    }
 
     /**
      * Creates credit card payment (PAYMENT_CREDIT_CARD) and saves it to commercetools service. Also created payment is
@@ -119,6 +138,25 @@ public class BasePaymentFixture extends BaseFixture {
                 .findFirst()
                 .map(SphereJsonUtils::parse)
                 .orElse(new TextNode("ERROR in payment transaction result: response JSON node not found"));
+    }
+
+    /**
+     * Check all the payments from {@code paymentNamesList} have non-FAILURE status. If at least one is failed -
+     * {@link IllegalStateException} is thrown.
+     * @param paymentNamesList names of payments to check
+     * @throws IllegalStateException if some payments are failed.
+     */
+    protected void validatePaymentsNotFailed(final List<String> paymentNamesList) throws IllegalStateException {
+        // since fetchPaymentByLegibleName() is a slow blocking operation - make the stream parallel
+        paymentNamesList.parallelStream().forEach(paymentName ->{
+            Payment payment = fetchPaymentByLegibleName(paymentName);
+            List<Transaction> transactions = payment.getTransactions();
+            TransactionState lastTransactionState = transactions.size() > 0 ? transactions.get(transactions.size() - 1).getState() : null;
+            if (FAILURE.equals(lastTransactionState)) {
+                throw new IllegalStateException(format("Payment [%s] transaction is FAILURE, payment status is [%s]",
+                        payment.getId(), payment.getPaymentStatus().getInterfaceCode()));
+            }
+        });
     }
 
     /**

@@ -4,12 +4,12 @@ import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
 import io.sphere.sdk.payments.Payment;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.ZonedDateTime;
 import java.util.ConcurrentModificationException;
@@ -22,7 +22,7 @@ import java.util.function.Consumer;
  */
 public abstract class ScheduledJob implements Job {
 
-    public static final Logger LOG = LogManager.getLogger(ScheduledJob.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ScheduledJob.class);
 
     public static final String SERVICE_KEY = "INTEGRATIONSERVICE";
     public static final String DISPATCHER_KEY = "DISPATCHERSUPPLIER";
@@ -41,12 +41,11 @@ public abstract class ScheduledJob implements Job {
                 final PaymentWithCartLike paymentWithCartLike = queryExecutor.getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
                 paymentDispatcher.accept(paymentWithCartLike);
             } catch (final NoCartLikeFoundException ex) {
-                LOG.debug(String.format("Could not dispatch payment with ID \"%s\": %s", payment.getId(), ex.getMessage()));
+                LOG.debug("Could not dispatch payment with ID \"{}\": {}", payment.getId(), ex.getMessage());
             } catch (final ConcurrentModificationException ex) {
-                LOG.info(String.format("Could not dispatch payment with ID \"%s\": The payment is currently processed by someone else.", payment.getId()));
-                LOG.debug(ex);
+                LOG.info("Could not dispatch payment with ID \"{}\": The payment is currently processed by someone else.", payment.getId());
             } catch (final RuntimeException ex) {
-                LOG.error(String.format("Error dispatching payment with ID \"%s\"", payment.getId()), ex);
+                LOG.error("Error dispatching payment with ID \"{}\"", payment.getId(), ex);
             }
         };
 

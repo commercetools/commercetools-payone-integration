@@ -1,7 +1,5 @@
 package util;
 
-import static org.openqa.selenium.support.ui.ExpectedConditions.not;
-
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -15,6 +13,11 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.openqa.selenium.support.ui.ExpectedConditions.not;
+import static util.constant.WebDriver3ds.URL_3DS_PATTERN;
+import static util.constant.WebDriverCommon.CSS_SELECTOR_PASSWORD;
+import static util.constant.WebDriverCommon.CSS_SELECTOR_SEND;
+
 /**
  * @author fhaertig
  * @author Jan Wolter
@@ -25,7 +28,7 @@ public class WebDriver3ds extends HtmlUnitDriver {
     private static final int DEFAULT_TIMEOUT = 5;
 
     public WebDriver3ds() {
-        super(BrowserVersion.FIREFOX_38, true);
+        super(BrowserVersion.FIREFOX_45, true);
 
         final Timeouts timeouts = manage().timeouts();
         timeouts.implicitlyWait(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
@@ -54,14 +57,14 @@ public class WebDriver3ds extends HtmlUnitDriver {
     public String execute3dsRedirectWithPassword(final String url, final String password) {
         navigate().to(url);
 
-        final WebElement pwInput = findElement(By.cssSelector("input[type=password]"));
+        final WebElement pwInput = findElement(By.cssSelector(CSS_SELECTOR_PASSWORD));
         pwInput.sendKeys(password);
-        final WebElement submitButton = findElement(By.cssSelector("input[name=send]"));
+        final WebElement submitButton = findElement(By.cssSelector(CSS_SELECTOR_SEND));
         submitButton.click();
 
         // Wait for redirect to complete
         final Wait<WebDriver> wait = new WebDriverWait(this, 10);
-        wait.until(not(ExpectedConditions.urlContains("3ds")));
+        wait.until(not(ExpectedConditions.urlContains(URL_3DS_PATTERN)));
         return getCurrentUrl();
     }
 

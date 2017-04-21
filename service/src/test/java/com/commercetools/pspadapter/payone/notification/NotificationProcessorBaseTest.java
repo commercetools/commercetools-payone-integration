@@ -1,48 +1,45 @@
 package com.commercetools.pspadapter.payone.notification;
 
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomer;
 import org.assertj.core.api.JUnitSoftAssertions;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 /**
  * @author Jan Wolter
  */
 @RunWith(MockitoJUnitRunner.class)
-public class NotificationProcessorBaseTest {
+public class NotificationProcessorBaseTest extends BaseNotificationProcessorTest {
     @Rule
     public JUnitSoftAssertions softly = new JUnitSoftAssertions();
 
     @Mock
-    private BlockingSphereClient client;
-
-    @Mock
     private Payment payment;
 
-    @Captor
-    private ArgumentCaptor<PaymentUpdateCommand> paymentUpdateCommandArgumentCaptor;
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
     @Test
     public void rethrowsSphereSdkConcurrentModificationExceptionWrappedInJavaUtilConcurrentModificationException() {
@@ -54,7 +51,7 @@ public class NotificationProcessorBaseTest {
 
         final ImmutableList<UpdateAction<Payment>> updateActions = ImmutableList.of(SetCustomer.of(null));
 
-        final NotificationProcessorBase testee = new NotificationProcessorBase(client) {
+        final NotificationProcessorBase testee = new NotificationProcessorBase(serviceFactory, serviceConfig) {
             @Override
             protected boolean canProcess(final Notification notification) {
                 return true;
@@ -68,15 +65,22 @@ public class NotificationProcessorBaseTest {
         };
 
         final ConcurrentModificationException sdkException = new ConcurrentModificationException();
-        when(client.executeBlocking(isA(PaymentUpdateCommand.class))).thenThrow(sdkException);
+        when(paymentService.updatePayment(any(), any())).thenThrow(sdkException);
 
         // act
         final Throwable throwable =
                 catchThrowable(() -> testee.processTransactionStatusNotification(notification, payment));
 
         // assert
-        verify(client).executeBlocking(paymentUpdateCommandArgumentCaptor.capture());
-        softly.assertThat(paymentUpdateCommandArgumentCaptor.getValue().getUpdateActions()).as("update action instance")
+        verify(paymentService).updatePayment(paymentRequestPayment.capture(), paymentRequestUpdatesCaptor.capture());
+
+        // order service methods should not be called
+        // because serviceConfig.isUpdateOrderPaymentState() expected to be "false" by default
+        verifyUpdateOrderActionsNotCalled();
+
+        softly.assertThat(paymentRequestPayment.getValue()).isEqualTo(payment);
+
+        softly.assertThat(paymentRequestUpdatesCaptor.getValue()).as("update action instance")
                 .isSameAs(updateActions);
 
         softly.assertThat(throwable).as("exception")

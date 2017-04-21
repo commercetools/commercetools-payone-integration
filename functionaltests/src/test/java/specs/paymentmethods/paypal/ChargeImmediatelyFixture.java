@@ -6,13 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
-import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.PaymentDraft;
-import io.sphere.sdk.payments.PaymentDraftBuilder;
-import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
-import io.sphere.sdk.payments.TransactionDraftBuilder;
-import io.sphere.sdk.payments.TransactionState;
-import io.sphere.sdk.payments.TransactionType;
+import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
@@ -21,10 +15,7 @@ import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
-import specs.paymentmethods.creditcard.ChargeImmediatelyWith3dsFixture;
 
 import javax.money.MonetaryAmount;
 import javax.money.format.MonetaryFormats;
@@ -44,8 +35,6 @@ import java.util.concurrent.ExecutionException;
 public class ChargeImmediatelyFixture extends BaseFixture {
 
     private static final String baseRedirectUrl = "https://example.com/paypal_charge_immediately/";
-
-    private static final Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyWith3dsFixture.class);
 
     public Map<String, String> createPayment(final String paymentName,
                                 final String paymentMethod,

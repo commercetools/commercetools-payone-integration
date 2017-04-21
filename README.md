@@ -7,6 +7,10 @@ and the [PAYONE](http://www.payone.de) payment service provider (server API).
 
 It is a standalone Microservice that connects the two cloud platforms and provides a small own helper API to force immediate handling of a payment. 
 
+<!-- 
+     npm install -g doctoc
+     doctoc README.md 
+     -->
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
@@ -26,9 +30,16 @@ It is a standalone Microservice that connects the two cloud platforms and provid
       - [Service configuration parameters](#service-configuration-parameters)
   - [Build](#build)
   - [Run](#run)
+    - [Docker run](#docker-run)
+    - [Local run for development and tests](#local-run-for-development-and-tests)
 - [Test environments](#test-environments)
   - [Development workflow](#development-workflow)
   - [Functional Tests](#functional-tests)
+    - [Heroku setup](#heroku-setup)
+    - [Known Heroku issues](#known-heroku-issues)
+    - [Travis setup](#travis-setup)
+    - [Publishing functional tests results](#publishing-functional-tests-results)
+    - [Known functional tests issues](#known-functional-tests-issues)
   - [Paypal Sandbox Accounts](#paypal-sandbox-accounts)
 - [Contribute Improvements](#contribute-improvements)
 - [Development Notes](#development-notes)
@@ -130,14 +141,13 @@ Can be found in [Commercetools Merchant Center](https://admin.sphere.io/).
 
 ##### PAYONE API client credentials
 
-All required. 
-
-Name | Content
----- | -------
-`PAYONE_PORTAL_ID` | Payment portal ID
-`PAYONE_KEY` | Payment portal key
-`PAYONE_MERCHANT_ID` | Merchant account ID
-`PAYONE_SUBACC_ID` | Subaccount ID
+Name                 | Content             | Required  |
+---------------------|---------------------|-----------|
+`PAYONE_PORTAL_ID`   | Payment portal ID   | **Yes**   |
+`PAYONE_KEY`         | Payment portal key  | **Yes**   |
+`PAYONE_MERCHANT_ID` | Merchant account ID | **Yes**   |
+`PAYONE_SUBACC_ID`   | Subaccount ID       | **Yes**   |
+`PAYONE_MODE`        | Payment mode        | **No**    |
 
 Can be found in the [PAYONE Merchant Interface](https://pmi.pay1.de/).
 
@@ -150,10 +160,14 @@ All optional.
 Name | Content | Default
 ---- | ------- | --------
 `SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 10 minutes like [PaymentInteractionAdded](http://dev.commercetools.com/http-api-projects-messages.html#payment-interaction-added-message) | poll every 30 seconds
-`LONG_TIME_FRAME_SCHEDULED_JOB_CRON` | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 2 days | poll every hour on 5th second
-`PAYONE_MODE` | the mode of operation with PAYONE <ul><li>`"live"` for production mode, (i.e. _actual payments_) or</li><li>`"test"` for test mode</li></ul> | `"test"`  
-`CT_START_FROM_SCRATCH` | :warning: _**Handle with care!**_ If and only if equal, ignoring case, to `"true"` the service will create the custom types it needs. _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. If not yet in the project, the Custom Types are created independently of this parameter (but only deleted and recreated if this parameter is set).  Related: [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34). | `"false"`
-`SECURE_KEY` | if provided and not empty, the value is used as the key for decrypting data from fields "IBAN" and "BIC" for payments with CustomType "PAYMENT_BANK_TRANSFER". The data must be the result of a Blowfish ECB encryption with said key and encoded in HEX. | "" (empty String)
+`LONG_TIME_FRAME_SCHEDULED_JOB_CRON`  | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 2 days | poll every hour on 5th second
+`PAYONE_MODE`                         | the mode of operation with PAYONE <ul><li>`"live"` for production mode, (i.e. _actual payments_) or</li><li>`"test"` for test mode</li></ul> | `"test"`  
+`CT_START_FROM_SCRATCH`               | :warning: _**Handle with care!**_ If and only if equal, ignoring case, to `"true"` the service will create the custom types it needs. _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. If not yet in the project, the Custom Types are created independently of this parameter (but only deleted and recreated if this parameter is set).  Related: [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34). | `"false"`
+`SECURE_KEY`                          | if provided and not empty, the value is used as the key for decrypting data from fields "IBAN" and "BIC" for payments with CustomType "PAYMENT_BANK_TRANSFER". The data must be the result of a Blowfish ECB encryption with said key and encoded in HEX. | "" (empty String)
+`UPDATE_ORDER_PAYMENT_STATE`          | if _true_ - `Order#paymentState` will be updated when payment status notification is received from Payone. By default the order's state remains unchanged. | "false" 
+
+**Note**: for integration tests `UPDATE_ORDER_PAYMENT_STATE` is expected to be **`true`**, 
+so explicitly setup it in the Heroku environment.
 
 ### Build
 
@@ -169,26 +183,15 @@ Run the JAR:
 java -jar service/build/libs/commercetools-payone-integration.jar
 ```
 
-Run the JAR for debug (port `1044` is variable):
-
-* Listen mode:
-    ```
-    java -agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
-    ```
-
-* Attach mode:
-    ```
-    java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
-    ```
-
 ### Run
+
+#### Docker run
+
 ```
 docker run \
 -e CT_CLIENT_ID=xxx \
 -e CT_CLIENT_SECRET=xxx \
 -e CT_PROJECT_KEY=xxx \
--e PAYONE_AUTH_PASS=xxx \
--e PAYONE_AUTH_USER=xxx \
 -e PAYONE_KEY=xxx \
 -e PAYONE_MERCHANT_ID=xxx \
 -e PAYONE_MODE=test|live \
@@ -197,7 +200,30 @@ docker run \
 sphereio/commercetools-payone-integration 
 ```
 
-The integration service itself does not provide SSL connectivity, this must be done by a load balancer / SSL terminator running in front of it (which is recommended in any case). 
+The integration service itself does not provide SSL connectivity, this must be done by a load balancer / SSL terminator running in front of it (which is recommended in any case).
+ 
+#### Local run for development and tests
+
+  In the [`/build.gradle`](/build.gradle) script the [_application_](https://docs.gradle.org/current/userguide/application_plugin.html)
+  plugin is applied 
+  thus `gradle run` task could be used for local run and debug 
+  (for example, in Intellij IDEA you could _Run/Debug_ the gradle task `run` from the tasks list).
+  
+  In the script this `run` task is configured to convert the required runtime values from the local gradle settings 
+(`~/.gradle/gradle.properties`) to java runtime properties (`-Dkey=value` arguments). 
+This allows to skip manually set-up environment variables for the service run.
+
+  To run the built jar from command line in debug mode use (port `1044` is variable): 
+
+  * Listen mode:
+      ```
+      java -agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
+      ```
+
+  * Attach mode:
+      ```
+      java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=1044 -jar service/build/libs/commercetools-payone-integration.jar
+      ```
 
 ## Test environments
 
@@ -212,43 +238,86 @@ a seperate account is required for each of the transaction types (see [Functiona
 
 > TODO document best practice on how to work in day-to-day development, esp. on how local machine, travis and heroku play together.  
 
-The integration tests of this implementation use a heroku instance of the service. If you are authorized to configure it the backend can be found at https://dashboard.heroku.com/apps/ct-p1-integration-staging/resources .
+The integration tests of this implementation use a heroku instance of the service. If you are authorized to configure 
+it the backend can be found at https://dashboard.heroku.com/apps/ct-payone-integration-staging/resources .
 
-Please do not access this instance for playground or experimental reasons as you may risk breaking running automated integration tests. 
+Please do not access this instance for playground or experimental reasons as you may risk breaking running automated 
+integration tests. 
 
 ### Functional Tests
+
+You could find the values for Heroku test service and Travis functional tests in the encrypted [`travis-build/`](/travis-build) directory.
+
+**Note**: it's important to update  [`travis-build/`](/travis-build) settings every time you change the build settings 
+in Travis config. Even better update first the file, then on the Travis web page.
+
+#### Heroku setup
+
+The test service run it Heroku expected to have the next values:
+
+<table>
+  <tr><th>Name</th><th>Content</th></tr>
+  <tr><td><code>CT_CLIENT_ID</code></td>                <td rowspan="3">Should be adjusted with Travis setup below</td></tr>
+  <tr><td><code>CT_CLIENT_SECRET</code></td>            </tr>
+  <tr><td><code>CT_PROJECT_KEY</code></td>              </tr>
+  <tr><td><code>CT_START_FROM_SCRATCH</code></td>       <td>false</td></tr>
+  <tr><td><code>PAYONE_KEY</code></td>                  <td rowspan="4">Should be adjusted with Travis setup below</td></tr>
+  <tr><td><code>PAYONE_MERCHANT_ID</code></td>          </tr>
+  <tr><td><code>PAYONE_PORTAL_ID</code></td>            </tr>
+  <tr><td><code>PAYONE_SUBACC_ID</code></td>            </tr>
+  <tr><td><code>PAYONE_MODE</code></td>                 <td>test</td></tr>
+  <tr><td><code>UPDATE_ORDER_PAYMENT_STATE</code></td>  <td>true</td></tr>
+</table> 
+
+Scheduler values are optional: this feature is not covered by the tests.
+
+#### Known Heroku issues
+
+  Some times Heroku environment has problems, so the functional tests might be unstable. To check Heroku issues use:
+
+  - Heroku CLI commands:
+    - `heroku apps:errors`
+    - `heroku status`
+    - `heroku logs --tail`
+
+  - Heroku web-page https://status.heroku.com/
+
+  As an example of the potential issues see ["Increased rate of "H10 App Crashed" errors"](https://status.heroku.com/incidents/1091)
+  incident report, which caused  inconsistent _Socket Timeout_, _503 Service unavailable_ and other connection errors.
+
+#### Travis setup
 
 The executable specification (using [Concordion](http://concordion.org/)) requires the following environment variables
 in addition to the [commercetools API client credentials](#commercetools-api-client-credentials):
 
-Name | Content
----- | -------
-`CT_PAYONE_INTEGRATION_URL` | the URL of the service instance under test
-`TEST_DATA_VISA_CREDIT_CARD_NO_3DS` | the pseudocardpan of an unconfirmed VISA credit card
-`TEST_DATA_VISA_CREDIT_CARD_3DS` | the pseudocardpan of a VISA credit card verified by 3-D Secure
-`TEST_DATA_3_DS_PASSWORD` | the 3DS password of the test card. Payone Test Cards use `12345`
-`TEST_DATA_SW_BANK_TRANSFER_IBAN` | the IBAN of a test bank account supporting Sofortueberweisung
-`TEST_DATA_SW_BANK_TRANSFER_BIC` | the BIC of a test bank account supporting Sofortueberweisung
+<table>
+  <tr><th>Name</th><th>Content</th></tr>
+  <tr><td><code>CT_PAYONE_INTEGRATION_URL</code></td>           <td>the URL of the service instance under test</td></tr>
+  <tr><td><code>TEST_DATA_VISA_CREDIT_CARD_NO_3DS</code></td>   <td>test simple VISA credit card number (don't use real credit card)</td></tr>
+  <tr><td><code>TEST_DATA_VISA_CREDIT_CARD_3DS</code></td>      <td>test 3-D secured VISA credit card number (dont' use real credit card)</td></tr>
+  <tr><td><code>TEST_DATA_3_DS_PASSWORD</code></td>             <td>the 3DS password of the test card. Payone Test Cards use <code>12345</code></td></tr>
+  <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_IBAN</code></td>     <td>the IBAN of a test bank account supporting Sofortueberweisung</td></tr>
+  <tr><td><code>TEST_DATA_SW_BANK_TRANSFER_BIC</code></td>      <td>the BIC of a test bank account supporting Sofortueberweisung</td></tr>
+  <tr><td><code>TEST_DATA_PAYONE_MERCHANT_ID</code></td>        <td rowspan="4">Payone credentials for pseudocartpan generating. <br/>
+                                                                                <b>Ensure these values are the same for Travis (local) test and Heroku deployed service!</b></td></tr>
+  <tr><td><code>TEST_DATA_PAYONE_SUBACC_ID</code></td></tr>
+  <tr><td><code>TEST_DATA_PAYONE_PORTAL_ID</code></td></tr>
+  <tr><td><code>TEST_DATA_PAYONE_KEY</code></td></tr>
+</table> 
 
-> **NOTE**: pseudocardpans are used to be expired after some period of time, 
-> so you should update them from time to time in local and Travis build settings.
-> 
-> Could we obtain a new "fresh" pseudocardpan for every build?
-
-To get a pseudocardpan for a credit card you can use the PAYONE server API. 
-To do this with the client API please refer to the corresponding documentation.
+The pseudocardpan for VISA is fetched at runtime for specified `TEST_DATA_VISA_CREDIT_CARD_NO_3DS`/`TEST_DATA_VISA_CREDIT_CARD_3DS`
+card numbers using PAYONE server API. To do this with the client API please refer to the corresponding Payone API documentation.
 With the server API you simply need to send a POST request of type "3dscheck" for example by using a command line tool:
 
 ```
-curl --data "request=3dscheck&mid=<PAYONE_MERCHANT_ID>&aid=<PAYONE_SUBACC_ID>&portalid=<PAYONE_PORTAL_ID>&key=<MD5_PAYONE_KEY>&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>" https://api.pay1.de/post-gateway/
+curl --data "request=3dscheck&mid=<PAYONE_MERCHANT_ID>&aid=<PAYONE_SUBACC_ID>&portalid=<PAYONE_PORTAL_ID>&key=<MD5_PAYONE_KEY>&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_NUMBER>" https://api.pay1.de/post-gateway/
 ```
 
 * <url> needs to be replaced by the PAYONE api url. You will find this in the server documentation.
 * You need to replace the values for mid, aid and portalid with the ones you want to use with PAYONE.
 * The value for `MD5_PAYONE_KEY` needs to be the MD5 encryption result of your PAYONE key (`PAYONE_KEY`). 
 Use `md5 -qs $PAYONE_KEY` to hash string value to MD5.
-* The `cardpan` must be the value of card number. You may get test data values from [wiki page]( https://wiki.commercetools.de/display/DEV/payone#payone-Creditcard%28canbetestedwithpublicIPonly%29). 
-Don't use `TEST_DATA_VISA_CREDIT_CARD_NO_3DS` or `TEST_DATA_VISA_CREDIT_CARD_3DS` as these values expected to be already pseudocardpan values.
+* The `cardpan` must be the value of card number. You may get test data values from [wiki page]( https://wiki.commercetools.de/display/DEV/payone#payone-Creditcard%28canbetestedwithpublicIPonly%29).
 * Note that the `cardtype` request argument needs to be correspondand: `V` or `M` for _VISA_ and _Master Card_ respectively.
 
 If you have all the values above set in [environment variables](#appendix-2-alternative-configuration-via-properties-file), 
@@ -256,7 +325,7 @@ and _md5_ command is available (which is default case on Mac OS X and most of th
 you may copy-paste and directly execute the next line (change only `<VISA_CREDIT_CARD_3DS_NUMBER>`):
 
 ```
-curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>" https://api.pay1.de/post-gateway/
+curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_NUMBER>" https://api.pay1.de/post-gateway/
 ```
 
 > NOTE:  When sending "storecarddata=yes" at the end you will receive the pseudocardpan in the response from PAYONE.
@@ -270,6 +339,28 @@ To run the executable specification invoke the following command line:
 The tests take a fairly long time to run as they have to wait for the Payone notification calls to arrive.
 
 Omit `:functionaltests:cleanTest` to run the tests only if something (f.i. the specification) has changed.
+
+#### Publishing functional tests results
+
+The build results are published to [`gh-pages`](https://github.com/commercetools/commercetools-payone-integration/tree/gh-pages) branch of the repo.
+Then you are able to review the tests results in [Test results page](http://commercetools.github.io/commercetools-payone-integration/).
+
+**Note:** 
+  - github pages are overridden by any build of any branch, so in 
+  
+  - for Travis build `githubPages.repoUri` must be in HTTPS format and `$GH_TOKEN` must be set to GitHub token 
+    with push permission
+  
+  - we should replace the plugin with newer version, see [this issue](https://github.com/commercetools/commercetools-payone-integration/issues/135)
+    for more details 
+
+#### Known functional tests issues
+
+  - Some tests are waiting for payment update notification for payments which are already failed. 
+    These cases should be reported and avoided (fail-fast approach).
+  
+  - Web-driver (selenium) tests which are navigating to web-pages (Sofortüberweisung, 3ds secure verification) may fail 
+    because of wrong HTML elements names, if the service providers change html structure of their sites.
 
 ### Paypal Sandbox Accounts
 
@@ -314,8 +405,8 @@ export CT_PAYONE_INTEGRATION_URL=""
 export TEST_DATA_VISA_CREDIT_CARD_NO_3DS=""
 export TEST_DATA_VISA_CREDIT_CARD_3DS=""
 export TEST_DATA_3_DS_PASSWORD=""
-TEST_DATA_SW_BANK_TRANSFER_IBAN=""
-TEST_DATA_SW_BANK_TRANSFER_BIC=""
+export TEST_DATA_SW_BANK_TRANSFER_IBAN=""
+export TEST_DATA_SW_BANK_TRANSFER_BIC=""
 ```
 
 ## Appendix 2: Alternative configuration via properties file

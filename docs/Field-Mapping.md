@@ -14,7 +14,7 @@
     - [triggering a new PAYONE transaction request given a CT transaction](#triggering-a-new-payone-transaction-request-given-a-ct-transaction)
     - [receiving the PAYONE TransactionStatus Notifications and storing them in an Interaction](#receiving-the-payone-transactionstatus-notifications-and-storing-them-in-an-interaction)
     - [updating the CT Payment given a PAYONE TransactionStatus Notification (Stored in an Interaction)](#updating-the-ct-payment-given-a-payone-transactionstatus-notification-stored-in-an-interaction)
-- [Unused / unsupported PAYONE fields & features](#unused--unsupported-payone-fields-&-features)
+- [Unused / unsupported PAYONE fields & features](#unused--unsupported-payone-fields--features)
 - [Constraint Rules to be implemented by the Integration](#constraint-rules-to-be-implemented-by-the-integration)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->

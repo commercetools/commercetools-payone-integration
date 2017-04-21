@@ -5,6 +5,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.google.common.cache.LoadingCache;
@@ -103,7 +104,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
             final Map<String, String> response = payonePostService.executePost(request);
 
             final String status = response.get("status");
-            if (status.equals("REDIRECT")) {
+            if (ResponseStatus.REDIRECT.getStateCode().equals(status)) {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
                             CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"),
@@ -121,7 +122,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
 
-                if (status.equals("APPROVED")) {
+                if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                             interfaceInteraction,
                             setStatusInterfaceCode(response),
@@ -131,7 +132,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                             SetInterfaceId.of(response.get("txid")),
                             SetAuthorization.of(paymentWithCartLike.getPayment().getAmountPlanned())
                     ));
-                } else if (status.equals("ERROR")) {
+                } else if (ResponseStatus.ERROR.getStateCode().equals(status)) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                             interfaceInteraction,
                             setStatusInterfaceCode(response),
@@ -139,7 +140,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                             ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
                             ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                     ));
-                } else if (status.equals("PENDING")) {
+                } else if (ResponseStatus.PENDING.getStateCode().equals(status)) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                             interfaceInteraction,
                             setStatusInterfaceCode(response),

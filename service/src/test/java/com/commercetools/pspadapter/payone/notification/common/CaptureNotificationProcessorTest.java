@@ -1,20 +1,11 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static util.UpdatePaymentTestHelper.*;
-
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
-import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
-import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.Transaction;
-import io.sphere.sdk.payments.TransactionDraftBuilder;
-import io.sphere.sdk.payments.TransactionState;
-import io.sphere.sdk.payments.TransactionType;
-import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
+import io.sphere.sdk.orders.PaymentState;
+import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
@@ -23,12 +14,8 @@ import io.sphere.sdk.utils.MoneyImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import util.PaymentTestHelper;
 
 import javax.money.MonetaryAmount;
 import java.time.LocalDateTime;
@@ -37,31 +24,32 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+import static util.UpdatePaymentTestHelper.*;
+
 /**
  * @author Jan Wolter
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CaptureNotificationProcessorTest {
+public class CaptureNotificationProcessorTest extends BaseChargedNotificationProcessorTest {
 
     private static final Integer millis = 1450365542;
     private static final ZonedDateTime timestamp =
         ZonedDateTime.of(LocalDateTime.ofEpochSecond(millis, 0, ZoneOffset.UTC), ZoneId.of("UTC"));
 
-    @Mock
-    private BlockingSphereClient client;
-
     @InjectMocks
     private CaptureNotificationProcessor testee;
 
-    @Captor
-    private ArgumentCaptor<PaymentUpdateCommand> paymentRequestCaptor;
 
-    private final PaymentTestHelper testHelper = new PaymentTestHelper();
-
-    private Notification notification;
+    // Payone "capture" is used to be mapped to CTP "paid" state
+    private static final PaymentState ORDER_PAYMENT_STATE = PaymentState.PAID;
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
+
         notification = new Notification();
         notification.setPrice("20.00");
         notification.setCurrency("EUR");
@@ -70,44 +58,15 @@ public class CaptureNotificationProcessorTest {
         notification.setClearingtype("cc");
         notification.setTxaction(NotificationAction.CAPTURE);
         notification.setTransactionStatus(TransactionStatus.COMPLETED);
+
+        when(paymentToOrderStateMapper.mapPaymentToOrderState(any(Payment.class)))
+                .thenReturn(ORDER_PAYMENT_STATE);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending() throws Exception {
-        // arrange
-        final Payment payment = testHelper.dummyPaymentOneAuthPending20EuroCC();
-        payment.getTransactions().clear();
-
-        notification.setTransactionStatus(TransactionStatus.PENDING);
-
-        // act
-        testee.processTransactionStatusNotification(notification, payment);
-
-        // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
-
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
-
-        final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-        final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
-                .of(TransactionType.CHARGE, amount, timestamp)
-                .state(TransactionState.PENDING)
-                .interactionId(notification.getSequencenumber())
-                .build());
-
-        final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, timestamp);
-        final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
-        final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
-
-        assertThat(updateActions).as("# of payment update actions").hasSize(4);
-        assertThat(updateActions).as("added transaction")
-                .filteredOn(u -> u.getAction().equals("addTransaction"))
-                .usingElementComparatorOnFields(
-                        "transaction.type", "transaction.amount", "transaction.state", "transaction.timestamp")
-                .containsOnlyOnce(transaction);
-
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+        super.processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending(testee, ORDER_PAYMENT_STATE);
     }
 
     @Test
@@ -121,9 +80,7 @@ public class CaptureNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
-
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
@@ -144,36 +101,34 @@ public class CaptureNotificationProcessorTest {
                 .containsOnlyOnce(transaction);
 
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void processingPendingNotificationForPendingChargeTransactionDoesNotChangeState() throws Exception {
-        // arrange
-        final Payment payment = testHelper.dummyPaymentOneChargePending20Euro();
-
-        notification.setSequencenumber(payment.getTransactions().get(0).getInteractionId());
-        notification.setTransactionStatus(TransactionStatus.PENDING);
-
-        // act
-        testee.processTransactionStatusNotification(notification, payment);
-
-        // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
-
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
-
-        final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, timestamp);
-        final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
-        final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
-
-        assertThat(updateActions).as("# of payment update actions").hasSize(3);
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+        super.processingPendingNotificationForPendingChargeTransactionDoesNotChangeState(testee, ORDER_PAYMENT_STATE);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void processingCompletedNotificationForPendingChargeTransactionDoesNotChangeState() throws Exception {
+        final Payment payment = processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe();
+        verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
+    }
+
+    @Test
+    public void orderServiceIsNotCalledWhenIsUpdateOrderPaymentStateFalse() throws Exception {
+        // this test is similar to #processingCompletedNotificationForPendingChargeTransactionDoesNotChangeState(),
+        // but #isUpdateOrderPaymentState() is false, so update order actions should be skipped
+        when(serviceConfig.isUpdateOrderPaymentState()).thenReturn(false);
+
+        processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe();
+        verifyUpdateOrderActionsNotCalled();
+    }
+
+    private Payment processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe() throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneChargePending20Euro();
         final Transaction chargeTransaction = payment.getTransactions().get(0);
@@ -184,9 +139,7 @@ public class CaptureNotificationProcessorTest {
         testee.processTransactionStatusNotification(notification, payment);
 
         // assert
-        verify(client).executeBlocking(paymentRequestCaptor.capture());
-
-        final List<? extends UpdateAction<Payment>> updateActions = paymentRequestCaptor.getValue().getUpdateActions();
+        final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, timestamp);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
@@ -194,5 +147,6 @@ public class CaptureNotificationProcessorTest {
 
         assertThat(updateActions).as("# of payment update actions").hasSize(3);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+        return payment;
     }
 }

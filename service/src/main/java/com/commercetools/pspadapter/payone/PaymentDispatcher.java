@@ -5,16 +5,14 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMeth
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
 import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.payments.PaymentMethodInfo;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
+import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
 
-    private static final Logger LOG = LogManager.getLogger(PaymentDispatcher.class);
+public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
 
     private final Map<PaymentMethod, PaymentMethodDispatcher> methodDispatcher;
 
@@ -30,7 +28,7 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
     public PaymentWithCartLike dispatchPayment(PaymentWithCartLike paymentWithCartLike) {
         final PaymentMethodInfo paymentMethodInfo = paymentWithCartLike.getPayment().getPaymentMethodInfo();
 
-        if (!"PAYONE".equals(paymentMethodInfo.getPaymentInterface())) {
+        if (!PAYONE.equals(paymentMethodInfo.getPaymentInterface())) {
             throw new IllegalArgumentException(String.format(
                     "unsupported payment interface '%s'", paymentMethodInfo.getPaymentInterface()));
         }

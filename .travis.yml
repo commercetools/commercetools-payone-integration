@@ -26,7 +26,6 @@ deploy:
     repo: commercetools/commercetools-payone-integration
     all_branches: true
 after_deploy:
-  - ./gradlew --continue --info :functionaltests:cleanTest :functionaltests:testSpec publishGhPages || travis_terminate 1
-  - echo "Building service jar file including all dependencies."
-  - ./gradlew stage || travis_terminate 1
-  - ./travis-build.sh || travis_terminate 1
+- echo "Publishing build results to http://commercetools.github.io/commercetools-payone-integration/"
+- ./gradlew --continue --info :functionaltests:cleanTest :functionaltests:testSpec publishGhPages || travis_terminate 1
+- ./travis-build.sh || travis_terminate 1

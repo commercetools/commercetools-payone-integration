@@ -1,15 +1,9 @@
 package com.commercetools.pspadapter.payone;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.JobBuilder;
-import org.quartz.JobDataMap;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
+import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -21,7 +15,7 @@ import java.util.Date;
  */
 public class ScheduledJobFactory {
 
-    public static final Logger LOG = LogManager.getLogger(IntegrationService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IntegrationService.class);
 
     private static final int DELAY_START_IN_SECONDS = 10;
 
@@ -45,6 +39,6 @@ public class ScheduledJobFactory {
         Date date = scheduler.scheduleJob(JobBuilder.newJob(jobClass).build(), trigger);
         DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
-        LOG.info(String.format("Starting scheduled job '%s' at %s", jobClass.getSimpleName(), df.format(date)));
+        LOG.info("Starting scheduled job '{}' at {}", jobClass.getSimpleName(), df.format(date));
     }
 }

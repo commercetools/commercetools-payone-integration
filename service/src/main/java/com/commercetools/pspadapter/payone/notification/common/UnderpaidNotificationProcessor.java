@@ -4,12 +4,13 @@ import java.util.List;
 
 import javax.money.MonetaryAmount;
 
+import com.commercetools.pspadapter.payone.ServiceFactory;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
 import com.google.common.collect.ImmutableList;
 
-import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
@@ -29,10 +30,10 @@ public class UnderpaidNotificationProcessor extends NotificationProcessorBase {
     /**
      * Initializes a new instance.
      *
-     * @param client the client for the commercetools platform API
+     * @param serviceFactory the services factory for commercetools platform API
      */
-    public UnderpaidNotificationProcessor(final BlockingSphereClient client) {
-        super(client);
+    public UnderpaidNotificationProcessor(ServiceFactory serviceFactory, ServiceConfig serviceConfig) {
+        super(serviceFactory, serviceConfig);
     }
 
     @Override
