@@ -202,25 +202,25 @@ ins {
                     <td class="inputvalue">Payment 1</td>
                     <td class="inputvalue">3210</td>
                     <td class="inputvalue">EUR</td>
-                    <td>890e466d-b5f1-4cfe-a80d-f81b4061ddc8</td>
+                    <td>699fec75-f110-48de-8565-dd556007bbf5</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
                     <td class="inputvalue">98765</td>
                     <td class="inputvalue">USD</td>
-                    <td>7641e693-3b3d-4ef8-969c-9244e5a59320</td>
+                    <td>d7f2b1b2-28d6-4964-93c5-54282fc1bb38</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
                     <td class="inputvalue">543</td>
                     <td class="inputvalue">EUR</td>
-                    <td>cf7dc132-2acb-4745-9298-6183680e4dc3</td>
+                    <td>43c11f11-1d5d-4212-951e-b6efff80aace</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
                     <td class="inputvalue">3456</td>
                     <td class="inputvalue">EUR</td>
-                    <td>d0fae3d4-9ba6-48e2-9596-121035182ab4</td>
+                    <td>3d65adca-947c-433a-a739-e16be8e28d0f</td>
                 </tr>
             </table>
             <p>
@@ -271,8 +271,10 @@ ins {
                 for each of the payments <span c:set="#successfulPayments" class="inputvalue">Payment 1, Payment 3, Payment 4</span>:
             </p>
             <ol>
-                <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="success">received</span> -&gt; has no effect if balance is 0</li>
-                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)" class="success">received</span>
+                <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="failure"><del class="expected">received</del>
+<ins class="actual">== false</ins></span> -&gt; has no effect if balance is 0</li>
+                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)" class="failure"><del class="expected">received</del>
+<ins class="actual">== false</ins></span>
                     -&gt;  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
             </ol>
             <table c:execute="#result = fetchPaymentDetails(#paymentName)">
@@ -287,30 +289,39 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
-                    <td class="success">1</td>
-                    <td class="success">1</td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
                     <td class="success">Success</td>
                     <td class="success">32,10 EUR</td>
-                    <td class="success">32,10 EUR</td>
-                    <td>19</td>
+                    <td class="failure"><del class="expected">32,10 EUR</del>
+<ins class="actual"> </ins></td>
+                    <td>12</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
-                    <td class="success">1</td>
-                    <td class="success">1</td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
                     <td class="success">Success</td>
                     <td class="success">5,43 EUR</td>
-                    <td class="success">5,43 EUR</td>
-                    <td>19</td>
+                    <td class="failure"><del class="expected">5,43 EUR</del>
+<ins class="actual"> </ins></td>
+                    <td>12</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
-                    <td class="success">1</td>
-                    <td class="success">1</td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
                     <td class="success">Success</td>
                     <td class="success">34,56 EUR</td>
-                    <td class="success">34,56 EUR</td>
-                    <td>19</td>
+                    <td class="failure"><del class="expected">34,56 EUR</del>
+<ins class="actual"> </ins></td>
+                    <td>12</td>
                 </tr>
             </table>
             <p>
@@ -330,7 +341,8 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
-                    <td class="success">Paid</td>
+                    <td class="failure"><del class="expected">Paid</del>
+<ins class="actual">(null)</ins></td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
@@ -338,11 +350,13 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
-                    <td class="success">Paid</td>
+                    <td class="failure"><del class="expected">Paid</del>
+<ins class="actual">(null)</ins></td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
-                    <td class="success">Paid</td>
+                    <td class="failure"><del class="expected">Paid</del>
+<ins class="actual">(null)</ins></td>
                 </tr>
             </table>
 
@@ -368,8 +382,9 @@ ins {
                     <td class="success">1</td>
                     <td class="success">Success</td>
                     <td class="success">32,10 EUR</td>
-                    <td class="success">32,10 EUR</td>
-                    <td>19</td>
+                    <td class="failure"><del class="expected">32,10 EUR</del>
+<ins class="actual"> </ins></td>
+                    <td>12</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
@@ -386,8 +401,9 @@ ins {
                     <td class="success">1</td>
                     <td class="success">Success</td>
                     <td class="success">5,43 EUR</td>
-                    <td class="success">5,43 EUR</td>
-                    <td>19</td>
+                    <td class="failure"><del class="expected">5,43 EUR</del>
+<ins class="actual"> </ins></td>
+                    <td>12</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
@@ -395,11 +411,12 @@ ins {
                     <td class="success">1</td>
                     <td class="success">Success</td>
                     <td class="success">34,56 EUR</td>
-                    <td class="success">34,56 EUR</td>
-                    <td>19</td>
+                    <td class="failure"><del class="expected">34,56 EUR</del>
+<ins class="actual"> </ins></td>
+                    <td>12</td>
                 </tr>
             </table>
         </div>
 
-    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 491362 ms on 20-Apr-2017 at 16:28:32 UTC</div></div></body>
+    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 1818047 ms on 21-Apr-2017 at 12:49:38 UTC</div></div></body>
 </html>
