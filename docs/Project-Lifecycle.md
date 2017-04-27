@@ -150,8 +150,6 @@ Open **Preferences...**, go to
 
 Select **Gradle Tests Runner** in the **Run tests using** dropdown and apply the changes.
 
-Then right click on the test you want to run and select **Create 'Test_name'...** with Gradle icon in front of it.
-
 [Stack Overflow: How to run test not as a JUnit but as a Gradle test](http://stackoverflow.com/a/34333598/980828)
 
 ### Development workflow
