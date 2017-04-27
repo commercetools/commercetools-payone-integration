@@ -14,6 +14,8 @@
     - [Run](#run)
       - [Local run for development and tests](#local-run-for-development-and-tests)
   - [Test environments](#test-environments)
+    - [Run as Gradle tests](#run-as-gradle-tests)
+      - [IntelliJ IDEA](#intellij-idea)
     - [Development workflow](#development-workflow)
     - [Functional Tests](#functional-tests)
       - [Heroku setup](#heroku-setup)
@@ -137,6 +139,20 @@ As a notable exception, testing PayPal payments requires developer sandbox accou
 
 **Warning**: Due to PayPal's complex and restrictive browser session handling and the parallel execution of tests (necessary due to PAYONE's notifications which take up to 7 minutes per transaction)
 a separate account is required for each of the transaction types (see [Functional Tests configuration](#functional-tests)).
+
+### Run as Gradle tests
+
+#### IntelliJ IDEA
+
+Open **Preferences...**, go to
+ 
+`Build, Execution, Deployment > Build Tools > Gradle > Runner`
+
+Select **Gradle Tests Runner** in the **Run tests using** dropdown and apply the changes.
+
+Then right click on the test you want to run and select **Create 'Test_name'...** with Gradle icon in front of it.
+
+[Stack Overflow: How to run test not as a JUnit but as a Gradle test](http://stackoverflow.com/a/34333598/980828)
 
 ### Development workflow
 
