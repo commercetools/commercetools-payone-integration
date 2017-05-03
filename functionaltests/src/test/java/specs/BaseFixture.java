@@ -272,7 +272,7 @@ public abstract class BaseFixture {
     protected String getUnconfirmedVisaPseudoCardPan() {
         synchronized (BaseFixture.class) {
             if (PSEUDO_CARD_PAN == null) {
-                String fetchedPseudoCardPan = fetchPseudoCardPan(getTestDataVisaCreditCardNo3Ds(),
+                final String fetchedPseudoCardPan = fetchPseudoCardPan(getTestDataVisaCreditCardNo3Ds(),
                         getTestDataPayoneMerchantId(),
                         getTestDataPayoneSubaccId(),
                         getTestDataPayonePortalId(),
@@ -296,7 +296,7 @@ public abstract class BaseFixture {
     protected String getVerifiedVisaPseudoCardPan() {
         synchronized (BaseFixture.class) {
             if (PSEUDO_CARD_PAN_3DS == null) {
-                String fetchedPseudoCardPan = fetchPseudoCardPan(getTestVisaCreditCard3Ds(),
+                final String fetchedPseudoCardPan = fetchPseudoCardPan(getTestVisaCreditCard3Ds(),
                         getTestDataPayoneMerchantId(),
                         getTestDataPayoneSubaccId(),
                         getTestDataPayonePortalId(),

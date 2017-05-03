@@ -38,7 +38,7 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
      */
     public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws Exception {
         final List<String> paymentNamesList = thePaymentNamesSplitter.splitToList(paymentNames);
-        String paymentIds = paymentNamesList.stream().map(this::getIdForLegibleName).collect(joining(", "));
+        final String paymentIds = paymentNamesList.stream().map(this::getIdForLegibleName).collect(joining(", "));
 
         validatePaymentsNotFailed(paymentNamesList);
 
