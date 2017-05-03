@@ -320,6 +320,10 @@ public abstract class BaseFixture {
      * you get "pseudocardpan is not found" response from Payone.
      *
      * @param cardPan Visa card number (expected to be test Visa number from Payone)
+     * @param mid Payone Merchant Id
+     * @param aid Payone Sub-Account Id
+     * @param pid Payone Portal Id
+     * @param key Payone Key (Access Token)
      * @return pseudocardpan string, registered in Payone merchant center
      * @throws RuntimeException if the response from Payone can't be parsed
      */
