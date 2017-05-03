@@ -30,14 +30,14 @@ public class PayoneConfig {
 
 
     public PayoneConfig(final TenantPropertyProvider tenantPropertyProvider) {
-        // read app common properties
-        apiUrl = tenantPropertyProvider.getPropertyProvider().getProperty(PropertyProvider.PAYONE_API_URL).orElse(DEFAULT_PAYONE_API_URL);
-        apiVersion = tenantPropertyProvider.getPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_API_VERSION);
-        encoding = tenantPropertyProvider.getPropertyProvider().getProperty(PropertyProvider.PAYONE_REQUEST_ENCODING).orElse(DEFAULT_PAYONE_REQUEST_ENCODING);
-        solutionName = tenantPropertyProvider.getPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SOLUTION_NAME);
-        solutionVersion = tenantPropertyProvider.getPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SOLUTION_VERSION);
-        integratorName = tenantPropertyProvider.getPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_INTEGRATOR_NAME);
-        integratorVersion = tenantPropertyProvider.getPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_INTEGRATOR_VERSION);
+        // read app common properties (not tenant specific)
+        apiUrl = tenantPropertyProvider.getCommonPropertyProvider().getProperty(PropertyProvider.PAYONE_API_URL).orElse(DEFAULT_PAYONE_API_URL);
+        apiVersion = tenantPropertyProvider.getCommonPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_API_VERSION);
+        encoding = tenantPropertyProvider.getCommonPropertyProvider().getProperty(PropertyProvider.PAYONE_REQUEST_ENCODING).orElse(DEFAULT_PAYONE_REQUEST_ENCODING);
+        solutionName = tenantPropertyProvider.getCommonPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SOLUTION_NAME);
+        solutionVersion = tenantPropertyProvider.getCommonPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_SOLUTION_VERSION);
+        integratorName = tenantPropertyProvider.getCommonPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_INTEGRATOR_NAME);
+        integratorVersion = tenantPropertyProvider.getCommonPropertyProvider().getMandatoryNonEmptyProperty(PropertyProvider.PAYONE_INTEGRATOR_VERSION);
 
         // read tenant specific properties
         subAccountId = tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.PAYONE_SUBACC_ID);

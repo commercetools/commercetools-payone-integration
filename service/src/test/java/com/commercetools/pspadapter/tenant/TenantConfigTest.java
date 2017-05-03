@@ -33,7 +33,7 @@ public class TenantConfigTest {
 
     @Before
     public void setUp() throws Exception {
-        when(tenantPropertyProvider.getPropertyProvider()).thenReturn(propertyProvider);
+        when(tenantPropertyProvider.getCommonPropertyProvider()).thenReturn(propertyProvider);
         when(tenantPropertyProvider.getTenantProperty(anyString())).thenReturn(Optional.of(tenantDummyValue));
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(anyString())).thenReturn(tenantDummyValue);
     }

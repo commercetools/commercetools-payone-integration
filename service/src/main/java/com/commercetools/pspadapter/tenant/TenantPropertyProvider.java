@@ -37,14 +37,30 @@ public class TenantPropertyProvider {
         return tenantName;
     }
 
-    public PropertyProvider getPropertyProvider() {
+    /**
+     * @return property provider which contains both common application and tenant specific (with tenant name prefix) properties.
+     */
+    public PropertyProvider getCommonPropertyProvider() {
         return propertyProvider;
     }
 
+    /**
+     * @param propertyName property name suffix, without tenant name.
+     * @return Optional value of tenant specific property, fetched by {@link #tenantName} and {@code propertyName}
+     */
     public Optional<String> getTenantProperty(String propertyName) {
         return propertyProvider.getProperty(getTenantPropertyName(propertyName));
     }
 
+    /**
+     * Fetch mandatory tenant specific property. If property doesn't exist or empty -
+     * {@link IllegalStateException} is thrown.
+     *
+     * @param propertyName property name suffix, without tenant name.
+     * @return non-null value of tenant specific property, fetched by {@link #tenantName} and {@code propertyName}
+     *
+     * @throws IllegalStateException if the property isn't defined or empty
+     */
     public String getTenantMandatoryNonEmptyProperty(String propertyName) {
         return propertyProvider.getMandatoryNonEmptyProperty(getTenantPropertyName(propertyName));
     }

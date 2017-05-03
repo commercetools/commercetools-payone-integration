@@ -37,7 +37,7 @@ public class BaseTenantPropertyTest {
         when(propertyProvider.getProperty(any())).thenReturn(Optional.of(dummyPropertyValue));
         when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn(dummyPropertyValue);
 
-        when(tenantPropertyProvider.getPropertyProvider()).thenReturn(propertyProvider);
+        when(tenantPropertyProvider.getCommonPropertyProvider()).thenReturn(propertyProvider);
         when(tenantPropertyProvider.getTenantProperty(anyString())).thenReturn(Optional.of(dummyTenantValue));
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(anyString())).thenReturn(dummyTenantValue);
 

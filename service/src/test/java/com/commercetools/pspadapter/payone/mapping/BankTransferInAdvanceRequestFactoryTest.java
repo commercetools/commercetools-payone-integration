@@ -43,7 +43,7 @@ public class BankTransferInAdvanceRequestFactoryTest extends BaseTenantPropertyT
         when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyVal"));
         when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
 
-        when(tenantPropertyProvider.getPropertyProvider()).thenReturn(propertyProvider);
+        when(tenantPropertyProvider.getCommonPropertyProvider()).thenReturn(propertyProvider);
         when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyVal"));
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
         //clear secure key to force unencrypted data

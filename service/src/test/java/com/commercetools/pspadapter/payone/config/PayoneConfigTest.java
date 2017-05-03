@@ -41,7 +41,7 @@ public class PayoneConfigTest {
         when(propertyProvider.getProperty(PropertyProvider.PAYONE_API_URL)).thenReturn(Optional.of("http://te.st"));
         when(propertyProvider.getMandatoryNonEmptyProperty(anyString())).thenReturn(commonDummyValue);
 
-        when(tenantPropertyProvider.getPropertyProvider()).thenReturn(propertyProvider);
+        when(tenantPropertyProvider.getCommonPropertyProvider()).thenReturn(propertyProvider);
         when(tenantPropertyProvider.getTenantProperty(anyString())).thenReturn(Optional.of(tenantDummyValue));
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(anyString())).thenReturn(tenantDummyValue);
     }
