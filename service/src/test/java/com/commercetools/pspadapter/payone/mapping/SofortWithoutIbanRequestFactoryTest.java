@@ -33,7 +33,6 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SofortWithoutIbanRequestFactoryTest extends BaseTenantPropertyTest {
 
-    private final PaymentTestHelper payments = new PaymentTestHelper();
     private SofortBankTransferRequestFactory factory;
 
     @Before
@@ -54,8 +53,8 @@ public class SofortWithoutIbanRequestFactoryTest extends BaseTenantPropertyTest 
         factory = new SofortBankTransferRequestFactory(tenantConfig);
 
 
-        Payment payment = payments.dummyPaymentOneAuthPending20EuroWithoutIbanPNT();
-        Order order = payments.dummyOrderMapToPayoneRequest();
+        Payment payment = paymentsTestHelper.dummyPaymentOneAuthPending20EuroWithoutIbanPNT();
+        Order order = paymentsTestHelper.dummyOrderMapToPayoneRequest();
         Customer customer = payment.getCustomer().getObj();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
@@ -141,8 +140,8 @@ public class SofortWithoutIbanRequestFactoryTest extends BaseTenantPropertyTest 
         TenantConfig tenantConfig = new TenantConfig(tenantPropertyProvider, payoneConfig);
         factory = new SofortBankTransferRequestFactory(tenantConfig);
 
-        Payment payment = payments.dummyPaymentOneAuthPending20EuroWithoutIbanPNT();
-        Order order = payments.dummyOrderMapToPayoneRequest();
+        Payment payment = paymentsTestHelper.dummyPaymentOneAuthPending20EuroWithoutIbanPNT();
+        Order order = paymentsTestHelper.dummyOrderMapToPayoneRequest();
         Customer customer = payment.getCustomer().getObj();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);

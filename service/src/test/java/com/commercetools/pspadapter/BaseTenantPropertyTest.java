@@ -6,6 +6,7 @@ import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import org.junit.Before;
 import org.mockito.Mock;
+import util.PaymentTestHelper;
 
 import java.util.Optional;
 
@@ -14,6 +15,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 public class BaseTenantPropertyTest {
+
+    protected final static PaymentTestHelper paymentsTestHelper = new PaymentTestHelper();
 
     protected static final String dummyPropertyValue = "123";
     protected static final String dummyTenantValue = "456";

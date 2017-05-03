@@ -6,9 +6,14 @@ import com.commercetools.pspadapter.payone.util.BlowfishUtil;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
-import spark.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
+import java.util.function.Consumer;
+
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.BIC_FIELD;
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IBAN_FIELD;
+import static java.util.Optional.ofNullable;
 
 /**
  * @author fhaertig
@@ -35,26 +40,30 @@ public class SofortBankTransferRequestFactory extends BankTransferWithoutIbanBic
 
         BankTransferAuthorizationRequest request = super.createAuthorizationRequest(paymentWithCartLike);
 
-        if (StringUtils.isNotEmpty(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD))) {
-            final String plainIban;
-            if (!secureKey.isEmpty()) {
-                plainIban = BlowfishUtil.decryptHexToString(secureKey, ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD));
-            } else {
-                plainIban = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.IBAN_FIELD);
-            }
-            request.setIban(plainIban);
-        }
-
-        if (StringUtils.isNotEmpty(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD))) {
-            final String plainBic;
-            if (!secureKey.isEmpty()) {
-                plainBic = BlowfishUtil.decryptHexToString(secureKey, ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD));
-            } else {
-                plainBic = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BIC_FIELD);
-            }
-            request.setBic(plainBic);
-        }
+        setBankField(ctPayment, IBAN_FIELD, request::setIban);
+        setBankField(ctPayment, BIC_FIELD,  request::setBic);
 
         return request;
+    }
+
+    /**
+     * Decrypt (if {@link #secureKey} is provided and set corresponding bank field (iban or bic) if it exists in the
+     * {@code ctPayment}'s custom field.
+     * @param ctPayment Payment which might have iban/bic values in the custom fields.
+     * @param fieldKey name of field (see {@link CustomFieldKeys#IBAN_FIELD} and {@link CustomFieldKeys#BIC_FIELD}
+     * @param bankFieldConsumer {@link Consumer} which sets iban/bic,
+     *                                          see {@link BankTransferAuthorizationRequest#setIban(String)}
+     *                                          and {@link BankTransferAuthorizationRequest#setBic(String)}
+     */
+    private void setBankField(@Nonnull Payment ctPayment,
+                              @Nonnull String fieldKey, @Nonnull Consumer<String> bankFieldConsumer) {
+
+        ofNullable(ctPayment.getCustom())
+            .map(customFields -> customFields.getFieldAsString(fieldKey))
+            .filter(StringUtils::isNotBlank)
+            .ifPresent(bankFieldAsString ->
+                    bankFieldConsumer.accept(secureKey.isEmpty()
+                            ? bankFieldAsString
+                            : BlowfishUtil.decryptHexToString(secureKey, bankFieldAsString)));
     }
 }
