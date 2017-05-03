@@ -71,7 +71,7 @@ public enum ClearingType {
             }
         }
         if (clearingType == null) {
-            throw new IllegalArgumentException("Commercetools clearingtype '" + ctKey + "' could not be mapped.");
+            throw new IllegalArgumentException("commercetools clearingtype '" + ctKey + "' could not be mapped.");
         } else {
             return clearingType;
         }

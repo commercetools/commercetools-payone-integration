@@ -99,7 +99,7 @@ Name                             | Content
 `TENANT1_CT_CLIENT_ID`           | the client id
 `TENANT1_CT_CLIENT_SECRET`       | the client secret
 
-Can be found in [Commercetools Admin Center](https://admin.commercetools.com/).
+Can be found in [commercetools Admin Center](https://admin.commercetools.com/).
 
 ##### PAYONE API client credentials
 
@@ -114,9 +114,6 @@ Name                         | Content             | Required  |
 `TENANT1_PAYONE_MODE`        | Payment mode        | No        |
 
 Can be found in the [PAYONE Merchant Interface](https://pmi.pay1.de/).
-
-This section explains the main benefit of the application: all these credentials may be skipped 
-in a shop frontend application if all transaction initiation is done through this service.
 
 ##### Optional service configuration parameters
 
@@ -149,11 +146,11 @@ sphereio/commercetools-payone-integration
 
 ## Multitenancy
 
-Starting from version 2 a single service instance may be use for multiple tenants, e.g. same service for different shop,
+Starting from version 2 a single service instance may be uses for multiple tenants, e.g. same service for different shop,
 merchants or suppliers. The next configuration properties are required for this:
 
   * set mandatory `TENANTS` property as described in _[Mandatory common properties](#mandatory-common-properties)_ section above.
-  * setup Commercetools and Payone properties for each specific tenant name, for example, if one has `TENANTS=BOOTS, BIKES`,
+  * setup _commercetools_ and _Payone_ properties for each specific tenant name, for example, if one has `TENANTS=BOOTS, BIKES`,
     then he should explicitly set `BOOTS_CT_PROJECT_KEY`, `BIKES_CT_PROJECT_KEY`, `BOOTS_PAYONE_PORTAL_ID`, 
     `BIKES_PAYONE_PORTAL_ID` and so on.
 
