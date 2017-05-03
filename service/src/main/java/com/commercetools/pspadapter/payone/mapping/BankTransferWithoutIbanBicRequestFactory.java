@@ -15,7 +15,7 @@ import java.util.Optional;
  * Created by mht on 15.08.16.
  */
 public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFactory {
-    public BankTransferWithoutIbanBicRequestFactory(@Nonnull TenantConfig tenantConfig) {
+    public BankTransferWithoutIbanBicRequestFactory(@Nonnull final TenantConfig tenantConfig) {
         super(tenantConfig);
     }
 

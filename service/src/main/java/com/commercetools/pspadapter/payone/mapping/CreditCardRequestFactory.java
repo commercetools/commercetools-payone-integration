@@ -18,7 +18,7 @@ import java.util.Optional;
  */
 public class CreditCardRequestFactory extends PayoneRequestFactory {
 
-    public CreditCardRequestFactory(@Nonnull TenantConfig tenantConfig) {
+    public CreditCardRequestFactory(@Nonnull final TenantConfig tenantConfig) {
         super(tenantConfig);
     }
 

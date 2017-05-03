@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
  */
 public class PostFinanceBanktransferRequestFactory extends BankTransferWithoutIbanBicRequestFactory {
 
-    public PostFinanceBanktransferRequestFactory(@Nonnull TenantConfig tenantConfig) {
+    public PostFinanceBanktransferRequestFactory(@Nonnull final TenantConfig tenantConfig) {
         super(tenantConfig);
     }
 

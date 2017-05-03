@@ -30,7 +30,7 @@ public class CustomerPaymentFixture extends BaseNotifiablePaymentFixture {
             final String currencyCode,
             final String buyerLastName) throws Exception {
 
-        Payment payment = createAndSaveBankTransferAdvancedPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, buyerLastName);
+        final Payment payment = createAndSaveBankTransferAdvancedPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, buyerLastName);
         return payment.getId();
     }
 

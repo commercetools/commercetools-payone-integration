@@ -81,8 +81,8 @@ public class ServiceConfig {
      * is empty (e.g., list of "a, , b").
      */
     private List<String> getMandatoryTenantNames(PropertyProvider propertyProvider) {
-        String tenantsList = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.TENANTS);
-        List<String> result = asList(tenantsList.trim().split("\\s*(,|;)\\s*"));
+        final String tenantsList = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.TENANTS);
+        final List<String> result = asList(tenantsList.trim().split("\\s*(,|;)\\s*"));
 
         if (result.size() < 1 || result.stream().anyMatch(StringUtils::isBlank)) {
             throw new IllegalStateException(format("Tenants list is invalid, pls check \"%s\" variable",

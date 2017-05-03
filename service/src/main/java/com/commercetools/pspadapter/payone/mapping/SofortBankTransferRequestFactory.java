@@ -23,7 +23,7 @@ public class SofortBankTransferRequestFactory extends BankTransferWithoutIbanBic
     @Nonnull
     private final String secureKey;
 
-    public SofortBankTransferRequestFactory(@Nonnull TenantConfig tenantConfig) {
+    public SofortBankTransferRequestFactory(@Nonnull final TenantConfig tenantConfig) {
         super(tenantConfig);
         this.secureKey = tenantConfig.getSecureKey() != null ? tenantConfig.getSecureKey() : "";
     }

@@ -20,7 +20,7 @@ import java.util.Optional;
  */
 public class BanktTransferInAdvanceRequestFactory extends PayoneRequestFactory {
 
-    public BanktTransferInAdvanceRequestFactory(@Nonnull TenantConfig tenantConfig) {
+    public BanktTransferInAdvanceRequestFactory(@Nonnull final TenantConfig tenantConfig) {
         super(tenantConfig);
     }
 

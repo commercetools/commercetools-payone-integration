@@ -21,7 +21,7 @@ public class ChargeImmediatelyWithout3dsFixture extends BaseCreditCardChargeFixt
                                 final String centAmount,
                                 final String currencyCode) throws Exception {
 
-        Payment payment = createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
+        final Payment payment = createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
         return payment.getId();
     }
 

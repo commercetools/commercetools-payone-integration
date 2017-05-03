@@ -34,7 +34,7 @@ public abstract class PayoneRequestFactory {
         return tenantConfig.getPayoneConfig();
     }
 
-    public PayoneRequestFactory(@Nonnull TenantConfig tenantConfig) {
+    public PayoneRequestFactory(@Nonnull final TenantConfig tenantConfig) {
         this.tenantConfig = tenantConfig;
         this.logger = LoggerFactory.getLogger(createLoggerName(this.getClass(), tenantConfig.getName()));
     }
