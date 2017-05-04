@@ -60,7 +60,7 @@ public class PaymentHandler {
                         return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
                     }
 
-                    final PaymentWithCartLike result = paymentDispatcher.dispatchPayment(payment);
+                    paymentDispatcher.dispatchPayment(payment);
                     return new PaymentHandleResult(HttpStatusCode.OK_200);
                 } catch (final ConcurrentModificationException cme) {
                     Thread.sleep(RETRY_DELAY);
