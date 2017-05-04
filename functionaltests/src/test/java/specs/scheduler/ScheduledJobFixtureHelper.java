@@ -1,5 +1,6 @@
 package specs.scheduler;
 
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentStatus;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +27,16 @@ public class ScheduledJobFixtureHelper {
         this.paymentFixture = paymentFixture;
     }
 
+    /**
+     * Create a payment, but don't handle it
+     * @param paymentName      test payment alias
+     * @param paymentMethod    payone payment method name
+     * @param transactionType  payone payment transaction type
+     * @param centAmount       payment amount
+     * @param currencyCode     payment currency
+     * @return map of created payment properties
+     * @throws Exception any exceptions in the tests
+     */
     public MultiValueResult createPayment(String paymentName,
                                                  String paymentMethod,
                                                  String transactionType,
@@ -45,6 +56,12 @@ public class ScheduledJobFixtureHelper {
                 .with("isNotModified", payment.getCreatedAt().equals(payment.getLastModifiedAt()));
     }
 
+    /**
+     * Verify the {@code paymentName} is automatically handled by (short) scheduled task.
+     * @param paymentName payment alias
+     * @return map of the payment properties after waiting scheduled task.
+     * @throws Exception any exceptions in the tests
+     */
     public MultiValueResult verifyPaymentIsHandled(String paymentName) throws Exception {
         Payment payment = paymentFixture.fetchPaymentByLegibleName(paymentName);
 
@@ -73,8 +90,21 @@ public class ScheduledJobFixtureHelper {
                 .with("hasBeenModified", payment.getCreatedAt().compareTo(payment.getLastModifiedAt()) < 0);
     }
 
+    /**
+     * A maximum duration we wait for a payment is handled by (short) scheduled task.
+     * <p>
+     * <b>Note:</b><ul>
+     *     <li>this test is depended on actual service's {@link ServiceConfig#getScheduledJobCronForShortTimeFramePoll()}
+     * value, which is configured by {@code SHORT_TIME_FRAME_SCHEDULED_JOB_CRON} environment variable
+     * (or fallback to default one). We expect the short time-frame is "every 30 seconds" (<b>{@code 0/30 * * * * ? *}</b>.
+     * Adjust this value if you change short time-frame schedule in the Heroku service.</li>
+     *     <li>We added 10 second gap to let the job complete if any lags occurred.</li>
+     * </ul>
+     *
+     * @return 40 (seconds)
+     */
     public static int waitSecondsTimeout() {
-        return 40; // we make 10 seconds overlap to let the job complete
+        return 40;
     }
 
 }
