@@ -39,7 +39,7 @@ public class TenantConfig {
                 .map(String::valueOf)
                 .orElse("");
 
-        updateOrderPaymentState = tenantPropertyProvider.getTenantProperty(UPDATE_ORDER_PAYMENT_STATE)
+        this.updateOrderPaymentState = tenantPropertyProvider.getTenantProperty(UPDATE_ORDER_PAYMENT_STATE)
                 .map(String::trim)
                 .map(Boolean::valueOf)
                 .orElse(false);
