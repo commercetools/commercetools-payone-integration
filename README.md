@@ -146,7 +146,7 @@ sphereio/commercetools-payone-integration
 
 ## Multitenancy
 
-Starting from version 2 a single service instance may be uses for multiple tenants, e.g. same service for different shop,
+Starting from version 2 a single service instance may be used for multiple tenants, e.g. same service for different shop,
 merchants or suppliers. The next configuration properties are required for this:
 
   * set mandatory `TENANTS` property as described in _[Mandatory common properties](#mandatory-common-properties)_ section above.
