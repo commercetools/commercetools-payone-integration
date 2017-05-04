@@ -165,7 +165,7 @@ When the service is started it initializes separate URL handlers for all specifi
 
 ### Scheduled tasks
 
-Scheduled the service also provides scheduled tasks to handle those notification which were created but never handled 
+The service also provides scheduled tasks to handle those notification which were created but never handled 
 (because of connection, lags, down-times etc issues). 
 
 There are two scheduled jobs: 

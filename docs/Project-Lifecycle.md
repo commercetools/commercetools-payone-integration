@@ -201,7 +201,7 @@ The test service run in Heroku expects to have the next values:
 </table> 
 
 **Note**: 
-  * `*_UPDATE_ORDER_PAYMENT_STATE` have different values, 
+  * `*_UPDATE_ORDER_PAYMENT_STATE` has different values for the test tenants, 
     thus the first tenant updates order state when the second one - **should not**.
   * the Integration tests validate only short scheduled job, e.g, from `SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` 
     (the test creates payments without explicit handle call, then waits 30 seconds and validates the payments are handled, 
