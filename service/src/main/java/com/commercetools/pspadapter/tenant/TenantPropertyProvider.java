@@ -2,6 +2,7 @@ package com.commercetools.pspadapter.tenant;
 
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 
 public class TenantPropertyProvider {
@@ -27,7 +28,7 @@ public class TenantPropertyProvider {
 
     private final PropertyProvider propertyProvider;
 
-    public TenantPropertyProvider(String tenantName, PropertyProvider propertyProvider) {
+    public TenantPropertyProvider(@Nonnull String tenantName, @Nonnull PropertyProvider propertyProvider) {
         this.tenantName = tenantName;
         this.tenantPropertyPrefix = tenantName + "_";
         this.propertyProvider = propertyProvider;
