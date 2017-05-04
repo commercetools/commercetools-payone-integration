@@ -9,7 +9,7 @@ import specs.multitenancy.BaseTenant2Fixture;
 @RunWith(ConcordionRunner.class)
 public class ScheduledJobShort2Fixture extends BaseTenant2Fixture {
 
-    private static ScheduledJobFixtureHelper helper;
+    private ScheduledJobFixtureHelper helper;
 
     @Before
     public void setUp() throws Exception {
