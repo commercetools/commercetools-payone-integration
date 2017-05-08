@@ -165,13 +165,14 @@ ins {
 </style><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
         <meta charset="UTF-8" />
         <link href="../../../concordion.css" rel="stylesheet" type="text/css" />
-        <title>Charge Immediately</title>
+        <title>Tenant Charge Immediately</title>
     <link type="text/css" rel="stylesheet" href="../../../inputstyle.css" /></head>
-    <body><span class="breadcrumbs"><a href="../../Specs.html">commercetools - PAYONE - Integration Service</a> &gt; <a href="../Paymentmethods.html">Payment Methods</a> &gt; <a href="Creditcard.html">Credit Card Payments</a> &gt;</span>
-        <h1>Charge Credit Card Immediately</h1>
+    <body><span class="breadcrumbs"><a href="../../Specs.html">commercetools - PAYONE - Integration Service</a> &gt; <a href="../Multitenancy.html">Multi Tenancy</a> &gt;</span>
+        <h1>Tenant  Charge Credit Card Immediately</h1>
         <p>
-            The integration service allows to charge a credit card in a one step process without initiating a separate
-            authorization before.
+            Test second tenant <b><code><span c:echo="getTenantName()">HEROKU_SECOND_TENANT</span></code></b> in CTP project
+            <b><code><span c:echo="ctProject2Key()">payone-integration-tests</span></code></b> and Payone portal
+            <b><code><span c:echo="getTestDataPayonePortalId()">2026522</span></code></b>
         </p>
         <p>
             It will do so by sending an <em c:set="#requestType" class="inputvalue">authorization</em> request to the PAYONE platform.
@@ -187,10 +188,6 @@ ins {
         </ul>
         <div class="example">
             <h3>Charge immediately</h3>
-            <p>
-                Given the following payments for
-                <em>a credit card that does <b>not</b> support charges for currencies other than EUR</em>:
-            </p>
             <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
                 <tr>
                     <th c:set="#paymentName">Payment Name</th>
@@ -199,68 +196,61 @@ ins {
                     <th c:echo="#paymentId">Payment ID (for information only)</th>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 1</td>
+                    <td class="inputvalue">Payment 2.1</td>
                     <td class="inputvalue">3210</td>
                     <td class="inputvalue">EUR</td>
-                    <td>1e95be6c-3053-4069-bb1c-10aafeb83f32</td>
+                    <td>8c1aa569-d2f9-46ad-b5b6-38c746a16cdf</td>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 2</td>
+                    <td class="inputvalue">Payment 2.2</td>
                     <td class="inputvalue">98765</td>
                     <td class="inputvalue">USD</td>
-                    <td>7bb73d94-9f4f-4430-8803-7c997624b46c</td>
+                    <td>cc5881b2-8757-4abd-9c0d-3be053e37128</td>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 3</td>
+                    <td class="inputvalue">Payment 2.3</td>
                     <td class="inputvalue">543</td>
                     <td class="inputvalue">EUR</td>
-                    <td>77149346-f87c-41ee-b2cd-0722c9a2aaa8</td>
+                    <td>c2686ae3-17fb-472a-ae8a-d0e6c1957b5b</td>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 4</td>
+                    <td class="inputvalue">Payment 2.4</td>
                     <td class="inputvalue">3456</td>
                     <td class="inputvalue">EUR</td>
-                    <td>0f6481a3-f2d9-4fcb-92ee-c93de9fed9b3</td>
+                    <td>3fa863b4-02a5-4dee-b787-aa788e5f556d</td>
                 </tr>
             </table>
-            <p>
-                When I request the integration service to handle them I will get the following results:
-            </p>
-            <table c:execute="#result = handlePayment(#paymentName, #requestType)">
+
+            <table c:execute="#result = handlePayment(#paymentName)">
                 <tr>
                     <th c:set="#paymentName">Payment Name</th>
                     <th c:assertEquals="#result.statusCode">Response Status Code</th>
-                    <th c:assertEquals="#result.interactionCount">total # of <em>authorization</em> requests sent</th>
-                    <th c:echo="#result.transactionState">Transaction State </th>
-                    <th c:echo="#result.version">Version (for information only)</th>
+                    <th c:assertEquals="#result.amountPlanned">Amount paid</th>
+                    <th c:assertEquals="#result.transactionState">Transaction State</th>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 1</td>
+                    <td class="inputvalue">Payment 2.1</td>
                     <td class="success">200</td>
-                    <td class="success">1</td>
-                    <td>Success</td>
-                    <td>12</td>
+                    <td class="success">32,10 EUR</td>
+                    <td class="success">Success</td>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 2</td>
+                    <td class="inputvalue">Payment 2.2</td>
                     <td class="success">200</td>
-                    <td class="success">1</td>
-                    <td>Failure</td>
-                    <td>10</td>
+                    <td class="success">987,65 USD</td>
+                    <td class="success">Failure</td>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 3</td>
+                    <td class="inputvalue">Payment 2.3</td>
                     <td class="success">200</td>
-                    <td class="success">1</td>
-                    <td>Success</td>
-                    <td>12</td>
+                    <td class="success">5,43 EUR</td>
+                    <td class="success">Success</td>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 4</td>
+                    <td class="inputvalue">Payment 2.4</td>
                     <td class="success">200</td>
-                    <td class="success">1</td>
-                    <td>Success</td>
-                    <td>12</td>
+                    <td class="success">34,56 EUR</td>
+                    <td class="success">Success</td>
                 </tr>
             </table>
             <p>
@@ -268,11 +258,11 @@ ins {
             </p>
             <p>
                 After a certain amount of time the Integration Service will have processed notifications from PAYONE in the following order
-                for each of the payments <span c:set="#successfulPayments" class="inputvalue">Payment 1, Payment 3, Payment 4</span>:
+                for each of the payments <span c:set="#successfulPayments" class="inputvalue">Payment 2.1, Payment 2.3, Payment 2.4</span>:
             </p>
             <ol>
                 <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="success">received</span> -&gt; has no effect if balance is 0</li>
-                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)" class="success">received</span>
+                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="success">received</span>
                     -&gt;  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
             </ol>
             <table c:execute="#result = fetchPaymentDetails(#paymentName)">
@@ -286,7 +276,7 @@ ins {
                     <th c:echo="#result.version">Version (for information only)</th>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 1</td>
+                    <td class="inputvalue">Payment 2.1</td>
                     <td class="success">1</td>
                     <td class="success">1</td>
                     <td class="success">Success</td>
@@ -295,7 +285,7 @@ ins {
                     <td>19</td>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 3</td>
+                    <td class="inputvalue">Payment 2.3</td>
                     <td class="success">1</td>
                     <td class="success">1</td>
                     <td class="success">Success</td>
@@ -304,7 +294,7 @@ ins {
                     <td>19</td>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 4</td>
+                    <td class="inputvalue">Payment 2.4</td>
                     <td class="success">1</td>
                     <td class="success">1</td>
                     <td class="success">Success</td>
@@ -314,92 +304,39 @@ ins {
                 </tr>
             </table>
             <p>
-                The failed payment <span c:set="#failedPaymentName" class="inputvalue">Payment 2</span>
+                The failed payment <span c:set="#failedPaymentName" class="inputvalue">Payment 2.2</span>
                 must have received <span c:assertEquals="getInteractionNotificationCountOfAction(#failedPaymentName, #txactionAppointed)" class="success">0</span> <b>appointed</b>
                 and <span c:assertEquals="getInteractionNotificationCountOfAction(#failedPaymentName, #txactionPaid)" class="success">0</span> <b>paid</b> notifications.
             </p>
 
 
             <h3>Verify Order#paymentState</h3>
-            <p>For <b>paid</b> payments it expected to be <b>Paid</b>,
-                for failed <i>Payment 2</i> - unchanged (null)</p>
+            <p>For second tenant we switched off order payment state update (<code><b>HEROKU_SECOND_TENANT_UPDATE_ORDER_PAYMENT_STATE=false</b></code>),
+                so changing payment status to <b>paid</b> should not change the order state.</p>
+
             <table c:execute="#orderPaymentState = fetchOrderPaymentState(#paymentName)">
                 <tr>
                     <th c:set="#paymentName">Payment Name</th>
                     <th c:assertEquals="#orderPaymentState">Order Payment State</th>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 1</td>
-                    <td class="success">Paid</td>
-                </tr>
-                <tr>
-                    <td class="inputvalue">Payment 2</td>
+                    <td class="inputvalue">Payment 2.1</td>
                     <td class="success">(null)</td>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 3</td>
-                    <td class="success">Paid</td>
+                    <td class="inputvalue">Payment 2.2</td>
+                    <td class="success">(null)</td>
                 </tr>
                 <tr>
-                    <td class="inputvalue">Payment 4</td>
-                    <td class="success">Paid</td>
+                    <td class="inputvalue">Payment 2.3</td>
+                    <td class="success">(null)</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 2.4</td>
+                    <td class="success">(null)</td>
                 </tr>
             </table>
 
-
-            <p>
-                The service ensures idempotence, hence when I request it to handle the same payments again then I
-                will get the same results as before, especially the total number of <em>preauthorization</em> requests sent
-                per payment must not change:
-            </p>
-            <table c:execute="#result = handlePayment(#paymentName, #requestType)">
-                <tr>
-                    <th c:set="#paymentName">Payment Name</th>
-                    <th c:assertEquals="#result.statusCode">Response Status Code</th>
-                    <th c:assertEquals="#result.interactionCount">total # of <br /><em>authorization</em> requests sent</th>
-                    <th c:assertEquals="#result.transactionState">Transaction State</th>
-                    <th c:assertEquals="#result.amountAuthorized">Authorized Amount</th>
-                    <th c:assertEquals="#result.amountPaid">Paid Amount</th>
-                    <th c:echo="#result.version">Version (for information only)</th>
-                </tr>
-                <tr>
-                    <td class="inputvalue">Payment 1</td>
-                    <td class="success">200</td>
-                    <td class="success">1</td>
-                    <td class="success">Success</td>
-                    <td class="success">32,10 EUR</td>
-                    <td class="success">32,10 EUR</td>
-                    <td>19</td>
-                </tr>
-                <tr>
-                    <td class="inputvalue">Payment 2</td>
-                    <td class="success">200</td>
-                    <td class="success">1</td>
-                    <td class="success">Failure</td>
-                    <td class="success"> </td>
-                    <td class="success"> </td>
-                    <td>10</td>
-                </tr>
-                <tr>
-                    <td class="inputvalue">Payment 3</td>
-                    <td class="success">200</td>
-                    <td class="success">1</td>
-                    <td class="success">Success</td>
-                    <td class="success">5,43 EUR</td>
-                    <td class="success">5,43 EUR</td>
-                    <td>19</td>
-                </tr>
-                <tr>
-                    <td class="inputvalue">Payment 4</td>
-                    <td class="success">200</td>
-                    <td class="success">1</td>
-                    <td class="success">Success</td>
-                    <td class="success">34,56 EUR</td>
-                    <td class="success">34,56 EUR</td>
-                    <td>19</td>
-                </tr>
-            </table>
         </div>
-
-    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 536717 ms on 08-May-2017 at 15:31:21 UTC</div></div></body>
+    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 627998 ms on 08-May-2017 at 15:32:23 UTC</div></div></body>
 </html>
