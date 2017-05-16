@@ -39,16 +39,17 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
             throw new IllegalArgumentException("No payment method provided");
         }
 
-        return Optional.ofNullable(methodDispatcher.get(PaymentMethod.fromMethodKey(paymentMethodInfo.getMethod())))
-            .map(methodDispatcher -> {
-                try {
-                    return methodDispatcher.dispatchPayment(paymentWithCartLike);
-                } catch (final ConcurrentModificationException cme) {
-                    throw new java.util.ConcurrentModificationException
-                            ("The payment could not be dispatched: " + cme.getMessage(), cme);
-                }
-            })
-            .orElseThrow(() -> new IllegalArgumentException(String.format(
-                    "Unsupported payment method '%s'", paymentMethodInfo.getMethod())));
+        return Optional.of(PaymentMethod.fromMethodKey(paymentMethodInfo.getMethod()))
+                .map(methodDispatcher::get)
+                .map(dispatcher -> {
+                    try {
+                        return dispatcher.dispatchPayment(paymentWithCartLike);
+                    } catch (final ConcurrentModificationException cme) {
+                        throw new java.util.ConcurrentModificationException("The payment could not be dispatched: "
+                                + cme.getMessage(), cme);
+                    }
+                })
+                .orElseThrow(() -> new IllegalArgumentException(String.format(
+                        "Unsupported payment method '%s'", paymentMethodInfo.getMethod())));
     }
 }

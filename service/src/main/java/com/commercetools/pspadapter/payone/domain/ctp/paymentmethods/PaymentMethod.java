@@ -3,6 +3,8 @@ package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
 import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.payments.TransactionType;
 
+import javax.annotation.Nonnull;
+
 import static java.util.Arrays.stream;
 
 /**
@@ -101,6 +103,7 @@ public enum PaymentMethod {
      * @return the requested payment mwethod
      * @throws IllegalArgumentException in case of an invalid method key
      */
+    @Nonnull
     public static PaymentMethod fromMethodKey(final String methodKey) {
         return stream(PaymentMethod.values())
                 .filter(value -> value.key.equals(methodKey))
