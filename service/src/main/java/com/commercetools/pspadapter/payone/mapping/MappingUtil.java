@@ -83,31 +83,27 @@ public class MappingUtil {
         request.setVatid(customer.getVatId());
 
         //birthday
-        Optional.ofNullable(customer.getDateOfBirth()).ifPresent(birthday -> {
-            request.setBirthday(birthday.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-        });
+        Optional.ofNullable(customer.getDateOfBirth())
+                .ifPresent(birthday -> request.setBirthday(birthday.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
 
         //TODO: Gender can also be a CustomField enum @Cart with values Female/Male
         //gender
-        Optional.ofNullable(customer.getCustom()).ifPresent(customs -> {
-            Optional.ofNullable(customs.getFieldAsString(CustomFieldKeys.GENDER_FIELD))
-                    .ifPresent(gender -> {
-                        request.setGender(gender.substring(0, 0));
-                    });
-        });
+        Optional.ofNullable(customer.getCustom())
+                .map(custom -> custom.getFieldAsString(CustomFieldKeys.GENDER_FIELD))
+                .ifPresent(gender -> request.setGender(gender.substring(0, 0)));
 
         //customerNumber
         Optional.ofNullable(customer.getCustomerNumber())
-            .ifPresent(customerNumber -> {
-                if (customerNumber.length() > 20) {
-                    LOG.warn("customer.customerNumber exceeds the maximum length of 20! Using substring of customer.id as fallback.");
-                    String id = customer.getId();
-                    id = id.replace("-", "").substring(0, 20);
-                    request.setCustomerid(id);
-                } else {
-                    request.setCustomerid(customerNumber);
-                }
-            });
+                .ifPresent(customerNumber -> {
+                    if (customerNumber.length() > 20) {
+                        LOG.warn("customer.customerNumber exceeds the maximum length of 20! Using substring of customer.id as fallback.");
+                        String id = customer.getId();
+                        id = id.replace("-", "").substring(0, 20);
+                        request.setCustomerid(id);
+                    } else {
+                        request.setCustomerid(customerNumber);
+                    }
+                });
     }
 
     public static void mapShippingAddressToRequest(final AuthorizationRequest request, final Address shippingAddress) {
@@ -145,9 +141,9 @@ public class MappingUtil {
 
     /**
      * Define localization name (ISO 639) from the {@code paymentWithCartLike} in the next order:<ul>
-     *     <li>if payment's custom filed <i>languageCode</i> is set - return this value</li>
-     *     <li>else if cartLike's {@code locale} is set - return {@link Locale#getLanguage()}</li>
-     *     <li>otherwise return {@link Optional#empty()}</li>
+     * <li>if payment's custom filed <i>languageCode</i> is set - return this value</li>
+     * <li>else if cartLike's {@code locale} is set - return {@link Locale#getLanguage()}</li>
+     * <li>otherwise return {@link Optional#empty()}</li>
      * </ul>
      *
      * @param paymentWithCartLike payment to lookup for locale
@@ -162,8 +158,8 @@ public class MappingUtil {
                 .map(customFields -> customFields.getFieldAsString(LANGUAGE_CODE_FIELD))
                 .map(Optional::of)
                 .orElseGet(() -> paymentOptional
-                                    .map(PaymentWithCartLike::getCartLike)
-                                    .map(CartLike::getLocale)
-                                    .map(Locale::getLanguage));
+                        .map(PaymentWithCartLike::getCartLike)
+                        .map(CartLike::getLocale)
+                        .map(Locale::getLanguage));
     }
 }
