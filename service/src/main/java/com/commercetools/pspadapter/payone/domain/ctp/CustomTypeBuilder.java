@@ -166,12 +166,7 @@ public class CustomTypeBuilder {
                 // TODO: cleanup this comment when pretty tested and good specified
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.GENDER_FIELD, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.IP, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.TELEPHONE_NUMBER, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.BIRTHDAY, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.NARRATIVE_TEXT, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.FINANCINGTYPE, FieldClassifier.REQUIRED)
+                createSingleLineStringFieldDefinition(CustomFieldKeys.IP, FieldClassifier.REQUIRED)
         ));
     }
 

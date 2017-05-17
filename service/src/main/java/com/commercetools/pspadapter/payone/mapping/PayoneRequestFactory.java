@@ -11,7 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IP;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguage;
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createLoggerName;
 
@@ -98,6 +100,21 @@ public abstract class PayoneRequestFactory {
 
         //customer's locale, if set in custom field or cartLike
         getPaymentLanguage(paymentWithCartLike).ifPresent(request::setLanguage);
+    }
+
+    protected static AuthorizationRequest mapKlarnaMandatoryFields(final AuthorizationRequest request,
+                                                   final PaymentWithCartLike paymentWithCartLike) {
+        // fistsname, lastname, street, zip, city, country, email, telephonenumber - must be mapped in mapBillingAddressToRequest
+        // gender, birthday - in mapCustomerToRequest
+        // language, amount, currency in mapFormPaymentWithCartLike
+        // financingtype - in the constructor
+
+        Optional.of(paymentWithCartLike.getPayment())
+                .map(Payment::getCustom)
+                .map(customFields -> customFields.getFieldAsString(IP))
+                .ifPresent(request::setIp);
+
+        return request;
     }
 
 }
