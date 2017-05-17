@@ -16,14 +16,7 @@ import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
-import io.sphere.sdk.types.BooleanFieldType;
-import io.sphere.sdk.types.DateFieldType;
-import io.sphere.sdk.types.EnumFieldType;
-import io.sphere.sdk.types.FieldDefinition;
-import io.sphere.sdk.types.FieldType;
-import io.sphere.sdk.types.StringFieldType;
-import io.sphere.sdk.types.Type;
-import io.sphere.sdk.types.TypeDraftBuilder;
+import io.sphere.sdk.types.*;
 import io.sphere.sdk.types.commands.TypeCreateCommand;
 import io.sphere.sdk.types.commands.TypeDeleteCommand;
 import io.sphere.sdk.types.queries.TypeQuery;
@@ -37,6 +30,7 @@ public class CustomTypeBuilder {
     public static final String PAYMENT_WALLET = "payment-WALLET";
     public static final String PAYMENT_BANK_TRANSFER = "payment-BANK_TRANSFER";
     public static final String PAYMENT_CASH_ADVANCE = "payment-CASH-ADVANCE";
+    public static final String PAYMENT_INVOICE_KLARNA = "payment-INVOICE-KLARNA";
 
     public static final String PAYONE_INTERACTION_REQUEST = "PAYONE_INTERACTION_REQUEST";
     public static final String PAYONE_INTERACTION_RESPONSE = "PAYONE_INTERACTION_RESPONSE";
@@ -58,6 +52,7 @@ public class CustomTypeBuilder {
 
         /**
          * Gets the proper enum value.
+         *
          * @param permission whether or not permission to erase shall be granted
          * @return {@link #GRANTED} if permission is true, {@link #DENIED} otherwise
          */
@@ -165,6 +160,18 @@ public class CustomTypeBuilder {
                 createSingleLineStringFieldDefinition(CustomFieldKeys.PAY_TO_NAME_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.PAY_TO_IBAN_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.PAY_TO_BIC_FIELD, FieldClassifier.OPTIONAL)
+        ));
+
+        createPaymentCustomType(PAYMENT_INVOICE_KLARNA, ImmutableList.of(
+                // TODO: cleanup this comment when pretty tested and good specified
+                createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.GENDER_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.IP, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.TELEPHONE_NUMBER, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.BIRTHDAY, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.NARRATIVE_TEXT, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.FINANCINGTYPE, FieldClassifier.REQUIRED)
         ));
     }
 
