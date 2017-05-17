@@ -7,10 +7,8 @@ import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPrea
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
-import org.javamoney.moneta.function.MonetaryUtil;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 /**
  * @author fhaertig
@@ -32,17 +30,6 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         final WalletPreauthorizationRequest request = new WalletPreauthorizationRequest(getPayoneConfig(), clearingSubType);
 
-        request.setReference(paymentWithCartLike.getReference());
-
-        Optional.ofNullable(ctPayment.getAmountPlanned())
-                .ifPresent(amount -> {
-                    request.setCurrency(amount.getCurrency().getCurrencyCode());
-                    request.setAmount(MonetaryUtil
-                            .minorUnits()
-                            .queryFrom(amount)
-                            .intValue());
-                });
-
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
 
         return request;
@@ -57,17 +44,6 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
 
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         WalletAuthorizationRequest request = new WalletAuthorizationRequest(getPayoneConfig(), clearingSubType);
-
-        request.setReference(paymentWithCartLike.getReference());
-
-        Optional.ofNullable(ctPayment.getAmountPlanned())
-                .ifPresent(amount -> {
-                    request.setCurrency(amount.getCurrency().getCurrencyCode());
-                    request.setAmount(MonetaryUtil
-                            .minorUnits()
-                            .queryFrom(amount)
-                            .intValue());
-                });
 
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
 

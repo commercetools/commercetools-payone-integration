@@ -10,10 +10,8 @@ import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
-import org.javamoney.moneta.function.MonetaryUtil;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 public class KlarnaRequestFactory extends PayoneRequestFactory {
 
@@ -39,17 +37,6 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
 
         final BKR request = requestConstructor.apply(getPayoneConfig(), clearingSubType, paymentWithCartLike);
-
-        request.setReference(paymentWithCartLike.getReference());
-
-        Optional.ofNullable(ctPayment.getAmountPlanned())
-                .ifPresent(amount -> {
-                    request.setCurrency(amount.getCurrency().getCurrencyCode());
-                    request.setAmount(MonetaryUtil
-                            .minorUnits()
-                            .queryFrom(amount)
-                            .intValue());
-                });
 
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
 

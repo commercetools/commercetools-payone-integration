@@ -29,17 +29,6 @@ public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFacto
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         BankTransferAuthorizationRequest request = new BankTransferAuthorizationRequest(getPayoneConfig(), clearingSubType);
 
-        request.setReference(paymentWithCartLike.getReference());
-
-        Optional.ofNullable(ctPayment.getAmountPlanned())
-                .ifPresent(amount -> {
-                    request.setCurrency(amount.getCurrency().getCurrencyCode());
-                    request.setAmount(MonetaryUtil
-                            .minorUnits()
-                            .queryFrom(amount)
-                            .intValue());
-                });
-
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
 
         //Despite declared as optional in PayOne Server API documentation. the Bankcountry is required

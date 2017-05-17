@@ -12,6 +12,7 @@ import io.sphere.sdk.models.Address;
 import io.sphere.sdk.models.Reference;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.types.CustomFields;
+import org.javamoney.moneta.function.MonetaryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,6 +140,22 @@ public class MappingUtil {
         request.setSuccessurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.SUCCESS_URL_FIELD));
         request.setErrorurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.ERROR_URL_FIELD));
         request.setBackurl(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.CANCEL_URL_FIELD));
+    }
+
+    /**
+     * Map planned amount value and currency from {@code payment} to {@code request}.
+     * @param request {@link AuthorizationRequest} to which set the values
+     * @param payment {@link Payment} from which read amount planned.
+     */
+    public static void mapAmountPlannedFromPayment(final AuthorizationRequest request, final Payment payment) {
+        Optional.ofNullable(payment.getAmountPlanned())
+                .ifPresent(amount -> {
+                    request.setCurrency(amount.getCurrency().getCurrencyCode());
+                    request.setAmount(MonetaryUtil
+                            .minorUnits()
+                            .queryFrom(amount)
+                            .intValue());
+                });
     }
 
     /**

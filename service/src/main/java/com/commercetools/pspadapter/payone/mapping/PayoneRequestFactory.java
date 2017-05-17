@@ -52,12 +52,28 @@ public abstract class PayoneRequestFactory {
         throw new UnsupportedOperationException("this request type is not supported by this payment method.");
     }
 
+    /**
+     * Map the next values from {@code paymentWithCartLike} to {@code request}:<ul>
+     *     <li>amount planned</li>
+     *     <li>order reference</li>
+     *     <li>custom fields</li>
+     *     <li>{@link io.sphere.sdk.customers.Customer} info if exists</li>
+     *     <li>billing and shipping address</li>
+     *     <li>language</li>
+     * </ul>
+     * @param request {@link AuthorizationRequest} instance to which set the values
+     * @param paymentWithCartLike cart/order info from which read the values
+     */
     protected void mapFormPaymentWithCartLike(final AuthorizationRequest request,
                                               final PaymentWithCartLike paymentWithCartLike) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
 
+        request.setReference(paymentWithCartLike.getReference());
+
         MappingUtil.mapCustomFieldsFromPayment(request, ctPayment.getCustom());
+
+        MappingUtil.mapAmountPlannedFromPayment(request, ctPayment);
 
         try {
             MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());

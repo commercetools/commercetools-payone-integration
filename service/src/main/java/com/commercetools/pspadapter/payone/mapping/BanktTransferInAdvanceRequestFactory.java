@@ -33,15 +33,6 @@ public class BanktTransferInAdvanceRequestFactory extends PayoneRequestFactory {
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         BankTransferInAdvancePreautorizationRequest request = new BankTransferInAdvancePreautorizationRequest(getPayoneConfig(), clearingSubType);
 
-        request.setReference(paymentWithCartLike.getReference());
-
-        Optional.ofNullable(ctPayment.getAmountPlanned())
-                .ifPresent(m -> request.setAmount(MonetaryUtil
-                                                    .minorUnits()
-                                                    .queryFrom(ctPayment.getAmountPlanned())
-                                                    .intValue()));
-        request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
-
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
 
         return request;
