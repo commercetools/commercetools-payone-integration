@@ -10,6 +10,7 @@ import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.mapping.*;
+import com.commercetools.pspadapter.payone.mapping.klarna.KlarnaRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.order.DefaultPaymentToOrderStateMapper;
 import com.commercetools.pspadapter.payone.mapping.order.PaymentToOrderStateMapper;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
@@ -199,7 +200,8 @@ public class TenantFactory {
                 PaymentMethod.BANK_TRANSFER_SOFORTUEBERWEISUNG,
                 PaymentMethod.BANK_TRANSFER_ADVANCE,
                 PaymentMethod.BANK_TRANSFER_POSTFINANCE_CARD,
-                PaymentMethod.BANK_TRANSFER_POSTFINANCE_EFINANCE
+                PaymentMethod.BANK_TRANSFER_POSTFINANCE_EFINANCE,
+                PaymentMethod.INVOICE_KLARNA
         );
 
         for (final PaymentMethod paymentMethod : supportedMethods) {
@@ -258,6 +260,8 @@ public class TenantFactory {
                 return new PostFinanceBanktransferRequestFactory(tenantConfig);
             case BANK_TRANSFER_ADVANCE:
                 return new BanktTransferInAdvanceRequestFactory(tenantConfig);
+            case INVOICE_KLARNA:
+                return new KlarnaRequestFactory(tenantConfig);
             default:
                 throw new IllegalArgumentException(format("No PayoneRequestFactory could be created for payment method %s", method));
         }
