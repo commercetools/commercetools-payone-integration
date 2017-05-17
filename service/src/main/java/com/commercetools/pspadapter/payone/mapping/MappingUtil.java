@@ -15,6 +15,7 @@ import io.sphere.sdk.types.CustomFields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
+import static com.commercetools.util.ServiceConstants.DEFAULT_LOCALE;
 
 /**
  * @author fhaertig
@@ -146,7 +148,7 @@ public class MappingUtil {
      * <li>otherwise return {@link Optional#empty()}</li>
      * </ul>
      *
-     * @param paymentWithCartLike payment to lookup for locale
+     * @param paymentWithCartLike payment to lookup for the locale
      * @return Optional String of 2 characters localization name by ISO 639, or {@link Optional#empty()} if not found.
      */
     public static Optional<String> getPaymentLanguage(@Nullable final PaymentWithCartLike paymentWithCartLike) {
@@ -161,5 +163,18 @@ public class MappingUtil {
                         .map(PaymentWithCartLike::getCartLike)
                         .map(CartLike::getLocale)
                         .map(Locale::getLanguage));
+    }
+
+    /**
+     * Same as {@link #getPaymentLanguage(PaymentWithCartLike)}, but falls back to
+     * {@link com.commercetools.util.ServiceConstants#DEFAULT_LOCALE} locale
+     * if not found in {@code paymentWithCartLike}.
+     *
+     * @param paymentWithCartLike payment to lookup for the locale
+     * @return String of 2 characters localization name by ISO 639
+     */
+    @Nonnull
+    public static String getPaymentLanguageTagOrFallback(@Nullable final PaymentWithCartLike paymentWithCartLike) {
+        return getPaymentLanguage(paymentWithCartLike).orElse(DEFAULT_LOCALE.getLanguage());
     }
 }

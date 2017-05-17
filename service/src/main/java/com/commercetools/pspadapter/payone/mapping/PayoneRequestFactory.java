@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
+import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguage;
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createLoggerName;
 
 /**
@@ -80,7 +81,7 @@ public abstract class PayoneRequestFactory {
         }
 
         //customer's locale, if set in custom field or cartLike
-        MappingUtil.getPaymentLanguage(paymentWithCartLike).ifPresent(request::setLanguage);
+        getPaymentLanguage(paymentWithCartLike).ifPresent(request::setLanguage);
     }
 
 }
