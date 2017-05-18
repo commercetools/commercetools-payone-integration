@@ -11,6 +11,7 @@ import io.sphere.sdk.models.LocalizedString;
 import io.sphere.sdk.models.Reference;
 import io.sphere.sdk.shippingmethods.ShippingMethod;
 import io.sphere.sdk.taxcategories.TaxRate;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaConstants.ID_MAX_LENGTH;
 import static com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaItemTypeEnum.*;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguageTagOrFallback;
 import static com.commercetools.util.ServiceConstants.DEFAULT_LOCALE;
@@ -52,7 +54,7 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
 
     private List<String> de;
 
-    private List<Double> va;
+    private List<Integer> va;
 
     protected BaseKlarnaRequest(final PayoneConfig config, final String requestType,
                                 final String financingtype, final PaymentWithCartLike paymentWithCartLike) {
@@ -151,11 +153,11 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
      *
      * @return list of VAT rates in percent, respective to {@link #getId()}
      */
-    public List<Double> getVa() {
+    public List<Integer> getVa() {
         return va;
     }
 
-    public void setVa(List<Double> va) {
+    public void setVa(List<Integer> va) {
         this.va = va;
     }
 
@@ -182,12 +184,12 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
         this.va = new ArrayList<>(itemsCount);
 
         // accumulate all items types discounts to a single value
-        AtomicInteger discountAccumulator = new AtomicInteger(0);
+        AtomicInteger discountAccumulatorEur = new AtomicInteger(0);
 
         // populate "goods" items
         cartLike.getLineItems().forEach(lineItem -> {
                     it.add(goods.toString());
-                    id.add(lineItem.getVariant().getSku());
+                    id.add(validateId(lineItem.getVariant().getSku()));
 
                     // TODO: the discounts are not separated as dedicated items in the Klarna request,
                     // instead below we calculate total discounts of the cart
@@ -198,20 +200,20 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
                     de.add(localizeOrFallback(lineItem.getName(), localesList, "item"));
                     va.add(getTaxRateIfPresentOrZero(lineItem.getTaxRate()));
 
-                    discountAccumulator.addAndGet(getTotalDiscountedPricePerItem(lineItem));
+                    discountAccumulatorEur.addAndGet(getTotalDiscountedPricePerItem(lineItem));
                 }
         );
 
         cartLike.getCustomLineItems().forEach(customLineItem -> {
             it.add(goods.toString());
             final String customItemName = localizeOrFallback(customLineItem.getName(), localesList, "custom item");
-            id.add(customItemName);
+            id.add(validateId(customItemName));
             pr.add(getCentsAmount((customLineItem.getMoney())));
             no.add(customLineItem.getQuantity());
             de.add(customItemName);
             va.add(getTaxRateIfPresentOrZero(customLineItem.getTaxRate()));
 
-            discountAccumulator.addAndGet(getTotalDiscountedPricePerItem(customLineItem));
+            discountAccumulatorEur.addAndGet(getTotalDiscountedPricePerItem(customLineItem));
         });
 
 
@@ -220,7 +222,7 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
             it.add(shipment.toString());
 
             final String shippingMethodName = shippingInfo.getShippingMethodName();
-            id.add(shippingMethodName);
+            id.add(validateId(shippingMethodName));
 
             pr.add(getCentsAmount(shippingInfo.getPrice()));
             no.add(1L); // always one shipment item so far
@@ -235,14 +237,14 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
             ofNullable(shippingInfo.getDiscountedPrice())
                     .map(DiscountedLineItemPrice::getValue)
                     .map(BaseKlarnaRequest::getCentsAmount)
-                    .ifPresent(discountAccumulator::addAndGet);
+                    .ifPresent(discountAccumulatorEur::addAndGet);
         });
 
-        int totalDiscount = discountAccumulator.get();
+        int totalDiscount = discountAccumulatorEur.get();
         if (totalDiscount > 0) {
             it.add(voucher.toString());
             final String totalDiscountName = "total discount";
-            id.add(totalDiscountName);
+            id.add(validateId(totalDiscountName));
             pr.add(totalDiscount);
 
             // so far we count accumulated discount from all items and shipment.
@@ -250,7 +252,7 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
             no.add(1L);
 
             de.add(totalDiscountName);
-            va.add(0.0); // taxes doesn't have any sense for accumulated discount
+            va.add(0); // taxes doesn't have any sense for accumulated discount
         }
 
     }
@@ -262,15 +264,25 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
         return ofNullable(string).map(str -> str.get(locales)).orElse(fallback);
     }
 
-    private static double getTaxRateIfPresentOrZero(@Nullable TaxRate taxRate) {
-        return ofNullable(taxRate)
-                .map(TaxRate::getAmount)
-                .map(amount -> amount * 100.0)// CTP stores tax in [0..1] range, Payone requires in [0..100]
-                .orElse(0.0);
+    /**
+     * @param id product id/name/sku
+     * @return trimmed to {@link KlarnaConstants#ID_MAX_LENGTH} product id/name/sku.
+     */
+    @Nonnull
+    private static String validateId(String id) {
+        return StringUtils.left(id, ID_MAX_LENGTH);
     }
 
-    private static int getCentsAmount(@Nonnull MonetaryAmount monetaryAmount) {
-        return monetaryAmount.getNumber().intValue();
+    private static Integer getTaxRateIfPresentOrZero(@Nullable TaxRate taxRate) {
+        return ofNullable(taxRate)
+                .map(TaxRate::getAmount)
+                .map(amount -> amount * 100)// CTP stores tax in [0..1] range, Payone requires in [0..100]
+                .map(Double::intValue) //  PAYONE accepts only integer there!!!
+                .orElse(0);
+    }
+
+    private static int getCentsAmount(@Nonnull MonetaryAmount monetaryAmountEur) {
+        return monetaryAmountEur.multiply(100).getNumber().intValue();
     }
 
     private static int getTotalDiscountedPricePerItem(@Nonnull LineItemLike lineItemLike) {
