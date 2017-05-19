@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class PayonePostServiceImpl implements PayonePostService {
 
@@ -83,24 +85,24 @@ public class PayonePostServiceImpl implements PayonePostService {
      * @return new {@link Map} where keys with list values
      */
     @Nonnull
-    private Map<String, Object> getObjectMapWithExpandedLists(Map<String, Object> parameters) {
+    Map<String, Object> getObjectMapWithExpandedLists(Map<String, Object> parameters) {
         return parameters.entrySet().stream()
-                .map(entry -> {
+                .flatMap(entry -> {
                     Object value = entry.getValue();
                     if (value instanceof List) {
-                        List list = (List) value;
+                        final List list = (List) value;
                         if (list.size() > 0) {
-                            for (int i = 0; i < list.size(); i++) {
-                                return Pair.of(entry.getKey() + "[" + (i + 1) + "]", list.get(i));
-                            }
+                            return IntStream.range(0, list.size())
+                                    .mapToObj(i -> Pair.of(entry.getKey() + "[" + (i + 1) + "]", list.get(i)));
                         } else {
-                            return Pair.of(entry.getKey() + "[]", "");
+                            return Stream.of(Pair.of(entry.getKey() + "[]", ""));
                         }
                     }
 
-                    return Pair.of(entry.getKey(), value);
+                    return Stream.of(Pair.of(entry.getKey(), value));
 
-                }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+                })
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
     Map<String, String> buildMapFromResultParams(final String serverResponse) throws UnsupportedEncodingException {
