@@ -1,5 +1,6 @@
 package util;
 
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.orders.Order;
@@ -53,6 +54,10 @@ public class PaymentTestHelper {
 
     public Payment dummyPaymentOneAuthPending20EuroCC() throws Exception {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_CC.json");
+    }
+
+    public Payment dummyPaymentOneAuthPending12150Cent_KLV() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneAuthPending12150Cent_KLV.json");
     }
 
     public Payment dummyPaymentOneAuthPending20EuroPPE() throws Exception {
@@ -119,6 +124,10 @@ public class PaymentTestHelper {
         return getCartFromFile("dummyCart.json");
     }
 
+    public Cart dummyKlarnaCart() throws Exception {
+        return getCartFromFile("dummyKlarnaCart.json");
+    }
+
     public Payment dummyPaymentTwoTransactionsPending() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsPending.json");
     }
@@ -143,5 +152,11 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentUnknownMethod.json");
     }
 
+    public PaymentWithCartLike createDummyPaymentWithCartLike(Payment payment, Cart cart) {
+        return new PaymentWithCartLike(payment, cart);
+    }
 
+    public PaymentWithCartLike createKlarnaPaymentWithCartLike() throws Exception {
+        return createDummyPaymentWithCartLike(dummyPaymentOneAuthPending12150Cent_KLV(), dummyKlarnaCart());
+    }
 }
