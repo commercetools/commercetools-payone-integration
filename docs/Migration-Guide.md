@@ -88,3 +88,8 @@ You have to change the payment handling URL:
 ### 5. PROFIT
 
 Congratulations, you are done!
+
+# Add Klarna payment
+
+Update custom types: add IP.
+TO be continued....

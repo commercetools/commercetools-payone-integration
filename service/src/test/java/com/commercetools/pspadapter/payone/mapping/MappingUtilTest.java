@@ -3,6 +3,7 @@ package com.commercetools.pspadapter.payone.mapping;
 import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardAuthorizationRequest;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.CartLike;
@@ -12,6 +13,7 @@ import io.sphere.sdk.models.Reference;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.types.CustomFields;
 import org.assertj.core.api.SoftAssertions;
+import org.javamoney.moneta.Money;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,8 +34,6 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class MappingUtilTest extends BaseTenantPropertyTest {
-
-    private static final String dummyValue = "123";
 
     private SoftAssertions softly;
 
@@ -164,34 +164,104 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
         // add properties to payment object one-by-one till valid customFields.getFieldAsString(LANGUAGE_CODE_FIELD)
         when(paymentWithCartLike.getPayment()).thenReturn(payment);
-        softly.assertThat(getPaymentLanguage(paymentWithCartLike).isPresent()).isFalse();
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike)).isEmpty();
 
         when(payment.getCustom()).thenReturn(customFields);
-        softly.assertThat(getPaymentLanguage(paymentWithCartLike).isPresent()).isFalse();
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike)).isEmpty();
 
         when(customFields.getFieldAsString(LANGUAGE_CODE_FIELD)).thenReturn("nl");
-        softly.assertThat(getPaymentLanguage(paymentWithCartLike).get()).isEqualTo("nl");
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike)).hasValue("nl");
 
         // now set flush payment object to null - fetch language from cartLike
         // set properties one-by-one till locale.getLanguage()
         when(paymentWithCartLike.getPayment()).thenReturn(null);
-        when((CartLike)paymentWithCartLike.getCartLike()).thenReturn(cardLike);
-        softly.assertThat(getPaymentLanguage(paymentWithCartLike).isPresent()).isFalse();
+        when((CartLike) paymentWithCartLike.getCartLike()).thenReturn(cardLike);
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike)).isEmpty();
 
         Locale locale = new Locale("xx");
         when(cardLike.getLocale()).thenReturn(locale);
-        softly.assertThat(getPaymentLanguage(paymentWithCartLike).get()).isEqualTo("xx");
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike)).hasValue("xx");
 
         // if both payment and cartLike set - payment value should privilege
         when(paymentWithCartLike.getPayment()).thenReturn(payment);
-        softly.assertThat(getPaymentLanguage(paymentWithCartLike).get()).isEqualTo("nl");
+        softly.assertThat(getPaymentLanguage(paymentWithCartLike)).hasValue("nl");
 
         // but as soon as payment reference doesn't have proper language at the end -
         // cartLike language should be fetched
         when(customFields.getFieldAsString(LANGUAGE_CODE_FIELD)).thenReturn(null);
         Optional<String> paymentLanguage = getPaymentLanguage(paymentWithCartLike);
-        softly.assertThat(paymentLanguage.get()).isEqualTo("xx");
+        softly.assertThat(paymentLanguage).hasValue("xx");
 
         softly.assertAll();
+    }
+
+    @Test
+    public void getPaymentLanguageTagOrFallback() throws Exception {
+        // base cases: null arguments
+        softly.assertThat(MappingUtil.getPaymentLanguageTagOrFallback(null)).isEqualTo("en");
+        softly.assertThat(MappingUtil.getPaymentLanguageTagOrFallback(paymentWithCartLike)).isEqualTo("en");
+
+        // add properties to payment object one-by-one till valid customFields.getFieldAsString(LANGUAGE_CODE_FIELD)
+        when(paymentWithCartLike.getPayment()).thenReturn(payment);
+        softly.assertThat(MappingUtil.getPaymentLanguageTagOrFallback(paymentWithCartLike)).isEqualTo("en");
+
+        when(payment.getCustom()).thenReturn(customFields);
+        softly.assertThat(MappingUtil.getPaymentLanguageTagOrFallback(paymentWithCartLike)).isEqualTo("en");
+
+        when(customFields.getFieldAsString(LANGUAGE_CODE_FIELD)).thenReturn("nl");
+        softly.assertThat(MappingUtil.getPaymentLanguageTagOrFallback(paymentWithCartLike)).isEqualTo("nl");
+
+        // now set flush payment object to null - fetch language from cartLike
+        // set properties one-by-one till locale.getLanguage()
+        when(paymentWithCartLike.getPayment()).thenReturn(null);
+        when((CartLike) paymentWithCartLike.getCartLike()).thenReturn(cardLike);
+        softly.assertThat(MappingUtil.getPaymentLanguageTagOrFallback(paymentWithCartLike)).isEqualTo("en");
+
+        Locale locale = new Locale("xx");
+        when(cardLike.getLocale()).thenReturn(locale);
+        softly.assertThat(MappingUtil.getPaymentLanguageTagOrFallback(paymentWithCartLike)).isEqualTo("xx");
+
+        // if both payment and cartLike set - payment value should privilege
+        when(paymentWithCartLike.getPayment()).thenReturn(payment);
+        softly.assertThat(MappingUtil.getPaymentLanguageTagOrFallback(paymentWithCartLike)).isEqualTo("nl");
+
+        // but as soon as payment reference doesn't have proper language at the end -
+        // cartLike language should be fetched
+        when(customFields.getFieldAsString(LANGUAGE_CODE_FIELD)).thenReturn(null);
+        String paymentLanguage = MappingUtil.getPaymentLanguageTagOrFallback(paymentWithCartLike);
+        softly.assertThat(paymentLanguage).isEqualTo("xx");
+
+        softly.assertAll();
+    }
+
+    @Test
+    public void mapAmountPlannedFromPayment_withoutPrice() throws Exception {
+        AuthorizationRequest request = new AuthorizationRequestImplTest(new PayoneConfig(tenantPropertyProvider), "testReqType", "testClearType");
+
+        when(payment.getAmountPlanned()).thenReturn(null);
+
+        MappingUtil.mapAmountPlannedFromPayment(request, payment);
+        assertThat(request.getAmount()).isEqualTo(0);
+        assertThat(request.getCurrency()).isNull();
+    }
+
+    @Test
+    public void mapAmountPlannedFromPayment_withPrice() throws Exception {
+        AuthorizationRequest request = new AuthorizationRequestImplTest(new PayoneConfig(tenantPropertyProvider), "testReqType", "testClearType");
+
+        when(payment.getAmountPlanned()).thenReturn(Money.of(18, "EUR"));
+
+        MappingUtil.mapAmountPlannedFromPayment(request, payment);
+        assertThat(request.getAmount()).isEqualTo(1800);
+        assertThat(request.getCurrency()).isEqualTo("EUR");
+    }
+
+    /**
+     * Simple implementation for tests.
+     */
+    private class AuthorizationRequestImplTest extends AuthorizationRequest {
+        protected AuthorizationRequestImplTest(PayoneConfig config, String requestType, String clearingtype) {
+            super(config, requestType, clearingtype);
+        }
     }
 }
