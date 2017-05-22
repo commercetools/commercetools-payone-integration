@@ -12,6 +12,7 @@ import io.sphere.sdk.models.Reference;
 import io.sphere.sdk.shippingmethods.ShippingMethod;
 import io.sphere.sdk.taxcategories.TaxRate;
 import org.apache.commons.lang3.StringUtils;
+import org.javamoney.moneta.function.MonetaryUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -184,7 +185,8 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
         this.va = new ArrayList<>(itemsCount);
 
         // accumulate all items types discounts to a single value
-        AtomicInteger discountAccumulatorEur = new AtomicInteger(0);
+        // the value is in major currency value (EUR, USD), not cents.
+        AtomicInteger discountAccumulatorMjr = new AtomicInteger(0);
 
         // populate "goods" items
         cartLike.getLineItems().forEach(lineItem -> {
@@ -200,7 +202,7 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
                     de.add(localizeOrFallback(lineItem.getName(), localesList, "item"));
                     va.add(getTaxRateIfPresentOrZero(lineItem.getTaxRate()));
 
-                    discountAccumulatorEur.addAndGet(getTotalDiscountedPricePerItem(lineItem));
+                    discountAccumulatorMjr.addAndGet(getTotalDiscountedPricePerItem(lineItem));
                 }
         );
 
@@ -213,7 +215,7 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
             de.add(customItemName);
             va.add(getTaxRateIfPresentOrZero(customLineItem.getTaxRate()));
 
-            discountAccumulatorEur.addAndGet(getTotalDiscountedPricePerItem(customLineItem));
+            discountAccumulatorMjr.addAndGet(getTotalDiscountedPricePerItem(customLineItem));
         });
 
 
@@ -237,15 +239,15 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
             ofNullable(shippingInfo.getDiscountedPrice())
                     .map(DiscountedLineItemPrice::getValue)
                     .map(BaseKlarnaRequest::getCentsAmount)
-                    .ifPresent(discountAccumulatorEur::addAndGet);
+                    .ifPresent(discountAccumulatorMjr::addAndGet);
         });
 
-        int totalDiscount = discountAccumulatorEur.get();
-        if (totalDiscount > 0) {
+        int totalDiscount = discountAccumulatorMjr.get();
+        if (totalDiscount != 0) {
             it.add(voucher.toString());
             final String totalDiscountName = "total discount";
             id.add(validateId(totalDiscountName));
-            pr.add(totalDiscount);
+            pr.add(-totalDiscount); // discount value will be added to the price, thus minus is applied
 
             // so far we count accumulated discount from all items and shipment.
             // Could be changed in future to support separated discount lines in the request
@@ -281,8 +283,8 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
                 .orElse(0);
     }
 
-    private static int getCentsAmount(@Nonnull MonetaryAmount monetaryAmountEur) {
-        return monetaryAmountEur.multiply(100).getNumber().intValue();
+    private static int getCentsAmount(@Nonnull MonetaryAmount monetaryAmountMjr) {
+        return MonetaryUtil.minorUnits().queryFrom(monetaryAmountMjr).intValue();
     }
 
     private static int getTotalDiscountedPricePerItem(@Nonnull LineItemLike lineItemLike) {

@@ -143,7 +143,8 @@ public class MappingUtil {
     }
 
     /**
-     * Map planned amount value and currency from {@code payment} to {@code request}.
+     * Map planned major unit (EUR, USD) amount value and currency to minor (cents) unit
+     * from {@code payment} to {@code request}.
      * @param request {@link AuthorizationRequest} to which set the values
      * @param payment {@link Payment} from which read amount planned.
      */
