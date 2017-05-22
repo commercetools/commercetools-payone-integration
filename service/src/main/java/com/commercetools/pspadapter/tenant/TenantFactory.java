@@ -219,6 +219,7 @@ public class TenantFactory {
         }
         return new PaymentDispatcher(methodDispatcherMap, getPayoneInterfaceName());
     }
+
     protected TransactionExecutor createTransactionExecutor(
             final TransactionType transactionType,
             final LoadingCache<String, Type> typeCache,
@@ -247,6 +248,14 @@ public class TenantFactory {
         return null;
     }
 
+    /**
+     * Get a new instance of {@link PayoneRequestFactory} based on payment method and tenant config.
+     *
+     * @param method       one of {@link PaymentMethod} instances.
+     * @param tenantConfig tenant specific configuration.
+     * @return new instance of {@link PayoneRequestFactory}.
+     */
+    @Nonnull
     protected PayoneRequestFactory createRequestFactory(@Nonnull PaymentMethod method, @Nonnull TenantConfig tenantConfig) {
         switch (method) {
             case CREDIT_CARD:
