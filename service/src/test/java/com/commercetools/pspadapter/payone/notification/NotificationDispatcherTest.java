@@ -6,7 +6,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
 import com.commercetools.pspadapter.tenant.TenantFactory;
-import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import com.commercetools.service.PaymentServiceImpl;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
@@ -60,6 +59,7 @@ public class NotificationDispatcherTest extends BaseTenantPropertyTest {
     private ImmutableMap<NotificationAction, NotificationProcessor> processors;
 
     @Before
+    @SuppressWarnings("unchecked")
     public void setUp() throws Exception {
         super.setUp();
 

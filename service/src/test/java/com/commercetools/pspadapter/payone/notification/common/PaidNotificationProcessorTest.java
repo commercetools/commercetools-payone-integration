@@ -124,6 +124,7 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
         verifyUpdateOrderActionsNotCalled();
     }
 
+    @SuppressWarnings("unchecked")
     private Payment processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccessWireframe() throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneChargePending20Euro();

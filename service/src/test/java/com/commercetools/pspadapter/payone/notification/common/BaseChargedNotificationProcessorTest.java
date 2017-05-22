@@ -35,6 +35,7 @@ public class BaseChargedNotificationProcessorTest extends BaseNotificationProces
     protected static final ZonedDateTime timestamp =
             ZonedDateTime.of(LocalDateTime.ofEpochSecond(millis, 0, ZoneOffset.UTC), ZoneId.of("UTC"));
 
+    @SuppressWarnings("unchecked")
     protected void processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending(NotificationProcessorBase testee,
                                                                                                              PaymentState expectedPaymentState)
             throws Exception {
