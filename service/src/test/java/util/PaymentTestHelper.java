@@ -59,8 +59,12 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_CC.json");
     }
 
-    public Payment dummyPaymentOneAuthPending24980Cent_KLV() throws Exception {
-        return getPaymentFromFile(KLARNA_DIR + "dummyPaymentOneAuthPending24980Cent_KLV.json");
+    public Payment dummyPayment24980Cent_KLV() throws Exception {
+        return getPaymentFromFile(KLARNA_DIR + "dummyPayment24980Cent_KLV.json");
+    }
+
+    public Payment dummyPayment_30900_KLV() throws Exception {
+        return getPaymentFromFile(KLARNA_DIR + "dummyPayment_30900_KLV.json");
     }
 
     public Payment dummyPaymentOneAuthPending20EuroPPE() throws Exception {
@@ -131,6 +135,10 @@ public class PaymentTestHelper {
         return getCartFromFile(KLARNA_DIR + "dummyKlarnaCart.json");
     }
 
+    public Cart dummyKlarnaCartWithoutDiscounts() throws Exception {
+        return getCartFromFile(KLARNA_DIR + "dummyKlarnaCartWithoutDiscounts.json");
+    }
+
     public Payment dummyPaymentTwoTransactionsPending() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsPending.json");
     }
@@ -160,6 +168,10 @@ public class PaymentTestHelper {
     }
 
     public PaymentWithCartLike createKlarnaPaymentWithCartLike() throws Exception {
-        return createDummyPaymentWithCartLike(dummyPaymentOneAuthPending24980Cent_KLV(), dummyKlarnaCart());
+        return createDummyPaymentWithCartLike(dummyPayment24980Cent_KLV(), dummyKlarnaCart());
+    }
+
+    public PaymentWithCartLike createKlarnaPaymentWithCartLikeWithoutDiscount() throws Exception {
+        return createDummyPaymentWithCartLike(dummyPayment_30900_KLV(), dummyKlarnaCartWithoutDiscounts());
     }
 }
