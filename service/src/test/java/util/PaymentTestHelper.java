@@ -56,8 +56,8 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_CC.json");
     }
 
-    public Payment dummyPaymentOneAuthPending12150Cent_KLV() throws Exception {
-        return getPaymentFromFile("dummyPaymentOneAuthPending12150Cent_KLV.json");
+    public Payment dummyPaymentOneAuthPending24980Cent_KLV() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneAuthPending24980Cent_KLV.json");
     }
 
     public Payment dummyPaymentOneAuthPending20EuroPPE() throws Exception {
@@ -157,6 +157,6 @@ public class PaymentTestHelper {
     }
 
     public PaymentWithCartLike createKlarnaPaymentWithCartLike() throws Exception {
-        return createDummyPaymentWithCartLike(dummyPaymentOneAuthPending12150Cent_KLV(), dummyKlarnaCart());
+        return createDummyPaymentWithCartLike(dummyPaymentOneAuthPending24980Cent_KLV(), dummyKlarnaCart());
     }
 }
