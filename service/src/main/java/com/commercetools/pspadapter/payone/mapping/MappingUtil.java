@@ -12,6 +12,7 @@ import io.sphere.sdk.models.Address;
 import io.sphere.sdk.models.Reference;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.types.CustomFields;
+import org.apache.commons.lang3.StringUtils;
 import org.javamoney.moneta.function.MonetaryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,10 +91,14 @@ public class MappingUtil {
                 .ifPresent(birthday -> request.setBirthday(birthday.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
 
         //TODO: Gender can also be a CustomField enum @Cart with values Female/Male
-        //gender
+        //gender: Payone supports one of 2 characters [m, f]
         Optional.ofNullable(customer.getCustom())
                 .map(custom -> custom.getFieldAsString(CustomFieldKeys.GENDER_FIELD))
-                .ifPresent(gender -> request.setGender(gender.substring(0, 0)));
+                .map(String::trim)
+                .filter(StringUtils::isNotBlank)
+                .map(gender -> gender.substring(0, 1))
+                .map(String::toLowerCase)
+                .ifPresent(request::setGender);
 
         //customerNumber
         Optional.ofNullable(customer.getCustomerNumber())
@@ -145,6 +150,7 @@ public class MappingUtil {
     /**
      * Map planned major unit (EUR, USD) amount value and currency to minor (cents) unit
      * from {@code payment} to {@code request}.
+     *
      * @param request {@link AuthorizationRequest} to which set the values
      * @param payment {@link Payment} from which read amount planned.
      */
