@@ -81,9 +81,4 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         assertThat("not implemented").isEqualTo("implemented");
     }
 
-    @Test
-    public void createRequestInternal() throws Exception {
-        assertThat("not implemented").isEqualTo("implemented");
-    }
-
 }

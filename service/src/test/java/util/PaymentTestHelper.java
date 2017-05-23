@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class PaymentTestHelper {
+
+    public static final String KLARNA_DIR = "com/commercetools/pspadapter/payone/mapping/klarna/";
+
     protected static InputStream getJsonFromFile(String filePath) throws IOException {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream(filePath);
     }
@@ -57,7 +60,7 @@ public class PaymentTestHelper {
     }
 
     public Payment dummyPaymentOneAuthPending24980Cent_KLV() throws Exception {
-        return getPaymentFromFile("dummyPaymentOneAuthPending24980Cent_KLV.json");
+        return getPaymentFromFile(KLARNA_DIR + "dummyPaymentOneAuthPending24980Cent_KLV.json");
     }
 
     public Payment dummyPaymentOneAuthPending20EuroPPE() throws Exception {
@@ -125,7 +128,7 @@ public class PaymentTestHelper {
     }
 
     public Cart dummyKlarnaCart() throws Exception {
-        return getCartFromFile("dummyKlarnaCart.json");
+        return getCartFromFile(KLARNA_DIR + "dummyKlarnaCart.json");
     }
 
     public Payment dummyPaymentTwoTransactionsPending() throws Exception {
