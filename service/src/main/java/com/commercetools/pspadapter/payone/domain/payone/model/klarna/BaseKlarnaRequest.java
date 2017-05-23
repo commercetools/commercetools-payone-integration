@@ -6,29 +6,29 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Authorizat
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import io.sphere.sdk.cartdiscounts.DiscountedLineItemPrice;
 import io.sphere.sdk.carts.CartLike;
-import io.sphere.sdk.carts.LineItemLike;
 import io.sphere.sdk.models.LocalizedString;
 import io.sphere.sdk.models.Reference;
 import io.sphere.sdk.shippingmethods.ShippingMethod;
-import io.sphere.sdk.taxcategories.TaxRate;
+import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.commons.lang3.StringUtils;
-import org.javamoney.moneta.function.MonetaryUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.money.MonetaryAmount;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaConstants.ID_MAX_LENGTH;
 import static com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaItemTypeEnum.*;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguageTagOrFallback;
+import static com.commercetools.pspadapter.payone.util.MoneyUtil.getActualPricePerLineItem;
+import static com.commercetools.pspadapter.payone.util.MoneyUtil.getTaxRateIfPresentOrZero;
 import static com.commercetools.util.ServiceConstants.DEFAULT_LOCALE;
+import static io.sphere.sdk.utils.MoneyImpl.centAmountOf;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -49,7 +49,7 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
 
     private List<String> id;
 
-    private List<Integer> pr;
+    private List<Long> pr;
 
     private List<Long> no;
 
@@ -110,17 +110,17 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
     }
 
     /**
-     * Unit price
+     * Full unit price without discounts.
      * <p>
      * (in smallest currency unit! e.g. cent)
      *
      * @return list of product prices, respective to {@link #getIt()} and {@link #getId()}
      */
-    public List<Integer> getPr() {
+    public List<Long> getPr() {
         return pr;
     }
 
-    public void setPr(List<Integer> pr) {
+    public void setPr(List<Long> pr) {
         this.pr = pr;
     }
 
@@ -175,7 +175,8 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
         final CartLike<?> cartLike = paymentWithCartLike.getCartLike();
         final int itemsCount = cartLike.getLineItems().size()
                 + cartLike.getCustomLineItems().size()
-                + 1; // cartLike.getShippingInfo();
+                + 1 // cartLike.getShippingInfo();
+                + 1; // discount
 
         this.id = new ArrayList<>(itemsCount);
         this.it = new ArrayList<>(itemsCount);
@@ -184,49 +185,51 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
         this.de = new ArrayList<>(itemsCount);
         this.va = new ArrayList<>(itemsCount);
 
-        // accumulate all items types discounts to a single value
-        // the value is in major currency value (EUR, USD), not cents.
-        AtomicInteger discountAccumulatorMjr = new AtomicInteger(0);
+        // accumulator for full prices - without discounts
+        final AtomicLong accumulatedFullPriceCents = new AtomicLong(0L);
+        // accumulator for actual prices - with discounts
+        final AtomicLong accumulatedActualPriceCents = new AtomicLong(0L);
 
-        // populate "goods" items
+        // populate "goods" items 1/2: normal line items
         cartLike.getLineItems().forEach(lineItem -> {
-                    it.add(goods.toString());
-                    id.add(validateId(lineItem.getVariant().getSku()));
+            it.add(goods.toString());
+            id.add(validateId(lineItem.getVariant().getSku()));
 
-                    // TODO: the discounts are not separated as dedicated items in the Klarna request,
-                    // instead below we calculate total discounts of the cart
-                    pr.add(getCentsAmount(lineItem.getPrice().getValue()));
+            no.add(lineItem.getQuantity());
 
-                    no.add(lineItem.getQuantity());
+            de.add(localizeOrFallback(lineItem.getName(), localesList, "item"));
+            va.add(getTaxRateIfPresentOrZero(lineItem.getTaxRate()));
 
-                    de.add(localizeOrFallback(lineItem.getName(), localesList, "item"));
-                    va.add(getTaxRateIfPresentOrZero(lineItem.getTaxRate()));
+            final long fullPriceCents = centAmountOf(lineItem.getPrice().getValue());
+            pr.add(fullPriceCents);
 
-                    discountAccumulatorMjr.addAndGet(getTotalDiscountedPricePerItem(lineItem));
-                }
-        );
+            accumulatedFullPriceCents.addAndGet(fullPriceCents * lineItem.getQuantity());
+            accumulatedActualPriceCents.addAndGet(getActualPricePerLineItem(lineItem));
+        });
 
+        // populate "goods" items 2/2: custom line items
         cartLike.getCustomLineItems().forEach(customLineItem -> {
             it.add(goods.toString());
             final String customItemName = localizeOrFallback(customLineItem.getName(), localesList, "custom item");
             id.add(validateId(customItemName));
-            pr.add(getCentsAmount((customLineItem.getMoney())));
             no.add(customLineItem.getQuantity());
             de.add(customItemName);
             va.add(getTaxRateIfPresentOrZero(customLineItem.getTaxRate()));
 
-            discountAccumulatorMjr.addAndGet(getTotalDiscountedPricePerItem(customLineItem));
+            final long fullPriceCents = centAmountOf(customLineItem.getMoney());
+            pr.add(fullPriceCents);
+
+            accumulatedFullPriceCents.addAndGet(fullPriceCents * customLineItem.getQuantity());
+            accumulatedActualPriceCents.addAndGet(getActualPricePerLineItem(customLineItem));
         });
 
-
-        // TODO: ensure shippingMethod is expanded in the request!!!
+        // populate "shipment"
         ofNullable(cartLike.getShippingInfo()).ifPresent(shippingInfo -> {
             it.add(shipment.toString());
 
             final String shippingMethodName = shippingInfo.getShippingMethodName();
             id.add(validateId(shippingMethodName));
 
-            pr.add(getCentsAmount(shippingInfo.getPrice()));
             no.add(1L); // always one shipment item so far
 
             de.add(ofNullable(shippingInfo.getShippingMethod())
@@ -236,18 +239,22 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
 
             va.add(getTaxRateIfPresentOrZero(shippingInfo.getTaxRate()));
 
-            ofNullable(shippingInfo.getDiscountedPrice())
+            final long fullPriceCents = centAmountOf(shippingInfo.getPrice());
+            pr.add(fullPriceCents);
+            accumulatedFullPriceCents.addAndGet(fullPriceCents);
+            accumulatedActualPriceCents.addAndGet(ofNullable(shippingInfo.getDiscountedPrice())
                     .map(DiscountedLineItemPrice::getValue)
-                    .map(BaseKlarnaRequest::getCentsAmount)
-                    .ifPresent(discountAccumulatorMjr::addAndGet);
+                    .map(MoneyImpl::centAmountOf)
+                    .orElse(fullPriceCents));
         });
 
-        int totalDiscount = discountAccumulatorMjr.get();
-        if (totalDiscount != 0) {
+        // populate "voucher" if a discount could be applied
+        long discountCents = accumulatedActualPriceCents.get() - accumulatedFullPriceCents.get();
+        if (discountCents != 0) {
             it.add(voucher.toString());
             final String totalDiscountName = "total discount";
             id.add(validateId(totalDiscountName));
-            pr.add(-totalDiscount); // discount value will be added to the price, thus minus is applied
+            pr.add(discountCents); // discount value should be negative
 
             // so far we count accumulated discount from all items and shipment.
             // Could be changed in future to support separated discount lines in the request
@@ -273,24 +280,6 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
     @Nonnull
     private static String validateId(String id) {
         return StringUtils.left(id, ID_MAX_LENGTH);
-    }
-
-    private static Integer getTaxRateIfPresentOrZero(@Nullable TaxRate taxRate) {
-        return ofNullable(taxRate)
-                .map(TaxRate::getAmount)
-                .map(amount -> amount * 100)// CTP stores tax in [0..1] range, Payone requires in [0..100]
-                .map(Double::intValue) //  PAYONE accepts only integer there!!!
-                .orElse(0);
-    }
-
-    private static int getCentsAmount(@Nonnull MonetaryAmount monetaryAmountMjr) {
-        return MonetaryUtil.minorUnits().queryFrom(monetaryAmountMjr).intValue();
-    }
-
-    private static int getTotalDiscountedPricePerItem(@Nonnull LineItemLike lineItemLike) {
-        return lineItemLike.getDiscountedPricePerQuantity().stream()
-                .mapToInt(discount -> getCentsAmount(discount.getDiscountedPrice().getValue()))
-                .sum();
     }
 
 }
