@@ -13,8 +13,12 @@ import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.ZonedDateTime;
+
+import static java.lang.String.format;
 
 /**
  * @author Jan Wolter
@@ -23,6 +27,8 @@ import java.time.ZonedDateTime;
  */
 public class UnsupportedTransactionExecutor implements TransactionExecutor {
     private final BlockingSphereClient client;
+
+    public static final Logger LOG = LoggerFactory.getLogger(UnsupportedTransactionExecutor.class);
 
     /**
      * Initializes the executor.
@@ -35,16 +41,21 @@ public class UnsupportedTransactionExecutor implements TransactionExecutor {
     @Override
     public PaymentWithCartLike executeTransaction(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction) {
         final Payment payment = paymentWithCartLike.getPayment();
+
+        LOG.warn("Trying to execute an unsupported transaction type [{}] for method [{}] on payment [{}]",
+                transaction.getType().toString(), payment.getPaymentMethodInfo().getMethod(), payment.getId());
+
         final ChangeTransactionState changeTransactionState = ChangeTransactionState.of(
                 TransactionState.FAILURE,
                 transaction.getId());
 
         final AddInterfaceInteraction addInterfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(
                 CustomTypeBuilder.PAYONE_UNSUPPORTED_TRANSACTION,
-                ImmutableMap.<String, Object>of(
+                ImmutableMap.of(
                         CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now(),
                         CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
-                        CustomFieldKeys.MESSAGE_FIELD, "Transaction type not supported."));
+                        CustomFieldKeys.MESSAGE_FIELD, format("Transaction type [%s] not supported for method [%s].",
+                                payment.getPaymentMethodInfo().getMethod(), transaction.getType())));
 
         return paymentWithCartLike.withPayment(
             client.executeBlocking(

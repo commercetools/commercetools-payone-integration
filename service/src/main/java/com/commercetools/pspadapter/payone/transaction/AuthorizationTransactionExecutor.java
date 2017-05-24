@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.transaction.creditcard;
+package com.commercetools.pspadapter.payone.transaction;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
@@ -8,7 +8,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Authorizat
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
-import com.commercetools.pspadapter.payone.transaction.TransactionBaseExecutor;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -22,6 +21,7 @@ import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.ZonedDateTime;
 import java.util.ConcurrentModificationException;
@@ -52,7 +52,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
 
             return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)
                     //sequenceNumber field is mandatory -> can't be null
-                    .anyMatch(fields -> fields.getFieldAsString(CustomFieldKeys.SEQUENCE_NUMBER_FIELD).equals(transaction.getInteractionId()));
+                    .anyMatch(fields -> StringUtils.equals(fields.getFieldAsString(CustomFieldKeys.SEQUENCE_NUMBER_FIELD), transaction.getInteractionId()));
         } else {
             return true;
         }

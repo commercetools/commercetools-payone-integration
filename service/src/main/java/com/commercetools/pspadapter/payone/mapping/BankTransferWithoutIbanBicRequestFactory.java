@@ -3,14 +3,13 @@ package com.commercetools.pspadapter.payone.mapping;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
-import com.google.common.base.Preconditions;
-import io.sphere.sdk.payments.Payment;
-import org.javamoney.moneta.function.MonetaryUtil;
+import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferPreathorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BaseBankTransferAuthorizationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
+import javax.annotation.Nonnull;
+import java.util.function.BiFunction;
 
 /**
  * Created by mht on 15.08.16.
@@ -22,28 +21,24 @@ public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFacto
 
     private static final Logger LOG = LoggerFactory.getLogger(BankTransferWithoutIbanBicRequestFactory.class);
 
+    protected Logger getLogger() {
+        return LOG;
+    }
+
     @Override
-    public BankTransferAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
+    public BaseBankTransferAuthorizationRequest createPreauthorizationRequest(@Nonnull PaymentWithCartLike paymentWithCartLike) {
+        return createBankTransferRequest(paymentWithCartLike, BankTransferPreathorizationRequest::new);
+    }
 
-        final Payment ctPayment = paymentWithCartLike.getPayment();
+    @Override
+    public BaseBankTransferAuthorizationRequest createAuthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
+        return createBankTransferRequest(paymentWithCartLike, BankTransferAuthorizationRequest::new);
+    }
 
-        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
+    protected BaseBankTransferAuthorizationRequest createBankTransferRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike,
+                                                                             @Nonnull final BiFunction<PayoneConfig, String, BaseBankTransferAuthorizationRequest> requestGenerator) {
 
-        final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
-        BankTransferAuthorizationRequest request = new BankTransferAuthorizationRequest(getPayoneConfig(), clearingSubType);
-
-        request.setReference(paymentWithCartLike.getReference());
-
-        Optional.ofNullable(ctPayment.getAmountPlanned())
-                .ifPresent(amount -> {
-                    request.setCurrency(amount.getCurrency().getCurrencyCode());
-                    request.setAmount(MonetaryUtil
-                            .minorUnits()
-                            .queryFrom(amount)
-                            .intValue());
-                });
-
-        mapFormPaymentWithCartLike(request, paymentWithCartLike, LOG);
+        BaseBankTransferAuthorizationRequest request = createBasicAuthorizationRequest(paymentWithCartLike, requestGenerator, getLogger());
 
         //Despite declared as optional in PayOne Server API documentation. the Bankcountry is required
         request.setBankcountry(request.getCountry());

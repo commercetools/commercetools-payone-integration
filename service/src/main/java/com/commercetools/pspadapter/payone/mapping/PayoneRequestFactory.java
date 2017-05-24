@@ -4,9 +4,16 @@ import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
+import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
+import org.javamoney.moneta.function.MonetaryUtil;
 import org.slf4j.Logger;
+
+import javax.annotation.Nonnull;
+import java.util.Optional;
+import java.util.function.BiFunction;
 
 /**
  * @author fhaertig
@@ -34,6 +41,47 @@ public abstract class PayoneRequestFactory {
 
     public CaptureRequest createCaptureRequest(final PaymentWithCartLike paymentWithCartLike, final int sequenceNumber) {
         throw new UnsupportedOperationException("this request type is not supported by this payment method.");
+    }
+
+    /**
+     * Create basic (pre)authorization request(based on {@code requestGenerator} and map the next default values
+     * from the payment:
+     * <ul>
+     *     <li>reference (orderNumber)</li>
+     *     <li>currency and amount (if specified in the payment)</li>
+     *     <li>custom fields, customer info, addresses, language and so on. See
+     *     {@link #mapFormPaymentWithCartLike(AuthorizationRequest, PaymentWithCartLike, Logger)} for details</li>
+     * </ul>
+     * @param paymentWithCartLike payment to map. {@code paymentWithCartLike.getPayment()} must be set.
+     * @param requestGenerator function to create request based on {@link PayoneConfig} and clearing type from the payment
+     * @param logger descendant class logger reference to log mapping errors and warnings.
+     * @param <T> Type of resulted authorization request, subclass of {@link AuthorizationRequest}
+     * @return created subclass of {@link AuthorizationRequest} of type {@code T} with mapped default payment values.
+     */
+    protected <T extends AuthorizationRequest> T createBasicAuthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike,
+                                                                                 @Nonnull final BiFunction<PayoneConfig, String, T> requestGenerator,
+                                                                                 @Nonnull final Logger logger) {
+        final Payment ctPayment = paymentWithCartLike.getPayment();
+
+        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
+
+        final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
+        T request = requestGenerator.apply(getPayoneConfig(), clearingSubType);
+
+        request.setReference(paymentWithCartLike.getReference());
+
+        Optional.ofNullable(ctPayment.getAmountPlanned())
+                .ifPresent(amount -> {
+                    request.setCurrency(amount.getCurrency().getCurrencyCode());
+                    request.setAmount(MonetaryUtil
+                            .minorUnits()
+                            .queryFrom(amount)
+                            .intValue());
+                });
+
+        mapFormPaymentWithCartLike(request, paymentWithCartLike, logger);
+
+        return request;
     }
 
     protected void mapFormPaymentWithCartLike(final AuthorizationRequest request,

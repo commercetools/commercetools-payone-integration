@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.transaction.creditcard;
+package com.commercetools.pspadapter.payone.transaction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;

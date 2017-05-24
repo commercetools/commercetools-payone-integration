@@ -3,7 +3,7 @@ package com.commercetools.pspadapter.payone.mapping;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BaseBankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import io.sphere.sdk.customers.Customer;
@@ -53,7 +53,7 @@ public class PostfinanceCardRequestFactoryTest {
         Customer customer = payment.getCustomer().getObj();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
-        BankTransferAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
+        BaseBankTransferAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
         SoftAssertions softly = new SoftAssertions();
 
         //base values

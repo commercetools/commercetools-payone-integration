@@ -16,7 +16,8 @@ public enum PaymentMethod {
      * @see MethodKeys#DIRECT_DEBIT_SEPA
      */
     DIRECT_DEBIT_SEPA(MethodKeys.DIRECT_DEBIT_SEPA,
-                    TransactionType.AUTHORIZATION
+                    TransactionType.AUTHORIZATION,
+                    TransactionType.CHARGE
     ),
 
     /**
@@ -38,20 +39,23 @@ public enum PaymentMethod {
      * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
      */
     BANK_TRANSFER_SOFORTUEBERWEISUNG(MethodKeys.BANK_TRANSFER_SOFORTUEBERWEISUNG,
-                    TransactionType.CHARGE
+            TransactionType.AUTHORIZATION,
+            TransactionType.CHARGE
     ),
 
     /**
      * @see MethodKeys#BANK_TRANSFER_ADVANCE
      */
     BANK_TRANSFER_ADVANCE(MethodKeys.BANK_TRANSFER_ADVANCE,
-                    TransactionType.CHARGE
+                    TransactionType.AUTHORIZATION,
+                    TransactionType.CHARGE // not supported by the documentation, but works, hence left for the backward compatibility
     ),
 
     /**
      * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
      */
     BANK_TRANSFER_POSTFINANCE_EFINANCE(MethodKeys.BANK_TRANSFER_POSTFINANCE_EFINANCE,
+            TransactionType.AUTHORIZATION,
             TransactionType.CHARGE
     ),
 
@@ -59,6 +63,7 @@ public enum PaymentMethod {
      * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
      */
     BANK_TRANSFER_POSTFINANCE_CARD(MethodKeys.BANK_TRANSFER_POSTFINANCE_CARD,
+            TransactionType.AUTHORIZATION,
             TransactionType.CHARGE
     );
 
