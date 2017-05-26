@@ -163,10 +163,11 @@ public class CustomTypeBuilder {
         ));
 
         createPaymentCustomType(PAYMENT_INVOICE_KLARNA, ImmutableList.of(
-                // TODO: cleanup this comment when pretty tested and good specified
+                // TODO: cleanup this comment when pretty tested, good specified and set-up on all depended projects
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.IP, FieldClassifier.REQUIRED)
+                createSingleLineStringFieldDefinition(CustomFieldKeys.IP, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.GENDER_FIELD, FieldClassifier.REQUIRED)
         ));
     }
 
