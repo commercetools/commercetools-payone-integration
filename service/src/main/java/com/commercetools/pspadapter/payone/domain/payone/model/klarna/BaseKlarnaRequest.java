@@ -17,7 +17,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -169,8 +168,14 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
      * @param paymentWithCartLike instance from which all the prices are fetched.
      */
     protected void mapKlarnaPropertiesFromPaymentCart(@Nonnull PaymentWithCartLike paymentWithCartLike) {
+        // create an ordered list of preferred locales to fetch from localized items properties,
+        // like sku, description etc.
+        // The idea is: try first to fetch the locale mentioned in the paymentWithCartLike,
+        // otherwise fallback to the default locale
         final Locale orderLocale = Locale.forLanguageTag(getPaymentLanguageTagOrFallback(paymentWithCartLike));
-        final Set<Locale> localesList = Stream.of(orderLocale, DEFAULT_LOCALE).collect(Collectors.toSet());
+        final List<Locale> localesList = Stream.of(orderLocale, DEFAULT_LOCALE)
+                .distinct() // if orderLocale == DEFAULT_LOCALE
+                .collect(Collectors.toList());
 
         final CartLike<?> cartLike = paymentWithCartLike.getCartLike();
         final int itemsCount = cartLike.getLineItems().size()
