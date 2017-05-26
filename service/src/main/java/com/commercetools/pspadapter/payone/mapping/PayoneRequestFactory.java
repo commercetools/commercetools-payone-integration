@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IP;
+import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getGenderFromPaymentCart;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguage;
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createLoggerName;
 
@@ -100,6 +101,9 @@ public abstract class PayoneRequestFactory {
 
         //customer's locale, if set in custom field or cartLike
         getPaymentLanguage(paymentWithCartLike).ifPresent(request::setLanguage);
+
+        //gender: Payone supports one of 2 characters [m, f]
+        getGenderFromPaymentCart(paymentWithCartLike).ifPresent(request::setGender);
     }
 
     protected static AuthorizationRequest mapKlarnaMandatoryFields(final AuthorizationRequest request,

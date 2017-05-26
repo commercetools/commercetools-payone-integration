@@ -23,9 +23,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.Locale;
 import java.util.Optional;
 
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.GENDER_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguage;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -254,6 +256,53 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         MappingUtil.mapAmountPlannedFromPayment(request, payment);
         assertThat(request.getAmount()).isEqualTo(1800);
         assertThat(request.getCurrency()).isEqualTo("EUR");
+    }
+
+    @Test
+    public void getGenderFromPaymentCart() throws Exception {
+        when((CartLike) paymentWithCartLike.getCartLike()).thenReturn(cardLike);
+        when(paymentWithCartLike.getPayment()).thenReturn(payment);
+        softly.assertThat(MappingUtil.getGenderFromPaymentCart(paymentWithCartLike)).isEmpty();
+
+        CustomFields cartCustomFields = mock(CustomFields.class);
+        when(cartCustomFields.getFieldAsString(GENDER_FIELD)).thenReturn("cartGender");
+        CustomFields paymentCustomFields = mock(CustomFields.class);
+        when(paymentCustomFields.getFieldAsString(GENDER_FIELD)).thenReturn("paymentGender");
+        CustomFields customerCustomFields = mock(CustomFields.class);
+        when(customerCustomFields.getFieldAsString(GENDER_FIELD)).thenReturn("USER_GENDER");
+
+
+        when(cardLike.getCustom()).thenReturn(cartCustomFields);
+        when(payment.getCustom()).thenReturn(paymentCustomFields);
+        Reference<Customer> of = Reference.of("test-id", customer);
+        when(payment.getCustomer()).thenReturn(of);
+        when(customer.getCustom()).thenReturn(customerCustomFields);
+
+        // payment custom field in the result
+        softly.assertThat(MappingUtil.getGenderFromPaymentCart(paymentWithCartLike)).hasValue("p");
+
+        // cart custom field in the result
+        when(payment.getCustom()).thenReturn(null);
+        softly.assertThat(MappingUtil.getGenderFromPaymentCart(paymentWithCartLike)).hasValue("c");
+
+        // customer custom field in the result
+        when(cartCustomFields.getFieldAsString(GENDER_FIELD)).thenReturn(null);
+        softly.assertThat(MappingUtil.getGenderFromPaymentCart(paymentWithCartLike)).hasValue("u");
+
+        // don't fail is cardLike.getCustom() is not set
+        when(cardLike.getCustom()).thenReturn(null);
+        softly.assertThat(MappingUtil.getGenderFromPaymentCart(paymentWithCartLike)).hasValue("u");
+
+        // empty if everything is empty
+        when(customerCustomFields.getFieldAsString(GENDER_FIELD)).thenReturn(null);
+        softly.assertThat(MappingUtil.getGenderFromPaymentCart(paymentWithCartLike)).isEmpty();
+
+        // custom field is set, but customer#getCustom() is null
+        when(customerCustomFields.getFieldAsString(GENDER_FIELD)).thenReturn("XXX");
+        when(customer.getCustom()).thenReturn(null);
+        softly.assertThat(MappingUtil.getGenderFromPaymentCart(paymentWithCartLike)).isEmpty();
+
+        softly.assertAll();
     }
 
     /**

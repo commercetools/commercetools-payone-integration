@@ -20,12 +20,16 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
 import static com.commercetools.util.ServiceConstants.DEFAULT_LOCALE;
+import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
 
 /**
  * @author fhaertig
@@ -70,16 +74,17 @@ public class MappingUtil {
         request.setZip(billingAddress.getPostalCode());
         request.setCity(billingAddress.getCity());
         request.setEmail(billingAddress.getEmail());
-        request.setTelephonenumber(Optional
-                .ofNullable(billingAddress.getPhone())
-                .orElse(billingAddress.getMobile()));
+        request.setTelephonenumber(
+                ofNullable(billingAddress.getPhone())
+                        .orElse(billingAddress.getMobile()));
 
         if (countriesWithStateAllowed.contains(billingAddress.getCountry())) {
             request.setState(billingAddress.getState());
         }
     }
 
-    public static void mapCustomerToRequest(final AuthorizationRequest request, final Reference<Customer> customerReference) {
+    public static void mapCustomerToRequest(@Nonnull final AuthorizationRequest request,
+                                            @Nullable final Reference<Customer> customerReference) {
 
         Preconditions.checkArgument(customerReference != null && customerReference.getObj() != null, "Missing customer object");
         final Customer customer = customerReference.getObj();
@@ -87,21 +92,11 @@ public class MappingUtil {
         request.setVatid(customer.getVatId());
 
         //birthday
-        Optional.ofNullable(customer.getDateOfBirth())
+        ofNullable(customer.getDateOfBirth())
                 .ifPresent(birthday -> request.setBirthday(birthday.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
 
-        //TODO: Gender can also be a CustomField enum @Cart with values Female/Male
-        //gender: Payone supports one of 2 characters [m, f]
-        Optional.ofNullable(customer.getCustom())
-                .map(custom -> custom.getFieldAsString(CustomFieldKeys.GENDER_FIELD))
-                .map(String::trim)
-                .filter(StringUtils::isNotBlank)
-                .map(gender -> gender.substring(0, 1))
-                .map(String::toLowerCase)
-                .ifPresent(request::setGender);
-
         //customerNumber
-        Optional.ofNullable(customer.getCustomerNumber())
+        ofNullable(customer.getCustomerNumber())
                 .ifPresent(customerNumber -> {
                     if (customerNumber.length() > 20) {
                         LOG.warn("customer.customerNumber exceeds the maximum length of 20! Using substring of customer.id as fallback.");
@@ -133,8 +128,6 @@ public class MappingUtil {
         if (countriesWithStateAllowed.contains(shippingAddress.getCountry())) {
             request.setShipping_state(shippingAddress.getState());
         }
-
-
     }
 
     public static void mapCustomFieldsFromPayment(final AuthorizationRequest request, final CustomFields ctPaymentCustomFields) {
@@ -155,7 +148,7 @@ public class MappingUtil {
      * @param payment {@link Payment} from which read amount planned.
      */
     public static void mapAmountPlannedFromPayment(final AuthorizationRequest request, final Payment payment) {
-        Optional.ofNullable(payment.getAmountPlanned())
+        ofNullable(payment.getAmountPlanned())
                 .ifPresent(amount -> {
                     request.setCurrency(amount.getCurrency().getCurrencyCode());
                     request.setAmount(MonetaryUtil
@@ -163,6 +156,38 @@ public class MappingUtil {
                             .queryFrom(amount)
                             .intValue());
                 });
+    }
+
+    /**
+     * Try to define gender from custom fields by {@link CustomFieldKeys#GENDER_FIELD} key.
+     * <p>
+     * For payone gender must be a lowercase single character.
+     * </p>
+     * <p>
+     * <b>Note:</b> for some payment types (like Klarna) gender is mandatory.
+     * </p>
+     * <p>
+     * In this implementation the gender lookup has the next order:<ul>
+     * <li>{@link Payment#getCustom()}</li>
+     * <li>{@link CartLike#getCustom()}</li>
+     * <li>{@code Payment.getCustomer().}{@link Customer#getCustom() getCustom()}, if exists</li>
+     * <li>Fallback to empty Optional, if not found</li>
+     * </ul>
+     * </p>
+     *
+     * @param paymentWithCartLike {@link PaymentWithCartLike} from which to lookup the gender
+     * @return First available lowercase single character gender if exists.
+     */
+    public static Optional<String> getGenderFromPaymentCart(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
+        return fetchFirstAvailableGender(asList(
+                paymentWithCartLike.getPayment()::getCustom,
+                paymentWithCartLike.getCartLike()::getCustom,
+                () -> Optional.of(paymentWithCartLike)
+                        .map(PaymentWithCartLike::getPayment)
+                        .map(Payment::getCustomer)
+                        .map(Reference::getObj)
+                        .map(Customer::getCustom)
+                        .orElse(null)));
     }
 
     /**
@@ -176,7 +201,7 @@ public class MappingUtil {
      * @return Optional String of 2 characters localization name by ISO 639, or {@link Optional#empty()} if not found.
      */
     public static Optional<String> getPaymentLanguage(@Nullable final PaymentWithCartLike paymentWithCartLike) {
-        Optional<PaymentWithCartLike> paymentOptional = Optional.ofNullable(paymentWithCartLike);
+        Optional<PaymentWithCartLike> paymentOptional = ofNullable(paymentWithCartLike);
 
         return paymentOptional
                 .map(PaymentWithCartLike::getPayment)
@@ -200,5 +225,38 @@ public class MappingUtil {
     @Nonnull
     public static String getPaymentLanguageTagOrFallback(@Nullable final PaymentWithCartLike paymentWithCartLike) {
         return getPaymentLanguage(paymentWithCartLike).orElse(DEFAULT_LOCALE.getLanguage());
+    }
+
+    /**
+     * Iterate the custom field suppliers and find the first one which contains a value in
+     * {@link CustomFieldKeys#GENDER_FIELD}.
+     * @param customFieldSuppliers list of suppliers of custom fields. The suppliers expected to be non-null, but
+     * supplied {@link Supplier#get()} result could be null, if custom field is not available for some types.
+     * @return First available lowercase single character gender if exists.
+     */
+    @Nonnull
+    private static Optional<String> fetchFirstAvailableGender(List<Supplier<? extends CustomFields>> customFieldSuppliers) {
+        return customFieldSuppliers.stream()
+                .map(Supplier::get)
+                .map(MappingUtil::getGenderFromCustomField)
+                .filter(Optional::isPresent)
+                .findFirst()
+                .orElseGet(Optional::empty);
+    }
+
+    /**
+     * Try to fetch {@link CustomFieldKeys#GENDER_FIELD} from the {@code customFields} and map it to Payone acceptable
+     * value.
+     * @param customFields {@link CustomFields} from which to fetch gender property.
+     * @return lowercase single character gender if exists.
+     */
+    @Nonnull
+    private static Optional<String> getGenderFromCustomField(@Nullable CustomFields customFields) {
+        return ofNullable(customFields)
+                .map(custom -> custom.getFieldAsString(CustomFieldKeys.GENDER_FIELD))
+                .map(String::trim)
+                .filter(StringUtils::isNotBlank)
+                .map(gender -> gender.substring(0, 1))
+                .map(String::toLowerCase);
     }
 }
