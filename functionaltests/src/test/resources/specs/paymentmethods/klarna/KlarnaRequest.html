@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link href="../../../concordion.css" rel="stylesheet" type="text/css" />
+    <title>Authorization via Klarna Invoice</title>
+</head>
+<body>
+<h1>(pre)authorization via Klarna Invoice</h1>
+<p>
+    It will store information about such a request as an interface interaction of type
+    <em>PAYONE_INTERACTION_REQUEST</em>.
+</p>
+<h2>Examples</h2>
+<h3>Common Setup</h3>
+<ul>
+    <li>payment.paymentMethodInfo.method: <span>INVOICE-KLARNA</span></li>
+</ul>
+<p>
+    Since Klarna has
+    <a href="https://developers.klarna.com/en/de/kpm/test-credentials">
+        very strict requirements to the payment request</a>,
+    the main cart payment properties are mocked in respective JSON files
+    (see <code>mocks/paymentmethods/klarna/KlarnaCartWithDiscounts.json</code>)
+    <br/>
+    Below we customize the following payment properties for a Klarna Invoice.
+</p>
+<div class="example">
+    <h3>Create payment and handle it</h3>
+    <table c:execute="#result = createPayment(#paymentName, #transactionType, #ip)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#ip">Payment Name</th>
+            <th c:echo="#result.paymentId">Payment ID (for information only)</th>
+            <th c:assertEquals="#result.ip">IP</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>AUTHORIZATION</td>
+            <td>192.168.0.45</td>
+            <td></td>
+            <td>192.168.0.45</td>
+        </tr>
+        <tr>
+            <td>Payment 2</td>
+            <td>CHARGE</td>
+            <td>2001:0db8:7777:0000:6666:8a2e:0370:7334</td>
+            <td></td>
+            <td>2001:0db8:7777:0000:6666:8a2e:0370:7334</td>
+        </tr>
+    </table>
+    <p>
+        When I request the integration service to handle them I will get the following results:
+    </p>
+    <table c:execute="#result = handlePayment(#paymentName, #requestType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:set="#requestType">Request type</th>
+            <th c:assertEquals="#result.interactionCount">total # of requests sent</th>
+            <th c:assertEquals="#result.transactionState">Transaction State </th>
+            <th c:assertEquals="#result.interfaceCode">Interface Code</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td>Payment 1</td>
+            <td>200</td>
+            <td>preauthorization</td>
+            <td>1</td>
+            <td>Success</td>
+            <td>APPROVED</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Payment 2</td>
+            <td>200</td>
+            <td>authorization</td>
+            <td>1</td>
+            <td>Success</td>
+            <td>APPROVED</td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
