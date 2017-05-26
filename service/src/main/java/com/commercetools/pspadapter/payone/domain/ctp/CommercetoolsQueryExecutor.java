@@ -11,6 +11,7 @@ import io.sphere.sdk.messages.queries.MessageQuery;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.queries.OrderQuery;
 import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.expansion.PaymentExpansionModel;
 import io.sphere.sdk.payments.messages.PaymentCreatedMessage;
 import io.sphere.sdk.payments.messages.PaymentTransactionAddedMessage;
 import io.sphere.sdk.payments.queries.PaymentByIdGet;
@@ -35,8 +36,12 @@ public class CommercetoolsQueryExecutor {
     }
 
     public PaymentWithCartLike getPaymentWithCartLike(final String paymentId) {
-        final CompletionStage<Payment> payment = client.execute(PaymentByIdGet.of(paymentId));
-        return getPaymentWithCartLike(paymentId, payment);
+        final CompletionStage<Payment> paymentStage = client.execute(PaymentByIdGet.of(paymentId)
+                // customer is used to parse some properties,
+                // see com.commercetools.pspadapter.payone.mapping.MappingUtil#mapCustomerToRequest()
+                .plusExpansionPaths(PaymentExpansionModel::customer));
+
+        return getPaymentWithCartLike(paymentId, paymentStage);
     }
 
     public PaymentWithCartLike getPaymentWithCartLike(String paymentId, CompletionStage<Payment> paymentFuture)  {
