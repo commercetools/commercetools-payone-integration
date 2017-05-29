@@ -167,6 +167,7 @@ public class CustomTypeBuilder {
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.IP, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.BIRTHDAY, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.GENDER_FIELD, FieldClassifier.REQUIRED)
         ));
     }

@@ -50,7 +50,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(request.getIp()).isEqualTo("8.8.8.8");
         softly.assertThat(request.getEmail()).isEqualTo("youremail@email.com");
         softly.assertThat(request.getTelephonenumber()).isEqualTo("01522113356");
-        softly.assertThat(request.getBirthday()).isEqualTo("19770101");
+        softly.assertThat(request.getBirthday()).isEqualTo("19881215");
 
         softly.assertThat(request.getFinancingtype()).isEqualTo("KLV");
         softly.assertThat(request.getClearingtype()).isEqualTo("fnc");
@@ -96,7 +96,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(request.getIp()).isEqualTo("8.8.8.8");
         softly.assertThat(request.getEmail()).isEqualTo("aaa.bbb@ggg.de");
         softly.assertThat(request.getTelephonenumber()).isEqualTo("+491234567890");
-        softly.assertThat(request.getBirthday()).isEqualTo("19770101");
+        softly.assertThat(request.getBirthday()).isEqualTo("19591131");
 
         softly.assertThat(request.getFinancingtype()).isEqualTo("KLV");
         softly.assertThat(request.getClearingtype()).isEqualTo("fnc");

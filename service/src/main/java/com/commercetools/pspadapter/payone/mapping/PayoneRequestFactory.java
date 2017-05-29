@@ -11,9 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
-import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IP;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getGenderFromPaymentCart;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguage;
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createLoggerName;
@@ -64,7 +62,8 @@ public abstract class PayoneRequestFactory {
      *     <li>billing and shipping address</li>
      *     <li>language</li>
      * </ul>
-     * @param request {@link AuthorizationRequest} instance to which set the values
+     *
+     * @param request             {@link AuthorizationRequest} instance to which set the values
      * @param paymentWithCartLike cart/order info from which read the values
      */
     protected void mapFormPaymentWithCartLike(final AuthorizationRequest request,
@@ -104,21 +103,6 @@ public abstract class PayoneRequestFactory {
 
         //gender: Payone supports one of 2 characters [m, f]
         getGenderFromPaymentCart(paymentWithCartLike).ifPresent(request::setGender);
-    }
-
-    protected static AuthorizationRequest mapKlarnaMandatoryFields(final AuthorizationRequest request,
-                                                   final PaymentWithCartLike paymentWithCartLike) {
-        // fistsname, lastname, street, zip, city, country, email, telephonenumber - must be mapped in mapBillingAddressToRequest
-        // gender, birthday - in mapCustomerToRequest
-        // language, amount, currency in mapFormPaymentWithCartLike
-        // financingtype - in the constructor
-
-        Optional.of(paymentWithCartLike.getPayment())
-                .map(Payment::getCustom)
-                .map(customFields -> customFields.getFieldAsString(IP))
-                .ifPresent(request::setIp);
-
-        return request;
     }
 
 }
