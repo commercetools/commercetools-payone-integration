@@ -40,37 +40,37 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         validateBaseRequestValues(request, RequestType.PREAUTHORIZATION.getType());
 
         // mandatory Klarna fields tested below
-        softly.assertThat(request.getFirstname()).isEqualTo("Joana");
-        softly.assertThat(request.getLastname()).isEqualTo("Smith");
-        softly.assertThat(request.getStreet()).isEqualTo("666 blah-blah road");
-        softly.assertThat(request.getZip()).isEqualTo("XXX YYY");
-        softly.assertThat(request.getCity()).isEqualTo("Todmorder");
-        softly.assertThat(request.getCountry()).isEqualTo("GB");
-        softly.assertThat(request.getGender()).isEqualTo("f");
-        softly.assertThat(request.getIp()).isEqualTo("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
-        softly.assertThat(request.getEmail()).isEqualTo("test.customer@test.co.uk");
-        softly.assertThat(request.getTelephonenumber()).isEqualTo("+445566778899");
-        softly.assertThat(request.getBirthday()).isEqualTo("19891203");
+        softly.assertThat(request.getFirstname()).isEqualTo("Testperson-de");
+        softly.assertThat(request.getLastname()).isEqualTo("Approved");
+        softly.assertThat(request.getStreet()).isEqualTo("Hellersbergstraße 14");
+        softly.assertThat(request.getZip()).isEqualTo("41460");
+        softly.assertThat(request.getCity()).isEqualTo("Neuss");
+        softly.assertThat(request.getCountry()).isEqualTo("DE");
+        softly.assertThat(request.getGender()).isEqualTo("m");
+        softly.assertThat(request.getIp()).isEqualTo("8.8.8.8");
+        softly.assertThat(request.getEmail()).isEqualTo("youremail@email.com");
+        softly.assertThat(request.getTelephonenumber()).isEqualTo("01522113356");
+        softly.assertThat(request.getBirthday()).isEqualTo("19770101");
 
         softly.assertThat(request.getFinancingtype()).isEqualTo("KLV");
         softly.assertThat(request.getClearingtype()).isEqualTo("fnc");
         softly.assertThat(request.getLanguage()).isEqualTo("de");
-        softly.assertThat(request.getAmount()).isEqualTo(24980);
-        softly.assertThat(request.getCurrency()).isEqualTo("GBP");
+        softly.assertThat(request.getAmount()).isEqualTo(59685);
+        softly.assertThat(request.getCurrency()).isEqualTo("EUR");
 
         // the order of the items might be different,
         // but then below the order of the items' properties should be also changed
-        softly.assertThat(request.getIt()).containsExactly(goods.toString(), goods.toString(), shipment.toString(), voucher.toString());
-        softly.assertThat(request.getId()).containsExactly("4777200888", "4777300700", "DHL GB", "total discount");
-        softly.assertThat(request.getPr()).containsExactly(4500L, 5900L, 950L, -2670L);
+        softly.assertThat(request.getIt()).containsExactly(goods.toString(), goods.toString(), goods.toString(), shipment.toString(), voucher.toString());
+        softly.assertThat(request.getId()).containsExactly("123454323454667", "2345234523", "456786468866578", "DHL", "total discount");
+        softly.assertThat(request.getPr()).containsExactly(12999L, 0L, 4923L, 495L, -7575L);
 
-        softly.assertThat(request.getNo()).containsExactly(2L, 3L, 1L, 1L);
+        softly.assertThat(request.getNo()).containsExactly(4L, 1L, 3L, 1L, 1L);
 
-        softly.assertThat(request.getDe()).containsExactly("Ohrringe blau", "Armband blau", "shipping DHL GB", "total discount");
-        softly.assertThat(request.getVa()).containsExactly(19, 19, 19, 0);
+        softly.assertThat(request.getDe()).containsExactly("Halskette", "Kasten", "Ringe", "shipping DHL", "total discount");
+        softly.assertThat(request.getVa()).containsExactly(19, 19, 19, 19, 0);
 
         // verify line items + shipment + discount == whole payment amount planned
-        long sum = IntStream.range(0, 4).mapToLong(i -> request.getNo().get(i) * request.getPr().get(i)).sum();
+        long sum = IntStream.range(0, request.getNo().size()).mapToLong(i -> request.getNo().get(i) * request.getPr().get(i)).sum();
         softly.assertThat(centAmountOf(paymentWithCartLike.getPayment().getAmountPlanned())).isEqualTo(sum);
 
         softly.assertAll();
