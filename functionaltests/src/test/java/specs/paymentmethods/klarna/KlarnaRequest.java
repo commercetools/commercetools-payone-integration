@@ -27,7 +27,8 @@ public class KlarnaRequest extends BasePaymentFixture {
             final String paymentName,
             final String transactionType,
             final String ip,
-            final String lastName) throws Exception {
+            final String lastName,
+            final String birthDay) throws Exception {
 
         Cart cart = createTemplateCartKlarna(lastName);
         cart = applyDiscounts(cart, DISCOUNT_999_CENT, DISCOUNT_10_PERCENT);
@@ -36,7 +37,7 @@ public class KlarnaRequest extends BasePaymentFixture {
         Payment payment = createAndSaveKlarnaPayment(cart, order, paymentName, transactionType,
                 MoneyImpl.centAmountOf(cart.getTotalPrice()).toString(),
                 cart.getTotalPrice().getCurrency().getCurrencyCode(),
-                ip);
+                ip, birthDay);
 
         Optional<CustomFields> custom = ofNullable(payment.getCustom());
 
@@ -54,6 +55,7 @@ public class KlarnaRequest extends BasePaymentFixture {
                 .with("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
                 .with("interactionCount", getInteractionRequestCount(payment, transactionId, requestType))
                 .with("transactionState", getTransactionState(payment, transactionId))
+                .with("interfaceId", payment.getInterfaceId())
                 .with("version", payment.getVersion().toString())
                 .with("interfaceCode", payment.getPaymentStatus().getInterfaceCode());
     }

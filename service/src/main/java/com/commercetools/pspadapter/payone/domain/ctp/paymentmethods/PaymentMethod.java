@@ -68,8 +68,8 @@ public enum PaymentMethod {
      * @see MethodKeys#INVOICE_KLARNA
      */
     INVOICE_KLARNA(MethodKeys.INVOICE_KLARNA,
-            TransactionType.AUTHORIZATION,
-            TransactionType.CHARGE
+            // based on Payone support talk: only "preauthorization" transaction type should be use
+            TransactionType.AUTHORIZATION
     );
 
     private String key;

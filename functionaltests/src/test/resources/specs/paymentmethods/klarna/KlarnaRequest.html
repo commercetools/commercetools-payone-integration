@@ -27,11 +27,12 @@
 </p>
 <div class="example">
     <h3>Create payment and handle it</h3>
-    <table c:execute="#result = createPayment(#paymentName, #transactionType, #ip, #buyerLastName)">
+    <table c:execute="#result = createPayment(#paymentName, #transactionType, #ip, #buyerLastName, #birthDay)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
             <th c:set="#transactionType">Transaction Type</th>
             <th c:set="#buyerLastName">Buyer surname<sup><a href="#buyer-lastname-description">[1]</a></sup></th>
+            <th c:set="#birthDay">Buyer birth day</th>
             <th c:set="#ip">Payment Name</th>
             <th c:echo="#result.paymentId">Payment ID (for information only)</th>
             <th c:assertEquals="#result.ip">IP</th>
@@ -40,14 +41,16 @@
             <td>Payment 1</td>
             <td>AUTHORIZATION</td>
             <td>Approved</td> <!-- It's a buyer surname, see https://developers.klarna.com/en/de/kpm/test-credentials-->
+            <td>1960-07-07</td>
             <td>192.168.0.45</td>
             <td></td>
             <td>192.168.0.45</td>
         </tr>
         <tr>
             <td>Payment 2</td>
-            <td>CHARGE</td>
+            <td>AUTHORIZATION</td>
             <td>Approved</td> <!-- It's a buyer surname, see https://developers.klarna.com/en/de/kpm/test-credentials-->
+            <td>19600707</td>
             <td>2001:0db8:7777:0000:6666:8a2e:0370:7334</td>
             <td></td>
             <td>2001:0db8:7777:0000:6666:8a2e:0370:7334</td>
@@ -56,6 +59,7 @@
             <td>Payment 3</td>
             <td>AUTHORIZATION</td>
             <td>Denied</td> <!-- It's a buyer surname, see https://developers.klarna.com/en/de/kpm/test-credentials-->
+            <td>19600707</td>
             <td>1.1.1.1</td>
             <td></td>
             <td>1.1.1.1</td>
@@ -79,6 +83,7 @@
             <th c:assertEquals="#result.transactionState">Transaction State</th>
             <th c:assertEquals="#result.interfaceCode">Interface Code</th>
             <th c:echo="#result.version">Version (for information only)</th>
+            <th c:echo="#result.interfaceId">Transaction Id(for information only)</th>
         </tr>
         <tr>
             <td>Payment 1</td>
@@ -88,14 +93,16 @@
             <td>Success</td>
             <td>APPROVED</td>
             <td></td>
+            <td></td>
         </tr>
         <tr>
             <td>Payment 2</td>
             <td>200</td>
-            <td>authorization</td>
+            <td>preauthorization</td>
             <td>1</td>
             <td>Success</td>
             <td>APPROVED</td>
+            <td></td>
             <td></td>
         </tr>
     </table>

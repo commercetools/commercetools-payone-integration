@@ -49,6 +49,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys.*;
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.*;
 import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlocking;
 import static io.sphere.sdk.payments.TransactionState.FAILURE;
 import static java.lang.String.format;
@@ -105,7 +106,7 @@ public class BasePaymentFixture extends BaseFixture {
                         ImmutableMap.<String, Object>builder()
                                 .put(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, pseudocardpan)
                                 .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, languageCode)
-                                .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")
+                                .put(REFERENCE_FIELD, "<placeholder>")
                                 .build()))
                 .build();
 
@@ -160,7 +161,7 @@ public class BasePaymentFixture extends BaseFixture {
                                 .put(CustomFieldKeys.SUCCESS_URL_FIELD, successUrl)
                                 .put(CustomFieldKeys.ERROR_URL_FIELD, errorUrl)
                                 .put(CustomFieldKeys.CANCEL_URL_FIELD, cancelUrl)
-                                .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")
+                                .put(REFERENCE_FIELD, "<placeholder>")
                                 .build()))
                 .build();
 
@@ -195,7 +196,7 @@ public class BasePaymentFixture extends BaseFixture {
                         CustomTypeBuilder.PAYMENT_CASH_ADVANCE,
                         ImmutableMap.<String, Object>builder()
                                 .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage())
-                                .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")
+                                .put(REFERENCE_FIELD, "<placeholder>")
                                 .build()))
                 .build();
 
@@ -217,7 +218,8 @@ public class BasePaymentFixture extends BaseFixture {
             final String transactionType,
             final String centAmount,
             final String currencyCode,
-            final String ip) {
+            final String ip,
+            final String birthDay) {
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
 
         // customer is required to fetch mandatory Klarna fields, like date of birth
@@ -241,14 +243,15 @@ public class BasePaymentFixture extends BaseFixture {
                 .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
                         CustomTypeBuilder.PAYMENT_INVOICE_KLARNA,
                         ImmutableMap.<String, Object>builder()
-                                .put(CustomFieldKeys.LANGUAGE_CODE_FIELD,
+                                .put(LANGUAGE_CODE_FIELD,
                                         ofNullable(cart.getLocale())
                                                 .map(Locale::getLanguage)
                                                 .orElseGet(Locale.GERMAN::getLanguage))
-                                .put(CustomFieldKeys.REFERENCE_FIELD, ofNullable(order.getOrderNumber())
+                                .put(REFERENCE_FIELD, ofNullable(order.getOrderNumber())
                                         .orElseThrow(() -> new IllegalStateException("Order must have a number")))
-                                .put(CustomFieldKeys.IP, ip)
-                                .put(CustomFieldKeys.GENDER_FIELD, "m")
+                                .put(IP, ip)
+                                .put(GENDER_FIELD, "m")
+                                .put(BIRTHDAY, birthDay)
                                 .build()))
                 .build();
 
@@ -288,7 +291,7 @@ public class BasePaymentFixture extends BaseFixture {
                                 ZonedDateTime.now())
                                 .state(TransactionState.PENDING)
                                 .build()))
-                        .add(SetCustomField.ofObject(CustomFieldKeys.REFERENCE_FIELD, orderNumber))
+                        .add(SetCustomField.ofObject(REFERENCE_FIELD, orderNumber))
                         .build()));
 
         return payment;
