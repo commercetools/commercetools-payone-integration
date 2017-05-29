@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.BIRTHDAY;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IP;
 import static java.util.Optional.ofNullable;
 
@@ -43,7 +44,8 @@ public class KlarnaRequest extends BasePaymentFixture {
 
         return MultiValueResult.multiValueResult()
                 .with("paymentId", payment.getId())
-                .with("ip", custom.map(customFields -> customFields.getFieldAsString(IP)).orElse("undefined"));
+                .with("ip", custom.map(customFields -> customFields.getFieldAsString(IP)).orElse("undefined"))
+                .with("birthday", custom.map(customFields -> customFields.getFieldAsString(BIRTHDAY)).orElse("undefined"));
     }
 
     public MultiValueResult handlePayment(final String paymentName,
@@ -59,5 +61,4 @@ public class KlarnaRequest extends BasePaymentFixture {
                 .with("version", payment.getVersion().toString())
                 .with("interfaceCode", payment.getPaymentStatus().getInterfaceCode());
     }
-
 }
