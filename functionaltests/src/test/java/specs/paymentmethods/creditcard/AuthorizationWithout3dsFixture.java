@@ -108,24 +108,11 @@ public class AuthorizationWithout3dsFixture extends BaseNotifiablePaymentFixture
     }
 
     public MultiValueResult fetchPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
-
-        Payment payment = fetchPaymentByLegibleName(paymentName);
-        long appointedNotificationCount = getTotalNotificationCountOfAction(payment, "appointed");
-
-        final String transactionId = getIdOfLastTransaction(payment);
-        final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
-                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
-                BaseFixture.EMPTY_STRING;
-
-        return MultiValueResult.multiValueResult()
-                .with("notificationCount", Long.toString(appointedNotificationCount))
-                .with("transactionState", getTransactionState(payment, transactionId))
-                .with("amountAuthorized", amountAuthorized)
-                .with("version", payment.getVersion().toString());
+        return fetchBasicPaymentDetails(paymentName, "appointed");
     }
 
+    @Override
     public long getInteractionNotificationOfActionCount(final String paymentName, final String txaction) throws ExecutionException {
-        Payment payment = fetchPaymentByLegibleName(paymentName);
-        return getTotalNotificationCountOfAction(payment, txaction);
+        return super.getInteractionNotificationOfActionCount(paymentName, txaction);
     }
 }

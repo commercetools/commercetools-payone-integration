@@ -10,7 +10,7 @@ import org.concordion.api.FullOGNL;
 import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
-import specs.response.BasePaymentFixture;
+import specs.paymentmethods.BaseNotifiablePaymentFixture;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -22,7 +22,7 @@ import static java.util.Optional.ofNullable;
 
 @RunWith(ConcordionRunner.class)
 @FullOGNL
-public class KlarnaRequest extends BasePaymentFixture {
+public class KlarnaRequest extends BaseNotifiablePaymentFixture {
 
     public MultiValueResult createPayment(
             final String paymentName,
@@ -60,5 +60,19 @@ public class KlarnaRequest extends BasePaymentFixture {
                 .with("interfaceId", payment.getInterfaceId())
                 .with("version", payment.getVersion().toString())
                 .with("interfaceCode", payment.getPaymentStatus().getInterfaceCode());
+    }
+
+    @Override
+    public boolean receivedNotificationOfActionFor(String paymentNames, String txaction) throws Exception {
+        return super.receivedNotificationOfActionFor(paymentNames, txaction);
+    }
+
+    public MultiValueResult fetchPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
+        return fetchBasicPaymentDetails(paymentName, "appointed");
+    }
+
+    @Override
+    public long getInteractionNotificationOfActionCount(final String paymentName, final String txaction) throws ExecutionException {
+        return super.getInteractionNotificationOfActionCount(paymentName, txaction);
     }
 }
