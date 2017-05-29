@@ -6,6 +6,7 @@ import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
+import org.concordion.api.FullOGNL;
 import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
@@ -19,14 +20,16 @@ import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IP;
 import static java.util.Optional.ofNullable;
 
 @RunWith(ConcordionRunner.class)
+@FullOGNL
 public class KlarnaRequest extends BasePaymentFixture {
 
     public MultiValueResult createPayment(
             final String paymentName,
             final String transactionType,
-            final String ip) throws Exception {
+            final String ip,
+            final String lastName) throws Exception {
 
-        Cart cart = createTemplateCartKlarna();
+        Cart cart = createTemplateCartKlarna(lastName);
         cart = applyDiscounts(cart, DISCOUNT_999_CENT, DISCOUNT_10_PERCENT);
         Order order = createOrderForCart(cart);
 
@@ -47,7 +50,6 @@ public class KlarnaRequest extends BasePaymentFixture {
         final HttpResponse response = requestToHandlePaymentByLegibleName(paymentName);
         final Payment payment = fetchPaymentByLegibleName(paymentName);
         final String transactionId = getIdOfLastTransaction(payment);
-
         return MultiValueResult.multiValueResult()
                 .with("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
                 .with("interactionCount", getInteractionRequestCount(payment, transactionId, requestType))

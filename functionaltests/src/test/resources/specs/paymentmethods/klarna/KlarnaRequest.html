@@ -2,7 +2,7 @@
 <html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <link href="../../../concordion.css" rel="stylesheet" type="text/css" />
+    <link href="../../../concordion.css" rel="stylesheet" type="text/css"/>
     <title>Authorization via Klarna Invoice</title>
 </head>
 <body>
@@ -27,10 +27,11 @@
 </p>
 <div class="example">
     <h3>Create payment and handle it</h3>
-    <table c:execute="#result = createPayment(#paymentName, #transactionType, #ip)">
+    <table c:execute="#result = createPayment(#paymentName, #transactionType, #ip, #buyerLastName)">
         <tr>
             <th c:set="#paymentName">Payment Name</th>
             <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#buyerLastName">Buyer surname<sup><a href="#buyer-lastname-description">[1]</a></sup></th>
             <th c:set="#ip">Payment Name</th>
             <th c:echo="#result.paymentId">Payment ID (for information only)</th>
             <th c:assertEquals="#result.ip">IP</th>
@@ -38,6 +39,7 @@
         <tr>
             <td>Payment 1</td>
             <td>AUTHORIZATION</td>
+            <td>Approved</td> <!-- It's a buyer surname, see https://developers.klarna.com/en/de/kpm/test-credentials-->
             <td>192.168.0.45</td>
             <td></td>
             <td>192.168.0.45</td>
@@ -45,11 +47,26 @@
         <tr>
             <td>Payment 2</td>
             <td>CHARGE</td>
+            <td>Approved</td> <!-- It's a buyer surname, see https://developers.klarna.com/en/de/kpm/test-credentials-->
             <td>2001:0db8:7777:0000:6666:8a2e:0370:7334</td>
             <td></td>
             <td>2001:0db8:7777:0000:6666:8a2e:0370:7334</td>
         </tr>
+        <tr>
+            <td>Payment 3</td>
+            <td>AUTHORIZATION</td>
+            <td>Denied</td> <!-- It's a buyer surname, see https://developers.klarna.com/en/de/kpm/test-credentials-->
+            <td>1.1.1.1</td>
+            <td></td>
+            <td>1.1.1.1</td>
+        </tr>
     </table>
+    <p>
+        <sup><a name="buyer-lastname-description" href="#buyer-lastname-description">[1]</a></sup><i>See more
+        information on
+        <a href="https://developers.klarna.com/en/de/kpm/test-credentials" target="_blank">Klarna test credentials</a>
+        page</i>
+    </p>
     <p>
         When I request the integration service to handle them I will get the following results:
     </p>
@@ -59,7 +76,7 @@
             <th c:assertEquals="#result.statusCode">Response Status Code</th>
             <th c:set="#requestType">Request type</th>
             <th c:assertEquals="#result.interactionCount">total # of requests sent</th>
-            <th c:assertEquals="#result.transactionState">Transaction State </th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
             <th c:assertEquals="#result.interfaceCode">Interface Code</th>
             <th c:echo="#result.version">Version (for information only)</th>
         </tr>
@@ -82,6 +99,29 @@
             <td></td>
         </tr>
     </table>
+
+    <p><code><b><span c:set="#payment3">Payment 3</span></b></code> (with <i>Denied</i> last name) expected to have
+        <span c:set="#payment3Request">preauthorization</span> transaction with following values:
+        <span c:execute="#payment3Handle = handlePayment(#payment3, #payment3Request)"></span>
+    <ul>
+        <li>Status <span c:assertEquals="#payment3Handle.statusCode">200</span></li>
+    <li>total # of requests sent <span c:assertEquals="#payment3Handle.interactionCount">1</span></li>
+    <li>Transaction State <span c:assertEquals="#payment3Handle.transactionState">Failure</span></li>
+    <li>Interface Code <code><b><span c:echo="#payment3Handle.interfaceCode"></span></b></code>
+        <span c:assertTrue="containsSubstring(#payment3Handle.interfaceCode, 'ERROR')">
+            <i>contains <code>ERROR</code></i> substring</span>
+        <sup><b><a href="#error-code-description">[2]</a></b></sup>
+    </li>
+    </ul>
+    </p>
+    <p>
+        <sup><a name="error-code-description" href="#error-code-description">[2]</a></sup>
+        <i>For now <code><b>ERROR 945 (Amount too high)</b> </code> is expected,
+            but this is not explicitly specified by Payone or Klarna.</i>
+    </p>
+    <p>
+        Wait for notifications: appointed->invoice->capture.
+    </p>
 </div>
 </body>
 </html>

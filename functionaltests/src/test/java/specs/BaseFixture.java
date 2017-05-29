@@ -39,6 +39,7 @@ import io.sphere.sdk.products.queries.ProductQuery;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 import io.sphere.sdk.utils.MoneyImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
 import org.junit.BeforeClass;
@@ -592,6 +593,25 @@ public abstract class BaseFixture {
     public boolean customStringFieldIsNull(final String paymentName, final String fieldName) {
         final Payment payment = fetchPaymentByLegibleName(paymentName);
         return payment.getCustom().getFieldAsString(fieldName) == null;
+    }
+
+    /**
+     * Use this method to match substring in the HTML test specs.
+     * <p>
+     * <b>Note:</b> <ul>
+     *     <li>according to Concordion limitations, to use string literals directly in the function calls,
+     *         {@code @FullOGNL} annotation for the test spec should be use.</li>
+     *     <li></li>
+     * </ul>
+     * </p>
+     *
+     * @param seq       the CharSequence to check, may be null
+     * @param searchSeq the CharSequence to find, may be null
+     * @return true if the CharSequence contains the search CharSequence,
+     * false if not or {@code null} string input
+     */
+    public final boolean containsSubstring(final CharSequence seq, final CharSequence searchSeq) {
+        return StringUtils.contains(seq, searchSeq);
     }
 }
 

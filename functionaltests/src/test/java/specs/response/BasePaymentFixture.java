@@ -11,6 +11,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
+import io.sphere.sdk.carts.CartDraftBuilder;
+import io.sphere.sdk.carts.CartDraftDsl;
 import io.sphere.sdk.carts.commands.CartCreateCommand;
 import io.sphere.sdk.carts.commands.CartUpdateCommand;
 import io.sphere.sdk.carts.commands.updateactions.AddDiscountCode;
@@ -20,6 +22,7 @@ import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.customers.queries.CustomerQueryBuilder;
 import io.sphere.sdk.json.SphereJsonUtils;
+import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.OrderFromCartDraft;
 import io.sphere.sdk.orders.commands.OrderFromCartCreateCommand;
@@ -298,10 +301,18 @@ public class BasePaymentFixture extends BaseFixture {
     /**
      * Create a cart ready for Klarna payment. This cart expected to have multiple line items,
      * shipping/billing address is respective to Klarna test data requirements.
+     * @param lastName "Approved" and "Denied" are 2 standard Klarna test names, see https://developers.klarna.com/en/de/kpm/test-credentials
      */
-    public Cart createTemplateCartKlarna() {
-        CartDraft cardDraft = SphereJsonUtils.readObjectFromResource(KLARNA_DEFAULT_CART_MOCK, CartDraft.class);
-        return ctpClient().executeBlocking(CartCreateCommand.of(cardDraft));
+    public Cart createTemplateCartKlarna(String lastName) {
+        CartDraft cartDraft = SphereJsonUtils.readObjectFromResource(KLARNA_DEFAULT_CART_MOCK, CartDraft.class);
+
+        Address billingAddress = cartDraft.getBillingAddress();
+        billingAddress = billingAddress != null ? billingAddress.withLastName(lastName) : null;
+        CartDraftDsl cartDraftDsl = CartDraftBuilder.of(cartDraft)
+                .billingAddress(billingAddress)
+                .build();
+
+        return ctpClient().executeBlocking(CartCreateCommand.of(cartDraftDsl));
     }
 
     public Order createOrderForCart(Cart cart) {
