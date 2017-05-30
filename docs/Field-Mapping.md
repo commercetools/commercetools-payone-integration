@@ -283,22 +283,30 @@ All payment methods:
     * `clearing_bankbic` ->  `paidFromBIC` 
    
 `INVOICE-KLARNA`:
-  * _Required_ `language` -> custom field `languageTag` of Type String on the CT Payment
-    * (may be moved to the Order, Cart and Customer Objects later)
+  * _Required_ 
+    * `language` -> custom field `languageTag` of Type String on the CT Payment
+      (may be moved to the Order, Cart and Customer Objects later)
+      
+    * `birthday` -> String custom field `birthday` in Payment in _YYYMMDD_ format.
+    * `ip` -> the IP address of the user -> String custom field `ip` in Payment. 
+    * `gender` -> The value is suppressed to first lowercase character -> String custom field `gender` in Payment
+    * `personalid` -> (***Not supported yet***) Personal ID Nr. 
+          Mandatory for Klarna if customers billing address is in certain nordics countries.
+          -> `personalId` custom field of type String.
+    
   * `clearing_instructionnote` ->  `invoiceUrl` field of type String, PAYONE master
   * mandatory risk management fields:
-   * `personalid` -> Personal ID Nr.  Mandatory for Klarna if customers billing address is in certain nordics countries. -> `personalId` custom field of type String. 
-   * `ip` -> `ipAddress` the IP address of the user is not stored in CT.  (required for Klarna)
+  
   * redirect support:
    * `redirecturl` ->  custom field `redirectUrl` of Type String on the CT Payment  (PAYONE master from response)
    * `successurl` ->  custom field `successUrl` of Type String on the CT Payment ( CT master )
    * `errorurl` -> custom field `errorUrl` Type String on Payment, CT master
    * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
   
-`WALLET`*:
+`WALLET`:
   * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment     
    
-## PAYONE fields that map to custom Fields on CT Cart, CT Customer or CT Order
+## PAYONE fields that map to custom Fields on CT Payment, CT Cart, CT Customer or CT Order
 
  * _Optional_ `customermessage` and `invoiceappendix`: Check for a custom Field `description` of type `LocalizedString` on the Cart / Order. Set both PAYONE fields.
    Use the `languageTag` set on the Payment to pick the right value. 
@@ -307,13 +315,12 @@ All payment methods:
   
 The following are required only for Installment-Type Payment Methods (mainly Klarna): 
  
- * `birthdate` and `vatid` : these fields are only available on the CT Customer and not on the Cart. I.e. Guest checkouts
-   cannot do some payment methods.
-   * If the fields `dateOfBirth` (type Date) and `vatId` (type String) respectively are set as custom object on the 
-     Cart / Order and have the right type they are used and take precedence over the Fields on the Customer Object
- * `gender`: Check the Cart for a custom field `customerGender`, as fallback check the Customer for a custom field 
-    named `gender`. If the first existing is of Type `Enum` and has a value `Male` or `Female` -> use that one as `f` or `m` respectively.  
- * `ip`: Check for a custom Field `customerIPAddress` of type `String` on the CT Cart / Order. 
+ * If the fields `dateOfBirth` (type Date) and `vatId` (type String) respectively are set as custom object on the 
+     Cart / Order and have the right type they are used and take precedence over the Fields on the Customer Object 
+ * If `birthday` is set in Payment custom field - this value overrides value from CT Customer above.
+     
+ * `gender`: custom field in Payment.  
+ * `ip`: custom field in Payment. 
 
 ## PAYONE transaction types -> CT Transaction Types 
 

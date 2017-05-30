@@ -24,6 +24,7 @@
       - [Publishing functional tests results](#publishing-functional-tests-results)
       - [Known functional tests issues](#known-functional-tests-issues)
     - [Paypal Sandbox Accounts](#paypal-sandbox-accounts)
+    - [Klarna Testing notes](#klarna-testing-notes)
   - [Appendix 1: Shell script template that sets the environment variables to run the service:](#appendix-1-shell-script-template-that-sets-the-environment-variables-to-run-the-service)
   - [Appendix 2: Shell script template that sets the environment variables to run the Integration Tests](#appendix-2-shell-script-template-that-sets-the-environment-variables-to-run-the-integration-tests)
     - [Appendix 3: Alternative configuration via properties file](#appendix-3-alternative-configuration-via-properties-file)
@@ -324,6 +325,20 @@ Then you are able to review the tests results in [Test results page](http://comm
 
 To test with Paypal, you need own Sandbox Buyer credentials via a developer account.
 
+### Klarna Testing notes
+
+Klarna has very strict requirements to the payment details. For testing purpose one should use
+[special Klarna test credentials](https://developers.klarna.com/en/de/kpm/test-credentials).
+
+These tests require next CTP settings:
+
+  * `gender`, `ip` and `birthday` custom fields in _payment-INVOICE-KLARNA_ custom type
+  * German language, country and prices must be active.
+  * 19% German tax is active
+  * `test-999-cent-code` and `test-10-percent-code` discount codes and respective discounts are active
+  * products from test mock cart [KlarnaCartWithTestAccountAddress.json](/blob/master/functionaltests/src/test/resources/mocks/paymentmethods/klarna/https://github.com/commercetools/commercetools-payone-integration/blob/17da0f6ed1c4b4b1e0b6d561fe03d8cfa3c0dc38/functionaltests/src/test/resources/mocks/paymentmethods/klarna/KlarnaCartWithTestAccountAddress.json)
+   are published
+  
 ## Appendix 1: Shell script template that sets the environment variables to run the service:
 
 (fill in the values required for your environment)
