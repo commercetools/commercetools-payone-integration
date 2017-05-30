@@ -33,6 +33,9 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
         return createRequestInternal(paymentWithCartLike, KlarnaPreauthorizationRequest::new);
     }
 
+    /**
+     * @see KlarnaAuthorizationRequest
+     */
     @Override
     public KlarnaAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
         return createRequestInternal(paymentWithCartLike, KlarnaAuthorizationRequest::new);
@@ -59,8 +62,8 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
      * Map {@code ip} and {@code birthday} from custom fields, if specified. The rest fields expected to be mapped
      * in previous default mapping methods.
      * <p>
-     *     <b>Note:</b> birthday from custom fields (if exist) is trimmed to contain only digits, so all of
-     *     "1956-07-12", "19560712", 1956/07/12" are valid dates and treated the same way.
+     * <b>Note:</b> birthday from custom fields (if exist) is trimmed to contain only digits, so all of
+     * "1956-07-12", "19560712", 1956/07/12" are valid dates and treated the same way.
      * </p>
      *
      * @param request             request to which write the values (recipient)
