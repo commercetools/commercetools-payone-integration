@@ -49,7 +49,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(request.getGender()).isEqualTo("m");
         softly.assertThat(request.getIp()).isEqualTo("8.8.8.8");
         softly.assertThat(request.getEmail()).isEqualTo("youremail@email.com");
-        softly.assertThat(request.getTelephonenumber()).isEqualTo("01522113356");
+        softly.assertThat(request.getTelephonenumber()).isEqualTo("099776635674"); // value from payment should override value from address
         softly.assertThat(request.getBirthday()).isEqualTo("19881215");
 
         softly.assertThat(request.getFinancingtype()).isEqualTo("KLV");
@@ -95,7 +95,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(request.getGender()).isEqualTo("m");
         softly.assertThat(request.getIp()).isEqualTo("8.8.8.8");
         softly.assertThat(request.getEmail()).isEqualTo("aaa.bbb@ggg.de");
-        softly.assertThat(request.getTelephonenumber()).isEqualTo("+491234567890");
+        softly.assertThat(request.getTelephonenumber()).isEqualTo("01234238746"); // value from payment should override value from address
         softly.assertThat(request.getBirthday()).isEqualTo("19591130");
 
         softly.assertThat(request.getFinancingtype()).isEqualTo("KLV");

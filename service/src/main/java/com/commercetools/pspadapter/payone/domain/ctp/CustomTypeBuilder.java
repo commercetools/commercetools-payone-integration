@@ -169,9 +169,10 @@ public class CustomTypeBuilder {
                 // TODO: cleanup this comment when pretty tested, good specified and set-up on all depended projects
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.GENDER_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.IP, FieldClassifier.REQUIRED),
                 createDateFieldDefinition(CustomFieldKeys.BIRTHDAY, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.GENDER_FIELD, FieldClassifier.REQUIRED)
+                createSingleLineStringFieldDefinition(CustomFieldKeys.TELEPHONENUMBER, FieldClassifier.REQUIRED)
         ));
     }
 

@@ -219,7 +219,8 @@ public class BasePaymentFixture extends BaseFixture {
             final String centAmount,
             final String currencyCode,
             final String ip,
-            final String birthDay) {
+            final String birthDay,
+            final String telephonenumber) {
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
 
         // customer is required to fetch mandatory Klarna fields, like date of birth
@@ -249,9 +250,10 @@ public class BasePaymentFixture extends BaseFixture {
                                                 .orElseGet(Locale.GERMAN::getLanguage))
                                 .put(REFERENCE_FIELD, ofNullable(order.getOrderNumber())
                                         .orElseThrow(() -> new IllegalStateException("Order must have a number")))
-                                .put(IP, ip)
                                 .put(GENDER_FIELD, "m")
+                                .put(IP, ip)
                                 .put(BIRTHDAY, birthDay)
+                                .put(TELEPHONENUMBER, telephonenumber)
                                 .build()))
                 .build();
 

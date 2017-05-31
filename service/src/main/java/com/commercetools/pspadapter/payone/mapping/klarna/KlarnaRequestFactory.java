@@ -20,8 +20,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.BIRTHDAY;
-import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IP;
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.*;
 
 public class KlarnaRequestFactory extends PayoneRequestFactory {
 
@@ -90,6 +89,9 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
 
         mapCustomFieldIfSignificant(customFields.getFieldAsDate(BIRTHDAY), request::setBirthday,
                 MappingUtil::dateToBirthdayString);
+
+        // override telephone number from billing address, if custom field is specified
+        mapCustomFieldIfSignificant(customFields.getFieldAsString(TELEPHONENUMBER), request::setTelephonenumber);
     }
 
     private static <T> void mapCustomFieldIfSignificant(@Nullable T fieldValue, @Nonnull Consumer<T> fieldConsumer) {

@@ -16,8 +16,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.BIRTHDAY;
-import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IP;
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.*;
 import static java.util.Optional.ofNullable;
 
 @RunWith(ConcordionRunner.class)
@@ -29,7 +28,8 @@ public class KlarnaRequest extends BaseNotifiablePaymentFixture {
             final String transactionType,
             final String ip,
             final String lastName,
-            final String birthDay) throws Exception {
+            final String birthDay,
+            final String telephonenumber) throws Exception {
 
         Cart cart = createTemplateCartKlarna(lastName);
         cart = applyDiscounts(cart, DISCOUNT_999_CENT, DISCOUNT_10_PERCENT);
@@ -38,14 +38,15 @@ public class KlarnaRequest extends BaseNotifiablePaymentFixture {
         Payment payment = createAndSaveKlarnaPayment(cart, order, paymentName, transactionType,
                 MoneyImpl.centAmountOf(cart.getTotalPrice()).toString(),
                 cart.getTotalPrice().getCurrency().getCurrencyCode(),
-                ip, birthDay);
+                ip, birthDay, telephonenumber);
 
         Optional<CustomFields> custom = ofNullable(payment.getCustom());
 
         return MultiValueResult.multiValueResult()
                 .with("paymentId", payment.getId())
-                .with("ip", custom.map(customFields -> customFields.getFieldAsString(IP)).orElse("undefined"))
-                .with("birthday", custom.map(customFields -> customFields.getFieldAsString(BIRTHDAY)).orElse("undefined"));
+                .with(IP, custom.map(customFields -> customFields.getFieldAsString(IP)).orElse("undefined"))
+                .with(BIRTHDAY, custom.map(customFields -> customFields.getFieldAsString(BIRTHDAY)).orElse("undefined"))
+                .with(TELEPHONENUMBER, custom.map(customFields -> customFields.getFieldAsString(TELEPHONENUMBER)).orElse("undefined"));
     }
 
     public MultiValueResult handlePayment(final String paymentName,
