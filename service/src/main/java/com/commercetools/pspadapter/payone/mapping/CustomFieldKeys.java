@@ -50,11 +50,6 @@ public final class CustomFieldKeys {
     public static final String IP = "ip"; // IP address, IPv4 or IPv6
     public static final String BIRTHDAY = "birthday"; // Date of birth (YYYYMMDD), Mandatory for DE, NE and AT
 
-    // TODO: looks like not necessary to use custom fields and can be populated from billing address and other properties
-    public static final String TELEPHONE_NUMBER = "telephonenumber";
-    public static final String NARRATIVE_TEXT = "narrative_text"; // optional
-    public static final String FINANCINGTYPE = "financingtype"; //KLV - Klarna Invoicing
-
     private CustomFieldKeys() {
     }
 }
