@@ -7,6 +7,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingTy
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.BaseKlarnaRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaPreauthorizationRequest;
+import com.commercetools.pspadapter.payone.mapping.MappingUtil;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.google.common.base.Preconditions;
@@ -87,9 +88,8 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
     private static void mapKlarnaCustomFields(@Nonnull AuthorizationRequest request, @Nonnull CustomFields customFields) {
         mapCustomFieldIfSignificant(customFields.getFieldAsString(IP), request::setIp);
 
-        mapCustomFieldIfSignificant(customFields.getFieldAsString(BIRTHDAY), request::setBirthday,
-                // Payone requires format yyyyMMdd, but CTP contains dashes "-" in between
-                ctpBirthdayString -> ctpBirthdayString.replaceAll("[^\\d.]", ""));
+        mapCustomFieldIfSignificant(customFields.getFieldAsDate(BIRTHDAY), request::setBirthday,
+                MappingUtil::dateToBirthdayString);
     }
 
     private static <T> void mapCustomFieldIfSignificant(@Nullable T fieldValue, @Nonnull Consumer<T> fieldConsumer) {

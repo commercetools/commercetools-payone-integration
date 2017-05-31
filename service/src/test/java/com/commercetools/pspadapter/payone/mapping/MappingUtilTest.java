@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.time.LocalDate;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -303,6 +304,13 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         softly.assertThat(MappingUtil.getGenderFromPaymentCart(paymentWithCartLike)).isEmpty();
 
         softly.assertAll();
+    }
+
+    @Test
+    public void dateToBirthdayString_converting() throws Exception {
+        assertThat(MappingUtil.dateToBirthdayString(null)).isNull();
+        assertThat(MappingUtil.dateToBirthdayString(LocalDate.of(1986, 12, 15))).isEqualTo("19861215");
+        assertThat(MappingUtil.dateToBirthdayString(LocalDate.of(1915, 1, 2))).isEqualTo("19150102");
     }
 
     /**

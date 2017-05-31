@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +39,11 @@ import static java.util.Optional.ofNullable;
 public class MappingUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(MappingUtil.class);
+
+    /**
+     * Payone birthday format.
+     */
+    public static final DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private static final Set<CountryCode> countriesWithStateAllowed = ImmutableSet.of(
         CountryCode.US,
@@ -93,7 +99,7 @@ public class MappingUtil {
 
         //birthday
         ofNullable(customer.getDateOfBirth())
-                .ifPresent(birthday -> request.setBirthday(birthday.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
+                .ifPresent(birthday -> request.setBirthday(dateToBirthdayString(birthday)));
 
         //customerNumber
         ofNullable(customer.getCustomerNumber())
@@ -258,5 +264,17 @@ public class MappingUtil {
                 .filter(StringUtils::isNotBlank)
                 .map(gender -> gender.substring(0, 1))
                 .map(String::toLowerCase);
+    }
+
+    /**
+     * Convert {@link LocalDate} {@code birthday} to payone specific birthday string.
+     * @param birthday birthday date to convert.
+     * @return "yyyyMMdd" formatted date or <b>null</b>, of {@code birthday} is <b>null</b>
+     */
+    @Nullable
+    public static String dateToBirthdayString(@Nullable LocalDate birthday) {
+        return ofNullable(birthday)
+                .map(date -> date.format(yyyyMMdd))
+                .orElse(null);
     }
 }

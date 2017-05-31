@@ -21,6 +21,9 @@ import io.sphere.sdk.types.commands.TypeCreateCommand;
 import io.sphere.sdk.types.commands.TypeDeleteCommand;
 import io.sphere.sdk.types.queries.TypeQuery;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * @author Jan Wolter
  */
@@ -167,7 +170,7 @@ public class CustomTypeBuilder {
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.IP, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.BIRTHDAY, FieldClassifier.REQUIRED),
+                createDateFieldDefinition(CustomFieldKeys.BIRTHDAY, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.GENDER_FIELD, FieldClassifier.REQUIRED)
         ));
     }
@@ -250,7 +253,14 @@ public class CustomTypeBuilder {
         return createFieldDefinition(StringFieldType.of(), fieldName, TextInputHint.MULTI_LINE, classifier);
     }
 
-    private FieldDefinition createFieldDefinition(final FieldType fieldType, final String fieldName, final TextInputHint inputHint, final FieldClassifier classifier) {
+    private FieldDefinition createDateFieldDefinition(final String fieldName, final FieldClassifier classifier) {
+        return createFieldDefinition(DateFieldType.of(), fieldName, null, classifier);
+    }
+
+    private FieldDefinition createFieldDefinition(@Nonnull final FieldType fieldType,
+                                                  @Nonnull final String fieldName,
+                                                  @Nullable final TextInputHint inputHint,
+                                                  @Nonnull final FieldClassifier classifier) {
         return FieldDefinition.of(
                     fieldType,
                     fieldName,
