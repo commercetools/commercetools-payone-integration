@@ -1,5 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?><html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
-<head><style>* {
+<head><script type="text/javascript">/* Stack Trace Toggling */
+
+function getElementById(id) {
+  var element;
+
+  if (document.getElementById) { // standard
+    return document.getElementById(id);
+  } else if (document.all) { // old IE versions
+    return document.all[id];
+  } else if (document.layers) { // nn4
+    return document.layers[id];
+  }
+  alert("Sorry, but your web browser is not supported by Concordion.");
+}
+
+function isVisible(element) {
+  return element.style.display;
+}
+
+function makeVisible(element) {
+  element.style.display = "block";
+}
+
+function makeInvisible(element) {
+  element.style.display = "";
+}
+
+function toggleStackTrace(stackTraceNumber) {
+  var stackTrace = getElementById("stackTrace" + stackTraceNumber);
+  var stackTraceButton = getElementById("stackTraceButton" + stackTraceNumber);
+  if (isVisible(stackTrace)) {
+    makeInvisible(stackTrace);
+    stackTraceButton.value = "View Stack";
+  } else {
+    makeVisible(stackTrace);
+    stackTraceButton.value = "Hide Stack";
+  }
+}
+</script><style>* {
   font-family: Arial;
 }
 body {
@@ -211,7 +249,7 @@ ins {
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">DE00123456782599100003</td>
             <td class="inputvalue">TESTTEST</td>
-            <td>821fe857-cf7a-47c6-9c7d-62b30947a4be</td>
+            <td>96fb6f22-6b71-4f03-b017-46ea465613f5</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
@@ -219,7 +257,7 @@ ins {
             <td class="inputvalue">USD</td>
             <td class="inputvalue" />
             <td class="inputvalue" />
-            <td>a04a0955-720f-431a-b604-3105980ad8ca</td>
+            <td>8afde6f4-e136-4a02-bc1d-05f903b5d08d</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 3</td>
@@ -227,7 +265,7 @@ ins {
             <td class="inputvalue">EUR</td>
             <td class="inputvalue" />
             <td class="inputvalue" />
-            <td>a91024db-af74-44fa-95c1-71ee6248ee56</td>
+            <td>3f26282b-e264-426c-a6b1-040192c013fb</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 4</td>
@@ -235,7 +273,7 @@ ins {
             <td class="inputvalue">EUR</td>
             <td class="inputvalue" />
             <td class="inputvalue" />
-            <td>585544f3-e2ad-46b9-9094-56e1927045d5</td>
+            <td>51ece4dd-06d0-4f16-b956-9b18d8811b7c</td>
         </tr>
     </table>
     <p>
@@ -378,10 +416,10 @@ ins {
             <th c:set="#paymentName">Payment Name</th>
             <th c:assertEquals="#orderPaymentState">Order Payment State</th>
         </tr>
-        <tr>
+        <tr><span class="failure"><del class="expected">
             <td class="inputvalue">Payment 1</td>
-            <td class="success">Paid</td>
-        </tr>
+            <td>Paid</td>
+        </del></span><span class="exceptionMessage">java.util.concurrent.CompletionException: io.sphere.sdk.http.HttpException: The underlying HTTP client detected a problem.</span><input class="stackTraceButton" id="stackTraceButton1" type="button" onclick="javascript:toggleStackTrace('1')" value="View Stack" /><div class="stackTrace" id="stackTrace1"><p>While evaluating expression: <code>#orderPaymentState = fetchOrderPaymentState(#paymentName)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: java.util.concurrent.CompletionException: io.sphere.sdk.http.HttpException: The underlying HTTP client detected a problem.</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.encodeThrowable (CompletableFuture.java:292)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeThrowable (CompletableFuture.java:308)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:593)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.postComplete (CompletableFuture.java:474)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeExceptionally (CompletableFuture.java:1977)</div><div class="stackTraceEntry">at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1 (HttpClientAdapterBase.java:56)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniWhenComplete (CompletableFuture.java:760)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire (CompletableFuture.java:736)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.postComplete (CompletableFuture.java:474)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeExceptionally (CompletableFuture.java:1977)</div><div class="stackTraceEntry">at io.sphere.sdk.http.ResponseAsyncCompletionHandler.onThrowable (ResponseAsyncCompletionHandler.java:23)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.NettyResponseFuture.abort (NettyResponseFuture.java:243)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.channel.NettyConnectListener.onFailure (NettyConnectListener.java:164)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.request.NettyChannelConnector$1.onFailure (NettyChannelConnector.java:103)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.SimpleChannelFutureListener.operationComplete (SimpleChannelFutureListener.java:28)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.SimpleChannelFutureListener.operationComplete (SimpleChannelFutureListener.java:20)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListener0 (DefaultPromise.java:507)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListeners0 (DefaultPromise.java:500)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListenersNow (DefaultPromise.java:479)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListeners (DefaultPromise.java:420)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.tryFailure (DefaultPromise.java:122)</div><div class="stackTraceEntry">at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.fulfillConnectPromise (AbstractNioChannel.java:278)</div><div class="stackTraceEntry">at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect (AbstractNioChannel.java:294)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKey (NioEventLoop.java:631)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized (NioEventLoop.java:566)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKeys (NioEventLoop.java:480)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.run (NioEventLoop.java:442)</div><div class="stackTraceEntry">at io.netty.util.concurrent.SingleThreadEventExecutor$2.run (SingleThreadEventExecutor.java:131)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run (DefaultThreadFactory.java:144)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:745)</div><div class="stackTraceExceptionMessage">java.util.concurrent.CompletionException: io.sphere.sdk.http.HttpException: The underlying HTTP client detected a problem.</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.encodeThrowable (CompletableFuture.java:292)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeThrowable (CompletableFuture.java:308)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:593)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.postComplete (CompletableFuture.java:474)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeExceptionally (CompletableFuture.java:1977)</div><div class="stackTraceEntry">at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1 (HttpClientAdapterBase.java:56)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniWhenComplete (CompletableFuture.java:760)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire (CompletableFuture.java:736)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.postComplete (CompletableFuture.java:474)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeExceptionally (CompletableFuture.java:1977)</div><div class="stackTraceEntry">at io.sphere.sdk.http.ResponseAsyncCompletionHandler.onThrowable (ResponseAsyncCompletionHandler.java:23)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.NettyResponseFuture.abort (NettyResponseFuture.java:243)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.channel.NettyConnectListener.onFailure (NettyConnectListener.java:164)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.request.NettyChannelConnector$1.onFailure (NettyChannelConnector.java:103)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.SimpleChannelFutureListener.operationComplete (SimpleChannelFutureListener.java:28)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.SimpleChannelFutureListener.operationComplete (SimpleChannelFutureListener.java:20)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListener0 (DefaultPromise.java:507)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListeners0 (DefaultPromise.java:500)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListenersNow (DefaultPromise.java:479)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListeners (DefaultPromise.java:420)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.tryFailure (DefaultPromise.java:122)</div><div class="stackTraceEntry">at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.fulfillConnectPromise (AbstractNioChannel.java:278)</div><div class="stackTraceEntry">at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect (AbstractNioChannel.java:294)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKey (NioEventLoop.java:631)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized (NioEventLoop.java:566)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKeys (NioEventLoop.java:480)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.run (NioEventLoop.java:442)</div><div class="stackTraceEntry">at io.netty.util.concurrent.SingleThreadEventExecutor$2.run (SingleThreadEventExecutor.java:131)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run (DefaultThreadFactory.java:144)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:745)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.http.HttpException: The underlying HTTP client detected a problem.</div><div class="stackTraceEntry">at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1 (HttpClientAdapterBase.java:53)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniWhenComplete (CompletableFuture.java:760)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire (CompletableFuture.java:736)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.postComplete (CompletableFuture.java:474)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeExceptionally (CompletableFuture.java:1977)</div><div class="stackTraceEntry">at io.sphere.sdk.http.ResponseAsyncCompletionHandler.onThrowable (ResponseAsyncCompletionHandler.java:23)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.NettyResponseFuture.abort (NettyResponseFuture.java:243)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.channel.NettyConnectListener.onFailure (NettyConnectListener.java:164)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.request.NettyChannelConnector$1.onFailure (NettyChannelConnector.java:103)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.SimpleChannelFutureListener.operationComplete (SimpleChannelFutureListener.java:28)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.SimpleChannelFutureListener.operationComplete (SimpleChannelFutureListener.java:20)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListener0 (DefaultPromise.java:507)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListeners0 (DefaultPromise.java:500)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListenersNow (DefaultPromise.java:479)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListeners (DefaultPromise.java:420)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.tryFailure (DefaultPromise.java:122)</div><div class="stackTraceEntry">at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.fulfillConnectPromise (AbstractNioChannel.java:278)</div><div class="stackTraceEntry">at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect (AbstractNioChannel.java:294)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKey (NioEventLoop.java:631)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized (NioEventLoop.java:566)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKeys (NioEventLoop.java:480)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.run (NioEventLoop.java:442)</div><div class="stackTraceEntry">at io.netty.util.concurrent.SingleThreadEventExecutor$2.run (SingleThreadEventExecutor.java:131)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run (DefaultThreadFactory.java:144)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:745)</div><div class="stackTraceExceptionMessage">java.net.ConnectException: Connection refused: api.sphere.io/35.186.204.86:443</div><div class="stackTraceEntry">at org.asynchttpclient.netty.channel.NettyConnectListener.onFailure (NettyConnectListener.java:162)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.request.NettyChannelConnector$1.onFailure (NettyChannelConnector.java:103)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.SimpleChannelFutureListener.operationComplete (SimpleChannelFutureListener.java:28)</div><div class="stackTraceEntry">at org.asynchttpclient.netty.SimpleChannelFutureListener.operationComplete (SimpleChannelFutureListener.java:20)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListener0 (DefaultPromise.java:507)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListeners0 (DefaultPromise.java:500)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListenersNow (DefaultPromise.java:479)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.notifyListeners (DefaultPromise.java:420)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultPromise.tryFailure (DefaultPromise.java:122)</div><div class="stackTraceEntry">at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.fulfillConnectPromise (AbstractNioChannel.java:278)</div><div class="stackTraceEntry">at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect (AbstractNioChannel.java:294)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKey (NioEventLoop.java:631)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized (NioEventLoop.java:566)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKeys (NioEventLoop.java:480)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.run (NioEventLoop.java:442)</div><div class="stackTraceEntry">at io.netty.util.concurrent.SingleThreadEventExecutor$2.run (SingleThreadEventExecutor.java:131)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run (DefaultThreadFactory.java:144)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:745)</div><div class="stackTraceExceptionMessage">io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: api.sphere.io/35.186.204.86:443</div><div class="stackTraceEntry">at sun.nio.ch.SocketChannelImpl.checkConnect (SocketChannelImpl.java:-2)</div><div class="stackTraceEntry">at sun.nio.ch.SocketChannelImpl.finishConnect (SocketChannelImpl.java:717)</div><div class="stackTraceEntry">at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect (NioSocketChannel.java:258)</div><div class="stackTraceEntry">at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect (AbstractNioChannel.java:291)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKey (NioEventLoop.java:631)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized (NioEventLoop.java:566)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.processSelectedKeys (NioEventLoop.java:480)</div><div class="stackTraceEntry">at io.netty.channel.nio.NioEventLoop.run (NioEventLoop.java:442)</div><div class="stackTraceEntry">at io.netty.util.concurrent.SingleThreadEventExecutor$2.run (SingleThreadEventExecutor.java:131)</div><div class="stackTraceEntry">at io.netty.util.concurrent.DefaultThreadFactory$DefaultRunnableDecorator.run (DefaultThreadFactory.java:144)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:745)</div></div></tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
             <td class="success">(null)</td>
@@ -410,5 +448,5 @@ ins {
     <li>The checkout implementation needs to take care of failed verifications - the user will be redirected to
         the <em>backUrl</em> or the <em>errorUrl</em> specified in the Payment object</li>
 </ol>
-<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 192749 ms on 31-May-2017 at 16:51:19 UTC</div></div></body>
+<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 308049 ms on 01-Jun-2017 at 09:16:40 UTC</div></div></body>
 </html>
