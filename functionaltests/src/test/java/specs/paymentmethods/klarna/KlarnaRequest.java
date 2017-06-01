@@ -44,9 +44,9 @@ public class KlarnaRequest extends BaseNotifiablePaymentFixture {
 
         return MultiValueResult.multiValueResult()
                 .with("paymentId", payment.getId())
-                .with(IP, custom.map(customFields -> customFields.getFieldAsString(IP)).orElse("undefined"))
-                .with(BIRTHDAY, custom.map(customFields -> customFields.getFieldAsString(BIRTHDAY)).orElse("undefined"))
-                .with(TELEPHONENUMBER, custom.map(customFields -> customFields.getFieldAsString(TELEPHONENUMBER)).orElse("undefined"));
+                .with(IP_FIELD, custom.map(customFields -> customFields.getFieldAsString(IP_FIELD)).orElse("undefined"))
+                .with(BIRTHDAY_FIELD, custom.map(customFields -> customFields.getFieldAsString(BIRTHDAY_FIELD)).orElse("undefined"))
+                .with(TELEPHONENUMBER_FIELD, custom.map(customFields -> customFields.getFieldAsString(TELEPHONENUMBER_FIELD)).orElse("undefined"));
     }
 
     public MultiValueResult handlePayment(final String paymentName,

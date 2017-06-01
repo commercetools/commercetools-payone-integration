@@ -251,9 +251,9 @@ public class BasePaymentFixture extends BaseFixture {
                                 .put(REFERENCE_FIELD, ofNullable(order.getOrderNumber())
                                         .orElseThrow(() -> new IllegalStateException("Order must have a number")))
                                 .put(GENDER_FIELD, "m")
-                                .put(IP, ip)
-                                .put(BIRTHDAY, birthDay)
-                                .put(TELEPHONENUMBER, telephonenumber)
+                                .put(IP_FIELD, ip)
+                                .put(BIRTHDAY_FIELD, birthDay)
+                                .put(TELEPHONENUMBER_FIELD, telephonenumber)
                                 .build()))
                 .build();
 

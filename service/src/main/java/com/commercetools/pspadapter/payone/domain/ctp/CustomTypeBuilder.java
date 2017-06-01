@@ -170,9 +170,9 @@ public class CustomTypeBuilder {
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.GENDER_FIELD, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.IP, FieldClassifier.REQUIRED),
-                createDateFieldDefinition(CustomFieldKeys.BIRTHDAY, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.TELEPHONENUMBER, FieldClassifier.REQUIRED)
+                createSingleLineStringFieldDefinition(CustomFieldKeys.IP_FIELD, FieldClassifier.REQUIRED),
+                createDateFieldDefinition(CustomFieldKeys.BIRTHDAY_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.TELEPHONENUMBER_FIELD, FieldClassifier.REQUIRED)
         ));
     }
 

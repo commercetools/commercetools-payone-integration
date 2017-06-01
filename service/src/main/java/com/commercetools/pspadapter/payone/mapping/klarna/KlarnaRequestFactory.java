@@ -85,13 +85,13 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
     }
 
     private static void mapKlarnaCustomFields(@Nonnull AuthorizationRequest request, @Nonnull CustomFields customFields) {
-        mapCustomFieldIfSignificant(customFields.getFieldAsString(IP), request::setIp);
+        mapCustomFieldIfSignificant(customFields.getFieldAsString(IP_FIELD), request::setIp);
 
-        mapCustomFieldIfSignificant(customFields.getFieldAsDate(BIRTHDAY), request::setBirthday,
+        mapCustomFieldIfSignificant(customFields.getFieldAsDate(BIRTHDAY_FIELD), request::setBirthday,
                 MappingUtil::dateToBirthdayString);
 
         // override telephone number from billing address, if custom field is specified
-        mapCustomFieldIfSignificant(customFields.getFieldAsString(TELEPHONENUMBER), request::setTelephonenumber);
+        mapCustomFieldIfSignificant(customFields.getFieldAsString(TELEPHONENUMBER_FIELD), request::setTelephonenumber);
     }
 
     private static <T> void mapCustomFieldIfSignificant(@Nullable T fieldValue, @Nonnull Consumer<T> fieldConsumer) {
