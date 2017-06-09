@@ -295,6 +295,7 @@ public class MappingUtil {
         return addresses.stream()
                 .filter(Objects::nonNull)
                 .map(addressPropertyReader)
+                .filter(Objects::nonNull)
                 .findFirst();
     }
 }

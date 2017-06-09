@@ -40,4 +40,9 @@ public class PayoneKlarnaCountryToLanguageMapper implements CountryToLanguageMap
         return ofNullable(countryCode)
                 .map(COUNTRY_LANGUAGE::get);
     }
+
+    @Override
+    public Optional<Locale> mapCountryToLanguage(@Nullable String countryCode) {
+        return mapCountryToLanguage(CountryCode.getByCodeIgnoreCase(countryCode));
+    }
 }

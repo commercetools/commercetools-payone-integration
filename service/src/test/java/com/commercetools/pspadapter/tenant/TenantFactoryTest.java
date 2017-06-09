@@ -7,6 +7,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaPreauthorizationRequest;
+import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.google.common.cache.LoadingCache;
 import io.sphere.sdk.client.BlockingSphereClient;
@@ -124,6 +125,12 @@ public class TenantFactoryTest {
         BlockingSphereClient blockingSphereClient = mock(BlockingSphereClient.class);
 
         PaymentDispatcher paymentDispatcher = factory.createPaymentDispatcher(tenantConfig, typeCache, blockingSphereClient);
+        assertThat(paymentDispatcher).isNotNull();
+    }
+
+    @Test
+    public void createCountryToLanguageMapper() throws Exception {
+        CountryToLanguageMapper paymentDispatcher = factory.createCountryToLanguageMapper();
         assertThat(paymentDispatcher).isNotNull();
     }
 }

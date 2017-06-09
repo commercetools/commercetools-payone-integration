@@ -27,6 +27,10 @@ import java.util.Optional;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.GENDER_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguage;
+import static com.neovisionaries.i18n.CountryCode.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -63,7 +67,7 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     @Test
     public void testCountryStateMapping() {
-        Address addressDE = Address.of(CountryCode.DE)
+        Address addressDE = Address.of(DE)
                 .withState("AK");
         Address addressUS = Address.of(CountryCode.US)
                 .withState("AK");
@@ -86,7 +90,7 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     @Test
     public void streetJoiningFull() {
-        Address addressWithNameNumber = Address.of(CountryCode.DE)
+        Address addressWithNameNumber = Address.of(DE)
                 .withStreetName("Test Street")
                 .withStreetNumber("2");
 
@@ -103,7 +107,7 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     @Test
     public void streetJoiningNoNumber() {
-        Address addressNoNumber = Address.of(CountryCode.DE)
+        Address addressNoNumber = Address.of(DE)
                 .withStreetName("Test Street");
 
         CreditCardAuthorizationRequest authorizationRequestNoNumber = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123");
@@ -119,7 +123,7 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     @Test
     public void streetJoiningNoName() {
-        Address addressNoName = Address.of(CountryCode.DE)
+        Address addressNoName = Address.of(DE)
                 .withStreetNumber("5");
 
         CreditCardAuthorizationRequest authorizationRequestNoName = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123");
@@ -311,6 +315,34 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         assertThat(MappingUtil.dateToBirthdayString(null)).isNull();
         assertThat(MappingUtil.dateToBirthdayString(LocalDate.of(1986, 12, 15))).isEqualTo("19861215");
         assertThat(MappingUtil.dateToBirthdayString(LocalDate.of(1915, 1, 2))).isEqualTo("19150102");
+    }
+
+    @Test
+    public void getFirstValueFromAddresses() throws Exception {
+        assertThat(MappingUtil.getFirstValueFromAddresses(emptyList(), Address::getEmail))
+                .isEmpty();
+
+        assertThat(MappingUtil.getFirstValueFromAddresses(singletonList(Address.of(CH)), Address::getCountry))
+                .contains(CH);
+
+        assertThat(MappingUtil.getFirstValueFromAddresses(asList(Address.of(DE), Address.of(NL)), Address::getCountry))
+                .contains(DE);
+
+        assertThat(MappingUtil.getFirstValueFromAddresses(asList(Address.of(AL).withCompany("xxx"),
+                                        Address.of(NL).withCompany("ggg")), Address::getCompany))
+                .contains("xxx");
+
+        assertThat(MappingUtil.getFirstValueFromAddresses(asList(Address.of(AL).withCompany("xxx").withEmail("TTT"),
+                Address.of(NL).withCompany("ggg").withEmail("KKK")), Address::getPhone))
+                .isEmpty();
+
+        assertThat(MappingUtil.getFirstValueFromAddresses(asList(Address.of(AL).withCompany("xxx").withEmail("TTT"),
+                Address.of(NL).withCompany("ggg").withEmail("KKK")), Address::getEmail))
+                .contains("TTT");
+
+        assertThat(MappingUtil.getFirstValueFromAddresses(asList(null,
+                Address.of(NL).withCompany("ggg").withEmail("KKK")), Address::getEmail))
+                .contains("KKK");
     }
 
     /**

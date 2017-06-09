@@ -3,8 +3,13 @@ package com.commercetools.pspadapter.payone.mapping.klarna;
 import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
+import com.commercetools.pspadapter.payone.domain.payone.model.klarna.BaseKlarnaRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaPreauthorizationRequest;
+import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
+import io.sphere.sdk.carts.CartLike;
+import io.sphere.sdk.models.Address;
+import io.sphere.sdk.payments.Payment;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,10 +17,15 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
+import java.util.Locale;
 import java.util.stream.IntStream;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaItemTypeEnum.*;
+import static com.neovisionaries.i18n.CountryCode.*;
 import static io.sphere.sdk.utils.MoneyImpl.centAmountOf;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
@@ -24,10 +34,12 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
 
     private final PaymentTestHelper helper = new PaymentTestHelper();
 
+    private final CountryToLanguageMapper countryToLanguageMapper = new PayoneKlarnaCountryToLanguageMapper();
+
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        klarnaRequestFactory = new KlarnaRequestFactory(tenantConfig);
+        klarnaRequestFactory = new KlarnaRequestFactory(tenantConfig, countryToLanguageMapper);
     }
 
     @Test
@@ -100,7 +112,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
 
         softly.assertThat(request.getFinancingtype()).isEqualTo("KLV");
         softly.assertThat(request.getClearingtype()).isEqualTo("fnc");
-        softly.assertThat(request.getLanguage()).isEqualTo("en");
+        softly.assertThat(request.getLanguage()).isEqualTo("de"); // the language for Klarna is mapped from country, even if it is explicitly set in the cart
         softly.assertThat(request.getAmount()).isEqualTo(30900);
         softly.assertThat(request.getCurrency()).isEqualTo("EUR");
 
@@ -124,4 +136,125 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertAll();
     }
 
+    @Test
+    public void countryToLanguageMapping_common() throws Exception {
+        SoftAssertions softly = new SoftAssertions();
+
+        Payment payment = paymentsTestHelper.dummyPaymentNoTransaction20EuroPlanned();
+        CartLike cartLike = mock(CartLike.class);
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, cartLike);
+        BaseKlarnaRequest request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+
+        softly.assertThat(request.getCountry()).isNull();
+        softly.assertThat(request.getLanguage()).isNull();
+
+        when(cartLike.getBillingAddress()).thenReturn(Address.of(DE));
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getCountry()).isEqualTo("DE");
+        softly.assertThat(request.getLanguage()).isEqualTo("de");
+
+        when(cartLike.getBillingAddress()).thenReturn(Address.of(NL));
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getCountry()).isEqualTo("NL");
+        softly.assertThat(request.getLanguage()).isEqualTo("nl");
+
+        when(cartLike.getBillingAddress()).thenReturn(Address.of(UK));
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getCountry()).isEqualTo("GB");
+        softly.assertThat(request.getLanguage()).isNull();
+
+        // verify language falls back to cart.locale if mapping is not possible from country
+        when(cartLike.getBillingAddress()).thenReturn(Address.of(US));
+        when(cartLike.getLocale()).thenReturn(Locale.FRANCE);
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getCountry()).isEqualTo("US");
+        softly.assertThat(request.getLanguage()).isEqualTo("fr");
+
+        when(cartLike.getBillingAddress()).thenReturn(null);
+        when(cartLike.getLocale()).thenReturn(Locale.CHINESE);
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getCountry()).isNull();
+        softly.assertThat(request.getLanguage()).isEqualTo("zh");
+
+        // no country and language
+        when(cartLike.getBillingAddress()).thenReturn(null);
+        when(cartLike.getLocale()).thenReturn(null);
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getCountry()).isNull();
+        softly.assertThat(request.getLanguage()).isNull();
+
+        // language from country has precedence for Klarna: locale is fi, but Austria mapped to de
+        when(cartLike.getBillingAddress()).thenReturn(Address.of(AT));
+        when(cartLike.getLocale()).thenReturn(new Locale("fi"));
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getCountry()).isEqualTo("AT");
+        softly.assertThat(request.getLanguage()).isEqualTo("de");
+
+        // if country language is not mappable in Klarna - locale from cart is used
+        when(cartLike.getBillingAddress()).thenReturn(Address.of(UA));
+        when(cartLike.getLocale()).thenReturn(new Locale("fi"));
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getCountry()).isEqualTo("UA");
+        softly.assertThat(request.getLanguage()).isEqualTo("fi");
+
+        softly.assertAll();
+    }
+
+    @Test
+    public void countryToLanguageMapping_fromShippingAddress() throws Exception {
+        SoftAssertions softly = new SoftAssertions();
+
+        Payment payment = paymentsTestHelper.dummyPaymentNoTransaction20EuroPlanned();
+        CartLike cartLike = mock(CartLike.class);
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, cartLike);
+        BaseKlarnaRequest request;
+
+        when(cartLike.getShippingAddress()).thenReturn(Address.of(DE));
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getLanguage()).isEqualTo("de");
+
+        when(cartLike.getShippingAddress()).thenReturn(Address.of(NL));
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getLanguage()).isEqualTo("nl");
+
+        // shipping address is set, but the country language can't be mapped
+        when(cartLike.getShippingAddress()).thenReturn(Address.of(CH));
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getLanguage()).isNull();
+
+        softly.assertAll();
+    }
+
+    @Test
+    public void countryToLanguageMapping_fromBothAddress() throws Exception {
+        SoftAssertions softly = new SoftAssertions();
+
+        Payment payment = paymentsTestHelper.dummyPaymentNoTransaction20EuroPlanned();
+        CartLike cartLike = mock(CartLike.class);
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, cartLike);
+        BaseKlarnaRequest request;
+
+        when(cartLike.getBillingAddress()).thenReturn(Address.of(AT));
+        when(cartLike.getShippingAddress()).thenReturn(Address.of(NL));
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getLanguage()).isEqualTo("de");
+
+        when(cartLike.getBillingAddress()).thenReturn(Address.of(NL));
+        when(cartLike.getShippingAddress()).thenReturn(Address.of(AT));
+        request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        softly.assertThat(request.getLanguage()).isEqualTo("nl");
+
+
+        softly.assertAll();
+    }
+
+    @Test
+    public void dateOfBirthRemainsFromCustomerIfMissingInCustomFields() throws Exception {
+        Payment payment = paymentsTestHelper.dummyPaymentNoTransaction20EuroPlanned();
+        CartLike cartLike = mock(CartLike.class);
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, cartLike);
+        BaseKlarnaRequest request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+
+        assertThat(request.getBirthday()).isEqualTo("19891203"); // from customer.obj.dateOfBirth
+    }
 }

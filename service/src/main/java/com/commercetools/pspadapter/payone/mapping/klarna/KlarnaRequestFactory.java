@@ -95,14 +95,7 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
                 .map(Payment::getCustom)
                 .ifPresent(customFields -> mapKlarnaCustomFields(request, customFields));
 
-        // map country code from billing/shipping address to respective language if it is set and the mapping exists.
-        // If country not set in the addresses, or countryToLanguageMapper doesn't have respective mapping -
-        // skip this step
-        CartLike<?> cartLike = paymentWithCartLike.getCartLike();
-        getFirstValueFromAddresses(asList(cartLike.getBillingAddress(), cartLike.getShippingAddress()), Address::getCountry)
-                .flatMap(countryToLanguageMapper::mapCountryToLanguage)
-                .map(Locale::getLanguage)
-                .ifPresent(request::setLanguage);
+        mapLanguageFromCountry(request, paymentWithCartLike.getCartLike());
 
         return request;
     }
@@ -143,6 +136,24 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
         if (fieldValue != null) {
             fieldConsumer.accept(fieldProcessor.apply(fieldValue));
         }
+    }
+
+    /**
+     * Map country code from billing/shipping address to respective language if it is set and the mapping exists.
+     * If country not set in the addresses, or {@link #countryToLanguageMapper} doesn't have respective mapping -
+     * don't alter {@link AuthorizationRequest#setLanguage(String)}
+     * @param request {@link AuthorizationRequest} where update the language
+     * @param cartLike {@link CartLike} from which to read the addresses/language settings.
+     */
+    protected void mapLanguageFromCountry(@Nonnull AuthorizationRequest request, @Nonnull CartLike<?> cartLike) {
+        countryToLanguageMapper.mapCountryToLanguage(request.getCountry()) // try to take country-locale from the request
+                .map(Optional::of)
+                .orElseGet(() -> // otherwise try to get country-locale from the cart
+                        getFirstValueFromAddresses(asList(cartLike.getBillingAddress(), cartLike.getShippingAddress()),
+                                Address::getCountry)
+                                .flatMap(countryToLanguageMapper::mapCountryToLanguage))
+                .map(Locale::getLanguage)
+                .ifPresent(request::setLanguage);
     }
 
     @FunctionalInterface
