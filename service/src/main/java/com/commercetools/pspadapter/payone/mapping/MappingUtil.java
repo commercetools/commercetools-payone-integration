@@ -21,10 +21,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
@@ -236,8 +234,9 @@ public class MappingUtil {
     /**
      * Iterate the custom field suppliers and find the first one which contains a value in
      * {@link CustomFieldKeys#GENDER_FIELD}.
+     *
      * @param customFieldSuppliers list of suppliers of custom fields. The suppliers expected to be non-null, but
-     * supplied {@link Supplier#get()} result could be null, if custom field is not available for some types.
+     *                             supplied {@link Supplier#get()} result could be null, if custom field is not available for some types.
      * @return First available lowercase single character gender if exists.
      */
     @Nonnull
@@ -253,6 +252,7 @@ public class MappingUtil {
     /**
      * Try to fetch {@link CustomFieldKeys#GENDER_FIELD} from the {@code customFields} and map it to Payone acceptable
      * value.
+     *
      * @param customFields {@link CustomFields} from which to fetch gender property.
      * @return lowercase single character gender if exists.
      */
@@ -268,6 +268,7 @@ public class MappingUtil {
 
     /**
      * Convert {@link LocalDate} {@code birthday} to payone specific birthday string.
+     *
      * @param birthday birthday date to convert.
      * @return "yyyyMMdd" formatted date or <b>null</b>, of {@code birthday} is <b>null</b>
      */
@@ -276,5 +277,24 @@ public class MappingUtil {
         return ofNullable(birthday)
                 .map(date -> date.format(yyyyMMdd))
                 .orElse(null);
+    }
+
+    /**
+     * From list of {@code addresses} try to read a value by {@code addressPropertyReader} and return it if exists.
+     *
+     * @param addresses             ordered list of addresses. The first found significant value from an address from
+     *                              the list will be returned.
+     * @param addressPropertyReader a {@link Function} which accepts address and reads a value from it.
+     * @param <A>                   {@link Address}
+     * @param <R>                   type of property to read
+     * @return First found significant property value from {@code addresses}. Otherwise - {@link Optional#empty()}
+     */
+    public static <A extends Address, R>
+    Optional<R> getFirstValueFromAddresses(@Nonnull List<A> addresses,
+                                           @Nonnull Function<A, R> addressPropertyReader) {
+        return addresses.stream()
+                .filter(Objects::nonNull)
+                .map(addressPropertyReader)
+                .findFirst();
     }
 }
