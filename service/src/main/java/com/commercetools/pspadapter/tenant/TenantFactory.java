@@ -67,8 +67,6 @@ public class TenantFactory {
     private final CustomTypeBuilder customTypeBuilder;
     private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
 
-    private final CountryToLanguageMapper countryToLanguageMapper;
-
 
     public TenantFactory(String payoneInterfaceName, TenantConfig tenantConfig) {
         this.payoneInterfaceName = payoneInterfaceName;
@@ -93,8 +91,6 @@ public class TenantFactory {
         this.paymentHandler = createPaymentHandler(payoneInterfaceName, tenantConfig.getName(), commercetoolsQueryExecutor, paymentDispatcher);
 
         this.customTypeBuilder = createCustomTypeBuilder(blockingSphereClient, tenantConfig.getStartFromScratch());
-
-        this.countryToLanguageMapper = createCountryToLanguageMapper();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -275,7 +271,7 @@ public class TenantFactory {
             case BANK_TRANSFER_ADVANCE:
                 return new BanktTransferInAdvanceRequestFactory(tenantConfig);
             case INVOICE_KLARNA:
-                return new KlarnaRequestFactory(tenantConfig, countryToLanguageMapper);
+                return new KlarnaRequestFactory(tenantConfig, createCountryToLanguageMapper());
             default:
                 throw new IllegalArgumentException(format("No PayoneRequestFactory could be created for payment method %s", method));
         }
@@ -290,6 +286,7 @@ public class TenantFactory {
         return CacheBuilder.newBuilder().build(new TypeCacheLoader(client));
     }
 
+    @Nonnull
     protected CountryToLanguageMapper createCountryToLanguageMapper() {
         return new PayoneKlarnaCountryToLanguageMapper();
     }
