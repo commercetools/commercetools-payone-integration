@@ -25,6 +25,7 @@ deploy:
     repo: commercetools/commercetools-payone-integration
     all_branches: true
 after_deploy:
+- sleep 10s # wait 10 seconds to run the deployed service completely before starting functional tests
 - echo "Publishing build results to http://commercetools.github.io/commercetools-payone-integration/"
 - ./gradlew --continue --info :functionaltests:cleanTest :functionaltests:testSpec publishGhPages || travis_terminate 1
 - ./travis-build.sh || travis_terminate 1

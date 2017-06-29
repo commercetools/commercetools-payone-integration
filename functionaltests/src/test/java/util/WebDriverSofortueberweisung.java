@@ -27,15 +27,8 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
 
     private static final int DEFAULT_TIMEOUT = 5;
 
-    private final String pin;
-
-    private final String tan;
-
-    public WebDriverSofortueberweisung(final String pin, final String tan) {
+    public WebDriverSofortueberweisung() {
         super(BrowserVersion.FIREFOX_45, true);
-
-        this.pin = pin;
-        this.tan = tan;
 
         final Timeouts timeouts = manage().timeouts();
         timeouts.implicitlyWait(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
@@ -55,7 +48,7 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
         webClient.setCssErrorHandler(new SilentCssErrorHandler());
     }
 
-    private void doLogin(final String userid) {
+    private void doLogin(String userid, String pin) {
         final WebElement useridInput = findElement(By.id(SU_LOGIN_NAME_ID));
         final WebElement pinInput = findElement(By.id(SU_USER_PIN_ID));
         useridInput.clear();
@@ -91,7 +84,7 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
         submitButton.click();
     }
 
-    private void provideTan() {
+    private void provideTan(String tan) {
         final WebElement tanInput = findElement(By.id(SU_BACKEND_FORM_TAN));
         final WebElement submitButton = findSubmitButton();
 
@@ -107,12 +100,12 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
      * @param userid the account id to use
      * @return the URL the browser was redirected to after submitting the {@code password}
      */
-    public String executeSofortueberweisungRedirect(final String url, final String userid) {
+    public String executeSofortueberweisungRedirect(final String url, final String userid, final String pin, final String tan) {
         final Wait<WebDriver> wait = new WebDriverWait(this, 20);
 
         navigate().to(url);
 
-        doLogin(userid);
+        doLogin(userid, pin);
 
         wait.until(ExpectedConditions.urlContains(SU_URL_SELECT_ACCOUNT_PATTERN));
 
@@ -120,7 +113,7 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
 
         wait.until(ExpectedConditions.urlContains(SU_URL_PROVIDE_TAN_PATTERN));
 
-        provideTan();
+        provideTan(tan);
 
         wait.until(not(ExpectedConditions.urlContains(SU_URL_PAY_1_PATTERN)));
 

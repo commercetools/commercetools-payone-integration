@@ -1,54 +1,55 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
+import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvancePreautorizationRequest;
-
+import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 import org.assertj.core.api.SoftAssertions;
 import org.javamoney.moneta.function.MonetaryUtil;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+
 /**
  * @author mht@dotsource.de
  *
  */
 @RunWith(MockitoJUnitRunner.class)
-public class BankTransferInAdvanceRequestFactoryTest {
+public class BankTransferInAdvanceRequestFactoryTest extends BaseTenantPropertyTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
     private BanktTransferInAdvanceRequestFactory factory;
 
-    @Mock
-    private PropertyProvider propertyProvider;
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
     @Test
     public void createFullAuthorizationRequestFromValidPayment() throws Exception {
-
         when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyVal"));
         when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
+
+        when(tenantPropertyProvider.getCommonPropertyProvider()).thenReturn(propertyProvider);
+        when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyVal"));
+        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
         //clear secure key to force unencrypted data
-        when(propertyProvider.getProperty(PropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
+        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
 
-        PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        factory = new BanktTransferInAdvanceRequestFactory(payoneConfig);
-
+        factory = new BanktTransferInAdvanceRequestFactory(tenantConfig);
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroVOR();
         Order order = payments.dummyOrderMapToPayoneRequest();

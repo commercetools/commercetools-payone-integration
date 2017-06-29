@@ -16,6 +16,8 @@ import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.LOG_PREFIX;
+
 /**
  * @author fhaertig
  * @since 07.12.15
@@ -24,33 +26,39 @@ public abstract class ScheduledJob implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledJob.class);
 
-    public static final String SERVICE_KEY = "INTEGRATIONSERVICE";
-    public static final String DISPATCHER_KEY = "DISPATCHERSUPPLIER";
+    public static final String INTEGRATION_SERVICE = "INTEGRATION_SERVICE";
 
     @Override
     public void execute(final JobExecutionContext context) throws JobExecutionException {
         JobDataMap dataMap = context.getMergedJobDataMap();
-        IntegrationService service = (IntegrationService) dataMap.get(SERVICE_KEY);
 
-        final PaymentDispatcher paymentDispatcher = (PaymentDispatcher) dataMap.get(DISPATCHER_KEY);
+        final IntegrationService integrationService = (IntegrationService) dataMap.get(INTEGRATION_SERVICE);
+
         final ZonedDateTime sinceDate = getSinceDateTime();
 
-        final CommercetoolsQueryExecutor queryExecutor = service.getCommercetoolsQueryExecutor();
-        final Consumer<Payment> paymentConsumer = payment -> {
-            try {
-                final PaymentWithCartLike paymentWithCartLike = queryExecutor.getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
-                paymentDispatcher.accept(paymentWithCartLike);
-            } catch (final NoCartLikeFoundException ex) {
-                LOG.debug("Could not dispatch payment with ID \"{}\": {}", payment.getId(), ex.getMessage());
-            } catch (final ConcurrentModificationException ex) {
-                LOG.info("Could not dispatch payment with ID \"{}\": The payment is currently processed by someone else.", payment.getId());
-            } catch (final RuntimeException ex) {
-                LOG.error("Error dispatching payment with ID \"{}\"", payment.getId(), ex);
-            }
-        };
+        integrationService.getTenantFactories().forEach(tenantFactory -> {
+            final CommercetoolsQueryExecutor queryExecutor = tenantFactory.getCommercetoolsQueryExecutor();
+            final PaymentDispatcher paymentDispatcher = tenantFactory.getPaymentDispatcher();
 
-        queryExecutor.consumePaymentCreatedMessages(sinceDate, paymentConsumer);
-        queryExecutor.consumePaymentTransactionAddedMessages(sinceDate, paymentConsumer);
+            final Consumer<Payment> paymentConsumer = payment -> {
+                try {
+                    final PaymentWithCartLike paymentWithCartLike = queryExecutor.getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
+                    paymentDispatcher.accept(paymentWithCartLike);
+                } catch (final NoCartLikeFoundException ex) {
+                    LOG.debug(LOG_PREFIX + " Could not dispatch payment with ID \"{}\": {}",
+                            tenantFactory.getTenantName(),  payment.getId(), ex.getMessage());
+                } catch (final ConcurrentModificationException ex) {
+                    LOG.info(LOG_PREFIX + " Could not dispatch payment with ID \"{}\": The payment is currently processed by someone else.",
+                            tenantFactory.getTenantName(), payment.getId());
+                } catch (final Throwable ex) {
+                    LOG.error(LOG_PREFIX + " Error dispatching payment with ID \"{}\"",
+                            tenantFactory.getTenantName(), payment.getId(), ex);
+                }
+            };
+
+            queryExecutor.consumePaymentCreatedMessages(sinceDate, paymentConsumer);
+            queryExecutor.consumePaymentTransactionAddedMessages(sinceDate, paymentConsumer);
+        });
     }
 
     protected abstract ZonedDateTime getSinceDateTime();

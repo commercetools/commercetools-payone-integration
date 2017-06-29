@@ -464,7 +464,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     public void orderServiceIsNotCalledWhenIsUpdateOrderPaymentStateFalse() throws Exception {
         // this test is similar to #mapsAppointedCompletedToSuccessfulAuthorizationTransaction(),
         // but #isUpdateOrderPaymentState() is false, so update order actions should be skipped
-        when(serviceConfig.isUpdateOrderPaymentState()).thenReturn(false);
+        when(tenantConfig.isUpdateOrderPaymentState()).thenReturn(false);
 
         mapsAppointedCompleteToSuccessfulAuthorizationTransactionWireframe();
         verifyUpdateOrderActionsNotCalled();

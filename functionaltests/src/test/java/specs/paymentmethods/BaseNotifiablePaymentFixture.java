@@ -1,13 +1,20 @@
 package specs.paymentmethods;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.PaymentState;
+import io.sphere.sdk.payments.Payment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import specs.BaseFixture;
 import specs.NotificationTimeoutWaiter;
 import specs.response.BasePaymentFixture;
 
+import javax.money.format.MonetaryFormats;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlocking;
@@ -30,8 +37,8 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
      * @return <b>true</b> if waited successfully for all notifications from {@code paymentNames} list
      */
     public boolean receivedNotificationOfActionFor(final String paymentNames, final String txaction) throws Exception {
-        final ImmutableList<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
-        String paymentIds = paymentNamesList.stream().map(this::getIdForLegibleName).collect(joining(", "));
+        final List<String> paymentNamesList = thePaymentNamesSplitter.splitToList(paymentNames);
+        final String paymentIds = paymentNamesList.stream().map(this::getIdForLegibleName).collect(joining(", "));
 
         validatePaymentsNotFailed(paymentNamesList);
 
@@ -74,6 +81,29 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
         return success;
     }
 
+    /**
+     * Used to wait for second notification (paid) if the previous one (appointed) has been successful.
+     * @param paymentNames
+     * @param txaction current txAction to wait (paid)
+     * @param prevTxaction previous txAction which must be successful
+     * @return <b>true</b> if previous and current txactions completed successfully.
+     * @throws Exception
+     */
+    public boolean receivedNextNotificationOfActionFor(final String paymentNames, final String txaction,
+                                                          final String prevTxaction) throws Exception {
+        final List<String> paymentNamesList = thePaymentNamesSplitter.splitToList(paymentNames);
+        long prevTxactionCount = countPaymentsWithNotificationOfAction(paymentNamesList, prevTxaction);
+        boolean preTxactionIsSuccess = prevTxactionCount == paymentNamesList.size();
+
+        if (!preTxactionIsSuccess) {
+            LOG.warn("Previous txAction [{}] was not success: expected {}, but found {}. Waiting for [{}] action is skipped!",
+                    prevTxaction, paymentNamesList.size(), prevTxactionCount, txaction);
+            return false;
+        }
+
+        return receivedNotificationOfActionFor(paymentNames, txaction);
+    }
+
     private static long msecToSec(long msec) {
         return TimeUnit.MILLISECONDS.toSeconds(msec);
     }
@@ -83,6 +113,32 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
                 .orElseThrow(() -> new RuntimeException(format("Order for payment [%s] not found", paymentId)));
 
         return ofNullable(order.getPaymentState()).map(PaymentState::toSphereName).orElse(null);
+    }
+
+    protected Map<String, String> fetchCreditCardPaymentDetails(final String paymentName) throws InterruptedException, ExecutionException {
+
+        final Payment payment = fetchPaymentByLegibleName(paymentName);
+
+        final long appointedNotificationCount = getTotalNotificationCountOfAction(payment, "appointed");
+        final long paidNotificationCount = getTotalNotificationCountOfAction(payment, "paid");
+
+        final String transactionId = getIdOfLastTransaction(payment);
+        final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
+                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
+                BaseFixture.EMPTY_STRING;
+
+        final String amountPaid = (payment.getAmountPaid() != null) ?
+                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountPaid()) :
+                BaseFixture.EMPTY_STRING;
+
+        return ImmutableMap.<String, String> builder()
+                .put("appointedNotificationCount", Long.toString(appointedNotificationCount))
+                .put("paidNotificationCount", Long.toString(paidNotificationCount))
+                .put("transactionState", getTransactionState(payment, transactionId))
+                .put("amountAuthorized", amountAuthorized)
+                .put("amountPaid", amountPaid)
+                .put("version", payment.getVersion().toString())
+                .build();
     }
 
 }

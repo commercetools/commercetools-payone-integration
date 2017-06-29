@@ -1,7 +1,6 @@
 package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
-import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
 import io.sphere.sdk.carts.Cart;
@@ -23,6 +22,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Random;
 import java.util.concurrent.CompletionException;
 
+import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Matchers.eq;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Jan Wolter
  */
-public class IntegrationServiceTest
+public class PaymentHandlerTest
 {
     private static final Cart UNUSED_CART = null;
 
@@ -44,8 +44,8 @@ public class IntegrationServiceTest
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
-    @Mock
-    private CustomTypeBuilder customTypeBuilder;
+//    @Mock
+//    private CustomTypeBuilder customTypeBuilder;
 
     @Mock
     private CommercetoolsQueryExecutor commercetoolsQueryExecutor;
@@ -56,12 +56,12 @@ public class IntegrationServiceTest
     @Mock
     private Payment payment;
 
-    private IntegrationService testee;
+    private PaymentHandler testee;
 
     @Before
     public void setUp() throws IOException {
         // the last argument in the constructor is a String, that's why we can't use @InjectMocks for this instantiation
-        testee = new IntegrationService(customTypeBuilder, commercetoolsQueryExecutor, paymentDispatcher, null, payonePaymentMethodInfo.getPaymentInterface());
+        testee = new PaymentHandler("TestIntegrationServicePaymentMethodName", "testTenantName", commercetoolsQueryExecutor, paymentDispatcher);
 
         when(payment.getVersion()).thenReturn(1L);
         when(payment.getPaymentMethodInfo()).thenReturn(payonePaymentMethodInfo);
@@ -149,8 +149,7 @@ public class IntegrationServiceTest
 
         // assert
         assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.NOT_FOUND_404));
-        assertThat(paymentHandleResult.body(), containsString("Could not process payment with ID \"" + paymentId + "\""));
-        assertThat(paymentHandleResult.body(), containsString(notFoundException.getMessage()));
+        assertThat(paymentHandleResult.body(), containsString(format("Could not process payment with ID [%s]: order or cart not found", paymentId)));
     }
 
     @Test
@@ -167,8 +166,7 @@ public class IntegrationServiceTest
 
         // assert
         assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.NOT_FOUND_404));
-        assertThat(paymentHandleResult.body(), containsString("Could not process payment with ID \"" + paymentId + "\""));
-        assertThat(paymentHandleResult.body(), containsString(noCartLikeFoundException.getMessage()));
+        assertThat(paymentHandleResult.body(), containsString(format("Could not process payment with ID [%s]: order or cart not found", paymentId)));
     }
 
     @Test
@@ -195,8 +193,7 @@ public class IntegrationServiceTest
         final String paymentId = randomString();
 
         final String exceptionMessage = randomString();
-        final CompletionException exception = new CompletionException(exceptionMessage) {
-        };
+        final CompletionException exception = new CompletionException(exceptionMessage) {};
 
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenThrow(exception);
 
@@ -205,8 +202,7 @@ public class IntegrationServiceTest
 
         // assert
         assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.INTERNAL_SERVER_ERROR_500));
-        assertThat(paymentHandleResult.body(), containsString("An error occurred during communication with the commercetools platform"));
-        assertThat(paymentHandleResult.body(), containsString(exceptionMessage));
+        assertThat(paymentHandleResult.body(), containsString(format("An error occurred during communication with the commercetools platform when processing [%s] payment. See the service logs", paymentId)));
     }
 
     @Test
@@ -225,8 +221,7 @@ public class IntegrationServiceTest
 
         // assert
         assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.INTERNAL_SERVER_ERROR_500));
-        assertThat(paymentHandleResult.body(), containsString("Sorry, but you hit us between the eyes"));
-        assertThat(paymentHandleResult.body(), containsString(exceptionMessage));
+        assertThat(paymentHandleResult.body(), containsString(format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId)));
     }
 
     @Test
@@ -247,7 +242,7 @@ public class IntegrationServiceTest
 
         // assert
         assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.INTERNAL_SERVER_ERROR_500));
-        assertThat(paymentHandleResult.body(), containsString(exceptionMessage));
+        assertThat(paymentHandleResult.body(), containsString(format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId)));
     }
 
     private static PaymentMethodInfo paymentMethodInfo(final String paymentInterface) {
@@ -271,6 +266,6 @@ public class IntegrationServiceTest
     }
 
     private static String randomString() {
-        return Integer.toString(random.nextInt());
+        return Integer.toString(random.nextInt(0x7FFFFFFF));
     }
 }

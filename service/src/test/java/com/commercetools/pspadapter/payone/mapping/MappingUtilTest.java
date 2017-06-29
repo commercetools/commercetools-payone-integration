@@ -1,7 +1,7 @@
 package com.commercetools.pspadapter.payone.mapping;
 
+import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardAuthorizationRequest;
 import com.neovisionaries.i18n.CountryCode;
@@ -24,7 +24,6 @@ import java.util.Optional;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguage;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
@@ -32,14 +31,11 @@ import static org.mockito.Mockito.when;
  * @since 18.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
-public class MappingUtilTest {
+public class MappingUtilTest extends BaseTenantPropertyTest {
 
     private static final String dummyValue = "123";
 
     private SoftAssertions softly;
-
-    @Mock
-    private PropertyProvider propertyProvider;
 
     @Mock
     private Customer customer;
@@ -57,11 +53,9 @@ public class MappingUtilTest {
     private CartLike cardLike;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         softly = new SoftAssertions();
-
-        when(propertyProvider.getProperty(anyString())).thenReturn(Optional.of(dummyValue));
-        when(propertyProvider.getMandatoryNonEmptyProperty(anyString())).thenReturn(dummyValue);
     }
 
     @Test
@@ -71,8 +65,8 @@ public class MappingUtilTest {
         Address addressUS = Address.of(CountryCode.US)
                 .withState("AK");
 
-        CreditCardAuthorizationRequest authorizationRequestDE = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
-        CreditCardAuthorizationRequest authorizationRequestUS = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
+        CreditCardAuthorizationRequest authorizationRequestDE = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123");
+        CreditCardAuthorizationRequest authorizationRequestUS = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123");
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestDE, addressDE);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestDE, addressDE);
@@ -93,7 +87,7 @@ public class MappingUtilTest {
                 .withStreetName("Test Street")
                 .withStreetNumber("2");
 
-        CreditCardAuthorizationRequest authorizationRequestWithNameNumber = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
+        CreditCardAuthorizationRequest authorizationRequestWithNameNumber = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123");
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestWithNameNumber, addressWithNameNumber);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestWithNameNumber, addressWithNameNumber);
@@ -109,7 +103,7 @@ public class MappingUtilTest {
         Address addressNoNumber = Address.of(CountryCode.DE)
                 .withStreetName("Test Street");
 
-        CreditCardAuthorizationRequest authorizationRequestNoNumber = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
+        CreditCardAuthorizationRequest authorizationRequestNoNumber = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123");
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestNoNumber, addressNoNumber);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestNoNumber, addressNoNumber);
@@ -125,7 +119,7 @@ public class MappingUtilTest {
         Address addressNoName = Address.of(CountryCode.DE)
                 .withStreetNumber("5");
 
-        CreditCardAuthorizationRequest authorizationRequestNoName = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
+        CreditCardAuthorizationRequest authorizationRequestNoName = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123");
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestNoName, addressNoName);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestNoName, addressNoName);
@@ -141,7 +135,7 @@ public class MappingUtilTest {
         when(customer.getCustomerNumber()).thenReturn("01234567890123456789");
         Reference<Customer> customerReference = Reference.of(Customer.referenceTypeId(), customer);
 
-        CreditCardAuthorizationRequest authorizationRequest = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
+        CreditCardAuthorizationRequest authorizationRequest = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123");
 
         MappingUtil.mapCustomerToRequest(authorizationRequest, customerReference);
 
@@ -154,7 +148,7 @@ public class MappingUtilTest {
         when(customer.getId()).thenReturn("276829bd-6fa3-450f-9e2a-9a8715a9a104");
         Reference<Customer> customerReference = Reference.of(Customer.referenceTypeId(), customer);
 
-        CreditCardAuthorizationRequest authorizationRequest = new CreditCardAuthorizationRequest(new PayoneConfig(propertyProvider), "000123");
+        CreditCardAuthorizationRequest authorizationRequest = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123");
 
         MappingUtil.mapCustomerToRequest(authorizationRequest, customerReference);
 

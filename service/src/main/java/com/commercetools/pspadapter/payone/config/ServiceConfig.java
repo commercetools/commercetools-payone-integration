@@ -1,6 +1,11 @@
 package com.commercetools.pspadapter.payone.config;
 
-import io.sphere.sdk.orders.Order;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
 
 /**
  * Provides the configuration of the integration service.
@@ -11,76 +16,44 @@ import io.sphere.sdk.orders.Order;
  */
 public class ServiceConfig {
 
-    private final String ctProjectKey;
-    private final String ctClientId;
-    private final String ctClientSecret;
-    private final boolean startFromScratch;
+
+    private final List<String> tenants;
+
     private final String scheduledJobCronShortTimeFrame;
     private final String scheduledJobCronLongTimeFrame;
-    private final String secureKey;
-    private final boolean updateOrderPaymentState;
 
     /**
      * Initializes the configuration.
      *
      * @param propertyProvider to get the parameters from
-     *
      * @throws IllegalStateException if a mandatory parameter is undefined or empty
      */
     public ServiceConfig(final PropertyProvider propertyProvider) {
-        ctProjectKey = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_PROJECT_KEY);
-        ctClientId  = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_ID);
-        ctClientSecret = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.CT_CLIENT_SECRET);
-        scheduledJobCronShortTimeFrame =
+
+        this.tenants = getMandatoryTenantNames(propertyProvider);
+
+        this.scheduledJobCronShortTimeFrame =
                 propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON)
                         .map(String::valueOf)
                         .orElse("0/30 * * * * ? *");
-        scheduledJobCronLongTimeFrame =
+        this.scheduledJobCronLongTimeFrame =
                 propertyProvider.getProperty(PropertyProvider.LONG_TIME_FRAME_SCHEDULED_JOB_CRON)
                         .map(String::valueOf)
                         .orElse("5 0 0/1 * * ? *");
-        startFromScratch = propertyProvider.getProperty(PropertyProvider.CT_START_FROM_SCRATCH)
-                .map(Boolean::valueOf)
-                .orElse(false);
-
-        secureKey = propertyProvider.getProperty(PropertyProvider.SECURE_KEY)
-                .map(String::valueOf)
-                .orElse("");
-
-        updateOrderPaymentState = propertyProvider.getProperty(PropertyProvider.UPDATE_ORDER_PAYMENT_STATE)
-                                .map(String::trim)
-                                .map(Boolean::valueOf)
-                                .orElse(false);
     }
 
     /**
-     * Gets the commercetools project key.
-     * @return the key of the commercetools project to connect with
+     * @return Non-empty list of tenant names, specified in {@code TENANTS} configuration property.
      */
-    public String getCtProjectKey() {
-        return ctProjectKey;
-    }
-
-    /**
-     * Gets the commercetools client ID.
-     * @return the client ID of the commercetools project to connect with
-     */
-    public String getCtClientId() {
-        return ctClientId;
-    }
-
-    /**
-     * Gets the commercetools client secret.
-     * @return the client password for the commercetools project to connect with
-     */
-    public String getCtClientSecret() {
-        return ctClientSecret;
+    public List<String> getTenants() {
+        return tenants;
     }
 
     /**
      * Gets the
      * <a href="http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger">QUARTZ cron expression</a>
      * for polling commercetools messages with a shorter time frame.
+     *
      * @return the cron expression
      */
     public String getScheduledJobCronForShortTimeFramePoll() {
@@ -91,6 +64,7 @@ public class ServiceConfig {
      * Gets the
      * <a href="http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger">QUARTZ cron expression</a>
      * for polling commercetools messages with a longer time frame.
+     *
      * @return the cron expression
      */
     public String getScheduledJobCronForLongTimeFramePoll() {
@@ -98,30 +72,23 @@ public class ServiceConfig {
     }
 
     /**
-     * Gets the flag indicating whether the service shall reset the commerctools project at start up.
-     * @return whether the commercetools project shall be reset
-     */
-    public boolean getStartFromScratch() {
-        return startFromScratch;
-    }
-
-    /**
-     * Gets the secure key which was used for encrypting data with Blowfish.
-     * @return the secure key as plain text
-     */
-    public String getSecureKey() {
-        return secureKey;
-    }
-
-    /**
-     * If <b>true</b> - when processing Payone notification (update payment status) {@link Order#getPaymentState()},
-     * linked to the payment, should be update also. Otherwise leave the order payment state unchanged.
+     * Split comma or semicolon separated list of the tenants names.
      * <p>
-     * By default it is <b>false</b>
-     * @return <b>true</b> if environment the property {@link PropertyProvider#UPDATE_ORDER_PAYMENT_STATE} is a string
-     * <i>true</i> case insensitive, <b>false</b> otherwise.
+     * All trailing/leading whitespaces are ignored.
+     * @param propertyProvider property provider which supplies {@link PropertyProvider#TENANTS} value.
+     * @return non-null non-empty list of tenants.
+     * @throws IllegalStateException if the property can't be parsed or the parsed list is empty, or one of the values
+     * is empty (e.g., list of "a, , b").
      */
-    public boolean isUpdateOrderPaymentState() {
-        return updateOrderPaymentState;
+    private List<String> getMandatoryTenantNames(PropertyProvider propertyProvider) {
+        final String tenantsList = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.TENANTS);
+        final List<String> result = asList(tenantsList.trim().split("\\s*(,|;)\\s*"));
+
+        if (result.size() < 1 || result.stream().anyMatch(StringUtils::isBlank)) {
+            throw new IllegalStateException(format("Tenants list is invalid, pls check \"%s\" variable",
+                    PropertyProvider.TENANTS));
+        }
+
+        return result;
     }
 }

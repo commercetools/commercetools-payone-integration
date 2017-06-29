@@ -24,7 +24,7 @@ def depVersions = [
 
 allprojects {
     group = 'com.commercetools'
-    version = '1.1.0' // this version is used in shadowJar.manifest.Implementation-Version and then at runtime as getImplementationVersion()
+    version = '2.0.0-RC' // this version is used in shadowJar.manifest.Implementation-Version and then at runtime as getImplementationVersion()
 
     tasks.withType(JavaCompile) {
         options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
@@ -65,7 +65,7 @@ project(":service") {
     apply plugin: 'application' // allow "run" task to build and run the app
 
     // required property for application plugin
-    mainClassName = 'com.commercetools.pspadapter.payone.ServiceFactory'
+    mainClassName = 'com.commercetools.Main'
 
     dependencies {
         compile 'com.mashape.unirest:unirest-java:1.4.7'
@@ -105,17 +105,20 @@ project(":service") {
                     'to JVM runtime properties (-Dkey=value arguments)'
 
         doLast {
-            applicationDefaultJvmArgs = assertAndGetServiceProperties(project)
+            applicationDefaultJvmArgs = getServiceProperties(project)
         }
     }
 }
 
 /**
- * Convert the list of required properties from gradle build properties or environment variables
- * to java runtime properties (supplied as <b>-Dkey=value</b> arguments).
+ * Convert the list of application specific properties from gradle build properties (<i>~/.gradle/gradle.properties</i>)
+ * or environment variables to java runtime properties (supplied as <b>-Dkey=value</b> arguments).
  * <p>
- * The function tries to find a property value from the {@code project} properties and then from environment variables.
- * If neither of them exists - throw an exception (fail-fast)
+ *     The function tries to find a property value from the {@code project} properties and then from environment variables.
+ *     If neither of them exists - the property mapping is skipped.
+ * <p>
+ *     Also this function tries to parse {@code TENANTS} property and later maps <b>all</b> available values which have
+ *     property name starting string with tenant name.
  * <p>
  *     Opposite to {@link #assertExecutableSpecRequirementsForTests(org.gradle.api.Project, org.gradle.api.tasks.testing.Test)}
  *     this function is used for the service runtime.
@@ -123,39 +126,62 @@ project(":service") {
  * @param project gradle project from which to take the properties
  * @return a list of java runtime argument in <i>-Dkey=value</i> syntax.
  *
- * @throws GradleException if any required system property or environment variable is undefined or empty
  * @see #assertExecutableSpecRequirementsForTests(org.gradle.api.Project, org.gradle.api.tasks.testing.Test)
  */
-static List<String> assertAndGetServiceProperties(Project project) {
-    // a list of mandatory runtime properties
-    def propertiesToMap = ['CT_PROJECT_KEY',
-                           'CT_CLIENT_ID',
-                           'CT_CLIENT_SECRET',
-
-                           'PAYONE_MERCHANT_ID',
-                           'PAYONE_PORTAL_ID',
-                           'PAYONE_SUBACC_ID',
-                           'PAYONE_KEY',
-                           'PAYONE_MODE'
+static List<String> getServiceProperties(Project project) {
+    def commonProperties = [
+            'TENANTS',
+            'LONG_TIME_FRAME_SCHEDULED_JOB_CRON',
+            'SHORT_TIME_FRAME_SCHEDULED_JOB_CRON'
     ]
 
-    return propertiesToMap.collect { propertyKey ->
-        def propertyValue = project.hasProperty(propertyKey) ? (String)project[propertyKey] : System.getenv(propertyKey)
-        return "-D${propertyKey}=${assertValueIsNotNullOrEmpty(propertyKey, propertyValue)}"
+    def tenantsString = findValueByName(project, 'TENANTS')?.trim()
+
+    // try to map all tenant-specific properties (e.g., prefixed by tenant name) from project.properties or System.getenv() set
+    if (tenantsString) {
+        def tenantsList = tenantsString.split("\\s*,\\s*") // split and trim
+
+        // merge and filter all properties prefixed by a tenant name
+        def tenantsProperties = (project.properties.keySet() + System.getenv().keySet()).findAll { property ->
+            tenantsList.any {tenantName -> property.startsWith(tenantName)}
+        }
+
+        commonProperties.addAll(tenantsProperties)
     }
+
+    def mappedCommonProperties = commonProperties.collect { propertyKey ->
+        def propertyValue = findValueByName(project, propertyKey)
+        if (propertyValue != null) {
+            return "-D${propertyKey}=${propertyValue}"
+        }
+        return null
+    }.grep() // filter out null (empty) properties
+
+    return mappedCommonProperties
+}
+
+/**
+ * Try to find a property value by name/key in the project properties (e.g. gradle runtime arguments) or
+ * environment variables. If property not found - <b>null</b> is returned.
+ * @param project project (aka map) where to search the property
+ * @param propertyKey property name/key
+ * @return property value or <b>null</b> if not found.
+ */
+static String findValueByName(Project project, String propertyKey) {
+    return project.hasProperty(propertyKey) ? (String) project[propertyKey] : System.getenv(propertyKey)
 }
 
 /**
  * Asserts that system properties and environment variables required for running the executable specification are set.
  * <p>
- *     Opposite to {@link #assertAndGetServiceProperties(org.gradle.api.Project)} this function is used for
+ *     Opposite to {@link #getServiceProperties(org.gradle.api.Project)} this function is used for
  *     functional tests.
  *
  * @param project the project
  * @param test the test task to assert the configuration for
  *
  * @throws GradleException if any required system property or environment variable is undefined or empty
- * @see #assertAndGetServiceProperties(org.gradle.api.Project)
+ * @see #getServiceProperties(org.gradle.api.Project)
  */
 static void assertExecutableSpecRequirementsForTests(Project project, Test test) {
     test.systemProperties['concordion.extensions'] =
@@ -166,25 +192,39 @@ static void assertExecutableSpecRequirementsForTests(Project project, Test test)
     test.systemProperties['concordion.output.dir'] = project.reporting.baseDir.getAbsolutePath() + "/spec"
     test.systemProperties['concordion.run.threadCount'] = '2.5C' // 2.5 * number of cores
 
-    def propertiesToMap = ['CT_PROJECT_KEY',
-                           'CT_CLIENT_ID',
-                           'CT_CLIENT_SECRET',
-                           'CT_PAYONE_INTEGRATION_URL',
+    def propertiesToMap = ['TEST_DATA_CT_PROJECT_KEY',
+                           'TEST_DATA_CT_CLIENT_ID',
+                           'TEST_DATA_CT_CLIENT_SECRET',
+                           'TEST_DATA_CT_PAYONE_INTEGRATION_URL',
+
+                           'TEST_DATA_TENANT_NAME',
 
                            'TEST_DATA_VISA_CREDIT_CARD_NO_3DS',
                            'TEST_DATA_VISA_CREDIT_CARD_3DS',
                            'TEST_DATA_3_DS_PASSWORD',
                            'TEST_DATA_SW_BANK_TRANSFER_IBAN',
                            'TEST_DATA_SW_BANK_TRANSFER_BIC',
+                           'TEST_DATA_SW_BANK_TRANSFER_PIN',
+                           'TEST_DATA_SW_BANK_TRANSFER_TAN',
 
                            'TEST_DATA_PAYONE_MERCHANT_ID',
                            'TEST_DATA_PAYONE_SUBACC_ID',
                            'TEST_DATA_PAYONE_PORTAL_ID',
-                           'TEST_DATA_PAYONE_KEY'
+                           'TEST_DATA_PAYONE_KEY',
+
+                            // BaseTenant2Fixture uses these values
+                           'TEST_DATA_TENANT_NAME_2',
+                           'TEST_DATA_CT_PROJECT_KEY_2',
+                           'TEST_DATA_CT_CLIENT_ID_2',
+                           'TEST_DATA_CT_CLIENT_SECRET_2',
+                           'TEST_DATA_PAYONE_MERCHANT_ID_2',
+                           'TEST_DATA_PAYONE_SUBACC_ID_2',
+                           'TEST_DATA_PAYONE_PORTAL_ID_2',
+                           'TEST_DATA_PAYONE_KEY_2'
     ]
 
     propertiesToMap.each { propertyKey ->
-        test.environment propertyKey, project.hasProperty(propertyKey) ? project[propertyKey] : System.getenv(propertyKey)
+        test.environment propertyKey, findValueByName(project, propertyKey)
         assertMapValueIsNotNullOrEmpty(propertyKey, test.getEnvironment())
     }
 }
@@ -253,8 +293,15 @@ githubPages {
 }
 
 publishGhPages  {
+    doFirst {
+        // print warning message if github pages plugin credentials are empty
+        if (!githubPages.credentials.username?.trim()) {
+            logger.warn("\n[WARNING] Github-pages credentials are empty, publishing the tests results may be skipped\n")
+        }
+    }
+
     doLast {
-        println "Published results to http://commercetools.github.io/commercetools-payone-integration/"
+        println "\nPublished results to http://commercetools.github.io/commercetools-payone-integration/\n"
     }
 }
 

@@ -19,13 +19,7 @@ import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.OrderFromCartDraft;
 import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.orders.commands.OrderFromCartCreateCommand;
-import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.PaymentDraft;
-import io.sphere.sdk.payments.PaymentDraftBuilder;
-import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
-import io.sphere.sdk.payments.TransactionDraftBuilder;
-import io.sphere.sdk.payments.TransactionState;
-import io.sphere.sdk.payments.TransactionType;
+import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
@@ -80,7 +74,7 @@ public class ChargePreauthorizedFixture extends BaseFixture {
     public boolean handlePayment(final String paymentId) throws IOException, ExecutionException, InterruptedException {
 
         final HttpResponse response = Request.Get(getHandlePaymentUrl(paymentId))
-                .connectTimeout(200)
+                .connectTimeout(REQUEST_TIMEOUT)
                 .execute()
                 .returnResponse();
 

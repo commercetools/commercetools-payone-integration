@@ -51,7 +51,7 @@ public class NotificationProcessorBaseTest extends BaseNotificationProcessorTest
 
         final ImmutableList<UpdateAction<Payment>> updateActions = ImmutableList.of(SetCustomer.of(null));
 
-        final NotificationProcessorBase testee = new NotificationProcessorBase(serviceFactory, serviceConfig) {
+        final NotificationProcessorBase testee = new NotificationProcessorBase(tenantFactory, tenantConfig) {
             @Override
             protected boolean canProcess(final Notification notification) {
                 return true;
@@ -75,7 +75,7 @@ public class NotificationProcessorBaseTest extends BaseNotificationProcessorTest
         verify(paymentService).updatePayment(paymentRequestPayment.capture(), paymentRequestUpdatesCaptor.capture());
 
         // order service methods should not be called
-        // because serviceConfig.isUpdateOrderPaymentState() expected to be "false" by default
+        // because tenantConfig.isUpdateOrderPaymentState() expected to be "false" by default
         verifyUpdateOrderActionsNotCalled();
 
         softly.assertThat(paymentRequestPayment.getValue()).isEqualTo(payment);

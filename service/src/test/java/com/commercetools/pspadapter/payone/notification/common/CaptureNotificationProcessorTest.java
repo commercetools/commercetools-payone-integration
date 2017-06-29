@@ -122,7 +122,7 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
     public void orderServiceIsNotCalledWhenIsUpdateOrderPaymentStateFalse() throws Exception {
         // this test is similar to #processingCompletedNotificationForPendingChargeTransactionDoesNotChangeState(),
         // but #isUpdateOrderPaymentState() is false, so update order actions should be skipped
-        when(serviceConfig.isUpdateOrderPaymentState()).thenReturn(false);
+        when(tenantConfig.isUpdateOrderPaymentState()).thenReturn(false);
 
         processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe();
         verifyUpdateOrderActionsNotCalled();

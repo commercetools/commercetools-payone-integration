@@ -92,6 +92,10 @@ public class CustomTypeBuilder {
         createPayoneSpecificTypes();
     }
 
+    public PermissionToStartFromScratch getPermissionToStartFromScratch() {
+        return permissionToStartFromScratch;
+    }
+
     private void resetPlatform() {
         // TODO jw: use futures
         // delete all orders

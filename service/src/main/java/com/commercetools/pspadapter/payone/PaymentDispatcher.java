@@ -10,14 +10,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
-
 public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
 
     private final Map<PaymentMethod, PaymentMethodDispatcher> methodDispatcher;
 
-    public PaymentDispatcher(final Map<PaymentMethod, PaymentMethodDispatcher> methodDispatcher) {
+    private final String payoneInterfaceName;
+
+    public PaymentDispatcher(final Map<PaymentMethod, PaymentMethodDispatcher> methodDispatcher,
+                             final String payoneInterfaceName) {
         this.methodDispatcher = methodDispatcher;
+        this.payoneInterfaceName = payoneInterfaceName;
     }
 
     @Override
@@ -28,7 +30,7 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
     public PaymentWithCartLike dispatchPayment(PaymentWithCartLike paymentWithCartLike) {
         final PaymentMethodInfo paymentMethodInfo = paymentWithCartLike.getPayment().getPaymentMethodInfo();
 
-        if (!PAYONE.equals(paymentMethodInfo.getPaymentInterface())) {
+        if (!payoneInterfaceName.equals(paymentMethodInfo.getPaymentInterface())) {
             throw new IllegalArgumentException(String.format(
                     "unsupported payment interface '%s'", paymentMethodInfo.getPaymentInterface()));
         }

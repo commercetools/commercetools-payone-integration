@@ -1,21 +1,22 @@
 package com.commercetools.pspadapter.payone.mapping;
 
+import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
+import com.commercetools.pspadapter.tenant.TenantConfig;
+import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 import org.assertj.core.api.SoftAssertions;
 import org.javamoney.moneta.function.MonetaryUtil;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
@@ -30,26 +31,25 @@ import static org.mockito.Mockito.when;
  * @since 22.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
-public class SofortRequestFactoryTest {
+public class SofortRequestFactoryTest extends BaseTenantPropertyTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
     private SofortBankTransferRequestFactory factory;
 
-    @Mock
-    private PropertyProvider propertyProvider;
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
     @Test
     public void createFullAuthorizationRequestFromValidPayment() throws Exception {
 
-        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyVal"));
-        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
+        when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyVal"));
+        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
         //clear secure key to force unencrypted data
-        when(propertyProvider.getProperty(PropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
+        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
 
-        PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        factory = new SofortBankTransferRequestFactory(payoneConfig, serviceConfig);
-
+        factory = new SofortBankTransferRequestFactory(tenantConfig);
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroPNT();
         Order order = payments.dummyOrderMapToPayoneRequest();
@@ -131,12 +131,12 @@ public class SofortRequestFactoryTest {
     @Test
     public void createFullAuthorizationRequestFromValidPaymentWithEncryptedBankData() throws Exception {
 
-        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyValue"));
-        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyValue");
+        when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyValue"));
+        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyValue");
 
-        PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        factory = new SofortBankTransferRequestFactory(payoneConfig, serviceConfig);
+        PayoneConfig payoneConfig = new PayoneConfig(tenantPropertyProvider);
+        TenantConfig tenantConfig = new TenantConfig(tenantPropertyProvider, payoneConfig);
+        factory = new SofortBankTransferRequestFactory(tenantConfig);
 
         final String testIban = "DE012345";
         final String testBic = "NOLADE0";

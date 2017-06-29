@@ -40,9 +40,10 @@ public class CtpJsonResponseFixture extends BasePaymentFixture {
                                     String transactionType,
                                     String centAmount,
                                     String currencyCode,
-                                    String languageCode) throws ExecutionException, InterruptedException, UnsupportedEncodingException {
+                                    String languageCode) throws Exception {
 
-        return createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, languageCode);
+        return createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, languageCode)
+                .getId();
     }
 
     public String createWalletPayment(
@@ -74,7 +75,7 @@ public class CtpJsonResponseFixture extends BasePaymentFixture {
                                 .build()))
                 .build();
 
-        Payment payment = createPaymentFromDraft(paymentName, paymentDraft, transactionType);
+        Payment payment = createPaymentCartOrderFromDraft(paymentName, paymentDraft, transactionType);
         return payment.getId();
     }
 

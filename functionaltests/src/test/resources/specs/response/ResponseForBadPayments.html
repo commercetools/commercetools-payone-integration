@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8"/>
     <link href="../../concordion.css" rel="stylesheet" type="text/css"/>
-    <title>Response from /commercetools/handle/payments/ URL</title>
+    <title>Response from handle payment URL with wrong arguments</title>
 </head>
-<body>
-<h1>Responses from <code>/commercetools/handle/payments/</code> URL with bad <code>paymentId</code> values</h1>
-Test we get correct response statuses <code>/commercetools/handle/payments/</code> for bad payment IDs.
+<body onload="document.getElementById('handlePaymentPath').href = document.getElementById('handlePaymentUrlValue').innerHTML">
+
+<!-- Invisible value to read from java Fixture -->
+<span id="handlePaymentUrlValue" c:echo="getHandlePaymentUrl(':id')"  style="display:none"></span>
+
+<h1>Responses from <code><span c:echo="getHandlePaymentPath(':id')"></span></code> URL with bad <code>paymentId</code> values</h1>
+Test we get correct response statuses <a id="handlePaymentPath" target="_blank"><span c:echo="getHandlePaymentPath(':id')"></span></a> for bad payment IDs.
 <div class="example">
     <table c:execute="#result = handleBadPaymentResponses(#paymentId)">
         <tr>

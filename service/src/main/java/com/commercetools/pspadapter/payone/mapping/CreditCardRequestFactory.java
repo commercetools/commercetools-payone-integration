@@ -1,17 +1,15 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardCaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
+import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.google.common.base.Preconditions;
-import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
 import org.javamoney.moneta.function.MonetaryUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 
 /**
@@ -20,10 +18,8 @@ import java.util.Optional;
  */
 public class CreditCardRequestFactory extends PayoneRequestFactory {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CreditCardRequestFactory.class);
-
-    public CreditCardRequestFactory(final PayoneConfig config) {
-        super(config);
+    public CreditCardRequestFactory(@Nonnull final TenantConfig tenantConfig) {
+        super(tenantConfig);
     }
 
     @Override
@@ -48,7 +44,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
                             .intValue());
                 });
 
-        mapFormPaymentWithCartLike(request, paymentWithCartLike, LOG);
+        mapFormPaymentWithCartLike(request, paymentWithCartLike);
 
         return request;
     }
@@ -72,7 +68,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
                                                     .intValue()));
         request.setCurrency(ctPayment.getAmountPlanned().getCurrency().getCurrencyCode());
 
-        mapFormPaymentWithCartLike(request, paymentWithCartLike, LOG);
+        mapFormPaymentWithCartLike(request, paymentWithCartLike);
 
         return request;
     }

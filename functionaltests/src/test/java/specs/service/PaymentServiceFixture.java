@@ -46,7 +46,6 @@ public class PaymentServiceFixture extends BaseFixture {
 
     @Before
     public void setUp() throws Exception {
-        super.initializeCommercetoolsClient();
         paymentService = new PaymentServiceImpl(this.ctpClient());
         paymentNameToOrderNumberMap = new HashMap<>();
     }

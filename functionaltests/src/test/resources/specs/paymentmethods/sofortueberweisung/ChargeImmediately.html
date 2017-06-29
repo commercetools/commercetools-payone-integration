@@ -159,7 +159,7 @@
     </p>
     <ol>
         <li>(txaction=<b c:set="#txactionAppointed">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)">received</span> -> has no effect, just as a confirmation</li>
-        <li>(txaction=<b c:set="#txactionPaid">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionPaid)">received</span>
+        <li>(txaction=<b c:set="#txactionPaid">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)">received</span>
             ->  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
     </ol>
     <table c:execute="#result = fetchPaymentDetails(#paymentName)">
@@ -239,6 +239,8 @@
 <h3>What happens if the verification fails?</h3>
 
 <ol>
+    <li><a href="/commercetools-payone-integration/latest/tests/testSpec/classes/specs.SpecsFixture.html">Check the test logs</a>
+        (click <i><b>Standard output</b></i> tab there)</li>
     <li>Check the name of the input fields in <code>WebDriverSofortueberweisung/WebDriverSofortueberweisungConstants</code>.
         If the Sofortüberweisung site changes the elements names - the test should be updated.</li>
     <li>Check potential issues during the payments creation. The payments won't be notified about status change once

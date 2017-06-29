@@ -1,11 +1,11 @@
 package com.commercetools.pspadapter.payone.notification;
 
-import com.commercetools.pspadapter.payone.ServiceFactory;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.order.PaymentToOrderStateMapper;
+import com.commercetools.pspadapter.tenant.TenantConfig;
+import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.commercetools.service.OrderService;
 import com.commercetools.service.PaymentService;
 import com.google.common.base.MoreObjects;
@@ -34,6 +34,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlocking;
+import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createLoggerName;
 
 /**
  * Base for notification processor implementations.
@@ -43,20 +44,22 @@ import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlo
 public abstract class NotificationProcessorBase implements NotificationProcessor {
     private static final String DEFAULT_SEQUENCE_NUMBER = "0";
 
-    private static final Logger LOG = LoggerFactory.getLogger(NotificationProcessorBase.class);
+    private final Logger logger;
 
-    private final ServiceFactory serviceFactory;
+    private final TenantFactory tenantFactory;
 
-    private final ServiceConfig serviceConfig;
+    private final TenantConfig tenantConfig;
 
     /**
      * Constructor for implementations.
      *
-     * @param serviceFactory the services factory for commercetools platform API
+     * @param tenantFactory the tenant services factory for commercetools platform API
      */
-    protected NotificationProcessorBase(final ServiceFactory serviceFactory, final ServiceConfig serviceConfig) {
-        this.serviceFactory = serviceFactory;
-        this.serviceConfig = serviceConfig;
+    protected NotificationProcessorBase(final TenantFactory tenantFactory, final TenantConfig tenantConfig) {
+        this.tenantFactory = tenantFactory;
+        this.tenantConfig = tenantConfig;
+
+        this.logger = LoggerFactory.getLogger(createLoggerName(this.getClass(), tenantConfig.getName()));
     }
 
     @Override
@@ -82,14 +85,14 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
     }
 
     /**
-     * If {@link #serviceConfig#isUpdateOrderPaymentState()} is <b>true</b> - fetch an order with respective payment id
+     * If {@link #tenantConfig#isUpdateOrderPaymentState()} is <b>true</b> - fetch an order with respective payment id
      * and try to update that order. If <b>false</b> - return completed stage with <b>null</b> value.
      *
      * @param updatedPayment <b>non-null</b> new updated payment instance.
      * @return completion stage with nullable updated {@link Order} if was updated.
      */
     private CompletionStage<Order> tryToUpdateOrderByPayment(Payment updatedPayment) {
-        if (serviceConfig.isUpdateOrderPaymentState()) {
+        if (tenantConfig.isUpdateOrderPaymentState()) {
             return getOrderService().getOrderByPaymentId(updatedPayment.getId())
                     .thenComposeAsync(order -> updateOrderIfExists(order.orElse(null), updatedPayment));
         }
@@ -115,7 +118,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
             PaymentState newPaymentState = getPaymentToOrderStateMapper().mapPaymentToOrderState(updatedPayment);
 
             if (newPaymentState == null && updatedPayment.getPaymentStatus() != null) {
-                LOG.warn("Payment [{}] has paymentStatus [{}] which can't be mapped to Order#paymentState. "
+                logger.warn("Payment [{}] has paymentStatus [{}] which can't be mapped to Order#paymentState. "
                                 + "The order's state remains unchanged.",
                         updatedPayment.getId(), updatedPayment.getPaymentStatus().getInterfaceCode());
             }
@@ -127,7 +130,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
         } else {
             // This may happen when Payone sends the notification faster then user was redirected back to the shop
             // and the order has not been created yet.
-            LOG.info("Payment [{}] is updated, but respective order is not found!", updatedPayment.getId());
+            logger.info("Payment [{}] is updated, but respective order is not found!", updatedPayment.getId());
         }
 
         return CompletableFuture.completedFuture(order);
@@ -235,14 +238,14 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
     }
 
     protected final PaymentService getPaymentService() {
-        return serviceFactory.getPaymentService();
+        return tenantFactory.getPaymentService();
     }
 
     protected final OrderService getOrderService() {
-        return serviceFactory.getOrderService();
+        return tenantFactory.getOrderService();
     }
 
     protected final PaymentToOrderStateMapper getPaymentToOrderStateMapper() {
-        return serviceFactory.getPaymentToOrderStateMapper();
+        return tenantFactory.getPaymentToOrderStateMapper();
     }
 }

@@ -1,8 +1,6 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.commercetools.pspadapter.payone.config.ServiceConfig;
+import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
@@ -13,9 +11,9 @@ import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 import org.assertj.core.api.SoftAssertions;
 import org.javamoney.moneta.function.MonetaryUtil;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
@@ -30,23 +28,23 @@ import static org.mockito.Mockito.when;
  *
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PostfinanceEfinanceRequestFactoryTest {
+public class PostfinanceEfinanceRequestFactoryTest extends BaseTenantPropertyTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
     private BankTransferWithoutIbanBicRequestFactory factory;
 
-    @Mock
-    private PropertyProvider propertyProvider;
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
     @Test
     public void createFullAuthorizationRequestFromValidPayment() throws Exception {
 
-        when(propertyProvider.getProperty(any())).thenReturn(Optional.of("dummyVal"));
-        when(propertyProvider.getMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
+        when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyVal"));
+        when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
 
-        PayoneConfig payoneConfig = new PayoneConfig(propertyProvider);
-        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
-        factory = new BankTransferWithoutIbanBicRequestFactory(payoneConfig);
+        factory = new BankTransferWithoutIbanBicRequestFactory(tenantConfig);
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroPFF();
         Order order = payments.dummyOrderMapToPayoneRequest();

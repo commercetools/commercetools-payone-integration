@@ -53,7 +53,7 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        webDriver = new WebDriverSofortueberweisung("12345", "12345");
+        webDriver = new WebDriverSofortueberweisung();
         successUrlForPayment = new HashMap<>();
     }
 
@@ -179,7 +179,10 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
             try {
                 Optional.ofNullable(payment.getCustom())
                         .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
-                        .map(redirectCustomField -> webDriver.executeSofortueberweisungRedirect(redirectCustomField, getTestDataSwBankTransferIban())
+                        .map(redirectCustomField -> webDriver.executeSofortueberweisungRedirect(redirectCustomField,
+                                                                                getTestDataSwBankTransferIban(),
+                                                                                getTestDataSwBankTransferPin(),
+                                                                                getTestDataSwBankTransferTan())
                                 .replace(baseRedirectUrl, "[...]"))
                         .ifPresent(successUrl -> successUrlForPayment.put(paymentName, successUrl));
             } catch (Exception e) {
@@ -206,6 +209,12 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
         }
 
         return super.receivedNotificationOfActionFor(paymentNames, txaction);
+    }
+
+    @Override
+    public boolean receivedNextNotificationOfActionFor(String paymentNames, String txaction, String prevTxaction) throws Exception {
+        // we keep this overriding just to easily see which test methods are run in this fixture
+        return super.receivedNextNotificationOfActionFor(paymentNames, txaction, prevTxaction);
     }
 
     @Override

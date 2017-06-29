@@ -1,26 +1,23 @@
 package com.commercetools.pspadapter.payone.mapping;
 
-import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
+import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
 import org.javamoney.moneta.function.MonetaryUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 
 /**
  * Created by mht on 15.08.16.
  */
 public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFactory {
-    public BankTransferWithoutIbanBicRequestFactory(PayoneConfig payoneConfig) {
-        super(payoneConfig);
+    public BankTransferWithoutIbanBicRequestFactory(@Nonnull final TenantConfig tenantConfig) {
+        super(tenantConfig);
     }
-
-    private static final Logger LOG = LoggerFactory.getLogger(BankTransferWithoutIbanBicRequestFactory.class);
 
     @Override
     public BankTransferAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
@@ -43,7 +40,7 @@ public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFacto
                             .intValue());
                 });
 
-        mapFormPaymentWithCartLike(request, paymentWithCartLike, LOG);
+        mapFormPaymentWithCartLike(request, paymentWithCartLike);
 
         //Despite declared as optional in PayOne Server API documentation. the Bankcountry is required
         request.setBankcountry(request.getCountry());
