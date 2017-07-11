@@ -168,8 +168,8 @@ The service also provides scheduled tasks to handle those notification which wer
 
 There are two scheduled jobs: 
   
-  * short term - handles lost payments for last 10 minutes.
-  * long term -  handles lost payments for last 2 days.
+  * short term - handles unprocessed payment transactions for last 10 minutes.
+  * long term -  handles unprocessed payment transactions for last 2 days.
 
 This jobs are run periodically based on `SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` and `LONG_TIME_FRAME_SCHEDULED_JOB_CRON`
 runtime values respectively. 
