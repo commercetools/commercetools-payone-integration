@@ -27,7 +27,7 @@ section in the main documentation page.
 ### 1. Integration Service changes
 
 1. One mandatory property added: `TENANTS`, a comma (or semicolon) separate list of your tenants (branches, franchising etc).
-This value will be used as a part of URL path for handling and notification resources. 
+This value will be exposed as a part of handle and notification URLs. 
 
     If you have exactly one tenant - put a single name. For example:
     ```
