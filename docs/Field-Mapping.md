@@ -294,7 +294,7 @@ All payment methods:
     See [MappingUtil#getGenderFromPaymentCart(PaymentWithCartLike)](https://github.com/commercetools/commercetools-payone-integration/blob/d317858cb088381063875494b24fd75417ccc328/service/src/main/java/com/commercetools/pspadapter/payone/mapping/MappingUtil.java#L185-L185)
     for more details.
     * `personalid` -> (***Not supported yet***) Personal ID Nr. 
-          Mandatory for Klarna if customers billing address is in certain nordics countries.
+          Mandatory for Klarna if customers billing address is Sweden, Finland, Denmark or Norway.
           -> `personalId` custom field of type String.
     
   * `clearing_instructionnote` ->  `invoiceUrl` field of type String, PAYONE master
