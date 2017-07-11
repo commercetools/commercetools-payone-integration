@@ -18,7 +18,7 @@ Klarna library updates:
      
      2.1 Supply Klarna API credentials (_EID_ and _Shared Secret_) to your Payone Merchant Manager.
   
-  3. Extend Klarna payment custom type in commercetools platform. In addition to standard _languageCode_ and _reference_
+  3. Create or extend Klarna payment custom type in commercetools platform. In addition to standard _languageCode_ and _reference_
      fields add the following:
 
      <table>
