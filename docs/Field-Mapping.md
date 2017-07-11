@@ -318,9 +318,9 @@ All payment methods:
   
 The following are required only for Installment-Type Payment Methods (mainly Klarna): 
  
- * If `birthday` is set in Payment custom field - this value overrides value from CTP Customer field.
- * `gender`: custom field in Payment.  
- * `ip`: custom field in Payment. 
+ * If `birthday` is set in `Payment` custom field - this value overrides value from CTP Customer field.
+ * `gender`: custom field in `Payment`.
+ * `ip`: custom field in `Payment`.
 
 ## PAYONE transaction types -> CT Transaction Types 
 
