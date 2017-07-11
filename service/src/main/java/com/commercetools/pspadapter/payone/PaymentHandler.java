@@ -76,7 +76,7 @@ public class PaymentHandler {
         } catch (final CompletionException e) {
             return completionExceptionHandler(e, paymentId);
         } catch (final Exception e) {
-            return logThrowableInResponse(e, paymentId);
+            return handleThrowableInResponse(e, paymentId);
         }
     }
 
@@ -103,7 +103,7 @@ public class PaymentHandler {
                 format("An error occurred during communication with the commercetools platform when processing [%s] payment. See the service logs", paymentId));
     }
 
-    private PaymentHandleResult logThrowableInResponse(@Nonnull Throwable throwable, @Nonnull String paymentId) {
+    private PaymentHandleResult handleThrowableInResponse(@Nonnull Throwable throwable, @Nonnull String paymentId) {
         logger.error("Error in response: ", throwable);
         return new PaymentHandleResult(INTERNAL_SERVER_ERROR_500,
                 format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId));
