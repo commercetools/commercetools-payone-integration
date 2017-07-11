@@ -9,7 +9,7 @@
   - [commercetools Payment resource mapping](#commercetools-payment-resource-mapping)
   - [commercetools Cart and Order object (mapping to payment interface on payment creation)](#commercetools-cart-and-order-object-mapping-to-payment-interface-on-payment-creation)
   - [PAYONE fields that map to custom CT Payment fields (by payment method)](#payone-fields-that-map-to-custom-ct-payment-fields-by-payment-method)
-  - [PAYONE fields that map to custom Fields on CT Cart, CT Customer or CT Order](#payone-fields-that-map-to-custom-fields-on-ct-cart-ct-customer-or-ct-order)
+  - [PAYONE fields that map to custom Fields on CT Payment, CT Cart, CT Customer or CT Order](#payone-fields-that-map-to-custom-fields-on-ct-payment-ct-cart-ct-customer-or-ct-order)
   - [PAYONE transaction types -> CT Transaction Types](#payone-transaction-types---ct-transaction-types)
     - [triggering a new PAYONE transaction request given a CT transaction](#triggering-a-new-payone-transaction-request-given-a-ct-transaction)
     - [receiving the PAYONE TransactionStatus Notifications and storing them in an Interaction](#receiving-the-payone-transactionstatus-notifications-and-storing-them-in-an-interaction)
