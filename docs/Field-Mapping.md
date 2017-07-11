@@ -289,7 +289,10 @@ All payment methods:
       
     * `birthday` -> String custom field `birthday` in Payment in _YYYMMDD_ format.
     * `ip` -> the IPv4/IPv6 address of the user -> String custom field `ip` in Payment. 
-    * `gender` -> The value is suppressed to first lowercase character -> String custom field `gender` in Payment
+    * `gender` -> Single lowercase letter of customer's gender (`m`/`f`). Fetched from string custom field `gender` in Payment, Order or Cart. 
+    If the value in the custom field is multi-character - it is trimmed to the first character.
+    See [MappingUtil#getGenderFromPaymentCart(PaymentWithCartLike)](https://github.com/commercetools/commercetools-payone-integration/blob/d317858cb088381063875494b24fd75417ccc328/service/src/main/java/com/commercetools/pspadapter/payone/mapping/MappingUtil.java#L185-L185)
+    for more details.
     * `personalid` -> (***Not supported yet***) Personal ID Nr. 
           Mandatory for Klarna if customers billing address is in certain nordics countries.
           -> `personalId` custom field of type String.
