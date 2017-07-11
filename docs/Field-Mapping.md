@@ -318,10 +318,7 @@ All payment methods:
   
 The following are required only for Installment-Type Payment Methods (mainly Klarna): 
  
- * If the fields `dateOfBirth` (type Date) and `vatId` (type String) respectively are set as custom object on the 
-     Cart / Order and have the right type they are used and take precedence over the Fields on the Customer Object 
- * If `birthday` is set in Payment custom field - this value overrides value from CT Customer above.
-     
+ * If `birthday` is set in Payment custom field - this value overrides value from CTP Customer field.
  * `gender`: custom field in Payment.  
  * `ip`: custom field in Payment. 
 
