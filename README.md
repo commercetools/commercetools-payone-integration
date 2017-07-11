@@ -113,7 +113,7 @@ Name                         | Content             | Required  |
 `TENANT1_PAYONE_SUBACC_ID`   | Subaccount ID       | **Yes**   |
 `TENANT1_PAYONE_MODE`        | Payment mode        | No        |
 
-Can be found in the [PAYONE Merchant Interface](https://pmi.pay1.de/).
+These values can be found in the [PAYONE Merchant Interface](https://pmi.pay1.de/).
 
 ##### Optional service configuration parameters
 
