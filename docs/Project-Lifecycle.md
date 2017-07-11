@@ -333,7 +333,7 @@ Klarna has very strict requirements to the payment details. For testing purpose 
 These tests require next CTP settings:
 
   * `gender`, `ip` and `birthday` custom fields in _payment-INVOICE-KLARNA_ custom type
-  * German language, country and prices must be active.
+  * German language, country and prices must be added/enabled in testing CTP project/products.
   * 19% German tax is active
   * `test-999-cent-code` and `test-10-percent-code` discount codes and respective discounts are active
   * products from test mock cart [KlarnaCartWithTestAccountAddress.json](/blob/master/functionaltests/src/test/resources/mocks/paymentmethods/klarna/https://github.com/commercetools/commercetools-payone-integration/blob/17da0f6ed1c4b4b1e0b6d561fe03d8cfa3c0dc38/functionaltests/src/test/resources/mocks/paymentmethods/klarna/KlarnaCartWithTestAccountAddress.json)
