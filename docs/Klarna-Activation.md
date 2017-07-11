@@ -27,7 +27,7 @@ Klarna library updates:
      <tr><td><b><code>gender</code></b></td><td>Only first lowercase character is used, see <a href="/blob/master/service/src/main/java/com/commercetools/pspadapter/payone/mapping/MappingUtil.java#L181-L181">MappingUtil.getGenderFromPaymentCart()</a></td></tr>
      <tr><td><b><code>birthday</code></b></td><td>If this field is empy - the service will try to apply 
                       <a href="http://dev.commercetools.com/http-api-projects-customers.html#customer">Customer's dateOfBirth</a>, 
-                      but this field is an optional, also it is not available for anonymouse purchases. 
+                      but this field is an optional, also it is not available for anonymous/guest checkout. 
                       <b>Thus we stronghly recommend to set this field.</b></td></tr>
      
      </table>
