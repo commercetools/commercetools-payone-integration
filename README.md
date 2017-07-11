@@ -84,7 +84,7 @@ with the same name.
 
 Name               | Content
 ------------------ | -----------------
-`TENANTS`          | comma or semicolon separated list of tenant names. At least one name is required. Whitespaces are ignored.
+`TENANTS`          | comma or semicolon separated list of alphanumeric unique tenant names. At least one name is required. Whitespaces are ignored. Besides underscore no special characters are allowed. **Note**: provided tenant names will be used as part of handle/notification URLs. 
 
 **Note**: the tenant names are used as a part of URI, thus use only characters allowed for path part of an URI. 
 We strongly recommend not to use special or Unicode characters and limit the set with `[a-Z0-9_-]`
