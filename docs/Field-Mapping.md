@@ -288,7 +288,7 @@ All payment methods:
     See [language resolution order](https://github.com/commercetools/commercetools-payone-integration/blob/d317858cb088381063875494b24fd75417ccc328/service/src/main/java/com/commercetools/pspadapter/payone/mapping/MappingUtil.java#L197) for more details.
       
     * `birthday` -> String custom field `birthday` in Payment in _YYYMMDD_ format.
-    * `ip` -> the IP address of the user -> String custom field `ip` in Payment. 
+    * `ip` -> the IPv4/IPv6 address of the user -> String custom field `ip` in Payment. 
     * `gender` -> The value is suppressed to first lowercase character -> String custom field `gender` in Payment
     * `personalid` -> (***Not supported yet***) Personal ID Nr. 
           Mandatory for Klarna if customers billing address is in certain nordics countries.
