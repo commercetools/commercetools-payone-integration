@@ -38,7 +38,7 @@ Klarna library updates:
      in the list of activated countries (by default Klarna is disabled for all countries).
      
      4.2 Ensure Klarna mandatory fields from the table above are populated, also note that **`telephonenumber`** is 
-     mandatory for Klarna, so ensure it is set in [`CartLike#billingAddress`](http://dev.commercetools.com/http-api-projects-carts.html#cart)
+     mandatory for Klarna, so ensure it is set in [`CartLike#billingAddress`](http://dev.commercetools.com/http-api-projects-carts.html#cart)[`#phone`](http://dev.commercetools.com/http-api-types.html#address)
      before handling the cart/payment.
      
      4.3 Payone requires: **`billing and delivery address need to be identical`**
