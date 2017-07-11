@@ -21,7 +21,7 @@ It is a standalone Microservice that connects the two cloud platforms and provid
   - [Required Configuration in the commercetools project](#required-configuration-in-the-commercetools-project)
     - [Domain Constraints](#domain-constraints)
   - [Required Configuration in PAYONE](#required-configuration-in-payone)
-  - [Configuration of the Integration Service itself](#configuration-of-the-integration-service-itself)
+  - [Configuration of the Integration Service](#configuration-of-the-integration-service)
   - [Mandatory common properties](#mandatory-common-properties)
       - [Mandatory commercetools API client credentials](#mandatory-commercetools-api-client-credentials)
       - [PAYONE API client credentials](#payone-api-client-credentials)
@@ -73,7 +73,7 @@ https://pmi.pay1.de/
 
 > Do not use a merchant account across commercetools projects, you may end up mixing customer accounts (debitorenkonten). 
 
-### Configuration of the Integration Service itself
+### Configuration of the Integration Service
 
 The integration service requires - _unless otherwise stated_ - the following environment variables 
 or Java runtime arguments. 
