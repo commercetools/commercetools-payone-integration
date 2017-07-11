@@ -117,8 +117,6 @@ These values can be found in the [PAYONE Merchant Interface](https://pmi.pay1.de
 
 ##### Optional service configuration parameters
 
-All below are optional.
-
 Name | Is tenant specific | Content | Default
 ---- | ------- | ------ | --------
 `SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` | No  | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 10 minutes like [PaymentInteractionAdded](http://dev.commercetools.com/http-api-projects-messages.html#payment-interaction-added-message) | poll every 30 seconds
