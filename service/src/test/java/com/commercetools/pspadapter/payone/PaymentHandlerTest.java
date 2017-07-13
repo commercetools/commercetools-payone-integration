@@ -132,7 +132,7 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.ACCEPTED_202));
-        assertThat(paymentHandleResult.body(), isEmptyString());
+        assertThat(paymentHandleResult.body(), containsString("The payment couldn't be processed"));
     }
 
     @Test
