@@ -284,8 +284,10 @@ All payment methods:
    
 `INVOICE-KLARNA`:
   * _Required_ 
-    * `language` -> custom field `languageCode` of Type String on the CT Payment, Order or Cart. 
+    * `language` -> custom field `languageCode` of Type String on the CT Payment, Order or Cart.
     See [language resolution order](https://github.com/commercetools/commercetools-payone-integration/blob/d317858cb088381063875494b24fd75417ccc328/service/src/main/java/com/commercetools/pspadapter/payone/mapping/MappingUtil.java#L197) for more details.
+    
+      * Must follow `ISO 639-1` standard (2 lowercase characters)
       
     * `birthday` -> String custom field `birthday` in Payment in _YYYMMDD_ format.
     * `ip` -> the IPv4/IPv6 address of the user -> String custom field `ip` in Payment. 
