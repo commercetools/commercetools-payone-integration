@@ -61,7 +61,7 @@ public abstract class PayoneRequestFactory {
         try {
             MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
         } catch (final IllegalArgumentException ex) {
-            logger.debug("Could not fully customer in payment with ID {} {}",
+            logger.debug("Could not fully map customer in payment with ID {} {}",
                     paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
