@@ -67,7 +67,9 @@ public class PaymentHandler {
                 }
             }
 
-            return new PaymentHandleResult(HttpStatusCode.ACCEPTED_202);
+            logger.warn("The payment [{}] couldn't be processed after {} retries", paymentId, RETRY_DELAY);
+            return new PaymentHandleResult(HttpStatusCode.ACCEPTED_202,
+                    format("The payment couldn't be processed after %s retries", RETRY_DELAY));
 
         } catch (final NotFoundException | NoCartLikeFoundException e) {
             return handleNotFoundException(paymentId);
@@ -93,6 +95,7 @@ public class PaymentHandler {
 
     /**
      * Completion exceptions used to tell nothing, thus we should try to report the exception cause.
+     *
      * @param e Exception to report
      * @return {@link PaymentHandleResult} with 500 status and message which refers to the logs.
      */
