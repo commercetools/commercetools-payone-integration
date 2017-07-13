@@ -102,7 +102,7 @@ project(":service") {
     }
 
     task convertGradlePropertiesToJvmArgs (type:Task) {
-        description 'Convert the gradle build properties (set in ~/.gradle/gradle.properties) ' +
+        description 'Convert the gradle build properties (set in gradle.properties) ' +
                     'to JVM runtime properties (-Dkey=value arguments)'
 
         doLast {
@@ -114,6 +114,10 @@ project(":service") {
 /**
  * Convert the list of application specific properties from gradle build properties (<i>~/.gradle/gradle.properties</i>)
  * or environment variables to java runtime properties (supplied as <b>-Dkey=value</b> arguments).
+ * <p>
+ *     The converting is used to provide easy local service run/debug: the developer specifies properties in local
+ *     {@code gradle.properties} and easily runs {@code ./gradlew run} task, which is provided by gradle
+ *     <i>application</i> plugin. Also in IDE you could run directly gradle <i>run</i> task in debug mode.
  * <p>
  *     The function tries to find a property value from the {@code project} properties and then from environment variables.
  *     If neither of them exists - the property mapping is skipped.
