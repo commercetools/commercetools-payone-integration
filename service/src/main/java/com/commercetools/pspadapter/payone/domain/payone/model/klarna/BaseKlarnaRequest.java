@@ -6,6 +6,9 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Authorizat
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import io.sphere.sdk.cartdiscounts.DiscountedLineItemPrice;
 import io.sphere.sdk.carts.CartLike;
+import io.sphere.sdk.carts.CartShippingInfo;
+import io.sphere.sdk.carts.CustomLineItem;
+import io.sphere.sdk.carts.LineItem;
 import io.sphere.sdk.models.LocalizedString;
 import io.sphere.sdk.models.Reference;
 import io.sphere.sdk.shippingmethods.ShippingMethod;
@@ -17,7 +20,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,6 +31,7 @@ import static com.commercetools.pspadapter.payone.util.MoneyUtil.getActualPriceP
 import static com.commercetools.pspadapter.payone.util.MoneyUtil.getTaxRateIfPresentOrZero;
 import static com.commercetools.util.ServiceConstants.DEFAULT_LOCALE;
 import static io.sphere.sdk.utils.MoneyImpl.centAmountOf;
+import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -190,71 +194,120 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
         this.de = new ArrayList<>(itemsCount);
         this.va = new ArrayList<>(itemsCount);
 
-        // accumulator for full prices - without discounts
-        final AtomicLong accumulatedFullPriceCents = new AtomicLong(0L);
-        // accumulator for actual prices - with discounts
-        final AtomicLong accumulatedActualPriceCents = new AtomicLong(0L);
+        // populate all "payable" items (goods, shipment) and get the aggregated price
+        PricesAggregator aggregatedPrices = populatePrices(asList(
+                () -> populateLineItems(cartLike.getLineItems(), localesList),
+                () -> populateCustomLineItems(cartLike.getCustomLineItems(), localesList),
+                () -> populateShipping(cartLike.getShippingInfo())));
 
-        // populate "goods" items 1/2: normal line items
-        cartLike.getLineItems().forEach(lineItem -> {
-            it.add(goods.toString());
-            id.add(validateId(lineItem.getVariant().getSku()));
+        // populate discount if applicable from aggregated price
+        populateVoucher(aggregatedPrices);
+    }
 
-            no.add(lineItem.getQuantity());
+    @Nonnull
+    private PricesAggregator populatePrices(List<Supplier<PricesAggregator>> pricesVoPopulators) {
+        return pricesVoPopulators.stream()
+                .map(Supplier::get)
+                .collect(PricesAggregator.pricesCollector());
+    }
 
-            de.add(localizeOrFallback(lineItem.getName(), localesList, "item"));
-            va.add(getTaxRateIfPresentOrZero(lineItem.getTaxRate()));
+    /**
+     * Populate "goods" of the Klarna request. This function is used for {@link LineItem} of CTP.
+     *
+     * @param lineItems list of line items to populate
+     * @param locales   applicable order locale
+     * @return aggregated prices object of all items from {@code lineItems}
+     */
+    @Nonnull
+    private PricesAggregator populateLineItems(@Nonnull List<LineItem> lineItems,
+                                               @Nonnull Iterable<Locale> locales) {
+        return lineItems.stream()
+                .map(lineItem -> {
+                    it.add(goods.toString());
+                    id.add(validateId(lineItem.getVariant().getSku()));
 
-            final long fullPriceCents = centAmountOf(lineItem.getPrice().getValue());
-            pr.add(fullPriceCents);
+                    no.add(lineItem.getQuantity());
 
-            accumulatedFullPriceCents.addAndGet(fullPriceCents * lineItem.getQuantity());
-            accumulatedActualPriceCents.addAndGet(getActualPricePerLineItem(lineItem));
-        });
+                    de.add(localizeOrFallback(lineItem.getName(), locales, "item"));
+                    va.add(getTaxRateIfPresentOrZero(lineItem.getTaxRate()));
 
-        // populate "goods" items 2/2: custom line items
-        cartLike.getCustomLineItems().forEach(customLineItem -> {
-            it.add(goods.toString());
-            final String customItemName = localizeOrFallback(customLineItem.getName(), localesList, "custom item");
-            id.add(validateId(customItemName));
-            no.add(customLineItem.getQuantity());
-            de.add(customItemName);
-            va.add(getTaxRateIfPresentOrZero(customLineItem.getTaxRate()));
+                    final long fullPriceCents = centAmountOf(lineItem.getPrice().getValue());
+                    pr.add(fullPriceCents);
 
-            final long fullPriceCents = centAmountOf(customLineItem.getMoney());
-            pr.add(fullPriceCents);
+                    return new PricesAggregator(fullPriceCents * lineItem.getQuantity(), getActualPricePerLineItem(lineItem));
+                }).collect(PricesAggregator.pricesCollector());
+    }
 
-            accumulatedFullPriceCents.addAndGet(fullPriceCents * customLineItem.getQuantity());
-            accumulatedActualPriceCents.addAndGet(getActualPricePerLineItem(customLineItem));
-        });
+    /**
+     * Populate "goods" of the Klarna request. This function is used for {@link CustomLineItem} of CTP.
+     *
+     * @param customLineItems list of custom line items to populate
+     * @param locales         applicable order locale
+     * @return aggregated prices object of all items from {@code customLineItems}
+     */
+    @Nonnull
+    private PricesAggregator populateCustomLineItems(@Nonnull List<CustomLineItem> customLineItems,
+                                                     @Nonnull Iterable<Locale> locales) {
+        return customLineItems.stream()
+                .map(customLineItem -> {
+                    it.add(goods.toString());
+                    final String customItemName = localizeOrFallback(customLineItem.getName(), locales, "custom item");
+                    id.add(validateId(customItemName));
+                    no.add(customLineItem.getQuantity());
+                    de.add(customItemName);
+                    va.add(getTaxRateIfPresentOrZero(customLineItem.getTaxRate()));
 
-        // populate "shipment"
-        ofNullable(cartLike.getShippingInfo()).ifPresent(shippingInfo -> {
-            it.add(shipment.toString());
+                    final long fullPriceCents = centAmountOf(customLineItem.getMoney());
+                    pr.add(fullPriceCents);
 
-            final String shippingMethodName = shippingInfo.getShippingMethodName();
-            id.add(validateId(shippingMethodName));
+                    return new PricesAggregator(fullPriceCents * customLineItem.getQuantity(), getActualPricePerLineItem(customLineItem));
+                })
+                .collect(PricesAggregator.pricesCollector());
+    }
 
-            no.add(1L); // always one shipment item so far
+    /**
+     * Populate "shipment" to <b>this</b> object and return aggregated shipment cost if any.
+     * If shipment is not specified - return empty prices.
+     *
+     * @param cartShippingInfo nullable {@link CartShippingInfo} to populate.
+     * @return single shipment cost
+     */
+    @Nonnull
+    private PricesAggregator populateShipping(@Nullable CartShippingInfo cartShippingInfo) {
+        return ofNullable(cartShippingInfo)
+                .map(shippingInfo -> {
+                    it.add(shipment.toString());
 
-            de.add(ofNullable(shippingInfo.getShippingMethod())
-                    .map(Reference::getObj)
-                    .map(ShippingMethod::getDescription)
-                    .orElse("shipping " + shippingMethodName));
+                    final String shippingMethodName = shippingInfo.getShippingMethodName();
+                    id.add(validateId(shippingMethodName));
 
-            va.add(getTaxRateIfPresentOrZero(shippingInfo.getTaxRate()));
+                    no.add(1L); // always one shipment item so far
 
-            final long fullPriceCents = centAmountOf(shippingInfo.getPrice());
-            pr.add(fullPriceCents);
-            accumulatedFullPriceCents.addAndGet(fullPriceCents);
-            accumulatedActualPriceCents.addAndGet(ofNullable(shippingInfo.getDiscountedPrice())
-                    .map(DiscountedLineItemPrice::getValue)
-                    .map(MoneyImpl::centAmountOf)
-                    .orElse(fullPriceCents));
-        });
+                    de.add(ofNullable(shippingInfo.getShippingMethod())
+                            .map(Reference::getObj)
+                            .map(ShippingMethod::getDescription)
+                            .orElse("shipping " + shippingMethodName));
 
-        // populate "voucher" if a discount could be applied
-        long discountCents = accumulatedActualPriceCents.get() - accumulatedFullPriceCents.get();
+                    va.add(getTaxRateIfPresentOrZero(shippingInfo.getTaxRate()));
+
+                    final long fullPriceCents = centAmountOf(shippingInfo.getPrice());
+                    pr.add(fullPriceCents);
+
+                    return new PricesAggregator(fullPriceCents, ofNullable(shippingInfo.getDiscountedPrice())
+                            .map(DiscountedLineItemPrice::getValue)
+                            .map(MoneyImpl::centAmountOf)
+                            .orElse(fullPriceCents));
+                })
+                .orElseGet(PricesAggregator::new);
+    }
+
+    /**
+     * Populate Klarna "voucher" if a discount could be applied.
+     *
+     * @param aggregatedPrices aggregated price from all line items and shipment.
+     */
+    private void populateVoucher(PricesAggregator aggregatedPrices) {
+        long discountCents = -aggregatedPrices.getDiscount();
         if (discountCents != 0) {
             it.add(voucher.toString());
             final String totalDiscountName = "total discount";
@@ -268,7 +321,6 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
             de.add(totalDiscountName);
             va.add(0); // taxes doesn't have any sense for accumulated discount
         }
-
     }
 
     @Nullable
@@ -283,8 +335,7 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
      * @return trimmed to {@link KlarnaConstants#ID_MAX_LENGTH} product id/name/sku.
      */
     @Nonnull
-    private static String validateId(String id) {
-        return StringUtils.left(id, ID_MAX_LENGTH);
+    private static String validateId(@Nullable String id) {
+        return ofNullable(StringUtils.left(id, ID_MAX_LENGTH)).orElse("");
     }
-
 }
