@@ -21,7 +21,7 @@ It is a standalone Microservice that connects the two cloud platforms and provid
   - [Required Configuration in the commercetools project](#required-configuration-in-the-commercetools-project)
     - [Domain Constraints](#domain-constraints)
   - [Required Configuration in PAYONE](#required-configuration-in-payone)
-  - [Configuration of the Integration Service itself](#configuration-of-the-integration-service-itself)
+  - [Configuration of the Integration Service](#configuration-of-the-integration-service)
   - [Mandatory common properties](#mandatory-common-properties)
       - [Mandatory commercetools API client credentials](#mandatory-commercetools-api-client-credentials)
       - [PAYONE API client credentials](#payone-api-client-credentials)
@@ -73,7 +73,7 @@ https://pmi.pay1.de/
 
 > Do not use a merchant account across commercetools projects, you may end up mixing customer accounts (debitorenkonten). 
 
-### Configuration of the Integration Service itself
+### Configuration of the Integration Service
 
 The integration service requires - _unless otherwise stated_ - the following environment variables 
 or Java runtime arguments. 
@@ -84,7 +84,7 @@ with the same name.
 
 Name               | Content
 ------------------ | -----------------
-`TENANTS`          | comma or semicolon separated list of tenant names. At least one name is required. Whitespaces are ignored.
+`TENANTS`          | comma or semicolon separated list of alphanumeric unique tenant names. At least one name is required. Whitespaces are ignored. Besides underscore no special characters are allowed. **Note**: provided tenant names will be used as part of handle/notification URLs. 
 
 **Note**: the tenant names are used as a part of URI, thus use only characters allowed for path part of an URI. 
 We strongly recommend not to use special or Unicode characters and limit the set with `[a-Z0-9_-]`
@@ -113,20 +113,18 @@ Name                         | Content             | Required  |
 `TENANT1_PAYONE_SUBACC_ID`   | Subaccount ID       | **Yes**   |
 `TENANT1_PAYONE_MODE`        | Payment mode        | No        |
 
-Can be found in the [PAYONE Merchant Interface](https://pmi.pay1.de/).
+These values can be found in the [PAYONE Merchant Interface](https://pmi.pay1.de/).
 
 ##### Optional service configuration parameters
 
-All below are optional.
-
 Name | Is tenant specific | Content | Default
 ---- | ------- | ------ | --------
-`SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` | No  | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 10 minutes like [PaymentInteractionAdded](http://dev.commercetools.com/http-api-projects-messages.html#payment-interaction-added-message) | poll every 30 seconds
-`LONG_TIME_FRAME_SCHEDULED_JOB_CRON`  | No  | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 2 days | poll every hour on 5th second
+`SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` | No  | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 10 minutes like [PaymentTransactionAdded](http://dev.commercetools.com/http-api-projects-messages.html#paymenttransactionadded-message) and [PaymentCreated](http://dev.commercetools.com/http-api-projects-messages.html#paymentcreated-message)| poll every 30 seconds (`0/30 * * * * ? *`)
+`LONG_TIME_FRAME_SCHEDULED_JOB_CRON`  | No  | same as `SHORT_TIME_FRAME_SCHEDULED_JOB_CRON`, but polls messages for the past 2 days | poll every hour on 5th second (`5 0 0/1 * * ? *`)
 `TENANT1_PAYONE_MODE`                 | Yes | the mode of operation with PAYONE <ul><li>`"live"` for production mode, (i.e. _actual payments_) or</li><li>`"test"` for test mode</li></ul> | `"test"`  
 `TENANT1_CT_START_FROM_SCRATCH`       | Yes | **WARNING** _**Handle with care!**_ If and only if equal, ignoring case, to `"true"` the service will create the custom types it needs. _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. If not yet in the project, the Custom Types are created independently of this parameter (but only deleted and recreated if this parameter is set).  Related: [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34). | `"false"`
 `TENANT1_SECURE_KEY`                  | Yes | if provided and not empty, the value is used as the key for decrypting data from fields "IBAN" and "BIC" for payments with CustomType "PAYMENT_BANK_TRANSFER". The data must be the result of a Blowfish ECB encryption with said key and encoded in HEX. | "" (empty String)
-`TENANT1_UPDATE_ORDER_PAYMENT_STATE`  | Yes | if _true_ - `Order#paymentState` will be updated when payment status notification is received from Payone. By default the order's state remains unchanged. | "false" 
+`TENANT1_UPDATE_ORDER_PAYMENT_STATE`  | Yes | if _true_ - `Order#paymentState` will be updated when payment status notification is received from Payone. By default the order's state remains unchanged. See [Order Payment Status Mapping](/docs/Order-Payment-Status-Mapping.md) for more details. | "false" 
 
 #### Docker run
 
@@ -170,8 +168,8 @@ The service also provides scheduled tasks to handle those notification which wer
 
 There are two scheduled jobs: 
   
-  * short term - handles lost payments for last 10 minutes.
-  * long term -  handles lost payments for last 2 days.
+  * short term - handles unprocessed payment transactions for last 10 minutes.
+  * long term -  handles unprocessed payment transactions for last 2 days.
 
 This jobs are run periodically based on `SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` and `LONG_TIME_FRAME_SCHEDULED_JOB_CRON`
 runtime values respectively. 
