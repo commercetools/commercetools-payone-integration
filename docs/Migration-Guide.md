@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [Migrating from v1 to v2](#migrating-from-v1-to-v2)
+- [Migrating from v1 to v2 (Multitenancy)](#migrating-from-v1-to-v2-multitenancy)
   - [1. Integration Service changes](#1-integration-service-changes)
   - [2. Payone portal changes](#2-payone-portal-changes)
   - [3. Changes in the shops which uses the service](#3-changes-in-the-shops-which-uses-the-service)
@@ -12,7 +12,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Migrating from v1 to v2
+## Migrating from v1 to v2 (Multitenancy)
 
 Version 2 introduced multi-tenancy feature. This is a ***breaking-change*** thus requires additional steps in the 
 service and Payone provider setup.
@@ -83,3 +83,6 @@ You have to change the payment handling URL:
   1. In the service settings (environment variables) add the same properties, but with `MERCHANT1_` prefix instead of `MAIN_SHOP_`
   1. In the new shop configure payment checkout service to connect to the new merchant URL 
     (like <code>**MERCHANT1**/commercetools/handle/payments/</code>)
+
+
+TO be continued....

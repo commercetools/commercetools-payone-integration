@@ -37,6 +37,7 @@ public class UpdatePaymentTestHelper {
         return SetStatusInterfaceText.of(notification.getTxaction().toString());
     }
 
+    @SuppressWarnings("unchecked")
     public static void assertStandardUpdateActions(final List<? extends UpdateAction<Payment>> updateActions,
                                                    final AddInterfaceInteraction interfaceInteraction,
                                                    final SetStatusInterfaceCode statusInterfaceCode,

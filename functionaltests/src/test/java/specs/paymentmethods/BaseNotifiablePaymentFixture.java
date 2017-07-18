@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.payments.Payment;
+import org.concordion.api.MultiValueResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import specs.BaseFixture;
@@ -139,6 +140,28 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
                 .put("amountPaid", amountPaid)
                 .put("version", payment.getVersion().toString())
                 .build();
+    }
+
+    public MultiValueResult fetchBasicPaymentDetails(final String paymentName, final String txaction) throws ExecutionException {
+
+        Payment payment = fetchPaymentByLegibleName(paymentName);
+        long appointedNotificationCount = getTotalNotificationCountOfAction(payment, txaction);
+
+        final String transactionId = getIdOfLastTransaction(payment);
+        final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
+                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
+                BaseFixture.EMPTY_STRING;
+
+        return MultiValueResult.multiValueResult()
+                .with("notificationCount", Long.toString(appointedNotificationCount))
+                .with("transactionState", getTransactionState(payment, transactionId))
+                .with("amountAuthorized", amountAuthorized)
+                .with("version", payment.getVersion().toString());
+    }
+
+    public long getInteractionNotificationOfActionCount(final String paymentName, final String txaction) throws ExecutionException {
+        Payment payment = fetchPaymentByLegibleName(paymentName);
+        return getTotalNotificationCountOfAction(payment, txaction);
     }
 
 }

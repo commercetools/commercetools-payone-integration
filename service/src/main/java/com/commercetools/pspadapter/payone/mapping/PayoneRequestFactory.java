@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
+import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getGenderFromPaymentCart;
+import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguage;
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createLoggerName;
 
 /**
@@ -51,12 +53,29 @@ public abstract class PayoneRequestFactory {
         throw new UnsupportedOperationException("this request type is not supported by this payment method.");
     }
 
+    /**
+     * Map the next values from {@code paymentWithCartLike} to {@code request}:<ul>
+     *     <li>amount planned</li>
+     *     <li>order reference</li>
+     *     <li>custom fields</li>
+     *     <li>{@link io.sphere.sdk.customers.Customer} info if exists</li>
+     *     <li>billing and shipping address</li>
+     *     <li>language</li>
+     * </ul>
+     *
+     * @param request             {@link AuthorizationRequest} instance to which set the values
+     * @param paymentWithCartLike cart/order info from which read the values
+     */
     protected void mapFormPaymentWithCartLike(final AuthorizationRequest request,
                                               final PaymentWithCartLike paymentWithCartLike) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
 
+        request.setReference(paymentWithCartLike.getReference());
+
         MappingUtil.mapCustomFieldsFromPayment(request, ctPayment.getCustom());
+
+        MappingUtil.mapAmountPlannedFromPayment(request, ctPayment);
 
         try {
             MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
@@ -80,7 +99,10 @@ public abstract class PayoneRequestFactory {
         }
 
         //customer's locale, if set in custom field or cartLike
-        MappingUtil.getPaymentLanguage(paymentWithCartLike).ifPresent(request::setLanguage);
+        getPaymentLanguage(paymentWithCartLike).ifPresent(request::setLanguage);
+
+        //gender: Payone supports one of 2 characters [m, f]
+        getGenderFromPaymentCart(paymentWithCartLike).ifPresent(request::setGender);
     }
 
 }

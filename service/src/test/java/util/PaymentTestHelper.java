@@ -1,5 +1,6 @@
 package util;
 
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.orders.Order;
@@ -14,6 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class PaymentTestHelper {
+
+    public static final String KLARNA_DIR = "com/commercetools/pspadapter/payone/mapping/klarna/";
+
     protected static InputStream getJsonFromFile(String filePath) throws IOException {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream(filePath);
     }
@@ -53,6 +57,14 @@ public class PaymentTestHelper {
 
     public Payment dummyPaymentOneAuthPending20EuroCC() throws Exception {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_CC.json");
+    }
+
+    public Payment dummyPaymentForKlarnaCart_KLV() throws Exception {
+        return getPaymentFromFile(KLARNA_DIR + "dummyPaymentForKlarnaCart_KLV.json");
+    }
+
+    public Payment dummyPaymentForKlarnaCartWithoutDiscounts_KLV() throws Exception {
+        return getPaymentFromFile(KLARNA_DIR + "dummyPaymentForKlarnaCartWithoutDiscounts_KLV.json");
     }
 
     public Payment dummyPaymentOneAuthPending20EuroPPE() throws Exception {
@@ -119,6 +131,14 @@ public class PaymentTestHelper {
         return getCartFromFile("dummyCart.json");
     }
 
+    public Cart dummyKlarnaCart() throws Exception {
+        return getCartFromFile(KLARNA_DIR + "dummyKlarnaCart.json");
+    }
+
+    public Cart dummyKlarnaCartWithoutDiscounts() throws Exception {
+        return getCartFromFile(KLARNA_DIR + "dummyKlarnaCartWithoutDiscounts.json");
+    }
+
     public Payment dummyPaymentTwoTransactionsPending() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsPending.json");
     }
@@ -143,5 +163,15 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentUnknownMethod.json");
     }
 
+    public PaymentWithCartLike createDummyPaymentWithCartLike(Payment payment, Cart cart) {
+        return new PaymentWithCartLike(payment, cart);
+    }
 
+    public PaymentWithCartLike createKlarnaPaymentWithCartLike() throws Exception {
+        return createDummyPaymentWithCartLike(dummyPaymentForKlarnaCart_KLV(), dummyKlarnaCart());
+    }
+
+    public PaymentWithCartLike createKlarnaPaymentWithCartLikeWithoutDiscount() throws Exception {
+        return createDummyPaymentWithCartLike(dummyPaymentForKlarnaCartWithoutDiscounts_KLV(), dummyKlarnaCartWithoutDiscounts());
+    }
 }

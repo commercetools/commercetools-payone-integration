@@ -10,6 +10,8 @@ import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.mapping.*;
+import com.commercetools.pspadapter.payone.mapping.klarna.KlarnaRequestFactory;
+import com.commercetools.pspadapter.payone.mapping.klarna.PayoneKlarnaCountryToLanguageMapper;
 import com.commercetools.pspadapter.payone.mapping.order.DefaultPaymentToOrderStateMapper;
 import com.commercetools.pspadapter.payone.mapping.order.PaymentToOrderStateMapper;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
@@ -199,7 +201,8 @@ public class TenantFactory {
                 PaymentMethod.BANK_TRANSFER_SOFORTUEBERWEISUNG,
                 PaymentMethod.BANK_TRANSFER_ADVANCE,
                 PaymentMethod.BANK_TRANSFER_POSTFINANCE_CARD,
-                PaymentMethod.BANK_TRANSFER_POSTFINANCE_EFINANCE
+                PaymentMethod.BANK_TRANSFER_POSTFINANCE_EFINANCE,
+                PaymentMethod.INVOICE_KLARNA
         );
 
         for (final PaymentMethod paymentMethod : supportedMethods) {
@@ -217,6 +220,7 @@ public class TenantFactory {
         }
         return new PaymentDispatcher(methodDispatcherMap, getPayoneInterfaceName());
     }
+
     protected TransactionExecutor createTransactionExecutor(
             final TransactionType transactionType,
             final LoadingCache<String, Type> typeCache,
@@ -245,6 +249,14 @@ public class TenantFactory {
         return null;
     }
 
+    /**
+     * Get a new instance of {@link PayoneRequestFactory} based on payment method and tenant config.
+     *
+     * @param method       one of {@link PaymentMethod} instances.
+     * @param tenantConfig tenant specific configuration.
+     * @return new instance of {@link PayoneRequestFactory}.
+     */
+    @Nonnull
     protected PayoneRequestFactory createRequestFactory(@Nonnull PaymentMethod method, @Nonnull TenantConfig tenantConfig) {
         switch (method) {
             case CREDIT_CARD:
@@ -258,6 +270,8 @@ public class TenantFactory {
                 return new PostFinanceBanktransferRequestFactory(tenantConfig);
             case BANK_TRANSFER_ADVANCE:
                 return new BanktTransferInAdvanceRequestFactory(tenantConfig);
+            case INVOICE_KLARNA:
+                return new KlarnaRequestFactory(tenantConfig, createCountryToLanguageMapper());
             default:
                 throw new IllegalArgumentException(format("No PayoneRequestFactory could be created for payment method %s", method));
         }
@@ -270,5 +284,10 @@ public class TenantFactory {
 
     protected LoadingCache<String, Type> createTypeCache(final BlockingSphereClient client) {
         return CacheBuilder.newBuilder().build(new TypeCacheLoader(client));
+    }
+
+    @Nonnull
+    protected CountryToLanguageMapper createCountryToLanguageMapper() {
+        return new PayoneKlarnaCountryToLanguageMapper();
     }
 }

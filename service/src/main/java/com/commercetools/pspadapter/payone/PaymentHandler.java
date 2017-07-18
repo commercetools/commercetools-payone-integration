@@ -53,14 +53,14 @@ public class PaymentHandler {
         try {
             for (int i = 0; i < RETRIES_LIMIT; i++) {
                 try {
-                    final PaymentWithCartLike payment = commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
-                    String paymentInterface = payment.getPayment().getPaymentMethodInfo().getPaymentInterface();
+                    final PaymentWithCartLike paymentWithCartLike = commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
+                    String paymentInterface = paymentWithCartLike.getPayment().getPaymentMethodInfo().getPaymentInterface();
                     if (!payoneInterfaceName.equals(paymentInterface)) {
                         logger.warn("Wrong payment interface name: expected [{}], found [{}]", payoneInterfaceName, paymentInterface);
                         return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
                     }
 
-                    paymentDispatcher.dispatchPayment(payment);
+                    paymentDispatcher.dispatchPayment(paymentWithCartLike);
                     return new PaymentHandleResult(HttpStatusCode.OK_200);
                 } catch (final ConcurrentModificationException cme) {
                     Thread.sleep(RETRY_DELAY);

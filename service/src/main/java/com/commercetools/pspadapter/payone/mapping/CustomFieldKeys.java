@@ -34,7 +34,6 @@ public final class CustomFieldKeys {
     public static final String MESSAGE_FIELD = "message";
 
     public static final String USER_ID_FIELD = "payoneUserId";
-    public static final String GENDER_FIELD = "gender";
 
     public static final String PAID_FROM_NAME_FIELD = "paidFromAccountHolderName";
     public static final String PAID_FROM_IBAN_FIELD = "paidFromIBAN";
@@ -45,4 +44,13 @@ public final class CustomFieldKeys {
     public static final String PAY_TO_NAME_FIELD = "paidToAccountHolderName";
     public static final String PAY_TO_IBAN_FIELD = "paidToIBAN";
     public static final String PAY_TO_BIC_FIELD = "paidToBIC";
+
+    // Klarna
+    public static final String GENDER_FIELD = "gender"; // KlarnaConstants.Gender
+    public static final String IP_FIELD = "ip"; // IP_FIELD address, IPv4 or IPv6
+    public static final String BIRTHDAY_FIELD = "birthday"; // Date of birth (YYYYMMDD), Mandatory for DE, NE and AT
+    public static final String TELEPHONENUMBER_FIELD = "telephonenumber"; // if the value is set - overrides optional value from address.
+
+    private CustomFieldKeys() {
+    }
 }

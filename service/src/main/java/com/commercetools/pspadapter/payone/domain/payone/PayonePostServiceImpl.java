@@ -6,13 +6,19 @@ import com.google.common.base.Preconditions;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class PayonePostServiceImpl implements PayonePostService {
 
@@ -33,6 +39,7 @@ public class PayonePostServiceImpl implements PayonePostService {
 
     /**
      * Initialize new service with url.
+     *
      * @param payoneServerApiUrl - the payone server api url, must not be null or empty
      * @return new instance of PayonePostServiceImpl.class
      * @throws IllegalArgumentException if the provided {@code payoneServerApiUrl} is invalid
@@ -45,17 +52,57 @@ public class PayonePostServiceImpl implements PayonePostService {
     public Map<String, String> executePost(final BaseRequest baseRequest) throws PayoneException {
 
         try {
+            Map<String, Object> mappedListParameters = getObjectMapWithExpandedLists(baseRequest.toStringMap(false));
+
             String serverResponse = Unirest.post(this.serverAPIURL)
-                    .fields(baseRequest.toStringMap(false))
+                    .fields(mappedListParameters)
                     .asString().getBody();
             if (serverResponse.contains("status=ERROR")) {
-                LOG.error("-> Payone POST request parameters: " + baseRequest.toStringMap(true).toString());
+                LOG.error("-> Payone POST request parameters: "
+                        + getObjectMapWithExpandedLists(baseRequest.toStringMap(true)).toString());
                 LOG.error("Payone POST response: " + serverResponse);
             }
             return buildMapFromResultParams(serverResponse);
         } catch (UnirestException | UnsupportedEncodingException e) {
             throw new PayoneException("Payone POST request failed. Cause: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Expand entries with list values to key-value pairs where the keys are transformed to set of {@code key[i]} with
+     * respective values from the list. Non-list arguments remain the same.
+     * <p>
+     * The indices origin is <b>1</b>.
+     * <p>
+     * <b>Note:</b> so far only {@link List} values are expanded, arrays behavior is still undefined.
+     * <p>
+     * Example:
+     * <pre> {"a": [5, 7], "b": "c", "d": ["e", "f"]} =>
+     * {"a[1]": 5, "a[2]": 7, "b": "c", "d[1]": "e", "d[2]": "f"}
+     * </pre>
+     *
+     * @param parameters Set of key-value pairs to expand
+     * @return new {@link Map} where keys with list values
+     */
+    @Nonnull
+    Map<String, Object> getObjectMapWithExpandedLists(Map<String, Object> parameters) {
+        return parameters.entrySet().stream()
+                .flatMap(entry -> {
+                    Object value = entry.getValue();
+                    if (value instanceof List) {
+                        final List list = (List) value;
+                        if (list.size() > 0) {
+                            return IntStream.range(0, list.size())
+                                    .mapToObj(i -> Pair.of(entry.getKey() + "[" + (i + 1) + "]", list.get(i)));
+                        } else {
+                            return Stream.of(Pair.of(entry.getKey() + "[]", ""));
+                        }
+                    }
+
+                    return Stream.of(Pair.of(entry.getKey(), value));
+
+                })
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
     Map<String, String> buildMapFromResultParams(final String serverResponse) throws UnsupportedEncodingException {

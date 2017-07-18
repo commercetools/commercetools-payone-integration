@@ -3,7 +3,9 @@ package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
 import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.payments.TransactionType;
 
-import java.util.Arrays;
+import javax.annotation.Nonnull;
+
+import static java.util.Arrays.stream;
 
 /**
  * Enumerates the payment methods available for Payone.
@@ -60,6 +62,14 @@ public enum PaymentMethod {
      */
     BANK_TRANSFER_POSTFINANCE_CARD(MethodKeys.BANK_TRANSFER_POSTFINANCE_CARD,
             TransactionType.CHARGE
+    ),
+
+    /**
+     * @see MethodKeys#INVOICE_KLARNA
+     */
+    INVOICE_KLARNA(MethodKeys.INVOICE_KLARNA,
+            // based on Payone support talk: only "preauthorization" transaction type should be use
+            TransactionType.AUTHORIZATION
     );
 
     private String key;
@@ -93,11 +103,11 @@ public enum PaymentMethod {
      * @return the requested payment mwethod
      * @throws IllegalArgumentException in case of an invalid method key
      */
+    @Nonnull
     public static PaymentMethod fromMethodKey(final String methodKey) {
-        final PaymentMethod result = Arrays.stream(PaymentMethod.values())
+        return stream(PaymentMethod.values())
                 .filter(value -> value.key.equals(methodKey))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Invalid PaymentMethod: %s", methodKey)));
-        return result;
     }
 }
