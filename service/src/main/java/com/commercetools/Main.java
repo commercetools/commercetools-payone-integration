@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 
+import static com.commercetools.pspadapter.payone.config.PropertyProvider.PAYONE_INTEGRATOR_VERSION;
 import static java.lang.String.format;
 
 public class Main {
@@ -27,8 +28,9 @@ public class Main {
         ScheduledJobFactory scheduledJobFactory = new ScheduledJobFactory();
 
         scheduledJobFactory.setAllScheduledItemsStartedListener(() ->
-                LOG.info(format("%n%1$s%nPayone Integration Service is STARTED%n%1$s",
-                "============================================================"))
+                LOG.info(format("%n%1$s%nPayone Integration Service is STARTED%nVersion: %2$s%n%1$s",
+                        "============================================================",
+                        propertyProvider.getProperty(PAYONE_INTEGRATOR_VERSION).orElse("DEBUG-VERSION")))
         );
 
         scheduledJobFactory.createScheduledJob(
