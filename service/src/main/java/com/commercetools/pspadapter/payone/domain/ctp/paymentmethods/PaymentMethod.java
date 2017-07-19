@@ -48,11 +48,11 @@ public enum PaymentMethod {
      */
     BANK_TRANSFER_ADVANCE(MethodKeys.BANK_TRANSFER_ADVANCE,
                     TransactionType.AUTHORIZATION,
-                    TransactionType.CHARGE // not supported by the documentation, but works, hence left for the backward compatibility
+                    TransactionType.CHARGE //TODO: SHOULD BE ONLY AUTHORIZATION?????
     ),
 
     /**
-     * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
+     * @see MethodKeys#BANK_TRANSFER_POSTFINANCE_EFINANCE
      */
     BANK_TRANSFER_POSTFINANCE_EFINANCE(MethodKeys.BANK_TRANSFER_POSTFINANCE_EFINANCE,
             TransactionType.AUTHORIZATION,
@@ -60,12 +60,15 @@ public enum PaymentMethod {
     ),
 
     /**
-     * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
+     * @see MethodKeys#BANK_TRANSFER_POSTFINANCE_CARD
      */
     BANK_TRANSFER_POSTFINANCE_CARD(MethodKeys.BANK_TRANSFER_POSTFINANCE_CARD,
             TransactionType.AUTHORIZATION,
             TransactionType.CHARGE
     );
+
+    // TODO: add INVOICE_KLARNA: MethodKeys#INVOICE_KLARNA only authorization
+
 
     private String key;
     private ImmutableSet<TransactionType> supportedTransactionTypes;

@@ -246,7 +246,7 @@ public class ServiceFactory {
                 // FIXME jw: shouldn't be nullable anymore when payment method is implemented completely
                 final TransactionExecutor executor = Optional
                             .ofNullable(createTransactionExecutor(type, typeCache, client, requestFactory, postService, paymentMethod))
-                            .orElse(defaultExecutor);
+                            .orElseThrow(() -> new RuntimeException("All transaction executors must be implemented now"));
 
                 executors.put(type, executor);
             }
