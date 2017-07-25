@@ -67,9 +67,9 @@ public class PaymentHandler {
                 }
             }
 
-            logger.warn("The payment [{}] couldn't be processed after {} retries", paymentId, RETRY_DELAY);
+            logger.warn("The payment [{}] couldn't be processed after {} retries", paymentId, RETRIES_LIMIT);
             return new PaymentHandleResult(HttpStatusCode.ACCEPTED_202,
-                    format("The payment couldn't be processed after %s retries", RETRY_DELAY));
+                    format("The payment couldn't be processed after %s retries", RETRIES_LIMIT));
 
         } catch (final NotFoundException | NoCartLikeFoundException e) {
             return handleNotFoundException(paymentId);
