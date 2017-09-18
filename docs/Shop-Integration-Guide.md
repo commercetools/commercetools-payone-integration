@@ -15,5 +15,5 @@
   and repeat payment process with a new payment.
 
         **Note**: the _payone-integration-service_ still doesn't have a `refund` endpoint to make automated refunding,
-        but [it is int the roadmap already](https://github.com/commercetools/commercetools-payone-integration/issues/167).
+        but [it is in the roadmap already](https://github.com/commercetools/commercetools-payone-integration/issues/167).
         When the endpoint is implemented - the refund could be initiated automatically.

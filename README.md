@@ -47,7 +47,7 @@ Read [Project lifecycle](docs/Project-Lifecycle.md) documentation for full infor
 ## For shop integration (front/back end developers)
 
 Read [Payone Integration Service Shop Integration Guide](docs/Shop-Integration-Guide.md): for those developers, 
-who integrate the service with real online shop.
+who integrate the service with online shop.
 
 ## Using the Integration in a project
 
