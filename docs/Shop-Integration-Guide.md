@@ -19,4 +19,4 @@
   
        **Note**: the _payone-integration-service_ still doesn't support `refund` endpoint to make automated refunding,
        but [it is in the roadmap already](https://github.com/commercetools/commercetools-payone-integration/issues/167).
-       When the endpoint is implemented - the refund could be initiated automatically.
+       When the endpoint is implemented - the refund process could be initiated by shop service (front/back end).
