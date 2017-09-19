@@ -1,4 +1,4 @@
-# Payone Integration Service Shop Integration Guide
+# Shop Integration Guide
 
 ## Payment amount validation
 
