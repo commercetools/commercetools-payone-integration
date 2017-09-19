@@ -2,10 +2,12 @@
 
 ## Payment amount validation
 
-  1. **Never re-use payment objects in a cart** if cart line items are changed (added/removed/quantity).
-  Create a new payment object and add to the cart, don't update transactions/amount planned on existent payments.
-  Omit re-usage of payment objects once payment process has been initiated (transaction added
-  or customer redirected to payment provider page).
+  1. **Never re-use payment objects in a cart**.
+  Create a new payment object and assign it to the cart if payment process has been initiated 
+  (transaction added or customer redirected to payment provider page) and any of the following occurred later:
+     
+     - Cart has changed (items, quantity, total amount, shipping/billing address, ...)
+     - Payment has changed (payment method, amount planned, currency, transaction type, ...)
 
   1. On success URL (when payment has been handled by the service) **before order creation** always validate cart
   handled amount against `Payment#amountPlanned` and `Payment#transaction#amount` (because it is possible that customer
