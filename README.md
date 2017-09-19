@@ -45,8 +45,7 @@ Read [Project lifecycle](docs/Project-Lifecycle.md) documentation for full infor
 
 ## Shop Integration Guide
 
-Read [Shop Integration Guide](docs/Shop-Integration-Guide.md):
-list of steps which has to be covered as part of frontend integration.
+[List of actions](docs/Shop-Integration-Guide.md) which needs to be covered by front end integration.
 
 ### Required Configuration in the commercetools project
 

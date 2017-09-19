@@ -12,7 +12,8 @@
   1. Before letting customer to initiate or retry payment process always check
   if there are any payments with transactions of type `Authorization` or `Charge` and state `Success`.
   In those cases create an order right away and show order confirmation page.
-  To avoid re-usage of same success URL for different checkouts/carts (payment manipulation) &mdash;
+  
+  1. To avoid re-usage of same success URL for different checkouts/carts (payment manipulation) &mdash;
   make sure that cart has successful payment (transactions of type `Authorization` or `Charge` and state `Success`).
 
   1. On success URL (when payment has been handled by the service) **before order creation** ensure:
