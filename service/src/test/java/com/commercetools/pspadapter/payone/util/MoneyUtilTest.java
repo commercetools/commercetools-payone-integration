@@ -1,5 +1,7 @@
 package com.commercetools.pspadapter.payone.util;
 
+import io.sphere.sdk.cartdiscounts.DiscountedLineItemPrice;
+import io.sphere.sdk.cartdiscounts.DiscountedLineItemPriceForQuantity;
 import io.sphere.sdk.carts.LineItem;
 import io.sphere.sdk.carts.LineItemLike;
 import io.sphere.sdk.json.SphereJsonUtils;
@@ -9,6 +11,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,10 +54,45 @@ public class MoneyUtilTest {
         when(lineItemLike.getTotalPrice()).thenReturn(Money.of(42.5, "EUR"));
         assertThat(MoneyUtil.getTotalDiscountedPricePerQuantity(lineItemLike)).isEmpty();
 
+        when(lineItemLike.getDiscountedPricePerQuantity()).thenReturn(emptyList());
+        assertThat(MoneyUtil.getTotalDiscountedPricePerQuantity(lineItemLike)).isEmpty();
+
+        DiscountedLineItemPriceForQuantity dlipfq = mock(DiscountedLineItemPriceForQuantity.class);
+        DiscountedLineItemPrice dlip = mock(DiscountedLineItemPrice.class);
+        when(dlip.getValue()).thenReturn(Money.of(1.2, "EUR"));
+        when(dlipfq.getQuantity()).thenReturn(3L);
+        when(dlipfq.getDiscountedPrice()).thenReturn(dlip);
+        when(lineItemLike.getDiscountedPricePerQuantity()).thenReturn(singletonList(dlipfq));
+        assertThat(MoneyUtil.getTotalDiscountedPricePerQuantity(lineItemLike)).contains(3L * 120); // 120 c == 1.2 EUR
+
         lineItemLike = SphereJsonUtils.readObjectFromResource(dummyLineItemWithDiscount, LineItem.class);
         assertThat(MoneyUtil.getTotalDiscountedPricePerQuantity(lineItemLike)).hasValue(15700L);
 
         lineItemLike = SphereJsonUtils.readObjectFromResource(dummyLineItemWithoutDiscount, LineItem.class);
         assertThat(MoneyUtil.getTotalDiscountedPricePerQuantity(lineItemLike)).isEmpty();
+    }
+
+    @Test
+    public void getTotalDiscountedPriceMonetaryPerQuantity() throws Exception {
+        LineItemLike lineItemLike = mock(LineItemLike.class);
+        when(lineItemLike.getTotalPrice()).thenReturn(Money.of(42.5, "EUR"));
+        assertThat(MoneyUtil.getTotalDiscountedPriceMonetaryPerQuantity(lineItemLike)).isEmpty();
+
+        when(lineItemLike.getDiscountedPricePerQuantity()).thenReturn(emptyList());
+        assertThat(MoneyUtil.getTotalDiscountedPriceMonetaryPerQuantity(lineItemLike)).isEmpty();
+
+        DiscountedLineItemPriceForQuantity dlipfq = mock(DiscountedLineItemPriceForQuantity.class);
+        DiscountedLineItemPrice dlip = mock(DiscountedLineItemPrice.class);
+        when(dlip.getValue()).thenReturn(Money.of(3.5, "EUR"));
+        when(dlipfq.getQuantity()).thenReturn(3L);
+        when(dlipfq.getDiscountedPrice()).thenReturn(dlip);
+        when(lineItemLike.getDiscountedPricePerQuantity()).thenReturn(singletonList(dlipfq));
+        assertThat(MoneyUtil.getTotalDiscountedPriceMonetaryPerQuantity(lineItemLike)).contains(Money.of(3 * 3.5, "EUR"));
+
+        lineItemLike = SphereJsonUtils.readObjectFromResource(dummyLineItemWithDiscount, LineItem.class);
+        assertThat(MoneyUtil.getTotalDiscountedPriceMonetaryPerQuantity(lineItemLike)).contains(Money.of(157.00, "GBP"));
+
+        lineItemLike = SphereJsonUtils.readObjectFromResource(dummyLineItemWithoutDiscount, LineItem.class);
+        assertThat(MoneyUtil.getTotalDiscountedPriceMonetaryPerQuantity(lineItemLike)).isEmpty();
     }
 }
