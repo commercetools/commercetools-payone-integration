@@ -29,11 +29,11 @@
 1. Assign created payment object to the cart (see also [bad practice](#bad-practice))
 
 1. Before customer click's on `Pay and order` ensure to execute following steps:
-  - [Validate cart state](#validate-cart-state)
-  - [Recalculate cart](#recalculate-cart)
-  - [Validate payment amount](#validate-payment-amount)
-  - [Validate payment transaction](#validate-payment-transaction)
-  - [Check payment cancelations](#check-payment-cancelations)
+    - [Validate cart state](#validate-cart-state)
+    - [Recalculate cart](#recalculate-cart)
+    - [Validate payment amount](#validate-payment-amount)
+    - [Validate payment transaction](#validate-payment-transaction)
+    - [Check payment cancelations](#check-payment-cancelations)
 
   In case all above validations were successful an order can be created right away and order confirmation page shown. Otherwise continue with payment process.
 
