@@ -1,5 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?><html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
-    <head><style>* {
+    <head><script type="text/javascript">/* Stack Trace Toggling */
+
+function getElementById(id) {
+  var element;
+
+  if (document.getElementById) { // standard
+    return document.getElementById(id);
+  } else if (document.all) { // old IE versions
+    return document.all[id];
+  } else if (document.layers) { // nn4
+    return document.layers[id];
+  }
+  alert("Sorry, but your web browser is not supported by Concordion.");
+}
+
+function isVisible(element) {
+  return element.style.display;
+}
+
+function makeVisible(element) {
+  element.style.display = "block";
+}
+
+function makeInvisible(element) {
+  element.style.display = "";
+}
+
+function toggleStackTrace(stackTraceNumber) {
+  var stackTrace = getElementById("stackTrace" + stackTraceNumber);
+  var stackTraceButton = getElementById("stackTraceButton" + stackTraceNumber);
+  if (isVisible(stackTrace)) {
+    makeInvisible(stackTrace);
+    stackTraceButton.value = "View Stack";
+  } else {
+    makeVisible(stackTrace);
+    stackTraceButton.value = "Hide Stack";
+  }
+}
+</script><style>* {
   font-family: Arial;
 }
 body {
@@ -208,25 +246,25 @@ ins {
                     <td class="inputvalue">Payment 1</td>
                     <td class="inputvalue">406</td>
                     <td class="inputvalue">EUR</td>
-                    <td>d33c7946-068f-471a-948a-0ecc210a1b82</td>
+                    <td>1d187748-c9a5-4341-ab18-9e713681a31b</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
                     <td class="inputvalue">91341</td>
                     <td class="inputvalue">USD</td>
-                    <td>af0e27e4-8454-451a-8c70-2b0ea3c33545</td>
+                    <td>070d8df0-43b3-4044-a05c-7bb25c099699</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
                     <td class="inputvalue">6113</td>
                     <td class="inputvalue">EUR</td>
-                    <td>eb17b48b-4ff0-4583-9a46-25788e1da1e5</td>
+                    <td>fd66073a-2a0e-4a91-b070-aff2ee2d2160</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
                     <td class="inputvalue">111283</td>
                     <td class="inputvalue">EUR</td>
-                    <td>02661f00-3e2a-47a9-94f7-d666de673f3b</td>
+                    <td>253eb33a-4c1a-45de-a8ce-cb719bb3bca8</td>
                 </tr>
             </table>
             <p>
@@ -312,7 +350,85 @@ ins {
             </p>
             <ol>
                 <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="success">received</span> -&gt; has no effect, just as a confirmation</li>
-                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="success">received</span>
+                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)"><span class="failure"><del class="expected">received</del></span><span class="exceptionMessage">io.sphere.sdk.client.GatewayTimeoutException: detailMessage: {
+  "statusCode": 504,
+  "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.",
+  "errors": [
+   { "code":"GatewayTimeout", "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server." },
+  ]
+}
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/payments/1d187748-c9a5-4341-ab18-9e713681a31b failed  with response code 504 on 2017-09-21T13:26:01.469Z
+http response: io.sphere.sdk.http.HttpResponseImpl@6373f8dc[statusCode=504,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Via=[1.1 google], ETag=["58f9d832-141"], X-Served-By=[api-gce-de8742bd.sphere.prod.commercetools.de], X-Served-Config=[sphere-projects-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[321], Content-Type=[application/json]},associatedRequest=&lt;null&gt;,textInterpretedBody={
+  "statusCode": 504,
+  "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.",
+  "errors": [
+   { "code":"GatewayTimeout", "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server." },
+  ]
+}
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /payments/1d187748-c9a5-4341-ab18-9e713681a31b
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: PaymentByIdGetImpl[javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,identifierToSearchFor=1d187748-c9a5-4341-ab18-9e713681a31b,expansionPaths=[],additionalParameters=[],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],builderFunction=io.sphere.sdk.payments.queries.PaymentByIdGetImpl$$Lambda$222/1897109451@3ac69b81]
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/1d187748-c9a5-4341-ab18-9e713681a31b,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/GatewayTimeoutException.html
+</span><input class="stackTraceButton" id="stackTraceButton1" type="button" onclick="javascript:toggleStackTrace('1')" value="View Stack" /><div class="stackTrace" id="stackTrace1"><p>While evaluating expression: <code>receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: io.sphere.sdk.client.GatewayTimeoutException: detailMessage: {
+  "statusCode": 504,
+  "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.",
+  "errors": [
+   { "code":"GatewayTimeout", "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server." },
+  ]
+}
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/payments/1d187748-c9a5-4341-ab18-9e713681a31b failed  with response code 504 on 2017-09-21T13:26:01.469Z
+http response: io.sphere.sdk.http.HttpResponseImpl@6373f8dc[statusCode=504,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Via=[1.1 google], ETag=["58f9d832-141"], X-Served-By=[api-gce-de8742bd.sphere.prod.commercetools.de], X-Served-Config=[sphere-projects-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[321], Content-Type=[application/json]},associatedRequest=&lt;null&gt;,textInterpretedBody={
+  "statusCode": 504,
+  "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.",
+  "errors": [
+   { "code":"GatewayTimeout", "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server." },
+  ]
+}
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /payments/1d187748-c9a5-4341-ab18-9e713681a31b
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: PaymentByIdGetImpl[javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,identifierToSearchFor=1d187748-c9a5-4341-ab18-9e713681a31b,expansionPaths=[],additionalParameters=[],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],builderFunction=io.sphere.sdk.payments.queries.PaymentByIdGetImpl$$Lambda$222/1897109451@3ac69b81]
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/1d187748-c9a5-4341-ab18-9e713681a31b,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/GatewayTimeoutException.html
+</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$10 (ExceptionFactory.java:49)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.GatewayTimeoutException: detailMessage: {
+  "statusCode": 504,
+  "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.",
+  "errors": [
+   { "code":"GatewayTimeout", "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server." },
+  ]
+}
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/payments/1d187748-c9a5-4341-ab18-9e713681a31b failed  with response code 504 on 2017-09-21T13:26:01.469Z
+http response: io.sphere.sdk.http.HttpResponseImpl@6373f8dc[statusCode=504,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Via=[1.1 google], ETag=["58f9d832-141"], X-Served-By=[api-gce-de8742bd.sphere.prod.commercetools.de], X-Served-Config=[sphere-projects-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[321], Content-Type=[application/json]},associatedRequest=&lt;null&gt;,textInterpretedBody={
+  "statusCode": 504,
+  "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.",
+  "errors": [
+   { "code":"GatewayTimeout", "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server." },
+  ]
+}
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /payments/1d187748-c9a5-4341-ab18-9e713681a31b
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: PaymentByIdGetImpl[javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,identifierToSearchFor=1d187748-c9a5-4341-ab18-9e713681a31b,expansionPaths=[],additionalParameters=[],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],builderFunction=io.sphere.sdk.payments.queries.PaymentByIdGetImpl$$Lambda$222/1897109451@3ac69b81]
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/1d187748-c9a5-4341-ab18-9e713681a31b,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/GatewayTimeoutException.html
+</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$10 (ExceptionFactory.java:49)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></span>
                     -&gt;  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
             </ol>
             <table c:execute="#result = fetchPaymentDetails(#paymentName)">
@@ -326,36 +442,324 @@ ins {
                     <th c:assertEquals="#result.successUrl">url called after successful verification</th>
                     <th c:echo="#result.version">Version (for information only)</th>
                 </tr>
-                <tr>
+                <tr><span class="failure"><del class="expected">
                     <td class="inputvalue">Payment 1</td>
-                    <td class="success">Success</td>
-                    <td class="success">1</td>
-                    <td class="success">1</td>
-                    <td class="success">null</td>
-                    <td class="success">4,06 EUR</td>
-                    <td class="success">[...]Payment+1+Success</td>
-                    <td>18</td>
-                </tr>
-                <tr>
+                    <td>Success</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>null</td>
+                    <td>4,06 EUR</td>
+                    <td>[...]Payment+1+Success</td>
+                    <td />
+                </del></span><span class="exceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/payments/1d187748-c9a5-4341-ab18-9e713681a31b failed  with response code 502 on 2017-09-21T13:26:01.479Z
+http response: io.sphere.sdk.http.HttpResponseImpl@ec62e33[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /payments/1d187748-c9a5-4341-ab18-9e713681a31b
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: PaymentByIdGetImpl[javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,identifierToSearchFor=1d187748-c9a5-4341-ab18-9e713681a31b,expansionPaths=[],additionalParameters=[],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],builderFunction=io.sphere.sdk.payments.queries.PaymentByIdGetImpl$$Lambda$222/1897109451@3ac69b81]
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/1d187748-c9a5-4341-ab18-9e713681a31b,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</span><input class="stackTraceButton" id="stackTraceButton2" type="button" onclick="javascript:toggleStackTrace('2')" value="View Stack" /><div class="stackTrace" id="stackTrace2"><p>While evaluating expression: <code>#result = fetchPaymentDetails(#paymentName)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/payments/1d187748-c9a5-4341-ab18-9e713681a31b failed  with response code 502 on 2017-09-21T13:26:01.479Z
+http response: io.sphere.sdk.http.HttpResponseImpl@ec62e33[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /payments/1d187748-c9a5-4341-ab18-9e713681a31b
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: PaymentByIdGetImpl[javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,identifierToSearchFor=1d187748-c9a5-4341-ab18-9e713681a31b,expansionPaths=[],additionalParameters=[],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],builderFunction=io.sphere.sdk.payments.queries.PaymentByIdGetImpl$$Lambda$222/1897109451@3ac69b81]
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/1d187748-c9a5-4341-ab18-9e713681a31b,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/payments/1d187748-c9a5-4341-ab18-9e713681a31b failed  with response code 502 on 2017-09-21T13:26:01.479Z
+http response: io.sphere.sdk.http.HttpResponseImpl@ec62e33[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /payments/1d187748-c9a5-4341-ab18-9e713681a31b
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: PaymentByIdGetImpl[javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,identifierToSearchFor=1d187748-c9a5-4341-ab18-9e713681a31b,expansionPaths=[],additionalParameters=[],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],builderFunction=io.sphere.sdk.payments.queries.PaymentByIdGetImpl$$Lambda$222/1897109451@3ac69b81]
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/1d187748-c9a5-4341-ab18-9e713681a31b,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
+                <tr><span class="failure"><del class="expected">
                     <td class="inputvalue">Payment 3</td>
-                    <td class="success">Success</td>
-                    <td class="success">1</td>
-                    <td class="success">1</td>
-                    <td class="success">null</td>
-                    <td class="success">61,13 EUR</td>
-                    <td class="success">[...]Payment+3+Success</td>
-                    <td>18</td>
-                </tr>
-                <tr>
+                    <td>Success</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>null</td>
+                    <td>61,13 EUR</td>
+                    <td>[...]Payment+3+Success</td>
+                    <td />
+                </del></span><span class="exceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/payments/fd66073a-2a0e-4a91-b070-aff2ee2d2160 failed  with response code 502 on 2017-09-21T13:26:01.491Z
+http response: io.sphere.sdk.http.HttpResponseImpl@12b70f72[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /payments/fd66073a-2a0e-4a91-b070-aff2ee2d2160
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: PaymentByIdGetImpl[javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,identifierToSearchFor=fd66073a-2a0e-4a91-b070-aff2ee2d2160,expansionPaths=[],additionalParameters=[],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],builderFunction=io.sphere.sdk.payments.queries.PaymentByIdGetImpl$$Lambda$222/1897109451@3ac69b81]
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/fd66073a-2a0e-4a91-b070-aff2ee2d2160,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</span><input class="stackTraceButton" id="stackTraceButton3" type="button" onclick="javascript:toggleStackTrace('3')" value="View Stack" /><div class="stackTrace" id="stackTrace3"><p>While evaluating expression: <code>#result = fetchPaymentDetails(#paymentName)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/payments/fd66073a-2a0e-4a91-b070-aff2ee2d2160 failed  with response code 502 on 2017-09-21T13:26:01.491Z
+http response: io.sphere.sdk.http.HttpResponseImpl@12b70f72[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /payments/fd66073a-2a0e-4a91-b070-aff2ee2d2160
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: PaymentByIdGetImpl[javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,identifierToSearchFor=fd66073a-2a0e-4a91-b070-aff2ee2d2160,expansionPaths=[],additionalParameters=[],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],builderFunction=io.sphere.sdk.payments.queries.PaymentByIdGetImpl$$Lambda$222/1897109451@3ac69b81]
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/fd66073a-2a0e-4a91-b070-aff2ee2d2160,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/payments/fd66073a-2a0e-4a91-b070-aff2ee2d2160 failed  with response code 502 on 2017-09-21T13:26:01.491Z
+http response: io.sphere.sdk.http.HttpResponseImpl@12b70f72[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /payments/fd66073a-2a0e-4a91-b070-aff2ee2d2160
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: PaymentByIdGetImpl[javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,identifierToSearchFor=fd66073a-2a0e-4a91-b070-aff2ee2d2160,expansionPaths=[],additionalParameters=[],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],builderFunction=io.sphere.sdk.payments.queries.PaymentByIdGetImpl$$Lambda$222/1897109451@3ac69b81]
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/fd66073a-2a0e-4a91-b070-aff2ee2d2160,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
+                <tr><span class="failure"><del class="expected">
                     <td class="inputvalue">Payment 4</td>
-                    <td class="success">Success</td>
-                    <td class="success">1</td>
-                    <td class="success">1</td>
-                    <td class="success">null</td>
-                    <td class="success">1.112,83 EUR</td>
-                    <td class="success">[...]Payment+4+Success</td>
-                    <td>18</td>
-                </tr>
+                    <td>Success</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>null</td>
+                    <td>1.112,83 EUR</td>
+                    <td>[...]Payment+4+Success</td>
+                    <td />
+                </del></span><span class="exceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/payments/253eb33a-4c1a-45de-a8ce-cb719bb3bca8 failed  with response code 502 on 2017-09-21T13:26:01.503Z
+http response: io.sphere.sdk.http.HttpResponseImpl@645aee45[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /payments/253eb33a-4c1a-45de-a8ce-cb719bb3bca8
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: PaymentByIdGetImpl[javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,identifierToSearchFor=253eb33a-4c1a-45de-a8ce-cb719bb3bca8,expansionPaths=[],additionalParameters=[],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],builderFunction=io.sphere.sdk.payments.queries.PaymentByIdGetImpl$$Lambda$222/1897109451@3ac69b81]
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/253eb33a-4c1a-45de-a8ce-cb719bb3bca8,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</span><input class="stackTraceButton" id="stackTraceButton4" type="button" onclick="javascript:toggleStackTrace('4')" value="View Stack" /><div class="stackTrace" id="stackTrace4"><p>While evaluating expression: <code>#result = fetchPaymentDetails(#paymentName)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/payments/253eb33a-4c1a-45de-a8ce-cb719bb3bca8 failed  with response code 502 on 2017-09-21T13:26:01.503Z
+http response: io.sphere.sdk.http.HttpResponseImpl@645aee45[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /payments/253eb33a-4c1a-45de-a8ce-cb719bb3bca8
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: PaymentByIdGetImpl[javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,identifierToSearchFor=253eb33a-4c1a-45de-a8ce-cb719bb3bca8,expansionPaths=[],additionalParameters=[],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],builderFunction=io.sphere.sdk.payments.queries.PaymentByIdGetImpl$$Lambda$222/1897109451@3ac69b81]
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/253eb33a-4c1a-45de-a8ce-cb719bb3bca8,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/payments/253eb33a-4c1a-45de-a8ce-cb719bb3bca8 failed  with response code 502 on 2017-09-21T13:26:01.503Z
+http response: io.sphere.sdk.http.HttpResponseImpl@645aee45[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /payments/253eb33a-4c1a-45de-a8ce-cb719bb3bca8
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: PaymentByIdGetImpl[javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,identifierToSearchFor=253eb33a-4c1a-45de-a8ce-cb719bb3bca8,expansionPaths=[],additionalParameters=[],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],builderFunction=io.sphere.sdk.payments.queries.PaymentByIdGetImpl$$Lambda$222/1897109451@3ac69b81]
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/253eb33a-4c1a-45de-a8ce-cb719bb3bca8,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
             </table>
 
             <h3>Verify Order#paymentState</h3>
@@ -366,22 +770,534 @@ ins {
                     <th c:set="#paymentName">Payment Name</th>
                     <th c:assertEquals="#orderPaymentState">Order Payment State</th>
                 </tr>
-                <tr>
+                <tr><span class="failure"><del class="expected">
                     <td class="inputvalue">Payment 1</td>
-                    <td class="success">Paid</td>
-                </tr>
-                <tr>
+                    <td>Paid</td>
+                </del></span><span class="exceptionMessage">java.util.concurrent.CompletionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.526Z
+http response: io.sphere.sdk.http.HttpResponseImpl@6a8defc7[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="1d187748-c9a5-4341-ab18-9e713681a31b"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@4558f992, readablePath=/orders?where=paymentInfo(payments(id="1d187748-c9a5-4341-ab18-9e713681a31b")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</span><input class="stackTraceButton" id="stackTraceButton5" type="button" onclick="javascript:toggleStackTrace('5')" value="View Stack" /><div class="stackTrace" id="stackTrace5"><p>While evaluating expression: <code>#orderPaymentState = fetchOrderPaymentState(#paymentName)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: java.util.concurrent.CompletionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.526Z
+http response: io.sphere.sdk.http.HttpResponseImpl@6a8defc7[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="1d187748-c9a5-4341-ab18-9e713681a31b"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@4558f992, readablePath=/orders?where=paymentInfo(payments(id="1d187748-c9a5-4341-ab18-9e713681a31b")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.encodeThrowable (CompletableFuture.java:273)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeThrowable (CompletableFuture.java:280)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:604)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">java.util.concurrent.CompletionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.526Z
+http response: io.sphere.sdk.http.HttpResponseImpl@6a8defc7[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="1d187748-c9a5-4341-ab18-9e713681a31b"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@4558f992, readablePath=/orders?where=paymentInfo(payments(id="1d187748-c9a5-4341-ab18-9e713681a31b")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.encodeThrowable (CompletableFuture.java:273)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeThrowable (CompletableFuture.java:280)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:604)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.526Z
+http response: io.sphere.sdk.http.HttpResponseImpl@6a8defc7[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="1d187748-c9a5-4341-ab18-9e713681a31b"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@4558f992, readablePath=/orders?where=paymentInfo(payments(id="1d187748-c9a5-4341-ab18-9e713681a31b")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%221d187748-c9a5-4341-ab18-9e713681a31b%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
+                <tr><span class="failure"><del class="expected">
                     <td class="inputvalue">Payment 2</td>
-                    <td class="success">(null)</td>
-                </tr>
-                <tr>
+                    <td>(null)</td>
+                </del></span><span class="exceptionMessage">java.util.concurrent.CompletionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.536Z
+http response: io.sphere.sdk.http.HttpResponseImpl@786c56e8[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="070d8df0-43b3-4044-a05c-7bb25c099699"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@57b942e1, readablePath=/orders?where=paymentInfo(payments(id="070d8df0-43b3-4044-a05c-7bb25c099699")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</span><input class="stackTraceButton" id="stackTraceButton6" type="button" onclick="javascript:toggleStackTrace('6')" value="View Stack" /><div class="stackTrace" id="stackTrace6"><p>While evaluating expression: <code>#orderPaymentState = fetchOrderPaymentState(#paymentName)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: java.util.concurrent.CompletionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.536Z
+http response: io.sphere.sdk.http.HttpResponseImpl@786c56e8[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="070d8df0-43b3-4044-a05c-7bb25c099699"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@57b942e1, readablePath=/orders?where=paymentInfo(payments(id="070d8df0-43b3-4044-a05c-7bb25c099699")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.encodeThrowable (CompletableFuture.java:273)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeThrowable (CompletableFuture.java:280)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:604)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">java.util.concurrent.CompletionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.536Z
+http response: io.sphere.sdk.http.HttpResponseImpl@786c56e8[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="070d8df0-43b3-4044-a05c-7bb25c099699"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@57b942e1, readablePath=/orders?where=paymentInfo(payments(id="070d8df0-43b3-4044-a05c-7bb25c099699")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.encodeThrowable (CompletableFuture.java:273)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeThrowable (CompletableFuture.java:280)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:604)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.536Z
+http response: io.sphere.sdk.http.HttpResponseImpl@786c56e8[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="070d8df0-43b3-4044-a05c-7bb25c099699"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@57b942e1, readablePath=/orders?where=paymentInfo(payments(id="070d8df0-43b3-4044-a05c-7bb25c099699")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22070d8df0-43b3-4044-a05c-7bb25c099699%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
+                <tr><span class="failure"><del class="expected">
                     <td class="inputvalue">Payment 3</td>
-                    <td class="success">Paid</td>
-                </tr>
-                <tr>
+                    <td>Paid</td>
+                </del></span><span class="exceptionMessage">java.util.concurrent.CompletionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.542Z
+http response: io.sphere.sdk.http.HttpResponseImpl@20ceea69[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="fd66073a-2a0e-4a91-b070-aff2ee2d2160"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@f1bf574, readablePath=/orders?where=paymentInfo(payments(id="fd66073a-2a0e-4a91-b070-aff2ee2d2160")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</span><input class="stackTraceButton" id="stackTraceButton7" type="button" onclick="javascript:toggleStackTrace('7')" value="View Stack" /><div class="stackTrace" id="stackTrace7"><p>While evaluating expression: <code>#orderPaymentState = fetchOrderPaymentState(#paymentName)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: java.util.concurrent.CompletionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.542Z
+http response: io.sphere.sdk.http.HttpResponseImpl@20ceea69[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="fd66073a-2a0e-4a91-b070-aff2ee2d2160"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@f1bf574, readablePath=/orders?where=paymentInfo(payments(id="fd66073a-2a0e-4a91-b070-aff2ee2d2160")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.encodeThrowable (CompletableFuture.java:273)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeThrowable (CompletableFuture.java:280)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:604)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">java.util.concurrent.CompletionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.542Z
+http response: io.sphere.sdk.http.HttpResponseImpl@20ceea69[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="fd66073a-2a0e-4a91-b070-aff2ee2d2160"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@f1bf574, readablePath=/orders?where=paymentInfo(payments(id="fd66073a-2a0e-4a91-b070-aff2ee2d2160")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.encodeThrowable (CompletableFuture.java:273)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeThrowable (CompletableFuture.java:280)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:604)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.542Z
+http response: io.sphere.sdk.http.HttpResponseImpl@20ceea69[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="fd66073a-2a0e-4a91-b070-aff2ee2d2160"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@f1bf574, readablePath=/orders?where=paymentInfo(payments(id="fd66073a-2a0e-4a91-b070-aff2ee2d2160")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22fd66073a-2a0e-4a91-b070-aff2ee2d2160%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
+                <tr><span class="failure"><del class="expected">
                     <td class="inputvalue">Payment 4</td>
-                    <td class="success">Paid</td>
-                </tr>
+                    <td>Paid</td>
+                </del></span><span class="exceptionMessage">java.util.concurrent.CompletionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.550Z
+http response: io.sphere.sdk.http.HttpResponseImpl@bdf977a[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="253eb33a-4c1a-45de-a8ce-cb719bb3bca8"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@240a8d05, readablePath=/orders?where=paymentInfo(payments(id="253eb33a-4c1a-45de-a8ce-cb719bb3bca8")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</span><input class="stackTraceButton" id="stackTraceButton8" type="button" onclick="javascript:toggleStackTrace('8')" value="View Stack" /><div class="stackTrace" id="stackTrace8"><p>While evaluating expression: <code>#orderPaymentState = fetchOrderPaymentState(#paymentName)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: java.util.concurrent.CompletionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.550Z
+http response: io.sphere.sdk.http.HttpResponseImpl@bdf977a[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="253eb33a-4c1a-45de-a8ce-cb719bb3bca8"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@240a8d05, readablePath=/orders?where=paymentInfo(payments(id="253eb33a-4c1a-45de-a8ce-cb719bb3bca8")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.encodeThrowable (CompletableFuture.java:273)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeThrowable (CompletableFuture.java:280)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:604)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">java.util.concurrent.CompletionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.550Z
+http response: io.sphere.sdk.http.HttpResponseImpl@bdf977a[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="253eb33a-4c1a-45de-a8ce-cb719bb3bca8"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@240a8d05, readablePath=/orders?where=paymentInfo(payments(id="253eb33a-4c1a-45de-a8ce-cb719bb3bca8")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.encodeThrowable (CompletableFuture.java:273)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.completeThrowable (CompletableFuture.java:280)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:604)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+
+summary: GET https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29 failed  with response code 502 on 2017-09-21T13:26:01.550Z
+http response: io.sphere.sdk.http.HttpResponseImpl@bdf977a[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:26:01 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
+&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
+&lt;title&gt;502 Server Error&lt;/title&gt;
+&lt;/head&gt;
+&lt;body text=#000000 bgcolor=#ffffff&gt;
+&lt;h1&gt;Error: Server Error&lt;/h1&gt;
+&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
+&lt;h2&gt;&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+]
+SDK: 1.13.0
+project: payone-integration-tests-heroku-17
+endpoint: GET /orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29
+Java: 1.8.0_144
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
+sphere request: OrderQueryImpl{predicate=[Predicate[paymentInfo(payments(id="253eb33a-4c1a-45de-a8ce-cb719bb3bca8"))]], sort=[], expand=[], additionalHttpQueryParameters=[], limit=null, offset=null, endpoint='/orders', resultMapper=io.sphere.sdk.queries.MetaModelQueryDslBuilder$$Lambda$236/1034389405@240a8d05, readablePath=/orders?where=paymentInfo(payments(id="253eb33a-4c1a-45de-a8ce-cb719bb3bca8")), request=HttpRequestIntent[httpMethod=GET,path=/orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29,headers={},body=&lt;null&gt;], withTotal=null}
+http request: HttpRequestImpl[httpMethod=GET,url=https://api.sphere.io/payone-integration-tests-heroku-17/orders?where=paymentInfo%28payments%28id%3D%22253eb33a-4c1a-45de-a8ce-cb719bb3bca8%22%29%29,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=&lt;null&gt;]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
+</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
             </table>
 
         </div>
@@ -395,5 +1311,5 @@ ins {
             The checkout implementation needs to take care of failed verifications - the user will be redirected to
             the <em>errorUrl</em> specified in the Payment object.
         </p>
-    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 203916 ms on 21-Sep-2017 at 13:06:19 UTC</div></div></body>
+    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 426065 ms on 21-Sep-2017 at 13:26:01 UTC</div></div></body>
 </html>
