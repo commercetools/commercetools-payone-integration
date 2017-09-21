@@ -1,43 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
-<head><script type="text/javascript">/* Stack Trace Toggling */
-
-function getElementById(id) {
-  var element;
-
-  if (document.getElementById) { // standard
-    return document.getElementById(id);
-  } else if (document.all) { // old IE versions
-    return document.all[id];
-  } else if (document.layers) { // nn4
-    return document.layers[id];
-  }
-  alert("Sorry, but your web browser is not supported by Concordion.");
-}
-
-function isVisible(element) {
-  return element.style.display;
-}
-
-function makeVisible(element) {
-  element.style.display = "block";
-}
-
-function makeInvisible(element) {
-  element.style.display = "";
-}
-
-function toggleStackTrace(stackTraceNumber) {
-  var stackTrace = getElementById("stackTrace" + stackTraceNumber);
-  var stackTraceButton = getElementById("stackTraceButton" + stackTraceNumber);
-  if (isVisible(stackTrace)) {
-    makeInvisible(stackTrace);
-    stackTraceButton.value = "View Stack";
-  } else {
-    makeVisible(stackTrace);
-    stackTraceButton.value = "Hide Stack";
-  }
-}
-</script><style>* {
+<head><style>* {
   font-family: Arial;
 }
 body {
@@ -226,664 +188,34 @@ Test that we get the correct Text into the paymentStatus.interfaceCode and payme
             <th c:set="#successURL">success URL (use incorrect url to force an error)</th>
             <th c:echo="#paymentId">Payment ID (for information only)</th>
         </tr>
-        <tr><span class="failure"><del class="expected">
+        <tr>
             <td class="inputvalue">Payment 1</td>
             <td class="inputvalue">406</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">invalid</td>
-            <td />
-        </del></span><span class="exceptionMessage">io.sphere.sdk.client.GatewayTimeoutException: detailMessage: {
-  "statusCode": 504,
-  "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.",
-  "errors": [
-   { "code":"GatewayTimeout", "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server." },
-  ]
-}
-
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments failed  with response code 504 on 2017-09-21T13:41:56.291Z
-http response: io.sphere.sdk.http.HttpResponseImpl@3c6f4728[statusCode=504,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 21 Sep 2017 13:41:56 GMT], Via=[1.1 google], ETag=["58f9d832-141"], X-Served-By=[api-gce-de8742bd.sphere.prod.commercetools.de], X-Served-Config=[sphere-projects-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[321], Content-Type=[application/json]},associatedRequest=&lt;null&gt;,textInterpretedBody={
-  "statusCode": 504,
-  "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.",
-  "errors": [
-   { "code":"GatewayTimeout", "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server." },
-  ]
-}
-]
-SDK: 1.13.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments
-Java: 1.8.0_144
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentCreateCommandImpl[body=PaymentDraftDsl[customer=&lt;null&gt;,externalId=&lt;null&gt;,interfaceId=&lt;null&gt;,amountPlanned=EUR 4.06000,amountAuthorized=&lt;null&gt;,authorizedUntil=&lt;null&gt;,amountPaid=&lt;null&gt;,amountRefunded=&lt;null&gt;,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=BANK_TRANSFER-SOFORTUEBERWEISUNG,name=&lt;null&gt;],custom=CustomFieldsDraftImpl[type=ResourceIdentifierImpl[id=&lt;null&gt;,key=payment-BANK_TRANSFER,typeId=&lt;null&gt;],fields={reference="&lt;placeholder&gt;", errorUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Error", cancelUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Cancel", successUrl="invalid", languageCode="en"}],paymentStatus=&lt;null&gt;,transactions=&lt;null&gt;,interfaceInteractions=&lt;null&gt;],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,expansionPaths=[],creationFunction=io.sphere.sdk.payments.commands.PaymentCreateCommandImpl$$Lambda$152/1319642054@67b268d8]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=io.sphere.sdk.http.StringHttpRequestBody@5274eba4[body={"amountPlanned":{"centAmount":406,"currencyCode":"EUR"},"custom":{"type":{"key":"payment-BANK_TRANSFER"},"fields":{"reference":"&lt;placeholder&gt;","errorUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Error","cancelUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Cancel","successUrl":"invalid","languageCode":"en"}},"paymentMethodInfo":{"paymentInterface":"PAYONE","method":"BANK_TRANSFER-SOFORTUEBERWEISUNG"}}]]
-http request formatted body: {
-  "amountPlanned" : {
-    "centAmount" : 406,
-    "currencyCode" : "EUR"
-  },
-  "custom" : {
-    "type" : {
-      "key" : "payment-BANK_TRANSFER"
-    },
-    "fields" : {
-      "reference" : "&lt;placeholder&gt;",
-      "errorUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Error",
-      "cancelUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Cancel",
-      "successUrl" : "invalid",
-      "languageCode" : "en"
-    }
-  },
-  "paymentMethodInfo" : {
-    "paymentInterface" : "PAYONE",
-    "method" : "BANK_TRANSFER-SOFORTUEBERWEISUNG"
-  }
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/GatewayTimeoutException.html
-</span><input class="stackTraceButton" id="stackTraceButton1" type="button" onclick="javascript:toggleStackTrace('1')" value="View Stack" /><div class="stackTrace" id="stackTrace1"><p>While evaluating expression: <code>#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode, #successURL)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: io.sphere.sdk.client.GatewayTimeoutException: detailMessage: {
-  "statusCode": 504,
-  "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.",
-  "errors": [
-   { "code":"GatewayTimeout", "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server." },
-  ]
-}
-
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments failed  with response code 504 on 2017-09-21T13:41:56.291Z
-http response: io.sphere.sdk.http.HttpResponseImpl@3c6f4728[statusCode=504,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 21 Sep 2017 13:41:56 GMT], Via=[1.1 google], ETag=["58f9d832-141"], X-Served-By=[api-gce-de8742bd.sphere.prod.commercetools.de], X-Served-Config=[sphere-projects-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[321], Content-Type=[application/json]},associatedRequest=&lt;null&gt;,textInterpretedBody={
-  "statusCode": 504,
-  "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.",
-  "errors": [
-   { "code":"GatewayTimeout", "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server." },
-  ]
-}
-]
-SDK: 1.13.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments
-Java: 1.8.0_144
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentCreateCommandImpl[body=PaymentDraftDsl[customer=&lt;null&gt;,externalId=&lt;null&gt;,interfaceId=&lt;null&gt;,amountPlanned=EUR 4.06000,amountAuthorized=&lt;null&gt;,authorizedUntil=&lt;null&gt;,amountPaid=&lt;null&gt;,amountRefunded=&lt;null&gt;,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=BANK_TRANSFER-SOFORTUEBERWEISUNG,name=&lt;null&gt;],custom=CustomFieldsDraftImpl[type=ResourceIdentifierImpl[id=&lt;null&gt;,key=payment-BANK_TRANSFER,typeId=&lt;null&gt;],fields={reference="&lt;placeholder&gt;", errorUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Error", cancelUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Cancel", successUrl="invalid", languageCode="en"}],paymentStatus=&lt;null&gt;,transactions=&lt;null&gt;,interfaceInteractions=&lt;null&gt;],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,expansionPaths=[],creationFunction=io.sphere.sdk.payments.commands.PaymentCreateCommandImpl$$Lambda$152/1319642054@67b268d8]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=io.sphere.sdk.http.StringHttpRequestBody@5274eba4[body={"amountPlanned":{"centAmount":406,"currencyCode":"EUR"},"custom":{"type":{"key":"payment-BANK_TRANSFER"},"fields":{"reference":"&lt;placeholder&gt;","errorUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Error","cancelUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Cancel","successUrl":"invalid","languageCode":"en"}},"paymentMethodInfo":{"paymentInterface":"PAYONE","method":"BANK_TRANSFER-SOFORTUEBERWEISUNG"}}]]
-http request formatted body: {
-  "amountPlanned" : {
-    "centAmount" : 406,
-    "currencyCode" : "EUR"
-  },
-  "custom" : {
-    "type" : {
-      "key" : "payment-BANK_TRANSFER"
-    },
-    "fields" : {
-      "reference" : "&lt;placeholder&gt;",
-      "errorUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Error",
-      "cancelUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Cancel",
-      "successUrl" : "invalid",
-      "languageCode" : "en"
-    }
-  },
-  "paymentMethodInfo" : {
-    "paymentInterface" : "PAYONE",
-    "method" : "BANK_TRANSFER-SOFORTUEBERWEISUNG"
-  }
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/GatewayTimeoutException.html
-</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$10 (ExceptionFactory.java:49)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.GatewayTimeoutException: detailMessage: {
-  "statusCode": 504,
-  "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.",
-  "errors": [
-   { "code":"GatewayTimeout", "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server." },
-  ]
-}
-
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments failed  with response code 504 on 2017-09-21T13:41:56.291Z
-http response: io.sphere.sdk.http.HttpResponseImpl@3c6f4728[statusCode=504,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 21 Sep 2017 13:41:56 GMT], Via=[1.1 google], ETag=["58f9d832-141"], X-Served-By=[api-gce-de8742bd.sphere.prod.commercetools.de], X-Served-Config=[sphere-projects-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[321], Content-Type=[application/json]},associatedRequest=&lt;null&gt;,textInterpretedBody={
-  "statusCode": 504,
-  "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.",
-  "errors": [
-   { "code":"GatewayTimeout", "message": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server." },
-  ]
-}
-]
-SDK: 1.13.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments
-Java: 1.8.0_144
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentCreateCommandImpl[body=PaymentDraftDsl[customer=&lt;null&gt;,externalId=&lt;null&gt;,interfaceId=&lt;null&gt;,amountPlanned=EUR 4.06000,amountAuthorized=&lt;null&gt;,authorizedUntil=&lt;null&gt;,amountPaid=&lt;null&gt;,amountRefunded=&lt;null&gt;,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=BANK_TRANSFER-SOFORTUEBERWEISUNG,name=&lt;null&gt;],custom=CustomFieldsDraftImpl[type=ResourceIdentifierImpl[id=&lt;null&gt;,key=payment-BANK_TRANSFER,typeId=&lt;null&gt;],fields={reference="&lt;placeholder&gt;", errorUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Error", cancelUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Cancel", successUrl="invalid", languageCode="en"}],paymentStatus=&lt;null&gt;,transactions=&lt;null&gt;,interfaceInteractions=&lt;null&gt;],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,expansionPaths=[],creationFunction=io.sphere.sdk.payments.commands.PaymentCreateCommandImpl$$Lambda$152/1319642054@67b268d8]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=io.sphere.sdk.http.StringHttpRequestBody@5274eba4[body={"amountPlanned":{"centAmount":406,"currencyCode":"EUR"},"custom":{"type":{"key":"payment-BANK_TRANSFER"},"fields":{"reference":"&lt;placeholder&gt;","errorUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Error","cancelUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Cancel","successUrl":"invalid","languageCode":"en"}},"paymentMethodInfo":{"paymentInterface":"PAYONE","method":"BANK_TRANSFER-SOFORTUEBERWEISUNG"}}]]
-http request formatted body: {
-  "amountPlanned" : {
-    "centAmount" : 406,
-    "currencyCode" : "EUR"
-  },
-  "custom" : {
-    "type" : {
-      "key" : "payment-BANK_TRANSFER"
-    },
-    "fields" : {
-      "reference" : "&lt;placeholder&gt;",
-      "errorUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Error",
-      "cancelUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-1-Cancel",
-      "successUrl" : "invalid",
-      "languageCode" : "en"
-    }
-  },
-  "paymentMethodInfo" : {
-    "paymentInterface" : "PAYONE",
-    "method" : "BANK_TRANSFER-SOFORTUEBERWEISUNG"
-  }
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/GatewayTimeoutException.html
-</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$10 (ExceptionFactory.java:49)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
-        <tr><span class="failure"><del class="expected">
+            <td>8035a7be-a197-46e3-8694-6cd007ac7752</td>
+        </tr>
+        <tr>
             <td class="inputvalue">Payment 2</td>
             <td class="inputvalue">407</td>
             <td class="inputvalue">USD</td>
             <td class="inputvalue" />
-            <td />
-        </del></span><span class="exceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments failed  with response code 502 on 2017-09-21T13:41:56.446Z
-http response: io.sphere.sdk.http.HttpResponseImpl@1f31b2e9[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:41:56 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-]
-SDK: 1.13.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments
-Java: 1.8.0_144
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentCreateCommandImpl[body=PaymentDraftDsl[customer=&lt;null&gt;,externalId=&lt;null&gt;,interfaceId=&lt;null&gt;,amountPlanned=USD 4.07000,amountAuthorized=&lt;null&gt;,authorizedUntil=&lt;null&gt;,amountPaid=&lt;null&gt;,amountRefunded=&lt;null&gt;,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=BANK_TRANSFER-SOFORTUEBERWEISUNG,name=&lt;null&gt;],custom=CustomFieldsDraftImpl[type=ResourceIdentifierImpl[id=&lt;null&gt;,key=payment-BANK_TRANSFER,typeId=&lt;null&gt;],fields={reference="&lt;placeholder&gt;", errorUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Error", cancelUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Cancel", successUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Success", languageCode="en"}],paymentStatus=&lt;null&gt;,transactions=&lt;null&gt;,interfaceInteractions=&lt;null&gt;],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,expansionPaths=[],creationFunction=io.sphere.sdk.payments.commands.PaymentCreateCommandImpl$$Lambda$152/1319642054@67b268d8]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=io.sphere.sdk.http.StringHttpRequestBody@473fd7ec[body={"amountPlanned":{"centAmount":407,"currencyCode":"USD"},"custom":{"type":{"key":"payment-BANK_TRANSFER"},"fields":{"reference":"&lt;placeholder&gt;","errorUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Error","cancelUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Cancel","successUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Success","languageCode":"en"}},"paymentMethodInfo":{"paymentInterface":"PAYONE","method":"BANK_TRANSFER-SOFORTUEBERWEISUNG"}}]]
-http request formatted body: {
-  "amountPlanned" : {
-    "centAmount" : 407,
-    "currencyCode" : "USD"
-  },
-  "custom" : {
-    "type" : {
-      "key" : "payment-BANK_TRANSFER"
-    },
-    "fields" : {
-      "reference" : "&lt;placeholder&gt;",
-      "errorUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Error",
-      "cancelUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Cancel",
-      "successUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Success",
-      "languageCode" : "en"
-    }
-  },
-  "paymentMethodInfo" : {
-    "paymentInterface" : "PAYONE",
-    "method" : "BANK_TRANSFER-SOFORTUEBERWEISUNG"
-  }
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
-</span><input class="stackTraceButton" id="stackTraceButton2" type="button" onclick="javascript:toggleStackTrace('2')" value="View Stack" /><div class="stackTrace" id="stackTrace2"><p>While evaluating expression: <code>#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode, #successURL)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments failed  with response code 502 on 2017-09-21T13:41:56.446Z
-http response: io.sphere.sdk.http.HttpResponseImpl@1f31b2e9[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:41:56 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-]
-SDK: 1.13.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments
-Java: 1.8.0_144
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentCreateCommandImpl[body=PaymentDraftDsl[customer=&lt;null&gt;,externalId=&lt;null&gt;,interfaceId=&lt;null&gt;,amountPlanned=USD 4.07000,amountAuthorized=&lt;null&gt;,authorizedUntil=&lt;null&gt;,amountPaid=&lt;null&gt;,amountRefunded=&lt;null&gt;,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=BANK_TRANSFER-SOFORTUEBERWEISUNG,name=&lt;null&gt;],custom=CustomFieldsDraftImpl[type=ResourceIdentifierImpl[id=&lt;null&gt;,key=payment-BANK_TRANSFER,typeId=&lt;null&gt;],fields={reference="&lt;placeholder&gt;", errorUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Error", cancelUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Cancel", successUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Success", languageCode="en"}],paymentStatus=&lt;null&gt;,transactions=&lt;null&gt;,interfaceInteractions=&lt;null&gt;],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,expansionPaths=[],creationFunction=io.sphere.sdk.payments.commands.PaymentCreateCommandImpl$$Lambda$152/1319642054@67b268d8]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=io.sphere.sdk.http.StringHttpRequestBody@473fd7ec[body={"amountPlanned":{"centAmount":407,"currencyCode":"USD"},"custom":{"type":{"key":"payment-BANK_TRANSFER"},"fields":{"reference":"&lt;placeholder&gt;","errorUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Error","cancelUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Cancel","successUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Success","languageCode":"en"}},"paymentMethodInfo":{"paymentInterface":"PAYONE","method":"BANK_TRANSFER-SOFORTUEBERWEISUNG"}}]]
-http request formatted body: {
-  "amountPlanned" : {
-    "centAmount" : 407,
-    "currencyCode" : "USD"
-  },
-  "custom" : {
-    "type" : {
-      "key" : "payment-BANK_TRANSFER"
-    },
-    "fields" : {
-      "reference" : "&lt;placeholder&gt;",
-      "errorUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Error",
-      "cancelUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Cancel",
-      "successUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Success",
-      "languageCode" : "en"
-    }
-  },
-  "paymentMethodInfo" : {
-    "paymentInterface" : "PAYONE",
-    "method" : "BANK_TRANSFER-SOFORTUEBERWEISUNG"
-  }
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
-</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments failed  with response code 502 on 2017-09-21T13:41:56.446Z
-http response: io.sphere.sdk.http.HttpResponseImpl@1f31b2e9[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:41:56 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-]
-SDK: 1.13.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments
-Java: 1.8.0_144
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentCreateCommandImpl[body=PaymentDraftDsl[customer=&lt;null&gt;,externalId=&lt;null&gt;,interfaceId=&lt;null&gt;,amountPlanned=USD 4.07000,amountAuthorized=&lt;null&gt;,authorizedUntil=&lt;null&gt;,amountPaid=&lt;null&gt;,amountRefunded=&lt;null&gt;,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=BANK_TRANSFER-SOFORTUEBERWEISUNG,name=&lt;null&gt;],custom=CustomFieldsDraftImpl[type=ResourceIdentifierImpl[id=&lt;null&gt;,key=payment-BANK_TRANSFER,typeId=&lt;null&gt;],fields={reference="&lt;placeholder&gt;", errorUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Error", cancelUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Cancel", successUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Success", languageCode="en"}],paymentStatus=&lt;null&gt;,transactions=&lt;null&gt;,interfaceInteractions=&lt;null&gt;],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,expansionPaths=[],creationFunction=io.sphere.sdk.payments.commands.PaymentCreateCommandImpl$$Lambda$152/1319642054@67b268d8]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=io.sphere.sdk.http.StringHttpRequestBody@473fd7ec[body={"amountPlanned":{"centAmount":407,"currencyCode":"USD"},"custom":{"type":{"key":"payment-BANK_TRANSFER"},"fields":{"reference":"&lt;placeholder&gt;","errorUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Error","cancelUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Cancel","successUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Success","languageCode":"en"}},"paymentMethodInfo":{"paymentInterface":"PAYONE","method":"BANK_TRANSFER-SOFORTUEBERWEISUNG"}}]]
-http request formatted body: {
-  "amountPlanned" : {
-    "centAmount" : 407,
-    "currencyCode" : "USD"
-  },
-  "custom" : {
-    "type" : {
-      "key" : "payment-BANK_TRANSFER"
-    },
-    "fields" : {
-      "reference" : "&lt;placeholder&gt;",
-      "errorUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Error",
-      "cancelUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Cancel",
-      "successUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-2-Success",
-      "languageCode" : "en"
-    }
-  },
-  "paymentMethodInfo" : {
-    "paymentInterface" : "PAYONE",
-    "method" : "BANK_TRANSFER-SOFORTUEBERWEISUNG"
-  }
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
-</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
-        <tr><span class="failure"><del class="expected">
+            <td>a1752d3a-3cce-408d-90e7-e0e26ab494ca</td>
+        </tr>
+        <tr>
             <td class="inputvalue">Payment 3</td>
             <td class="inputvalue">408</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue" />
-            <td />
-        </del></span><span class="exceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments failed  with response code 502 on 2017-09-21T13:41:56.676Z
-http response: io.sphere.sdk.http.HttpResponseImpl@614260ae[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:41:56 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-]
-SDK: 1.13.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments
-Java: 1.8.0_144
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentCreateCommandImpl[body=PaymentDraftDsl[customer=&lt;null&gt;,externalId=&lt;null&gt;,interfaceId=&lt;null&gt;,amountPlanned=EUR 4.08000,amountAuthorized=&lt;null&gt;,authorizedUntil=&lt;null&gt;,amountPaid=&lt;null&gt;,amountRefunded=&lt;null&gt;,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=BANK_TRANSFER-SOFORTUEBERWEISUNG,name=&lt;null&gt;],custom=CustomFieldsDraftImpl[type=ResourceIdentifierImpl[id=&lt;null&gt;,key=payment-BANK_TRANSFER,typeId=&lt;null&gt;],fields={reference="&lt;placeholder&gt;", errorUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Error", cancelUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Cancel", successUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Success", languageCode="en"}],paymentStatus=&lt;null&gt;,transactions=&lt;null&gt;,interfaceInteractions=&lt;null&gt;],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,expansionPaths=[],creationFunction=io.sphere.sdk.payments.commands.PaymentCreateCommandImpl$$Lambda$152/1319642054@67b268d8]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=io.sphere.sdk.http.StringHttpRequestBody@f588661[body={"amountPlanned":{"centAmount":408,"currencyCode":"EUR"},"custom":{"type":{"key":"payment-BANK_TRANSFER"},"fields":{"reference":"&lt;placeholder&gt;","errorUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Error","cancelUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Cancel","successUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Success","languageCode":"en"}},"paymentMethodInfo":{"paymentInterface":"PAYONE","method":"BANK_TRANSFER-SOFORTUEBERWEISUNG"}}]]
-http request formatted body: {
-  "amountPlanned" : {
-    "centAmount" : 408,
-    "currencyCode" : "EUR"
-  },
-  "custom" : {
-    "type" : {
-      "key" : "payment-BANK_TRANSFER"
-    },
-    "fields" : {
-      "reference" : "&lt;placeholder&gt;",
-      "errorUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Error",
-      "cancelUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Cancel",
-      "successUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Success",
-      "languageCode" : "en"
-    }
-  },
-  "paymentMethodInfo" : {
-    "paymentInterface" : "PAYONE",
-    "method" : "BANK_TRANSFER-SOFORTUEBERWEISUNG"
-  }
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
-</span><input class="stackTraceButton" id="stackTraceButton3" type="button" onclick="javascript:toggleStackTrace('3')" value="View Stack" /><div class="stackTrace" id="stackTrace3"><p>While evaluating expression: <code>#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode, #successURL)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments failed  with response code 502 on 2017-09-21T13:41:56.676Z
-http response: io.sphere.sdk.http.HttpResponseImpl@614260ae[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:41:56 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-]
-SDK: 1.13.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments
-Java: 1.8.0_144
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentCreateCommandImpl[body=PaymentDraftDsl[customer=&lt;null&gt;,externalId=&lt;null&gt;,interfaceId=&lt;null&gt;,amountPlanned=EUR 4.08000,amountAuthorized=&lt;null&gt;,authorizedUntil=&lt;null&gt;,amountPaid=&lt;null&gt;,amountRefunded=&lt;null&gt;,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=BANK_TRANSFER-SOFORTUEBERWEISUNG,name=&lt;null&gt;],custom=CustomFieldsDraftImpl[type=ResourceIdentifierImpl[id=&lt;null&gt;,key=payment-BANK_TRANSFER,typeId=&lt;null&gt;],fields={reference="&lt;placeholder&gt;", errorUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Error", cancelUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Cancel", successUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Success", languageCode="en"}],paymentStatus=&lt;null&gt;,transactions=&lt;null&gt;,interfaceInteractions=&lt;null&gt;],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,expansionPaths=[],creationFunction=io.sphere.sdk.payments.commands.PaymentCreateCommandImpl$$Lambda$152/1319642054@67b268d8]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=io.sphere.sdk.http.StringHttpRequestBody@f588661[body={"amountPlanned":{"centAmount":408,"currencyCode":"EUR"},"custom":{"type":{"key":"payment-BANK_TRANSFER"},"fields":{"reference":"&lt;placeholder&gt;","errorUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Error","cancelUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Cancel","successUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Success","languageCode":"en"}},"paymentMethodInfo":{"paymentInterface":"PAYONE","method":"BANK_TRANSFER-SOFORTUEBERWEISUNG"}}]]
-http request formatted body: {
-  "amountPlanned" : {
-    "centAmount" : 408,
-    "currencyCode" : "EUR"
-  },
-  "custom" : {
-    "type" : {
-      "key" : "payment-BANK_TRANSFER"
-    },
-    "fields" : {
-      "reference" : "&lt;placeholder&gt;",
-      "errorUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Error",
-      "cancelUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Cancel",
-      "successUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Success",
-      "languageCode" : "en"
-    }
-  },
-  "paymentMethodInfo" : {
-    "paymentInterface" : "PAYONE",
-    "method" : "BANK_TRANSFER-SOFORTUEBERWEISUNG"
-  }
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
-</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments failed  with response code 502 on 2017-09-21T13:41:56.676Z
-http response: io.sphere.sdk.http.HttpResponseImpl@614260ae[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:41:56 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-]
-SDK: 1.13.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments
-Java: 1.8.0_144
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentCreateCommandImpl[body=PaymentDraftDsl[customer=&lt;null&gt;,externalId=&lt;null&gt;,interfaceId=&lt;null&gt;,amountPlanned=EUR 4.08000,amountAuthorized=&lt;null&gt;,authorizedUntil=&lt;null&gt;,amountPaid=&lt;null&gt;,amountRefunded=&lt;null&gt;,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=BANK_TRANSFER-SOFORTUEBERWEISUNG,name=&lt;null&gt;],custom=CustomFieldsDraftImpl[type=ResourceIdentifierImpl[id=&lt;null&gt;,key=payment-BANK_TRANSFER,typeId=&lt;null&gt;],fields={reference="&lt;placeholder&gt;", errorUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Error", cancelUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Cancel", successUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Success", languageCode="en"}],paymentStatus=&lt;null&gt;,transactions=&lt;null&gt;,interfaceInteractions=&lt;null&gt;],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,expansionPaths=[],creationFunction=io.sphere.sdk.payments.commands.PaymentCreateCommandImpl$$Lambda$152/1319642054@67b268d8]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=io.sphere.sdk.http.StringHttpRequestBody@f588661[body={"amountPlanned":{"centAmount":408,"currencyCode":"EUR"},"custom":{"type":{"key":"payment-BANK_TRANSFER"},"fields":{"reference":"&lt;placeholder&gt;","errorUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Error","cancelUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Cancel","successUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Success","languageCode":"en"}},"paymentMethodInfo":{"paymentInterface":"PAYONE","method":"BANK_TRANSFER-SOFORTUEBERWEISUNG"}}]]
-http request formatted body: {
-  "amountPlanned" : {
-    "centAmount" : 408,
-    "currencyCode" : "EUR"
-  },
-  "custom" : {
-    "type" : {
-      "key" : "payment-BANK_TRANSFER"
-    },
-    "fields" : {
-      "reference" : "&lt;placeholder&gt;",
-      "errorUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Error",
-      "cancelUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Cancel",
-      "successUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-3-Success",
-      "languageCode" : "en"
-    }
-  },
-  "paymentMethodInfo" : {
-    "paymentInterface" : "PAYONE",
-    "method" : "BANK_TRANSFER-SOFORTUEBERWEISUNG"
-  }
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
-</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
-        <tr><span class="failure"><del class="expected">
+            <td>93abf5b0-1996-46dd-9889-d9692f58a452</td>
+        </tr>
+        <tr>
             <td class="inputvalue">Payment 4</td>
             <td class="inputvalue">0</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue" />
-            <td />
-        </del></span><span class="exceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments failed  with response code 502 on 2017-09-21T13:41:56.729Z
-http response: io.sphere.sdk.http.HttpResponseImpl@6302e2dc[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:41:56 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-]
-SDK: 1.13.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments
-Java: 1.8.0_144
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentCreateCommandImpl[body=PaymentDraftDsl[customer=&lt;null&gt;,externalId=&lt;null&gt;,interfaceId=&lt;null&gt;,amountPlanned=EUR 0.00000,amountAuthorized=&lt;null&gt;,authorizedUntil=&lt;null&gt;,amountPaid=&lt;null&gt;,amountRefunded=&lt;null&gt;,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=BANK_TRANSFER-SOFORTUEBERWEISUNG,name=&lt;null&gt;],custom=CustomFieldsDraftImpl[type=ResourceIdentifierImpl[id=&lt;null&gt;,key=payment-BANK_TRANSFER,typeId=&lt;null&gt;],fields={reference="&lt;placeholder&gt;", errorUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Error", cancelUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Cancel", successUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Success", languageCode="en"}],paymentStatus=&lt;null&gt;,transactions=&lt;null&gt;,interfaceInteractions=&lt;null&gt;],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,expansionPaths=[],creationFunction=io.sphere.sdk.payments.commands.PaymentCreateCommandImpl$$Lambda$152/1319642054@67b268d8]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=io.sphere.sdk.http.StringHttpRequestBody@1f3d6935[body={"amountPlanned":{"centAmount":0,"currencyCode":"EUR"},"custom":{"type":{"key":"payment-BANK_TRANSFER"},"fields":{"reference":"&lt;placeholder&gt;","errorUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Error","cancelUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Cancel","successUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Success","languageCode":"en"}},"paymentMethodInfo":{"paymentInterface":"PAYONE","method":"BANK_TRANSFER-SOFORTUEBERWEISUNG"}}]]
-http request formatted body: {
-  "amountPlanned" : {
-    "centAmount" : 0,
-    "currencyCode" : "EUR"
-  },
-  "custom" : {
-    "type" : {
-      "key" : "payment-BANK_TRANSFER"
-    },
-    "fields" : {
-      "reference" : "&lt;placeholder&gt;",
-      "errorUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Error",
-      "cancelUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Cancel",
-      "successUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Success",
-      "languageCode" : "en"
-    }
-  },
-  "paymentMethodInfo" : {
-    "paymentInterface" : "PAYONE",
-    "method" : "BANK_TRANSFER-SOFORTUEBERWEISUNG"
-  }
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
-</span><input class="stackTraceButton" id="stackTraceButton4" type="button" onclick="javascript:toggleStackTrace('4')" value="View Stack" /><div class="stackTrace" id="stackTrace4"><p>While evaluating expression: <code>#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode, #successURL)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: io.sphere.sdk.client.BadGatewayException: detailMessage: 
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments failed  with response code 502 on 2017-09-21T13:41:56.729Z
-http response: io.sphere.sdk.http.HttpResponseImpl@6302e2dc[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:41:56 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-]
-SDK: 1.13.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments
-Java: 1.8.0_144
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentCreateCommandImpl[body=PaymentDraftDsl[customer=&lt;null&gt;,externalId=&lt;null&gt;,interfaceId=&lt;null&gt;,amountPlanned=EUR 0.00000,amountAuthorized=&lt;null&gt;,authorizedUntil=&lt;null&gt;,amountPaid=&lt;null&gt;,amountRefunded=&lt;null&gt;,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=BANK_TRANSFER-SOFORTUEBERWEISUNG,name=&lt;null&gt;],custom=CustomFieldsDraftImpl[type=ResourceIdentifierImpl[id=&lt;null&gt;,key=payment-BANK_TRANSFER,typeId=&lt;null&gt;],fields={reference="&lt;placeholder&gt;", errorUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Error", cancelUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Cancel", successUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Success", languageCode="en"}],paymentStatus=&lt;null&gt;,transactions=&lt;null&gt;,interfaceInteractions=&lt;null&gt;],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,expansionPaths=[],creationFunction=io.sphere.sdk.payments.commands.PaymentCreateCommandImpl$$Lambda$152/1319642054@67b268d8]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=io.sphere.sdk.http.StringHttpRequestBody@1f3d6935[body={"amountPlanned":{"centAmount":0,"currencyCode":"EUR"},"custom":{"type":{"key":"payment-BANK_TRANSFER"},"fields":{"reference":"&lt;placeholder&gt;","errorUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Error","cancelUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Cancel","successUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Success","languageCode":"en"}},"paymentMethodInfo":{"paymentInterface":"PAYONE","method":"BANK_TRANSFER-SOFORTUEBERWEISUNG"}}]]
-http request formatted body: {
-  "amountPlanned" : {
-    "centAmount" : 0,
-    "currencyCode" : "EUR"
-  },
-  "custom" : {
-    "type" : {
-      "key" : "payment-BANK_TRANSFER"
-    },
-    "fields" : {
-      "reference" : "&lt;placeholder&gt;",
-      "errorUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Error",
-      "cancelUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Cancel",
-      "successUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Success",
-      "languageCode" : "en"
-    }
-  },
-  "paymentMethodInfo" : {
-    "paymentInterface" : "PAYONE",
-    "method" : "BANK_TRANSFER-SOFORTUEBERWEISUNG"
-  }
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
-</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.BadGatewayException: detailMessage: 
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments failed  with response code 502 on 2017-09-21T13:41:56.729Z
-http response: io.sphere.sdk.http.HttpResponseImpl@6302e2dc[statusCode=502,headers={Referrer-Policy=[no-referrer], Alt-Svc=[clear], Content-Length=[332], Date=[Thu, 21 Sep 2017 13:41:56 GMT], Content-Type=[text/html; charset=UTF-8]},associatedRequest=&lt;null&gt;,textInterpretedBody=
-&lt;html&gt;&lt;head&gt;
-&lt;meta http-equiv="content-type" content="text/html;charset=utf-8"&gt;
-&lt;title&gt;502 Server Error&lt;/title&gt;
-&lt;/head&gt;
-&lt;body text=#000000 bgcolor=#ffffff&gt;
-&lt;h1&gt;Error: Server Error&lt;/h1&gt;
-&lt;h2&gt;The server encountered a temporary error and could not complete your request.&lt;p&gt;Please try again in 30 seconds.&lt;/h2&gt;
-&lt;h2&gt;&lt;/h2&gt;
-&lt;/body&gt;&lt;/html&gt;
-]
-SDK: 1.13.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments
-Java: 1.8.0_144
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentCreateCommandImpl[body=PaymentDraftDsl[customer=&lt;null&gt;,externalId=&lt;null&gt;,interfaceId=&lt;null&gt;,amountPlanned=EUR 0.00000,amountAuthorized=&lt;null&gt;,authorizedUntil=&lt;null&gt;,amountPaid=&lt;null&gt;,amountRefunded=&lt;null&gt;,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=BANK_TRANSFER-SOFORTUEBERWEISUNG,name=&lt;null&gt;],custom=CustomFieldsDraftImpl[type=ResourceIdentifierImpl[id=&lt;null&gt;,key=payment-BANK_TRANSFER,typeId=&lt;null&gt;],fields={reference="&lt;placeholder&gt;", errorUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Error", cancelUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Cancel", successUrl="https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Success", languageCode="en"}],paymentStatus=&lt;null&gt;,transactions=&lt;null&gt;,interfaceInteractions=&lt;null&gt;],expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],javaType=[simple type, class io.sphere.sdk.payments.Payment],endpoint=/payments,expansionPaths=[],creationFunction=io.sphere.sdk.payments.commands.PaymentCreateCommandImpl$$Lambda$152/1319642054@67b268d8]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.13.0 (AHC/2.0) Java/1.8.0_144-b01 (Linux; amd64)], Accept-Encoding=[gzip]},body=io.sphere.sdk.http.StringHttpRequestBody@1f3d6935[body={"amountPlanned":{"centAmount":0,"currencyCode":"EUR"},"custom":{"type":{"key":"payment-BANK_TRANSFER"},"fields":{"reference":"&lt;placeholder&gt;","errorUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Error","cancelUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Cancel","successUrl":"https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Success","languageCode":"en"}},"paymentMethodInfo":{"paymentInterface":"PAYONE","method":"BANK_TRANSFER-SOFORTUEBERWEISUNG"}}]]
-http request formatted body: {
-  "amountPlanned" : {
-    "centAmount" : 0,
-    "currencyCode" : "EUR"
-  },
-  "custom" : {
-    "type" : {
-      "key" : "payment-BANK_TRANSFER"
-    },
-    "fields" : {
-      "reference" : "&lt;placeholder&gt;",
-      "errorUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Error",
-      "cancelUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Cancel",
-      "successUrl" : "https://www.example.com/sofortueberweisung_charge_immediately/Payment-4-Success",
-      "languageCode" : "en"
-    }
-  },
-  "paymentMethodInfo" : {
-    "paymentInterface" : "PAYONE",
-    "method" : "BANK_TRANSFER-SOFORTUEBERWEISUNG"
-  }
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/BadGatewayException.html
-</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$8 (ExceptionFactory.java:47)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:148)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:133)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:127)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$5 (SphereClientImpl.java:86)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
+            <td>afda80c9-5b0e-4e1d-9cc0-d3627e5fefda</td>
+        </tr>
     </table>
     <p>
     When I request the integration service to handle them I will get the following results:
@@ -897,39 +229,39 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <th c:assertEquals="#result.transactionState">Transaction State </th>
             <th c:echo="#result.version">Version (for information only)</th>
         </tr>
-        <tr><span class="failure"><del class="expected">
+        <tr>
             <td class="inputvalue">Payment 1</td>
-            <td>200</td>
-            <td>ERROR 1041</td>
-            <td>Parameter {successurl} faulty or missing</td>
-            <td>Failure</td>
-            <td />
-        </del></span><span class="exceptionMessage">IllegalStateException: Legible payment name 'Payment 1' not mapped to any payment ID.</span><input class="stackTraceButton" id="stackTraceButton5" type="button" onclick="javascript:toggleStackTrace('5')" value="View Stack" /><div class="stackTrace" id="stackTrace5"><p>While evaluating expression: <code>#result = handlePayment(#paymentName, #requestType)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: IllegalStateException: Legible payment name 'Payment 1' not mapped to any payment ID.</div><div class="stackTraceEntry">at com.google.common.base.Preconditions.checkState (Preconditions.java:174)</div><div class="stackTraceEntry">at specs.BaseFixture.requestToHandlePaymentByLegibleName (BaseFixture.java:504)</div><div class="stackTraceEntry">at specs.response.ResponsesFixture.handlePayment (ResponsesFixture.java:87)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke0 (NativeMethodAccessorImpl.java:-2)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)</div><div class="stackTraceEntry">at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)</div><div class="stackTraceEntry">at java.lang.reflect.Method.invoke (Method.java:498)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.invokeMethod (OgnlRuntime.java:532)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callAppropriateMethod (OgnlRuntime.java:826)</div><div class="stackTraceEntry">at ognl.ObjectMethodAccessor.callMethod (ObjectMethodAccessor.java:61)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callMethod (OgnlRuntime.java:860)</div><div class="stackTraceEntry">at ognl.ASTMethod.getValueBody (ASTMethod.java:73)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.ASTAssign.getValueBody (ASTAssign.java:49)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:333)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:378)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:357)</div><div class="stackTraceEntry">at org.concordion.internal.OgnlEvaluator.evaluate (OgnlEvaluator.java:32)</div><div class="stackTraceEntry">at org.concordion.internal.SimpleEvaluator.evaluate (SimpleEvaluator.java:15)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$DefaultStrategy.execute (ExecuteCommand.java:52)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$TableStrategy.execute (ExecuteCommand.java:70)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.api.CommandCallList.processSequentially (CommandCallList.java:30)</div><div class="stackTraceEntry">at org.concordion.internal.command.SpecificationCommand.execute (SpecificationCommand.java:31)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.XMLSpecification.process (XMLSpecification.java:17)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:33)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:26)</div><div class="stackTraceEntry">at org.concordion.internal.FixtureRunner.run (FixtureRunner.java:24)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner$1.evaluate (ConcordionRunner.java:125)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runLeaf (ParentRunner.java:325)</div><div class="stackTraceEntry">at org.junit.runners.BlockJUnit4ClassRunner.runChild (BlockJUnit4ClassRunner.java:78)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:115)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:21)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.RunBefores.evaluate (RunBefores.java:26)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:128)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:27)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:137)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:115)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:105)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:62)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:49)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runJUnitClass (DefaultConcordionRunner.java:101)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runTestClass (DefaultConcordionRunner.java:65)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.execute (DefaultConcordionRunner.java:28)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:122)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:117)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleTask.runInterruptibly (TrustedListenableFutureTask.java:108)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.InterruptibleTask.run (InterruptibleTask.java:41)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask.run (TrustedListenableFutureTask.java:77)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor.runWorker (ThreadPoolExecutor.java:1149)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor$Worker.run (ThreadPoolExecutor.java:624)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">java.lang.IllegalStateException: Legible payment name 'Payment 1' not mapped to any payment ID.</div><div class="stackTraceEntry">at com.google.common.base.Preconditions.checkState (Preconditions.java:174)</div><div class="stackTraceEntry">at specs.BaseFixture.requestToHandlePaymentByLegibleName (BaseFixture.java:504)</div><div class="stackTraceEntry">at specs.response.ResponsesFixture.handlePayment (ResponsesFixture.java:87)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke0 (NativeMethodAccessorImpl.java:-2)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)</div><div class="stackTraceEntry">at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)</div><div class="stackTraceEntry">at java.lang.reflect.Method.invoke (Method.java:498)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.invokeMethod (OgnlRuntime.java:532)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callAppropriateMethod (OgnlRuntime.java:826)</div><div class="stackTraceEntry">at ognl.ObjectMethodAccessor.callMethod (ObjectMethodAccessor.java:61)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callMethod (OgnlRuntime.java:860)</div><div class="stackTraceEntry">at ognl.ASTMethod.getValueBody (ASTMethod.java:73)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.ASTAssign.getValueBody (ASTAssign.java:49)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:333)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:378)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:357)</div><div class="stackTraceEntry">at org.concordion.internal.OgnlEvaluator.evaluate (OgnlEvaluator.java:32)</div><div class="stackTraceEntry">at org.concordion.internal.SimpleEvaluator.evaluate (SimpleEvaluator.java:15)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$DefaultStrategy.execute (ExecuteCommand.java:52)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$TableStrategy.execute (ExecuteCommand.java:70)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.api.CommandCallList.processSequentially (CommandCallList.java:30)</div><div class="stackTraceEntry">at org.concordion.internal.command.SpecificationCommand.execute (SpecificationCommand.java:31)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.XMLSpecification.process (XMLSpecification.java:17)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:33)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:26)</div><div class="stackTraceEntry">at org.concordion.internal.FixtureRunner.run (FixtureRunner.java:24)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner$1.evaluate (ConcordionRunner.java:125)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runLeaf (ParentRunner.java:325)</div><div class="stackTraceEntry">at org.junit.runners.BlockJUnit4ClassRunner.runChild (BlockJUnit4ClassRunner.java:78)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:115)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:21)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.RunBefores.evaluate (RunBefores.java:26)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:128)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:27)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:137)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:115)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:105)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:62)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:49)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runJUnitClass (DefaultConcordionRunner.java:101)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runTestClass (DefaultConcordionRunner.java:65)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.execute (DefaultConcordionRunner.java:28)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:122)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:117)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleTask.runInterruptibly (TrustedListenableFutureTask.java:108)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.InterruptibleTask.run (InterruptibleTask.java:41)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask.run (TrustedListenableFutureTask.java:77)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor.runWorker (ThreadPoolExecutor.java:1149)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor$Worker.run (ThreadPoolExecutor.java:624)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
-        <tr><span class="failure"><del class="expected">
+            <td class="success">200</td>
+            <td class="success">ERROR 1041</td>
+            <td class="success">Parameter {successurl} faulty or missing</td>
+            <td class="success">Failure</td>
+            <td>10</td>
+        </tr>
+        <tr>
             <td class="inputvalue">Payment 2</td>
-            <td>200</td>
-            <td>ERROR 923</td>
-            <td>Payment type not available for this currency or card type</td>
-            <td>Failure</td>
-            <td />
-        </del></span><span class="exceptionMessage">IllegalStateException: Legible payment name 'Payment 2' not mapped to any payment ID.</span><input class="stackTraceButton" id="stackTraceButton6" type="button" onclick="javascript:toggleStackTrace('6')" value="View Stack" /><div class="stackTrace" id="stackTrace6"><p>While evaluating expression: <code>#result = handlePayment(#paymentName, #requestType)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: IllegalStateException: Legible payment name 'Payment 2' not mapped to any payment ID.</div><div class="stackTraceEntry">at com.google.common.base.Preconditions.checkState (Preconditions.java:174)</div><div class="stackTraceEntry">at specs.BaseFixture.requestToHandlePaymentByLegibleName (BaseFixture.java:504)</div><div class="stackTraceEntry">at specs.response.ResponsesFixture.handlePayment (ResponsesFixture.java:87)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke0 (NativeMethodAccessorImpl.java:-2)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)</div><div class="stackTraceEntry">at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)</div><div class="stackTraceEntry">at java.lang.reflect.Method.invoke (Method.java:498)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.invokeMethod (OgnlRuntime.java:532)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callAppropriateMethod (OgnlRuntime.java:826)</div><div class="stackTraceEntry">at ognl.ObjectMethodAccessor.callMethod (ObjectMethodAccessor.java:61)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callMethod (OgnlRuntime.java:860)</div><div class="stackTraceEntry">at ognl.ASTMethod.getValueBody (ASTMethod.java:73)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.ASTAssign.getValueBody (ASTAssign.java:49)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:333)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:378)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:357)</div><div class="stackTraceEntry">at org.concordion.internal.OgnlEvaluator.evaluate (OgnlEvaluator.java:32)</div><div class="stackTraceEntry">at org.concordion.internal.SimpleEvaluator.evaluate (SimpleEvaluator.java:15)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$DefaultStrategy.execute (ExecuteCommand.java:52)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$TableStrategy.execute (ExecuteCommand.java:70)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.api.CommandCallList.processSequentially (CommandCallList.java:30)</div><div class="stackTraceEntry">at org.concordion.internal.command.SpecificationCommand.execute (SpecificationCommand.java:31)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.XMLSpecification.process (XMLSpecification.java:17)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:33)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:26)</div><div class="stackTraceEntry">at org.concordion.internal.FixtureRunner.run (FixtureRunner.java:24)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner$1.evaluate (ConcordionRunner.java:125)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runLeaf (ParentRunner.java:325)</div><div class="stackTraceEntry">at org.junit.runners.BlockJUnit4ClassRunner.runChild (BlockJUnit4ClassRunner.java:78)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:115)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:21)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.RunBefores.evaluate (RunBefores.java:26)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:128)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:27)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:137)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:115)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:105)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:62)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:49)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runJUnitClass (DefaultConcordionRunner.java:101)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runTestClass (DefaultConcordionRunner.java:65)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.execute (DefaultConcordionRunner.java:28)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:122)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:117)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleTask.runInterruptibly (TrustedListenableFutureTask.java:108)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.InterruptibleTask.run (InterruptibleTask.java:41)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask.run (TrustedListenableFutureTask.java:77)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor.runWorker (ThreadPoolExecutor.java:1149)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor$Worker.run (ThreadPoolExecutor.java:624)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">java.lang.IllegalStateException: Legible payment name 'Payment 2' not mapped to any payment ID.</div><div class="stackTraceEntry">at com.google.common.base.Preconditions.checkState (Preconditions.java:174)</div><div class="stackTraceEntry">at specs.BaseFixture.requestToHandlePaymentByLegibleName (BaseFixture.java:504)</div><div class="stackTraceEntry">at specs.response.ResponsesFixture.handlePayment (ResponsesFixture.java:87)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke0 (NativeMethodAccessorImpl.java:-2)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)</div><div class="stackTraceEntry">at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)</div><div class="stackTraceEntry">at java.lang.reflect.Method.invoke (Method.java:498)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.invokeMethod (OgnlRuntime.java:532)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callAppropriateMethod (OgnlRuntime.java:826)</div><div class="stackTraceEntry">at ognl.ObjectMethodAccessor.callMethod (ObjectMethodAccessor.java:61)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callMethod (OgnlRuntime.java:860)</div><div class="stackTraceEntry">at ognl.ASTMethod.getValueBody (ASTMethod.java:73)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.ASTAssign.getValueBody (ASTAssign.java:49)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:333)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:378)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:357)</div><div class="stackTraceEntry">at org.concordion.internal.OgnlEvaluator.evaluate (OgnlEvaluator.java:32)</div><div class="stackTraceEntry">at org.concordion.internal.SimpleEvaluator.evaluate (SimpleEvaluator.java:15)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$DefaultStrategy.execute (ExecuteCommand.java:52)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$TableStrategy.execute (ExecuteCommand.java:70)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.api.CommandCallList.processSequentially (CommandCallList.java:30)</div><div class="stackTraceEntry">at org.concordion.internal.command.SpecificationCommand.execute (SpecificationCommand.java:31)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.XMLSpecification.process (XMLSpecification.java:17)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:33)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:26)</div><div class="stackTraceEntry">at org.concordion.internal.FixtureRunner.run (FixtureRunner.java:24)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner$1.evaluate (ConcordionRunner.java:125)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runLeaf (ParentRunner.java:325)</div><div class="stackTraceEntry">at org.junit.runners.BlockJUnit4ClassRunner.runChild (BlockJUnit4ClassRunner.java:78)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:115)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:21)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.RunBefores.evaluate (RunBefores.java:26)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:128)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:27)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:137)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:115)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:105)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:62)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:49)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runJUnitClass (DefaultConcordionRunner.java:101)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runTestClass (DefaultConcordionRunner.java:65)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.execute (DefaultConcordionRunner.java:28)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:122)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:117)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleTask.runInterruptibly (TrustedListenableFutureTask.java:108)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.InterruptibleTask.run (InterruptibleTask.java:41)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask.run (TrustedListenableFutureTask.java:77)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor.runWorker (ThreadPoolExecutor.java:1149)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor$Worker.run (ThreadPoolExecutor.java:624)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
-        <tr><span class="failure"><del class="expected">
+            <td class="success">200</td>
+            <td class="success">ERROR 923</td>
+            <td class="success">Payment type not available for this currency or card type</td>
+            <td class="success">Failure</td>
+            <td>10</td>
+        </tr>
+        <tr>
             <td class="inputvalue">Payment 3</td>
-            <td>200</td>
-            <td>REDIRECT</td>
-            <td>REDIRECT</td>
-            <td>Pending</td>
-            <td />
-        </del></span><span class="exceptionMessage">IllegalStateException: Legible payment name 'Payment 3' not mapped to any payment ID.</span><input class="stackTraceButton" id="stackTraceButton7" type="button" onclick="javascript:toggleStackTrace('7')" value="View Stack" /><div class="stackTrace" id="stackTrace7"><p>While evaluating expression: <code>#result = handlePayment(#paymentName, #requestType)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: IllegalStateException: Legible payment name 'Payment 3' not mapped to any payment ID.</div><div class="stackTraceEntry">at com.google.common.base.Preconditions.checkState (Preconditions.java:174)</div><div class="stackTraceEntry">at specs.BaseFixture.requestToHandlePaymentByLegibleName (BaseFixture.java:504)</div><div class="stackTraceEntry">at specs.response.ResponsesFixture.handlePayment (ResponsesFixture.java:87)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke0 (NativeMethodAccessorImpl.java:-2)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)</div><div class="stackTraceEntry">at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)</div><div class="stackTraceEntry">at java.lang.reflect.Method.invoke (Method.java:498)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.invokeMethod (OgnlRuntime.java:532)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callAppropriateMethod (OgnlRuntime.java:826)</div><div class="stackTraceEntry">at ognl.ObjectMethodAccessor.callMethod (ObjectMethodAccessor.java:61)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callMethod (OgnlRuntime.java:860)</div><div class="stackTraceEntry">at ognl.ASTMethod.getValueBody (ASTMethod.java:73)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.ASTAssign.getValueBody (ASTAssign.java:49)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:333)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:378)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:357)</div><div class="stackTraceEntry">at org.concordion.internal.OgnlEvaluator.evaluate (OgnlEvaluator.java:32)</div><div class="stackTraceEntry">at org.concordion.internal.SimpleEvaluator.evaluate (SimpleEvaluator.java:15)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$DefaultStrategy.execute (ExecuteCommand.java:52)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$TableStrategy.execute (ExecuteCommand.java:70)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.api.CommandCallList.processSequentially (CommandCallList.java:30)</div><div class="stackTraceEntry">at org.concordion.internal.command.SpecificationCommand.execute (SpecificationCommand.java:31)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.XMLSpecification.process (XMLSpecification.java:17)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:33)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:26)</div><div class="stackTraceEntry">at org.concordion.internal.FixtureRunner.run (FixtureRunner.java:24)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner$1.evaluate (ConcordionRunner.java:125)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runLeaf (ParentRunner.java:325)</div><div class="stackTraceEntry">at org.junit.runners.BlockJUnit4ClassRunner.runChild (BlockJUnit4ClassRunner.java:78)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:115)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:21)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.RunBefores.evaluate (RunBefores.java:26)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:128)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:27)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:137)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:115)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:105)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:62)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:49)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runJUnitClass (DefaultConcordionRunner.java:101)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runTestClass (DefaultConcordionRunner.java:65)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.execute (DefaultConcordionRunner.java:28)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:122)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:117)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleTask.runInterruptibly (TrustedListenableFutureTask.java:108)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.InterruptibleTask.run (InterruptibleTask.java:41)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask.run (TrustedListenableFutureTask.java:77)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor.runWorker (ThreadPoolExecutor.java:1149)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor$Worker.run (ThreadPoolExecutor.java:624)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">java.lang.IllegalStateException: Legible payment name 'Payment 3' not mapped to any payment ID.</div><div class="stackTraceEntry">at com.google.common.base.Preconditions.checkState (Preconditions.java:174)</div><div class="stackTraceEntry">at specs.BaseFixture.requestToHandlePaymentByLegibleName (BaseFixture.java:504)</div><div class="stackTraceEntry">at specs.response.ResponsesFixture.handlePayment (ResponsesFixture.java:87)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke0 (NativeMethodAccessorImpl.java:-2)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)</div><div class="stackTraceEntry">at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)</div><div class="stackTraceEntry">at java.lang.reflect.Method.invoke (Method.java:498)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.invokeMethod (OgnlRuntime.java:532)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callAppropriateMethod (OgnlRuntime.java:826)</div><div class="stackTraceEntry">at ognl.ObjectMethodAccessor.callMethod (ObjectMethodAccessor.java:61)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callMethod (OgnlRuntime.java:860)</div><div class="stackTraceEntry">at ognl.ASTMethod.getValueBody (ASTMethod.java:73)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.ASTAssign.getValueBody (ASTAssign.java:49)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:333)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:378)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:357)</div><div class="stackTraceEntry">at org.concordion.internal.OgnlEvaluator.evaluate (OgnlEvaluator.java:32)</div><div class="stackTraceEntry">at org.concordion.internal.SimpleEvaluator.evaluate (SimpleEvaluator.java:15)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$DefaultStrategy.execute (ExecuteCommand.java:52)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$TableStrategy.execute (ExecuteCommand.java:70)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.api.CommandCallList.processSequentially (CommandCallList.java:30)</div><div class="stackTraceEntry">at org.concordion.internal.command.SpecificationCommand.execute (SpecificationCommand.java:31)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.XMLSpecification.process (XMLSpecification.java:17)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:33)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:26)</div><div class="stackTraceEntry">at org.concordion.internal.FixtureRunner.run (FixtureRunner.java:24)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner$1.evaluate (ConcordionRunner.java:125)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runLeaf (ParentRunner.java:325)</div><div class="stackTraceEntry">at org.junit.runners.BlockJUnit4ClassRunner.runChild (BlockJUnit4ClassRunner.java:78)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:115)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:21)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.RunBefores.evaluate (RunBefores.java:26)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:128)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:27)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:137)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:115)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:105)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:62)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:49)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runJUnitClass (DefaultConcordionRunner.java:101)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runTestClass (DefaultConcordionRunner.java:65)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.execute (DefaultConcordionRunner.java:28)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:122)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:117)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleTask.runInterruptibly (TrustedListenableFutureTask.java:108)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.InterruptibleTask.run (InterruptibleTask.java:41)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask.run (TrustedListenableFutureTask.java:77)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor.runWorker (ThreadPoolExecutor.java:1149)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor$Worker.run (ThreadPoolExecutor.java:624)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
-        <tr><span class="failure"><del class="expected">
+            <td class="success">200</td>
+            <td class="success">REDIRECT</td>
+            <td class="success">REDIRECT</td>
+            <td class="success">Pending</td>
+            <td>10</td>
+        </tr>
+        <tr>
             <td class="inputvalue">Payment 4</td>
-            <td>200</td>
-            <td>ERROR 1016</td>
-            <td>Parameter {amount} faulty or missing</td>
-            <td>Failure</td>
-            <td />
-        </del></span><span class="exceptionMessage">IllegalStateException: Legible payment name 'Payment 4' not mapped to any payment ID.</span><input class="stackTraceButton" id="stackTraceButton8" type="button" onclick="javascript:toggleStackTrace('8')" value="View Stack" /><div class="stackTrace" id="stackTrace8"><p>While evaluating expression: <code>#result = handlePayment(#paymentName, #requestType)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: IllegalStateException: Legible payment name 'Payment 4' not mapped to any payment ID.</div><div class="stackTraceEntry">at com.google.common.base.Preconditions.checkState (Preconditions.java:174)</div><div class="stackTraceEntry">at specs.BaseFixture.requestToHandlePaymentByLegibleName (BaseFixture.java:504)</div><div class="stackTraceEntry">at specs.response.ResponsesFixture.handlePayment (ResponsesFixture.java:87)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke0 (NativeMethodAccessorImpl.java:-2)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)</div><div class="stackTraceEntry">at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)</div><div class="stackTraceEntry">at java.lang.reflect.Method.invoke (Method.java:498)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.invokeMethod (OgnlRuntime.java:532)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callAppropriateMethod (OgnlRuntime.java:826)</div><div class="stackTraceEntry">at ognl.ObjectMethodAccessor.callMethod (ObjectMethodAccessor.java:61)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callMethod (OgnlRuntime.java:860)</div><div class="stackTraceEntry">at ognl.ASTMethod.getValueBody (ASTMethod.java:73)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.ASTAssign.getValueBody (ASTAssign.java:49)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:333)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:378)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:357)</div><div class="stackTraceEntry">at org.concordion.internal.OgnlEvaluator.evaluate (OgnlEvaluator.java:32)</div><div class="stackTraceEntry">at org.concordion.internal.SimpleEvaluator.evaluate (SimpleEvaluator.java:15)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$DefaultStrategy.execute (ExecuteCommand.java:52)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$TableStrategy.execute (ExecuteCommand.java:70)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.api.CommandCallList.processSequentially (CommandCallList.java:30)</div><div class="stackTraceEntry">at org.concordion.internal.command.SpecificationCommand.execute (SpecificationCommand.java:31)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.XMLSpecification.process (XMLSpecification.java:17)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:33)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:26)</div><div class="stackTraceEntry">at org.concordion.internal.FixtureRunner.run (FixtureRunner.java:24)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner$1.evaluate (ConcordionRunner.java:125)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runLeaf (ParentRunner.java:325)</div><div class="stackTraceEntry">at org.junit.runners.BlockJUnit4ClassRunner.runChild (BlockJUnit4ClassRunner.java:78)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:115)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:21)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.RunBefores.evaluate (RunBefores.java:26)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:128)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:27)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:137)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:115)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:105)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:62)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:49)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runJUnitClass (DefaultConcordionRunner.java:101)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runTestClass (DefaultConcordionRunner.java:65)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.execute (DefaultConcordionRunner.java:28)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:122)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:117)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleTask.runInterruptibly (TrustedListenableFutureTask.java:108)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.InterruptibleTask.run (InterruptibleTask.java:41)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask.run (TrustedListenableFutureTask.java:77)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor.runWorker (ThreadPoolExecutor.java:1149)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor$Worker.run (ThreadPoolExecutor.java:624)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">java.lang.IllegalStateException: Legible payment name 'Payment 4' not mapped to any payment ID.</div><div class="stackTraceEntry">at com.google.common.base.Preconditions.checkState (Preconditions.java:174)</div><div class="stackTraceEntry">at specs.BaseFixture.requestToHandlePaymentByLegibleName (BaseFixture.java:504)</div><div class="stackTraceEntry">at specs.response.ResponsesFixture.handlePayment (ResponsesFixture.java:87)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke0 (NativeMethodAccessorImpl.java:-2)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)</div><div class="stackTraceEntry">at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)</div><div class="stackTraceEntry">at java.lang.reflect.Method.invoke (Method.java:498)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.invokeMethod (OgnlRuntime.java:532)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callAppropriateMethod (OgnlRuntime.java:826)</div><div class="stackTraceEntry">at ognl.ObjectMethodAccessor.callMethod (ObjectMethodAccessor.java:61)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callMethod (OgnlRuntime.java:860)</div><div class="stackTraceEntry">at ognl.ASTMethod.getValueBody (ASTMethod.java:73)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.ASTAssign.getValueBody (ASTAssign.java:49)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:170)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:210)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:333)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:378)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:357)</div><div class="stackTraceEntry">at org.concordion.internal.OgnlEvaluator.evaluate (OgnlEvaluator.java:32)</div><div class="stackTraceEntry">at org.concordion.internal.SimpleEvaluator.evaluate (SimpleEvaluator.java:15)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$DefaultStrategy.execute (ExecuteCommand.java:52)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand$TableStrategy.execute (ExecuteCommand.java:70)</div><div class="stackTraceEntry">at org.concordion.internal.command.ExecuteCommand.execute (ExecuteCommand.java:39)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$2.run (AbstractCommandDecorator.java:23)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:42)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.execute (AbstractCommandDecorator.java:21)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.api.CommandCallList.processSequentially (CommandCallList.java:30)</div><div class="stackTraceEntry">at org.concordion.internal.command.SpecificationCommand.execute (SpecificationCommand.java:31)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:29)</div><div class="stackTraceEntry">at org.concordion.internal.XMLSpecification.process (XMLSpecification.java:17)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:33)</div><div class="stackTraceEntry">at org.concordion.Concordion.process (Concordion.java:26)</div><div class="stackTraceEntry">at org.concordion.internal.FixtureRunner.run (FixtureRunner.java:24)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner$1.evaluate (ConcordionRunner.java:125)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runLeaf (ParentRunner.java:325)</div><div class="stackTraceEntry">at org.junit.runners.BlockJUnit4ClassRunner.runChild (BlockJUnit4ClassRunner.java:78)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:115)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:21)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.RunBefores.evaluate (RunBefores.java:26)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:128)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:27)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:137)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:115)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:105)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:62)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:49)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runJUnitClass (DefaultConcordionRunner.java:101)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runTestClass (DefaultConcordionRunner.java:65)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.execute (DefaultConcordionRunner.java:28)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:122)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:117)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleTask.runInterruptibly (TrustedListenableFutureTask.java:108)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.InterruptibleTask.run (InterruptibleTask.java:41)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask.run (TrustedListenableFutureTask.java:77)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor.runWorker (ThreadPoolExecutor.java:1149)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor$Worker.run (ThreadPoolExecutor.java:624)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
+            <td class="success">200</td>
+            <td class="success">ERROR 1016</td>
+            <td class="success">Parameter {amount} faulty or missing</td>
+            <td class="success">Failure</td>
+            <td>10</td>
+        </tr>
     </table>
 </div>
-<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 62370 ms on 21-Sep-2017 at 13:41:56 UTC</div></div></body>
+<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 12010 ms on 21-Sep-2017 at 15:48:26 UTC</div></div></body>
 </html>
