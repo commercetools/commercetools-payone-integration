@@ -17,7 +17,7 @@ It is a standalone Microservice that connects the two cloud platforms and provid
 
 - [Documentation](#documentation)
 - [For developers and contributors](#for-developers-and-contributors)
-- [Using the Integration in a project](#using-the-integration-in-a-project)
+- [Shop Integration Guide](#shop-integration-guide)
   - [Required Configuration in the commercetools project](#required-configuration-in-the-commercetools-project)
     - [Domain Constraints](#domain-constraints)
   - [Required Configuration in PAYONE](#required-configuration-in-payone)
@@ -43,7 +43,9 @@ It is a standalone Microservice that connects the two cloud platforms and provid
 
 Read [Project lifecycle](docs/Project-Lifecycle.md) documentation for full information.
 
-## Using the Integration in a project
+## Shop Integration Guide
+
+[List of actions](docs/Shop-Integration-Guide.md) which needs to be covered by front end integration.
 
 ### Required Configuration in the commercetools project
 
