@@ -7,7 +7,7 @@ import io.sphere.sdk.utils.MoneyImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
+import javax.money.MonetaryAmount;
 import java.util.Optional;
 
 import static io.sphere.sdk.utils.MoneyImpl.centAmountOf;
@@ -57,7 +57,6 @@ public final class MoneyUtil {
      */
     public static long getActualPricePerLineItem(@Nonnull LineItemLike lineItemLike) {
         return getTotalDiscountedPricePerQuantity(lineItemLike)
-                .map(i -> i) // aka mapToInt
                 .orElseGet(() -> centAmountOf(lineItemLike.getTotalPrice()));
     }
 
@@ -69,15 +68,15 @@ public final class MoneyUtil {
      * @return total discounted price for all <i>quantity</i> items, or empty.
      */
     public static Optional<Long> getTotalDiscountedPricePerQuantity(@Nonnull LineItemLike lineItemLike) {
-        List<DiscountedLineItemPriceForQuantity> dppq = lineItemLike.getDiscountedPricePerQuantity();
-        if (dppq.size() > 0) {
-            return Optional.of(dppq.stream()
-                    .map(dlipfq -> dlipfq.getDiscountedPrice().getValue().multiply(dlipfq.getQuantity()))
-                    .mapToLong(MoneyImpl::centAmountOf)
-                    .sum());
-        }
+        return getTotalDiscountedPriceMonetaryPerQuantity(lineItemLike).map(MoneyImpl::centAmountOf);
+    }
 
-        return Optional.empty();
+    public static Optional<MonetaryAmount> getTotalDiscountedPriceMonetaryPerQuantity(@Nonnull LineItemLike lineItemLike) {
+        return Optional.of(lineItemLike.getDiscountedPricePerQuantity())
+                .filter(dppq -> dppq.size() > 0)
+                .flatMap(dppq -> dppq.stream()
+                        .map(dlipfq -> dlipfq.getDiscountedPrice().getValue().multiply(dlipfq.getQuantity()))
+                        .reduce(MonetaryAmount::add));
     }
 
     private MoneyUtil() {
