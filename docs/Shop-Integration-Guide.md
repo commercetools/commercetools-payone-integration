@@ -1,5 +1,20 @@
 # Integration guide
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Checkout](#checkout)
+- [Recalculate cart](#recalculate-cart)
+- [Validate cart state](#validate-cart-state)
+- [Success URL creation](#success-url-creation)
+- [Validate payment amount](#validate-payment-amount)
+- [Validate payment transaction](#validate-payment-transaction)
+- [Check payment cancelations](#check-payment-cancelations)
+- [Bad practice](#bad-practice)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ### Checkout
 
 1. On each checkout step [validate cart state](#validate-cart-state)
