@@ -22,9 +22,9 @@
 1. Show available payment methods. If cart has already payment objects then front end could optionally use most recently created (get last element or use `Payment#createdAt`) payment object in order to preselect customer's last payment method selection.
 
 1. Once customer selected payment create CTP payment object and set required fields as described [here](https://github.com/commercetools/commercetools-payone-integration/blob/master/docs/Field-Mapping.md). **Note**: ensure new payment object is created (**do not reuse existing one**) if:
-  - Cart has changed (items, quantity, total amount, shipping/billing address, ...)
-  - Customer selected payment method (does not matter if same as before or not)
-  - Payment has changed (amount planned, currency, transaction type, ...)
+    - Cart has changed (items, quantity, total amount, shipping/billing address, ...)
+    - Customer selected payment method (does not matter if same as before or not)
+    - Payment has changed (amount planned, currency, transaction type, ...)
 
 1. Assign created payment object to the cart (see also [bad practice](#bad-practice))
 
