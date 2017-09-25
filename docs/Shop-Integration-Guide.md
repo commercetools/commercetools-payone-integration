@@ -5,12 +5,13 @@
 
 
 - [Checkout](#checkout)
-- [Recalculate cart](#recalculate-cart)
+- [Payment validation](#payment-validation)
 - [Validate cart state](#validate-cart-state)
+- [Recalculate cart](#recalculate-cart)
 - [Validate payment amount](#validate-payment-amount)
 - [Validate payment transaction](#validate-payment-transaction)
 - [Check payment cancelations](#check-payment-cancelations)
-- [Refund automation](#automation-of-refunds-for-wrong-transactions)
+- [Automation of refunds](#automation-of-refunds)
 - [Bad practice](#bad-practice)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
