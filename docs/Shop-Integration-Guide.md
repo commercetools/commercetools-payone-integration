@@ -59,7 +59,7 @@
   - [Validate cart state](#validate-cart-state)
   - [Recalculate cart](#recalculate-cart)
   - [Validate payment amount](#validate-payment-amount)
-  - [Validate payment transaction](#validate-payment-transaction).
+  - [Validate payment transaction](#validate-payment-transaction)
   - [Check payment cancelations](#check-payment-cancelations)
 
 ### Validate cart state
