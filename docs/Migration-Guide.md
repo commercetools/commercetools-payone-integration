@@ -85,4 +85,17 @@ You have to change the payment handling URL:
     (like <code>**MERCHANT1**/commercetools/handle/payments/</code>)
 
 
-TO be continued....
+## Migrating from v2.1.0 to v2.2.0 (Multitenancy)
+
+  1. `Initial` state should be explicitly used as default transaction state now. 
+      
+      See [issue #175](https://github.com/commercetools/commercetools-payone-integration/pull/175) 
+      
+      See [Release Notes](http://dev.commercetools.com/release-notes.html#release-notes---commercetools-platform---version-release-29-september-2017)
+      
+      See [Transaction States](https://dev.commercetools.com/http-api-projects-payments.html#transactionstate) documentation
+  
+  1. All references and update actions for `amountAuthorized`, `amountPaid` and `amountRefunded` are removed 
+  since they are deprecated. The service consumers should not rely on them any more.  
+  
+      See [Release Notes](http://dev.commercetools.com/release-notes.html#release-notes---commercetools-platform---version-release-29-september-2017)

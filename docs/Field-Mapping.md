@@ -84,10 +84,7 @@ WORK IN PROGRESS (only active calls to PO here, no status notifications yet)
 | interfaceId | `txid` | PAYONE |  |
 | amountPlanned.centAmount | - | CT | Initially set by checkout and not modified any more. `price` from PAYONE notifications is only checked against the matching transaction amount, not the overall goal described in amountPlanned. |
 | amountPlanned.currency | - | CT |  |
-| amountAuthorized.centAmount | `amount` | CT / PAYONE | ONLY on CREDIT_CARD payments: Once the Authorization Transaction is in status "Success", copy the amount here.  |
 | authorizedUntil | - | PAYONE | credit card payments are treated as valid seven days after the `txtime` value of the `preauthorization` call (not of other transactions!), but that is not a guarantee. Therefore it was chosen to better leave this field empty.  |
-| amountPaid.centAmount | `receivable` minus `balance` | PAYONE | only if both parameters available |
-| amountRefunded.centAmount | (from transactions) | PAYONE | (Sum of successful Refund Transactions) |
 | paymentMethodInfo.paymentInterface | - | CT | Must be "PAYONE" in CT, otherwise do not handle the Payment at all |
 | paymentMethodInfo.method | - | CT | (see the method mapping table above) |
 | paymentMethodInfo.name.{locale} | - | - | (not passed, project specific content) |
@@ -380,10 +377,6 @@ The matching transaction is found by sequencenumber = interactionId.
 | `vsettlement` | not set or `completed` | `7.5` | (unsupported) | (unsupported) | only available with PAYONE Billing module, must be activated |
 | `invoice` | not set or `completed` | `7.5` | (nothing) | (nothing) | no status change, just write the invoice ID / URL |
 | `failed` | not set or `completed` | `7.5` | (unsupported)  | (unsupported) | (not fully implemented at PAYONE yet) |
-
-Additional fields to be updated in any case:
- * amountPaid
- * amountRefunded
 
 # Unused / unsupported PAYONE fields & features
 
