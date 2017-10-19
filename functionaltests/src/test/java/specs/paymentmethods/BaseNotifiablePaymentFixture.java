@@ -7,13 +7,10 @@ import io.sphere.sdk.payments.Payment;
 import org.concordion.api.MultiValueResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import specs.BaseFixture;
 import specs.NotificationTimeoutWaiter;
 import specs.response.BasePaymentFixture;
 
-import javax.money.format.MonetaryFormats;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -88,7 +85,6 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
      * @param txaction current txAction to wait (paid)
      * @param prevTxaction previous txAction which must be successful
      * @return <b>true</b> if previous and current txactions completed successfully.
-     * @throws Exception
      */
     public boolean receivedNextNotificationOfActionFor(final String paymentNames, final String txaction,
                                                           final String prevTxaction) throws Exception {
@@ -124,20 +120,11 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
         final long paidNotificationCount = getTotalNotificationCountOfAction(payment, "paid");
 
         final String transactionId = getIdOfLastTransaction(payment);
-        final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
-                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
-                BaseFixture.EMPTY_STRING;
-
-        final String amountPaid = (payment.getAmountPaid() != null) ?
-                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountPaid()) :
-                BaseFixture.EMPTY_STRING;
 
         return ImmutableMap.<String, String> builder()
                 .put("appointedNotificationCount", Long.toString(appointedNotificationCount))
                 .put("paidNotificationCount", Long.toString(paidNotificationCount))
                 .put("transactionState", getTransactionState(payment, transactionId))
-                .put("amountAuthorized", amountAuthorized)
-                .put("amountPaid", amountPaid)
                 .put("version", payment.getVersion().toString())
                 .build();
     }
@@ -148,14 +135,9 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
         long appointedNotificationCount = getTotalNotificationCountOfAction(payment, txaction);
 
         final String transactionId = getIdOfLastTransaction(payment);
-        final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
-                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
-                BaseFixture.EMPTY_STRING;
-
         return MultiValueResult.multiValueResult()
                 .with("notificationCount", Long.toString(appointedNotificationCount))
                 .with("transactionState", getTransactionState(payment, transactionId))
-                .with("amountAuthorized", amountAuthorized)
                 .with("version", payment.getVersion().toString());
     }
 
