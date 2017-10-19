@@ -191,7 +191,6 @@ public class CreditCardRequestFactoryTest extends BaseTenantPropertyTest {
 
     @Test
     public void createFullCaptureRequestFromValidPayment() throws Exception {
-
         Payment payment = payments.dummyPaymentOneChargePending20Euro();
         Order order = payments.dummyOrderMapToPayoneRequest();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
@@ -212,8 +211,8 @@ public class CreditCardRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(result.getIntegratorVersion()).isEqualTo(payoneConfig.getIntegratorVersion());
 
         //monetary
-        softly.assertThat(result.getAmount()).isEqualTo(extractMinorPart().queryFrom(payment.getAmountAuthorized()).intValue());
-        softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountAuthorized().getCurrency().getCurrencyCode());
+        softly.assertThat(result.getAmount()).isEqualTo(extractMinorPart().queryFrom(payment.getAmountPlanned()).intValue());
+        softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
         softly.assertThat(result.getTxid()).isEqualTo(payment.getInterfaceId());
         softly.assertThat(result.getSequencenumber()).isEqualTo(Integer.valueOf(payment.getTransactions().get(0).getInteractionId()));
