@@ -72,7 +72,7 @@ public final class MoneyUtil {
     }
 
     public static Optional<MonetaryAmount> getTotalDiscountedPriceMonetaryPerQuantity(@Nonnull LineItemLike lineItemLike) {
-        return Optional.of(lineItemLike.getDiscountedPricePerQuantity())
+        return Optional.ofNullable(lineItemLike.getDiscountedPricePerQuantity())
                 .filter(dppq -> dppq.size() > 0)
                 .flatMap(dppq -> dppq.stream()
                         .map(dlipfq -> dlipfq.getDiscountedPrice().getValue().multiply(dlipfq.getQuantity()))
