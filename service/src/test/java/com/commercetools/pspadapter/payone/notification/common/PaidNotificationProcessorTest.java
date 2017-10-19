@@ -81,21 +81,11 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
                 .build());
 
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, timestamp);
-
-        assertThat(updateActions).as("# of payment update actions").hasSize(5);
-        assertThat(updateActions).as("added transaction")
-                .filteredOn(u -> u.getAction().equals("addTransaction"))
-                .usingElementComparatorOnFields(
-                        "transaction.type", "transaction.amount", "transaction.state", "transaction.timestamp")
-                .containsOnlyOnce(transaction);
-
-        assertThat(updateActions).as("amount paid")
-                .filteredOn(u -> u.getAction().equals("setAmountPaid"))
-                .containsOnly(SetAmountPaid.of(MoneyImpl.of(notification.getPrice(), notification.getCurrency())));
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+        assertThat(updateActions).as("added transactions")
+                .containsExactlyInAnyOrder(transaction, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -145,16 +135,11 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-        assertThat(updateActions).as("# of payment update actions").hasSize(5);
-        assertThat(updateActions).as("transaction state change")
-                .filteredOn(u -> u.getAction().equals("changeTransactionState"))
-                .containsOnly(ChangeTransactionState.of(TransactionState.SUCCESS, chargeTransaction.getId()));
+        assertThat(updateActions).as("payment update actions list")
+                .containsExactlyInAnyOrder(
+                        ChangeTransactionState.of(TransactionState.SUCCESS, chargeTransaction.getId()),
+                        interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
-        assertThat(updateActions).as("amount paid")
-                .filteredOn(u -> u.getAction().equals("setAmountPaid"))
-                .containsOnly(SetAmountPaid.of(MoneyImpl.of(notification.getPrice(), notification.getCurrency())));
-
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         return payment;
     }
 
