@@ -12,12 +12,10 @@ import io.sphere.sdk.payments.Payment;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-import static org.javamoney.moneta.function.MonetaryQueries.extractMinorPart;
+import static org.javamoney.moneta.function.MonetaryQueries.convertMinorPart;
 
 /**
- *
  * @author mht@dotsource.de
- *
  */
 public class BanktTransferInAdvanceRequestFactory extends PayoneRequestFactory {
 
@@ -52,7 +50,7 @@ public class BanktTransferInAdvanceRequestFactory extends PayoneRequestFactory {
         Optional.ofNullable(ctPayment.getAmountPlanned())
                 .ifPresent(amount -> {
                     request.setCurrency(amount.getCurrency().getCurrencyCode());
-                    request.setAmount(extractMinorPart()
+                    request.setAmount(convertMinorPart()
                             .queryFrom(amount)
                             .intValue());
                 });

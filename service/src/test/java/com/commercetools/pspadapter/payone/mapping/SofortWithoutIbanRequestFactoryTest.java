@@ -21,7 +21,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-import static org.javamoney.moneta.function.MonetaryQueries.extractMinorPart;
+import static org.javamoney.moneta.function.MonetaryQueries.convertMinorPart;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -89,7 +89,7 @@ public class SofortWithoutIbanRequestFactoryTest extends BaseTenantPropertyTest 
         softly.assertThat(result.getLanguage()).isEqualTo(order.getLocale().getLanguage());
 
         //monetary
-        softly.assertThat(result.getAmount()).isEqualTo(extractMinorPart().queryFrom(payment.getAmountPlanned()).intValue());
+        softly.assertThat(result.getAmount()).isEqualTo(convertMinorPart().queryFrom(payment.getAmountPlanned()).intValue());
         softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
         //urls
@@ -176,7 +176,7 @@ public class SofortWithoutIbanRequestFactoryTest extends BaseTenantPropertyTest 
         softly.assertThat(result.getLanguage()).isEqualTo(order.getLocale().getLanguage());
 
         //monetary
-        softly.assertThat(result.getAmount()).isEqualTo(extractMinorPart().queryFrom(payment.getAmountPlanned()).intValue());
+        softly.assertThat(result.getAmount()).isEqualTo(convertMinorPart().queryFrom(payment.getAmountPlanned()).intValue());
         softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
         //urls

@@ -28,7 +28,7 @@ import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUA
 import static com.commercetools.util.ServiceConstants.DEFAULT_LOCALE;
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
-import static org.javamoney.moneta.function.MonetaryQueries.extractMinorPart;
+import static org.javamoney.moneta.function.MonetaryQueries.convertMinorPart;
 
 /**
  * @author fhaertig
@@ -44,16 +44,16 @@ public class MappingUtil {
     public static final DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private static final Set<CountryCode> countriesWithStateAllowed = ImmutableSet.of(
-        CountryCode.US,
-        CountryCode.CA,
-        CountryCode.CN,
-        CountryCode.JP,
-        CountryCode.MX,
-        CountryCode.BR,
-        CountryCode.AR,
-        CountryCode.ID,
-        CountryCode.TH,
-        CountryCode.IN
+            CountryCode.US,
+            CountryCode.CA,
+            CountryCode.CN,
+            CountryCode.JP,
+            CountryCode.MX,
+            CountryCode.BR,
+            CountryCode.AR,
+            CountryCode.ID,
+            CountryCode.TH,
+            CountryCode.IN
     );
 
     public static void mapBillingAddressToRequest(
@@ -155,7 +155,7 @@ public class MappingUtil {
         ofNullable(payment.getAmountPlanned())
                 .ifPresent(amount -> {
                     request.setCurrency(amount.getCurrency().getCurrencyCode());
-                    request.setAmount(extractMinorPart()
+                    request.setAmount(convertMinorPart()
                             .queryFrom(amount)
                             .intValue());
                 });
