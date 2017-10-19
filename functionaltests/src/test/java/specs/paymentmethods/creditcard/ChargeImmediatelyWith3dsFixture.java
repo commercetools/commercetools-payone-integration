@@ -17,11 +17,9 @@ import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import specs.BaseFixture;
 import util.WebDriver3ds;
 
 import javax.money.MonetaryAmount;
-import javax.money.format.MonetaryFormats;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.ZonedDateTime;
@@ -122,19 +120,9 @@ public class ChargeImmediatelyWith3dsFixture extends BaseCreditCardChargeFixture
         final long appointedNotificationCount = getTotalNotificationCountOfAction(payment, "appointed");
         final long paidNotificationCount = getTotalNotificationCountOfAction(payment, "paid");
 
-        final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
-                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
-                NULL_STRING;
-
-        final String amountPaid = (payment.getAmountPaid() != null) ?
-                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountPaid()) :
-                BaseFixture.EMPTY_STRING;
-
         return ImmutableMap.<String, String>builder()
                 .put("transactionState", getTransactionState(payment, transactionId))
                 .put("responseRedirectUrl", responseRedirectUrl.substring(0, urlTrimAt))
-                .put("amountAuthorized", amountAuthorized)
-                .put("amountPaid", amountPaid)
                 .put("successUrl", successUrlForPayment.getOrDefault(paymentName, EMPTY_STRING))
                 .put("appointedNotificationCount", String.valueOf(appointedNotificationCount))
                 .put("paidNotificationCount", String.valueOf(paidNotificationCount))

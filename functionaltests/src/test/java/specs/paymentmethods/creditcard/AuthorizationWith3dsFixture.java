@@ -19,12 +19,10 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import specs.BaseFixture;
 import specs.paymentmethods.BaseNotifiablePaymentFixture;
 import util.WebDriver3ds;
 
 import javax.money.MonetaryAmount;
-import javax.money.format.MonetaryFormats;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -169,14 +167,9 @@ public class AuthorizationWith3dsFixture extends BaseNotifiablePaymentFixture {
         final Payment updatedPayment = fetchPaymentById(payment.getId());
         final long appointedNotificationCount = getTotalNotificationCountOfAction(updatedPayment, txAction);
 
-        final String amountAuthorized = (updatedPayment.getAmountAuthorized() != null) ?
-                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(updatedPayment.getAmountAuthorized()) :
-                BaseFixture.EMPTY_STRING;
-
         return ImmutableMap.<String, String> builder()
                 .put("appointedNotificationCount", String.valueOf(appointedNotificationCount))
                 .put("transactionState", getTransactionState(updatedPayment, transactionId))
-                .put("amountAuthorized", amountAuthorized)
                 .put("version", updatedPayment.getVersion().toString())
                 .build();
     }
