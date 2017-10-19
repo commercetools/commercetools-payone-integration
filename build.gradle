@@ -14,12 +14,16 @@ plugins {
 
 def depVersions = [
         commercetoolsSdkJvm: '1.24.0',
+        fluentHc: '4.5.1',
         guava: '19.0',
         hamcrest: '1.3',
         jUnit: '4.12',
         assertJ: '3.8.0',
         slf4jLogbackClassic: '1.2.2',
-        slf4jLog4j: '1.7.25'
+        slf4jLog4j: '1.7.25',
+        unirest: '1.4.7',
+        hamcrestDate: '2.0.1',
+        mockito: '1.10.19'
 ]
 
 allprojects {
@@ -50,6 +54,8 @@ subprojects {
         implementation "com.commercetools.sdk.jvm.core:commercetools-models:$depVersions.commercetoolsSdkJvm"
         implementation "ch.qos.logback:logback-classic:$depVersions.slf4jLogbackClassic"
         implementation "org.assertj:assertj-core:${depVersions.assertJ}"
+        implementation "org.apache.httpcomponents:fluent-hc:${depVersions.fluentHc}"
+        implementation "com.mashape.unirest:unirest-java:${depVersions.unirest}"
 
         testImplementation "junit:junit:$depVersions.jUnit"
         testImplementation "org.hamcrest:hamcrest-core:$depVersions.hamcrest"
@@ -70,17 +76,15 @@ project(":service") {
     mainClassName = 'com.commercetools.Main'
 
     dependencies {
-        implementation 'com.mashape.unirest:unirest-java:1.4.7'
         implementation 'com.neovisionaries:nv-i18n:1.17'
         implementation('com.sparkjava:spark-core:2.5.4') {
             exclude group: 'org.slf4j', module: 'slf4j-simple'
         }
-        implementation 'org.apache.httpcomponents:fluent-hc:4.5.1'
         implementation 'org.quartz-scheduler:quartz:2.2.2'
 
         testImplementation "org.assertj:assertj-core:${depVersions.assertJ}"
-        testImplementation 'org.exparity:hamcrest-date:2.0.1'
-        testImplementation 'org.mockito:mockito-core:1.10.19'
+        testImplementation "org.exparity:hamcrest-date:${depVersions.hamcrestDate}"
+        testImplementation "org.mockito:mockito-core:${depVersions.mockito}"
     }
 
     shadowJar {
@@ -238,16 +242,16 @@ static void assertExecutableSpecRequirementsForTests(Project project, Test test)
 
 project(":functionaltests") {
     dependencies {
-        compile project(":service")
+        testImplementation project(":service")
 
-        testCompile 'org.concordion:concordion:1.5.1'
-        testCompile 'org.concordion:concordion-input-style-extension:0.1'
-        testCompile 'org.concordion:concordion-run-totals-extension:1.0.0'
-        testCompile 'org.concordion:concordion-parallel-run-extension:1.0.1'
-        testCompile 'org.seleniumhq.selenium:selenium-java:2.53.1'
+        testImplementation 'org.concordion:concordion:1.5.1'
+        testImplementation 'org.concordion:concordion-input-style-extension:0.1'
+        testImplementation 'org.concordion:concordion-run-totals-extension:1.0.0'
+        testImplementation 'org.concordion:concordion-parallel-run-extension:1.0.1'
+        testImplementation 'org.seleniumhq.selenium:selenium-java:2.53.1'
 
         // the selenium dependency above has default Log4j logger, thus we have to bridge it to our slf4j settings
-        testCompile "org.slf4j:log4j-over-slf4j:$depVersions.slf4jLog4j"
+        testImplementation "org.slf4j:log4j-over-slf4j:$depVersions.slf4jLog4j"
     }
 
     compileJava.dependsOn ':service:jar'
