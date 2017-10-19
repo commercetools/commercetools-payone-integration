@@ -10,7 +10,6 @@ import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
-import io.sphere.sdk.payments.commands.updateactions.SetAmountPaid;
 import io.sphere.sdk.utils.MoneyImpl;
 
 import javax.money.MonetaryAmount;
@@ -53,8 +52,6 @@ public class PaidNotificationProcessor extends NotificationProcessorBase {
                         if (transaction.getState().equals(TransactionState.PENDING)) {
                             listBuilder.add(ChangeTransactionState.of(ctTransactionState, transaction.getId()));
                         }
-
-                        addSetAmountPaidForChangedAmount(payment, notification, listBuilder);
                     }
                     return listBuilder.build();
                 })
@@ -67,33 +64,8 @@ public class PaidNotificationProcessor extends NotificationProcessorBase {
                             .interactionId(sequenceNumber)
                             .build()));
 
-                    if (ctTransactionState.equals(TransactionState.SUCCESS)) {
-                        addSetAmountPaidForChangedAmount(payment, notification, listBuilder);
-                    }
-
                     return listBuilder.build();
                 });
     }
-
-    /**
-     * Adds a {@link SetAmountPaid} action to the list builder if the result of
-     * <pre>
-     *     amountPaid = notification.receivable - notification.balance
-     * </pre>
-     * differs from {@code payment.getAmountPaid()}.
-     *
-     * @param payment the payment
-     * @param notification the "paid" notification
-     * @param actions the builder for the list of payment update actions
-     */
-    private static void addSetAmountPaidForChangedAmount(final Payment payment,
-                                                         final Notification notification,
-                                                         final ImmutableList.Builder<UpdateAction<Payment>> actions) {
-        final MonetaryAmount receivable = MoneyImpl.of(notification.getReceivable(), notification.getCurrency());
-        final MonetaryAmount balance = MoneyImpl.of(notification.getBalance(), notification.getCurrency());
-        final MonetaryAmount amountPaid = receivable.subtract(balance);
-        if ((payment.getAmountPaid() == null) || !amountPaid.isEqualTo(payment.getAmountPaid())) {
-            actions.add(SetAmountPaid.of(amountPaid));
-        }
-    }
 }
+

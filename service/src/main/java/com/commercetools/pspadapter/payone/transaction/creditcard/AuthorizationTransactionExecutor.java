@@ -129,8 +129,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                             setStatusInterfaceText(response),
                             ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
                             ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId()),
-                            SetInterfaceId.of(response.get("txid")),
-                            SetAuthorization.of(paymentWithCartLike.getPayment().getAmountPlanned())
+                            SetInterfaceId.of(response.get("txid"))
                     ));
                 } else if (ResponseStatus.ERROR.getStateCode().equals(status)) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
