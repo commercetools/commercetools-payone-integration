@@ -8,6 +8,7 @@ import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
 import io.sphere.sdk.carts.CartDraftBuilder;
+import io.sphere.sdk.carts.LineItemDraft;
 import io.sphere.sdk.carts.commands.CartCreateCommand;
 import io.sphere.sdk.carts.commands.CartUpdateCommand;
 import io.sphere.sdk.carts.commands.updateactions.AddLineItem;
@@ -121,7 +122,7 @@ public class ChargePreauthorizedFixture extends BaseFixture {
                  ctpClient.executeBlocking(CartCreateCommand.of(cardDraft)),
                  ImmutableList.of(
                          AddPayment.of(payment),
-                         AddLineItem.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1),
+                         AddLineItem.of(LineItemDraft.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1)),
                          SetShippingAddress.of(Address.of(CountryCode.DE)),
                          SetBillingAddress.of(Address.of(CountryCode.DE).withLastName("Test Buyer"))
                  )));
