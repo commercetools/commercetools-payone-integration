@@ -8,10 +8,11 @@ import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
-import org.javamoney.moneta.function.MonetaryUtil;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+
+import static org.javamoney.moneta.function.MonetaryQueries.extractMinorPart;
 
 /**
  *
@@ -48,11 +49,10 @@ public class BanktTransferInAdvanceRequestFactory extends PayoneRequestFactory {
         request.setTxid(ctPayment.getInterfaceId());
 
         request.setSequencenumber(sequenceNumber);
-        Optional.ofNullable(ctPayment.getAmountPaid())
+        Optional.ofNullable(ctPayment.getAmountPlanned())
                 .ifPresent(amount -> {
                     request.setCurrency(amount.getCurrency().getCurrencyCode());
-                    request.setAmount(MonetaryUtil
-                            .minorUnits()
+                    request.setAmount(extractMinorPart()
                             .queryFrom(amount)
                             .intValue());
                 });

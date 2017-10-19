@@ -7,10 +7,11 @@ import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.Credit
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
-import org.javamoney.moneta.function.MonetaryUtil;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+
+import static org.javamoney.moneta.function.MonetaryQueries.extractMinorPart;
 
 /**
  * @author fhaertig
@@ -63,11 +64,10 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         request.setTxid(ctPayment.getInterfaceId());
 
         request.setSequencenumber(sequenceNumber);
-        Optional.ofNullable(ctPayment.getAmountAuthorized())
+        Optional.ofNullable(ctPayment.getAmountPlanned())
                 .ifPresent(amount -> {
                     request.setCurrency(amount.getCurrency().getCurrencyCode());
-                    request.setAmount(MonetaryUtil
-                            .minorUnits()
+                    request.setAmount(extractMinorPart()
                             .queryFrom(amount)
                             .intValue());
                 });

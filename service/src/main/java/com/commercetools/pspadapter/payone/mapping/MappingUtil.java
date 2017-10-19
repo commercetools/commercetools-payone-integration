@@ -13,7 +13,6 @@ import io.sphere.sdk.models.Reference;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.types.CustomFields;
 import org.apache.commons.lang3.StringUtils;
-import org.javamoney.moneta.function.MonetaryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +28,7 @@ import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUA
 import static com.commercetools.util.ServiceConstants.DEFAULT_LOCALE;
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
+import static org.javamoney.moneta.function.MonetaryQueries.extractMinorPart;
 
 /**
  * @author fhaertig
@@ -155,8 +155,7 @@ public class MappingUtil {
         ofNullable(payment.getAmountPlanned())
                 .ifPresent(amount -> {
                     request.setCurrency(amount.getCurrency().getCurrencyCode());
-                    request.setAmount(MonetaryUtil
-                            .minorUnits()
+                    request.setAmount(extractMinorPart()
                             .queryFrom(amount)
                             .intValue());
                 });
