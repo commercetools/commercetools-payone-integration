@@ -1,8 +1,13 @@
 package com.commercetools.pspadapter.payone;
 
+import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.PropertyProvider;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
+import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.pspadapter.tenant.TenantFactory;
+import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.http.HttpStatusCode;
@@ -14,8 +19,12 @@ import org.slf4j.LoggerFactory;
 import spark.Spark;
 import spark.utils.CollectionUtils;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
+
+import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author fhaertig
@@ -25,16 +34,28 @@ public class IntegrationService {
 
     public static final Logger LOG = LoggerFactory.getLogger(IntegrationService.class);
 
-    public static final String HEROKU_ASSIGNED_PORT = "PORT";
+    private static final String HEROKU_ASSIGNED_PORT = "PORT";
 
     private final List<TenantFactory> tenantFactories;
 
-    public IntegrationService(final List<TenantFactory> tenantFactories) {
-        if (CollectionUtils.isEmpty(tenantFactories)) {
+    // cached health response object, which contains:
+    // status (200), tenants (names list), applicationInfo (version, name)
+    private final ImmutableMap healthResponse;
+
+    public IntegrationService(@Nonnull final ServiceConfig serviceConfig,
+                              @Nonnull final PropertyProvider propertyProvider) {
+
+        this.tenantFactories = serviceConfig.getTenants().stream()
+                .map(tenantName -> new TenantPropertyProvider(tenantName, propertyProvider))
+                .map(tenantPropertyProvider -> new TenantConfig(tenantPropertyProvider, new PayoneConfig(tenantPropertyProvider)))
+                .map(tenantConfig -> new TenantFactory(PAYONE, tenantConfig))
+                .collect(toList());
+
+        if (CollectionUtils.isEmpty(this.tenantFactories)) {
             throw new IllegalArgumentException("Tenants list must be non-empty");
         }
 
-        this.tenantFactories = tenantFactories;
+        this.healthResponse = createHealthResponse(serviceConfig);
     }
 
     /**
@@ -45,7 +66,6 @@ public class IntegrationService {
     }
 
     public void start() {
-
         initSparkService();
 
         for (TenantFactory tenantFactory : tenantFactories) {
@@ -67,7 +87,9 @@ public class IntegrationService {
         Spark.get("/health", (req, res) -> {
             res.status(HttpStatusCode.OK_200);
             res.type(ContentType.APPLICATION_JSON.getMimeType());
-            return ImmutableMap.of("status", HttpStatus.OK_200);
+
+            return healthResponse;
+
         }, SphereJsonUtils::toJsonString);
     }
 
@@ -129,5 +151,20 @@ public class IntegrationService {
 
         final String systemProperty = System.getProperty(HEROKU_ASSIGNED_PORT, "8080");
         return Integer.parseInt(systemProperty);
+    }
+
+    private ImmutableMap createHealthResponse(@Nonnull final ServiceConfig serviceConfig) {
+        final ImmutableMap<String, String> applicationInfo = ImmutableMap.of(
+                "version", serviceConfig.getApplicationVersion(),
+                "title", serviceConfig.getApplicationName());
+
+        final List<String> tenants = tenantFactories.stream()
+                .map(TenantFactory::getTenantName)
+                .collect(toList());
+
+        return ImmutableMap.of(
+                "status", HttpStatus.OK_200,
+                "tenants", tenants,
+                "applicationInfo", applicationInfo);
     }
 }
