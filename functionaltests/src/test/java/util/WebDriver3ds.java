@@ -50,7 +50,7 @@ public class WebDriver3ds extends HtmlUnitDriver {
      * Submits the given {@code password} at the given {@code url}'s "password" element, waits for a redirect and
      * returns the URL it was redirected to.
      *
-     * @param url the URL to navigate to
+     * @param url      the URL to navigate to
      * @param password the password
      * @return the URL the browser was redirected to after submitting the {@code password}
      */

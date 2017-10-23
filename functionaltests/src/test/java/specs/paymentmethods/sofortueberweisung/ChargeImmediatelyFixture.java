@@ -15,7 +15,6 @@ import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -44,8 +43,6 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
 
     private static final String baseRedirectUrl = "https://www.example.com/sofortueberweisung_charge_immediately/";
 
-    private WebDriverSofortueberweisung webDriver;
-
     private Map<String, String> successUrlForPayment;
 
     private static Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyFixture.class);
@@ -53,13 +50,7 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        webDriver = new WebDriverSofortueberweisung();
         successUrlForPayment = new HashMap<>();
-    }
-
-    @After
-    public void tearDown() {
-        webDriver.quit();
     }
 
     public String createPayment(final String paymentName,
@@ -174,24 +165,42 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
     public boolean executeRedirectForPayments(final String paymentNames) throws ExecutionException {
         final Collection<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 
-        paymentNamesList.forEach(paymentName -> {
-            final Payment payment = fetchPaymentByLegibleName(paymentName);
-            try {
-                Optional.ofNullable(payment.getCustom())
-                        .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
-                        .map(redirectCustomField -> webDriver.executeSofortueberweisungRedirect(redirectCustomField,
-                                                                                getTestDataSwBankTransferIban(),
-                                                                                getTestDataSwBankTransferPin(),
-                                                                                getTestDataSwBankTransferTan())
-                                .replace(baseRedirectUrl, "[...]"))
-                        .ifPresent(successUrl -> successUrlForPayment.put(paymentName, successUrl));
-            } catch (Exception e) {
-                LOG.error("Error executing redirect for Sofortüberweisung Charge Immediate fixture", e);
-            }
+        // run all 3 payments approval in parallel, aka 3 different sessions
+        final int processedCount = paymentNamesList.stream().parallel()
+                .mapToInt(this::approvePaymentAsCustomer)
+                .sum();
 
-        });
+        return successUrlForPayment.size() == processedCount;
+    }
 
-        return successUrlForPayment.size() == paymentNamesList.size();
+    /**
+     * Simulate customer's payment approval: log in in browser, set field values, press submit buttons.
+     *
+     * @param paymentName payment name to approve
+     * @return 1 if items is approved, 0 - if approval was not possible.
+     */
+    private int approvePaymentAsCustomer(String paymentName) {
+        final Payment payment = fetchPaymentByLegibleName(paymentName);
+        final WebDriverSofortueberweisung webDriver = new WebDriverSofortueberweisung();
+        try {
+            Optional.ofNullable(payment.getCustom())
+                    .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
+                    .map(redirectCustomField -> webDriver.executeSofortueberweisungRedirect(redirectCustomField,
+                            getTestDataSwBankTransferIban(),
+                            getTestDataSwBankTransferPin(),
+                            getTestDataSwBankTransferTan())
+                            .replace(baseRedirectUrl, "[...]"))
+                    .ifPresent(successUrl -> successUrlForPayment.put(paymentName, successUrl));
+        } catch (Exception e) {
+            LOG.error("Error redirect for Sofortüberweisung Charge Immediate for payment name [{}], id = [{}]",
+                    paymentName, payment.getId(), e);
+            return 0;
+        } finally {
+            webDriver.manage().deleteAllCookies();
+            webDriver.quit();
+        }
+
+        return 1;
     }
 
     @Override
