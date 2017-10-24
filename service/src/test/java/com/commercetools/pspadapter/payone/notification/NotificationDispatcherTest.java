@@ -111,7 +111,7 @@ public class NotificationDispatcherTest extends BaseTenantPropertyTest {
         notification.setCurrency("EUR");
         notification.setPortalid("dummyConfigValue");
         notification.setAid("dummyConfigValue");
-        notification.setKey(Hashing.md5().hashString("dummyConfigValue", Charsets.UTF_8).toString());
+        notification.setKey(Hashing.sha384().hashString("dummyConfigValue", Charsets.UTF_8).toString());
         notification.setMode("dummyConfigValue");
         notification.setTxtime("1450365542");
         notification.setTxaction(NotificationAction.APPOINTED);
@@ -140,7 +140,7 @@ public class NotificationDispatcherTest extends BaseTenantPropertyTest {
         notification.setCurrency("EUR");
         notification.setPortalid("dummyConfigValue");
         notification.setAid("dummyConfigValue");
-        notification.setKey(Hashing.md5().hashString("dummyConfigValue", Charsets.UTF_8).toString());
+        notification.setKey(Hashing.sha384().hashString("dummyConfigValue", Charsets.UTF_8).toString());
         notification.setMode("dummyConfigValue");
         notification.setTxtime("1450365542");
         notification.setTxaction(NotificationAction.APPOINTED);
@@ -197,7 +197,7 @@ public class NotificationDispatcherTest extends BaseTenantPropertyTest {
         notification.setCurrency("EUR");
         notification.setPortalid("dummyConfigValue");
         notification.setAid("dummyConfigValue");
-        notification.setKey(Hashing.md5().hashString("dummyConfigValue", Charsets.UTF_8).toString());
+        notification.setKey(Hashing.sha384().hashString("dummyConfigValue", Charsets.UTF_8).toString());
         notification.setMode("dummyConfigValue");
         notification.setTxtime("1450365542");
         notification.setTxaction(NotificationAction.APPOINTED);

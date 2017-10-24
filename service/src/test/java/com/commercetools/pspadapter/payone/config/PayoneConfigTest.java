@@ -69,10 +69,10 @@ public class PayoneConfigTest {
     }
 
     @Test
-    public void getsKeyAsMd5Hash() {
+    public void getsKeyAsSha384Hash() {
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.PAYONE_KEY)).thenReturn("key 1");
-        assertThat(new PayoneConfig(tenantPropertyProvider).getKeyAsMd5Hash())
-                .isEqualTo(Hashing.md5().hashString("key 1", Charsets.UTF_8).toString());
+        assertThat(new PayoneConfig(tenantPropertyProvider).getKeyAsSha384Hash())
+                .isEqualTo(Hashing.sha384().hashString("key 1", Charsets.UTF_8).toString());
     }
 
     @Test
