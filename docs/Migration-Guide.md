@@ -99,3 +99,6 @@ You have to change the payment handling URL:
   since they are deprecated. The service consumers should not rely on them any more.  
   
       See [Release Notes](http://dev.commercetools.com/release-notes.html#release-notes---commercetools-platform---version-release-29-september-2017)
+
+  1. It is recommended to set the hashing algorithm to "sha2-384" ("advanced" tab in the portal config) 
+  

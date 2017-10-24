@@ -268,24 +268,24 @@ card numbers using PAYONE server API. To do this with the client API please refe
 With the server API you simply need to send a POST request of type "3dscheck" for example by using a command line tool:
 
 ```
-curl --data "request=3dscheck&mid=<PAYONE_MERCHANT_ID>&aid=<PAYONE_SUBACC_ID>&portalid=<PAYONE_PORTAL_ID>&key=<MD5_PAYONE_KEY>&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_NUMBER>" https://api.pay1.de/post-gateway/
+curl --data "request=3dscheck&mid=<PAYONE_MERCHANT_ID>&aid=<PAYONE_SUBACC_ID>&portalid=<PAYONE_PORTAL_ID>&key=<SHA2_384_PAYONE_KEY>&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_NUMBER>" https://api.pay1.de/post-gateway/
 ```
 
 * <url> needs to be replaced by the PAYONE api url. You will find this in the server documentation.
 * You need to replace the values for mid, aid and portalid with the ones you want to use with PAYONE.
-* The value for `MD5_PAYONE_KEY` needs to be the MD5 encryption result of your PAYONE key (`PAYONE_KEY`). 
-Use `md5 -qs $PAYONE_KEY` to hash string value to MD5.
+* The value for `SHA2_384_PAYONE_KEY` needs to be the SHA2-384 encryption result of your PAYONE key (`PAYONE_KEY`). 
+Use `echo -n $PAYONE_KEY | shasum -a 384` to hash string value to SHA2-384.
 * The `cardpan` must be the value of card number. You may get test data values from [wiki page]( https://wiki.commercetools.de/display/DEV/payone#payone-Creditcard%28canbetestedwithpublicIPonly%29).
 * Note that the `cardtype` request argument needs to be corresponding: `V` or `M` for _VISA_ and _Master Card_ respectively.
 * Each tenant generates own pseudocardpan number for the same test card number, because the pseudocardpan numbers are 
   specific for each Payone portal.
 
 If you have all values above set in [environment variables](#appendix-2-shell-script-template-that-sets-the-environment-variables-to-run-the-integration-tests), 
-and _md5_ command is available (which is default case on Mac OS X and most of Linux distributions), 
+and _shasum_ command is available (which is default case on Mac OS X and most of Linux distributions), 
 you may copy-paste and directly execute next line (change only `<VISA_CREDIT_CARD_3DS_NUMBER>`):
 
 ```
-curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_NUMBER>" https://api.pay1.de/post-gateway/
+curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(echo -n $PAYONE_KEY | shashum -a 384)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_NUMBER>" https://api.pay1.de/post-gateway/
 ```
 
 To run the integration tests locally  - invoke the following command line:

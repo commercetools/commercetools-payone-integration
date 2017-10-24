@@ -56,7 +56,7 @@ https://pmi.pay1.de/
 
  * Create a Payment Portal of type "Shop" for the site you are planning (please also maintain separate portal for
    automated testing, demo systems etc.)
- * Set the hashing algorithm to "md5 oder sha2-384 (für Migration)" ("advanced" tab in the portal config)
+ * Set the hashing algorithm to "sha2-384" ("advanced" tab in the portal config)
  * Put the notification listener URL of where you will deploy the microservice into "Transaction Status URL" in the
    "advanced" tab of the portal. The value typically is https://{your-service-instance.example.com}/{tenant-name}/payone/notification .  
  * Configure the "riskcheck" settings as intended (esp. 3Dsecure)
