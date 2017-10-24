@@ -18,7 +18,7 @@ public class PayoneConfig {
     private final String subAccountId;
     private final String merchantId;
     private final String portalId;
-    private final String keyAsMd5Hash;
+    private final String keyAsSha384Hash;
     private final String mode;
     private final String apiUrl;
     private final String apiVersion;
@@ -45,7 +45,7 @@ public class PayoneConfig {
         portalId = tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.PAYONE_PORTAL_ID);
         mode = tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.PAYONE_MODE).orElse(DEFAULT_PAYONE_MODE);
         final String plainKey = tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.PAYONE_KEY);
-        keyAsMd5Hash = Hashing.md5().hashString(plainKey, Charsets.UTF_8).toString();
+        keyAsSha384Hash = Hashing.sha384().hashString(plainKey, Charsets.UTF_8).toString();
     }
 
     public String getApiUrl() {
@@ -60,8 +60,8 @@ public class PayoneConfig {
         return merchantId;
     }
 
-    public String getKeyAsMd5Hash() {
-        return keyAsMd5Hash;
+    public String getKeyAsSha384Hash() {
+        return keyAsSha384Hash;
     }
 
     public String getPortalId() {

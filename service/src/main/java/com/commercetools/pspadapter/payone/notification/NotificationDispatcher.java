@@ -70,7 +70,7 @@ public class NotificationDispatcher {
      * @throws IllegalArgumentException if any argument is null or not matching
      */
     private void validateSecrets(final Notification notification) throws IllegalArgumentException {
-        Preconditions.checkArgument(config.getKeyAsMd5Hash().equals(notification.getKey()),
+        Preconditions.checkArgument(config.getKeyAsSha384Hash().equals(notification.getKey()),
                 "the value for 'key' is not valid for this service instance: " + notification.getKey());
         Preconditions.checkArgument(config.getPortalId().equals(notification.getPortalid()),
                 "the value for 'portalid' is not valid for this service instance: " + notification.getPortalid());
