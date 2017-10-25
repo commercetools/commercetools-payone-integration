@@ -177,7 +177,7 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
      * Simulate customer's payment approval: log in in browser, set field values, press submit buttons.
      *
      * @param paymentName payment name to approve
-     * @return 1 if items is approved, 0 - if approval was not possible.
+     * @return 1 if payment is approved, 0 - if approval was not possible.
      */
     private int approvePaymentAsCustomer(String paymentName) {
         final Payment payment = fetchPaymentByLegibleName(paymentName);
