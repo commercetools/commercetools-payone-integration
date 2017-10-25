@@ -13,20 +13,30 @@ plugins {
 }
 
 def depVersions = [
+        //all
         commercetoolsSdkJvm: '1.25.0',
-        sparkCore: '2.6.0',
-        fluentHc: '4.5.3',
         guava: '23.0',
-        quartz: '2.3.0',
-        hamcrest: '1.3',
-        jUnit: '4.12',
-        assertJ: '3.8.0',
         slf4jLogbackClassic: '1.2.3',
-        slf4jLog4j: '1.7.25',
         unirest: '1.4.9',
+
+        // :service
+        sparkCore: '2.6.0',
+        quartz: '2.3.0',
+        jUnit: '4.12',
+        hamcrest: '1.3',
+        assertJ: '3.8.0',
         mockito: '1.10.19',
+
+        // : functionaltests
+        fluentHc: '4.5.3',
+        slf4jLog4j: '1.7.25',
         seleniumJava: '3.6.0',
-        seleniumHtmlunitDriver: '2.52.0'
+        seleniumHtmlunitDriver: '2.52.0',
+        concordion: '1.5.1',
+        concordionInputStyleExtension: '0.1',
+        concordionConcordionRunTotalsExtension: '1.0.0',
+        concordionParallelRunExtension: '1.0.1'
+
 ]
 
 allprojects {
@@ -239,10 +249,10 @@ project(":functionaltests") {
     dependencies {
         testImplementation project(":service")
 
-        testImplementation 'org.concordion:concordion:1.5.1'
-        testImplementation 'org.concordion:concordion-input-style-extension:0.1'
-        testImplementation 'org.concordion:concordion-run-totals-extension:1.0.0'
-        testImplementation ('org.concordion:concordion-parallel-run-extension:1.0.1') {
+        testImplementation "org.concordion:concordion:${depVersions.concordion}"
+        testImplementation "org.concordion:concordion-input-style-extension:${depVersions.concordionInputStyleExtension}"
+        testImplementation "org.concordion:concordion-run-totals-extension:${depVersions.concordionConcordionRunTotalsExtension}"
+        testImplementation ("org.concordion:concordion-parallel-run-extension:${depVersions.concordionParallelRunExtension}") {
             exclude group: 'com.google.guava', module: 'guava'
         }
 
