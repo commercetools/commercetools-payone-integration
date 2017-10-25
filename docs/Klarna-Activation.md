@@ -3,6 +3,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Add Klarna payment](#add-klarna-payment)
+  - [Klarna staging test](#klarna-staging-test)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -42,3 +43,8 @@ Klarna library updates:
      before handling the cart/payment.
      
      4.3 Payone requires: **`billing and delivery address need to be identical`**
+     
+## Klarna staging test
+ 
+Use the following credentials to test Klarna payments on sandbox 
+https://developers.klarna.com/en/se/kpm/test-credentials
