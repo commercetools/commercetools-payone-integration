@@ -28,7 +28,7 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
     private static final int DEFAULT_TIMEOUT = 5;
 
     public WebDriverSofortueberweisung() {
-        super(BrowserVersion.FIREFOX_45, true);
+        super(BrowserVersion.CHROME, true);
 
         final Timeouts timeouts = manage().timeouts();
         timeouts.implicitlyWait(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
