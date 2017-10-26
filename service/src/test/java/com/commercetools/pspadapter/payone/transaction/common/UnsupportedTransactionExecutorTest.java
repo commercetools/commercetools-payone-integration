@@ -2,8 +2,8 @@ package com.commercetools.pspadapter.payone.transaction.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.when;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
@@ -44,7 +44,7 @@ public class UnsupportedTransactionExecutorTest {
         final Transaction transaction = inputPayment.getTransactions().get(0);
 
         // TODO jw: use more specific matchers
-        when(client.executeBlocking(argThat(instanceOf(PaymentUpdateCommand.class)))).thenReturn(outputPayment);
+        when(client.executeBlocking(isA(PaymentUpdateCommand.class))).thenReturn(outputPayment);
 
         assertThat(testee.executeTransaction(new PaymentWithCartLike(inputPayment, (Cart)null), transaction).getPayment()).isSameAs(outputPayment);
     }
@@ -56,7 +56,7 @@ public class UnsupportedTransactionExecutorTest {
 
         // TODO jw: use more specific matchers
         final CompletionException completionException = new CompletionException(new Exception());
-        when(client.executeBlocking(argThat(instanceOf(PaymentUpdateCommand.class))))
+        when(client.executeBlocking(isA(PaymentUpdateCommand.class)))
                 .thenThrow(completionException);
 
         final Throwable throwable = catchThrowable(() -> testee.executeTransaction(new PaymentWithCartLike(inputPayment, (Cart)null), transaction));
