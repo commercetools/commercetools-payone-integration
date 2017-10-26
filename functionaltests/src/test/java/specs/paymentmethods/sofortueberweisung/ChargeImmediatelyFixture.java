@@ -13,9 +13,9 @@ import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpResponse;
 import org.concordion.integration.junit4.ConcordionRunner;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -27,10 +27,16 @@ import javax.money.MonetaryAmount;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Optional.empty;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 
 /**
@@ -42,8 +48,6 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
 
     private static final String baseRedirectUrl = "https://www.example.com/sofortueberweisung_charge_immediately/";
 
-    private WebDriverSofortueberweisung webDriver;
-
     private Map<String, String> successUrlForPayment;
 
     private static Logger LOG = LoggerFactory.getLogger(ChargeImmediatelyFixture.class);
@@ -51,13 +55,7 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        webDriver = new WebDriverSofortueberweisung();
-        successUrlForPayment = new HashMap<>();
-    }
-
-    @After
-    public void tearDown() {
-        webDriver.quit();
+        successUrlForPayment = emptyMap();
     }
 
     public String createPayment(final String paymentName,
@@ -154,24 +152,45 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
     public boolean executeRedirectForPayments(final String paymentNames) throws ExecutionException {
         final Collection<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 
-        paymentNamesList.forEach(paymentName -> {
-            final Payment payment = fetchPaymentByLegibleName(paymentName);
-            try {
-                Optional.ofNullable(payment.getCustom())
-                        .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
-                        .map(redirectCustomField -> webDriver.executeSofortueberweisungRedirect(redirectCustomField,
-                                                                                getTestDataSwBankTransferIban(),
-                                                                                getTestDataSwBankTransferPin(),
-                                                                                getTestDataSwBankTransferTan())
-                                .replace(baseRedirectUrl, "[...]"))
-                        .ifPresent(successUrl -> successUrlForPayment.put(paymentName, successUrl));
-            } catch (Exception e) {
-                LOG.error("Error executing redirect for Sofortüberweisung Charge Immediate fixture", e);
-            }
-
-        });
+        // run all 3 payments approval in parallel, aka 3 different sessions
+        // and collect successfully approved redirect URLs
+        successUrlForPayment = paymentNamesList.stream().parallel()
+                .map(this::approvePaymentAsCustomer)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(toMap(Pair::getKey, Pair::getValue));
 
         return successUrlForPayment.size() == paymentNamesList.size();
+    }
+
+    /**
+     * Simulate customer's payment approval: log in in browser, set field values, press submit buttons.
+     *
+     * @param paymentName payment name to approve
+     * @return optional {@code paymentName -> successUrl} pairs if payment has been approved succesfuly.
+     */
+    private Optional<Pair<String, String>> approvePaymentAsCustomer(String paymentName) {
+        final Payment payment = fetchPaymentByLegibleName(paymentName);
+        final WebDriverSofortueberweisung webDriver = new WebDriverSofortueberweisung();
+        try {
+            return Optional.ofNullable(payment.getCustom())
+                    .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
+                    .map(redirectCustomField -> webDriver.executeSofortueberweisungRedirect(redirectCustomField,
+                            getTestDataSwBankTransferIban(),
+                            getTestDataSwBankTransferPin(),
+                            getTestDataSwBankTransferTan())
+                            .replace(baseRedirectUrl, "[...]"))
+                    .map(successUrl -> Pair.of(paymentName, successUrl));
+
+        } catch (Exception e) {
+            LOG.error("Error redirect for Sofortüberweisung Charge Immediate for payment name [{}], id = [{}]",
+                    paymentName, payment.getId(), e);
+        } finally {
+            webDriver.manage().deleteAllCookies();
+            webDriver.quit();
+        }
+
+        return empty();
     }
 
     @Override

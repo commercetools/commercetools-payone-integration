@@ -22,8 +22,12 @@ public final class WebDriverSofortueberweisungConstants {
 
     /**
      * Name of radio button input with account to select for tests after log-in process.
+     * <pre>
+     * Girokonto (Max Mustermann)
+     * DE06000000000023456789
+     * </pre>
      */
-    public static final String SU_TEST_ACCOUNT_RADIO_BUTTON = "MultipaysSessionSenderAccountNumberTechnical23456789";
+    public static final String SU_TEST_ACCOUNT_RADIO_BUTTON = "account-1";
 
     public static final String SU_URL_SELECT_ACCOUNT_PATTERN = "select_account";
     public static final String SU_URL_PROVIDE_TAN_PATTERN = "provide_tan";
