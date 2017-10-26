@@ -28,7 +28,6 @@ import io.sphere.sdk.products.Product;
 import io.sphere.sdk.products.queries.ProductQuery;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.fluent.Request;
 import org.concordion.api.ExpectedToFail;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
@@ -40,6 +39,8 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
+
+import static util.HttpRequestUtil.executeGetRequest;
 
 /**
  * @author fhaertig
@@ -72,14 +73,10 @@ public class ChargePreauthorizedFixture extends BaseFixture {
         return paymentId;
     }
 
-    public boolean handlePayment(final String paymentId) throws IOException, ExecutionException, InterruptedException {
-
-        final HttpResponse response = Request.Get(getHandlePaymentUrl(paymentId))
-                .connectTimeout(REQUEST_TIMEOUT)
-                .execute()
-                .returnResponse();
-
-        return response.getStatusLine().getStatusCode() == 200;
+    public int handlePayment(final String paymentId) throws IOException, ExecutionException, InterruptedException {
+        return executeGetRequest(getHandlePaymentUrl(paymentId))
+                .getStatusLine()
+                .getStatusCode();
     }
 
     public String getInterfaceInteractionCount(

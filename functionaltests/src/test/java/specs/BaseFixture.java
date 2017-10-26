@@ -42,7 +42,6 @@ import io.sphere.sdk.types.Type;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.fluent.Request;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +63,7 @@ import java.util.regex.Pattern;
 import static java.lang.String.format;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.DOTALL;
+import static util.HttpRequestUtil.executeGetRequest;
 
 /**
  * @author fhaertig
@@ -81,12 +81,6 @@ public abstract class BaseFixture {
     protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(15);
     protected static final long RETRY_DELAY = TimeUnit.SECONDS.toMillis(15);
     protected static final long INTERMEDIATE_REPORT_DELAY = TimeUnit.MINUTES.toMillis(3);
-
-    // looks like heroku may have some lags, so we use 10 seconds to avoid false test fails because of timeouts
-    protected static final int REQUEST_TIMEOUT = 10000;
-
-    // timeout for simple requests, like health or malformed id, where heavy processing is not expected
-    protected static final int SIMPLE_REQUEST_TIMEOUT = 2000;
 
     protected static final Duration CTP_REQUEST_TIMEOUT = Duration.ofMinutes(2);
 
@@ -179,10 +173,7 @@ public abstract class BaseFixture {
     }
 
     public HttpResponse sendGetRequestToUrl(final String url) throws IOException {
-        return Request.Get(url)
-                .connectTimeout(REQUEST_TIMEOUT)
-                .execute()
-                .returnResponse();
+        return executeGetRequest(url);
     }
 
     protected static String getConfigurationParameter(final String configParameterName) {
@@ -505,10 +496,7 @@ public abstract class BaseFixture {
         Preconditions.checkState(payments.containsKey(paymentName),
                 format("Legible payment name '%s' not mapped to any payment ID.", paymentName));
 
-        return Request.Get(getHandlePaymentUrl(payments.get(paymentName)))
-                .connectTimeout(REQUEST_TIMEOUT)
-                .execute()
-                .returnResponse();
+        return executeGetRequest(getHandlePaymentUrl(payments.get(paymentName)));
     }
 
     protected String getIdForLegibleName(final String paymentName) {
