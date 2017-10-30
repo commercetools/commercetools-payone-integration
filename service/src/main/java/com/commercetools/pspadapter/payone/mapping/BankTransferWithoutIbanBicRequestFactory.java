@@ -6,10 +6,8 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingTy
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
-import org.javamoney.moneta.function.MonetaryUtil;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 /**
  * Created by mht on 15.08.16.

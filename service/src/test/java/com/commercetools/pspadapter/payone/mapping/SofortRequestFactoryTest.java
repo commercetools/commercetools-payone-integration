@@ -13,7 +13,6 @@ import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 import org.assertj.core.api.SoftAssertions;
-import org.javamoney.moneta.function.MonetaryUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +22,7 @@ import util.PaymentTestHelper;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import static org.javamoney.moneta.function.MonetaryQueries.convertMinorPart;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -88,7 +88,7 @@ public class SofortRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(result.getLanguage()).isEqualTo(order.getLocale().getLanguage());
 
         //monetary
-        softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
+        softly.assertThat(result.getAmount()).isEqualTo(convertMinorPart().queryFrom(payment.getAmountPlanned()).intValue());
         softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
         //urls
@@ -175,7 +175,7 @@ public class SofortRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(result.getCustomerid()).isEqualTo(payment.getCustomer().getObj().getCustomerNumber());
 
         //monetary
-        softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
+        softly.assertThat(result.getAmount()).isEqualTo(convertMinorPart().queryFrom(payment.getAmountPlanned()).intValue());
         softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
         //urls

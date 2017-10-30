@@ -12,7 +12,6 @@ import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 import org.assertj.core.api.SoftAssertions;
-import org.javamoney.moneta.function.MonetaryUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
+import static org.javamoney.moneta.function.MonetaryQueries.convertMinorPart;
 
 /**
  * @author fhaertig
@@ -42,7 +42,7 @@ public class PaypalRequestFactoryTest extends BaseTenantPropertyTest {
     }
 
     @Test
-     public void createFullPreauthorizationRequestFromValidPayment() throws Exception {
+    public void createFullPreauthorizationRequestFromValidPayment() throws Exception {
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroPPE();
         Order order = payments.dummyOrderMapToPayoneRequest();
@@ -78,7 +78,7 @@ public class PaypalRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(result.getLanguage()).isEqualTo(payment.getCustom().getFieldAsString(LANGUAGE_CODE_FIELD));
 
         //monetary
-        softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
+        softly.assertThat(result.getAmount()).isEqualTo(convertMinorPart().queryFrom(payment.getAmountPlanned()).intValue());
         softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
         //urls
@@ -155,7 +155,7 @@ public class PaypalRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(result.getLanguage()).isEqualTo(payment.getCustom().getFieldAsString(LANGUAGE_CODE_FIELD));
 
         //monetary
-        softly.assertThat(result.getAmount()).isEqualTo(MonetaryUtil.minorUnits().queryFrom(payment.getAmountPlanned()).intValue());
+        softly.assertThat(result.getAmount()).isEqualTo(convertMinorPart().queryFrom(payment.getAmountPlanned()).intValue());
         softly.assertThat(result.getCurrency()).isEqualTo(payment.getAmountPlanned().getCurrency().getCurrencyCode());
 
         //urls

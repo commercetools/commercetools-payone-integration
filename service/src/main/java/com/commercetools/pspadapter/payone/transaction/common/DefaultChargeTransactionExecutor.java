@@ -136,7 +136,6 @@ public class DefaultChargeTransactionExecutor extends TransactionBaseExecutor {
                             setStatusInterfaceCode(response),
                             setStatusInterfaceText(response),
                             SetInterfaceId.of(response.get("txid")),
-                            SetAuthorization.of(updatedPayment.getAmountPlanned()),
                             ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
                             ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
                     ));

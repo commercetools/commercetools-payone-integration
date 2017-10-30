@@ -12,7 +12,6 @@ import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractionId;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
-import io.sphere.sdk.payments.commands.updateactions.SetAuthorization;
 import io.sphere.sdk.utils.MoneyImpl;
 
 import javax.money.MonetaryAmount;
@@ -78,14 +77,12 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
                                 notification.getTransactionStatus().equals(TransactionStatus.COMPLETED)) {
                             listBuilder.add(ChangeTransactionState.of(
                                     notification.getTransactionStatus().getCtTransactionState(), transaction.getId()));
-
-                            listBuilder.add(SetAuthorization.of(payment.getAmountPlanned()));
                         }
 
                         return listBuilder;
                     })
                     .orElseGet(() -> {
-                        addPaymentUpdatesForNewAuthorizationTransaction(payment, notification, listBuilder);
+                        addPaymentUpdatesForNewAuthorizationTransaction(notification, listBuilder);
                         return listBuilder;
                     })
                     .build();
@@ -96,16 +93,11 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
     }
 
     private static void addPaymentUpdatesForNewAuthorizationTransaction(
-            final Payment payment,
             final Notification notification,
             final ImmutableList.Builder<UpdateAction<Payment>> listBuilder) {
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
 
         final TransactionState ctTransactionState = notification.getTransactionStatus().getCtTransactionState();
-        if (ctTransactionState.equals(TransactionState.SUCCESS)) {
-            final SetAuthorization setAuthorizationAction = SetAuthorization.of(payment.getAmountPlanned());
-            listBuilder.add(setAuthorizationAction);
-        }
 
         listBuilder.add(AddTransaction.of(TransactionDraftBuilder.of(TransactionType.AUTHORIZATION, amount)
                 .timestamp(toZonedDateTime(notification))

@@ -11,6 +11,7 @@ import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.google.common.cache.LoadingCache;
 import io.sphere.sdk.client.BlockingSphereClient;
+import io.sphere.sdk.client.SphereClientConfig;
 import io.sphere.sdk.types.Type;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +45,8 @@ public class TenantFactoryTest {
         when(payoneConfig.getApiUrl()).thenReturn("http://test.api.url");
         when(tenantConfig.getPayoneConfig()).thenReturn(payoneConfig);
         when(tenantConfig.getName()).thenReturn("testTenantName");
+        when(tenantConfig.getSphereClientConfig())
+                .thenReturn(SphereClientConfig.of("test-key", "test-client-id", "test-client-secret"));
 
         factory = new TenantFactory("testPayoneInterfaceName", tenantConfig);
     }

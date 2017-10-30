@@ -26,7 +26,6 @@ import specs.BaseFixture;
 import javax.money.CurrencyUnit;
 import javax.money.MonetaryAmount;
 import javax.money.NumberValue;
-import javax.money.format.MonetaryFormats;
 import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.Optional;
@@ -98,16 +97,11 @@ public class OrderServiceImplFixture extends BaseFixture {
         final Payment payment = fetchPaymentByLegibleName(paymentName);
         final String transactionId = getIdOfLastTransaction(payment);
 
-        final String amountAuthorized = (payment.getAmountAuthorized() != null) ?
-                MonetaryFormats.getAmountFormat(Locale.GERMANY).format(payment.getAmountAuthorized()) :
-                BaseFixture.EMPTY_STRING;
-
         Optional<Order> order = executeBlocking(orderService.getOrderByPaymentId(payment.getId()));
 
         return MultiValueResult.multiValueResult()
                 .with("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
                 .with("transactionState", getTransactionState(payment, transactionId))
-                .with("amountAuthorized", amountAuthorized)
                 .with("centAmount", order.map(Order::getTotalPrice).map(MonetaryAmount::getNumber).map(NumberValue::intValue).orElse(-666))
                 .with("currencyCode", order.map(Order::getTotalPrice).map(MonetaryAmount::getCurrency).map(CurrencyUnit::getCurrencyCode).orElse("ERR"))
                 .with("paymentState", order.map(Order::getPaymentState).map(PaymentState::toString).orElse(null));

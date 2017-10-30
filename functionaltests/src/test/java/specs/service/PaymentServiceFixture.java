@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
-import io.sphere.sdk.payments.commands.updateactions.SetAmountPaid;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
 import io.sphere.sdk.types.CustomFields;
@@ -136,8 +135,7 @@ public class PaymentServiceFixture extends BaseFixture {
      * Test {@link PaymentService#updatePayment(io.sphere.sdk.payments.Payment, java.util.List)}
      */
     public MultiValueResult updatePayment(String paymentName, String statusCode, String statusText,
-                                          String sequenceNumber, String txAction, String notificationText,
-                                          long paidCentAmount, String currencyCode) {
+                                          String sequenceNumber, String txAction, String notificationText) {
         final Payment payment = fetchPaymentByLegibleName(paymentName);
 
         ImmutableList<UpdateAction<Payment>> actions = ImmutableList.of(
@@ -149,8 +147,7 @@ public class PaymentServiceFixture extends BaseFixture {
                                 TIMESTAMP_FIELD, ZonedDateTime.now(),
                                 SEQUENCE_NUMBER_FIELD, sequenceNumber,
                                 TX_ACTION_FIELD, txAction,
-                                NOTIFICATION_FIELD, notificationText)),
-                SetAmountPaid.of(createMonetaryAmountFromCent(paidCentAmount, currencyCode)));
+                                NOTIFICATION_FIELD, notificationText)));
 
         Payment updatedPayment = executeBlocking(paymentService.updatePayment(payment, actions));
 
@@ -159,13 +156,12 @@ public class PaymentServiceFixture extends BaseFixture {
     }
 
     /**
-     * Test the previous call of {@link #updatePayment(String, String, String, String, String, String, long, String)}
+     * Test the previous call of {@link #updatePayment(String, String, String, String, String, String)}
      * was successful.
      *
      * @param paymentName            test specific unique payment name
      * @param paymentMethodInterface payment provider name, like PAYONE
-     * @return set of the same values as set in the {@link #updatePayment(String, String, String, String, String, String, long, String)},
-     *         except the paid amount is set as formatted string.
+     * @return set of the same values as set in the {@link #updatePayment(String, String, String, String, String, String)}
      */
     public MultiValueResult verifyUpdatedPayment(String paymentName, String paymentMethodInterface) {
         final String interfaceId = paymentNameToOrderNumberMap.get(paymentName);
@@ -184,8 +180,7 @@ public class PaymentServiceFixture extends BaseFixture {
                 .with("statusText", payment.getPaymentStatus().getInterfaceText())
                 .with("sequenceNumber", interfaceInteractions.getFieldAsString(SEQUENCE_NUMBER_FIELD))
                 .with("txAction", interfaceInteractions.getFieldAsString(TX_ACTION_FIELD))
-                .with("notificationText", interfaceInteractions.getFieldAsString(NOTIFICATION_FIELD))
-                .with("paid", currencyFormatterDe.format(payment.getAmountPaid()));
+                .with("notificationText", interfaceInteractions.getFieldAsString(NOTIFICATION_FIELD));
     }
 
 
