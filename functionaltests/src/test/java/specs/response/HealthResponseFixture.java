@@ -28,7 +28,7 @@ public class HealthResponseFixture extends BasePaymentFixture {
     }
 
     public MultiValueResult handleHealthResponse() throws Exception {
-        final HttpResponse httpResponse = Request.Get(getHealthUrl())
+        HttpResponse httpResponse = Request.Get(getHealthUrl())
                 .connectTimeout(SIMPLE_REQUEST_TIMEOUT)
                 .execute()
                 .returnResponse();
@@ -36,8 +36,8 @@ public class HealthResponseFixture extends BasePaymentFixture {
         String responseString = new BasicResponseHandler().handleResponse(httpResponse);
 
         ObjectMapper mapper = new ObjectMapper();
-        final JsonNode jsonNode = mapper.readTree(responseString);
-        final Optional<JsonNode> tenantNames = ofNullable(jsonNode.get("tenants")).filter(JsonNode::isArray);
+        JsonNode jsonNode = mapper.readTree(responseString);
+        Optional<JsonNode> tenantNames = ofNullable(jsonNode.get("tenants")).filter(JsonNode::isArray);
         Optional<JsonNode> applicationInfo = ofNullable(jsonNode.get("applicationInfo")).filter(JsonNode::isObject);
         String title = applicationInfo.map(node -> node.get("title")).map(JsonNode::textValue).orElse("");
         String version = applicationInfo.map(node -> node.get("version")).map(JsonNode::textValue).orElse("");
