@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.commercetools.util.HttpRequestUtil.executePostRequest;
+import static com.commercetools.util.HttpRequestUtil.executePostRequestToString;
 import static com.commercetools.util.HttpRequestUtil.nvPair;
 import static java.util.stream.Collectors.toList;
 
@@ -56,7 +56,7 @@ public class PayonePostServiceImpl implements PayonePostService {
             List<BasicNameValuePair> mappedListParameters =
                     getNameValuePairsWithExpandedLists(baseRequest.toStringMap(false));
 
-            String serverResponse = executePostRequest(this.serverAPIURL, mappedListParameters).toString();
+            String serverResponse = executePostRequestToString(this.serverAPIURL, mappedListParameters);
 
             if (serverResponse.contains("status=ERROR")) {
                 LOG.error("-> Payone POST request parameters: "

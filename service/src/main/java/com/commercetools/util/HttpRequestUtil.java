@@ -1,15 +1,22 @@
 package com.commercetools.util;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,6 +41,10 @@ import java.util.Objects;
  * <p>
  * This util is intended to replace <i>Unirest</i> and <i>fluent-hc</i> dependencies, which don't propose any flexible
  * way to implement retry strategy.
+ * <p>
+ * Implementation note (for developers): remember, the responses must be closed, otherwise the connections won't return
+ * to the pool, no new connections will be available and {@link org.apache.http.conn.ConnectionPoolTimeoutException}
+ * thrown. See {@link #executeReadAndCloseRequest(HttpUriRequest)}
  */
 public final class HttpRequestUtil {
 
@@ -64,15 +75,28 @@ public final class HttpRequestUtil {
             .setRetryHandler(HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT)
             .build();
 
+    private static final BasicResponseHandler BASIC_RESPONSE_HANDLER = new BasicResponseHandler();
+
     /**
      * Execute retryable HTTP GET request with default {@link #REQUEST_TIMEOUT}
      *
      * @param url url to get
      * @return response from the {@code url}
-     * @throws IOException if request failed
+     * @throws IOException in case of a problem or the connection was aborted
      */
     public static HttpResponse executeGetRequest(@Nonnull String url) throws IOException {
-        return CLIENT.execute(new HttpGet(url));
+        return executeReadAndCloseRequest(new HttpGet(url));
+    }
+
+    /**
+     * Make URL request and return a response string.
+     *
+     * @param url URL to get/query
+     * @return response string from the request
+     * @throws IOException in case of a problem or the connection was aborted
+     */
+    public static String executeGetRequestToString(@Nonnull String url) throws IOException {
+        return responseToString(executeGetRequest(url));
     }
 
     /**
@@ -82,7 +106,7 @@ public final class HttpRequestUtil {
      * @param parameters list of values to send as URL encoded form data. If <b>null</b> - not data is sent, but
      *                   empty POST request is executed.
      * @return response from the {@code url}
-     * @throws IOException if request failed
+     * @throws IOException in case of a problem or the connection was aborted
      */
     public static HttpResponse executePostRequest(@Nonnull String url, @Nullable Iterable<? extends NameValuePair> parameters)
             throws IOException {
@@ -91,7 +115,31 @@ public final class HttpRequestUtil {
             request.setEntity(new UrlEncodedFormEntity(parameters));
         }
 
-        return CLIENT.execute(request);
+        return executeReadAndCloseRequest(request);
+    }
+
+    /**
+     * Make URL request and return a response string.
+     *
+     * @param url        URL to post/query
+     * @param parameters list of values to send as URL encoded form data. If <b>null</b> - not data is sent, but
+     *                   empty POST request is executed.
+     * @return response string from the request
+     * @throws IOException in case of a problem or the connection was aborted
+     */
+    public static String executePostRequestToString(@Nonnull String url, @Nullable Iterable<? extends NameValuePair> parameters)
+            throws IOException {
+        return responseToString(executePostRequest(url, parameters));
+    }
+
+    /**
+     * Read string content from {@link HttpResponse}.
+     * @param response response to read
+     * @return string content of the response
+     * @throws IOException in case of a problem or the connection was aborted
+     */
+    public static String responseToString(@Nonnull final HttpResponse response) throws IOException {
+        return BASIC_RESPONSE_HANDLER.handleResponse(response);
     }
 
     /**
@@ -104,6 +152,34 @@ public final class HttpRequestUtil {
      */
     public static BasicNameValuePair nvPair(@Nonnull final String name, @Nullable final Object value) {
         return new BasicNameValuePair(name, Objects.toString(value, null));
+    }
+
+    /**
+     * Be default apache httpclient responses are not closed, thus we should explicitly read the stream and close the
+     * connection.
+     * <p>
+     * The connection will be closed even if read exception occurs.
+     *
+     * @param request GET/POST/other request to execute, read and close
+     * @return read and closed {@link CloseableHttpResponse} instance from {@link CloseableHttpClient#execute(HttpUriRequest)}
+     * where {@link HttpResponse#getEntity()} is set to read string value.
+     * @throws IOException if reading failed. Note, even in case of exception the {@code response} will be closed.
+     */
+    private static CloseableHttpResponse executeReadAndCloseRequest(@Nonnull final HttpUriRequest request) throws IOException {
+        final CloseableHttpResponse response = CLIENT.execute(request);
+        try {
+            final HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                final ByteArrayEntity byteArrayEntity = new ByteArrayEntity(EntityUtils.toByteArray(entity));
+                final ContentType contentType = ContentType.getOrDefault(entity);
+                byteArrayEntity.setContentType(contentType.toString());
+                response.setEntity(byteArrayEntity);
+            }
+        } finally {
+            response.close();
+        }
+
+        return response;
     }
 
     private HttpRequestUtil() {

@@ -324,7 +324,7 @@ public abstract class BaseFixture {
 
         String cardPanResponse = null;
         try {
-            cardPanResponse = executePostRequest("https://api.pay1.de/post-gateway/",
+            cardPanResponse = executePostRequestToString("https://api.pay1.de/post-gateway/",
                     ImmutableList.of(
                             nvPair("request", "3dscheck"),
                             nvPair("mid", mid),
@@ -341,8 +341,7 @@ public abstract class BaseFixture {
                             nvPair("cardexpiredate", "2512"),
                             nvPair("cardcvc2", "123"),
                             nvPair("cardtype", "V"),
-                            nvPair("cardpan", cardPan)))
-                    .toString();
+                            nvPair("cardpan", cardPan)));
         } catch (Throwable e) {
             throw new RuntimeException("Error on pseudocardpan fetch", e);
         }

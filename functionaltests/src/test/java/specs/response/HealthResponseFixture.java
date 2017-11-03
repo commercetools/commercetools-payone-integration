@@ -3,12 +3,12 @@ package specs.response;
 import com.google.gson.JsonParser;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 
 import static com.commercetools.util.HttpRequestUtil.executeGetRequest;
+import static com.commercetools.util.HttpRequestUtil.responseToString;
 
 /**
  * Simple /health URL response checker
@@ -22,7 +22,7 @@ public class HealthResponseFixture extends BasePaymentFixture {
 
     public MultiValueResult handleHealthResponse() throws Exception {
         final HttpResponse httpResponse = executeGetRequest(getHealthUrl());
-        String responseString = new BasicResponseHandler().handleResponse(httpResponse);
+        String responseString = responseToString(httpResponse);
 
         JsonParser parser = new JsonParser();
 
