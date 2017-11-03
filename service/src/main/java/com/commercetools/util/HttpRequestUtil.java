@@ -59,7 +59,7 @@ public final class HttpRequestUtil {
     public static final int RETRY_TIMES = 3;
 
     /**
-     * This retry handler implementation override default list of <i>nonRetriableClasses</i> excluding
+     * This retry handler implementation overrides default list of <i>nonRetriableClasses</i> excluding
      * {@link java.io.InterruptedIOException} and {@link ConnectException} so the client will retry on interruption and
      * socket timeouts.
      * <p>
