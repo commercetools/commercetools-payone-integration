@@ -40,7 +40,7 @@ import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
-import static util.HttpRequestUtil.executeGetRequest;
+import static com.commercetools.util.HttpRequestUtil.executeGetRequest;
 
 /**
  * @author fhaertig

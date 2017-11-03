@@ -3,13 +3,13 @@ package specs.response;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 
-import static util.HttpRequestUtil.executeFastPostRequest;
+import static com.commercetools.util.HttpRequestUtil.executePostRequest;
 
 @RunWith(ConcordionRunner.class)
 public class NotificationResponseFixture extends BasePaymentFixture {
 
     public int handleEmptyNotificationResponse() throws Exception {
-        return executeFastPostRequest(getNotificationUrl())
+        return executePostRequest(getNotificationUrl(), null)
                 .getStatusLine()
                 .getStatusCode();
     }

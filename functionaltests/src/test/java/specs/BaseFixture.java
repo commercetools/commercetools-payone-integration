@@ -12,7 +12,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.*;
 import com.google.common.hash.Hashing;
-import com.mashape.unirest.http.Unirest;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
@@ -60,10 +59,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.commercetools.util.HttpRequestUtil.*;
 import static java.lang.String.format;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.DOTALL;
-import static util.HttpRequestUtil.executeGetRequest;
 
 /**
  * @author fhaertig
@@ -325,28 +324,27 @@ public abstract class BaseFixture {
 
         String cardPanResponse = null;
         try {
-            cardPanResponse = Unirest.post("https://api.pay1.de/post-gateway/")
-              .fields(ImmutableMap.<String, Object>builder()
-                  .put("request", "3dscheck")
-                  .put("mid", mid)
-                  .put("aid", aid)
-                  .put("portalid", pid)
-                  .put("key", Hashing.md5().hashString(key, Charsets.UTF_8).toString())
-                  .put("mode", "test")
-                  .put("api_version", "3.9")
-                  .put("amount", "2")
-                  .put("currency", "EUR")
-                  .put("clearingtype", "cc")
-                  .put("exiturl", "http://www.example.com")
-                  .put("storecarddata", "yes")
-                  .put("cardexpiredate", "2512")
-                  .put("cardcvc2", "123")
-                  .put("cardtype", "V")
-                  .put("cardpan", cardPan)
-                  .build())
-              .asString().getBody();
+            cardPanResponse = executePostRequest("https://api.pay1.de/post-gateway/",
+                    ImmutableList.of(
+                            nvPair("request", "3dscheck"),
+                            nvPair("mid", mid),
+                            nvPair("aid", aid),
+                            nvPair("portalid", pid),
+                            nvPair("key", Hashing.md5().hashString(key, Charsets.UTF_8).toString()),
+                            nvPair("mode", "test"),
+                            nvPair("api_version", "3.9"),
+                            nvPair("amount", "2"),
+                            nvPair("currency", "EUR"),
+                            nvPair("clearingtype", "cc"),
+                            nvPair("exiturl", "http://www.example.com"),
+                            nvPair("storecarddata", "yes"),
+                            nvPair("cardexpiredate", "2512"),
+                            nvPair("cardcvc2", "123"),
+                            nvPair("cardtype", "V"),
+                            nvPair("cardpan", cardPan)))
+                    .toString();
         } catch (Throwable e) {
-          throw new RuntimeException("Error on pseudocardpan fetch", e);
+            throw new RuntimeException("Error on pseudocardpan fetch", e);
         }
 
         Pattern p = Pattern.compile("^.*pseudocardpan\\s*=\\s*(\\d+).*$", CASE_INSENSITIVE | DOTALL);

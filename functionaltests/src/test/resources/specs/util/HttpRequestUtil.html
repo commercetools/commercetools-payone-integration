@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link href="../../concordion.css" rel="stylesheet" type="text/css"/>
+    <title>Http Request Util Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<h1><code>HttpRequestUtil</code> class</h1>
+
+<h4>Default timeout is <span c:echo="getDefaultTimeout()" style="color: green"></span> msec</h4>
+
+<div class="example">
+    <p c:execute="#response = executeShortGetRequest()">
+        Verify that when response timeout is <span c:echo="#response.timeout" style="color: green; font-weight: bold"></span> msec
+        then the response status is <span c:assertEquals="#response.responseStatus">200</span></p>
+</div>
+<div class="example">
+    <p c:execute="#response = executeLongGetRequest()">
+        Verify that when timeout is <span c:echo="#response.timeout" style="color: green; font-weight: bold"></span> msec then
+    <ul>
+        <li><span c:assertTrue="#response.ioExceptionCaught"><code>IOException</code> is caught at the end</span></li>
+        <li><span c:assertTrue="#response.executionTimeIs4Times">Complete execution duration is at least 4 times longer comparing to default request timeout</span>
+            <br/>(<code><span c:echo="#response.executionTime"></span> msec &gt;=
+                <span c:echo="#response.defaultRequestTimeout" style="color: green; font-weight: bold"></span>
+                msec × (<span c:echo="#response.retryTimes"></span> + 1)</code>)
+        </li>
+    </ul>
+    </p>
+</div>
+</body>
+</html>

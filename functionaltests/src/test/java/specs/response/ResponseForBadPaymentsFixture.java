@@ -4,7 +4,7 @@ import org.concordion.api.FullOGNL;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 
-import static util.HttpRequestUtil.executeFastGetRequest;
+import static com.commercetools.util.HttpRequestUtil.executeGetRequest;
 
 /**
  * {@code /${getTenantName()}/commercetools/handle/payments/} URL tests for bad IDs.
@@ -15,7 +15,7 @@ import static util.HttpRequestUtil.executeFastGetRequest;
 public class ResponseForBadPaymentsFixture extends BasePaymentFixture {
 
     public int handleBadPaymentResponses(String paymentId) throws Exception {
-        return executeFastGetRequest(getHandlePaymentUrl(paymentId))
+        return executeGetRequest(getHandlePaymentUrl(paymentId))
                 .getStatusLine()
                 .getStatusCode();
     }
