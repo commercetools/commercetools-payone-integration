@@ -7,7 +7,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Optional;
 
-import static com.commercetools.pspadapter.payone.config.PropertyProvider.TENANTS;
+import static com.commercetools.pspadapter.payone.config.PropertyProvider.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Matchers.anyString;
@@ -66,6 +66,20 @@ public class ServiceConfigTest {
     public void getsSingleTenantName() {
         when(propertyProvider.getProperty(TENANTS)).thenReturn(Optional.of("testTenantName"));
         assertThat(new ServiceConfig(propertyProvider).getTenants()).containsOnly("testTenantName");
+    }
+
+    @Test
+    public void getsApplicationInfo() {
+        assertThat(propertyProvider.getMandatoryNonEmptyProperty(PAYONE_INTEGRATOR_NAME)).isEqualTo("DEBUG-TITLE");
+        assertThat(propertyProvider.getMandatoryNonEmptyProperty(PAYONE_INTEGRATOR_VERSION)).isEqualTo("DEBUG-VERSION");
+
+        when(propertyProvider.getProperty(TENANTS)).thenReturn(Optional.of("testTenantName"));
+        when(propertyProvider.getMandatoryNonEmptyProperty(PAYONE_INTEGRATOR_NAME)).thenReturn("testAppName");
+        when(propertyProvider.getMandatoryNonEmptyProperty(PAYONE_INTEGRATOR_VERSION)).thenReturn("testAppVersion");
+
+        ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
+        assertThat(serviceConfig.getApplicationName()).isEqualTo("testAppName");
+        assertThat(serviceConfig.getApplicationVersion()).isEqualTo("testAppVersion");
     }
 
     @Test

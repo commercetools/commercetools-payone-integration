@@ -2,8 +2,10 @@ package com.commercetools.pspadapter.payone.config;
 
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
+import static com.commercetools.pspadapter.payone.config.PropertyProvider.*;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
@@ -21,6 +23,8 @@ public class ServiceConfig {
 
     private final String scheduledJobCronShortTimeFrame;
     private final String scheduledJobCronLongTimeFrame;
+    private final String applicationName;
+    private final String applicationVersion;
 
     /**
      * Initializes the configuration.
@@ -32,12 +36,15 @@ public class ServiceConfig {
 
         this.tenants = getMandatoryTenantNames(propertyProvider);
 
+        this.applicationName = propertyProvider.getMandatoryNonEmptyProperty(PAYONE_INTEGRATOR_NAME);
+        this.applicationVersion = propertyProvider.getMandatoryNonEmptyProperty(PAYONE_INTEGRATOR_VERSION);
+
         this.scheduledJobCronShortTimeFrame =
-                propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON)
+                propertyProvider.getProperty(SHORT_TIME_FRAME_SCHEDULED_JOB_CRON)
                         .map(String::valueOf)
                         .orElse("0/30 * * * * ? *");
         this.scheduledJobCronLongTimeFrame =
-                propertyProvider.getProperty(PropertyProvider.LONG_TIME_FRAME_SCHEDULED_JOB_CRON)
+                propertyProvider.getProperty(LONG_TIME_FRAME_SCHEDULED_JOB_CRON)
                         .map(String::valueOf)
                         .orElse("5 0 0/1 * * ? *");
     }
@@ -49,6 +56,16 @@ public class ServiceConfig {
         return tenants;
     }
 
+    @Nonnull
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    @Nonnull
+    public String getApplicationVersion() {
+        return applicationVersion;
+    }
+
     /**
      * Gets the
      * <a href="http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger">QUARTZ cron expression</a>
@@ -56,6 +73,7 @@ public class ServiceConfig {
      *
      * @return the cron expression
      */
+    @Nonnull
     public String getScheduledJobCronForShortTimeFramePoll() {
         return scheduledJobCronShortTimeFrame;
     }
@@ -67,6 +85,7 @@ public class ServiceConfig {
      *
      * @return the cron expression
      */
+    @Nonnull
     public String getScheduledJobCronForLongTimeFramePoll() {
         return scheduledJobCronLongTimeFrame;
     }
@@ -75,10 +94,11 @@ public class ServiceConfig {
      * Split comma or semicolon separated list of the tenants names.
      * <p>
      * All trailing/leading whitespaces are ignored.
+     *
      * @param propertyProvider property provider which supplies {@link PropertyProvider#TENANTS} value.
      * @return non-null non-empty list of tenants.
      * @throws IllegalStateException if the property can't be parsed or the parsed list is empty, or one of the values
-     * is empty (e.g., list of "a, , b").
+     *                               is empty (e.g., list of "a, , b").
      */
     private List<String> getMandatoryTenantNames(PropertyProvider propertyProvider) {
         final String tenantsList = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.TENANTS);
