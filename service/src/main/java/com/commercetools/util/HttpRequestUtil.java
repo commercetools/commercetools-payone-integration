@@ -1,5 +1,6 @@
 package com.commercetools.util;
 
+import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -16,6 +17,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 import javax.annotation.Nonnull;
@@ -42,9 +44,13 @@ import java.util.Objects;
  * This util is intended to replace <i>Unirest</i> and <i>fluent-hc</i> dependencies, which don't propose any flexible
  * way to implement retry strategy.
  * <p>
- * Implementation note (for developers): remember, the responses must be closed, otherwise the connections won't return
- * to the pool, no new connections will be available and {@link org.apache.http.conn.ConnectionPoolTimeoutException}
- * thrown. See {@link #executeReadAndCloseRequest(HttpUriRequest)}
+ * Implementation notes (for developers):<ul>
+ * <li>remember, the responses must be closed, otherwise the connections won't be return to the pool,
+ * no new connections will be available and {@link org.apache.http.conn.ConnectionPoolTimeoutException} will be
+ * thrown. See {@link #executeReadAndCloseRequest(HttpUriRequest)}</li>
+ * <li>{@link UrlEncodedFormEntity} the charset should be explicitly set to UTF-8, otherwise
+ * {@link HTTP#DEF_CONTENT_CHARSET ISO_8859_1} is used, which is not acceptable for German alphabet</li>
+ * </ul>
  */
 public final class HttpRequestUtil {
 
@@ -112,7 +118,7 @@ public final class HttpRequestUtil {
             throws IOException {
         final HttpPost request = new HttpPost(url);
         if (parameters != null) {
-            request.setEntity(new UrlEncodedFormEntity(parameters));
+            request.setEntity(new UrlEncodedFormEntity(parameters, Consts.UTF_8));
         }
 
         return executeReadAndCloseRequest(request);
@@ -134,6 +140,7 @@ public final class HttpRequestUtil {
 
     /**
      * Read string content from {@link HttpResponse}.
+     *
      * @param response response to read
      * @return string content of the response
      * @throws IOException in case of a problem or the connection was aborted
