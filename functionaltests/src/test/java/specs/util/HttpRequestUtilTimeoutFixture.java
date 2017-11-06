@@ -14,6 +14,9 @@ public class HttpRequestUtilTimeoutFixture extends HttpRequestUtilFixture {
 
     /**
      * Verify that if request timeout is too long - the client will retry 3 times.
+     * This request has response timeout larger than max request time in
+     * {@link com.commercetools.util.HttpRequestUtil#REQUEST_TIMEOUT} thus should failure, opposite to
+     * {@link HttpRequestUtilSuccessFixture#executeShortGetRequest()}
      */
     public MultiValueResult executeLongGetRequest() throws Exception {
         final int timeout = REQUEST_TIMEOUT * 2;

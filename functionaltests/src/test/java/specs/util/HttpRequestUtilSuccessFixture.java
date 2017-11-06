@@ -16,7 +16,10 @@ import static java.util.stream.Collectors.joining;
 public class HttpRequestUtilSuccessFixture extends HttpRequestUtilFixture {
 
     /**
-     * Verify normal response
+     * Verify normal response.
+     * This request has response timeout shorter than max request time in
+     * {@link com.commercetools.util.HttpRequestUtil#REQUEST_TIMEOUT} thus should success, opposite to
+     * {@link HttpRequestUtilTimeoutFixture#executeLongGetRequest()}
      */
     public MultiValueResult executeShortGetRequest() throws Exception {
         final int timeout = REQUEST_TIMEOUT / 2;
