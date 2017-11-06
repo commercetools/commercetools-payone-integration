@@ -93,30 +93,30 @@ public class PayonePostServiceImplTest {
                         .put("listDoubles", asList(3.14, 2.71, 9.81))
                         .build());
 
-        assertThat(withExpandedLists).hasSize(15);
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("foo", "bar"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("woot", "wootValue"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("a", "42"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("empty", ""));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("boolTrue", "true"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("boolFalse", "false"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("list1[1]", "1"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("list1[2]", "2"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("list1[3]", "3"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("listString[1]", "ein"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("listString[2]", "zwei"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("listString[3]", "drei"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("listDoubles[1]", "3.14"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("listDoubles[2]", "2.71"));
-        assertThat(withExpandedLists).contains(new BasicNameValuePair("listDoubles[3]", "9.81"));
+        assertThat(withExpandedLists).containsExactlyInAnyOrder(
+                new BasicNameValuePair("foo", "bar"),
+                new BasicNameValuePair("woot", "wootValue"),
+                new BasicNameValuePair("a", "42"),
+                new BasicNameValuePair("empty", ""),
+                new BasicNameValuePair("boolTrue", "true"),
+                new BasicNameValuePair("boolFalse", "false"),
+                new BasicNameValuePair("list1[1]", "1"),
+                new BasicNameValuePair("list1[2]", "2"),
+                new BasicNameValuePair("list1[3]", "3"),
+                new BasicNameValuePair("listString[1]", "ein"),
+                new BasicNameValuePair("listString[2]", "zwei"),
+                new BasicNameValuePair("listString[3]", "drei"),
+                new BasicNameValuePair("listDoubles[1]", "3.14"),
+                new BasicNameValuePair("listDoubles[2]", "2.71"),
+                new BasicNameValuePair("listDoubles[3]", "9.81"));
 
 
         final List<BasicNameValuePair> withEmptyLists = payonePostService.getNameValuePairsWithExpandedLists(
                 ImmutableMap.of("foo", new ArrayList<>(),
                         "bar", new LinkedList<>()));
 
-        assertThat(withEmptyLists.size()).isEqualTo(2);
-        assertThat(withEmptyLists).contains(new BasicNameValuePair("foo[]", ""));
-        assertThat(withEmptyLists).contains(new BasicNameValuePair("bar[]", ""));
+        assertThat(withEmptyLists).containsExactlyInAnyOrder(
+                new BasicNameValuePair("foo[]", ""),
+                new BasicNameValuePair("bar[]", ""));
     }
 }
