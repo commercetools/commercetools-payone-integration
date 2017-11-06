@@ -21,7 +21,7 @@ public class TransactionBaseExecutorTest {
                 "errorcode", "00123"
         ));
 
-        assertThat(jsonString).isNotEmpty();
+        assertThat(jsonString).isNotBlank();
 
         JsonNode node = new ObjectMapper().readTree(jsonString);
 
@@ -46,7 +46,7 @@ public class TransactionBaseExecutorTest {
         final String TEST_ERROR_MESSAGE = "TEST MESSAGE WOOT";
         String jsonString = TransactionBaseExecutor.exceptionToResponseJsonString(new Exception(TEST_ERROR_MESSAGE));
 
-        assertThat(jsonString).isNotEmpty();
+        assertThat(jsonString).isNotBlank();
 
         JsonNode node = new ObjectMapper().readTree(jsonString);
 
@@ -54,7 +54,9 @@ public class TransactionBaseExecutorTest {
         assertThat(node.has(ERROR_CODE)).isTrue();
         assertThat(node.has(CUSTOMER_MESSAGE)).isTrue();
 
-        assertThat(node.get(ERROR_MESSAGE).asText()).as("Error message node should contain exception message").contains(TEST_ERROR_MESSAGE);
+        assertThat(node.get(ERROR_MESSAGE).asText())
+                .as("Error message node should contain exception message")
+                .contains(TEST_ERROR_MESSAGE);
 
     }
 
