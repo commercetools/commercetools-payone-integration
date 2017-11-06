@@ -59,9 +59,9 @@ public class PayonePostServiceImpl implements PayonePostService {
             String serverResponse = executePostRequestToString(this.serverAPIURL, mappedListParameters);
 
             if (serverResponse.contains("status=ERROR")) {
-                LOG.error("-> Payone POST request parameters: "
-                        + getNameValuePairsWithExpandedLists(baseRequest.toStringMap(true)).toString());
-                LOG.error("Payone POST response: " + serverResponse);
+                LOG.error("-> Payone POST request parameters: {}",
+                        getNameValuePairsWithExpandedLists(baseRequest.toStringMap(true)).toString());
+                LOG.error("Payone POST response: {}", serverResponse);
             }
             return buildMapFromResultParams(serverResponse);
         } catch (Exception e) {
