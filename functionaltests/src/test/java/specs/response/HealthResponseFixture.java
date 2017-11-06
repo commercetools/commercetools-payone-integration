@@ -1,21 +1,20 @@
 package specs.response;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
+import static com.commercetools.util.HttpRequestUtil.executeGetRequest;
+import static com.commercetools.util.HttpRequestUtil.responseToString;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.joining;
 
 /**
  * Simple /health URL response checker
@@ -28,47 +27,26 @@ public class HealthResponseFixture extends BasePaymentFixture {
     }
 
     public MultiValueResult handleHealthResponse() throws Exception {
-        HttpResponse httpResponse = Request.Get(getHealthUrl())
-                .connectTimeout(SIMPLE_REQUEST_TIMEOUT)
-                .execute()
-                .returnResponse();
+        HttpResponse httpResponse = executeGetRequest(getHealthUrl());
+        String responseString = responseToString(httpResponse);
 
-        String responseString = new BasicResponseHandler().handleResponse(httpResponse);
+        JsonParser parser = new JsonParser();
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonNode = mapper.readTree(responseString);
-        Optional<JsonNode> tenantNames = ofNullable(jsonNode.get("tenants")).filter(JsonNode::isArray);
-        Optional<JsonNode> applicationInfo = ofNullable(jsonNode.get("applicationInfo")).filter(JsonNode::isObject);
-        String title = applicationInfo.map(node -> node.get("title")).map(JsonNode::textValue).orElse("");
-        String version = applicationInfo.map(node -> node.get("version")).map(JsonNode::textValue).orElse("");
+        JsonObject rootNode = parser.parse(responseString).getAsJsonObject();
+        String bodyStatus = rootNode.get("status").getAsString();
+        Optional<JsonArray> tenantNames = ofNullable(rootNode.get("tenants")).filter(JsonElement::isJsonArray).map(JsonElement::getAsJsonArray);
+        Optional<JsonObject> applicationInfo = ofNullable(rootNode.getAsJsonObject("applicationInfo")).filter(JsonObject::isJsonObject);
+        String title = applicationInfo.map(node -> node.get("title")).map(JsonElement::getAsString).orElse("");
+        String version = applicationInfo.map(node -> node.get("version")).map(JsonElement::getAsString).orElse("");
 
         return MultiValueResult.multiValueResult()
                 .with("statusCode", httpResponse.getStatusLine().getStatusCode())
                 .with("mimeType", ContentType.getOrDefault(httpResponse.getEntity()).getMimeType())
-                .with("bodyStatus", jsonNode.get("status"))
-                .with("bodyTenants", tenantNames.map(JsonNode::toString).orElse("undefined"))
-                .with("bodyTenantsSize", tenantNames.map(JsonNode::size).orElse(0))
+                .with("bodyStatus", bodyStatus)
+                .with("bodyTenants", tenantNames.map(JsonArray::toString).orElse("<<undefined>>")) // info only
+                .with("bodyTenantsSize", tenantNames.map(JsonArray::size).orElse(0))
                 .with("bodyApplicationName", title)
                 .with("bodyApplicationVersion", version)
                 .with("versionIsEmpty", version.isEmpty());
     }
-
-    /**
-     * Join with "+" tenant names in alphabetical order
-     * @param jsonObject
-     * @return
-     */
-    private static String concatTenantNames(final JsonNode jsonObject) {
-        return ofNullable(jsonObject)
-                .filter(JsonNode::isArray)
-                .map(arr -> IntStream.range(0, arr.size())
-                        .mapToObj(arr::get)
-                        .filter(Objects::nonNull)
-                        .map(JsonNode::textValue)
-                        .sorted()
-                        .collect(joining("+")))
-                .orElse("");
-
-    }
-
 }
