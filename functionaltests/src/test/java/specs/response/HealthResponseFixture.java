@@ -21,7 +21,7 @@ public class HealthResponseFixture extends BasePaymentFixture {
     }
 
     public MultiValueResult handleHealthResponse() throws Exception {
-        final HttpResponse httpResponse = executeGetRequest(getHealthUrl());
+        HttpResponse httpResponse = executeGetRequest(getHealthUrl());
         String responseString = responseToString(httpResponse);
 
         JsonParser parser = new JsonParser();
