@@ -3,10 +3,8 @@ package com.commercetools.pspadapter.payone.domain.payone;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.BaseRequest;
 import com.google.common.base.Preconditions;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,9 +14,12 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static com.commercetools.util.HttpRequestUtil.executePostRequestToString;
+import static com.commercetools.util.HttpRequestUtil.nameValue;
+import static java.util.stream.Collectors.toList;
 
 public class PayonePostServiceImpl implements PayonePostService {
 
@@ -52,18 +53,18 @@ public class PayonePostServiceImpl implements PayonePostService {
     public Map<String, String> executePost(final BaseRequest baseRequest) throws PayoneException {
 
         try {
-            Map<String, Object> mappedListParameters = getObjectMapWithExpandedLists(baseRequest.toStringMap(false));
+            List<BasicNameValuePair> mappedListParameters =
+                    getNameValuePairsWithExpandedLists(baseRequest.toStringMap(false));
 
-            String serverResponse = Unirest.post(this.serverAPIURL)
-                    .fields(mappedListParameters)
-                    .asString().getBody();
+            String serverResponse = executePostRequestToString(this.serverAPIURL, mappedListParameters);
+
             if (serverResponse.contains("status=ERROR")) {
-                LOG.error("-> Payone POST request parameters: "
-                        + getObjectMapWithExpandedLists(baseRequest.toStringMap(true)).toString());
-                LOG.error("Payone POST response: " + serverResponse);
+                LOG.error("-> Payone POST request parameters: {}",
+                        getNameValuePairsWithExpandedLists(baseRequest.toStringMap(true)).toString());
+                LOG.error("Payone POST response: {}", serverResponse);
             }
             return buildMapFromResultParams(serverResponse);
-        } catch (UnirestException | UnsupportedEncodingException e) {
+        } catch (Exception e) {
             throw new PayoneException("Payone POST request failed. Cause: " + e.getMessage(), e);
         }
     }
@@ -82,10 +83,11 @@ public class PayonePostServiceImpl implements PayonePostService {
      * </pre>
      *
      * @param parameters Set of key-value pairs to expand
-     * @return new {@link Map} where keys with list values
+     * @return new {@link List} with respective {@link BasicNameValuePair} values from {@code parameters}.
+     * Note: the items order in the list is undefined.
      */
     @Nonnull
-    Map<String, Object> getObjectMapWithExpandedLists(Map<String, Object> parameters) {
+    List<BasicNameValuePair> getNameValuePairsWithExpandedLists(Map<String, Object> parameters) {
         return parameters.entrySet().stream()
                 .flatMap(entry -> {
                     Object value = entry.getValue();
@@ -93,20 +95,20 @@ public class PayonePostServiceImpl implements PayonePostService {
                         final List list = (List) value;
                         if (list.size() > 0) {
                             return IntStream.range(0, list.size())
-                                    .mapToObj(i -> Pair.of(entry.getKey() + "[" + (i + 1) + "]", list.get(i)));
+                                    .mapToObj(i -> nameValue(entry.getKey() + "[" + (i + 1) + "]", list.get(i)));
                         } else {
-                            return Stream.of(Pair.of(entry.getKey() + "[]", ""));
+                            return Stream.of(nameValue(entry.getKey() + "[]", ""));
                         }
                     }
 
-                    return Stream.of(Pair.of(entry.getKey(), value));
+                    return Stream.of(nameValue(entry.getKey(), value));
 
                 })
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+                .collect(toList());
     }
 
     Map<String, String> buildMapFromResultParams(final String serverResponse) throws UnsupportedEncodingException {
-        Map<String, String> resultMap = new HashMap<String, String>();
+        Map<String, String> resultMap = new HashMap<>();
 
         String[] properties = serverResponse.split("\\r?\\n");
         for (String property : properties) {
