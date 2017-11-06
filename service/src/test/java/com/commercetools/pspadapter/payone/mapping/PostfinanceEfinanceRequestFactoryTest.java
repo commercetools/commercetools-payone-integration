@@ -58,7 +58,7 @@ public class PostfinanceEfinanceRequestFactoryTest extends BaseTenantPropertyTes
         softly.assertThat(result.getAid()).isEqualTo(payoneConfig.getSubAccountId());
         softly.assertThat(result.getMid()).isEqualTo(payoneConfig.getMerchantId());
         softly.assertThat(result.getPortalid()).isEqualTo(payoneConfig.getPortalId());
-        softly.assertThat(result.getKey()).isEqualTo(payoneConfig.getKeyAsSha384Hash());
+        softly.assertThat(result.getKey()).isEqualTo(payoneConfig.getKeyAsHash());
         softly.assertThat(result.getMode()).isEqualTo(payoneConfig.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(payoneConfig.getApiVersion());
         softly.assertThat(result.getSolutionName()).isEqualTo(payoneConfig.getSolutionName());

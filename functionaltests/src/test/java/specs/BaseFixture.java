@@ -4,14 +4,13 @@ import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.base.Charsets;
+import com.commercetools.pspadapter.payone.util.PayoneHash;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.*;
-import com.google.common.hash.Hashing;
 import com.mashape.unirest.http.Unirest;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
@@ -330,7 +329,7 @@ public abstract class BaseFixture {
      * @throws RuntimeException if the response from Payone can't be parsed
      */
     protected String fetchPseudoCardPan(String cardPan, String mid, String aid, String pid, String key) {
-        //curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(echo -n $PAYONE_KEY | shasum -a 384)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>"
+        //curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>"
 
         String cardPanResponse = null;
         try {
@@ -340,7 +339,7 @@ public abstract class BaseFixture {
                   .put("mid", mid)
                   .put("aid", aid)
                   .put("portalid", pid)
-                  .put("key", Hashing.sha384().hashString(key, Charsets.UTF_8).toString())
+                  .put("key", PayoneHash.calculate(key))
                   .put("mode", "test")
                   .put("api_version", "3.9")
                   .put("amount", "2")

@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.config;
 
+import com.commercetools.pspadapter.payone.util.PayoneHash;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
@@ -69,10 +70,10 @@ public class PayoneConfigTest {
     }
 
     @Test
-    public void getsKeyAsSha384Hash() {
+    public void getsKeyAsHash() {
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.PAYONE_KEY)).thenReturn("key 1");
-        assertThat(new PayoneConfig(tenantPropertyProvider).getKeyAsSha384Hash())
-                .isEqualTo(Hashing.sha384().hashString("key 1", Charsets.UTF_8).toString());
+        assertThat(new PayoneConfig(tenantPropertyProvider).getKeyAsHash())
+                .isEqualTo(PayoneHash.calculate("key 1"));
     }
 
     @Test

@@ -1,8 +1,7 @@
 package com.commercetools.pspadapter.payone.config;
 
+import com.commercetools.pspadapter.payone.util.PayoneHash;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
 
 /**
  * @author fhaertig
@@ -18,7 +17,7 @@ public class PayoneConfig {
     private final String subAccountId;
     private final String merchantId;
     private final String portalId;
-    private final String keyAsSha384Hash;
+    private final String keyAsHash;
     private final String mode;
     private final String apiUrl;
     private final String apiVersion;
@@ -45,7 +44,7 @@ public class PayoneConfig {
         portalId = tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.PAYONE_PORTAL_ID);
         mode = tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.PAYONE_MODE).orElse(DEFAULT_PAYONE_MODE);
         final String plainKey = tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(TenantPropertyProvider.PAYONE_KEY);
-        keyAsSha384Hash = Hashing.sha384().hashString(plainKey, Charsets.UTF_8).toString();
+        keyAsHash = PayoneHash.calculate(plainKey);
     }
 
     public String getApiUrl() {
@@ -60,8 +59,8 @@ public class PayoneConfig {
         return merchantId;
     }
 
-    public String getKeyAsSha384Hash() {
-        return keyAsSha384Hash;
+    public String getKeyAsHash() {
+        return keyAsHash;
     }
 
     public String getPortalId() {

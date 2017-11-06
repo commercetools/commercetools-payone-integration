@@ -96,7 +96,7 @@ public class BaseRequest implements Serializable {
 
     BaseRequest(final PayoneConfig config, final String requestType) {
         this.mid = config.getMerchantId();
-        this.key = config.getKeyAsSha384Hash();
+        this.key = config.getKeyAsHash();
         this.mode = config.getMode();
         this.portalid = config.getPortalId();
         this.apiVersion = config.getApiVersion();

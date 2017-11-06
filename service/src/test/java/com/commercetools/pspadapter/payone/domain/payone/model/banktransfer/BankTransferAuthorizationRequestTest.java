@@ -22,7 +22,7 @@ public class BankTransferAuthorizationRequestTest {
     private static final String onlinebanktransfertype = "test-type";
     private static final String merchantId = "merchant X";
     private static final String portalId = "portal 23";
-    private static final String keySha384Hash = "hashed key";
+    private static final String keyHash = "hashed key";
     private static final String mode = "unit test";
     private static final String apiVersion = "v.1.2.3";
     private static final String iban = "DE012345";
@@ -35,7 +35,7 @@ public class BankTransferAuthorizationRequestTest {
     public void setUp() {
         when(payoneConfig.getMerchantId()).thenReturn(merchantId);
         when(payoneConfig.getPortalId()).thenReturn(portalId);
-        when(payoneConfig.getKeyAsSha384Hash()).thenReturn(keySha384Hash);
+        when(payoneConfig.getKeyAsHash()).thenReturn(keyHash);
         when(payoneConfig.getMode()).thenReturn(mode);
         when(payoneConfig.getApiVersion()).thenReturn(apiVersion);
     }
@@ -55,7 +55,7 @@ public class BankTransferAuthorizationRequestTest {
                 entry("portalid", portalId),
                 entry("mode", mode),
                 entry("api_version", apiVersion),
-                entry("key", keySha384Hash),
+                entry("key", keyHash),
                 entry("iban", iban),
                 entry("bic", bic),
                 entry("amount", 0));

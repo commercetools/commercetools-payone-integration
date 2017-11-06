@@ -59,7 +59,7 @@ public class BaseTenantPropertyTest {
         softly.assertThat(request.getAid()).isEqualTo(payoneConfig.getSubAccountId());
         softly.assertThat(request.getMid()).isEqualTo(payoneConfig.getMerchantId());
         softly.assertThat(request.getPortalid()).isEqualTo(payoneConfig.getPortalId());
-        softly.assertThat(request.getKey()).isEqualTo(payoneConfig.getKeyAsSha384Hash());
+        softly.assertThat(request.getKey()).isEqualTo(payoneConfig.getKeyAsHash());
         softly.assertThat(request.getMode()).isEqualTo(payoneConfig.getMode());
         softly.assertThat(request.getApiVersion()).isEqualTo(payoneConfig.getApiVersion());
         softly.assertThat(request.getEncoding()).isEqualTo(payoneConfig.getEncoding());

@@ -65,7 +65,7 @@ public class SofortRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(result.getMid()).isEqualTo(payoneConfig.getMerchantId());
         softly.assertThat(result.getEncoding()).isEqualTo(payoneConfig.getEncoding());
         softly.assertThat(result.getPortalid()).isEqualTo(payoneConfig.getPortalId());
-        softly.assertThat(result.getKey()).isEqualTo(payoneConfig.getKeyAsSha384Hash());
+        softly.assertThat(result.getKey()).isEqualTo(payoneConfig.getKeyAsHash());
         softly.assertThat(result.getMode()).isEqualTo(payoneConfig.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(payoneConfig.getApiVersion());
         softly.assertThat(result.getSolutionName()).isEqualTo(payoneConfig.getSolutionName());
@@ -153,7 +153,7 @@ public class SofortRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(result.getAid()).isEqualTo(payoneConfig.getSubAccountId());
         softly.assertThat(result.getMid()).isEqualTo(payoneConfig.getMerchantId());
         softly.assertThat(result.getPortalid()).isEqualTo(payoneConfig.getPortalId());
-        softly.assertThat(result.getKey()).isEqualTo(payoneConfig.getKeyAsSha384Hash());
+        softly.assertThat(result.getKey()).isEqualTo(payoneConfig.getKeyAsHash());
         softly.assertThat(result.getMode()).isEqualTo(payoneConfig.getMode());
         softly.assertThat(result.getApiVersion()).isEqualTo(payoneConfig.getApiVersion());
         softly.assertThat(result.getEncoding()).isEqualTo(payoneConfig.getEncoding());
