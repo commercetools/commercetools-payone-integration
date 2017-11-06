@@ -5,12 +5,11 @@ buildscript {
 
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
+        classpath 'org.ajoberstar:gradle-git-publish:0.3.2'
     }
 }
 
-plugins {
-    id 'org.ajoberstar.github-pages' version '1.6.0'
-}
+apply from: "$rootDir/gradle-scripts/git-publish.gradle"
 
 def depVersions = [
         //all
@@ -289,45 +288,6 @@ project(":functionaltests") {
 
     testSpec.doFirst {
         assertExecutableSpecRequirementsForTests(project, testSpec)
-    }
-}
-
-// Publish build results to github pages settings:
-
-def staticPages = project.copySpec {
-    from 'ghpages/' // static content - root index.html page
-}
-
-def generatedPages = project.copySpec {
-    into 'latest/'
-    from 'functionaltests/build/reports/' // test results: both Concordion and loging console outputs
-}
-
-githubPages {
-    repoUri = 'https://github.com/commercetools/commercetools-payone-integration.git'
-
-    credentials {
-        // with GitHub token only HTTPS protocol should be used as a repo Uri
-        username = System.getenv('GH_TOKEN')
-        password = ''
-    }
-
-    pages {
-        into '.'
-        with staticPages, generatedPages
-    }
-}
-
-publishGhPages  {
-    doFirst {
-        // print warning message if github pages plugin credentials are empty
-        if (!githubPages.credentials.username?.trim()) {
-            logger.warn("\n[WARNING] Github-pages credentials are empty, publishing the tests results may be skipped\n")
-        }
-    }
-
-    doLast {
-        println "\nPublished results to http://commercetools.github.io/commercetools-payone-integration/\n"
     }
 }
 
