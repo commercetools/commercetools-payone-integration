@@ -162,7 +162,7 @@ public final class HttpRequestUtil {
     }
 
     /**
-     * Be default apache httpclient responses are not closed, thus we should explicitly read the stream and close the
+     * By default apache httpclient responses are not closed, thus we should explicitly read the stream and close the
      * connection.
      * <p>
      * The connection will be closed even if read exception occurs.
