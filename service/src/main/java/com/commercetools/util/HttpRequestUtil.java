@@ -157,7 +157,7 @@ public final class HttpRequestUtil {
      *              otherwise {@link Object#toString()} is applied.
      * @return new instance of {@link BasicNameValuePair} with {@code name} and {@code value}
      */
-    public static BasicNameValuePair nvPair(@Nonnull final String name, @Nullable final Object value) {
+    public static BasicNameValuePair nameValue(@Nonnull final String name, @Nullable final Object value) {
         return new BasicNameValuePair(name, Objects.toString(value, null));
     }
 

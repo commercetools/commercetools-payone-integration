@@ -326,22 +326,22 @@ public abstract class BaseFixture {
         try {
             cardPanResponse = executePostRequestToString("https://api.pay1.de/post-gateway/",
                     ImmutableList.of(
-                            nvPair("request", "3dscheck"),
-                            nvPair("mid", mid),
-                            nvPair("aid", aid),
-                            nvPair("portalid", pid),
-                            nvPair("key", Hashing.md5().hashString(key, Charsets.UTF_8).toString()),
-                            nvPair("mode", "test"),
-                            nvPair("api_version", "3.9"),
-                            nvPair("amount", "2"),
-                            nvPair("currency", "EUR"),
-                            nvPair("clearingtype", "cc"),
-                            nvPair("exiturl", "http://www.example.com"),
-                            nvPair("storecarddata", "yes"),
-                            nvPair("cardexpiredate", "2512"),
-                            nvPair("cardcvc2", "123"),
-                            nvPair("cardtype", "V"),
-                            nvPair("cardpan", cardPan)));
+                            nameValue("request", "3dscheck"),
+                            nameValue("mid", mid),
+                            nameValue("aid", aid),
+                            nameValue("portalid", pid),
+                            nameValue("key", Hashing.md5().hashString(key, Charsets.UTF_8).toString()),
+                            nameValue("mode", "test"),
+                            nameValue("api_version", "3.9"),
+                            nameValue("amount", "2"),
+                            nameValue("currency", "EUR"),
+                            nameValue("clearingtype", "cc"),
+                            nameValue("exiturl", "http://www.example.com"),
+                            nameValue("storecarddata", "yes"),
+                            nameValue("cardexpiredate", "2512"),
+                            nameValue("cardcvc2", "123"),
+                            nameValue("cardtype", "V"),
+                            nameValue("cardpan", cardPan)));
         } catch (Throwable e) {
             throw new RuntimeException("Error on pseudocardpan fetch", e);
         }

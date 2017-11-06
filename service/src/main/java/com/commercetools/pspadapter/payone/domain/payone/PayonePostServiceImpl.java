@@ -18,7 +18,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.commercetools.util.HttpRequestUtil.executePostRequestToString;
-import static com.commercetools.util.HttpRequestUtil.nvPair;
+import static com.commercetools.util.HttpRequestUtil.nameValue;
 import static java.util.stream.Collectors.toList;
 
 public class PayonePostServiceImpl implements PayonePostService {
@@ -95,13 +95,13 @@ public class PayonePostServiceImpl implements PayonePostService {
                         final List list = (List) value;
                         if (list.size() > 0) {
                             return IntStream.range(0, list.size())
-                                    .mapToObj(i -> nvPair(entry.getKey() + "[" + (i + 1) + "]", list.get(i)));
+                                    .mapToObj(i -> nameValue(entry.getKey() + "[" + (i + 1) + "]", list.get(i)));
                         } else {
-                            return Stream.of(nvPair(entry.getKey() + "[]", ""));
+                            return Stream.of(nameValue(entry.getKey() + "[]", ""));
                         }
                     }
 
-                    return Stream.of(nvPair(entry.getKey(), value));
+                    return Stream.of(nameValue(entry.getKey(), value));
 
                 })
                 .collect(toList());

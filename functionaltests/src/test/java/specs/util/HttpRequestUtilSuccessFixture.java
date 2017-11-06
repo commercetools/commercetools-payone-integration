@@ -32,11 +32,11 @@ public class HttpRequestUtilSuccessFixture extends HttpRequestUtilFixture {
 
     public MultiValueResult executePostWithArguments() throws Exception {
         HttpResponse httpResponse = executePostRequest(HTTP_BIN_POST, ImmutableList.of(
-                nvPair("a", "b"),
-                nvPair("hello", 22),
-                nvPair("Fußgängerübergänge", "Пішохідні переходи"),
-                nvPair("Їжачок", "قنفذ"),
-                nvPair("инь-янь", "陰陽")));
+                nameValue("a", "b"),
+                nameValue("hello", 22),
+                nameValue("Fußgängerübergänge", "Пішохідні переходи"),
+                nameValue("Їжачок", "قنفذ"),
+                nameValue("инь-янь", "陰陽")));
 
         String responseString = responseToString(httpResponse);
         JsonObject response = new JsonParser().parse(responseString).getAsJsonObject();
