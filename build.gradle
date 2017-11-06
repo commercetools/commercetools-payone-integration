@@ -208,7 +208,10 @@ static void assertExecutableSpecRequirementsForTests(Project project, Test test)
             'org.concordion.ext.ParallelRunExtension'
 
     test.systemProperties['concordion.output.dir'] = project.reporting.baseDir.getAbsolutePath() + "/spec"
-    test.systemProperties['concordion.run.threadCount'] = '2.5C' // 2.5 * number of cores
+    
+    // test all "waiting" classes in parallel so we have less shorter critical path of all long lasting blocking tests
+    // See all BaseNotifiablePaymentFixture children for more details
+    test.systemProperties['concordion.run.threadCount'] = '16'
 
     def propertiesToMap = ['TEST_DATA_CT_PROJECT_KEY',
                            'TEST_DATA_CT_CLIENT_ID',
