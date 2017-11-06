@@ -75,7 +75,7 @@ public final class HttpRequestUtil {
     private static final CloseableHttpClient CLIENT = HttpClientBuilder.create()
             .setDefaultRequestConfig(RequestConfig.custom()
                     .setConnectionRequestTimeout(REQUEST_TIMEOUT)
-                    .setSocketTimeout(REQUEST_TIMEOUT)
+                    .setSocketTimeout(REQUEST_TIMEOUT * 6)
                     .setConnectTimeout(REQUEST_TIMEOUT)
                     .build())
             .setRetryHandler(HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT)
