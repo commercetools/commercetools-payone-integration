@@ -6,6 +6,14 @@ buildscript {
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
         classpath 'org.ajoberstar:gradle-git-publish:0.3.2'
+        classpath("org.ajoberstar:grgit:2.1.0")
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        mavenCentral()
     }
 }
 
@@ -38,24 +46,17 @@ def depVersions = [
 
 ]
 
-allprojects {
+subprojects {
+    apply plugin: 'java'
+
     group = 'com.commercetools'
     version = '2.2.0-dev' // this version is used in shadowJar.manifest.Implementation-Version and then at runtime as getImplementationVersion()
-
-    tasks.withType(JavaCompile) {
-        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-    }
-}
-
-subprojects {
-
-    apply plugin: 'java'
 
     sourceCompatibility = '1.8'
     targetCompatibility = '1.8'
 
-    repositories {
-        mavenCentral()
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
     }
 
     dependencies {
@@ -71,6 +72,9 @@ subprojects {
 project(":service") {
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'application' // allow "run" task to build and run the app
+
+    // patch project.version with git tag/commit name (if any)
+    apply from: "$rootDir/gradle-scripts/version-resolver.gradle"
 
     // required property for application plugin
     mainClassName = 'com.commercetools.Main'
@@ -91,13 +95,14 @@ project(":service") {
         baseName = rootProject.name
         classifier = null
         version = null
+        mainClassName = project.mainClassName
 
         manifest {
             attributes 'Main-Class': project.mainClassName
 
             // set version to define at runtime using getImplementationVersion()
             attributes 'Implementation-Title': rootProject.name
-            attributes 'Implementation-Version': allprojects.version
+            attributes 'Implementation-Version': project.version
         }
 
         doLast {

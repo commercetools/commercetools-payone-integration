@@ -1,0 +1,13 @@
+// try to define git tag version and replace project.version with this value, if exists.
+// otherwise - concat commit number to project.version
+
+apply plugin: "org.ajoberstar.grgit"
+
+final HEAD = grgit.head()
+final tags = grgit.tag.list()
+final currentCommitTag = tags.find({ it.commit == HEAD }) // find out if current commit has a tag
+
+project.version = currentCommitTag ? currentCommitTag.name : "${project.version}-${HEAD.abbreviatedId}"
+
+println "\nActual project version: ${project.version}\n"
+
