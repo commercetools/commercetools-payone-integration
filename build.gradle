@@ -327,3 +327,13 @@ task ciBuild {
     description 'This task is run by Travis. It builds the service and runs its unit tests. In addition it builds the functionaltests.'
     dependsOn ':service:test', ':functionaltests:compileTestJava'
 }
+
+task clean {
+    description 'By default :clean is executed only for :service and :functionaltests, ' +
+            'thus we add cleaning for root build dir, where :functionaltests git publish results are stored'
+    dependsOn ':service:clean', ':functionaltests:clean'
+    doLast {
+        rootProject.buildDir.deleteDir()
+    }
+}
+
