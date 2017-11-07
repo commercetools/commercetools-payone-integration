@@ -5,12 +5,19 @@ buildscript {
 
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
+        classpath 'org.ajoberstar:gradle-git-publish:0.3.2'
+        classpath 'org.ajoberstar:grgit:2.1.0'
     }
 }
 
-plugins {
-    id 'org.ajoberstar.github-pages' version '1.6.0'
+allprojects {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
 }
+
+apply from: "$rootDir/gradle-scripts/git-publish.gradle"
 
 def depVersions = [
         //all
@@ -37,24 +44,17 @@ def depVersions = [
 
 ]
 
-allprojects {
+subprojects {
+    apply plugin: 'java'
+
     group = 'com.commercetools'
     version = '2.2.0-dev' // this version is used in shadowJar.manifest.Implementation-Version and then at runtime as getImplementationVersion()
-
-    tasks.withType(JavaCompile) {
-        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-    }
-}
-
-subprojects {
-
-    apply plugin: 'java'
 
     sourceCompatibility = '1.8'
     targetCompatibility = '1.8'
 
-    repositories {
-        mavenCentral()
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
     }
 
     dependencies {
@@ -67,13 +67,12 @@ subprojects {
 
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.4.1'
-}
-
 project(":service") {
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'application' // allow "run" task to build and run the app
+
+    // patch project.version with git tag/commit name (if any)
+    apply from: "$rootDir/gradle-scripts/version-resolver.gradle"
 
     // required property for application plugin
     mainClassName = 'com.commercetools.Main'
@@ -93,13 +92,12 @@ project(":service") {
         baseName = rootProject.name
         classifier = null
         version = null
+        mainClassName = project.mainClassName
 
         manifest {
-            attributes 'Main-Class': project.mainClassName
-
             // set version to define at runtime using getImplementationVersion()
             attributes 'Implementation-Title': rootProject.name
-            attributes 'Implementation-Version': allprojects.version
+            attributes 'Implementation-Version': project.version
         }
 
         doLast {
@@ -109,6 +107,12 @@ project(":service") {
 
     run {
         description 'Use this task to run the service locally using gradle.properties settings'
+        dependsOn ':service:convertGradlePropertiesToJvmArgs'
+    }
+
+    runShadow {
+        description 'Use this task to run the service locally using gradle.properties settings and ' +
+                'include all manifest info specified in \'shadowJar\' configuration'
         dependsOn ':service:convertGradlePropertiesToJvmArgs'
     }
 
@@ -206,7 +210,10 @@ static void assertExecutableSpecRequirementsForTests(Project project, Test test)
             'org.concordion.ext.ParallelRunExtension'
 
     test.systemProperties['concordion.output.dir'] = project.reporting.baseDir.getAbsolutePath() + "/spec"
-    test.systemProperties['concordion.run.threadCount'] = '2.5C' // 2.5 * number of cores
+
+    // test all "waiting" classes in parallel so we have less shorter critical path of all long lasting blocking tests
+    // See all BaseNotifiablePayment + ScheduledJob + HttpRequestUtilTimeout fixtures for more details
+    test.systemProperties['concordion.run.threadCount'] = '16'
 
     def propertiesToMap = ['TEST_DATA_CT_PROJECT_KEY',
                            'TEST_DATA_CT_CLIENT_ID',
@@ -286,45 +293,6 @@ project(":functionaltests") {
     }
 }
 
-// Publish build results to github pages settings:
-
-def staticPages = project.copySpec {
-    from 'ghpages/' // static content - root index.html page
-}
-
-def generatedPages = project.copySpec {
-    into 'latest/'
-    from 'functionaltests/build/reports/' // test results: both Concordion and loging console outputs
-}
-
-githubPages {
-    repoUri = 'https://github.com/commercetools/commercetools-payone-integration.git'
-
-    credentials {
-        // with GitHub token only HTTPS protocol should be used as a repo Uri
-        username = System.getenv('GH_TOKEN')
-        password = ''
-    }
-
-    pages {
-        into '.'
-        with staticPages, generatedPages
-    }
-}
-
-publishGhPages  {
-    doFirst {
-        // print warning message if github pages plugin credentials are empty
-        if (!githubPages.credentials.username?.trim()) {
-            logger.warn("\n[WARNING] Github-pages credentials are empty, publishing the tests results may be skipped\n")
-        }
-    }
-
-    doLast {
-        println "\nPublished results to http://commercetools.github.io/commercetools-payone-integration/\n"
-    }
-}
-
 /**
  * Asserts that the map contains a non-null, non-empty value for the given key.
  * @param key the key of the value to be checked
@@ -360,3 +328,13 @@ task ciBuild {
     description 'This task is run by Travis. It builds the service and runs its unit tests. In addition it builds the functionaltests.'
     dependsOn ':service:test', ':functionaltests:compileTestJava'
 }
+
+task clean {
+    description 'By default :clean is executed only for :service and :functionaltests, ' +
+            'thus we add cleaning for root build dir, where :functionaltests git publish results are stored'
+    dependsOn ':service:clean', ':functionaltests:clean'
+    doLast {
+        rootProject.buildDir.deleteDir()
+    }
+}
+

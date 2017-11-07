@@ -8,15 +8,24 @@ import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.MalformedURLException;
-
 import static java.lang.String.format;
 
 public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) throws SchedulerException, MalformedURLException {
+    /**
+     * It is recommended to run this service using {@code ./gradlew :service:run}
+     * or {@code ./gradlew :service:runShadow} command - this will parse mandatory environment
+     * variables from {@code gradle.properties} file.
+     * Most of IDE should support Run/Debug configuration to run such gradle tasks.
+     * <p>
+     * See more in {@code Project-Lifecycle.md} documentation.
+     *
+     * @param args default command line args (ignored so far)
+     * @throws SchedulerException if scheduled quartz jobs can't be started
+     */
+    public static void main(String[] args) throws SchedulerException {
 
         final PropertyProvider propertyProvider = new PropertyProvider();
         final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
