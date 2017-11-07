@@ -79,7 +79,11 @@ public final class HttpRequestUtil {
             new DefaultHttpRequestRetryHandler(RETRY_TIMES, false, Arrays.asList(
                     UnknownHostException.class,
                     SSLException.class)) {
-                // empty implementation, we just need to use protected constructor
+                // it is an anonymous class extension, but we don't need the functionality change,
+                // we just need to access protected constructor
+                // DefaultHttpRequestRetryHandler(int, boolean, Collection<Class<? extends IOException>>),
+                // where we could specify reduced nonRetriableClasses list.
+                // Thus the implementation is empty.
             };
 
     private static final CloseableHttpClient CLIENT = HttpClientBuilder.create()
