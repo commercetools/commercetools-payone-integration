@@ -41,7 +41,10 @@ import java.util.Objects;
  * (see {@link DefaultHttpRequestRetryHandler#isRequestSentRetryEnabled()}
  * and {@link #HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT})</li>
  * <li>connections pool is 200 connections, up to 20 per route (see {@link #CONNECTION_MAX_TOTAL}
- * and {@link #CONNECTION_MAX_PER_ROUTE}</li>
+ * and {@link #CONNECTION_MAX_PER_ROUTE}). These values are "inherited" from
+ * <a href="https://github.com/Kong/unirest-java/blob/3b461599ad021d0a3f14213c0dbb85bab7244f66/src/main/java/com/mashape/unirest/http/options/Options.java#L23-L24">Unirest</a>
+ * library. It could be changed in the future if we face problems (for example, decrease if we have OutOfMemory
+ * or increase if out of connections from the pool.</li>
  * </ul>
  * <p>
  * This util is intended to replace <i>Unirest</i> and <i>fluent-hc</i> dependencies, which don't propose any flexible
