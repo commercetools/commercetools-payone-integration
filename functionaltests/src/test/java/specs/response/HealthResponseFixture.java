@@ -1,13 +1,20 @@
 package specs.response;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
-import org.json.JSONObject;
 import org.junit.runner.RunWith;
+
+import java.util.Optional;
+
+import static com.commercetools.util.HttpRequestUtil.executeGetRequest;
+import static com.commercetools.util.HttpRequestUtil.responseToString;
+import static java.util.Optional.ofNullable;
 
 /**
  * Simple /health URL response checker
@@ -20,17 +27,26 @@ public class HealthResponseFixture extends BasePaymentFixture {
     }
 
     public MultiValueResult handleHealthResponse() throws Exception {
-        final HttpResponse httpResponse = Request.Get(getHealthUrl())
-                .connectTimeout(SIMPLE_REQUEST_TIMEOUT)
-                .execute()
-                .returnResponse();
+        HttpResponse httpResponse = executeGetRequest(getHealthUrl());
+        String responseString = responseToString(httpResponse);
 
-        String responseString = new BasicResponseHandler().handleResponse(httpResponse);
+        JsonParser parser = new JsonParser();
+
+        JsonObject rootNode = parser.parse(responseString).getAsJsonObject();
+        String bodyStatus = rootNode.get("status").getAsString();
+        Optional<JsonArray> tenantNames = ofNullable(rootNode.get("tenants")).filter(JsonElement::isJsonArray).map(JsonElement::getAsJsonArray);
+        Optional<JsonObject> applicationInfo = ofNullable(rootNode.getAsJsonObject("applicationInfo")).filter(JsonObject::isJsonObject);
+        String title = applicationInfo.map(node -> node.get("title")).map(JsonElement::getAsString).orElse("");
+        String version = applicationInfo.map(node -> node.get("version")).map(JsonElement::getAsString).orElse("");
 
         return MultiValueResult.multiValueResult()
                 .with("statusCode", httpResponse.getStatusLine().getStatusCode())
                 .with("mimeType", ContentType.getOrDefault(httpResponse.getEntity()).getMimeType())
-                .with("bodyStatus", (new JSONObject(responseString)).getInt("status"));
+                .with("bodyStatus", bodyStatus)
+                .with("bodyTenants", tenantNames.map(JsonArray::toString).orElse("<<undefined>>")) // info only
+                .with("bodyTenantsSize", tenantNames.map(JsonArray::size).orElse(0))
+                .with("bodyApplicationName", title)
+                .with("bodyApplicationVersion", version)
+                .with("versionIsEmpty", version.isEmpty());
     }
-
 }

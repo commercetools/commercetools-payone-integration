@@ -9,9 +9,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,11 +31,11 @@ public class DefaultPaymentToOrderStateMapperTest {
 
     @Test
     public void mapPaymentToOrderPaymentState_cornerCases() throws Exception {
-        assertThat(mapper.mapPaymentToOrderState(null), is(nullValue()));
-        assertThat(mapper.mapPaymentToOrderState(payment), is(nullValue()));
+        assertThat(mapper.mapPaymentToOrderState(null)).isNull();
+        assertThat(mapper.mapPaymentToOrderState(payment)).isNull();
 
         when(payment.getPaymentStatus()).thenReturn(paymentStatus);
-        assertThat(mapper.mapPaymentToOrderState(payment), is(nullValue()));
+        assertThat(mapper.mapPaymentToOrderState(payment)).isNull();
 
         assertPaymentStatusCode(null, null);
         assertPaymentStatusCode("", null);
@@ -75,7 +74,7 @@ public class DefaultPaymentToOrderStateMapperTest {
     private void assertPaymentStatusCode(String statusCodeToInject, PaymentState expected) {
         when(payment.getPaymentStatus()).thenReturn(paymentStatus);
         when(paymentStatus.getInterfaceCode()).thenReturn(statusCodeToInject);
-        assertThat(mapper.mapPaymentToOrderState(payment), is(expected));
+        assertThat(mapper.mapPaymentToOrderState(payment)).isEqualTo(expected);
     }
 
 }

@@ -1,8 +1,6 @@
 package com.commercetools.pspadapter.payone.transaction;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.Cart;
@@ -60,7 +58,7 @@ public class PaymentMethodDispatcherTest {
         final CountingTransactionExecutor countingTransactionExecutor = countingTransactionExecutor();
         final PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(countingTransactionExecutor, ImmutableMap.of());
         dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentTwoTransactionsPending(), (Cart)null));
-        assertThat(countingTransactionExecutor.getCount(), is(1));
+        assertThat(countingTransactionExecutor.getCount()).isEqualTo(1);
     }
 
     @Test
@@ -75,9 +73,9 @@ public class PaymentMethodDispatcherTest {
                         TransactionType.REFUND, refundExecutor));
 
         dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentTwoTransactionsPending(), (Cart)null));
-        assertThat(defaultExecutor.getCount(), is(0));
-        assertThat(chargeExecutor.getCount(), is(1));
-        assertThat(refundExecutor.getCount(), is(0));
+        assertThat(defaultExecutor.getCount()).isEqualTo(0);
+        assertThat(chargeExecutor.getCount()).isEqualTo(1);
+        assertThat(refundExecutor.getCount()).isEqualTo(0);
     }
 
     @Test
@@ -92,8 +90,8 @@ public class PaymentMethodDispatcherTest {
                         TransactionType.REFUND, refundExecutor));
 
         dispatcher.dispatchPayment(dispatcher.dispatchPayment(dispatcher.dispatchPayment(new PaymentWithCartLike(payments.dummyPaymentTwoTransactionsPending(), (Cart)null))));
-        assertThat(defaultExecutor.getCount(), is(0));
-        assertThat(chargeExecutor.getCount(), is(3));
-        assertThat(refundExecutor.getCount(), is(1));
+        assertThat(defaultExecutor.getCount()).isEqualTo(0);
+        assertThat(chargeExecutor.getCount()).isEqualTo(3);
+        assertThat(refundExecutor.getCount()).isEqualTo(1);
     }
 }

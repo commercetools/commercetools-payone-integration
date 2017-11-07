@@ -11,7 +11,6 @@ import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.*;
-import com.mashape.unirest.http.Unirest;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
@@ -41,7 +40,6 @@ import io.sphere.sdk.types.Type;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.fluent.Request;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +58,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.commercetools.util.HttpRequestUtil.*;
 import static java.lang.String.format;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.DOTALL;
@@ -80,12 +79,6 @@ public abstract class BaseFixture {
     protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(15);
     protected static final long RETRY_DELAY = TimeUnit.SECONDS.toMillis(15);
     protected static final long INTERMEDIATE_REPORT_DELAY = TimeUnit.MINUTES.toMillis(3);
-
-    // looks like heroku may have some lags, so we use 10 seconds to avoid false test fails because of timeouts
-    protected static final int REQUEST_TIMEOUT = 10000;
-
-    // timeout for simple requests, like health or malformed id, where heavy processing is not expected
-    protected static final int SIMPLE_REQUEST_TIMEOUT = 2000;
 
     protected static final Duration CTP_REQUEST_TIMEOUT = Duration.ofMinutes(2);
 
@@ -178,10 +171,7 @@ public abstract class BaseFixture {
     }
 
     public HttpResponse sendGetRequestToUrl(final String url) throws IOException {
-        return Request.Get(url)
-                .connectTimeout(REQUEST_TIMEOUT)
-                .execute()
-                .returnResponse();
+        return executeGetRequest(url);
     }
 
     protected static String getConfigurationParameter(final String configParameterName) {
@@ -333,28 +323,26 @@ public abstract class BaseFixture {
 
         String cardPanResponse = null;
         try {
-            cardPanResponse = Unirest.post("https://api.pay1.de/post-gateway/")
-              .fields(ImmutableMap.<String, Object>builder()
-                  .put("request", "3dscheck")
-                  .put("mid", mid)
-                  .put("aid", aid)
-                  .put("portalid", pid)
-                  .put("key", PayoneHash.calculate(key))
-                  .put("mode", "test")
-                  .put("api_version", "3.9")
-                  .put("amount", "2")
-                  .put("currency", "EUR")
-                  .put("clearingtype", "cc")
-                  .put("exiturl", "http://www.example.com")
-                  .put("storecarddata", "yes")
-                  .put("cardexpiredate", "2512")
-                  .put("cardcvc2", "123")
-                  .put("cardtype", "V")
-                  .put("cardpan", cardPan)
-                  .build())
-              .asString().getBody();
+            cardPanResponse = executePostRequestToString("https://api.pay1.de/post-gateway/",
+                    ImmutableList.of(
+                            nameValue("request", "3dscheck"),
+                            nameValue("mid", mid),
+                            nameValue("aid", aid),
+                            nameValue("portalid", pid),
+                            nameValue("key", PayoneHash.calculate(key)),
+                            nameValue("mode", "test"),
+                            nameValue("api_version", "3.9"),
+                            nameValue("amount", "2"),
+                            nameValue("currency", "EUR"),
+                            nameValue("clearingtype", "cc"),
+                            nameValue("exiturl", "http://www.example.com"),
+                            nameValue("storecarddata", "yes"),
+                            nameValue("cardexpiredate", "2512"),
+                            nameValue("cardcvc2", "123"),
+                            nameValue("cardtype", "V"),
+                            nameValue("cardpan", cardPan)));
         } catch (Throwable e) {
-          throw new RuntimeException("Error on pseudocardpan fetch", e);
+            throw new RuntimeException("Error on pseudocardpan fetch", e);
         }
 
         Pattern p = Pattern.compile("^.*pseudocardpan\\s*=\\s*(\\d+).*$", CASE_INSENSITIVE | DOTALL);
@@ -504,10 +492,7 @@ public abstract class BaseFixture {
         Preconditions.checkState(payments.containsKey(paymentName),
                 format("Legible payment name '%s' not mapped to any payment ID.", paymentName));
 
-        return Request.Get(getHandlePaymentUrl(payments.get(paymentName)))
-                .connectTimeout(REQUEST_TIMEOUT)
-                .execute()
-                .returnResponse();
+        return executeGetRequest(getHandlePaymentUrl(payments.get(paymentName)));
     }
 
     protected String getIdForLegibleName(final String paymentName) {

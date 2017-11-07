@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link href="../../concordion.css" rel="stylesheet" type="text/css"/>
+    <title>Http Request Util Success Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<h1><code>HttpRequestUtil</code> class with success requests</h1>
+
+<h4>Default timeout is <span c:echo="getDefaultTimeout()" style="color: green"></span> msec</h4>
+
+<div class="example">
+    <p c:execute="#response = executeShortGetRequest()">
+        Verify that when response timeout is <span c:echo="#response.timeout"
+                                                   style="color: green; font-weight: bold"></span> msec
+        then the response status is <span c:assertEquals="#response.responseStatus">200</span></p>
+</div>
+
+<div class="example">
+    <p c:execute="#response = executePostWithArguments()">
+        Verify that when executed POST request with UTF-8 values over reflective post service:
+    <ul>
+        <li>response status is <span c:assertEquals="#response.responseStatus"><code>200</code></span></li>
+        <li>accepted<code>-></code>returned request<code>-></code>response is
+            <br/>
+            <span c:assertEquals="#response.fullRequest">Fußgängerübergänge=Пішохідні переходи&amp;a=b&amp;hello=22&amp;Їжачок=قنفذ&amp;инь-янь=陰陽</span>
+        </li>
+    </ul>
+    </p>
+</div>
+</body>
+</html>

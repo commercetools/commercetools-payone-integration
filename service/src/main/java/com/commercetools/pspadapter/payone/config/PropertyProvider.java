@@ -8,7 +8,9 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author fhaertig
@@ -36,13 +38,14 @@ public class PropertyProvider {
     private final List<Function<String, String>> propertiesGetters;
 
     public PropertyProvider() {
+        String implementationTitle = ofNullable(getClass().getPackage().getImplementationTitle()).orElse("DEBUG-TITLE");
         String implementationVersion = ofNullable(getClass().getPackage().getImplementationVersion()).orElse("DEBUG-VERSION");
         internalProperties = ImmutableMap.<String, String>builder()
                 .put(PAYONE_API_VERSION, "3.9")
                 .put(PAYONE_REQUEST_ENCODING, "UTF-8")
                 .put(PAYONE_SOLUTION_NAME, "commercetools-platform")
                 .put(PAYONE_SOLUTION_VERSION, "1")
-                .put(PAYONE_INTEGRATOR_NAME, "commercetools-payone-integration")
+                .put(PAYONE_INTEGRATOR_NAME, implementationTitle)
                 .put(PAYONE_INTEGRATOR_VERSION, implementationVersion)
                 .build();
 
@@ -58,16 +61,18 @@ public class PropertyProvider {
      *     <li>fetch from hardcoded {@link #internalProperties} map.</li>
      * </ul>
      * <p>
-     *     If neither of them exists - empty {@link Optional} is returned.
+     * If neither of them exists - empty {@link Optional} is returned.
      *
      * @param propertyName the name of the requested property, must not be null
      * @return the property, an empty Optional if not present; empty values are treated as present
      */
     public Optional<String> getProperty(final String propertyName) {
-        return propertiesGetters.stream()
-                .map(getter -> getter.apply(propertyName))
-                .filter(Objects::nonNull)
-                .findFirst();
+        return isNotBlank(propertyName)
+                ? propertiesGetters.stream()
+                    .map(getter -> getter.apply(propertyName))
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                : empty();
     }
 
     /**
