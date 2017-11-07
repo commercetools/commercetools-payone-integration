@@ -8,7 +8,10 @@ import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
 import io.sphere.sdk.types.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
@@ -83,11 +86,23 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
      * @return JSON string with key-value entries following Payone API.
      * @see #responseToJsonString(Map)
      */
-    protected static String exceptionToResponseJsonString(Exception exception) {
+    protected static String exceptionToResponseJsonString(@Nonnull Exception exception) {
         return responseToJsonString(ImmutableMap.of(
                 STATUS, ResponseStatus.ERROR.getStateCode(),
                 ERROR_CODE, ResponseErrorCode.TRANSACTION_EXCEPTION.getErrorCode(),
                 ERROR_MESSAGE, "Integration Service Exception: " + exception.getMessage(),
                 CUSTOMER_MESSAGE, "Error on payment transaction processing."));
+    }
+
+    /**
+     * Get default logger for this class.
+     * Since this method calls {@link LoggerFactory} every time it is recommended only for rare call, like, for example,
+     * in <i>catch</i> blocks, so a class doesn't keep redundant logger reference permanently.
+     *
+     * @return default logger by {@link Class}
+     */
+    @Nonnull
+    protected Logger getLogger() {
+        return LoggerFactory.getLogger(this.getClass());
     }
 }

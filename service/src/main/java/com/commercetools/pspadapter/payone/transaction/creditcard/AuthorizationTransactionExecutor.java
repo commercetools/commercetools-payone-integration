@@ -151,6 +151,8 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
             throw new IllegalStateException("Unknown PayOne status");
         }
         catch (PayoneException pe) {
+            getLogger().error("Payone request exception: ", pe);
+
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(pe),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),

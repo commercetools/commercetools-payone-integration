@@ -12,6 +12,7 @@ import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
 import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
 import io.sphere.sdk.utils.MoneyImpl;
+import org.slf4j.LoggerFactory;
 
 import javax.money.MonetaryAmount;
 import java.util.ConcurrentModificationException;
@@ -57,6 +58,9 @@ public class NotificationDispatcher {
         try {
             dispatchNotificationToProcessor(notification, notificationProcessor);
         } catch (final ConcurrentModificationException e) {
+            LoggerFactory.getLogger(this.getClass()).warn("ConcurrentModificationException on notification [{}]. Retry once more.",
+                    notification.toString());
+
             // try once more
             dispatchNotificationToProcessor(notification, notificationProcessor);
         }
