@@ -4,14 +4,13 @@ import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.base.Charsets;
+import com.commercetools.pspadapter.payone.util.PayoneHash;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.*;
-import com.google.common.hash.Hashing;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
@@ -330,7 +329,7 @@ public abstract class BaseFixture {
                             nameValue("mid", mid),
                             nameValue("aid", aid),
                             nameValue("portalid", pid),
-                            nameValue("key", Hashing.md5().hashString(key, Charsets.UTF_8).toString()),
+                            nameValue("key", PayoneHash.calculate(key)),
                             nameValue("mode", "test"),
                             nameValue("api_version", "3.9"),
                             nameValue("amount", "2"),
