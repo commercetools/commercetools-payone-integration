@@ -64,9 +64,9 @@ public final class HttpRequestUtil {
 
     public static final int RETRY_TIMES = 3;
 
-    private static final int CONNECTION_MAX_TOTAL = 200;
+    static final int CONNECTION_MAX_TOTAL = 200;
 
-    private static final int CONNECTION_MAX_PER_ROUTE = 20;
+    static final int CONNECTION_MAX_PER_ROUTE = 20;
 
     /**
      * This retry handler implementation overrides default list of <i>nonRetriableClasses</i> excluding
