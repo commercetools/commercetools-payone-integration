@@ -16,6 +16,7 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
@@ -39,6 +40,8 @@ import java.util.Objects;
  * <li>retries on connections exceptions up to 3 times, if request has not been sent yet
  * (see {@link DefaultHttpRequestRetryHandler#isRequestSentRetryEnabled()}
  * and {@link #HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT})</li>
+ * <li>connections pool is 200 connections, up to 20 per route (see {@link #CONNECTION_MAX_TOTAL}
+ * and {@link #CONNECTION_MAX_PER_ROUTE}</li>
  * </ul>
  * <p>
  * This util is intended to replace <i>Unirest</i> and <i>fluent-hc</i> dependencies, which don't propose any flexible
@@ -57,6 +60,10 @@ public final class HttpRequestUtil {
     public static final int REQUEST_TIMEOUT = 10000;
 
     public static final int RETRY_TIMES = 3;
+
+    private static final int CONNECTION_MAX_TOTAL = 200;
+
+    private static final int CONNECTION_MAX_PER_ROUTE = 20;
 
     /**
      * This retry handler implementation overrides default list of <i>nonRetriableClasses</i> excluding
@@ -79,9 +86,18 @@ public final class HttpRequestUtil {
                     .setConnectTimeout(REQUEST_TIMEOUT)
                     .build())
             .setRetryHandler(HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT)
+            .setConnectionManager(buildDefaultConnectionManager())
             .build();
 
     private static final BasicResponseHandler BASIC_RESPONSE_HANDLER = new BasicResponseHandler();
+
+    private static PoolingHttpClientConnectionManager buildDefaultConnectionManager() {
+        final PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(CONNECTION_MAX_TOTAL);
+        connectionManager.setDefaultMaxPerRoute(CONNECTION_MAX_PER_ROUTE);
+
+        return connectionManager;
+    }
 
     /**
      * Execute retryable HTTP GET request with default {@link #REQUEST_TIMEOUT}
