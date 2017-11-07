@@ -63,7 +63,7 @@ public class PaymentHandler {
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
                     return new PaymentHandleResult(HttpStatusCode.OK_200);
                 } catch (final ConcurrentModificationException cme) {
-                    logger.warn("ConcurrentModificationException on payment [{}]. Retry #{}", paymentId, i + 1);
+                    logger.warn("Exception on dispatchPayment with id [{}]. Retry {} of {}", paymentId, i + 1, RETRIES_LIMIT);
                     Thread.sleep(RETRY_DELAY);
                 }
             }
