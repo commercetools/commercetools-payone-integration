@@ -99,3 +99,9 @@ You have to change the payment handling URL:
   since they are deprecated. The service consumers should not rely on them any more.  
   
       See [Release Notes](http://dev.commercetools.com/release-notes.html#release-notes---commercetools-platform---version-release-29-september-2017)
+
+  1. Note, that property _Method hash calculation_ in 
+  `https://pmi.pay1.de -> Configuration -> Payment Portals -> Extended -> Method hash calculation`) 
+  is responsible only for _client API_. As talked to Payone support, server API remains on MD5 and 
+  there is no any plans to update it soon.
+  
