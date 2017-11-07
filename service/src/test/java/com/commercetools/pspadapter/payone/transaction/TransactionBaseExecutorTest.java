@@ -6,8 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TransactionBaseExecutorTest {
 
@@ -22,19 +21,19 @@ public class TransactionBaseExecutorTest {
                 "errorcode", "00123"
         ));
 
-        assertThat(jsonString, is(not(isEmptyOrNullString())));
+        assertThat(jsonString).isNotBlank();
 
         JsonNode node = new ObjectMapper().readTree(jsonString);
 
-        assertThat(node.get("woot").asText(), is("hack"));
-        assertThat(node.get("foo").asText(), is("bar"));
-        assertThat(node.get("errorcode").asText(), is("00123"));
+        assertThat(node.get("woot").asText()).isEqualTo("hack");
+        assertThat(node.get("foo").asText()).isEqualTo("bar");
+        assertThat(node.get("errorcode").asText()).isEqualTo("00123");
 
         // check no any other (default) fields are added
-        assertThat(node.has(ERROR_MESSAGE), is(false));
-        assertThat(node.has(CUSTOMER_MESSAGE), is(false));
-        assertThat(node.has("redirecturl"), is(false));
-        assertThat(node.has("txid"), is(false));
+        assertThat(node.has(ERROR_MESSAGE)).isFalse();
+        assertThat(node.has(CUSTOMER_MESSAGE)).isFalse();
+        assertThat(node.has("redirecturl")).isFalse();
+        assertThat(node.has("txid")).isFalse();
     }
 
     /**
@@ -47,16 +46,17 @@ public class TransactionBaseExecutorTest {
         final String TEST_ERROR_MESSAGE = "TEST MESSAGE WOOT";
         String jsonString = TransactionBaseExecutor.exceptionToResponseJsonString(new Exception(TEST_ERROR_MESSAGE));
 
-        assertThat(jsonString, is(not(isEmptyOrNullString())));
+        assertThat(jsonString).isNotBlank();
 
         JsonNode node = new ObjectMapper().readTree(jsonString);
 
-        assertThat(node.has(STATUS), is(true));
-        assertThat(node.has(ERROR_CODE), is(true));
-        assertThat(node.has(CUSTOMER_MESSAGE), is(true));
+        assertThat(node.has(STATUS)).isTrue();
+        assertThat(node.has(ERROR_CODE)).isTrue();
+        assertThat(node.has(CUSTOMER_MESSAGE)).isTrue();
 
-        assertThat("Error message node should contain exception message",
-                node.get(ERROR_MESSAGE).asText(), containsString(TEST_ERROR_MESSAGE));
+        assertThat(node.get(ERROR_MESSAGE).asText())
+                .as("Error message node should contain exception message")
+                .contains(TEST_ERROR_MESSAGE);
 
     }
 

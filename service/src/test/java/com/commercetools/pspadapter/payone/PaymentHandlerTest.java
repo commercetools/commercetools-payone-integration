@@ -23,8 +23,8 @@ import java.util.Random;
 import java.util.concurrent.CompletionException;
 
 import static java.lang.String.format;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
@@ -82,8 +82,8 @@ public class PaymentHandlerTest
         final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.OK_200));
-        assertThat(paymentHandleResult.body(), isEmptyString());
+        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
+        assertThat(paymentHandleResult.body()).isEmpty();
     }
 
     @Test
@@ -111,8 +111,8 @@ public class PaymentHandlerTest
         final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.OK_200));
-        assertThat(paymentHandleResult.body(), isEmptyString());
+        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
+        assertThat(paymentHandleResult.body()).isEmpty();
     }
 
     @Test
@@ -131,8 +131,8 @@ public class PaymentHandlerTest
         final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.ACCEPTED_202));
-        assertThat(paymentHandleResult.body(), containsString("The payment couldn't be processed"));
+        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.ACCEPTED_202);
+        assertThat(paymentHandleResult.body()).contains("The payment couldn't be processed");
     }
 
     @Test
@@ -148,8 +148,8 @@ public class PaymentHandlerTest
         final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.NOT_FOUND_404));
-        assertThat(paymentHandleResult.body(), containsString(format("Could not process payment with ID [%s]: order or cart not found", paymentId)));
+        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
+        assertThat(paymentHandleResult.body()).contains(format("Could not process payment with ID [%s]: order or cart not found", paymentId));
     }
 
     @Test
@@ -165,8 +165,8 @@ public class PaymentHandlerTest
         final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.NOT_FOUND_404));
-        assertThat(paymentHandleResult.body(), containsString(format("Could not process payment with ID [%s]: order or cart not found", paymentId)));
+        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
+        assertThat(paymentHandleResult.body()).contains(format("Could not process payment with ID [%s]: order or cart not found", paymentId));
     }
 
     @Test
@@ -183,8 +183,8 @@ public class PaymentHandlerTest
         final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.BAD_REQUEST_400));
-        assertThat(paymentHandleResult.body(), isEmptyString());
+        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST_400);
+        assertThat(paymentHandleResult.body()).isEmpty();
     }
 
     @Test
@@ -201,8 +201,8 @@ public class PaymentHandlerTest
         final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.INTERNAL_SERVER_ERROR_500));
-        assertThat(paymentHandleResult.body(), containsString(format("An error occurred during communication with the commercetools platform when processing [%s] payment. See the service logs", paymentId)));
+        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
+        assertThat(paymentHandleResult.body()).contains(format("An error occurred during communication with the commercetools platform when processing [%s] payment. See the service logs", paymentId));
     }
 
     @Test
@@ -220,8 +220,8 @@ public class PaymentHandlerTest
         final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.INTERNAL_SERVER_ERROR_500));
-        assertThat(paymentHandleResult.body(), containsString(format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId)));
+        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
+        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId));
     }
 
     @Test
@@ -241,8 +241,8 @@ public class PaymentHandlerTest
         final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode(), is(HttpStatusCode.INTERNAL_SERVER_ERROR_500));
-        assertThat(paymentHandleResult.body(), containsString(format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId)));
+        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
+        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId));
     }
 
     private static PaymentMethodInfo paymentMethodInfo(final String paymentInterface) {
