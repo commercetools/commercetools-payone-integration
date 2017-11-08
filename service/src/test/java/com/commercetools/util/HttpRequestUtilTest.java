@@ -80,14 +80,20 @@ public class HttpRequestUtilTest {
 
         newFixedThreadPool.shutdown();
 
-        // length of the longest pipe in the multi thread pipeline
-        final int criticalPath = (int) Math.ceil((double) requests / nThreads);
+        // length of the longest pipe in the multi thread pipeline,
+        // literally it is an maximum integer number of sequential requests in one pipe (thread)
+        final int criticalPathLength = (int) Math.ceil((double) requests / nThreads);
 
-        // await not more than twice (REQUEST_TIMEOUT * criticalPath),
-        final long maxCriticalPathDuration = (2 * REQUEST_TIMEOUT * criticalPath);
-        boolean interrupted = newFixedThreadPool.awaitTermination(maxCriticalPathDuration, TimeUnit.MILLISECONDS);
+        // longest expected time of one successful request (even if retried),
+        // which may have +RETRY_TIMES attempts additionally to the first (failed) attempt
+        final int longestRequestTimeMsec = REQUEST_TIMEOUT * (1 + RETRY_TIMES);
+
+        // await not more than (longestRequestTimeMsec * criticalPathLength) msec with
+        // coefficient 1.5 is added to avoid test fails on some lags and threads switching timeouts.
+        final long maxCriticalPathDurationMsec = (int) (1.5 * longestRequestTimeMsec * criticalPathLength);
+        boolean interrupted = newFixedThreadPool.awaitTermination(maxCriticalPathDurationMsec, TimeUnit.MILLISECONDS);
         assertThat(interrupted)
-                .withFailMessage(format("The execution thread pool was not able to shutdown in time %s msec", maxCriticalPathDuration))
+                .withFailMessage(format("The execution thread pool was not able to shutdown in time %s msec", maxCriticalPathDurationMsec))
                 .isTrue();
 
         assertThat(counter.get()).isEqualTo(requests);
