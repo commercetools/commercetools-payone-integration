@@ -57,19 +57,6 @@ public class HttpRequestUtilParallelTest {
         });
     }
 
-    @Test
-    public void executeGetRequestToString_returnsString() throws Exception {
-        assertThat(executeGetRequestToString("http://httpbin.org/get")).contains("http://httpbin.org/get");
-    }
-
-    @Test
-    public void executePostRequestToString_returnsStringContainingRequestArguments() throws Exception {
-        assertThat(executePostRequestToString("http://httpbin.org/post", asList(
-                nameValue("aaa", "bbb"),
-                nameValue("ccc", 89456677823452345L))))
-                .contains("http://httpbin.org/post", "aaa", "bbb", "ccc", "89456677823452345");
-    }
-
     private void makeParallelRequests(final int nThreads, final int requests, final Supplier<Integer> request) throws Exception {
         final ExecutorService newFixedThreadPool = Executors.newFixedThreadPool(nThreads);
 
