@@ -106,12 +106,18 @@ running in front of it (which is recommended in any case).
 
   In the [`/build.gradle`](/build.gradle) script the [_application_](https://docs.gradle.org/current/userguide/application_plugin.html)
   plugin is applied 
-  thus `gradle run` task could be used for local run and debug 
-  (for example, in Intellij IDEA you could _Run/Debug_ the gradle task `run` from the tasks list).
+  thus `./gradlew run` or `./gradlew :service:run` task could be used for local run and debug 
+  (for example, in Intellij IDEA you could _Run/Debug_ the gradle task `run` from the tasks list: 
+  `commercetools-payone-integration -> :service -> Tasks -> application -> run`).
   
   In the script this `run` task is configured to convert the required runtime values from the local gradle settings 
 (`gradle.properties`) to java runtime properties (`-Dkey=value` arguments). 
 This allows to skip manually set-up environment variables for the service run.
+
+  Also, with included [_shadow jar gradle plugin_](http://imperceptiblethoughts.com/shadow/) 
+  one could run/debug the application using shadowed (fat/über) jar using `./gradlew runShadow` (`./gradlew :service:runShadow`) task. 
+  Opposite to simple `run` this will build full jar with all included metadata (like project name, version and so on).
+  This could be useful if one wants to test `/health` resource to verify gradle built-in name/version resolving.
 
   If you wish to build/run/debug the app from command line use the next commands (port `1044` is variable): 
 

@@ -1,0 +1,72 @@
+apply plugin: 'org.ajoberstar.git-publish'
+
+gitPublish {
+    // NOTE:
+    // 1) $GRGIT_USER environment variable or "org.ajoberstar.grgit.auth.username" system property must be set
+    // to actual github token, see https://github.com/ajoberstar/gradle-git-publish#migrating-from-orgajoberstargithub-pages
+    // http://ajoberstar.org/grgit/index.html
+    // Also, see gitPublishReset#doFirst below for the implemented fallback for these values.
+    // 2) to use GH token `repoUri` must have an https (not git or ssh) protocol
+
+    repoUri = 'https://github.com/commercetools/commercetools-payone-integration.git'
+    branch = 'gh-pages'
+
+    // what to publish, this is a standard CopySpec
+    contents {
+        into '.'
+        from 'ghpages/' // 1. static content - root index.html page
+
+        with project.copySpec { // 2. test results: both Concordion and logging console outputs
+            into 'latest/'
+            from 'functionaltests/build/reports/'
+        }
+
+        with project.copySpec { // 3. service unit test results
+            into 'service_test/'
+            from 'service/build/reports/'
+        }
+    }
+
+    // message used when committing changes
+    commitMessage = "Publishing tests results (adding commit info here would be cool)"
+}
+
+gitPublishReset {
+    doFirst {
+        /* try to find github publish token in the next order:
+             1) -Dorg.ajoberstar.grgit.auth.username java runtime property
+             2) -Porg.ajoberstar.grgit.auth.username gradle runtime property
+             3) "org.ajoberstar.grgit.auth.username" property from gradle.properties file
+             4) $GRGIT_USER env variable
+             5) $GH_TOKEN env variable
+         interrupt the task if neither of them is set.
+        */
+        final authProperty = 'org.ajoberstar.grgit.auth.username'
+        if (!System.getProperty(authProperty)?.trim()) {
+
+            def githubToken = (project.hasProperty(authProperty) ? project.property(authProperty) :
+                                    (System.getenv('GRGIT_USER') ?:
+                                            System.getenv('GH_TOKEN')))
+
+
+            if (!githubToken?.trim()) {
+                throw new InvalidUserDataException("Unable to authorise git publish. To authorise, please" +
+                        " make sure one of the following is set (in order of priority):\n" +
+                        "1. -D$authProperty Java runtime property\n" +
+                        "2. -P$authProperty gradle runtime property\n" +
+                        "3. $authProperty in gradle.properties file\n" +
+                        "4. GRGIT_USER environment variable\n" +
+                        "5. GH_TOKEN environment variable\n"
+                        )
+            }
+
+            System.setProperty(authProperty, githubToken)
+        }
+    }
+}
+
+gitPublishPush {
+    doLast {
+        println "\nPublished results to http://commercetools.github.io/commercetools-payone-integration/\n"
+    }
+}

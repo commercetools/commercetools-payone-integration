@@ -16,6 +16,7 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
@@ -39,6 +40,11 @@ import java.util.Objects;
  * <li>retries on connections exceptions up to 3 times, if request has not been sent yet
  * (see {@link DefaultHttpRequestRetryHandler#isRequestSentRetryEnabled()}
  * and {@link #HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT})</li>
+ * <li>connections pool is 200 connections, up to 20 per route (see {@link #CONNECTION_MAX_TOTAL}
+ * and {@link #CONNECTION_MAX_PER_ROUTE}). These values are "inherited" from
+ * <a href="https://github.com/Kong/unirest-java/blob/3b461599ad021d0a3f14213c0dbb85bab7244f66/src/main/java/com/mashape/unirest/http/options/Options.java#L23-L24">Unirest</a>
+ * library. It could be changed in the future if we face problems (for example, decrease if we have OutOfMemory
+ * or increase if out of connections from the pool.</li>
  * </ul>
  * <p>
  * This util is intended to replace <i>Unirest</i> and <i>fluent-hc</i> dependencies, which don't propose any flexible
@@ -54,10 +60,18 @@ import java.util.Objects;
  */
 public final class HttpRequestUtil {
 
-    public static final int REQUEST_TIMEOUT = 10000;
+    static final int REQUEST_TIMEOUT = 10000;
 
-    public static final int RETRY_TIMES = 3;
+    static final int RETRY_TIMES = 3;
 
+    static final int CONNECTION_MAX_TOTAL = 200;
+
+    static final int CONNECTION_MAX_PER_ROUTE = 20;
+
+    /**
+     * Don't resend request on connection exception once it has been successfully sent.
+     */
+    static final boolean REQUEST_SENT_RETRY_ENABLED = false;
     /**
      * This retry handler implementation overrides default list of <i>nonRetriableClasses</i> excluding
      * {@link java.io.InterruptedIOException} and {@link ConnectException} so the client will retry on interruption and
@@ -66,10 +80,14 @@ public final class HttpRequestUtil {
      * The implementation will retry 3 times.
      */
     private static final DefaultHttpRequestRetryHandler HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT =
-            new DefaultHttpRequestRetryHandler(RETRY_TIMES, false, Arrays.asList(
+            new DefaultHttpRequestRetryHandler(RETRY_TIMES, REQUEST_SENT_RETRY_ENABLED, Arrays.asList(
                     UnknownHostException.class,
                     SSLException.class)) {
-                // empty implementation, we just need to use protected constructor
+                // it is an anonymous class extension, but we don't need the functionality change,
+                // we just need to access protected constructor
+                // DefaultHttpRequestRetryHandler(int, boolean, Collection<Class<? extends IOException>>),
+                // where we could specify reduced nonRetriableClasses list.
+                // Thus the implementation is empty.
             };
 
     private static final CloseableHttpClient CLIENT = HttpClientBuilder.create()
@@ -79,9 +97,18 @@ public final class HttpRequestUtil {
                     .setConnectTimeout(REQUEST_TIMEOUT)
                     .build())
             .setRetryHandler(HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT)
+            .setConnectionManager(buildDefaultConnectionManager())
             .build();
 
     private static final BasicResponseHandler BASIC_RESPONSE_HANDLER = new BasicResponseHandler();
+
+    private static PoolingHttpClientConnectionManager buildDefaultConnectionManager() {
+        final PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(CONNECTION_MAX_TOTAL);
+        connectionManager.setDefaultMaxPerRoute(CONNECTION_MAX_PER_ROUTE);
+
+        return connectionManager;
+    }
 
     /**
      * Execute retryable HTTP GET request with default {@link #REQUEST_TIMEOUT}
