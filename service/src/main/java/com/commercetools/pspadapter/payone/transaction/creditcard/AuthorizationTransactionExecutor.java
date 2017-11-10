@@ -22,6 +22,8 @@ import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.ZonedDateTime;
 import java.util.ConcurrentModificationException;
@@ -29,6 +31,9 @@ import java.util.Map;
 import java.util.Optional;
 
 public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationTransactionExecutor.class);
+
     private final PayoneRequestFactory requestFactory;
     private final PayonePostService payonePostService;
     private final BlockingSphereClient client;
@@ -151,7 +156,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
             throw new IllegalStateException("Unknown PayOne status");
         }
         catch (PayoneException pe) {
-            getLogger().error("Payone request exception: ", pe);
+            LOGGER.error("Payone request exception: ", pe);
 
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(pe),

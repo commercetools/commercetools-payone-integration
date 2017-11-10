@@ -12,6 +12,7 @@ import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
 import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
 import io.sphere.sdk.utils.MoneyImpl;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.money.MonetaryAmount;
@@ -25,6 +26,8 @@ import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlo
  * @since 17.12.15
  */
 public class NotificationDispatcher {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationDispatcher.class);
 
     private final NotificationProcessor defaultProcessor;
     private final ImmutableMap<NotificationAction, NotificationProcessor> processors;
@@ -58,7 +61,7 @@ public class NotificationDispatcher {
         try {
             dispatchNotificationToProcessor(notification, notificationProcessor);
         } catch (final ConcurrentModificationException e) {
-            LoggerFactory.getLogger(this.getClass()).warn("ConcurrentModificationException on notification [{}]. Retry once more.",
+            LOGGER.warn("ConcurrentModificationException on notification [{}]. Retry once more.",
                     notification.toString());
 
             // try once more

@@ -93,16 +93,4 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
                 ERROR_MESSAGE, "Integration Service Exception: " + exception.getMessage(),
                 CUSTOMER_MESSAGE, "Error on payment transaction processing."));
     }
-
-    /**
-     * Get default logger for this class.
-     * Since this method calls {@link LoggerFactory} every time it is recommended only for rare call, like, for example,
-     * in <i>catch</i> blocks, so a class doesn't keep redundant logger reference permanently.
-     *
-     * @return default logger by {@link Class}
-     */
-    @Nonnull
-    protected Logger getLogger() {
-        return LoggerFactory.getLogger(this.getClass());
-    }
 }
