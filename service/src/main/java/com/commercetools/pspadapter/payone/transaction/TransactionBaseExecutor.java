@@ -8,7 +8,10 @@ import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
 import io.sphere.sdk.types.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
@@ -83,7 +86,7 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
      * @return JSON string with key-value entries following Payone API.
      * @see #responseToJsonString(Map)
      */
-    protected static String exceptionToResponseJsonString(Exception exception) {
+    protected static String exceptionToResponseJsonString(@Nonnull Exception exception) {
         return responseToJsonString(ImmutableMap.of(
                 STATUS, ResponseStatus.ERROR.getStateCode(),
                 ERROR_CODE, ResponseErrorCode.TRANSACTION_EXCEPTION.getErrorCode(),

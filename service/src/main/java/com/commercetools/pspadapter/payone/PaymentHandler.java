@@ -63,11 +63,12 @@ public class PaymentHandler {
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
                     return new PaymentHandleResult(HttpStatusCode.OK_200);
                 } catch (final ConcurrentModificationException cme) {
+                    logger.warn("Exception on dispatchPayment with id [{}]. Retry {} of {}", paymentId, i + 1, RETRIES_LIMIT);
                     Thread.sleep(RETRY_DELAY);
                 }
             }
 
-            logger.warn("The payment [{}] couldn't be processed after {} retries", paymentId, RETRIES_LIMIT);
+            logger.error("The payment [{}] couldn't be processed after {} retries", paymentId, RETRIES_LIMIT);
             return new PaymentHandleResult(HttpStatusCode.ACCEPTED_202,
                     format("The payment couldn't be processed after %s retries", RETRIES_LIMIT));
 
