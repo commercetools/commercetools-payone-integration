@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomer;
 import org.assertj.core.api.JUnitSoftAssertions;
 import org.junit.Before;
@@ -19,10 +20,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Jan Wolter
@@ -51,7 +52,7 @@ public class NotificationProcessorBaseTest extends BaseNotificationProcessorTest
 
         final ImmutableList<UpdateAction<Payment>> updateActions = ImmutableList.of(SetCustomer.of(null));
 
-        final NotificationProcessorBase testee = new NotificationProcessorBase(tenantFactory, tenantConfig) {
+        final NotificationProcessorBase testee = new NotificationProcessorBase(tenantFactory, tenantConfig, transactionStateResolver) {
             @Override
             protected boolean canProcess(final Notification notification) {
                 return true;
@@ -86,6 +87,22 @@ public class NotificationProcessorBaseTest extends BaseNotificationProcessorTest
         softly.assertThat(throwable).as("exception")
                 .isInstanceOf(java.util.ConcurrentModificationException.class)
                 .hasCause(sdkException);
+    }
+
+    @Test
+    public void isNotCompletedTransaction_callsInjectedStateResolver() throws Exception {
+        final NotificationProcessorBase testee = new NotificationProcessorBase(tenantFactory, tenantConfig, transactionStateResolver){
+            @Override
+            protected boolean canProcess(Notification notification) {
+                return true;
+            }
+        };
+
+        doReturn(true).when(transactionStateResolver).isNotCompletedTransaction(any());
+        assertThat(testee.isNotCompletedTransaction(mock(Transaction.class))).isTrue();
+
+        doReturn(false).when(transactionStateResolver).isNotCompletedTransaction(any());
+        assertThat(testee.isNotCompletedTransaction(mock(Transaction.class))).isFalse();
     }
 
     private static NotificationAction randomTxAction() {

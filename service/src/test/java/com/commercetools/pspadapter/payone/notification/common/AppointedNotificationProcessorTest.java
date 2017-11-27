@@ -4,17 +4,16 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
 import com.commercetools.pspadapter.payone.notification.BaseNotificationProcessorTest;
+import com.google.common.collect.ImmutableList;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.orders.PaymentState;
-import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.TransactionDraftBuilder;
-import io.sphere.sdk.payments.TransactionState;
-import io.sphere.sdk.payments.TransactionType;
+import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -25,8 +24,13 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus.PENDING;
+import static io.sphere.sdk.payments.TransactionState.SUCCESS;
+import static io.sphere.sdk.payments.TransactionType.AUTHORIZATION;
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static util.UpdatePaymentTestHelper.*;
 
@@ -71,7 +75,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
             throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentNoTransaction20EuroPlanned();
-        notification.setTransactionStatus(TransactionStatus.PENDING);
+        notification.setTransactionStatus(PENDING);
 
         // act
         testee.processTransactionStatusNotification(notification, payment);
@@ -81,7 +85,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         final AddTransaction transaction = AddTransaction.of(
-                TransactionDraftBuilder.of(TransactionType.AUTHORIZATION, amount, TXTIME_ZONED_DATE_TIME)
+                TransactionDraftBuilder.of(AUTHORIZATION, amount, TXTIME_ZONED_DATE_TIME)
                         .state(TransactionState.PENDING)
                         .interactionId(notification.getSequencenumber())
                         .build());
@@ -120,8 +124,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
-                .of(TransactionType.AUTHORIZATION, amount, TXTIME_ZONED_DATE_TIME)
-                .state(TransactionState.SUCCESS)
+                .of(AUTHORIZATION, amount, TXTIME_ZONED_DATE_TIME)
+                .state(SUCCESS)
                 .interactionId(notification.getSequencenumber())
                 .build());
 
@@ -141,7 +145,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
             throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentNoTransaction20EuroPlanned();
-        notification.setTransactionStatus(TransactionStatus.PENDING);
+        notification.setTransactionStatus(PENDING);
         notification.setBalance("20.00");
 
         // act
@@ -224,7 +228,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         final Payment payment = testHelper.dummyPaymentNoTransaction20EuroPlanned();
         notification.setSequencenumber("1");
         notification.setBalance("20.00");
-        notification.setTransactionStatus(TransactionStatus.PENDING);
+        notification.setTransactionStatus(PENDING);
 
         // act
         testee.processTransactionStatusNotification(notification, payment);
@@ -307,7 +311,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         final Payment payment = testHelper.dummyPaymentOneChargePending20Euro();
 
         notification.setSequencenumber("1");
-        notification.setTransactionStatus(TransactionStatus.PENDING);
+        notification.setTransactionStatus(PENDING);
 
         // act
         testee.processTransactionStatusNotification(notification, payment);
@@ -365,7 +369,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     public void mapsAppointedPendingToPendingAuthorizationTransaction() throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneAuthPending20EuroCC();
-        notification.setTransactionStatus(TransactionStatus.PENDING);
+        notification.setTransactionStatus(PENDING);
 
         // act
         testee.processTransactionStatusNotification(notification, payment);
@@ -402,7 +406,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
 
         assertThat(updateActions).as("update actions list")
                 .containsExactlyInAnyOrder(
-                        ChangeTransactionState.of(TransactionState.SUCCESS, payment.getTransactions().get(0).getId()),
+                        ChangeTransactionState.of(SUCCESS, payment.getTransactions().get(0).getId()),
                         interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
@@ -413,7 +417,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     public void mapsAppointedPendingToSuccessfulAuthorizationTransaction() throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentAuthSuccess();
-        notification.setTransactionStatus(TransactionStatus.PENDING);
+        notification.setTransactionStatus(PENDING);
 
         // act
         testee.processTransactionStatusNotification(notification, payment);
@@ -449,6 +453,44 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         verifyUpdateOrderActionsNotCalled();
     }
 
+    @Test
+    public void whenAuthTransactionIsInitial_ChangeTransactionStateISAdded() throws Exception {
+        Payment paymentAuthPending = testHelper.dummyPaymentOneAuthInitial20EuroCC();
+        ImmutableList<UpdateAction<Payment>> authPendingUpdates = testee.createPaymentUpdates(paymentAuthPending, notification);
+        assertThat(authPendingUpdates).containsOnlyOnce(ChangeTransactionState.of(
+                notification.getTransactionStatus().getCtTransactionState(), paymentAuthPending.getTransactions().get(0).getId()));
+
+        verify_isNotCompletedTransaction_called(TransactionState.INITIAL, AUTHORIZATION);
+    }
+
+    @Test
+    public void whenAuthTransactionIsPending_ChangeTransactionStateISAdded() throws Exception {
+        Payment paymentAuthPending = testHelper.dummyPaymentOneAuthPending20EuroCC();
+        ImmutableList<UpdateAction<Payment>> authPendingUpdates = testee.createPaymentUpdates(paymentAuthPending, notification);
+        assertThat(authPendingUpdates).containsOnlyOnce(ChangeTransactionState.of(
+                notification.getTransactionStatus().getCtTransactionState(), paymentAuthPending.getTransactions().get(0).getId()));
+
+        verify_isNotCompletedTransaction_called(TransactionState.PENDING, AUTHORIZATION);
+    }
+
+    @Test
+    public void whenAuthTransactionIsSuccess_ChangeTransactionStateNOTAdded() throws Exception {
+        Payment paymentAuthSuccess = testHelper.dummyPaymentAuthSuccess();
+        ImmutableList<UpdateAction<Payment>> authSuccessUpdates = testee.createPaymentUpdates(paymentAuthSuccess, notification);
+        assertTransactionOfTypeIsNotAdded(authSuccessUpdates, ChangeTransactionState.class);
+
+        verify_isNotCompletedTransaction_called(TransactionState.SUCCESS, AUTHORIZATION);
+    }
+
+    @Test
+    public void whenAuthTransactionIsFailure_ChangeTransactionStateNOTAdded() throws Exception {
+        Payment paymentAuthFailure = testHelper.dummyPaymentOneAuthFailure20EuroCC();
+        ImmutableList<UpdateAction<Payment>> authFailureUpdates = testee.createPaymentUpdates(paymentAuthFailure, notification);
+        assertTransactionOfTypeIsNotAdded(authFailureUpdates, ChangeTransactionState.class);
+
+        verify_isNotCompletedTransaction_called(TransactionState.FAILURE, AUTHORIZATION);
+    }
+
     private Payment mapsAppointedCompleteToSuccessfulAuthorizationTransactionWireframe() throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentAuthSuccess();
@@ -467,4 +509,5 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         assertThat(updateActions).as("# of update actions").hasSize(3);
         return payment;
     }
+
 }

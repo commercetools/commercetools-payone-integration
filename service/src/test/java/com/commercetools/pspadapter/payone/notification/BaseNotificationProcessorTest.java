@@ -1,5 +1,7 @@
 package com.commercetools.pspadapter.payone.notification;
 
+import com.commercetools.payments.TransactionStateResolver;
+import com.commercetools.payments.TransactionStateResolverImpl;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.mapping.order.PaymentToOrderStateMapper;
 import com.commercetools.pspadapter.tenant.TenantConfig;
@@ -10,16 +12,21 @@ import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.Transaction;
+import io.sphere.sdk.payments.TransactionState;
+import io.sphere.sdk.payments.TransactionType;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import util.PaymentTestHelper;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
@@ -41,6 +48,10 @@ public class BaseNotificationProcessorTest {
 
     @Mock
     protected TenantConfig tenantConfig;
+
+    // it is used for injection to "@InjectMocks *NotificationProcessor testee" instances in the child classes
+    @Spy
+    protected TransactionStateResolver transactionStateResolver = new TransactionStateResolverImpl();
 
     @Mock
     protected Order orderToUpdate;
@@ -110,5 +121,32 @@ public class BaseNotificationProcessorTest {
         verify(orderService, never()).updateOrderPaymentState(anyObject(), anyObject());
     }
 
+    protected final void assertTransactionOfTypeIsNotAdded(List<UpdateAction<Payment>> actions,
+                                                   Class<? extends UpdateAction<? extends Payment>> actionType) {
+        actions.stream()
+                .filter(actionType::isInstance)
+                .findFirst()
+                .ifPresent(action -> {
+                    throw new AssertionError(
+                            format("Expected that actions list does not contain action \"%s\", but it contains",
+                                    actionType.getSimpleName()));
+                });
+    }
+
+    /**
+     * Also verify that {@link com.commercetools.payments.TransactionStateResolver#isNotCompletedTransaction(Transaction)}
+     * has been called during a test, so we are sure we are testing {@code isNotCompletedTransaction()} influence
+     *
+     * @param transactionState expected captured transaction state
+     * @param transactionType  expected captured transaction type
+     */
+    protected final void verify_isNotCompletedTransaction_called(TransactionState transactionState,
+                                                         TransactionType transactionType) {
+        ArgumentCaptor<Transaction> transactionCaptorAuthFailure = ArgumentCaptor.forClass(Transaction.class);
+        verify(transactionStateResolver).isNotCompletedTransaction(transactionCaptorAuthFailure.capture());
+        Transaction capturedAuthSuccessTransaction = transactionCaptorAuthFailure.getValue();
+        assertThat(capturedAuthSuccessTransaction.getType()).isEqualTo(transactionType);
+        assertThat(capturedAuthSuccessTransaction.getState()).isEqualTo(transactionState);
+    }
 
 }
