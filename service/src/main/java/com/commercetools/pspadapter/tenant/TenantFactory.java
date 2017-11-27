@@ -1,5 +1,7 @@
 package com.commercetools.pspadapter.tenant;
 
+import com.commercetools.payments.TransactionStateResolver;
+import com.commercetools.payments.TransactionStateResolverImpl;
 import com.commercetools.pspadapter.payone.PaymentDispatcher;
 import com.commercetools.pspadapter.payone.PaymentHandler;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
@@ -84,7 +86,7 @@ public class TenantFactory {
 
         this.paymentDispatcher = createPaymentDispatcher(tenantConfig, createTypeCache(blockingSphereClient), blockingSphereClient);
 
-        this.notificationDispatcher = createNotificationDispatcher(tenantConfig);
+        this.notificationDispatcher = createNotificationDispatcher(tenantConfig, createTransactionStateResolver());
 
         this.commercetoolsQueryExecutor = new CommercetoolsQueryExecutor(blockingSphereClient);
 
@@ -168,14 +170,16 @@ public class TenantFactory {
         return new DefaultPaymentToOrderStateMapper();
     }
 
-    protected NotificationDispatcher createNotificationDispatcher(TenantConfig tenantConfig) {
-        final NotificationProcessor defaultNotificationProcessor = new DefaultNotificationProcessor(this, tenantConfig);
+    protected NotificationDispatcher createNotificationDispatcher(TenantConfig tenantConfig,
+                                                                  TransactionStateResolver transactionStateResolver) {
+        final NotificationProcessor defaultNotificationProcessor =
+                new DefaultNotificationProcessor(this, tenantConfig, transactionStateResolver);
 
         final ImmutableMap.Builder<NotificationAction, NotificationProcessor> builder = ImmutableMap.builder();
-        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(this, tenantConfig));
-        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(this, tenantConfig));
-        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(this, tenantConfig));
-        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(this, tenantConfig));
+        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(this, tenantConfig, transactionStateResolver));
+        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(this, tenantConfig, transactionStateResolver));
+        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(this, tenantConfig, transactionStateResolver));
+        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(this, tenantConfig, transactionStateResolver));
 
         return new NotificationDispatcher(defaultNotificationProcessor, builder.build(), this, tenantConfig.getPayoneConfig());
     }
@@ -289,5 +293,10 @@ public class TenantFactory {
     @Nonnull
     protected CountryToLanguageMapper createCountryToLanguageMapper() {
         return new PayoneKlarnaCountryToLanguageMapper();
+    }
+
+    @Nonnull
+    protected TransactionStateResolver createTransactionStateResolver() {
+        return new TransactionStateResolverImpl();
     }
 }

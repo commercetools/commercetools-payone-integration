@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
+import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
@@ -19,8 +20,9 @@ public class DefaultNotificationProcessor extends NotificationProcessorBase {
      *
      * @param serviceFactory the services factory for commercetools platform API
      */
-    public DefaultNotificationProcessor(TenantFactory serviceFactory, TenantConfig tenantConfig) {
-        super(serviceFactory, tenantConfig);
+    public DefaultNotificationProcessor(TenantFactory serviceFactory, TenantConfig tenantConfig,
+                                        TransactionStateResolver transactionStateResolver) {
+        super(serviceFactory, tenantConfig, transactionStateResolver);
     }
 
         @Override

@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
+import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
@@ -26,8 +27,9 @@ public class PaidNotificationProcessor extends NotificationProcessorBase {
      *
      * @param serviceFactory the services factory for commercetools platform API
      */
-    public PaidNotificationProcessor(TenantFactory serviceFactory, TenantConfig tenantConfig) {
-        super(serviceFactory, tenantConfig);
+    public PaidNotificationProcessor(TenantFactory serviceFactory, TenantConfig tenantConfig,
+                                     TransactionStateResolver transactionStateResolver) {
+        super(serviceFactory, tenantConfig, transactionStateResolver);
     }
 
     @Override
@@ -49,7 +51,7 @@ public class PaidNotificationProcessor extends NotificationProcessorBase {
         return findMatchingTransaction(transactions, TransactionType.CHARGE, sequenceNumber)
                 .map(transaction -> {
                     if (ctTransactionState.equals(TransactionState.SUCCESS)) {
-                        if (transaction.getState().equals(TransactionState.PENDING)) {
+                        if (isNotCompletedTransaction(transaction)) {
                             listBuilder.add(ChangeTransactionState.of(ctTransactionState, transaction.getId()));
                         }
                     }

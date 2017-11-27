@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
+import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
@@ -26,8 +27,9 @@ public class UnderpaidNotificationProcessor extends NotificationProcessorBase {
      *
      * @param serviceFactory the services factory for commercetools platform API
      */
-    public UnderpaidNotificationProcessor(TenantFactory serviceFactory, TenantConfig tenantConfig) {
-        super(serviceFactory, tenantConfig);
+    public UnderpaidNotificationProcessor(TenantFactory serviceFactory, TenantConfig tenantConfig,
+                                          TransactionStateResolver transactionStateResolver) {
+        super(serviceFactory, tenantConfig, transactionStateResolver);
     }
 
     @Override

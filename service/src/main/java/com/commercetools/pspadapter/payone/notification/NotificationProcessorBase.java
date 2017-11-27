@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.notification;
 
+import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
@@ -50,14 +51,20 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
 
     private final TenantConfig tenantConfig;
 
+    private final TransactionStateResolver transactionStateResolver;
+
     /**
      * Constructor for implementations.
      *
-     * @param tenantFactory the tenant services factory for commercetools platform API
+     * @param tenantFactory            the tenant services factory for commercetools platform API
+     * @param tenantConfig             the current tenant config, for which notification is received
+     * @param transactionStateResolver helper which defines if a transaction state is assumed as "not completed"
      */
-    protected NotificationProcessorBase(final TenantFactory tenantFactory, final TenantConfig tenantConfig) {
+    protected NotificationProcessorBase(final TenantFactory tenantFactory, final TenantConfig tenantConfig,
+                                        final TransactionStateResolver transactionStateResolver) {
         this.tenantFactory = tenantFactory;
         this.tenantConfig = tenantConfig;
+        this.transactionStateResolver = transactionStateResolver;
 
         this.logger = LoggerFactory.getLogger(createLoggerName(this.getClass(), tenantConfig.getName()));
     }
@@ -144,6 +151,10 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
      */
     protected abstract boolean canProcess(Notification notification);
 
+    protected boolean isNotCompletedTransaction(@Nonnull Transaction transaction) {
+        return transactionStateResolver.isNotCompletedTransaction(transaction);
+    }
+
     /**
      * Generates a list of update actions which can be applied to the payment in one step.
      *
@@ -211,11 +222,11 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
      * Checks whether {@code transactions} contains a transaction of the given {@code transactionType} with the
      * given {@code interactionId}.
      *
-     * @param transactions the list of transactions
+     * @param transactions    the list of transactions
      * @param transactionType the type of transaction
-     * @param interactionId the interaction ID (aka PAYONE's sequencenumber)
+     * @param interactionId   the interaction ID (aka PAYONE's sequencenumber)
      * @return whether there is a {@code CHARGE} transaction with the provided {@code interactionId} in
-     *         the {@code transactions}
+     * the {@code transactions}
      */
     protected static Optional<Transaction> findMatchingTransaction(final Collection<Transaction> transactions,
                                                                    final TransactionType transactionType,
