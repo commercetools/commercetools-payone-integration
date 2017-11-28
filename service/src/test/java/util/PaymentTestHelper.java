@@ -155,18 +155,46 @@ public class PaymentTestHelper {
         return getCartFromFile(KLARNA_DIR + "dummyKlarnaCartWithoutDiscounts.json");
     }
 
+    /**
+     * Note, the transactions in this payment expected to be "updated" later using
+     * {@link #dummyPaymentTwoTransactionsSuccessInitial()} mock, thus the payment an the transactions have respectively
+     * same IDs.
+     *
+     * @see #dummyPaymentTwoTransactionsSuccessInitial()
+     */
     public Payment dummyPaymentTwoTransactionsInitial() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsInitial.json");
     }
 
-    public Payment dummyPaymentTwoTransactionsPending() throws Exception {
-        return getPaymentFromFile("dummyPaymentTwoTransactionsPending.json");
-    }
-
+    /**
+     * Note, this payment contains kind of "updated" transactions from the
+     * {@link #dummyPaymentTwoTransactionsInitial()}, thus the payment an the transactions have respectively
+     * same IDs.
+     *
+     * @see #dummyPaymentTwoTransactionsInitial()
+     */
     public Payment dummyPaymentTwoTransactionsSuccessInitial() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsSuccessInitial.json");
     }
 
+    /**
+     * Note, the transactions in this payment expected to be "updated" later using
+     * {@link #dummyPaymentTwoTransactionsSuccessPending()} mock, thus the payment an the transactions have respectively
+     * same IDs.
+     *
+     * @see #dummyPaymentTwoTransactionsSuccessPending()
+     */
+    public Payment dummyPaymentTwoTransactionsPending() throws Exception {
+        return getPaymentFromFile("dummyPaymentTwoTransactionsPending.json");
+    }
+
+    /**
+     * Note, this payment contains kind of "updated" transactions from the
+     * {@link #dummyPaymentTwoTransactionsPending()}, thus the payment an the transactions have respectively
+     * same IDs.
+     *
+     * @see #dummyPaymentTwoTransactionsPending()
+     */
     public Payment dummyPaymentTwoTransactionsSuccessPending() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsSuccessPending.json");
     }

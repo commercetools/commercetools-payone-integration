@@ -96,14 +96,19 @@ public class PaymentDispatcherTest {
         dispatcher.dispatchPayment(paymentPendingOrInitialWithCartLike);
 
         ArgumentCaptor<Transaction> transactionCaptor = ArgumentCaptor.forClass(Transaction.class);
+
+        // isNotCompletedTransaction expected to be called twice: 1 - filter transaction, 2 - re-verify update transaction
         verify(transactionStateResolver, times(2)).isNotCompletedTransaction(transactionCaptor.capture());
+
+        // credit card is dispatched ones, cos it has only one CC payment
         assertThat(creditCardDispatcher.count).isEqualTo(1);
+        // sepa is not called, because there were no sepa payments
         assertThat(sepaDispatcher.count).isEqualTo(0);
-        List<Transaction> verifiedTransactions = transactionCaptor.getAllValues();
 
         // PaymentMethodDispatcher#dispatchPayment() filters in first in-completed (Initial/Pending) transaction,
         // and then verifies updated transaction, which is the same in our case.
         // second transaction is skipped, because the first one is updated successfully.
+        List<Transaction> verifiedTransactions = transactionCaptor.getAllValues();
         assertThat(verifiedTransactions.stream().map(Transaction::getId).collect(toList()))
                 .containsExactly(firstInitTransaction.getId(), firstInitTransaction.getId());
 
@@ -111,7 +116,9 @@ public class PaymentDispatcherTest {
         // 2 is number of times isNotCompletedTransaction() is called on previous step,
         // +3 times is called now: 1 for first success transaction (filtered out), 1 for second pending/initial, 1 for updated transaction
         verify(transactionStateResolver, times(2 + 3)).isNotCompletedTransaction(transactionCaptor.capture());
-        assertThat(creditCardDispatcher.count).isEqualTo(2);
+        // second (accumulated) with test above CC dispatch call
+        assertThat(creditCardDispatcher.count).isEqualTo(1 + 1);
+        // sepa still never called
         assertThat(sepaDispatcher.count).isEqualTo(0);
     }
 }
