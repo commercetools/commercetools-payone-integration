@@ -96,7 +96,8 @@ public class BaseNotificationProcessorTest {
 
     /**
      * Verify that the processor called expected order service functions when a payment is updated
-     * @param payment payment which is updated
+     *
+     * @param payment              payment which is updated
      * @param expectedPaymentState expected new payment state of the updated order
      */
     protected void verifyUpdateOrderActions(Payment payment, PaymentState expectedPaymentState) {
@@ -122,7 +123,7 @@ public class BaseNotificationProcessorTest {
     }
 
     protected final void assertTransactionOfTypeIsNotAdded(List<UpdateAction<Payment>> actions,
-                                                   Class<? extends UpdateAction<? extends Payment>> actionType) {
+                                                           Class<? extends UpdateAction<? extends Payment>> actionType) {
         actions.stream()
                 .filter(actionType::isInstance)
                 .findFirst()
@@ -135,13 +136,14 @@ public class BaseNotificationProcessorTest {
 
     /**
      * Also verify that {@link com.commercetools.payments.TransactionStateResolver#isNotCompletedTransaction(Transaction)}
-     * has been called during a test, so we are sure we are testing {@code isNotCompletedTransaction()} influence
+     * has been called during a test with expected transaction type/state,
+     * so we are sure we are testing {@code isNotCompletedTransaction()} influence
      *
      * @param transactionState expected captured transaction state
      * @param transactionType  expected captured transaction type
      */
     protected final void verify_isNotCompletedTransaction_called(TransactionState transactionState,
-                                                         TransactionType transactionType) {
+                                                                 TransactionType transactionType) {
         ArgumentCaptor<Transaction> transactionCaptorAuthFailure = ArgumentCaptor.forClass(Transaction.class);
         verify(transactionStateResolver).isNotCompletedTransaction(transactionCaptorAuthFailure.capture());
         Transaction capturedAuthSuccessTransaction = transactionCaptorAuthFailure.getValue();
