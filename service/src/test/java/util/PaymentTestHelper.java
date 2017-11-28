@@ -155,8 +155,16 @@ public class PaymentTestHelper {
         return getCartFromFile(KLARNA_DIR + "dummyKlarnaCartWithoutDiscounts.json");
     }
 
+    public Payment dummyPaymentTwoTransactionsInitial() throws Exception {
+        return getPaymentFromFile("dummyPaymentTwoTransactionsInitial.json");
+    }
+
     public Payment dummyPaymentTwoTransactionsPending() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsPending.json");
+    }
+
+    public Payment dummyPaymentTwoTransactionsSuccessInitial() throws Exception {
+        return getPaymentFromFile("dummyPaymentTwoTransactionsSuccessInitial.json");
     }
 
     public Payment dummyPaymentTwoTransactionsSuccessPending() throws Exception {

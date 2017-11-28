@@ -144,9 +144,9 @@ public class BaseNotificationProcessorTest {
      */
     protected final void verify_isNotCompletedTransaction_called(TransactionState transactionState,
                                                                  TransactionType transactionType) {
-        ArgumentCaptor<Transaction> transactionCaptorAuthFailure = ArgumentCaptor.forClass(Transaction.class);
-        verify(transactionStateResolver).isNotCompletedTransaction(transactionCaptorAuthFailure.capture());
-        Transaction capturedAuthSuccessTransaction = transactionCaptorAuthFailure.getValue();
+        ArgumentCaptor<Transaction> transactionCaptor = ArgumentCaptor.forClass(Transaction.class);
+        verify(transactionStateResolver).isNotCompletedTransaction(transactionCaptor.capture());
+        Transaction capturedAuthSuccessTransaction = transactionCaptor.getValue();
         assertThat(capturedAuthSuccessTransaction.getType()).isEqualTo(transactionType);
         assertThat(capturedAuthSuccessTransaction.getState()).isEqualTo(transactionState);
     }

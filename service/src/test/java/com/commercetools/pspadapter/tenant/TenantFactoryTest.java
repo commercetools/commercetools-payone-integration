@@ -1,5 +1,7 @@
 package com.commercetools.pspadapter.tenant;
 
+import com.commercetools.payments.TransactionStateResolver;
+import com.commercetools.payments.TransactionStateResolverImpl;
 import com.commercetools.pspadapter.payone.PaymentDispatcher;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
@@ -39,6 +41,8 @@ public class TenantFactoryTest {
     private TenantFactory factory;
 
     private final PaymentTestHelper testHelper = new PaymentTestHelper();
+
+    private TransactionStateResolver transactionStateResolver = new TransactionStateResolverImpl();
 
     @Before
     public void setUp() throws Exception {
@@ -127,7 +131,8 @@ public class TenantFactoryTest {
         LoadingCache<String, Type> typeCache = mock(LoadingCache.class);
         BlockingSphereClient blockingSphereClient = mock(BlockingSphereClient.class);
 
-        PaymentDispatcher paymentDispatcher = factory.createPaymentDispatcher(tenantConfig, typeCache, blockingSphereClient);
+        PaymentDispatcher paymentDispatcher = factory.createPaymentDispatcher(tenantConfig, typeCache,
+                blockingSphereClient, transactionStateResolver);
         assertThat(paymentDispatcher).isNotNull();
     }
 

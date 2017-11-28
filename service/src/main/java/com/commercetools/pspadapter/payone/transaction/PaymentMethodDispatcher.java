@@ -35,7 +35,7 @@ public class PaymentMethodDispatcher {
                 if (transactionStateResolver.isNotCompletedTransaction(updatedTransaction)) { // Still Pending, stop ->
                     // executor has done its duty, notification from Payone required to proceed with this transaction
                     return newPaymentWithCartLike;
-                } else { // Recursively execute next Pending Transaction
+                } else { // Recursively execute next Initial/Pending Transaction
                     return dispatchPayment(newPaymentWithCartLike);
                 }
             })
