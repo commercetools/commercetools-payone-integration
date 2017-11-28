@@ -1,34 +1,38 @@
 package com.commercetools.pspadapter.payone.transaction;
 
+import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Transaction;
-import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
+
+import javax.annotation.Nonnull;
 
 public class PaymentMethodDispatcher {
     private final TransactionExecutor defaultExecutor;
     private final ImmutableMap<TransactionType, TransactionExecutor> executors;
+    private final TransactionStateResolver transactionStateResolver;
 
     public PaymentMethodDispatcher(
-            final TransactionExecutor defaultExecutor,
-            final ImmutableMap<TransactionType, TransactionExecutor> executors) {
+            @Nonnull final TransactionExecutor defaultExecutor,
+            @Nonnull final ImmutableMap<TransactionType, TransactionExecutor> executors,
+            @Nonnull final TransactionStateResolver transactionStateResolver) {
         this.defaultExecutor = defaultExecutor;
         this.executors = executors;
+        this.transactionStateResolver = transactionStateResolver;
     }
 
-    public PaymentWithCartLike dispatchPayment(final PaymentWithCartLike paymentWithCartLike) {
+    public PaymentWithCartLike dispatchPayment(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
         // Execute the first Pending Transaction
         return paymentWithCartLike.getPayment()
             .getTransactions()
             .stream()
-            .filter(transaction -> TransactionState.PENDING.equals(transaction.getState()))
+            .filter(transactionStateResolver::isNotCompletedTransaction)
             .findFirst()
             .map(transaction -> {
                 final PaymentWithCartLike newPaymentWithCartLike = executeTransaction(paymentWithCartLike, transaction);
                 final Transaction updatedTransaction = getUpdatedTransaction(transaction, newPaymentWithCartLike);
-
-                if (TransactionState.PENDING.equals(updatedTransaction.getState())) { // Still Pending, stop ->
+                if (transactionStateResolver.isNotCompletedTransaction(updatedTransaction)) { // Still Pending, stop ->
                     // executor has done its duty, notification from Payone required to proceed with this transaction
                     return newPaymentWithCartLike;
                 } else { // Recursively execute next Pending Transaction
