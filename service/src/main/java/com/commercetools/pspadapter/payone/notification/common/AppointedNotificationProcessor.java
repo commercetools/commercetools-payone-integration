@@ -15,9 +15,9 @@ import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractio
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 import io.sphere.sdk.utils.MoneyImpl;
 
+import javax.annotation.Nonnull;
 import javax.money.MonetaryAmount;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * An implementation of a NotificationProcessor specifically for notifications with txaction 'appointed'.
@@ -58,13 +58,9 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
         }
 
         if (sequenceNumber.equals("1")) {
-            final Optional<Transaction> transaction =
-                    findMatchingTransaction(transactions, TransactionType.CHARGE, "0");
-            if (transaction.isPresent()) {
-                listBuilder.add(ChangeTransactionInteractionId.of(sequenceNumber, transaction.get().getId()));
-            } else {
-                addPaymentUpdatesForNewChargeTransaction(notification, listBuilder);
-            }
+
+            listBuilder.add(matchingChangeInteractionOrChargeTransaction(notification, transactions, sequenceNumber));
+
             return listBuilder.build();
         }
 
@@ -90,8 +86,18 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
                     .build();
         }
 
-        addPaymentUpdatesForNewChargeTransaction(notification, listBuilder);
+        listBuilder.add(addChargePendingTransaction(notification));
         return listBuilder.build();
+    }
+
+    private UpdateAction<Payment> matchingChangeInteractionOrChargeTransaction(@Nonnull final Notification notification,
+                                                                               @Nonnull final List<Transaction> transactions,
+                                                                               @Nonnull final String sequenceNumber) {
+        // if a CHARGE transaction with "0" interaction id found - update interaction id,
+        // otherwise -  create ad new Charge-Pending transaction with interactionId == notification.sequencenumber
+        return findMatchingTransaction(transactions, TransactionType.CHARGE, "0")
+                .map(transaction -> (UpdateAction<Payment>) ChangeTransactionInteractionId.of(sequenceNumber, transaction.getId()))
+                .orElseGet(() -> addChargePendingTransaction(notification));
     }
 
     private static void addPaymentUpdatesForNewAuthorizationTransaction(
@@ -108,15 +114,13 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
                 .build()));
     }
 
-    private static void addPaymentUpdatesForNewChargeTransaction(
-            final Notification notification,
-            final ImmutableList.Builder<UpdateAction<Payment>> listBuilder) {
+    private static AddTransaction addChargePendingTransaction(final Notification notification) {
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
 
-        listBuilder.add(AddTransaction.of(TransactionDraftBuilder.of(TransactionType.CHARGE, amount)
+        return AddTransaction.of(TransactionDraftBuilder.of(TransactionType.CHARGE, amount)
                 .timestamp(toZonedDateTime(notification))
                 .state(TransactionState.PENDING)
                 .interactionId(notification.getSequencenumber())
-                .build()));
+                .build());
     }
 }
