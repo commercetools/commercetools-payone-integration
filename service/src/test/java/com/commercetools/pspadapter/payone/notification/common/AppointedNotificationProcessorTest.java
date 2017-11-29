@@ -84,27 +84,14 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-        final AddTransaction transaction = AddTransaction.of(
-                TransactionDraftBuilder.of(AUTHORIZATION, amount, TXTIME_ZONED_DATE_TIME)
-                        .state(TransactionState.PENDING)
-                        .interactionId(notification.getSequencenumber())
-                        .build());
-
+        final AddTransaction addTransaction = getAddTransaction(AUTHORIZATION, TransactionState.PENDING, amount,
+                TXTIME_ZONED_DATE_TIME, notification.getSequencenumber());
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
         assertThat(updateActions)
-                .filteredOn(u -> u.getAction().equals("addTransaction"))
-                .usingElementComparatorOnFields(
-                        "transaction.type",
-                        "transaction.amount",
-                        "transaction.state",
-                        "transaction.timestamp",
-                        "transaction.interactionId")
-                .containsOnlyOnce(transaction);
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
-        assertThat(updateActions).as("# of update actions").hasSize(4);
+                .containsExactlyInAnyOrder(addTransaction, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -123,18 +110,14 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-        final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
-                .of(AUTHORIZATION, amount, TXTIME_ZONED_DATE_TIME)
-                .state(SUCCESS)
-                .interactionId(notification.getSequencenumber())
-                .build());
-
+        final AddTransaction addTransaction = getAddTransaction(AUTHORIZATION, TransactionState.SUCCESS, amount,
+                TXTIME_ZONED_DATE_TIME, notification.getSequencenumber());
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-        assertThat(updateActions).as("update actions list")
-                .containsExactlyInAnyOrder(transaction, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+        assertThat(updateActions)
+                .containsExactlyInAnyOrder(addTransaction, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -155,27 +138,14 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-        final AddTransaction transaction = AddTransaction.of(
-                TransactionDraftBuilder.of(TransactionType.CHARGE, amount, TXTIME_ZONED_DATE_TIME)
-                        .state(TransactionState.PENDING)
-                        .interactionId(notification.getSequencenumber())
-                        .build());
-
+        final AddTransaction addTransaction = getAddTransaction(TransactionType.CHARGE, TransactionState.PENDING, amount,
+                TXTIME_ZONED_DATE_TIME, notification.getSequencenumber());
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
         assertThat(updateActions)
-                .filteredOn(u -> u.getAction().equals("addTransaction"))
-                .usingElementComparatorOnFields(
-                        "transaction.type",
-                        "transaction.amount",
-                        "transaction.state",
-                        "transaction.timestamp",
-                        "transaction.interactionId")
-                .containsOnlyOnce(transaction);
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
-        assertThat(updateActions).as("# of update actions").hasSize(4);
+                .containsExactlyInAnyOrder(addTransaction, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -195,27 +165,14 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-        final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
-                .of(TransactionType.CHARGE, amount, TXTIME_ZONED_DATE_TIME)
-                .state(TransactionState.PENDING)
-                .interactionId(notification.getSequencenumber())
-                .build());
-
+        final AddTransaction addTransaction = getAddTransaction(TransactionType.CHARGE, TransactionState.PENDING, amount,
+                TXTIME_ZONED_DATE_TIME, notification.getSequencenumber());
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
         assertThat(updateActions)
-                .filteredOn(u -> u.getAction().equals("addTransaction"))
-                .usingElementComparatorOnFields(
-                        "transaction.type",
-                        "transaction.amount",
-                        "transaction.state",
-                        "transaction.timestamp",
-                        "transaction.interactionId")
-                .containsOnlyOnce(transaction);
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
-        assertThat(updateActions).as("# of update actions").hasSize(4);
+                .containsExactlyInAnyOrder(addTransaction, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -237,27 +194,14 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-        final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
-                .of(TransactionType.CHARGE, amount, TXTIME_ZONED_DATE_TIME)
-                .state(TransactionState.PENDING)
-                .interactionId(notification.getSequencenumber())
-                .build());
-
+        final AddTransaction addTransaction = getAddTransaction(TransactionType.CHARGE, TransactionState.PENDING, amount,
+                TXTIME_ZONED_DATE_TIME, notification.getSequencenumber());
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
         assertThat(updateActions)
-                .filteredOn(u -> u.getAction().equals("addTransaction"))
-                .usingElementComparatorOnFields(
-                        "transaction.type",
-                        "transaction.amount",
-                        "transaction.state",
-                        "transaction.timestamp",
-                        "transaction.interactionId")
-                .containsOnlyOnce(transaction);
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
-        assertThat(updateActions).as("# of update actions").hasSize(4);
+                .containsExactlyInAnyOrder(addTransaction, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -278,27 +222,14 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-        final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
-                .of(TransactionType.CHARGE, amount, TXTIME_ZONED_DATE_TIME)
-                .state(TransactionState.PENDING)
-                .interactionId(notification.getSequencenumber())
-                .build());
-
+        final AddTransaction addTransaction = getAddTransaction(TransactionType.CHARGE, TransactionState.PENDING, amount,
+                TXTIME_ZONED_DATE_TIME, notification.getSequencenumber());
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
         assertThat(updateActions)
-                .filteredOn(u -> u.getAction().equals("addTransaction"))
-                .usingElementComparatorOnFields(
-                        "transaction.type",
-                        "transaction.amount",
-                        "transaction.state",
-                        "transaction.timestamp",
-                        "transaction.interactionId")
-                .containsOnlyOnce(transaction);
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
-        assertThat(updateActions).as("# of update actions").hasSize(4);
+                .containsExactlyInAnyOrder(addTransaction, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -319,17 +250,14 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         // assert
         final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
+        final ChangeTransactionInteractionId chargeTransaction =
+                getChangeTransactionInteractionId(notification.getSequencenumber(), payment.getTransactions().get(0).getId());
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
         assertThat(updateActions)
-                .filteredOn(u -> u.getAction().equals("changeTransactionInteractionId"))
-                .containsOnly(
-                        ChangeTransactionInteractionId.of(notification.getSequencenumber(),
-                                payment.getTransactions().get(0).getId()));
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
-        assertThat(updateActions).as("# of update actions").hasSize(4);
+                .containsExactlyInAnyOrder(chargeTransaction, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -349,17 +277,14 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         // assert
         final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
+        final ChangeTransactionInteractionId chargeTransaction =
+                getChangeTransactionInteractionId(notification.getSequencenumber(), payment.getTransactions().get(0).getId());
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
         assertThat(updateActions)
-                .filteredOn(u -> u.getAction().equals("changeTransactionInteractionId"))
-                .containsOnly(
-                        ChangeTransactionInteractionId.of(notification.getSequencenumber(),
-                                payment.getTransactions().get(0).getId()));
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
-        assertThat(updateActions).as("# of update actions").hasSize(4);
+                .containsExactlyInAnyOrder(chargeTransaction, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -381,9 +306,8 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
-        assertThat(updateActions).as("# of update actions").hasSize(3);
+        assertThat(updateActions)
+                .containsExactlyInAnyOrder(interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -400,14 +324,13 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         // assert
         final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
+        final ChangeTransactionState changeTransactionState = getChangeTransactionState(SUCCESS, payment.getTransactions().get(0).getId());
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-        assertThat(updateActions).as("update actions list")
-                .containsExactlyInAnyOrder(
-                        ChangeTransactionState.of(SUCCESS, payment.getTransactions().get(0).getId()),
-                        interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+        assertThat(updateActions)
+                .containsExactlyInAnyOrder(changeTransactionState, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -429,9 +352,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
-        assertThat(updateActions).as("# of update actions").hasSize(3);
+        assertThat(updateActions).containsExactlyInAnyOrder(interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -505,8 +426,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-        assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
-        assertThat(updateActions).as("# of update actions").hasSize(3);
+        assertThat(updateActions).containsExactlyInAnyOrder(interfaceInteraction, statusInterfaceCode, statusInterfaceText);
         return payment;
     }
 

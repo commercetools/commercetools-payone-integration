@@ -6,10 +6,12 @@ import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
-import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
-import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
-import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
+import io.sphere.sdk.payments.TransactionDraftBuilder;
+import io.sphere.sdk.payments.TransactionState;
+import io.sphere.sdk.payments.TransactionType;
+import io.sphere.sdk.payments.commands.updateactions.*;
 
+import javax.money.MonetaryAmount;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -36,6 +38,28 @@ public class UpdatePaymentTestHelper {
     public static SetStatusInterfaceText getSetStatusInterfaceText(final Notification notification){
         return SetStatusInterfaceText.of(notification.getTxaction().toString());
     }
+
+    public static AddTransaction getAddTransaction(final TransactionType transactionType,
+                                                   final TransactionState transactionState,
+                                                   final MonetaryAmount amount,
+                                                   final ZonedDateTime timestamp,
+                                                   final String interactionId) {
+        return AddTransaction.of(
+                TransactionDraftBuilder.of(transactionType, amount, timestamp)
+                        .state(transactionState)
+                        .interactionId(interactionId)
+                        .build());
+    }
+
+    public static ChangeTransactionInteractionId getChangeTransactionInteractionId(final String interactionId,
+                                                                                   final String transactionId) {
+        return ChangeTransactionInteractionId.of(interactionId, transactionId);
+    }
+
+    public static ChangeTransactionState getChangeTransactionState(final TransactionState state, final String id) {
+        return ChangeTransactionState.of(state, id);
+    }
+
 
     @SuppressWarnings("unchecked")
     public static void assertStandardUpdateActions(final List<? extends UpdateAction<Payment>> updateActions,
