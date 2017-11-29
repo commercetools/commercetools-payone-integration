@@ -250,14 +250,14 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         // assert
         final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
-        final ChangeTransactionInteractionId chargeTransaction =
+        final ChangeTransactionInteractionId changeTransaction =
                 getChangeTransactionInteractionId(notification.getSequencenumber(), payment.getTransactions().get(0).getId());
         final AddInterfaceInteraction interfaceInteraction = getAddInterfaceInteraction(notification, TXTIME_ZONED_DATE_TIME);
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
         assertThat(updateActions)
-                .containsExactlyInAnyOrder(chargeTransaction, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+                .containsExactlyInAnyOrder(changeTransaction, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
@@ -310,6 +310,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
                 .containsExactlyInAnyOrder(interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
+        verify_isNotCompletedTransaction_called(currentState, TransactionType.AUTHORIZATION);
     }
 
     @Test
@@ -333,6 +334,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
                 .containsExactlyInAnyOrder(changeTransactionState, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
+        verify_isNotCompletedTransaction_called(currentState, TransactionType.AUTHORIZATION);
     }
 
     @Test
@@ -362,6 +364,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     public void mapsAppointedCompletedToSuccessfulAuthorizationTransaction() throws Exception {
         Payment payment = mapsAppointedCompleteToSuccessfulAuthorizationTransactionWireframe();
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
+        verify_isNotCompletedTransaction_called(TransactionState.SUCCESS, AUTHORIZATION);
     }
 
     @Test
@@ -372,10 +375,11 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
 
         mapsAppointedCompleteToSuccessfulAuthorizationTransactionWireframe();
         verifyUpdateOrderActionsNotCalled();
+        verify_isNotCompletedTransaction_called(TransactionState.SUCCESS, AUTHORIZATION);
     }
 
     @Test
-    public void whenAuthTransactionIsInitial_ChangeTransactionStateISAdded() throws Exception {
+    public void whenAuthTransactionIsInitial_ChangeTransactionStateToSuccessAdded() throws Exception {
         Payment paymentAuthPending = testHelper.dummyPaymentOneAuthInitial20EuroCC();
         ImmutableList<UpdateAction<Payment>> authPendingUpdates = testee.createPaymentUpdates(paymentAuthPending, notification);
         assertThat(authPendingUpdates).containsOnlyOnce(ChangeTransactionState.of(
@@ -385,7 +389,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     }
 
     @Test
-    public void whenAuthTransactionIsPending_ChangeTransactionStateISAdded() throws Exception {
+    public void whenAuthTransactionIsPending_ChangeTransactionStateToSuccessAdded() throws Exception {
         Payment paymentAuthPending = testHelper.dummyPaymentOneAuthPending20EuroCC();
         ImmutableList<UpdateAction<Payment>> authPendingUpdates = testee.createPaymentUpdates(paymentAuthPending, notification);
         assertThat(authPendingUpdates).containsOnlyOnce(ChangeTransactionState.of(
