@@ -22,6 +22,9 @@ public interface TransactionStateResolver {
      * During migration mode this "initial" phase expected to be {@link io.sphere.sdk.payments.TransactionState#PENDING}
      * or {@link io.sphere.sdk.payments.TransactionState#INITIAL}.
      *
+     * TODO: this method should be re-factored when full migration to <i>Initial</i> state is done. Search for
+     * "Initial/PendingFix" marker string in the sources to find out which tests/methods should be re-factored.
+     *
      * @param transaction transaction to verify
      * @return <b>true</b> if the transaction is in pending or initial state.
      */

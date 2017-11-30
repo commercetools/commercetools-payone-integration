@@ -29,6 +29,7 @@ public class TransactionStateResolverImplTest {
         when(transaction.getState()).thenReturn(INITIAL);
         assertThat(resolver.isNotCompletedTransaction(transaction)).isTrue();
 
+        //TODO: Initial/PendingFix - this case should fail after migration
         when(transaction.getState()).thenReturn(PENDING);
         assertThat(resolver.isNotCompletedTransaction(transaction)).isTrue();
 
