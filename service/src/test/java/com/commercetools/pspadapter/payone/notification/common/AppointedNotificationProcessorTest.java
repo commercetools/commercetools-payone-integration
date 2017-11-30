@@ -7,13 +7,14 @@ import com.commercetools.pspadapter.payone.notification.BaseNotificationProcesso
 import com.google.common.collect.ImmutableList;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.orders.PaymentState;
-import io.sphere.sdk.payments.*;
+import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.TransactionState;
+import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -27,10 +28,8 @@ import java.util.List;
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus.PENDING;
 import static io.sphere.sdk.payments.TransactionState.SUCCESS;
 import static io.sphere.sdk.payments.TransactionType.AUTHORIZATION;
-import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static util.UpdatePaymentTestHelper.*;
 
@@ -290,10 +289,16 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    public void mapsAppointedPendingToPendingAuthorizationTransaction() throws Exception {
-        // arrange
-        final Payment payment = testHelper.dummyPaymentOneAuthPending20EuroCC();
+    public void whenCurrentInitial_mapsAppointedPendingToPendingAuthorizationWithoutStateChange() throws Exception {
+        mapsAppointedPendingToPendingAuthorizationWithoutStateChange(testHelper.dummyPaymentOneAuthInitial20EuroCC(), TransactionState.INITIAL);
+    }
+
+    @Test
+    public void whenCurrentPending_mapsAppointedPendingToPendingAuthorizationWithoutStateChange() throws Exception {
+        mapsAppointedPendingToPendingAuthorizationWithoutStateChange(testHelper.dummyPaymentOneAuthPending20EuroCC(), TransactionState.PENDING);
+    }
+
+    private void mapsAppointedPendingToPendingAuthorizationWithoutStateChange(final Payment payment, final TransactionState currentState) throws Exception {
         notification.setTransactionStatus(PENDING);
 
         // act
@@ -314,11 +319,16 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    public void mapsAppointedCompletedToPendingAuthorizationTransactionAndChangesStateToSuccess() throws Exception {
-        // arrange
-        final Payment payment = testHelper.dummyPaymentOneAuthPending20EuroCC();
+    public void whenCurrentInitial_mapsAppointedCompletedToPendingSuccess() throws Exception {
+        mapsAppointedCompletedToPendingSuccess(testHelper.dummyPaymentOneAuthInitial20EuroCC(), TransactionState.INITIAL);
+    }
 
+    @Test
+    public void whenCurrentPending_mapsAppointedCompletedToPendingSuccess() throws Exception {
+        mapsAppointedCompletedToPendingSuccess(testHelper.dummyPaymentOneAuthPending20EuroCC(), TransactionState.PENDING);
+    }
+
+    private void mapsAppointedCompletedToPendingSuccess(final Payment payment, final TransactionState currentState) throws Exception {
         // act
         testee.processTransactionStatusNotification(notification, payment);
 
@@ -383,7 +393,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         Payment paymentAuthPending = testHelper.dummyPaymentOneAuthInitial20EuroCC();
         ImmutableList<UpdateAction<Payment>> authPendingUpdates = testee.createPaymentUpdates(paymentAuthPending, notification);
         assertThat(authPendingUpdates).containsOnlyOnce(ChangeTransactionState.of(
-                notification.getTransactionStatus().getCtTransactionState(), paymentAuthPending.getTransactions().get(0).getId()));
+                TransactionState.SUCCESS, paymentAuthPending.getTransactions().get(0).getId()));
 
         verify_isNotCompletedTransaction_called(TransactionState.INITIAL, AUTHORIZATION);
     }
@@ -393,7 +403,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
         Payment paymentAuthPending = testHelper.dummyPaymentOneAuthPending20EuroCC();
         ImmutableList<UpdateAction<Payment>> authPendingUpdates = testee.createPaymentUpdates(paymentAuthPending, notification);
         assertThat(authPendingUpdates).containsOnlyOnce(ChangeTransactionState.of(
-                notification.getTransactionStatus().getCtTransactionState(), paymentAuthPending.getTransactions().get(0).getId()));
+                TransactionState.SUCCESS, paymentAuthPending.getTransactions().get(0).getId()));
 
         verify_isNotCompletedTransaction_called(TransactionState.PENDING, AUTHORIZATION);
     }
