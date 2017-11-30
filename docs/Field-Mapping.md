@@ -362,23 +362,23 @@ For now all PAYONE notification we process expecting `notify_version == 7.5`.
 The matching transaction is found by sequencenumber = interactionId.
 > Please note, that in case of cancelation notification of an PAYONE authorization, the sequencenumber of the CT Chargeback can collide with the sequencenumber of the initial CT Charge (w/o CT Authorization) transaction.
 
-| PAYONE `txaction` | PAYONE `transaction_status` | CT `TransactionType` | CT `TransactionState` | Notes |
-|---|---|---|---|---|
-| **`appointed`** | **`pending`** |  **`Authorization`** (must be one and the first) |  **`Pending`** | create an **`Authorization`** if none there |
-| **`appointed`** | **`completed`** | **`Authorization`** (must be one and the first | **`Success`** | create an **`Authorization`** if none there |
-| **`appointed`** | **`completed`** | *NOT* **`Authorization`** | **`Pending`**  | |
-| **`capture`** | not set or **`completed`** | **`Charge`** | usually a **`paid`** follows separately (CT **`Pending`**), but on direct debit the **`capture`** already means money flow -> CT **`Success`** | create a **`Charge`** if none with matching sequencenumber there |
-| **`paid`** | not set or **`completed`** | **`Charge`** | **`Success`** | create a **`Charge`** if no matching one is found. Does not count up the sequence number |
-| **`underpaid`** | not set or **`completed`** | **`Charge`** | **`Pending`** | create a **`Charge`** if no matching one found |
-| **`cancelation`** | not set or **`completed`** | new **`Chargeback`** | **`Success`** | see 4.2.6 Sample: authorization, ELV with cancelation to derive formula for amount |
-| **`refund`** | not set or **`completed`** | **`Refund`** | **`Success`** | create a **`Refund`** if no matching one found. |
-| **`debit`** | not set or **`completed`** | **`Refund`** if receivable has decreased (Fee does not exist, yet) | **`Success`** if balance has decreased by the same amount, **`Pending`** otherwise | new **`Refund`** if no matching there |
-| **`transfer`** | not set or **`completed`** | (nothing) | (nothing) TODO Warnung reinschreiben, da auf anderen Kunden umgeschaltet.   | Transfer like in "switch" / "move to" another bank account |
-| **`reminder`** | not set or **`completed`** | (nothing) | (nothing) | status of dunning procedure |
-| **`vauthorization`** | not set or **`completed`** | (unsupported) | (unsupported) | only available with PAYONE Billing module, must be activated |
-| **`vsettlement`** | not set or **`completed`** | (unsupported) | (unsupported) | only available with PAYONE Billing module, must be activated |
-| **`invoice`** | not set or **`completed`** | (nothing) | (nothing) | no status change, just write the invoice ID / URL |
-| **`failed`** | not set or **`completed`** | (unsupported)  | (unsupported) | (not fully implemented at PAYONE yet) |
+| PAYONE `txaction` | PAYONE `transaction_status` | CT `TransactionType` | CT `TransactionState` | Notes | Miscellaneous |
+|---|---|---|---|---|---|
+| **`appointed`** | **`pending`** |  **`Authorization`** (must be single transaction in the list) |  **`Pending`** | create an **`Authorization`** if none there | |
+| **`appointed`** | **`completed`** | **`Authorization`** (must be single transaction in the list) | **`Success`** | create an **`Authorization`** if none there | It's important to save transaction **`Success`** state right after `appointed/completed` notification because in most of the shops the orders are created if the last Authorization/Charge transaction is success |
+| **`appointed`** | **`completed`** | *NOT* **`Authorization`** | **`Pending`**  | | |
+| **`capture`** | not set or **`completed`** | **`Charge`** | usually a **`paid`** follows separately (CT **`Pending`**), but on direct debit the **`capture`** already means money flow -> CT **`Success`** | create a **`Charge`** if none with matching sequencenumber there | |
+| **`paid`** | not set or **`completed`** | **`Charge`** | **`Success`** | create a **`Charge`** if no matching one is found. Does not count up the sequence number | |
+| **`underpaid`** | not set or **`completed`** | **`Charge`** | **`Pending`** | create a **`Charge`** if no matching one found | |
+| **`cancelation`** | not set or **`completed`** | new **`Chargeback`** | **`Success`** | see 4.2.6 Sample: authorization, ELV with cancelation to derive formula for amount | |
+| **`refund`** | not set or **`completed`** | **`Refund`** | **`Success`** | create a **`Refund`** if no matching one found. | |
+| **`debit`** | not set or **`completed`** | **`Refund`** if receivable has decreased (Fee does not exist, yet) | **`Success`** if balance has decreased by the same amount, **`Pending`** otherwise | new **`Refund`** if no matching there | |
+| **`transfer`** | not set or **`completed`** | (nothing) | (nothing) TODO Warnung reinschreiben, da auf anderen Kunden umgeschaltet.   | Transfer like in "switch" / "move to" another bank account | |
+| **`reminder`** | not set or **`completed`** | (nothing) | (nothing) | status of dunning procedure | |
+| **`vauthorization`** | not set or **`completed`** | (unsupported) | (unsupported) | only available with PAYONE Billing module, must be activated | |
+| **`vsettlement`** | not set or **`completed`** | (unsupported) | (unsupported) | only available with PAYONE Billing module, must be activated | |
+| **`invoice`** | not set or **`completed`** | (nothing) | (nothing) | no status change, just write the invoice ID / URL | |
+| **`failed`** | not set or **`completed`** | (unsupported)  | (unsupported) | (not fully implemented at PAYONE yet) | |
 
 # Unused / unsupported PAYONE fields & features
 
