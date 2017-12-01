@@ -72,6 +72,8 @@ public class PaymentMethodDispatcherTest {
 
     @Test
     public void callsDefaultExecutorWithPending() throws Exception {
+        // Initial/PendingFix: this should not be true after migrating to Initial state:
+        // Pending transactions should NOT call executor any more
         callsDefaultExecutorWithTransactionState(payments.dummyPaymentTwoTransactionsPending());
     }
 
@@ -90,6 +92,8 @@ public class PaymentMethodDispatcherTest {
 
     @Test
     public void callsCorrectExecutorForPending() throws Exception {
+        // Initial/PendingFix: this should not be true after migrating to Initial state:
+        // Pending transactions should NOT call executor any more
         callsCorrectExecutorForTransactionState(payments.dummyPaymentTwoTransactionsPending());
     }
 
@@ -118,6 +122,8 @@ public class PaymentMethodDispatcherTest {
 
     @Test
     public void callsSecondExecutorAfterFirstTransactionStateChangedFromPending() throws Exception {
+        // Initial/PendingFix: this should not be true after migrating to Initial state:
+        // Pending transactions should NOT call executor any more
         callsSecondExecutorAfterFirstTransactionStateChanged(payments.dummyPaymentTwoTransactionsPending(),
                 payments.dummyPaymentTwoTransactionsSuccessPending());
     }

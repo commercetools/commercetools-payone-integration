@@ -54,6 +54,7 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
         final String sequenceNumber = toSequenceNumber(notification.getSequencenumber());
 
         if (findMatchingTransaction(transactions, TransactionType.CHARGE, sequenceNumber).isPresent()) {
+            // https://github.com/commercetools/commercetools-payone-integration/issues/196
             return listBuilder.build();
         }
 

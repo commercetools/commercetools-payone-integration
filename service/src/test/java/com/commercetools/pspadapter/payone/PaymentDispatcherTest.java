@@ -76,6 +76,8 @@ public class PaymentDispatcherTest {
 
     @Test
     public void testDispatchCorrectlyWithPendingTransactions() throws Exception {
+        // Initial/PendingFix: this should not be true after migrating to Initial state:
+        // Pending transactions should NOT be dispatched any more
         verifyDispatchCallsProperMethods(payments.dummyPaymentTwoTransactionsPending(),
                 payments.dummyPaymentTwoTransactionsSuccessPending());
     }
