@@ -13,7 +13,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
-import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
@@ -25,6 +24,7 @@ import io.sphere.sdk.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.time.ZonedDateTime;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
@@ -41,13 +41,14 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
 
     private final PayoneRequestFactory requestFactory;
     private final PayonePostService payonePostService;
-    private final BlockingSphereClient client;
 
-    public BankTransferInAdvanceChargeTransactionExecutor(LoadingCache<String, Type> typeCache, PayoneRequestFactory requestFactory, PayonePostService payonePostService, BlockingSphereClient client) {
-        super(typeCache);
+    public BankTransferInAdvanceChargeTransactionExecutor(@Nonnull final LoadingCache<String, Type> typeCache,
+                                                          @Nonnull final PayoneRequestFactory requestFactory,
+                                                          @Nonnull final PayonePostService payonePostService,
+                                                          @Nonnull final BlockingSphereClient client) {
+        super(typeCache, client);
         this.requestFactory = requestFactory;
         this.payonePostService = payonePostService;
-        this.client = client;
     }
 
     @Override
@@ -160,8 +161,5 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
         }
     }
 
-    private PaymentWithCartLike update(PaymentWithCartLike paymentWithCartLike, Payment payment, ImmutableList<UpdateActionImpl<Payment>> updateActions) {
-        return paymentWithCartLike.withPayment(
-            client.executeBlocking(PaymentUpdateCommand.of(payment, updateActions)));
-    }
+
 }

@@ -1,15 +1,19 @@
 package com.commercetools.pspadapter.payone.transaction;
 
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseErrorCode;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.sphere.sdk.client.BlockingSphereClient;
+import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.json.SphereJsonUtils;
+import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
 import io.sphere.sdk.types.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -24,8 +28,12 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
 
     public static final String ERROR = "ERROR";
 
-    public TransactionBaseExecutor(LoadingCache<String, Type> typeCache) {
+    protected final BlockingSphereClient client;
+
+    public TransactionBaseExecutor(@Nonnull final LoadingCache<String, Type> typeCache,
+                                   @Nonnull final BlockingSphereClient client) {
         super(typeCache);
+        this.client = client;
     }
 
     /**
@@ -92,5 +100,10 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
                 ERROR_CODE, ResponseErrorCode.TRANSACTION_EXCEPTION.getErrorCode(),
                 ERROR_MESSAGE, "Integration Service Exception: " + exception.getMessage(),
                 CUSTOMER_MESSAGE, "Error on payment transaction processing."));
+    }
+
+    protected PaymentWithCartLike update(PaymentWithCartLike paymentWithCartLike, Payment payment, ImmutableList<UpdateActionImpl<Payment>> updateActions) {
+        return paymentWithCartLike.withPayment(
+                client.executeBlocking(PaymentUpdateCommand.of(payment, updateActions)));
     }
 }

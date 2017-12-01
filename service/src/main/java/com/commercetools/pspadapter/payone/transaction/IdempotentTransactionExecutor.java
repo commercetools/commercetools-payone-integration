@@ -9,6 +9,7 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.IntUnaryOperator;
@@ -25,7 +26,7 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
 
     private LoadingCache<String, Type> typeCache;
 
-    public IdempotentTransactionExecutor(final LoadingCache<String, Type> typeCache) {
+    public IdempotentTransactionExecutor(@Nonnull final LoadingCache<String, Type> typeCache) {
         this.typeCache = typeCache;
     }
 
