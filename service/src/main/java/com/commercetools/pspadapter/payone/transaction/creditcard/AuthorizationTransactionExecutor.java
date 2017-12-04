@@ -65,11 +65,6 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
     }
 
     @Override
-    protected PaymentWithCartLike attemptFirstExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        return attemptExecution(paymentWithCartLike, transaction);
-    }
-
-    @Override
     protected Optional<CustomFields> findLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
         return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_REQUEST)
             .filter(i -> transaction.getId().equals(i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))
@@ -90,8 +85,8 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
         return paymentWithCartLike;
     }
 
-    private PaymentWithCartLike attemptExecution(final PaymentWithCartLike paymentWithCartLike,
-                                                 final Transaction transaction) {
+    protected PaymentWithCartLike attemptExecution(final PaymentWithCartLike paymentWithCartLike,
+                                                   final Transaction transaction) {
         final String transactionId = transaction.getId();
         final String sequenceNumber = String.valueOf(getNextSequenceNumber(paymentWithCartLike));
 

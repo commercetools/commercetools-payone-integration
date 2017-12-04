@@ -71,11 +71,6 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
     }
 
     @Override
-    public PaymentWithCartLike attemptFirstExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        return attemptExecution(paymentWithCartLike, transaction);
-    }
-
-    @Override
     public Optional<CustomFields> findLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
         return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_REQUEST)
             .filter(i -> i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD).equals(transaction.getId()))
@@ -96,7 +91,8 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
         return paymentWithCartLike;
     }
 
-    private PaymentWithCartLike attemptExecution(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction) {
+    protected PaymentWithCartLike attemptExecution(final PaymentWithCartLike paymentWithCartLike,
+                                                   final Transaction transaction) {
         final String transactionId = transaction.getId();
         final int sequenceNumber = getNextSequenceNumber(paymentWithCartLike);
 

@@ -10,6 +10,7 @@ import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
@@ -35,6 +36,14 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
         super(typeCache);
         this.client = client;
     }
+
+    @Override
+    protected PaymentWithCartLike attemptFirstExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
+        return attemptExecution(paymentWithCartLike, transaction);
+    }
+
+    abstract protected PaymentWithCartLike attemptExecution(final PaymentWithCartLike paymentWithCartLike,
+                                                            final Transaction transaction);
 
     /**
      * Creates the SetStatusInterfaceCode from the response
