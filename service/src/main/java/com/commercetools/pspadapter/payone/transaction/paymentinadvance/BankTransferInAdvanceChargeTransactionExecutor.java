@@ -97,6 +97,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
     }
 
     private PaymentWithCartLike attemptExecution(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction) {
+        final String transactionId = transaction.getId();
         final int sequenceNumber = getNextSequenceNumber(paymentWithCartLike);
 
         final AuthorizationRequest request = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
@@ -106,9 +107,9 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
                 ImmutableList.of(
                         AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
                             ImmutableMap.of(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString(),
-                                    CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
+                                    CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                                     CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now())),
-                        ChangeTransactionInteractionId.of(String.valueOf(sequenceNumber), transaction.getId()))
+                        ChangeTransactionInteractionId.of(String.valueOf(sequenceNumber), transactionId))
             ));
 
         try {
@@ -118,7 +119,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
 
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                 ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
-                        CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
+                        CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                         CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now()));
 
             if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
@@ -127,7 +128,8 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
                         setStatusInterfaceCode(response),
                         setStatusInterfaceText(response),
                         SetInterfaceId.of(response.get("txid")),
-                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId()),
+                        ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
+                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId),
                         SetCustomField.ofObject(CustomFieldKeys.PAY_TO_BIC_FIELD, response.get("clearing_bankbic")),
                         SetCustomField.ofObject(CustomFieldKeys.PAY_TO_IBAN_FIELD, response.get("clearing_bankiban")),
                         SetCustomField.ofObject(CustomFieldKeys.PAY_TO_NAME_FIELD, response.get("clearing_bankaccountholder"))
@@ -137,12 +139,13 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
                         interfaceInteraction,
                         setStatusInterfaceCode(response),
                         setStatusInterfaceText(response),
-                        ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
-                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
+                        ChangeTransactionState.of(TransactionState.FAILURE, transactionId),
+                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId)
                 ));
             } else if (ResponseStatus.PENDING.getStateCode().equals(status)) {
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
+                        ChangeTransactionState.of(TransactionState.PENDING, transaction.getId()),
                         setStatusInterfaceCode(response),
                         setStatusInterfaceText(response),
                         SetInterfaceId.of(response.get("txid"))));
@@ -155,9 +158,12 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
 
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(pe),
-                            CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
+                            CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now()));
-            return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));
+
+            final ChangeTransactionState failureTransaction = ChangeTransactionState.of(TransactionState.FAILURE, transactionId);
+
+            return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction, failureTransaction));
         }
     }
 

@@ -90,7 +90,9 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
         return paymentWithCartLike;
     }
 
-    private PaymentWithCartLike attemptExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
+    private PaymentWithCartLike attemptExecution(final PaymentWithCartLike paymentWithCartLike,
+                                                 final Transaction transaction) {
+        final String transactionId = transaction.getId();
         final String sequenceNumber = String.valueOf(getNextSequenceNumber(paymentWithCartLike));
 
         final AuthorizationRequest request = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
@@ -100,9 +102,9 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                     ImmutableList.of(
                             AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
                                     ImmutableMap.of(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString() /* TODO */,
-                                            CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
+                                            CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */)),
-                            ChangeTransactionInteractionId.of(sequenceNumber, transaction.getId())
+                            ChangeTransactionInteractionId.of(sequenceNumber, transactionId)
                     )
             ));
 
@@ -114,10 +116,11 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
                             CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"),
-                            CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
+                            CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
+                        ChangeTransactionState.of(TransactionState.PENDING, transactionId),
                         setStatusInterfaceCode(response),
                         setStatusInterfaceText(response),
                         SetInterfaceId.of(response.get("txid")),
@@ -125,7 +128,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
             } else {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
-                            CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
+                            CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
 
                 if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
@@ -133,8 +136,8 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                             interfaceInteraction,
                             setStatusInterfaceCode(response),
                             setStatusInterfaceText(response),
-                            ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
-                            ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId()),
+                            ChangeTransactionState.of(TransactionState.SUCCESS, transactionId),
+                            ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId),
                             SetInterfaceId.of(response.get("txid"))
                     ));
                 } else if (ResponseStatus.ERROR.getStateCode().equals(status)) {
@@ -142,12 +145,13 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                             interfaceInteraction,
                             setStatusInterfaceCode(response),
                             setStatusInterfaceText(response),
-                            ChangeTransactionState.of(TransactionState.FAILURE, transaction.getId()),
-                            ChangeTransactionTimestamp.of(ZonedDateTime.now(), transaction.getId())
+                            ChangeTransactionState.of(TransactionState.FAILURE, transactionId),
+                            ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId)
                     ));
                 } else if (ResponseStatus.PENDING.getStateCode().equals(status)) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                             interfaceInteraction,
+                            ChangeTransactionState.of(TransactionState.PENDING, transaction.getId()),
                             setStatusInterfaceCode(response),
                             setStatusInterfaceText(response),
                             SetInterfaceId.of(response.get("txid"))));
@@ -161,9 +165,12 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
 
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(pe),
-                            CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
+                            CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
-            return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction));
+
+            final ChangeTransactionState failureTransaction = ChangeTransactionState.of(TransactionState.FAILURE, transactionId);
+
+            return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction, failureTransaction));
         }
     }
 }
