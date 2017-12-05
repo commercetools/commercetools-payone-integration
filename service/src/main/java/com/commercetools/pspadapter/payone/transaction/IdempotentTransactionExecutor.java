@@ -8,11 +8,11 @@ import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -96,22 +96,22 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
      * @return 0 if no notifications received yet, else the highest sequence number received + 1
      */
     protected int getNextSequenceNumber(final PaymentWithCartLike paymentWithCartLike) {
-        IntUnaryOperator increase = (x) -> x + 1;
         Predicate<String> isInteger = (i) -> i != null && i.matches("-?[0-9]+");
 
         return IntStream.concat(
             getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)
                 .map(f -> f.getFieldAsString(CustomFieldKeys.SEQUENCE_NUMBER_FIELD))
-                .filter(isInteger::test)
+                .filter(isInteger)
                 .mapToInt(Integer::parseInt),
             paymentWithCartLike
                 .getPayment()
                 .getTransactions()
                 .stream()
-                .filter(t -> isInteger.test(t.getInteractionId()))
-                .mapToInt(t -> Integer.parseInt(t.getInteractionId().trim()))
+                .map(t -> StringUtils.trim(t.getInteractionId()))
+                .filter(isInteger)
+                .mapToInt(Integer::parseInt)
         )
-        .map(increase)
+        .map(i -> i + 1)
         .max()
         .orElse(0);
     }
@@ -125,8 +125,6 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
                         .map(t -> getTypeCache().getUnchecked(t).toReference())
                         .anyMatch(t -> t.getId().equals(i.getType().getId())));
     }
-
-
 
     private LoadingCache<String, Type> getTypeCache() {
         return this.typeCache;

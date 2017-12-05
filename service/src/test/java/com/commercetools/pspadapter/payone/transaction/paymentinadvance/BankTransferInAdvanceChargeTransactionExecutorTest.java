@@ -1,9 +1,9 @@
-package com.commercetools.pspadapter.payone.transaction.common;
+package com.commercetools.pspadapter.payone.transaction.paymentinadvance;
 
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseErrorCode;
+import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvancePreautorizationRequest;
 import com.commercetools.pspadapter.payone.transaction.BaseTransactionBaseExecutorTest;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.TransactionState;
@@ -13,7 +13,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT;
 import static com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE;
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus.*;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -21,44 +20,28 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultChargeTransactionExecutorTest extends BaseTransactionBaseExecutorTest {
+public class BankTransferInAdvanceChargeTransactionExecutorTest extends BaseTransactionBaseExecutorTest {
 
-    private DefaultChargeTransactionExecutor executor;
+    private BankTransferInAdvanceChargeTransactionExecutor executor;
 
     @Mock
-    protected AuthorizationRequest authorizationRequest;
+    protected BankTransferInAdvancePreautorizationRequest preAuthorizationRequest;
+
 
     @Override
     @Before
     public void setUp() {
         super.setUp();
+        executor = new BankTransferInAdvanceChargeTransactionExecutor(typeCache, requestFactory, payonePostService, client);
 
-        executor = new DefaultChargeTransactionExecutor(typeCache, requestFactory, payonePostService, client);
-
-        when(authorizationRequest.toStringMap(anyBoolean())).thenReturn(ImmutableMap.of("testRequestKey1", "testRequestValue2",
+        when(preAuthorizationRequest.toStringMap(anyBoolean())).thenReturn(ImmutableMap.of("testRequestKey1", "testRequestValue2",
                 "testRequestKey2", "testRequestValue2"));
-        when(requestFactory.createAuthorizationRequest(paymentWithCartLike)).thenReturn(authorizationRequest);
-    }
-
-    @Test
-    public void attemptExecution_withRedirectResponse_createsUpdateActions() throws Exception {
-        when(payonePostService.executePost(authorizationRequest)).thenReturn(ImmutableMap.of(
-                PayoneResponseFields.STATUS, REDIRECT.getStateCode(),
-                PayoneResponseFields.REDIRECT, "http://mock-redirect.url",
-                PayoneResponseFields.TXID, "responseTxid"
-        ));
-        executor.attemptExecution(paymentWithCartLike, transaction);
-
-        assertRequestInterfaceInteraction(2);
-        assertRedirectActions(TransactionState.PENDING);
-        assertSetInterfaceIdActions();
-        assertRedirectAddInterfaceInteractionAction(PAYONE_INTERACTION_REDIRECT,
-                "http://mock-redirect.url", REDIRECT.getStateCode(), "responseTxid");
+        when(requestFactory.createPreauthorizationRequest(paymentWithCartLike)).thenReturn(preAuthorizationRequest);
     }
 
     @Test
     public void attemptExecution_withApprovedResponse_createsUpdateActions() throws Exception {
-        when(payonePostService.executePost(authorizationRequest)).thenReturn(ImmutableMap.of(
+        when(payonePostService.executePost(preAuthorizationRequest)).thenReturn(ImmutableMap.of(
                 PayoneResponseFields.STATUS, APPROVED.getStateCode(),
                 PayoneResponseFields.TXID, "responseTxid"
         ));
@@ -72,7 +55,7 @@ public class DefaultChargeTransactionExecutorTest extends BaseTransactionBaseExe
 
     @Test
     public void attemptExecution_withErrorResponse_createsUpdateActions() throws Exception {
-        when(payonePostService.executePost(authorizationRequest)).thenReturn(ImmutableMap.of(
+        when(payonePostService.executePost(preAuthorizationRequest)).thenReturn(ImmutableMap.of(
                 PayoneResponseFields.STATUS, ERROR.getStateCode(),
                 PayoneResponseFields.TXID, "responseTxid"
         ));
@@ -85,7 +68,7 @@ public class DefaultChargeTransactionExecutorTest extends BaseTransactionBaseExe
 
     @Test
     public void attemptExecution_withPendingResponse_createsUpdateActions() throws Exception {
-        when(payonePostService.executePost(authorizationRequest)).thenReturn(ImmutableMap.of(
+        when(payonePostService.executePost(preAuthorizationRequest)).thenReturn(ImmutableMap.of(
                 PayoneResponseFields.STATUS, PENDING.getStateCode(),
                 PayoneResponseFields.TXID, "responseTxid"
         ));
@@ -99,7 +82,7 @@ public class DefaultChargeTransactionExecutorTest extends BaseTransactionBaseExe
 
     @Test
     public void attemptExecution_withPayoneException_createsUpdateActions() throws Exception {
-        when(payonePostService.executePost(authorizationRequest)).thenThrow(new PayoneException("payone exception message"));
+        when(payonePostService.executePost(preAuthorizationRequest)).thenThrow(new PayoneException("payone exception message"));
 
         executor.attemptExecution(paymentWithCartLike, transaction);
 
@@ -110,10 +93,30 @@ public class DefaultChargeTransactionExecutorTest extends BaseTransactionBaseExe
                 "payone exception message", ERROR.getStateCode(), ResponseErrorCode.TRANSACTION_EXCEPTION.getErrorCode());
     }
 
+    /**
+     * For Bank Transfer Advanced redirect is not expected response - exception is expected.
+     * <p>
+     * TODO: https://github.com/commercetools/commercetools-payone-integration/issues/199
+     */
+    @Test
+    public void attemptExecution_withRedirectResponse_throwsException() throws Exception {
+        when(payonePostService.executePost(preAuthorizationRequest)).thenReturn(ImmutableMap.of(
+                PayoneResponseFields.STATUS, REDIRECT.getStateCode(),
+                PayoneResponseFields.REDIRECT, "http://mock-redirect.url",
+                PayoneResponseFields.TXID, "responseTxid"
+        ));
+
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> executor.attemptExecution(paymentWithCartLike, transaction))
+                .withMessageContaining("Unknown PayOne status");
+
+        assertRequestInterfaceInteraction(1);
+    }
+
     // TODO: https://github.com/commercetools/commercetools-payone-integration/issues/199
     @Test
     public void attemptExecution_withUnexpectedResponseStatus_throwsException() throws Exception {
-        when(payonePostService.executePost(authorizationRequest)).thenReturn(ImmutableMap.of(
+        when(payonePostService.executePost(preAuthorizationRequest)).thenReturn(ImmutableMap.of(
                 PayoneResponseFields.STATUS, "OH-NO-DAVID-BLAINE",
                 PayoneResponseFields.TXID, "responseTxid"
         ));
