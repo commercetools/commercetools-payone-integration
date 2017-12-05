@@ -5,6 +5,9 @@ public final class PayoneResponseFields {
     // most of requests have it
     public static final String STATUS = "status";
 
+
+    public static final String REDIRECT = "redirecturl";
+
     // in case of error response
     public static final String ERROR_CODE = "errorcode";
     public static final String CUSTOMER_MESSAGE = "customermessage";

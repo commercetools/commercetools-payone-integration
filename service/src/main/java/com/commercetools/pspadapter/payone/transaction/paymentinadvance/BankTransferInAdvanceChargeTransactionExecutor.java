@@ -147,6 +147,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
                         SetInterfaceId.of(response.get("txid"))));
             }
 
+            // TODO: https://github.com/commercetools/commercetools-payone-integration/issues/199
             throw new IllegalStateException("Unknown PayOne status");
         }
         catch (PayoneException pe) {

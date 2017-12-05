@@ -153,6 +153,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                 }
             }
 
+            // TODO: https://github.com/commercetools/commercetools-payone-integration/issues/199
             throw new IllegalStateException("Unknown PayOne status");
         }
         catch (PayoneException pe) {
