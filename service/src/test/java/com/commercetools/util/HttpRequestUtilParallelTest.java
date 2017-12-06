@@ -143,7 +143,7 @@ public class HttpRequestUtilParallelTest {
 
         assertThat(counter.get())
                 .withFailMessage(format("Incorrect number of finished requests: expected %d, executed %d. " +
-                        "See the standard error logs (stderr) for exceptions", counter.get(), nRequests))
+                        "Please see the standard error logs (stderr) for exceptions", counter.get(), nRequests))
                 .isEqualTo(nRequests);
     }
 
