@@ -42,7 +42,7 @@ public class DefaultChargeTransactionExecutorTest extends BaseTransactionBaseExe
     public void attemptExecution_withRedirectResponse_createsUpdateActions() throws Exception {
         when(payonePostService.executePost(authorizationRequest)).thenReturn(ImmutableMap.of(
                 PayoneResponseFields.STATUS, REDIRECT.getStateCode(),
-                PayoneResponseFields.REDIRECT, "http://mock-redirect.url",
+                PayoneResponseFields.REDIRECT_URL, "http://mock-redirect.url",
                 PayoneResponseFields.TXID, "responseTxid"
         ));
         executor.attemptExecution(paymentWithCartLike, transaction);

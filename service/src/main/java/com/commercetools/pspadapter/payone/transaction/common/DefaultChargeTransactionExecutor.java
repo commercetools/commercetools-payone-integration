@@ -119,7 +119,7 @@ public class DefaultChargeTransactionExecutor extends TransactionBaseExecutor {
             if (ResponseStatus.REDIRECT.getStateCode().equals(status)) {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
-                            CustomFieldKeys.REDIRECT_URL_FIELD, response.get(PayoneResponseFields.REDIRECT),
+                            CustomFieldKeys.REDIRECT_URL_FIELD, response.get(PayoneResponseFields.REDIRECT_URL),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
@@ -128,7 +128,7 @@ public class DefaultChargeTransactionExecutor extends TransactionBaseExecutor {
                         setStatusInterfaceCode(response),
                         setStatusInterfaceText(response),
                         SetInterfaceId.of(response.get(TXID)),
-                        SetCustomField.ofObject(CustomFieldKeys.REDIRECT_URL_FIELD, response.get(PayoneResponseFields.REDIRECT))));
+                        SetCustomField.ofObject(CustomFieldKeys.REDIRECT_URL_FIELD, response.get(PayoneResponseFields.REDIRECT_URL))));
             } else {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),

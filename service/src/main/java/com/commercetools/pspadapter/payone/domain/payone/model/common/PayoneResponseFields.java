@@ -5,8 +5,7 @@ public final class PayoneResponseFields {
     // most of requests have it
     public static final String STATUS = "status";
 
-    // TODO: rename to REDIRECT_URL
-    public static final String REDIRECT = "redirecturl";
+    public static final String REDIRECT_URL = "redirecturl";
 
     // in case of error response
     public static final String ERROR_CODE = "errorcode";

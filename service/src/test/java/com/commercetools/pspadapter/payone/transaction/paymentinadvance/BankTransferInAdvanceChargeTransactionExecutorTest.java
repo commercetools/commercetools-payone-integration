@@ -97,7 +97,7 @@ public class BankTransferInAdvanceChargeTransactionExecutorTest extends BaseTran
     public void attemptExecution_withRedirectResponse_throwsException() throws Exception {
         when(payonePostService.executePost(preAuthorizationRequest)).thenReturn(ImmutableMap.of(
                 PayoneResponseFields.STATUS, REDIRECT.getStateCode(),
-                PayoneResponseFields.REDIRECT, "http://mock-redirect.url",
+                PayoneResponseFields.REDIRECT_URL, "http://mock-redirect.url",
                 PayoneResponseFields.TXID, "responseTxid"
         ));
 
