@@ -35,24 +35,28 @@ public class HttpRequestUtilParallelTest {
 
     @Test
     public void executeGetRequest_shouldBeParalleled() throws Exception {
-        makeAndAssertParallelRequests(nThreads, nRequests, createRequestsSupplier(
-                () -> executeGetRequest(HTTP_HTTPBIN_ORG_GET),
-                // in get requests asserted only response status
-                httpResponse -> assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_OK)));
+        ExceptionalSupplier<HttpResponse> getRequestSupplier = () -> executeGetRequest(HTTP_HTTPBIN_ORG_GET);
+
+        // in get requests asserted only response status
+        ExceptionalConsumer<HttpResponse> getResponseAssertor =
+                httpResponse -> assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_OK);
+
+        makeAndAssertParallelRequests(nThreads, nRequests, createRequestsValidator(getRequestSupplier, getResponseAssertor));
     }
 
     @Test
     public void executePostRequest_shouldBeParalleled() throws Exception {
-        makeAndAssertParallelRequests(nThreads, nRequests, createRequestsSupplier(
-                () -> executePostRequest(HTTP_HTTPBIN_ORG_POST, asList(
-                        nameValue("xxx", "yyy"),
-                        nameValue("zzz", 11223344))),
-                // in post requests asserted status and body
-                httpResponse -> {
-                    assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_OK);
-                    assertThat(responseToString(httpResponse)).contains("xxx", "yyy", "zzz", "11223344");
-                }
-        ));
+        ExceptionalSupplier<HttpResponse> postRequestSupplier = () -> executePostRequest(HTTP_HTTPBIN_ORG_POST, asList(
+                nameValue("xxx", "yyy"),
+                nameValue("zzz", 11223344)));
+
+        // in post requests asserted status and body
+        ExceptionalConsumer<HttpResponse> postResponseAssertor = httpResponse -> {
+            assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_OK);
+            assertThat(responseToString(httpResponse)).contains("xxx", "yyy", "zzz", "11223344");
+        };
+
+        makeAndAssertParallelRequests(nThreads, nRequests, createRequestsValidator(postRequestSupplier, postResponseAssertor));
     }
 
     /**
@@ -68,8 +72,8 @@ public class HttpRequestUtilParallelTest {
      * @param responseAssertConsumer procedure to assert the response obtained from {@code responseSupplier}
      * @return new supplier which when finished successfully - returns <b>1</b>, otherwise - <b>0</b>.
      */
-    private Supplier<Integer> createRequestsSupplier(final ExceptionalSupplier<HttpResponse> responseSupplier,
-                                                     final ExceptionalConsumer<HttpResponse> responseAssertConsumer) {
+    private Supplier<Integer> createRequestsValidator(final ExceptionalSupplier<HttpResponse> responseSupplier,
+                                                      final ExceptionalConsumer<HttpResponse> responseAssertConsumer) {
         return () -> {
             try {
                 int statusCode;
@@ -109,19 +113,19 @@ public class HttpRequestUtilParallelTest {
      * from {@code requestSupplier}. At the end assert that all {@code nRequests} finished successfully, i.e.
      * exception or timeout not happened.
      *
-     * @param nThreads        number of parallel requests/threads
-     * @param nRequests       total number of requests to execute
-     * @param requestSupplier requests generator: generated requests return <b>1</b> if finished successfully or
-     *                        <b>0</b> otherwise
+     * @param nThreads         number of parallel requests/threads
+     * @param nRequests        total number of requests to execute
+     * @param requestValidator requests validator: generates request, validate response  and return <b>1</b> if
+     *                         the request is finished successfully or <b>0</b> otherwise
      * @throws Exception in case of thread pool exceptions
      */
     private void makeAndAssertParallelRequests(final int nThreads, final int nRequests,
-                                               final Supplier<Integer> requestSupplier) throws Exception {
+                                               final Supplier<Integer> requestValidator) throws Exception {
         final ExecutorService newFixedThreadPool = Executors.newFixedThreadPool(nThreads);
 
         final AtomicInteger counter = new AtomicInteger(0);
         for (int i = 0; i < nRequests; i++) {
-            newFixedThreadPool.execute(() -> counter.addAndGet(requestSupplier.get()));
+            newFixedThreadPool.execute(() -> counter.addAndGet(requestValidator.get()));
         }
 
         newFixedThreadPool.shutdown();
