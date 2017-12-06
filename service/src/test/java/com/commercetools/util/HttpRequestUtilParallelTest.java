@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import static com.commercetools.util.HttpRequestUtil.*;
+import static com.commercetools.util.HttpRequestUtilTest.*;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.apache.http.HttpStatus.SC_REQUEST_TIMEOUT;
@@ -35,7 +36,7 @@ public class HttpRequestUtilParallelTest {
     @Test
     public void executeGetRequest_shouldBeParalleled() throws Exception {
         makeAndAssertParallelRequests(nThreads, nRequests, createRequestsSupplier(
-                () -> executeGetRequest("http://httpbin.org/get"),
+                () -> executeGetRequest(HTTP_HTTPBIN_ORG_GET),
                 // in get requests asserted only response status
                 httpResponse -> assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_OK)));
     }
@@ -43,7 +44,7 @@ public class HttpRequestUtilParallelTest {
     @Test
     public void executePostRequest_shouldBeParalleled() throws Exception {
         makeAndAssertParallelRequests(nThreads, nRequests, createRequestsSupplier(
-                () -> executePostRequest("http://httpbin.org/post", asList(
+                () -> executePostRequest(HTTP_HTTPBIN_ORG_POST, asList(
                         nameValue("xxx", "yyy"),
                         nameValue("zzz", 11223344))),
                 // in post requests asserted status and body
@@ -77,7 +78,7 @@ public class HttpRequestUtilParallelTest {
                 do {
                     if (repeatedTimes > 0) {
                         LOGGER.warn("{} \"Request Timeout\" received from [{}]. Retry {} of {} ...",
-                                SC_REQUEST_TIMEOUT, "http://httpbin.org/", repeatedTimes, RETRY_TIMES);
+                                SC_REQUEST_TIMEOUT, HTTP_HTTPBIN_ORG, repeatedTimes, RETRY_TIMES);
                     }
                     httpResponse = responseSupplier.get();
                     statusCode = httpResponse.getStatusLine().getStatusCode();
