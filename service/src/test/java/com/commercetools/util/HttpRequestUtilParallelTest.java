@@ -30,11 +30,11 @@ public class HttpRequestUtilParallelTest {
 
     // try to make 200 simultaneous requests in 200 threads
     private final int nThreads = CONNECTION_MAX_TOTAL;
-    private final int requests = CONNECTION_MAX_TOTAL;
+    private final int nRequests = CONNECTION_MAX_TOTAL;
 
     @Test
     public void executeGetRequest_shouldBeParalleled() throws Exception {
-        makeAndAssertParallelRequests(nThreads, requests, createRequestsSupplier(
+        makeAndAssertParallelRequests(nThreads, nRequests, createRequestsSupplier(
                 () -> executeGetRequest("http://httpbin.org/get"),
                 // in get requests asserted only response status
                 httpResponse -> assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_OK)));
@@ -42,7 +42,7 @@ public class HttpRequestUtilParallelTest {
 
     @Test
     public void executePostRequest_shouldBeParalleled() throws Exception {
-        makeAndAssertParallelRequests(nThreads, requests, createRequestsSupplier(
+        makeAndAssertParallelRequests(nThreads, nRequests, createRequestsSupplier(
                 () -> executePostRequest("http://httpbin.org/post", asList(
                         nameValue("xxx", "yyy"),
                         nameValue("zzz", 11223344))),
@@ -104,22 +104,22 @@ public class HttpRequestUtilParallelTest {
     }
 
     /**
-     * Execute and count {@code requestsNumber} simultaneous (parallel) requests in {@code nThreads} generating them
-     * from {@code requestSupplier}. At the end assert that all {@code requestsNumber} finished successfully, i.e.
+     * Execute and count {@code nRequests} simultaneous (parallel) requests in {@code nThreads} generating them
+     * from {@code requestSupplier}. At the end assert that all {@code nRequests} finished successfully, i.e.
      * exception or timeout not happened.
      *
      * @param nThreads        number of parallel requests/threads
-     * @param requestsNumber  total number of requests to execute
+     * @param nRequests       total number of requests to execute
      * @param requestSupplier requests generator: generated requests return <b>1</b> if finished successfully or
      *                        <b>0</b> otherwise
      * @throws Exception in case of thread pool exceptions
      */
-    private void makeAndAssertParallelRequests(final int nThreads, final int requestsNumber,
+    private void makeAndAssertParallelRequests(final int nThreads, final int nRequests,
                                                final Supplier<Integer> requestSupplier) throws Exception {
         final ExecutorService newFixedThreadPool = Executors.newFixedThreadPool(nThreads);
 
         final AtomicInteger counter = new AtomicInteger(0);
-        for (int i = 0; i < requestsNumber; i++) {
+        for (int i = 0; i < nRequests; i++) {
             newFixedThreadPool.execute(() -> counter.addAndGet(requestSupplier.get()));
         }
 
@@ -127,7 +127,7 @@ public class HttpRequestUtilParallelTest {
 
         // length of the longest pipe in the multi thread pipeline,
         // literally it is an maximum integer number of sequential requests in one pipe (thread)
-        final int criticalPathLength = (int) Math.ceil((double) requestsNumber / nThreads);
+        final int criticalPathLength = (int) Math.ceil((double) nRequests / nThreads);
 
         // longest expected time of one successful request (even if retried),
         // which may have +RETRY_TIMES attempts additionally to the first (failed) attempt
@@ -143,8 +143,8 @@ public class HttpRequestUtilParallelTest {
 
         assertThat(counter.get())
                 .withFailMessage(format("Incorrect number of finished requests: expected %d, executed %d. " +
-                        "See the standard error logs (stderr) for exceptions", counter.get(), requestsNumber))
-                .isEqualTo(requestsNumber);
+                        "See the standard error logs (stderr) for exceptions", counter.get(), nRequests))
+                .isEqualTo(nRequests);
     }
 
     @FunctionalInterface
