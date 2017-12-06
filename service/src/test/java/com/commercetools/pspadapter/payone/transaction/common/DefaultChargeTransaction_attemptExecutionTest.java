@@ -2,7 +2,7 @@ package com.commercetools.pspadapter.payone.transaction.common;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields;
-import com.commercetools.pspadapter.payone.transaction.BaseTransactionBaseExecutorTest;
+import com.commercetools.pspadapter.payone.transaction.BaseTransaction_attemptExecutionTest;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.TransactionState;
 import org.junit.Before;
@@ -19,7 +19,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultChargeTransactionExecutorTest extends BaseTransactionBaseExecutorTest {
+public class DefaultChargeTransaction_attemptExecutionTest extends BaseTransaction_attemptExecutionTest {
 
     private DefaultChargeTransactionExecutor executor;
 

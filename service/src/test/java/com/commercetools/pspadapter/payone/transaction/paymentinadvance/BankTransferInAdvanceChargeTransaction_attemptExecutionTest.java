@@ -3,7 +3,7 @@ package com.commercetools.pspadapter.payone.transaction.paymentinadvance;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields;
 import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvancePreautorizationRequest;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.commercetools.pspadapter.payone.transaction.BaseTransactionBaseExecutorTest;
+import com.commercetools.pspadapter.payone.transaction.BaseTransaction_attemptExecutionTest;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
@@ -23,7 +23,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BankTransferInAdvanceChargeTransactionExecutorTest extends BaseTransactionBaseExecutorTest {
+public class BankTransferInAdvanceChargeTransaction_attemptExecutionTest extends BaseTransaction_attemptExecutionTest {
 
     private BankTransferInAdvanceChargeTransactionExecutor executor;
 

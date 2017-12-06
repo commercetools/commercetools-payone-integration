@@ -46,7 +46,7 @@ import static org.mockito.Mockito.*;
 /**
  * Base class/methods for testing/asserting transaction executors.
  */
-public class BaseTransactionBaseExecutorTest {
+public class BaseTransaction_attemptExecutionTest {
     @Mock
     protected LoadingCache<String, Type> typeCache;
 
