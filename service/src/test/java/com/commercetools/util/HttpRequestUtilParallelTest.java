@@ -96,7 +96,7 @@ public class HttpRequestUtilParallelTest {
                 responseAssertConsumer.accept(httpResponse);
                 return 1;
             } catch (Exception e) {
-                LOGGER.error("Request exception: {}", e.toString());
+                LOGGER.error("Request exception: ", e);
             }
 
             return 0;
