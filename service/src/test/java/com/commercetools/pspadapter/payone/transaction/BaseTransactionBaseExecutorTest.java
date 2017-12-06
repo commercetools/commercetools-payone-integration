@@ -2,11 +2,17 @@ package com.commercetools.pspadapter.payone.transaction;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
+import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.BaseRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseErrorCode;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
@@ -29,11 +35,11 @@ import java.util.List;
 import java.util.Map;
 
 import static com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder.PAYONE_INTERACTION_REQUEST;
-import static com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus.REDIRECT;
+import static com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus.*;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.*;
 import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -90,6 +96,73 @@ public class BaseTransactionBaseExecutorTest {
         when(client.executeBlocking(any())).thenReturn(updatedPayment);
 
         when(transaction.getId()).thenReturn("transaction-mock-id");
+    }
+
+    /**
+     * Common test for {@link ResponseStatus#ERROR} from Payone.
+     */
+    protected void attemptExecution_withErrorResponse_createsUpdateActions(final BaseRequest request,
+                                                                           final TransactionBaseExecutor executor) throws Exception {
+        when(payonePostService.executePost(request)).thenReturn(ImmutableMap.of(
+                PayoneResponseFields.STATUS, ERROR.getStateCode(),
+                PayoneResponseFields.TXID, "responseTxid"
+        ));
+        executor.attemptExecution(paymentWithCartLike, transaction);
+
+        assertRequestInterfaceInteraction(2);
+        assertChangeTransactionStateActions(TransactionState.FAILURE);
+        assertCommonAddInterfaceInteractionAction(PAYONE_INTERACTION_RESPONSE, "responseTxid", ERROR.getStateCode());
+    }
+
+    /**
+     * Common test for {@link ResponseStatus#PENDING} from Payone.
+     */
+    protected void attemptExecution_withPendingResponse_createsUpdateActions(final BaseRequest request,
+                                                                             final TransactionBaseExecutor executor) throws Exception {
+        when(payonePostService.executePost(request)).thenReturn(ImmutableMap.of(
+                PayoneResponseFields.STATUS, PENDING.getStateCode(),
+                PayoneResponseFields.TXID, "responseTxid"
+        ));
+        executor.attemptExecution(paymentWithCartLike, transaction);
+
+        assertRequestInterfaceInteraction(2);
+        assertChangeTransactionStateActions(TransactionState.PENDING);
+        assertSetInterfaceIdActions();
+        assertCommonAddInterfaceInteractionAction(PAYONE_INTERACTION_RESPONSE, "responseTxid", PENDING.getStateCode());
+    }
+
+    /**
+     * Common test for case when {@link #payonePostService} throws an exception on execution.
+     */
+    protected void attemptExecution_withPayoneException_createsUpdateActions(final BaseRequest request,
+                                                                             final TransactionBaseExecutor executor) throws Exception {
+        when(payonePostService.executePost(request)).thenThrow(new PayoneException("payone exception message"));
+
+        executor.attemptExecution(paymentWithCartLike, transaction);
+
+        assertRequestInterfaceInteraction(2);
+        assertChangeTransactionStateActions(TransactionState.FAILURE);
+        assertCommonAddInterfaceInteractionAction(PAYONE_INTERACTION_RESPONSE,
+                // opposite to other branches we don't expect to have txid here
+                "payone exception message", ERROR.getStateCode(), ResponseErrorCode.TRANSACTION_EXCEPTION.getErrorCode());
+    }
+
+    /**
+     * TODO: should be re-factored when https://github.com/commercetools/commercetools-payone-integration/issues/199
+     * is fixed.
+     */
+    protected void attemptExecution_withUnexpectedResponseStatus_throwsException(final BaseRequest request,
+                                                                                 final TransactionBaseExecutor executor) throws Exception {
+        when(payonePostService.executePost(request)).thenReturn(ImmutableMap.of(
+                PayoneResponseFields.STATUS, "OH-NO-DAVID-BLAINE",
+                PayoneResponseFields.TXID, "responseTxid"
+        ));
+
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> executor.attemptExecution(paymentWithCartLike, transaction))
+                .withMessageContaining("Unknown PayOne status");
+
+        assertRequestInterfaceInteraction(1);
     }
 
     protected void assertChangeTransactionStateActions(final TransactionState expectedTransactionState) {

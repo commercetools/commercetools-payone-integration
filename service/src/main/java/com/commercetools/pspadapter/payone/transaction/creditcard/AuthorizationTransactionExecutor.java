@@ -30,6 +30,8 @@ import java.util.ConcurrentModificationException;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
+
 public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationTransactionExecutor.class);
@@ -106,11 +108,11 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
         try {
             final Map<String, String> response = payonePostService.executePost(request);
 
-            final String status = response.get("status");
+            final String status = response.get(STATUS);
             if (ResponseStatus.REDIRECT.getStateCode().equals(status)) {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
-                            CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"),
+                            CustomFieldKeys.REDIRECT_URL_FIELD, response.get(REDIRECT),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
@@ -118,8 +120,8 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                         ChangeTransactionState.of(TransactionState.PENDING, transactionId),
                         setStatusInterfaceCode(response),
                         setStatusInterfaceText(response),
-                        SetInterfaceId.of(response.get("txid")),
-                        SetCustomField.ofObject(CustomFieldKeys.REDIRECT_URL_FIELD, response.get("redirecturl"))));
+                        SetInterfaceId.of(response.get(TXID)),
+                        SetCustomField.ofObject(CustomFieldKeys.REDIRECT_URL_FIELD, response.get(REDIRECT))));
             } else {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                     ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
@@ -133,7 +135,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                             setStatusInterfaceText(response),
                             ChangeTransactionState.of(TransactionState.SUCCESS, transactionId),
                             ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId),
-                            SetInterfaceId.of(response.get("txid"))
+                            SetInterfaceId.of(response.get(TXID))
                     ));
                 } else if (ResponseStatus.ERROR.getStateCode().equals(status)) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
@@ -149,7 +151,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                             ChangeTransactionState.of(TransactionState.PENDING, transaction.getId()),
                             setStatusInterfaceCode(response),
                             setStatusInterfaceText(response),
-                            SetInterfaceId.of(response.get("txid"))));
+                            SetInterfaceId.of(response.get(TXID))));
                 }
             }
 

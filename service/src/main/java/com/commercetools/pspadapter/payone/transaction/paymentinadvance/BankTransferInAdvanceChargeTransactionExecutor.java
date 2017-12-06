@@ -30,6 +30,8 @@ import java.util.ConcurrentModificationException;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
+
 /**
  * Responsible to create the PayOne Request (PreAuthorization) and check if answer is approved or Error
  * @author mht@dotsource.de
@@ -111,7 +113,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
         try {
             final Map<String, String> response = payonePostService.executePost(request);
 
-            final String status = response.get("status");
+            final String status = response.get(STATUS);
 
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                 ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
@@ -123,12 +125,12 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
                         interfaceInteraction,
                         setStatusInterfaceCode(response),
                         setStatusInterfaceText(response),
-                        SetInterfaceId.of(response.get("txid")),
-                        ChangeTransactionState.of(TransactionState.SUCCESS, transaction.getId()),
+                        SetInterfaceId.of(response.get(TXID)),
+                        ChangeTransactionState.of(TransactionState.SUCCESS, transactionId),
                         ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId),
-                        SetCustomField.ofObject(CustomFieldKeys.PAY_TO_BIC_FIELD, response.get("clearing_bankbic")),
-                        SetCustomField.ofObject(CustomFieldKeys.PAY_TO_IBAN_FIELD, response.get("clearing_bankiban")),
-                        SetCustomField.ofObject(CustomFieldKeys.PAY_TO_NAME_FIELD, response.get("clearing_bankaccountholder"))
+                        SetCustomField.ofObject(CustomFieldKeys.PAY_TO_BIC_FIELD, response.get(BIC)),
+                        SetCustomField.ofObject(CustomFieldKeys.PAY_TO_IBAN_FIELD, response.get(IBAN)),
+                        SetCustomField.ofObject(CustomFieldKeys.PAY_TO_NAME_FIELD, response.get(ACCOUNT_HOLDER))
                 ));
             } else if (ResponseStatus.ERROR.getStateCode().equals(status)) {
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
@@ -141,10 +143,10 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
             } else if (ResponseStatus.PENDING.getStateCode().equals(status)) {
                 return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                         interfaceInteraction,
-                        ChangeTransactionState.of(TransactionState.PENDING, transaction.getId()),
+                        ChangeTransactionState.of(TransactionState.PENDING, transactionId),
                         setStatusInterfaceCode(response),
                         setStatusInterfaceText(response),
-                        SetInterfaceId.of(response.get("txid"))));
+                        SetInterfaceId.of(response.get(TXID))));
             }
 
             // TODO: https://github.com/commercetools/commercetools-payone-integration/issues/199

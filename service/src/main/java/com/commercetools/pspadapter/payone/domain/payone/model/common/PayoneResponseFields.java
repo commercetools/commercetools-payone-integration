@@ -5,7 +5,7 @@ public final class PayoneResponseFields {
     // most of requests have it
     public static final String STATUS = "status";
 
-
+    // TODO: rename to REDIRECT_URL
     public static final String REDIRECT = "redirecturl";
 
     // in case of error response
@@ -14,6 +14,11 @@ public final class PayoneResponseFields {
     public static final String ERROR_MESSAGE = "errormessage";
 
     public static final String TXID = "txid";
+
+    // bank transfer fields
+    public static final String BIC = "clearing_bankbic";
+    public static final String IBAN = "clearing_bankiban";
+    public static final String ACCOUNT_HOLDER = "clearing_bankaccountholder";
 
     private PayoneResponseFields() {
     }
