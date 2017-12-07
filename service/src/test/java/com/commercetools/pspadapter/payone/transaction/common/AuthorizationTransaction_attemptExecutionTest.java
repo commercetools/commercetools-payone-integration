@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.transaction.creditcard;
+package com.commercetools.pspadapter.payone.transaction.common;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.transaction.BaseTransaction_attemptExecutionTest;

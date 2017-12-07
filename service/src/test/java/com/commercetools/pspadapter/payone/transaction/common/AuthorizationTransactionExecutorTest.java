@@ -1,8 +1,4 @@
-package com.commercetools.pspadapter.payone.transaction.creditcard;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
+package com.commercetools.pspadapter.payone.transaction.common;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
@@ -26,6 +22,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 
 /**

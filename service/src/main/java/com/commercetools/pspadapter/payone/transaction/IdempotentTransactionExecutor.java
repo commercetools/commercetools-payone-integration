@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 /**
  * Idempotently executes a Transaction of one Type (e.g. Charge) for a specific PaymentWithCartLike Method.
- *
+ * <p>
  * If no Transaction of that type in State Pending exists, the same PaymentWithCartLike is returned.
  */
 public abstract class IdempotentTransactionExecutor implements TransactionExecutor {
@@ -33,17 +33,23 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
     /**
      * @return The Type that is supported.
      */
+    @Nonnull
     public abstract TransactionType supportedTransactionType();
 
     /**
      * Executes a transaction idempotently.
-     * @param paymentWithCartLike
-     * @param transaction
+     *
+     * @param paymentWithCartLike payment/cart, for which transaction is executed
+     * @param transaction         transaction to execute
      * @return A new version of the PaymentWithCartLike.
      */
     @Override
-    public PaymentWithCartLike executeTransaction(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        if (transaction.getType() != supportedTransactionType()) throw new IllegalArgumentException("Unsupported Transaction Type");
+    @Nonnull
+    public PaymentWithCartLike executeTransaction(@Nonnull PaymentWithCartLike paymentWithCartLike,
+                                                  @Nonnull Transaction transaction) {
+        if (transaction.getType() != supportedTransactionType()) {
+            throw new IllegalArgumentException("Unsupported Transaction Type");
+        }
 
         if (wasExecuted(paymentWithCartLike, transaction)) return paymentWithCartLike;
 
@@ -55,11 +61,12 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
     /**
      * Whether the transaction was executed and nothing else can be done by the executor.
      *
-     * @param paymentWithCartLike
-     * @param transaction
-     * @return
+     * @param paymentWithCartLike payment/cart, which has to be verified
+     * @param transaction         transaction, which has to be verified
+     * @return <b>true</b> if transaction has been already executed
      */
     protected abstract boolean wasExecuted(PaymentWithCartLike paymentWithCartLike, Transaction transaction);
+
     /**
      * Tries to execute the transaction for the first time.
      * To ensure Idempotency, an InterfaceInteraction is first added to the PaymentWithCartLike that can be found later.
@@ -87,7 +94,9 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
      * @param lastExecutionAttempt
      * @return A new version of the PaymentWithCartLike.
      */
-    protected abstract PaymentWithCartLike retryLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction, CustomFields lastExecutionAttempt);
+    protected abstract PaymentWithCartLike retryLastExecutionAttempt(@Nonnull PaymentWithCartLike paymentWithCartLike,
+                                                                     @Nonnull Transaction transaction,
+                                                                     @Nonnull CustomFields lastExecutionAttempt);
 
     /**
      * Determines the next sequence number to use from already received notifications.

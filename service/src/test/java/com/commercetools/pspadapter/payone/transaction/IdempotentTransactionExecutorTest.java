@@ -1,9 +1,5 @@
 package com.commercetools.pspadapter.payone.transaction;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
@@ -25,8 +21,14 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author fhaertig
@@ -132,8 +134,11 @@ public class IdempotentTransactionExecutorTest {
         }
 
         @Override
-        protected PaymentWithCartLike retryLastExecutionAttempt(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction, final CustomFields lastExecutionAttempt) {
-            return null;
+        @Nonnull
+        protected PaymentWithCartLike retryLastExecutionAttempt(@Nonnull final PaymentWithCartLike paymentWithCartLike,
+                                                                @Nonnull final Transaction transaction,
+                                                                @Nonnull final CustomFields lastExecutionAttempt) {
+            return mock(PaymentWithCartLike.class);
         }
     }
 

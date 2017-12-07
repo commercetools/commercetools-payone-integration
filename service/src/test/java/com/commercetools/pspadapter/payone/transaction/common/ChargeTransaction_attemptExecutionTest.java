@@ -13,9 +13,9 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultChargeTransaction_attemptExecutionTest extends BaseTransaction_attemptExecutionTest {
+public class ChargeTransaction_attemptExecutionTest extends BaseTransaction_attemptExecutionTest {
 
-    private DefaultChargeTransactionExecutor executor;
+    private ChargeTransactionExecutor executor;
 
     @Mock
     protected AuthorizationRequest authorizationRequest;
@@ -25,7 +25,7 @@ public class DefaultChargeTransaction_attemptExecutionTest extends BaseTransacti
     public void setUp() {
         super.setUp();
 
-        executor = new DefaultChargeTransactionExecutor(typeCache, requestFactory, payonePostService, client);
+        executor = new ChargeTransactionExecutor(typeCache, requestFactory, payonePostService, client);
 
         when(authorizationRequest.toStringMap(anyBoolean())).thenReturn(ImmutableMap.of("testRequestKey1", "testRequestValue2",
                 "testRequestKey2", "testRequestValue2"));

@@ -21,9 +21,9 @@ import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.common.*;
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
-import com.commercetools.pspadapter.payone.transaction.common.DefaultChargeTransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.common.ChargeTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.UnsupportedTransactionExecutor;
-import com.commercetools.pspadapter.payone.transaction.creditcard.AuthorizationTransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.common.AuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.paymentinadvance.BankTransferInAdvanceChargeTransactionExecutor;
 import com.commercetools.service.OrderService;
 import com.commercetools.service.OrderServiceImpl;
@@ -250,7 +250,7 @@ public class TenantFactory {
                     case BANK_TRANSFER_ADVANCE:
                         return new BankTransferInAdvanceChargeTransactionExecutor(typeCache, requestFactory, postService, client);
                     default:
-                        return new DefaultChargeTransactionExecutor(typeCache, requestFactory, postService, client);
+                        return new ChargeTransactionExecutor(typeCache, requestFactory, postService, client);
                 }
             case REFUND:
                 break;

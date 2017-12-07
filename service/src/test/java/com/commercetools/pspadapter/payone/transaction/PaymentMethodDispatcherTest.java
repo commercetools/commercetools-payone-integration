@@ -10,6 +10,7 @@ import io.sphere.sdk.payments.TransactionType;
 import org.junit.Test;
 import util.PaymentTestHelper;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.CompletionException;
 
 import static java.lang.String.format;
@@ -30,7 +31,9 @@ public class PaymentMethodDispatcherTest {
             int count = 0;
 
             @Override
-            public PaymentWithCartLike executeTransaction(PaymentWithCartLike payment, Transaction transaction) {
+            @Nonnull
+            public PaymentWithCartLike executeTransaction(@Nonnull PaymentWithCartLike payment,
+                                                          @Nonnull Transaction transaction) {
                 count += 1;
                 return payment;
             }
@@ -48,7 +51,8 @@ public class PaymentMethodDispatcherTest {
             int count = 0;
 
             @Override
-            public PaymentWithCartLike executeTransaction(PaymentWithCartLike payment, Transaction transaction) {
+            @Nonnull
+            public PaymentWithCartLike executeTransaction(@Nonnull PaymentWithCartLike payment, @Nonnull Transaction transaction) {
                 count += 1;
                 if (count > afterExecutions) try {
                     return payment.withPayment(successfullyExecutedPayment);

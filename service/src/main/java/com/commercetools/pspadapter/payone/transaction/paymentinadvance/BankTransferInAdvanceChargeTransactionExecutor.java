@@ -80,7 +80,10 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
     }
 
     @Override
-    public PaymentWithCartLike retryLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction, CustomFields lastExecutionAttempt) {
+    @Nonnull
+    public PaymentWithCartLike retryLastExecutionAttempt(@Nonnull PaymentWithCartLike paymentWithCartLike,
+                                                         @Nonnull Transaction transaction,
+                                                         @Nonnull CustomFields lastExecutionAttempt) {
         if (lastExecutionAttempt.getFieldAsDateTime(CustomFieldKeys.TIMESTAMP_FIELD).isBefore(ZonedDateTime.now().minusMinutes(5))) {
             return attemptExecution(paymentWithCartLike, transaction);
         }
