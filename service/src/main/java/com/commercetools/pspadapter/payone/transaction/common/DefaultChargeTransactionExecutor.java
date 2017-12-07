@@ -136,7 +136,6 @@ public class DefaultChargeTransactionExecutor extends TransactionBaseExecutor {
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
 
                 if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
-
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                             interfaceInteraction,
                             setStatusInterfaceCode(response),

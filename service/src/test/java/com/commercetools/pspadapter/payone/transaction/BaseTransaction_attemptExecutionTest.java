@@ -34,8 +34,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
-import static com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder.PAYONE_INTERACTION_REQUEST;
-import static com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE;
+import static com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder.*;
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus.*;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.*;
 import static java.lang.String.format;
@@ -96,6 +95,36 @@ public class BaseTransaction_attemptExecutionTest {
         when(client.executeBlocking(any())).thenReturn(updatedPayment);
 
         when(transaction.getId()).thenReturn("transaction-mock-id");
+    }
+
+    protected void attemptExecution_withRedirectResponse_createsUpdateActions(final BaseRequest request,
+                                                                              final TransactionBaseExecutor executor) throws Exception {
+        when(payonePostService.executePost(request)).thenReturn(ImmutableMap.of(
+                PayoneResponseFields.STATUS, REDIRECT.getStateCode(),
+                PayoneResponseFields.REDIRECT_URL, "http://mock-redirect.url",
+                PayoneResponseFields.TXID, "responseTxid"
+        ));
+        executor.attemptExecution(paymentWithCartLike, transaction);
+
+        assertRequestInterfaceInteraction(2);
+        assertRedirectActions(TransactionState.PENDING);
+        assertSetInterfaceIdActions();
+        assertRedirectAddInterfaceInteractionAction(PAYONE_INTERACTION_REDIRECT,
+                "http://mock-redirect.url", REDIRECT.getStateCode(), "responseTxid");
+    }
+
+    protected void attemptExecution_withApprovedResponse_createsUpdateActions(final BaseRequest request,
+                                                                           final TransactionBaseExecutor executor) throws Exception {
+        when(payonePostService.executePost(request)).thenReturn(ImmutableMap.of(
+                PayoneResponseFields.STATUS, APPROVED.getStateCode(),
+                PayoneResponseFields.TXID, "responseTxid"
+        ));
+        executor.attemptExecution(paymentWithCartLike, transaction);
+
+        assertRequestInterfaceInteraction(2);
+        assertChangeTransactionStateActions(TransactionState.SUCCESS);
+        assertSetInterfaceIdActions();
+        assertCommonAddInterfaceInteractionAction(PAYONE_INTERACTION_RESPONSE, "responseTxid", APPROVED.getStateCode());
     }
 
     /**

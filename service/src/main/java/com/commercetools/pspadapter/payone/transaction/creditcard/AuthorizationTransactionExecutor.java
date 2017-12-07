@@ -148,7 +148,7 @@ public class AuthorizationTransactionExecutor extends TransactionBaseExecutor {
                 } else if (ResponseStatus.PENDING.getStateCode().equals(status)) {
                     return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
                             interfaceInteraction,
-                            ChangeTransactionState.of(TransactionState.PENDING, transaction.getId()),
+                            ChangeTransactionState.of(TransactionState.PENDING, transactionId),
                             setStatusInterfaceCode(response),
                             setStatusInterfaceText(response),
                             SetInterfaceId.of(response.get(TXID))));

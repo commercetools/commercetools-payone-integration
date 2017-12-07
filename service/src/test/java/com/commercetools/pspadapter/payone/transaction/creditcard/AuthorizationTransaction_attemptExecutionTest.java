@@ -1,4 +1,4 @@
-package com.commercetools.pspadapter.payone.transaction.common;
+package com.commercetools.pspadapter.payone.transaction.creditcard;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.transaction.BaseTransaction_attemptExecutionTest;
@@ -13,9 +13,9 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultChargeTransaction_attemptExecutionTest extends BaseTransaction_attemptExecutionTest {
+public class AuthorizationTransaction_attemptExecutionTest extends BaseTransaction_attemptExecutionTest {
 
-    private DefaultChargeTransactionExecutor executor;
+    private AuthorizationTransactionExecutor executor;
 
     @Mock
     protected AuthorizationRequest authorizationRequest;
@@ -25,11 +25,11 @@ public class DefaultChargeTransaction_attemptExecutionTest extends BaseTransacti
     public void setUp() {
         super.setUp();
 
-        executor = new DefaultChargeTransactionExecutor(typeCache, requestFactory, payonePostService, client);
+        executor = new AuthorizationTransactionExecutor(typeCache, requestFactory, payonePostService, client);
 
         when(authorizationRequest.toStringMap(anyBoolean())).thenReturn(ImmutableMap.of("testRequestKey1", "testRequestValue2",
                 "testRequestKey2", "testRequestValue2"));
-        when(requestFactory.createAuthorizationRequest(paymentWithCartLike)).thenReturn(authorizationRequest);
+        when(requestFactory.createPreauthorizationRequest(paymentWithCartLike)).thenReturn(authorizationRequest);
     }
 
     @Test
