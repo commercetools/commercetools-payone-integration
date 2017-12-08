@@ -80,7 +80,7 @@ public class IntegrationService {
         Spark.port(port());
 
         // This is a temporary jerry-rig for the load balancer to check connection with the service itself.
-        // For now it just returns a JSON response {"status":200}
+        // For now it just returns a JSON response with status code, tenants list and static application info.
         // It should be expanded to a more real health-checker service, which really performs PAYONE status check.
         // But don't forget, a load balancer may call this URL very often (like 1 per sec),
         // so don't make this request processor heavy, or implement is as independent background service.
