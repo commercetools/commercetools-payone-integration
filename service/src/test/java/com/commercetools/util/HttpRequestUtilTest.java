@@ -19,8 +19,9 @@ import static org.assertj.core.data.MapEntry.entry;
 
 public class HttpRequestUtilTest {
 
-    private static final String HTTP_HTTPBIN_ORG_GET = "http://httpbin.org/get";
-    private static final String HTTP_HTTPBIN_ORG_POST = "http://httpbin.org/post";
+    static final String HTTP_HTTPBIN_ORG = "http://httpbin.org/";
+    static final String HTTP_HTTPBIN_ORG_GET = HTTP_HTTPBIN_ORG + "get";
+    static final String HTTP_HTTPBIN_ORG_POST = HTTP_HTTPBIN_ORG + "post";
 
     private static final ObjectMapper jsonMapper = new ObjectMapper();
 
