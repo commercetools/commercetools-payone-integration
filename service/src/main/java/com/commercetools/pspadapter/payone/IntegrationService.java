@@ -11,7 +11,6 @@ import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.http.HttpStatusCode;
-import io.sphere.sdk.json.SphereJsonUtils;
 import org.apache.http.entity.ContentType;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
@@ -24,6 +23,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
+import static io.sphere.sdk.json.SphereJsonUtils.toJsonString;
+import static io.sphere.sdk.json.SphereJsonUtils.toPrettyJsonString;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -40,7 +41,7 @@ public class IntegrationService {
 
     // cached health response object, which contains:
     // status (200), tenants (names list), applicationInfo (version, name)
-    private final ImmutableMap healthResponse;
+    private final ImmutableMap<String, Object> healthResponse;
 
     public IntegrationService(@Nonnull final ServiceConfig serviceConfig,
                               @Nonnull final PropertyProvider propertyProvider) {
@@ -84,13 +85,13 @@ public class IntegrationService {
         // But don't forget, a load balancer may call this URL very often (like 1 per sec),
         // so don't make this request processor heavy, or implement is as independent background service.
         LOG.info("Register /health URL");
+        LOG.info("Use /health?pretty to pretty-print output JSON");
         Spark.get("/health", (req, res) -> {
             res.status(HttpStatusCode.OK_200);
             res.type(ContentType.APPLICATION_JSON.getMimeType());
 
-            return healthResponse;
-
-        }, SphereJsonUtils::toJsonString);
+            return req.queryParams("pretty") != null ? toPrettyJsonString(healthResponse) : toJsonString(healthResponse);
+        });
     }
 
     private static void initTenantServiceResources(TenantFactory tenantFactory) {
@@ -153,7 +154,7 @@ public class IntegrationService {
         return Integer.parseInt(systemProperty);
     }
 
-    private ImmutableMap createHealthResponse(@Nonnull final ServiceConfig serviceConfig) {
+    private ImmutableMap<String, Object> createHealthResponse(@Nonnull final ServiceConfig serviceConfig) {
         final ImmutableMap<String, String> applicationInfo = ImmutableMap.of(
                 "version", serviceConfig.getApplicationVersion(),
                 "title", serviceConfig.getApplicationName());
