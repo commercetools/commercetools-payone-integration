@@ -63,7 +63,10 @@
   - [Check payment cancelations](#check-payment-cancelations)
 
 ### Validate cart state
-Check if current cart has been ordered already (`Cart#cartState` = `Ordered`). In this case load order by ordered cart ID and show oder confirmation page. This might happen if  cart has been already ordered in different tab or by asynchronous process like [commercetools-payment-to-order-processor](https://github.com/commercetools/commercetools-payment-to-order-processor) job.
+Check if current cart has been ordered already (`Cart#cartState` = `Ordered`).
+In this case load order by ordered cart ID and show oder confirmation page.
+This might happen if  cart has been already ordered in different tab or by asynchronous process like
+[commercetools-payment-to-order-processor](https://github.com/commercetools/commercetools-payment-to-order-processor) job.
 
 ### Recalculate cart
 To ensure cart totals are always up-to-date execute cart [recalculate](https://dev.commercetools.com/http-api-projects-carts.html#recalculate)
