@@ -13,12 +13,16 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
+import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
-import io.sphere.sdk.payments.commands.updateactions.*;
+import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
+import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractionId;
+import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
+import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 import org.slf4j.Logger;
@@ -27,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.time.ZonedDateTime;
 import java.util.ConcurrentModificationException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -124,38 +129,22 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
                         CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now()));
 
             if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
-                return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
-                        interfaceInteraction,
-                        setStatusInterfaceCode(response),
-                        setStatusInterfaceText(response),
-                        SetInterfaceId.of(response.get(TXID)),
-                        ChangeTransactionState.of(TransactionState.SUCCESS, transactionId),
-                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId),
-                        SetCustomField.ofObject(CustomFieldKeys.PAY_TO_BIC_FIELD, response.get(BIC)),
-                        SetCustomField.ofObject(CustomFieldKeys.PAY_TO_IBAN_FIELD, response.get(IBAN)),
-                        SetCustomField.ofObject(CustomFieldKeys.PAY_TO_NAME_FIELD, response.get(ACCOUNT_HOLDER))
-                ));
+
+                return update(paymentWithCartLike, updatedPayment, getBankTransferAdvancedUpdateActionsList(TransactionState.SUCCESS, updatedPayment, transactionId, response, interfaceInteraction));
+
             } else if (ResponseStatus.ERROR.getStateCode().equals(status)) {
-                return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
-                        interfaceInteraction,
-                        setStatusInterfaceCode(response),
-                        setStatusInterfaceText(response),
-                        ChangeTransactionState.of(TransactionState.FAILURE, transactionId),
-                        ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId)
-                ));
+
+                return update(paymentWithCartLike, updatedPayment, getDefaultUpdateActionsList(TransactionState.FAILURE, updatedPayment, transactionId, response, interfaceInteraction));
+
             } else if (ResponseStatus.PENDING.getStateCode().equals(status)) {
-                return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
-                        interfaceInteraction,
-                        ChangeTransactionState.of(TransactionState.PENDING, transactionId),
-                        setStatusInterfaceCode(response),
-                        setStatusInterfaceText(response),
-                        SetInterfaceId.of(response.get(TXID))));
+
+                return update(paymentWithCartLike, updatedPayment, getDefaultSuccessUpdateActionsList(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
+
             }
 
             // TODO: https://github.com/commercetools/commercetools-payone-integration/issues/199
-            throw new IllegalStateException("Unknown PayOne status");
-        }
-        catch (PayoneException pe) {
+            throw new IllegalStateException("Unknown PayOne status: " + status);
+        } catch (PayoneException pe) {
             LOGGER.error("Payone request exception: ", pe);
 
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
@@ -167,6 +156,27 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
 
             return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction, failureTransaction));
         }
+    }
+
+    /**
+     * Additionally to {@link #getDefaultSuccessUpdateActionsList(TransactionState, Payment, String, Map, AddInterfaceInteraction)}
+     * adds payer and IBAN/BIC custom fields.
+     * <p>
+     * This update actions list is used for all success payment handling (including redirect, approved and pending)
+     */
+    protected List<UpdateActionImpl<Payment>> getBankTransferAdvancedUpdateActionsList(@Nonnull TransactionState newState,
+                                                                                       @Nonnull Payment updatedPayment,
+                                                                                       @Nonnull String transactionId,
+                                                                                       @Nonnull Map<String, String> response,
+                                                                                       @Nonnull AddInterfaceInteraction interfaceInteraction) {
+
+        List<UpdateActionImpl<Payment>> updateActions = getDefaultSuccessUpdateActionsList(newState, updatedPayment, transactionId, response, interfaceInteraction);
+
+        updateActions.add(SetCustomField.ofObject(CustomFieldKeys.PAY_TO_BIC_FIELD, response.get(BIC)));
+        updateActions.add(SetCustomField.ofObject(CustomFieldKeys.PAY_TO_IBAN_FIELD, response.get(IBAN)));
+        updateActions.add(SetCustomField.ofObject(CustomFieldKeys.PAY_TO_NAME_FIELD, response.get(ACCOUNT_HOLDER)));
+
+        return updateActions;
     }
 
 

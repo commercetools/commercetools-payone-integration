@@ -38,6 +38,7 @@ import static com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder.*
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus.*;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.*;
 import static java.lang.String.format;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -92,9 +93,10 @@ public class BaseTransaction_attemptExecutionTest {
         when(paymentCustomField.getFieldAsString(REFERENCE_FIELD)).thenReturn("test-payment-reference");
         paymentWithCartLike = new PaymentWithCartLike(paymentToUpdate, cartLike);
 
-        when(client.executeBlocking(any())).thenReturn(updatedPayment);
-
         when(transaction.getId()).thenReturn("transaction-mock-id");
+        when(updatedPayment.getTransactions()).thenReturn(singletonList(transaction));
+
+        when(client.executeBlocking(any())).thenReturn(updatedPayment);
     }
 
     protected void attemptExecution_withRedirectResponse_createsUpdateActions(final BaseRequest request,

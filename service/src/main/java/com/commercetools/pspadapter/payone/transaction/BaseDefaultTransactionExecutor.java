@@ -24,11 +24,8 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.time.ZonedDateTime;
-import java.util.ConcurrentModificationException;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.TXID;
 
 /**
  * Base class for validating/executing/re-trying preauthorization/authorization (authorization/charge) transactions.
@@ -130,13 +127,9 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
                                 CustomFieldKeys.REDIRECT_URL_FIELD, response.get(PayoneResponseFields.REDIRECT_URL),
                                 CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                                 CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
-                return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
-                        interfaceInteraction,
-                        ChangeTransactionState.of(TransactionState.PENDING, transactionId),
-                        setStatusInterfaceCode(response),
-                        setStatusInterfaceText(response),
-                        SetInterfaceId.of(response.get(TXID)),
-                        SetCustomField.ofObject(CustomFieldKeys.REDIRECT_URL_FIELD, response.get(PayoneResponseFields.REDIRECT_URL))));
+
+                return update(paymentWithCartLike, updatedPayment, getRedirectUpdateActionsList(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
+
             } else {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                         ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
@@ -144,34 +137,22 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
                                 CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
 
                 if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
-                    return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
-                            interfaceInteraction,
-                            setStatusInterfaceCode(response),
-                            setStatusInterfaceText(response),
-                            ChangeTransactionState.of(TransactionState.SUCCESS, transactionId),
-                            ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId),
-                            SetInterfaceId.of(response.get(TXID))
-                    ));
+
+                    return update(paymentWithCartLike, updatedPayment, getDefaultSuccessUpdateActionsList(TransactionState.SUCCESS, updatedPayment, transactionId, response, interfaceInteraction));
+
                 } else if (ResponseStatus.ERROR.getStateCode().equals(status)) {
-                    return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
-                            interfaceInteraction,
-                            setStatusInterfaceCode(response),
-                            setStatusInterfaceText(response),
-                            ChangeTransactionState.of(TransactionState.FAILURE, transactionId),
-                            ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId)
-                    ));
+
+                    return update(paymentWithCartLike, updatedPayment, getDefaultUpdateActionsList(TransactionState.FAILURE, updatedPayment, transactionId, response, interfaceInteraction));
+
                 } else if (ResponseStatus.PENDING.getStateCode().equals(status)) {
-                    return update(paymentWithCartLike, updatedPayment, ImmutableList.of(
-                            interfaceInteraction,
-                            ChangeTransactionState.of(TransactionState.PENDING, transactionId),
-                            setStatusInterfaceCode(response),
-                            setStatusInterfaceText(response),
-                            SetInterfaceId.of(response.get(TXID))));
+
+                    return update(paymentWithCartLike, updatedPayment, getDefaultSuccessUpdateActionsList(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
+
                 }
             }
 
             // TODO: https://github.com/commercetools/commercetools-payone-integration/issues/199
-            throw new IllegalStateException("Unknown PayOne status");
+            throw new IllegalStateException("Unknown PayOne status: " + status);
         } catch (PayoneException pe) {
             getClassLogger().error("Payone request exception: ", pe);
 

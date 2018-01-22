@@ -1,31 +1,38 @@
 package com.commercetools.pspadapter.payone.transaction;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseErrorCode;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus;
+import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import io.sphere.sdk.client.BlockingSphereClient;
+import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
+import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
-import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
-import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
+import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.types.Type;
 
 import javax.annotation.Nonnull;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
+import static com.commercetools.pspadapter.payone.util.PaymentUtil.getTransactionById;
 
 /**
  * @author mht@dotsource.de
  * Common base class responsible for default paymentupdateactions
  */
-public abstract class TransactionBaseExecutor extends IdempotentTransactionExecutor{
+public abstract class TransactionBaseExecutor extends IdempotentTransactionExecutor {
 
     public static final String ERROR = "ERROR";
 
@@ -111,7 +118,73 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
                 CUSTOMER_MESSAGE, "Error on payment transaction processing."));
     }
 
-    protected PaymentWithCartLike update(PaymentWithCartLike paymentWithCartLike, Payment payment, ImmutableList<UpdateActionImpl<Payment>> updateActions) {
+    /**
+     * Additionally to {@link #getDefaultSuccessUpdateActionsList(TransactionState, Payment, String, Map, AddInterfaceInteraction)}
+     * updates redirect specific custom fields.
+     */
+    protected List<UpdateActionImpl<Payment>> getRedirectUpdateActionsList(@Nonnull TransactionState newState,
+                                                                           @Nonnull Payment updatedPayment,
+                                                                           @Nonnull String transactionId,
+                                                                           @Nonnull Map<String, String> response,
+                                                                           @Nonnull AddInterfaceInteraction interfaceInteraction) {
+
+        List<UpdateActionImpl<Payment>> updateActions =
+                getDefaultSuccessUpdateActionsList(newState, updatedPayment, transactionId, response, interfaceInteraction);
+
+        updateActions.add(SetCustomField.ofObject(CustomFieldKeys.REDIRECT_URL_FIELD, response.get(PayoneResponseFields.REDIRECT_URL)));
+
+        return updateActions;
+    }
+
+    /**
+     * Additionally to {@link #getDefaultUpdateActionsList(TransactionState, Payment, String, Map, AddInterfaceInteraction)}
+     * adds payment interface id from the {@code response} ({@link PayoneResponseFields#TXID} field).
+     * <p>
+     * This update actions list is used for all success payment handling (including redirect, approved and pending)
+     */
+    protected List<UpdateActionImpl<Payment>> getDefaultSuccessUpdateActionsList(@Nonnull TransactionState newState,
+                                                                                 @Nonnull Payment updatedPayment,
+                                                                                 @Nonnull String transactionId,
+                                                                                 @Nonnull Map<String, String> response,
+                                                                                 @Nonnull AddInterfaceInteraction interfaceInteraction) {
+        List<UpdateActionImpl<Payment>> updateActions = getDefaultUpdateActionsList(newState, updatedPayment, transactionId, response, interfaceInteraction);
+        updateActions.add(SetInterfaceId.of(response.get(TXID)));
+
+        return updateActions;
+    }
+
+    /**
+     * Default payment update actions list, which is saved on any Payone response. The list is mutable and includes:<ul>
+     * <li>{@code interfaceInteraction}</li>
+     * <li>Payone status code and text from the {@code response}</li>
+     * <li>change transaction timestamp to current time</li>
+     * <li>(optionally) change transaction state if current transaction state is not equal to {@code newState}.
+     * <br/>
+     * <b>Note:</b> CTP platform throws exception if change transaction state action is called with the same value
+     * the transaction has right now.</li>
+     * </ul>
+     */
+    protected List<UpdateActionImpl<Payment>> getDefaultUpdateActionsList(@Nonnull TransactionState newState,
+                                                                          @Nonnull Payment updatedPayment,
+                                                                          @Nonnull String transactionId,
+                                                                          @Nonnull Map<String, String> response,
+                                                                          @Nonnull AddInterfaceInteraction interfaceInteraction) {
+        ArrayList<UpdateActionImpl<Payment>> updateActions = Lists.newArrayList(
+                interfaceInteraction,
+                setStatusInterfaceCode(response),
+                setStatusInterfaceText(response),
+                ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId));
+
+        // avoid CTP exception if the transaction already has newState
+        getTransactionById(updatedPayment, transactionId)
+                .filter(tr -> tr.getState() != newState)
+                .map(tr -> ChangeTransactionState.of(newState, transactionId))
+                .ifPresent(updateActions::add);
+
+        return updateActions;
+    }
+
+    protected PaymentWithCartLike update(PaymentWithCartLike paymentWithCartLike, Payment payment, List<? extends UpdateAction<Payment>> updateActions) {
         return paymentWithCartLike.withPayment(
                 client.executeBlocking(PaymentUpdateCommand.of(payment, updateActions)));
     }
