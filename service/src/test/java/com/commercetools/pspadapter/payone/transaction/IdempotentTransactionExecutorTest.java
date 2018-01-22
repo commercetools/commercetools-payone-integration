@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static util.JvmSdkMockUtil.pagedQueryResultsMock;
 
 /**
  * @author fhaertig
@@ -52,13 +53,13 @@ public class IdempotentTransactionExecutorTest {
             PagedQueryResult<Type> customTypes = testHelper.getCustomTypes();
             String queryString = Arrays.asList(a.getArguments()).get(0).toString();
             if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE)) {
-                return PagedQueryResult.of(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE, customTypes));
+                return pagedQueryResultsMock(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE, customTypes));
             } else if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)) {
-                return PagedQueryResult.of(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION, customTypes));
+                return pagedQueryResultsMock(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION, customTypes));
             } else if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT)) {
-                return PagedQueryResult.of(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT, customTypes));
+                return pagedQueryResultsMock(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT, customTypes));
             } else if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST)) {
-                return PagedQueryResult.of(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST, customTypes));
+                return pagedQueryResultsMock(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST, customTypes));
             }
             return PagedQueryResult.empty();
         });
