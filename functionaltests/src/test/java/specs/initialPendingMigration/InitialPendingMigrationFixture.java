@@ -18,6 +18,7 @@ import specs.paymentmethods.BaseNotifiablePaymentFixture;
 
 import javax.money.MonetaryAmount;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Map;
@@ -26,11 +27,24 @@ import java.util.concurrent.ExecutionException;
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
+/**
+ * Temporary test the service support both <i>Initial</i> and <i>Pending</i> transaction states to start processing.
+ * After full migration to <i>Initial</i> state by CTP platform this test won't be valid any more.
+ * <p>
+ * Since it is a temporary test - we put everything to one class because this will be hardly supported and maintainable
+ * in the future.
+ *
+ * @see <a href="http://dev.commercetools.com/release-notes.html#release-notes---commercetools-platform---version-release-29-september-2017">Release Notes - commercetools platform - Version Release 29 September 2017</a>
+ */
 @RunWith(ConcordionRunner.class)
 public class InitialPendingMigrationFixture extends BaseNotifiablePaymentFixture {
 
-    public String createPaymentCreditCard(
+    private static final String baseRedirectUrl = "https://example.com/migration_test/";
+
+    public String createPaymentCreditCardWithout3ds(
             String paymentName,
             String paymentMethod,
             String paymentCustomType,
@@ -41,6 +55,23 @@ public class InitialPendingMigrationFixture extends BaseNotifiablePaymentFixture
 
         return createPayment(paymentName, paymentMethod, paymentCustomType,
                 ImmutableMap.of(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan()),
+                transactionType, transactionState, centAmount, currencyCode);
+    }
+
+    public String createPaymentCreditCard3ds(
+            String paymentName,
+            String paymentMethod,
+            String paymentCustomType,
+            String transactionType,
+            String transactionState,
+            String centAmount,
+            String currencyCode) throws UnsupportedEncodingException {
+
+        return createPayment(paymentName, paymentMethod, paymentCustomType,
+                ImmutableMap.of(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, getVerifiedVisaPseudoCardPan(),
+                        CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8"),
+                        CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8"),
+                        CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8")),
                 transactionType, transactionState, centAmount, currencyCode);
     }
 
@@ -116,11 +147,18 @@ public class InitialPendingMigrationFixture extends BaseNotifiablePaymentFixture
         final Payment payment = fetchPaymentByLegibleName(paymentName);
         final String transactionId = getIdOfLastTransaction(payment);
 
+        // verified only by REDIRECT payments (paypal, Secure Credit card)
+        final String responseRedirectUrl = ofNullable(payment.getCustom())
+                .flatMap(customFields -> ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)))
+                .map(url -> substringBefore(url, "?"))
+                .orElse(NULL_STRING);
+
         return MultiValueResult.multiValueResult()
                 .with("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
                 .with("interactionCount", getInteractionRequestCount(payment, transactionId, requestType))
                 .with("transactionState", getTransactionState(payment, transactionId))
                 .with("interfaceStatusCode", payment.getPaymentStatus().getInterfaceCode())
+                .with("responseRedirectUrl", responseRedirectUrl)
                 .with("version", payment.getVersion().toString());
     }
 
