@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link href="../../concordion.css" rel="stylesheet" type="text/css"/>
+    <title>CTP Initial Payment State Migration Tests</title>
+</head>
+<body>
+<h1>CTP Initial Payment State Migration Tests</h1>
+
+This tests verify that the application works properly in mode of migration, e.g. it handles CTP payments with
+<b>both</b> <b><i>Initial</i></b> and <b><i>Pending</i></b> transaction states.
+
+<p style="font-size: large; background-color: #FFCCCC">
+    <b>Note:</b> the tests with <b><i>Pending</i></b> transaction states won't be valid any more when full CTP
+    completely migrates to <b><i>Initial</i></b> default transaction state.
+    <br/>
+    See <a
+        href="http://dev.commercetools.com/release-notes.html#release-notes---commercetools-platform---version-release-29-september-2017">
+    Release Notes - commercetools platform - Version Release 29 September 2017
+</a>
+</p>
+
+<div class="example">
+    <h3>Credit Card</h3>
+    <table c:execute="#paymentId = createPaymentCreditCard(#paymentName, #paymentMethod, #paymentCustomType, #transactionType, #transactionState, #centAmount, #currencyCode)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#paymentMethod">Payment Method</th>
+            <th c:set="#paymentCustomType">Payment Custom Type</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#transactionState">Transaction State</th>
+            <th c:set="#centAmount">Cent Amount</th>
+            <th c:set="#currencyCode">Currency Code</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td>CreditCard Authorization Initial</td>
+            <td>CREDIT_CARD</td>
+            <td>payment-CREDIT_CARD</td>
+            <td>AUTHORIZATION</td>
+            <td>INITIAL</td>
+            <td>111</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>CreditCard Authorization Pending</td>
+            <td>CREDIT_CARD</td>
+            <td>payment-CREDIT_CARD</td>
+            <td>AUTHORIZATION</td>
+            <td>PENDING</td>
+            <td>112</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>CreditCard Charge Initial</td>
+            <td>CREDIT_CARD</td>
+            <td>payment-CREDIT_CARD</td>
+            <td>CHARGE</td>
+            <td>INITIAL</td>
+            <td>121</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>CreditCard Charge Pending</td>
+            <td>CREDIT_CARD</td>
+            <td>payment-CREDIT_CARD</td>
+            <td>CHARGE</td>
+            <td>PENDING</td>
+            <td>122</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <h3>Paypal (Wallet)</h3>
+    <table c:execute="#paymentId = createPaymentPaypal(#paymentName, #paymentMethod, #paymentCustomType, #transactionType, #transactionState, #centAmount, #currencyCode)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#paymentMethod">Payment Method</th>
+            <th c:set="#paymentCustomType">Payment Custom Type</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#transactionState">Transaction State</th>
+            <th c:set="#centAmount">Cent Amount</th>
+            <th c:set="#currencyCode">Currency Code</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td>Paypal Authorization Initial</td>
+            <td>WALLET-PAYPAL</td>
+            <td>payment-WALLET</td>
+            <td>AUTHORIZATION</td>
+            <td>INITIAL</td>
+            <td>211</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Paypal Authorization Pending</td>
+            <td>WALLET-PAYPAL</td>
+            <td>payment-WALLET</td>
+            <td>AUTHORIZATION</td>
+            <td>PENDING</td>
+            <td>212</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Paypal Charge Initial</td>
+            <td>WALLET-PAYPAL</td>
+            <td>payment-WALLET</td>
+            <td>CHARGE</td>
+            <td>INITIAL</td>
+            <td>221</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Paypal Charge Pending</td>
+            <td>WALLET-PAYPAL</td>
+            <td>payment-WALLET</td>
+            <td>CHARGE</td>
+            <td>PENDING</td>
+            <td>111</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <h3>Bank Transfer Advanced (Vorkasse)</h3>
+    <table c:execute="#paymentId = createSimplePayment(#paymentName, #paymentMethod, #paymentCustomType, #transactionType, #transactionState, #centAmount, #currencyCode)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#paymentMethod">Payment Method</th>
+            <th c:set="#paymentCustomType">Payment Custom Type</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#transactionState">Transaction State</th>
+            <th c:set="#centAmount">Cent Amount</th>
+            <th c:set="#currencyCode">Currency Code</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td>BankTransfer Charge Initial</td>
+            <td>BANK_TRANSFER-ADVANCE</td>
+            <td>payment-CASH-ADVANCE</td>
+            <td>CHARGE</td>
+            <td>INITIAL</td>
+            <td>321</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>BankTransfer Charge Pending</td>
+            <td>BANK_TRANSFER-ADVANCE</td>
+            <td>payment-CASH-ADVANCE</td>
+            <td>CHARGE</td>
+            <td>PENDING</td>
+            <td>322</td>
+            <td>EUR</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <h2>When request the integration service to handle them - get the following results:</h2>
+
+    <h3>Credit Card</h3>
+    <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:assertEquals="#result.interfaceStatusCode">Payment Status Code</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td>CreditCard Authorization Initial</td>
+            <td>authorization</td>
+            <td>200</td>
+            <td>Success</td>
+            <td>APPROVED</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>CreditCard Authorization Pending</td>
+            <td>authorization</td>
+            <td>200</td>
+            <td>Success</td>
+            <td>APPROVED</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>CreditCard Charge Initial</td>
+            <td>charge</td>
+            <td>200</td>
+            <td>Success</td>
+            <td>APPROVED</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>CreditCard Charge Pending</td>
+            <td>charge</td>
+            <td>200</td>
+            <td>Success</td>
+            <td>APPROVED</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <h3>Paypal (Wallet)</h3>
+    <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:assertEquals="#result.interfaceStatusCode">Payment Status Code</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td>Paypal Authorization Initial</td>
+            <td>authorization</td>
+            <td>200</td>
+            <td>Pending</td>
+            <td>REDIRECT</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Paypal Authorization Pending</td>
+            <td>authorization</td>
+            <td>200</td>
+            <td>Pending</td>
+            <td>REDIRECT</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Paypal Charge Initial</td>
+            <td>charge</td>
+            <td>200</td>
+            <td>Pending</td>
+            <td>REDIRECT</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Paypal Charge Pending</td>
+            <td>charge</td>
+            <td>200</td>
+            <td>Pending</td>
+            <td>REDIRECT</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <h3>Bank Transfer Advanced (Vorkasse)</h3>
+    <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:assertEquals="#result.interfaceStatusCode">Payment Status Code</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td>BankTransfer Charge Initial</td>
+            <td>charge</td>
+            <td>200</td>
+            <td>Success</td>
+            <td>APPROVED</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>BankTransfer Charge Pending</td>
+            <td>charge</td>
+            <td>200</td>
+            <td>Success</td>
+            <td>APPROVED</td>
+            <td></td>
+        </tr>
+    </table>
+
+</div>
+</body>
+</html>
