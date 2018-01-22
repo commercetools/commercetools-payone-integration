@@ -3,13 +3,16 @@ package specs.initialPendingMigration;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
+import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import io.sphere.sdk.types.CustomFieldsDraft;
+import io.sphere.sdk.utils.MoneyImpl;
 import org.apache.http.HttpResponse;
 import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
@@ -99,6 +102,24 @@ public class InitialPendingMigrationFixture extends BaseNotifiablePaymentFixture
                                       String transactionType, String transactionState,
                                       String centAmount, String currencyCode) {
         return createPayment(paymentName, paymentMethod, paymentCustomType, emptyMap(), transactionType, transactionState, centAmount, currencyCode);
+    }
+
+    public String createKlarnaPayment(final String paymentName,
+                                      final String transactionType,
+                                      final String ip,
+                                      final String lastName,
+                                      final String birthDay,
+                                      final String telephonenumber) {
+        Cart cart = createTemplateCartKlarna(lastName);
+        Order order = createOrderForCart(cart);
+
+        Payment payment = createAndSaveKlarnaPayment(cart, order, paymentName, transactionType,
+                MoneyImpl.centAmountOf(cart.getTotalPrice()).toString(),
+                cart.getTotalPrice().getCurrency().getCurrencyCode(),
+                ip, birthDay, telephonenumber);
+
+        return payment.getId();
+
     }
 
     private String createPayment(String paymentName, String paymentMethod, String paymentCustomType,

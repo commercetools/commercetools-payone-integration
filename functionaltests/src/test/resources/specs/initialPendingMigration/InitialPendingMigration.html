@@ -218,6 +218,35 @@ This tests verify that the application works properly in mode of migration, e.g.
         </tr>
     </table>
 
+    <h3>Klarna</h3>
+    <table c:execute="#paymentId = createKlarnaPayment(#paymentName, #transactionType, #ip, #buyerLastName, #birthDay, #telephonenumber)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#buyerLastName">Buyer surname<sup><a href="#buyer-lastname-description">[1]</a></sup></th>
+            <th c:set="#birthDay">Buyer birth day</th>
+            <th c:set="#ip">IP address</th>
+            <th c:set="#telephonenumber">Telephone</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td>Klarna Payment 1</td>
+            <td>AUTHORIZATION</td>
+            <td>Approved</td> <!-- It's a buyer surname, see https://developers.klarna.com/en/de/kpm/test-credentials-->
+            <td>1960-07-07</td>
+            <td>192.168.0.45</td>
+            <td>034568557</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <p>
+        <sup><a name="buyer-lastname-description" href="#buyer-lastname-description">[1]</a></sup><i>See more
+        information on
+        <a href="https://developers.klarna.com/en/de/kpm/test-credentials" target="_blank">Klarna test credentials</a>
+        page</i>
+    </p>
+
     <hr/>
 
     <h2>When request the integration service to handle them - get the following results:</h2>
@@ -385,6 +414,26 @@ This tests verify that the application works properly in mode of migration, e.g.
         <tr>
             <td>BankTransfer Charge Pending</td>
             <td>charge</td>
+            <td>200</td>
+            <td>Success</td>
+            <td>APPROVED</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <h3>Klarna</h3>
+    <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:assertEquals="#result.interfaceStatusCode">Payment Status Code</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td>Klarna Payment 1</td>
+            <td>preauthorization</td>
             <td>200</td>
             <td>Success</td>
             <td>APPROVED</td>
