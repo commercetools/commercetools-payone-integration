@@ -203,7 +203,7 @@ ins {
             <td class="inputvalue">Payment 1</td>
             <td class="inputvalue">7</td>
             <td class="inputvalue">EUR</td>
-            <td>c47b0e1d-d024-4731-94e7-f21c8e0077f3</td>
+            <td>947b8596-d4a6-498f-87f1-30e526643be0</td>
             <td>https://example.com/paypal_authorization/Payment+1+Success</td>
             <td><em>null</em></td>
             <td>https://example.com/paypal_authorization/Payment+1+Success</td>
@@ -212,7 +212,7 @@ ins {
             <td class="inputvalue">Payment 2</td>
             <td class="inputvalue">2234</td>
             <td class="inputvalue">USD</td>
-            <td>82ecd9d9-37cd-4918-bb7d-b23de22da24e</td>
+            <td>03fca247-aee2-4189-9350-9d474276527f</td>
             <td>https://example.com/paypal_authorization/Payment+2+Success</td>
             <td><em>null</em></td>
             <td>https://example.com/paypal_authorization/Payment+2+Success</td>
@@ -221,7 +221,7 @@ ins {
             <td class="inputvalue">Payment 3</td>
             <td class="inputvalue">43434</td>
             <td class="inputvalue">EUR</td>
-            <td>bcff6271-5089-47cb-b356-54d9628a48b5</td>
+            <td>2aba9d70-f62e-4ff0-92f8-983bc5353da7</td>
             <td>https://example.com/paypal_authorization/Payment+3+Success</td>
             <td><em>null</em></td>
             <td>https://example.com/paypal_authorization/Payment+3+Success</td>
@@ -230,7 +230,7 @@ ins {
             <td class="inputvalue">Payment 4</td>
             <td class="inputvalue">715431</td>
             <td class="inputvalue">EUR</td>
-            <td>491ae2d5-eb7d-45eb-8b84-de58b551a679</td>
+            <td>34da7e3b-f0fe-4f89-bced-c8c9eee4ed2a</td>
             <td>https://example.com/paypal_authorization/Payment+4+Success</td>
             <td><em>null</em></td>
             <td>https://example.com/paypal_authorization/Payment+4+Success</td>
@@ -249,11 +249,10 @@ ins {
         </tr>
         <tr>
             <td class="inputvalue">Payment 1</td>
-            <td class="failure"><del class="expected">200</del>
-<ins class="actual">202</ins></td>
+            <td class="success">200</td>
             <td class="success">1</td>
             <td class="success">Pending</td>
-            <td>5</td>
+            <td>11</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
@@ -266,8 +265,9 @@ ins {
             <td class="inputvalue">Payment 3</td>
             <td class="success">200</td>
             <td class="success">1</td>
-            <td class="success">Pending</td>
-            <td>11</td>
+            <td class="failure"><del class="expected">Pending</del>
+<ins class="actual">Failure</ins></td>
+            <td>7</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 4</td>
@@ -291,6 +291,13 @@ ins {
         </tr>
         <tr>
             <td class="inputvalue">Payment 1</td>
+            <td class="success">Pending</td>
+            <td class="success">https://www.sandbox.paypal.com/webscr</td>
+            <td>https://www.sandbox.paypal.com/webscr?useraction=commit&amp;cmd=_express-checkout&amp;token=EC-7CU08610VN934332J</td>
+            <td>11</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Payment 3</td>
             <td class="failure"><del class="expected">Pending</del>
 <ins class="actual">Failure</ins></td>
             <td class="failure"><del class="expected">https://www.sandbox.paypal.com/webscr</del>
@@ -299,17 +306,10 @@ ins {
             <td>7</td>
         </tr>
         <tr>
-            <td class="inputvalue">Payment 3</td>
-            <td class="success">Pending</td>
-            <td class="success">https://www.sandbox.paypal.com/webscr</td>
-            <td>https://www.sandbox.paypal.com/webscr?useraction=commit&amp;cmd=_express-checkout&amp;token=EC-422738645R3244400</td>
-            <td>11</td>
-        </tr>
-        <tr>
             <td class="inputvalue">Payment 4</td>
             <td class="success">Pending</td>
             <td class="success">https://www.sandbox.paypal.com/webscr</td>
-            <td>https://www.sandbox.paypal.com/webscr?useraction=commit&amp;cmd=_express-checkout&amp;token=EC-2AT14511JW8416400</td>
+            <td>https://www.sandbox.paypal.com/webscr?useraction=commit&amp;cmd=_express-checkout&amp;token=EC-1D589826WU614110F</td>
             <td>11</td>
         </tr>
     </table>
@@ -330,9 +330,8 @@ ins {
             <td class="inputvalue">Payment 1</td>
             <td class="success">200</td>
             <td class="success">1</td>
-            <td class="failure"><del class="expected">Pending</del>
-<ins class="actual">Failure</ins></td>
-            <td>7</td>
+            <td class="success">Pending</td>
+            <td>11</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
@@ -345,8 +344,9 @@ ins {
             <td class="inputvalue">Payment 3</td>
             <td class="success">200</td>
             <td class="success">1</td>
-            <td class="success">Pending</td>
-            <td>11</td>
+            <td class="failure"><del class="expected">Pending</del>
+<ins class="actual">Failure</ins></td>
+            <td>7</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 4</td>
@@ -383,5 +383,5 @@ ins {
     The checkout implementation needs to take care of failed verifications - the user will be redirected to
     the <em>backUrl</em> or the <em>errorUrl</em> specified in the Payment object.
 </p>
-<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 24663 ms on 23-Jan-2018 at 15:41:49 UTC</div></div></body>
+<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 30974 ms on 23-Jan-2018 at 16:16:38 UTC</div></div></body>
 </html>
