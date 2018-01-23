@@ -117,8 +117,7 @@ public class AuthorizationWith3dsFixture extends BaseNotifiablePaymentFixture {
                 .build();
     }
 
-    public Map<String, String> fetchPaymentDetails(final String paymentName)
-            throws InterruptedException, ExecutionException {
+    public Map<String, String> fetchPaymentDetails(final String paymentName) {
         final Payment payment = fetchPaymentByLegibleName(paymentName);
 
         final String transactionId = getIdOfLastTransaction(payment);
