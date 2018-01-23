@@ -39,13 +39,13 @@ public class ChargeImmediatelyFixture extends BaseFixture {
                                 final String paymentMethod,
                                 final String transactionType,
                                 final String centAmount,
-                                final String currencyCode) throws ExecutionException, InterruptedException, UnsupportedEncodingException {
+                                final String currencyCode) {
 
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
 
-        final String successUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8");
-        final String errorUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8");
-        final String cancelUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8");
+        final String successUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Success");
+        final String errorUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Error");
+        final String cancelUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Cancel");
         final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
                 .paymentMethodInfo(PaymentMethodInfoBuilder.of()
                         .method(paymentMethod)

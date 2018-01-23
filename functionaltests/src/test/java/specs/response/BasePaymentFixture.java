@@ -61,8 +61,6 @@ import static java.util.Optional.ofNullable;
  */
 public class BasePaymentFixture extends BaseFixture {
 
-    public static final String baseRedirectUrl = "https://www.example.com/sofortueberweisung_charge_immediately/";
-
     public static final String DISCOUNT_10_PERCENT = "test-10-percent-code";
     public static final String DISCOUNT_999_CENT = "test-999-cent-code";
 

@@ -21,8 +21,6 @@ import specs.paymentmethods.BaseNotifiablePaymentFixture;
 
 import javax.money.MonetaryAmount;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -68,13 +66,13 @@ public class InitialPendingMigrationFixture extends BaseNotifiablePaymentFixture
             String transactionType,
             String transactionState,
             String centAmount,
-            String currencyCode) throws UnsupportedEncodingException {
+            String currencyCode) {
 
         return createPayment(paymentName, paymentMethod, paymentCustomType,
                 ImmutableMap.of(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, getVerifiedVisaPseudoCardPan(),
-                        CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8"),
-                        CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8"),
-                        CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8")),
+                        CustomFieldKeys.SUCCESS_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Success"),
+                        CustomFieldKeys.ERROR_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName,  "Error"),
+                        CustomFieldKeys.CANCEL_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Cancel")),
                 transactionType, transactionState, centAmount, currencyCode);
     }
 
@@ -85,11 +83,11 @@ public class InitialPendingMigrationFixture extends BaseNotifiablePaymentFixture
             String transactionType,
             String transactionState,
             String centAmount,
-            String currencyCode) throws Exception {
+            String currencyCode) {
 
-        String successUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8");
-        String errorUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8");
-        String cancelUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8");
+        final String successUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Success");
+        final String errorUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Error");
+        final String cancelUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Cancel");
 
         return createPayment(paymentName, paymentMethod, paymentCustomType,
                 ImmutableMap.of(CustomFieldKeys.SUCCESS_URL_FIELD, successUrl,

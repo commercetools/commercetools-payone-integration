@@ -24,8 +24,6 @@ import util.WebDriver3ds;
 
 import javax.money.MonetaryAmount;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.Map;
@@ -62,7 +60,7 @@ public class AuthorizationWith3dsFixture extends BaseNotifiablePaymentFixture {
             final String paymentMethod,
             final String transactionType,
             final String centAmount,
-            final String currencyCode) throws ExecutionException, InterruptedException, UnsupportedEncodingException {
+            final String currencyCode) {
 
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
         final String pseudocardpan = getVerifiedVisaPseudoCardPan();
@@ -77,9 +75,9 @@ public class AuthorizationWith3dsFixture extends BaseNotifiablePaymentFixture {
                         ImmutableMap.<String, Object>builder()
                                 .put(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, pseudocardpan)
                                 .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage())
-                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8"))
-                                .put(CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8"))
-                                .put(CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8"))
+                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Success"))
+                                .put(CustomFieldKeys.ERROR_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Error"))
+                                .put(CustomFieldKeys.CANCEL_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Cancel"))
                                 .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")
                                 .build()))
                 .build();
@@ -111,7 +109,7 @@ public class AuthorizationWith3dsFixture extends BaseNotifiablePaymentFixture {
         final Payment payment = fetchPaymentByLegibleName(paymentName);
         final String transactionId = getIdOfLastTransaction(payment);
 
-        return ImmutableMap.<String, String> builder()
+        return ImmutableMap.<String, String>builder()
                 .put("statusCode", Integer.toString(response.getStatusLine().getStatusCode()))
                 .put("interactionCount", getInteractionRequestCount(payment, transactionId, requestType))
                 .put("transactionState", getTransactionState(payment, transactionId))
@@ -138,8 +136,8 @@ public class AuthorizationWith3dsFixture extends BaseNotifiablePaymentFixture {
                 .build();
     }
 
-    public  Map<String, String> executeRedirectAndWaitForNotificationOfAction(final String paymentName,
-                                                                              final String txAction)
+    public Map<String, String> executeRedirectAndWaitForNotificationOfAction(final String paymentName,
+                                                                             final String txAction)
             throws InterruptedException, ExecutionException {
 
         final Payment payment = fetchPaymentByLegibleName(paymentName);
@@ -167,7 +165,7 @@ public class AuthorizationWith3dsFixture extends BaseNotifiablePaymentFixture {
         final Payment updatedPayment = fetchPaymentById(payment.getId());
         final long appointedNotificationCount = getTotalNotificationCountOfAction(updatedPayment, txAction);
 
-        return ImmutableMap.<String, String> builder()
+        return ImmutableMap.<String, String>builder()
                 .put("appointedNotificationCount", String.valueOf(appointedNotificationCount))
                 .put("transactionState", getTransactionState(updatedPayment, transactionId))
                 .put("version", updatedPayment.getVersion().toString())

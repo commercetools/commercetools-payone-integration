@@ -79,9 +79,9 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
                         CustomTypeBuilder.PAYMENT_BANK_TRANSFER,
                         ImmutableMap.<String, Object>builder()
                                 .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage())
-                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + (paymentName + " Success").replace(" ", "-"))
-                                .put(CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + (paymentName + " Error").replace(" ", "-"))
-                                .put(CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + (paymentName + " Cancel").replace(" ", "-"))
+                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Success"))
+                                .put(CustomFieldKeys.ERROR_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Error"))
+                                .put(CustomFieldKeys.CANCEL_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Cancel"))
                                 .put(CustomFieldKeys.IBAN_FIELD, iban)
                                 .put(CustomFieldKeys.BIC_FIELD, bic)
                                 .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")

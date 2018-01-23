@@ -21,7 +21,6 @@ import org.junit.runner.RunWith;
 import specs.BaseFixture;
 
 import javax.money.MonetaryAmount;
-import java.net.URLEncoder;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Locale;
@@ -31,11 +30,12 @@ import java.util.Optional;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.*;
 import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlocking;
 import static java.lang.String.format;
-import static specs.response.BasePaymentFixture.baseRedirectUrl;
 
 @RunWith(ConcordionRunner.class)
 @FullOGNL // to support long arguments list for #updatePayment()
 public class PaymentServiceFixture extends BaseFixture {
+
+    public static final String baseRedirectUrl = "https://www.example.com/payment_service/";
 
     private PaymentService paymentService;
 
@@ -73,9 +73,9 @@ public class PaymentServiceFixture extends BaseFixture {
 
         final String orderNumber = interfaceIdPrefix + ORDER_NUMBER_SEPARATOR + getRandomOrderNumber();
 
-        final String successUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8");
-        final String errorUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8");
-        final String cancelUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8");
+        final String successUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Success");
+        final String errorUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Error");
+        final String cancelUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Cancel");
         final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
                 .paymentMethodInfo(PaymentMethodInfoBuilder.of()
                         .method(paymentMethod)

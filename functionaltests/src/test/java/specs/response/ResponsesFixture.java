@@ -19,13 +19,10 @@ import specs.BaseFixture;
 
 import javax.money.MonetaryAmount;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-
-import static specs.response.BasePaymentFixture.baseRedirectUrl;
 
 /**
  * @author mht@dotsource.de
@@ -33,13 +30,14 @@ import static specs.response.BasePaymentFixture.baseRedirectUrl;
 @RunWith(ConcordionRunner.class)
 public class ResponsesFixture extends BaseFixture {
 
+    public static final String baseRedirectUrl = "https://www.example.com/common_responses/";
+
     public String createPayment(final String paymentName,
                                 final String paymentMethod,
                                 final String transactionType,
                                 final String centAmount,
                                 final String currencyCode,
-                                final String successURL)
-            throws ExecutionException, InterruptedException, UnsupportedEncodingException {
+                                final String successURL) {
 
 
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
@@ -54,9 +52,9 @@ public class ResponsesFixture extends BaseFixture {
                         CustomTypeBuilder.PAYMENT_BANK_TRANSFER,
                         ImmutableMap.<String, Object>builder()
                                 .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage())
-                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, "".equals(successURL) ? baseRedirectUrl + (paymentName + " Success").replace(" ", "-") : successURL)
-                                .put(CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + (paymentName + " Error").replace(" ", "-"))
-                                .put(CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + (paymentName + " Cancel").replace(" ", "-"))
+                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, "".equals(successURL) ? createRedirectUrl(baseRedirectUrl, paymentName, "Success") : successURL)
+                                .put(CustomFieldKeys.ERROR_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Error"))
+                                .put(CustomFieldKeys.CANCEL_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Cancel"))
                                 .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")
                                 .build()))
                 .build();

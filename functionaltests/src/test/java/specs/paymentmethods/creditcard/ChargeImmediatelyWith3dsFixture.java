@@ -20,8 +20,6 @@ import org.junit.runner.RunWith;
 import util.WebDriver3ds;
 
 import javax.money.MonetaryAmount;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -55,7 +53,7 @@ public class ChargeImmediatelyWith3dsFixture extends BaseCreditCardChargeFixture
                                 final String paymentMethod,
                                 final String transactionType,
                                 final String centAmount,
-                                final String currencyCode) throws ExecutionException, InterruptedException, UnsupportedEncodingException {
+                                final String currencyCode) {
 
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
         final String pseudocardpan = getVerifiedVisaPseudoCardPan();
@@ -71,9 +69,9 @@ public class ChargeImmediatelyWith3dsFixture extends BaseCreditCardChargeFixture
                         ImmutableMap.<String, Object>builder()
                                 .put(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, pseudocardpan)
                                 .put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage())
-                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8"))
-                                .put(CustomFieldKeys.ERROR_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8"))
-                                .put(CustomFieldKeys.CANCEL_URL_FIELD, baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8"))
+                                .put(CustomFieldKeys.SUCCESS_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Success"))
+                                .put(CustomFieldKeys.ERROR_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Error"))
+                                .put(CustomFieldKeys.CANCEL_URL_FIELD, createRedirectUrl(baseRedirectUrl, paymentName, "Cancel"))
                                 .put(CustomFieldKeys.REFERENCE_FIELD, "<placeholder>")
                                 .build()))
                 .build();
