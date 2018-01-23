@@ -130,7 +130,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
 
             if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
 
-                return update(paymentWithCartLike, updatedPayment, getBankTransferAdvancedUpdateActionsList(TransactionState.SUCCESS, updatedPayment, transactionId, response, interfaceInteraction));
+                return update(paymentWithCartLike, updatedPayment, getBankTransferAdvancedUpdateActionsList(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
 
             } else if (ResponseStatus.ERROR.getStateCode().equals(status)) {
 

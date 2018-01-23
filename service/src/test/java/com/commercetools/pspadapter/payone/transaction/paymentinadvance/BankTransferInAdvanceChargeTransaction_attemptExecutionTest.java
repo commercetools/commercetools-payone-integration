@@ -56,7 +56,10 @@ public class BankTransferInAdvanceChargeTransaction_attemptExecutionTest extends
         executor.attemptExecution(paymentWithCartLike, transaction);
 
         assertRequestInterfaceInteraction(2);
-        assertChangeTransactionStateActions(TransactionState.SUCCESS);
+
+        // opposite to instant and redirect payment methods, Vorkasse remains/becomes Pending till buyer sends money
+        assertChangeTransactionStateActions(TransactionState.PENDING);
+
         assertSetInterfaceIdActions();
         assertCommonAddInterfaceInteractionAction(PAYONE_INTERACTION_RESPONSE, "responseTxid", APPROVED.getStateCode());
 
