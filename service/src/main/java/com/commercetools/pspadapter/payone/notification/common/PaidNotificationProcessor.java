@@ -25,11 +25,11 @@ public class PaidNotificationProcessor extends NotificationProcessorBase {
     /**
      * Initializes a new instance.
      *
-     * @param serviceFactory the services factory for commercetools platform API
+     * @param tenantFactory the tenant factory for commercetools platform API
      */
-    public PaidNotificationProcessor(TenantFactory serviceFactory, TenantConfig tenantConfig,
+    public PaidNotificationProcessor(TenantFactory tenantFactory, TenantConfig tenantConfig,
                                      TransactionStateResolver transactionStateResolver) {
-        super(serviceFactory, tenantConfig, transactionStateResolver);
+        super(tenantFactory, tenantConfig, transactionStateResolver);
     }
 
     @Override

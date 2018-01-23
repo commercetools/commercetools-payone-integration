@@ -26,11 +26,11 @@ public class CaptureNotificationProcessor extends NotificationProcessorBase {
     /**
      * Initializes a new instance.
      *
-     * @param serviceFactory the services factory for commercetools platform API
+     * @param tenantFactory the tenant factory for commercetools platform API
      */
-    public CaptureNotificationProcessor(TenantFactory serviceFactory, TenantConfig tenantConfig,
+    public CaptureNotificationProcessor(TenantFactory tenantFactory, TenantConfig tenantConfig,
                                         TransactionStateResolver transactionStateResolver) {
-        super(serviceFactory, tenantConfig, transactionStateResolver);
+        super(tenantFactory, tenantConfig, transactionStateResolver);
     }
 
         @Override
