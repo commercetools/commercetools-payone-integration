@@ -62,17 +62,18 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
 
     @Override
     public boolean wasExecuted(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        if (getCustomFieldsOfType(paymentWithCartLike,
+        boolean hasTransactionId = getCustomFieldsOfType(paymentWithCartLike,
                 CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
                 CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT)
-                .noneMatch(fields -> transaction.getId().equals(fields.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)))) {
+                .anyMatch(fields -> transaction.getId().equals(fields.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD)));
 
+        if (!hasTransactionId) {
             return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)
                     //sequenceNumber field is mandatory -> can't be null
                     .anyMatch(fields -> fields.getFieldAsString(CustomFieldKeys.SEQUENCE_NUMBER_FIELD).equals(transaction.getInteractionId()));
-        } else {
-            return true;
         }
+
+        return true;
     }
 
     @Override
