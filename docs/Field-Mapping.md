@@ -326,12 +326,12 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
 
 ### triggering a new PAYONE transaction request for given CT payment/transaction
 
-Since service version [`v2.2.+`](https://github.com/commercetools/commercetools-payone-integration/releases/tag/v2.1.0),
+Since service version [`v2.2.+`](https://github.com/commercetools/commercetools-payone-integration/releases/tag/v2.2.0),
 ([when `Initial` CTP transaction stage was introduced](http://dev.commercetools.com/release-notes.html#release-notes---commercetools-platform---version-release-29-september-2017)) 
-`Pending` state means that the transaction was accepted/processed Payone service, but still not completed.
+`Pending` state means that the transaction was accepted/processed by Payone service, but still not completed.
 This might happen in following cases:
   - _redirect_ payments: buyer was redirected to payment provider page (PayPal, Credit Card verification, Sofortüberweisung etc),
-  still but still not completed/approved the payment
+  but still not completed/approved the payment
   - _bank transfer_, like `CASH_ADVANCE` or other bank transfer methods. This means the bill was issued,
   but still not completed by customer
 
