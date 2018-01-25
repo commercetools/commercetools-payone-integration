@@ -11,7 +11,8 @@
   - [PAYONE fields that map to custom CT Payment fields (by payment method)](#payone-fields-that-map-to-custom-ct-payment-fields-by-payment-method)
   - [PAYONE fields that map to custom Fields on CT Payment, CT Cart, CT Customer or CT Order](#payone-fields-that-map-to-custom-fields-on-ct-payment-ct-cart-ct-customer-or-ct-order)
   - [PAYONE transaction types -> CT Transaction Types](#payone-transaction-types---ct-transaction-types)
-    - [triggering a new PAYONE transaction request given a CT transaction](#triggering-a-new-payone-transaction-request-given-a-ct-transaction)
+    - [triggering a new PAYONE transaction request for given CT payment/transaction](#triggering-a-new-payone-transaction-request-for-given-ct-paymenttransaction)
+    - [CT to Payone transaction type mapping](#ct-to-payone-transaction-type-mapping)
     - [receiving the PAYONE TransactionStatus Notifications and storing them in an Interaction](#receiving-the-payone-transactionstatus-notifications-and-storing-them-in-an-interaction)
     - [updating the CT Payment given a PAYONE TransactionStatus Notification (Stored in an Interaction)](#updating-the-ct-payment-given-a-payone-transactionstatus-notification-stored-in-an-interaction)
 - [Unused / unsupported PAYONE fields & features](#unused--unsupported-payone-fields--features)
@@ -323,19 +324,32 @@ The following are required only for Installment-Type Payment Methods (mainly Kla
 
 ## PAYONE transaction types -> CT Transaction Types 
 
-### triggering a new PAYONE transaction request given a CT transaction
+### triggering a new PAYONE transaction request for given CT payment/transaction
 
-Please take care of idempotency. The `TransactionState` alone does not suffice to avoid creating duplicate PAYONE transactions. 
-It could remain in `Pending` for various reasons.
-`interfaceId`  and `timestamp` of the Transaction can be used to manage idempotency if a persistent field is necessary. 
- 
-| CT `TransactionType` | CT `TransactionState` | PAYONE `request` | Notes |
-|---|---|---|---|
-| `Authorization` | `Pending` | `preauthorization` |  |
-| `CancelAuthorization` | `Pending` | ONLY on credit card: Send a capture with amount=0.   |  |
-| `Charge` | `Pending` | if an `Authorization` Transaction exists: `capture`; otherwise: `authorization`  |  |
-| `Refund` | `Pending` |  `debit` with negative amount of refund. `refund` is a subset of the functionality and does not need to be used.  |  |
-| `Chargeback` | - | - |  (not applicable, is just triggered from PAYONE to CT)  |
+Since service version [`v2.2.+`](https://github.com/commercetools/commercetools-payone-integration/releases/tag/v2.1.0),
+([when `Initial` CTP transaction stage was introduced](http://dev.commercetools.com/release-notes.html#release-notes---commercetools-platform---version-release-29-september-2017)) 
+`Pending` state means that the transaction was accepted/processed Payone service, but still not completed.
+This might happen in following cases:
+  - _redirect_ payments: buyer was redirected to payment provider page (PayPal, Credit Card verification, Sofortüberweisung etc),
+  still but still not completed/approved the payment
+  - _bank transfer_, like `CASH_ADVANCE` or other bank transfer methods. This means the bill was issued,
+  but still not completed by customer
+
+After buyer completes the transaction (approves payment on redirected page, or commits bank transfer)
+respective notification is sent by Payone and our service changes transaction state from `Pending` to `Success`.
+
+Transactions for _immediate_ payments (like unconfirmed _Credit Card_ or _Invoices_ payments) become `Success`
+immediately after success Payone response.
+
+### CT to Payone transaction type mapping
+
+| CT `TransactionType`  | PAYONE `request`                                                                 |
+|-----------------------|----------------------------------------------------------------------------------|
+| `Authorization`       | `preauthorization`                                                               |
+| `Charge`              | if an `authorization` Transaction exists: `capture`; otherwise: `authorization`  |
+| `CancelAuthorization` | ONLY on credit card: Send a capture with amount=0.                               |
+| `Refund`              | `debit` with negative amount of refund. `refund` is a subset of the functionality and does not need to be used.  |
+| `Chargeback`          | (not applicable, is just triggered from PAYONE to CT)                            |
 
 
 ### receiving the PAYONE TransactionStatus Notifications and storing them in an Interaction
