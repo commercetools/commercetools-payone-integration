@@ -23,7 +23,7 @@ public class PaymentMethodDispatcher {
     }
 
     public PaymentWithCartLike dispatchPayment(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
-        // Execute the first Pending Transaction
+        // Execute the first uncompleted transaction
         return paymentWithCartLike.getPayment()
             .getTransactions()
             .stream()
@@ -32,10 +32,10 @@ public class PaymentMethodDispatcher {
             .map(transaction -> {
                 final PaymentWithCartLike newPaymentWithCartLike = executeTransaction(paymentWithCartLike, transaction);
                 final Transaction updatedTransaction = getUpdatedTransaction(transaction, newPaymentWithCartLike);
-                if (transactionStateResolver.isNotCompletedTransaction(updatedTransaction)) { // Still Pending, stop ->
-                    // executor has done its duty, notification from Payone required to proceed with this transaction
+                if (transactionStateResolver.isNotCompletedTransaction(updatedTransaction)) { // Still not completed ->
+                    // stop, executor has done its duty, notification from Payone required to proceed with this transaction
                     return newPaymentWithCartLike;
-                } else { // Recursively execute next Initial/Pending Transaction
+                } else { // Recursively execute next uncompleted Transaction
                     return dispatchPayment(newPaymentWithCartLike);
                 }
             })
