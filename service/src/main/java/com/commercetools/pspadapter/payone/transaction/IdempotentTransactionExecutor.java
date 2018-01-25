@@ -62,7 +62,7 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
      * Whether the transaction was executed and nothing else can be done by the executor.
      *
      * @param paymentWithCartLike payment/cart, which has to be verified
-     * @param transaction         transaction, which has to be verified
+     * @param transaction         transaction from {@code paymentWithCartLike}, which has to be verified
      * @return <b>true</b> if transaction has been already executed
      */
     protected abstract boolean wasExecuted(PaymentWithCartLike paymentWithCartLike, Transaction transaction);
