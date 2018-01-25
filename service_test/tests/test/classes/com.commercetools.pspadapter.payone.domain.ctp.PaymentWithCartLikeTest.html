@@ -41,7 +41,7 @@
 </td>
 <td>
 <div class="infoBox" id="duration">
-<div class="counter">0.163s</div>
+<div class="counter">0.181s</div>
 <p>duration</p>
 </div>
 </td>
@@ -79,22 +79,22 @@
 </thead>
 <tr>
 <td class="success">createFromCartAndPaymentWithReference</td>
-<td>0.020s</td>
+<td>0.019s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">createFromOrderAndPaymentWithReference</td>
-<td>0.011s</td>
+<td>0.016s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">createFromOrderAndPaymentWithoutReference</td>
-<td>0.119s</td>
+<td>0.127s</td>
 <td class="success">passed</td>
 </tr>
 <tr>
 <td class="success">createWithNewPaymentOrderNumberChanges</td>
-<td>0.013s</td>
+<td>0.019s</td>
 <td class="success">passed</td>
 </tr>
 </table>
@@ -102,9 +102,139 @@
 <div id="tab1" class="tab">
 <h2>Standard output</h2>
 <span class="code">
-<pre>11:12:07.084 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [pool-18-thread-1] - Can't fetch tokens.
+<pre>11:00:45.463 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [Thread-52] - Failed to fetch token.
+java.util.concurrent.CompletionException: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/f783b80a-7f56-4f2e-a2a3-64f4e9f74971` on 2018-01-25T11:00:45.358Z
+http response formatted body: {
+  &quot;statusCode&quot; : 401,
+  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
+  &quot;errors&quot; : [ {
+    &quot;code&quot; : &quot;invalid_client&quot;,
+    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+  } ],
+  &quot;error&quot; : &quot;invalid_client&quot;,
+  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+}
+http response: io.sphere.sdk.http.HttpResponseImpl@76f8ff93[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/f783b80a-7f56-4f2e-a2a3-64f4e9f74971], Server-Timing=[auth=0.001;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-27800538.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+SDK: 1.28.0
+project: test-key
+Java: 1.8.0_151
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
+sphere request: &lt;unknown&gt;
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/f783b80a-7f56-4f2e-a2a3-64f4e9f74971], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
+
+	at java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:273)
+	at java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:280)
+	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:604)
+	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
+	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
+	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
+	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+Caused by: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/f783b80a-7f56-4f2e-a2a3-64f4e9f74971` on 2018-01-25T11:00:45.358Z
+http response formatted body: {
+  &quot;statusCode&quot; : 401,
+  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
+  &quot;errors&quot; : [ {
+    &quot;code&quot; : &quot;invalid_client&quot;,
+    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+  } ],
+  &quot;error&quot; : &quot;invalid_client&quot;,
+  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+}
+http response: io.sphere.sdk.http.HttpResponseImpl@76f8ff93[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/f783b80a-7f56-4f2e-a2a3-64f4e9f74971], Server-Timing=[auth=0.001;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-27800538.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+SDK: 1.28.0
+project: test-key
+Java: 1.8.0_151
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
+sphere request: &lt;unknown&gt;
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/f783b80a-7f56-4f2e-a2a3-64f4e9f74971], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
+
+	at io.sphere.sdk.client.TokensSupplierImpl.parseResponse(TokensSupplierImpl.java:122)
+	at io.sphere.sdk.client.TokensSupplierImpl.lambda$get$1(TokensSupplierImpl.java:55)
+	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:602)
+	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
+	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
+	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
+	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+11:00:45.463 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [pool-33-thread-1] - Can't fetch tokens.
+java.util.concurrent.CompletionException: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/f783b80a-7f56-4f2e-a2a3-64f4e9f74971` on 2018-01-25T11:00:45.358Z
+http response formatted body: {
+  &quot;statusCode&quot; : 401,
+  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
+  &quot;errors&quot; : [ {
+    &quot;code&quot; : &quot;invalid_client&quot;,
+    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+  } ],
+  &quot;error&quot; : &quot;invalid_client&quot;,
+  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+}
+http response: io.sphere.sdk.http.HttpResponseImpl@76f8ff93[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/f783b80a-7f56-4f2e-a2a3-64f4e9f74971], Server-Timing=[auth=0.001;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-27800538.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+SDK: 1.28.0
+project: test-key
+Java: 1.8.0_151
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
+sphere request: &lt;unknown&gt;
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/f783b80a-7f56-4f2e-a2a3-64f4e9f74971], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
+
+	at java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:273)
+	at java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:280)
+	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:604)
+	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
+	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
+	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
+	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+Caused by: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/f783b80a-7f56-4f2e-a2a3-64f4e9f74971` on 2018-01-25T11:00:45.358Z
+http response formatted body: {
+  &quot;statusCode&quot; : 401,
+  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
+  &quot;errors&quot; : [ {
+    &quot;code&quot; : &quot;invalid_client&quot;,
+    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+  } ],
+  &quot;error&quot; : &quot;invalid_client&quot;,
+  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+}
+http response: io.sphere.sdk.http.HttpResponseImpl@76f8ff93[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/f783b80a-7f56-4f2e-a2a3-64f4e9f74971], Server-Timing=[auth=0.001;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-27800538.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+SDK: 1.28.0
+project: test-key
+Java: 1.8.0_151
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
+sphere request: &lt;unknown&gt;
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/f783b80a-7f56-4f2e-a2a3-64f4e9f74971], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
+
+	at io.sphere.sdk.client.TokensSupplierImpl.parseResponse(TokensSupplierImpl.java:122)
+	at io.sphere.sdk.client.TokensSupplierImpl.lambda$get$1(TokensSupplierImpl.java:55)
+	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:602)
+	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
+	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
+	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
+	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+11:00:45.489 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [pool-15-thread-1] - Can't fetch tokens.
 io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/78dbd2ba-1531-4b60-a4ba-7f7fba8119f4` on 2018-01-24T11:12:07.015Z
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/0c07d91b-0b13-4d99-916c-bda9fdb2227c` on 2018-01-25T11:00:45.396Z
 http response formatted body: {
   &quot;statusCode&quot; : 401,
   &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
@@ -115,13 +245,13 @@ http response formatted body: {
   &quot;error&quot; : &quot;invalid_client&quot;,
   &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
 }
-http response: io.sphere.sdk.http.HttpResponseImpl@19bf3b0a[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/78dbd2ba-1531-4b60-a4ba-7f7fba8119f4], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:06 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-6775fe23.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+http response: io.sphere.sdk.http.HttpResponseImpl@47a93ffc[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/0c07d91b-0b13-4d99-916c-bda9fdb2227c], Server-Timing=[auth=0.002;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-fcaf4933.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
 SDK: 1.28.0
 project: test-key
 Java: 1.8.0_151
 cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
 sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/78dbd2ba-1531-4b60-a4ba-7f7fba8119f4], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/0c07d91b-0b13-4d99-916c-bda9fdb2227c], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
 additional notes: []
 Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
 
@@ -135,9 +265,9 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
 	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
 	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
 	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-11:12:07.131 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [Thread-59] - Failed to fetch token.
+11:00:45.497 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [pool-30-thread-1] - Can't fetch tokens.
 java.util.concurrent.CompletionException: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/4845c215-c6c6-4f5b-8045-aa6f3d480017` on 2018-01-24T11:12:07.024Z
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/4971fe67-a4ae-4309-9459-f8d186af74fa` on 2018-01-25T11:00:45.411Z
 http response formatted body: {
   &quot;statusCode&quot; : 401,
   &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
@@ -148,13 +278,13 @@ http response formatted body: {
   &quot;error&quot; : &quot;invalid_client&quot;,
   &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
 }
-http response: io.sphere.sdk.http.HttpResponseImpl@7cbeef79[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/4845c215-c6c6-4f5b-8045-aa6f3d480017], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-fcaf4933.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+http response: io.sphere.sdk.http.HttpResponseImpl@20b29b5b[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/4971fe67-a4ae-4309-9459-f8d186af74fa], Server-Timing=[auth=0.002;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-fcaf4933.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
 SDK: 1.28.0
 project: test-key
 Java: 1.8.0_151
 cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
 sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/4845c215-c6c6-4f5b-8045-aa6f3d480017], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/4971fe67-a4ae-4309-9459-f8d186af74fa], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
 additional notes: []
 Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
 
@@ -169,7 +299,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
 	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
 	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
 Caused by: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/4845c215-c6c6-4f5b-8045-aa6f3d480017` on 2018-01-24T11:12:07.024Z
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/4971fe67-a4ae-4309-9459-f8d186af74fa` on 2018-01-25T11:00:45.411Z
 http response formatted body: {
   &quot;statusCode&quot; : 401,
   &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
@@ -180,13 +310,13 @@ http response formatted body: {
   &quot;error&quot; : &quot;invalid_client&quot;,
   &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
 }
-http response: io.sphere.sdk.http.HttpResponseImpl@7cbeef79[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/4845c215-c6c6-4f5b-8045-aa6f3d480017], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-fcaf4933.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+http response: io.sphere.sdk.http.HttpResponseImpl@20b29b5b[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/4971fe67-a4ae-4309-9459-f8d186af74fa], Server-Timing=[auth=0.002;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-fcaf4933.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
 SDK: 1.28.0
 project: test-key
 Java: 1.8.0_151
 cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
 sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/4845c215-c6c6-4f5b-8045-aa6f3d480017], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/4971fe67-a4ae-4309-9459-f8d186af74fa], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
 additional notes: []
 Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
 
@@ -200,9 +330,139 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
 	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
 	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
 	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-11:12:07.132 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [pool-24-thread-1] - Can't fetch tokens.
+11:00:45.500 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [Thread-57] - Failed to fetch token.
+java.util.concurrent.CompletionException: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/4971fe67-a4ae-4309-9459-f8d186af74fa` on 2018-01-25T11:00:45.411Z
+http response formatted body: {
+  &quot;statusCode&quot; : 401,
+  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
+  &quot;errors&quot; : [ {
+    &quot;code&quot; : &quot;invalid_client&quot;,
+    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+  } ],
+  &quot;error&quot; : &quot;invalid_client&quot;,
+  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+}
+http response: io.sphere.sdk.http.HttpResponseImpl@20b29b5b[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/4971fe67-a4ae-4309-9459-f8d186af74fa], Server-Timing=[auth=0.002;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-fcaf4933.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+SDK: 1.28.0
+project: test-key
+Java: 1.8.0_151
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
+sphere request: &lt;unknown&gt;
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/4971fe67-a4ae-4309-9459-f8d186af74fa], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
+
+	at java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:273)
+	at java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:280)
+	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:604)
+	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
+	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
+	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
+	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+Caused by: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/4971fe67-a4ae-4309-9459-f8d186af74fa` on 2018-01-25T11:00:45.411Z
+http response formatted body: {
+  &quot;statusCode&quot; : 401,
+  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
+  &quot;errors&quot; : [ {
+    &quot;code&quot; : &quot;invalid_client&quot;,
+    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+  } ],
+  &quot;error&quot; : &quot;invalid_client&quot;,
+  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+}
+http response: io.sphere.sdk.http.HttpResponseImpl@20b29b5b[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/4971fe67-a4ae-4309-9459-f8d186af74fa], Server-Timing=[auth=0.002;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-fcaf4933.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+SDK: 1.28.0
+project: test-key
+Java: 1.8.0_151
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
+sphere request: &lt;unknown&gt;
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/4971fe67-a4ae-4309-9459-f8d186af74fa], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
+
+	at io.sphere.sdk.client.TokensSupplierImpl.parseResponse(TokensSupplierImpl.java:122)
+	at io.sphere.sdk.client.TokensSupplierImpl.lambda$get$1(TokensSupplierImpl.java:55)
+	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:602)
+	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
+	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
+	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
+	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+11:00:45.502 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [Thread-56] - Failed to fetch token.
+java.util.concurrent.CompletionException: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/0c07d91b-0b13-4d99-916c-bda9fdb2227c` on 2018-01-25T11:00:45.396Z
+http response formatted body: {
+  &quot;statusCode&quot; : 401,
+  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
+  &quot;errors&quot; : [ {
+    &quot;code&quot; : &quot;invalid_client&quot;,
+    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+  } ],
+  &quot;error&quot; : &quot;invalid_client&quot;,
+  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+}
+http response: io.sphere.sdk.http.HttpResponseImpl@47a93ffc[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/0c07d91b-0b13-4d99-916c-bda9fdb2227c], Server-Timing=[auth=0.002;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-fcaf4933.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+SDK: 1.28.0
+project: test-key
+Java: 1.8.0_151
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
+sphere request: &lt;unknown&gt;
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/0c07d91b-0b13-4d99-916c-bda9fdb2227c], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
+
+	at java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:273)
+	at java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:280)
+	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:604)
+	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
+	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
+	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
+	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+Caused by: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/0c07d91b-0b13-4d99-916c-bda9fdb2227c` on 2018-01-25T11:00:45.396Z
+http response formatted body: {
+  &quot;statusCode&quot; : 401,
+  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
+  &quot;errors&quot; : [ {
+    &quot;code&quot; : &quot;invalid_client&quot;,
+    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+  } ],
+  &quot;error&quot; : &quot;invalid_client&quot;,
+  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+}
+http response: io.sphere.sdk.http.HttpResponseImpl@47a93ffc[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/0c07d91b-0b13-4d99-916c-bda9fdb2227c], Server-Timing=[auth=0.002;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-fcaf4933.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+SDK: 1.28.0
+project: test-key
+Java: 1.8.0_151
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
+sphere request: &lt;unknown&gt;
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/0c07d91b-0b13-4d99-916c-bda9fdb2227c], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
+
+	at io.sphere.sdk.client.TokensSupplierImpl.parseResponse(TokensSupplierImpl.java:122)
+	at io.sphere.sdk.client.TokensSupplierImpl.lambda$get$1(TokensSupplierImpl.java:55)
+	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:602)
+	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
+	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
+	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
+	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+11:00:45.522 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [pool-24-thread-1] - Can't fetch tokens.
 io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/4845c215-c6c6-4f5b-8045-aa6f3d480017` on 2018-01-24T11:12:07.024Z
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/952dc913-b081-4ce2-a89a-e9405e4605e7` on 2018-01-25T11:00:45.493Z
 http response formatted body: {
   &quot;statusCode&quot; : 401,
   &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
@@ -213,13 +473,13 @@ http response formatted body: {
   &quot;error&quot; : &quot;invalid_client&quot;,
   &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
 }
-http response: io.sphere.sdk.http.HttpResponseImpl@7cbeef79[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/4845c215-c6c6-4f5b-8045-aa6f3d480017], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-fcaf4933.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+http response: io.sphere.sdk.http.HttpResponseImpl@140cd72b[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/952dc913-b081-4ce2-a89a-e9405e4605e7], Server-Timing=[auth=0.001;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-27800538.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
 SDK: 1.28.0
 project: test-key
 Java: 1.8.0_151
 cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
 sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/4845c215-c6c6-4f5b-8045-aa6f3d480017], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/952dc913-b081-4ce2-a89a-e9405e4605e7], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
 additional notes: []
 Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
 
@@ -233,9 +493,9 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
 	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
 	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
 	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-11:12:07.153 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [pool-33-thread-1] - Can't fetch tokens.
+11:00:45.524 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [Thread-62] - Failed to fetch token.
 java.util.concurrent.CompletionException: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/e74a357d-c223-4d11-808d-6bf0e80d059b` on 2018-01-24T11:12:07.104Z
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/952dc913-b081-4ce2-a89a-e9405e4605e7` on 2018-01-25T11:00:45.493Z
 http response formatted body: {
   &quot;statusCode&quot; : 401,
   &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
@@ -246,13 +506,13 @@ http response formatted body: {
   &quot;error&quot; : &quot;invalid_client&quot;,
   &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
 }
-http response: io.sphere.sdk.http.HttpResponseImpl@204d802c[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/e74a357d-c223-4d11-808d-6bf0e80d059b], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-9b803276.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+http response: io.sphere.sdk.http.HttpResponseImpl@140cd72b[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/952dc913-b081-4ce2-a89a-e9405e4605e7], Server-Timing=[auth=0.001;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-27800538.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
 SDK: 1.28.0
 project: test-key
 Java: 1.8.0_151
 cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
 sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/e74a357d-c223-4d11-808d-6bf0e80d059b], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/952dc913-b081-4ce2-a89a-e9405e4605e7], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
 additional notes: []
 Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
 
@@ -267,7 +527,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
 	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
 	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
 Caused by: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/e74a357d-c223-4d11-808d-6bf0e80d059b` on 2018-01-24T11:12:07.104Z
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/952dc913-b081-4ce2-a89a-e9405e4605e7` on 2018-01-25T11:00:45.493Z
 http response formatted body: {
   &quot;statusCode&quot; : 401,
   &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
@@ -278,13 +538,13 @@ http response formatted body: {
   &quot;error&quot; : &quot;invalid_client&quot;,
   &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
 }
-http response: io.sphere.sdk.http.HttpResponseImpl@204d802c[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/e74a357d-c223-4d11-808d-6bf0e80d059b], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-9b803276.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+http response: io.sphere.sdk.http.HttpResponseImpl@140cd72b[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/952dc913-b081-4ce2-a89a-e9405e4605e7], Server-Timing=[auth=0.001;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-27800538.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
 SDK: 1.28.0
 project: test-key
 Java: 1.8.0_151
 cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
 sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/e74a357d-c223-4d11-808d-6bf0e80d059b], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/952dc913-b081-4ce2-a89a-e9405e4605e7], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
 additional notes: []
 Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
 
@@ -298,9 +558,9 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
 	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
 	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
 	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-11:12:07.160 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [Thread-66] - Failed to fetch token.
-java.util.concurrent.CompletionException: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/e74a357d-c223-4d11-808d-6bf0e80d059b` on 2018-01-24T11:12:07.104Z
+11:00:45.531 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [pool-27-thread-1] - Can't fetch tokens.
+io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/8c01154e-72b4-41f0-9ed5-7e6b29bb383b` on 2018-01-25T11:00:45.514Z
 http response formatted body: {
   &quot;statusCode&quot; : 401,
   &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
@@ -311,13 +571,46 @@ http response formatted body: {
   &quot;error&quot; : &quot;invalid_client&quot;,
   &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
 }
-http response: io.sphere.sdk.http.HttpResponseImpl@204d802c[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/e74a357d-c223-4d11-808d-6bf0e80d059b], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-9b803276.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+http response: io.sphere.sdk.http.HttpResponseImpl@1f37bf36[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/8c01154e-72b4-41f0-9ed5-7e6b29bb383b], Server-Timing=[auth=0.001;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-27800538.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
 SDK: 1.28.0
 project: test-key
 Java: 1.8.0_151
 cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
 sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/e74a357d-c223-4d11-808d-6bf0e80d059b], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/8c01154e-72b4-41f0-9ed5-7e6b29bb383b], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+additional notes: []
+Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
+
+	at io.sphere.sdk.client.TokensSupplierImpl.parseResponse(TokensSupplierImpl.java:122)
+	at io.sphere.sdk.client.TokensSupplierImpl.lambda$get$1(TokensSupplierImpl.java:55)
+	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:602)
+	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
+	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
+	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
+	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
+	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
+11:00:45.539 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [Thread-65] - Failed to fetch token.
+java.util.concurrent.CompletionException: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/8c01154e-72b4-41f0-9ed5-7e6b29bb383b` on 2018-01-25T11:00:45.514Z
+http response formatted body: {
+  &quot;statusCode&quot; : 401,
+  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
+  &quot;errors&quot; : [ {
+    &quot;code&quot; : &quot;invalid_client&quot;,
+    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+  } ],
+  &quot;error&quot; : &quot;invalid_client&quot;,
+  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
+}
+http response: io.sphere.sdk.http.HttpResponseImpl@1f37bf36[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/8c01154e-72b4-41f0-9ed5-7e6b29bb383b], Server-Timing=[auth=0.001;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-27800538.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+SDK: 1.28.0
+project: test-key
+Java: 1.8.0_151
+cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
+sphere request: &lt;unknown&gt;
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/8c01154e-72b4-41f0-9ed5-7e6b29bb383b], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
 additional notes: []
 Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
 
@@ -332,7 +625,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
 	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
 	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
 Caused by: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/e74a357d-c223-4d11-808d-6bf0e80d059b` on 2018-01-24T11:12:07.104Z
+summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/8c01154e-72b4-41f0-9ed5-7e6b29bb383b` on 2018-01-25T11:00:45.514Z
 http response formatted body: {
   &quot;statusCode&quot; : 401,
   &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
@@ -343,208 +636,13 @@ http response formatted body: {
   &quot;error&quot; : &quot;invalid_client&quot;,
   &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
 }
-http response: io.sphere.sdk.http.HttpResponseImpl@204d802c[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/e74a357d-c223-4d11-808d-6bf0e80d059b], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-9b803276.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
+http response: io.sphere.sdk.http.HttpResponseImpl@1f37bf36[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/8c01154e-72b4-41f0-9ed5-7e6b29bb383b], Server-Timing=[auth=0.001;], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Thu, 25 Jan 2018 11:00:45 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-27800538.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
 SDK: 1.28.0
 project: test-key
 Java: 1.8.0_151
 cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
 sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/e74a357d-c223-4d11-808d-6bf0e80d059b], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
-
-	at io.sphere.sdk.client.TokensSupplierImpl.parseResponse(TokensSupplierImpl.java:122)
-	at io.sphere.sdk.client.TokensSupplierImpl.lambda$get$1(TokensSupplierImpl.java:55)
-	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:602)
-	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
-	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
-	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
-	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
-	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
-	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-11:12:07.221 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [Thread-69] - Failed to fetch token.
-java.util.concurrent.CompletionException: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/7a1716ac-2533-4af8-a870-419f426f0a60` on 2018-01-24T11:12:07.151Z
-http response formatted body: {
-  &quot;statusCode&quot; : 401,
-  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
-  &quot;errors&quot; : [ {
-    &quot;code&quot; : &quot;invalid_client&quot;,
-    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
-  } ],
-  &quot;error&quot; : &quot;invalid_client&quot;,
-  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
-}
-http response: io.sphere.sdk.http.HttpResponseImpl@3f135f0a[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/7a1716ac-2533-4af8-a870-419f426f0a60], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-27800538.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
-SDK: 1.28.0
-project: test-key
-Java: 1.8.0_151
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
-sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/7a1716ac-2533-4af8-a870-419f426f0a60], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
-
-	at java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:273)
-	at java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:280)
-	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:604)
-	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
-	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
-	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
-	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
-	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
-	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-Caused by: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/7a1716ac-2533-4af8-a870-419f426f0a60` on 2018-01-24T11:12:07.151Z
-http response formatted body: {
-  &quot;statusCode&quot; : 401,
-  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
-  &quot;errors&quot; : [ {
-    &quot;code&quot; : &quot;invalid_client&quot;,
-    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
-  } ],
-  &quot;error&quot; : &quot;invalid_client&quot;,
-  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
-}
-http response: io.sphere.sdk.http.HttpResponseImpl@3f135f0a[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/7a1716ac-2533-4af8-a870-419f426f0a60], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-27800538.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
-SDK: 1.28.0
-project: test-key
-Java: 1.8.0_151
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
-sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/7a1716ac-2533-4af8-a870-419f426f0a60], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
-
-	at io.sphere.sdk.client.TokensSupplierImpl.parseResponse(TokensSupplierImpl.java:122)
-	at io.sphere.sdk.client.TokensSupplierImpl.lambda$get$1(TokensSupplierImpl.java:55)
-	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:602)
-	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
-	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
-	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
-	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
-	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
-	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-11:12:07.225 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [Thread-72] - Failed to fetch token.
-java.util.concurrent.CompletionException: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/bf2f25b8-eeb2-4563-bd77-42d153c55a65` on 2018-01-24T11:12:07.215Z
-http response formatted body: {
-  &quot;statusCode&quot; : 401,
-  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
-  &quot;errors&quot; : [ {
-    &quot;code&quot; : &quot;invalid_client&quot;,
-    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
-  } ],
-  &quot;error&quot; : &quot;invalid_client&quot;,
-  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
-}
-http response: io.sphere.sdk.http.HttpResponseImpl@4bc0ce70[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/bf2f25b8-eeb2-4563-bd77-42d153c55a65], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-fcaf4933.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
-SDK: 1.28.0
-project: test-key
-Java: 1.8.0_151
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
-sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/bf2f25b8-eeb2-4563-bd77-42d153c55a65], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
-
-	at java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:273)
-	at java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:280)
-	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:604)
-	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
-	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
-	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
-	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
-	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
-	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-Caused by: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/bf2f25b8-eeb2-4563-bd77-42d153c55a65` on 2018-01-24T11:12:07.215Z
-http response formatted body: {
-  &quot;statusCode&quot; : 401,
-  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
-  &quot;errors&quot; : [ {
-    &quot;code&quot; : &quot;invalid_client&quot;,
-    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
-  } ],
-  &quot;error&quot; : &quot;invalid_client&quot;,
-  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
-}
-http response: io.sphere.sdk.http.HttpResponseImpl@4bc0ce70[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/bf2f25b8-eeb2-4563-bd77-42d153c55a65], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-fcaf4933.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
-SDK: 1.28.0
-project: test-key
-Java: 1.8.0_151
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
-sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/bf2f25b8-eeb2-4563-bd77-42d153c55a65], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
-
-	at io.sphere.sdk.client.TokensSupplierImpl.parseResponse(TokensSupplierImpl.java:122)
-	at io.sphere.sdk.client.TokensSupplierImpl.lambda$get$1(TokensSupplierImpl.java:55)
-	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:602)
-	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
-	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
-	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
-	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
-	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
-	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-11:12:07.259 ?[1;31m[ERROR]?[0;39m ?[36msphere.oauth?[0;39m [Thread-73] - Failed to fetch token.
-java.util.concurrent.CompletionException: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/c072212c-880e-44b4-bd98-2ff46067ca89` on 2018-01-24T11:12:07.216Z
-http response formatted body: {
-  &quot;statusCode&quot; : 401,
-  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
-  &quot;errors&quot; : [ {
-    &quot;code&quot; : &quot;invalid_client&quot;,
-    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
-  } ],
-  &quot;error&quot; : &quot;invalid_client&quot;,
-  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
-}
-http response: io.sphere.sdk.http.HttpResponseImpl@75d75e97[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/c072212c-880e-44b4-bd98-2ff46067ca89], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-6775fe23.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
-SDK: 1.28.0
-project: test-key
-Java: 1.8.0_151
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
-sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/c072212c-880e-44b4-bd98-2ff46067ca89], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
-
-	at java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:273)
-	at java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:280)
-	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:604)
-	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:577)
-	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1962)
-	at io.sphere.sdk.http.HttpClientAdapterBase.lambda$execute$1(HttpClientAdapterBase.java:58)
-	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:760)
-	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:736)
-	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:474)
-Caused by: io.sphere.sdk.client.InvalidClientCredentialsException: detailMessage: Invalid credentials for test-key on https://auth.sphere.io
-summary: POST https://auth.sphere.io/oauth/token failed  with response code 401 with X-Correlation-ID `test-key/c072212c-880e-44b4-bd98-2ff46067ca89` on 2018-01-24T11:12:07.216Z
-http response formatted body: {
-  &quot;statusCode&quot; : 401,
-  &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,
-  &quot;errors&quot; : [ {
-    &quot;code&quot; : &quot;invalid_client&quot;,
-    &quot;message&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
-  } ],
-  &quot;error&quot; : &quot;invalid_client&quot;,
-  &quot;error_description&quot; : &quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;
-}
-http response: io.sphere.sdk.http.HttpResponseImpl@75d75e97[statusCode=401,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[test-key/c072212c-880e-44b4-bd98-2ff46067ca89], WWW-Authenticate=[Bearer realm=&quot;sphere&quot;, error=&quot;invalid_client&quot;, error_description=&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;], Pragma=[no-cache], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Wed, 24 Jan 2018 11:12:07 GMT], Via=[1.1 google], Cache-Control=[no-store], X-Served-By=[auth-gce-6775fe23.sphere.prod.commercetools.de], X-Served-Config=[sphere-auth-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[345], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={&quot;statusCode&quot;:401,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;,&quot;errors&quot;:[{&quot;code&quot;:&quot;invalid_client&quot;,&quot;message&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}],&quot;error&quot;:&quot;invalid_client&quot;,&quot;error_description&quot;:&quot;Please provide valid client credentials using HTTP Basic Authentication.&quot;}]
-SDK: 1.28.0
-project: test-key
-Java: 1.8.0_151
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/service
-sphere request: &lt;unknown&gt;
-http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/c072212c-880e-44b4-bd98-2ff46067ca89], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
+http request: HttpRequestImpl[httpMethod=POST,url=https://auth.sphere.io/oauth/token,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.28.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], X-Correlation-ID=[test-key/8c01154e-72b4-41f0-9ed5-7e6b29bb383b], Content-Type=[application/x-www-form-urlencoded]},body=FormUrlEncodedHttpRequestBody[data=[NameValuePairImpl[name=grant_type,value=client_credentials], NameValuePairImpl[name=scope,value=manage_project:test-key]]]]
 additional notes: []
 Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/InvalidClientCredentialsException.html
 
@@ -569,7 +667,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
 <input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
 </label>
 </div>Generated by 
-<a href="http://www.gradle.org">Gradle 4.3</a> at Jan 24, 2018 11:13:46 AM</p>
+<a href="http://www.gradle.org">Gradle 4.3</a> at Jan 25, 2018 11:02:25 AM</p>
 </div>
 </div>
 </body>
