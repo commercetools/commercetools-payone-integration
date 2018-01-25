@@ -94,6 +94,7 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
      * @param lastExecutionAttempt
      * @return A new version of the PaymentWithCartLike.
      */
+    @Nonnull
     protected abstract PaymentWithCartLike retryLastExecutionAttempt(@Nonnull PaymentWithCartLike paymentWithCartLike,
                                                                      @Nonnull Transaction transaction,
                                                                      @Nonnull CustomFields lastExecutionAttempt);

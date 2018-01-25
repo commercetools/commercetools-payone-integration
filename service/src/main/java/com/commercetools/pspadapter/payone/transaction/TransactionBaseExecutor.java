@@ -49,6 +49,7 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
         return attemptExecution(paymentWithCartLike, transaction);
     }
 
+    @Nonnull
     abstract protected PaymentWithCartLike attemptExecution(final PaymentWithCartLike paymentWithCartLike,
                                                             final Transaction transaction);
 

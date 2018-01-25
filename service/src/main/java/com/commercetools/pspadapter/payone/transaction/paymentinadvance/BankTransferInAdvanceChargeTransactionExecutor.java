@@ -101,6 +101,8 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
         return paymentWithCartLike;
     }
 
+    @Override
+    @Nonnull
     protected PaymentWithCartLike attemptExecution(final PaymentWithCartLike paymentWithCartLike,
                                                    final Transaction transaction) {
         final String transactionId = transaction.getId();
