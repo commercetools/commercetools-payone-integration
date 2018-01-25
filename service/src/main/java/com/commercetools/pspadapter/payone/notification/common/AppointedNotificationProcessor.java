@@ -29,11 +29,6 @@ import java.util.List;
  */
 public class AppointedNotificationProcessor extends NotificationProcessorBase {
 
-    /**
-     * Initializes a new instance.
-     *
-     * @param tenantFactory the tenant factory for commercetools platform API
-     */
     public AppointedNotificationProcessor(TenantFactory tenantFactory, TenantConfig tenantConfig,
                                           TransactionStateResolver transactionStateResolver) {
         super(tenantFactory, tenantConfig, transactionStateResolver);

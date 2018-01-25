@@ -23,11 +23,6 @@ import java.util.List;
  */
 public class CaptureNotificationProcessor extends NotificationProcessorBase {
 
-    /**
-     * Initializes a new instance.
-     *
-     * @param tenantFactory the tenant factory for commercetools platform API
-     */
     public CaptureNotificationProcessor(TenantFactory tenantFactory, TenantConfig tenantConfig,
                                         TransactionStateResolver transactionStateResolver) {
         super(tenantFactory, tenantConfig, transactionStateResolver);

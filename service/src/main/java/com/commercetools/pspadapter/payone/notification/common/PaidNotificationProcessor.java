@@ -22,11 +22,7 @@ import java.util.List;
  * @author Jan Wolter
  */
 public class PaidNotificationProcessor extends NotificationProcessorBase {
-    /**
-     * Initializes a new instance.
-     *
-     * @param tenantFactory the tenant factory for commercetools platform API
-     */
+
     public PaidNotificationProcessor(TenantFactory tenantFactory, TenantConfig tenantConfig,
                                      TransactionStateResolver transactionStateResolver) {
         super(tenantFactory, tenantConfig, transactionStateResolver);

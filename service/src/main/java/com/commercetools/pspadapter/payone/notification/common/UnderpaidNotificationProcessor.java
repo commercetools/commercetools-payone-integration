@@ -22,11 +22,7 @@ import java.util.Optional;
  * @author mht@dotsource.de
  */
 public class UnderpaidNotificationProcessor extends NotificationProcessorBase {
-    /**
-     * Initializes a new instance.
-     *
-     * @param tenantFactory the tenant factory for commercetools platform API
-     */
+
     public UnderpaidNotificationProcessor(TenantFactory tenantFactory, TenantConfig tenantConfig,
                                           TransactionStateResolver transactionStateResolver) {
         super(tenantFactory, tenantConfig, transactionStateResolver);

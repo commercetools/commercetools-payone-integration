@@ -15,11 +15,6 @@ import com.commercetools.pspadapter.tenant.TenantFactory;
  */
 public class DefaultNotificationProcessor extends NotificationProcessorBase {
 
-    /**
-     * Initializes a new instance.
-     *
-     * @param tenantFactory the tenant factory for commercetools platform API
-     */
     public DefaultNotificationProcessor(TenantFactory tenantFactory, TenantConfig tenantConfig,
                                         TransactionStateResolver transactionStateResolver) {
         super(tenantFactory, tenantConfig, transactionStateResolver);
