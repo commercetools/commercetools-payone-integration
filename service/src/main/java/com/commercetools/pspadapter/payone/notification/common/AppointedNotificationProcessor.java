@@ -42,8 +42,8 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
     @Override
     protected ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
                                                                         final Notification notification) {
-        final ImmutableList.Builder<UpdateAction<Payment>> listBuilder = ImmutableList.builder();
-        listBuilder.addAll(super.createPaymentUpdates(payment, notification));
+        final ImmutableList.Builder<UpdateAction<Payment>> actionsBuilder = ImmutableList.builder();
+        actionsBuilder.addAll(super.createPaymentUpdates(payment, notification));
 
         final List<Transaction> transactions = payment.getTransactions();
         final String sequenceNumber = toSequenceNumber(notification.getSequencenumber());
@@ -51,14 +51,14 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
         if (findMatchingTransaction(transactions, TransactionType.CHARGE, sequenceNumber).isPresent()) {
             // TODO: https://github.com/commercetools/commercetools-payone-integration/issues/196
             // also: never tested (either unit nor functional)
-            return listBuilder.build();
+            return actionsBuilder.build();
         }
 
         if (sequenceNumber.equals("1")) {
 
-            listBuilder.add(matchingChangeInteractionOrChargeTransaction(notification, transactions, sequenceNumber));
+            actionsBuilder.add(matchingChangeInteractionOrChargeTransaction(notification, transactions, sequenceNumber));
 
-            return listBuilder.build();
+            return actionsBuilder.build();
         }
 
         final MonetaryAmount balance = MoneyImpl.of(notification.getBalance(), notification.getCurrency());
@@ -70,21 +70,21 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
                         //set transactionState if still pending and notification has status "complete"
                         if (isNotCompletedTransaction(transaction) &&
                                 notification.getTransactionStatus().equals(TransactionStatus.COMPLETED)) {
-                            listBuilder.add(ChangeTransactionState.of(
+                            actionsBuilder.add(ChangeTransactionState.of(
                                     notification.getTransactionStatus().getCtTransactionState(), transaction.getId()));
                         }
 
-                        return listBuilder;
+                        return actionsBuilder;
                     })
                     .orElseGet(() -> {
-                        addPaymentUpdatesForNewAuthorizationTransaction(notification, listBuilder);
-                        return listBuilder;
+                        addPaymentUpdatesForNewAuthorizationTransaction(notification, actionsBuilder);
+                        return actionsBuilder;
                     })
                     .build();
         }
 
-        listBuilder.add(addChargePendingTransaction(notification));
-        return listBuilder.build();
+        actionsBuilder.add(addChargePendingTransaction(notification));
+        return actionsBuilder.build();
     }
 
     private UpdateAction<Payment> matchingChangeInteractionOrChargeTransaction(@Nonnull final Notification notification,
