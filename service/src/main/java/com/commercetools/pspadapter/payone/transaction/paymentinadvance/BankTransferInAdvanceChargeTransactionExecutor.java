@@ -132,15 +132,15 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
 
             if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
 
-                return update(paymentWithCartLike, updatedPayment, getBankTransferAdvancedUpdateActionsList(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
+                return update(paymentWithCartLike, updatedPayment, getBankTransferAdvancedUpdateActions(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
 
             } else if (ResponseStatus.ERROR.getStateCode().equals(status)) {
 
-                return update(paymentWithCartLike, updatedPayment, getDefaultUpdateActionsList(TransactionState.FAILURE, updatedPayment, transactionId, response, interfaceInteraction));
+                return update(paymentWithCartLike, updatedPayment, getDefaultUpdateActions(TransactionState.FAILURE, updatedPayment, transactionId, response, interfaceInteraction));
 
             } else if (ResponseStatus.PENDING.getStateCode().equals(status)) {
 
-                return update(paymentWithCartLike, updatedPayment, getDefaultSuccessUpdateActionsList(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
+                return update(paymentWithCartLike, updatedPayment, getDefaultSuccessUpdateActions(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
 
             }
 
@@ -161,18 +161,18 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends TransactionB
     }
 
     /**
-     * Additionally to {@link #getDefaultSuccessUpdateActionsList(TransactionState, Payment, String, Map, AddInterfaceInteraction)}
+     * Additionally to {@link #getDefaultSuccessUpdateActions(TransactionState, Payment, String, Map, AddInterfaceInteraction)}
      * adds payer and IBAN/BIC custom fields.
      * <p>
      * This update actions list is used for all success payment handling (including redirect, approved and pending)
      */
-    protected List<UpdateActionImpl<Payment>> getBankTransferAdvancedUpdateActionsList(@Nonnull TransactionState newState,
-                                                                                       @Nonnull Payment updatedPayment,
-                                                                                       @Nonnull String transactionId,
-                                                                                       @Nonnull Map<String, String> response,
-                                                                                       @Nonnull AddInterfaceInteraction interfaceInteraction) {
+    protected List<UpdateActionImpl<Payment>> getBankTransferAdvancedUpdateActions(@Nonnull TransactionState newState,
+                                                                                   @Nonnull Payment updatedPayment,
+                                                                                   @Nonnull String transactionId,
+                                                                                   @Nonnull Map<String, String> response,
+                                                                                   @Nonnull AddInterfaceInteraction interfaceInteraction) {
 
-        List<UpdateActionImpl<Payment>> updateActions = getDefaultSuccessUpdateActionsList(newState, updatedPayment, transactionId, response, interfaceInteraction);
+        List<UpdateActionImpl<Payment>> updateActions = getDefaultSuccessUpdateActions(newState, updatedPayment, transactionId, response, interfaceInteraction);
 
         updateActions.add(SetCustomField.ofObject(CustomFieldKeys.PAY_TO_BIC_FIELD, response.get(BIC)));
         updateActions.add(SetCustomField.ofObject(CustomFieldKeys.PAY_TO_IBAN_FIELD, response.get(IBAN)));

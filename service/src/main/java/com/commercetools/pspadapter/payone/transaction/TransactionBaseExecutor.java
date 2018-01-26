@@ -120,17 +120,17 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
     }
 
     /**
-     * Additionally to {@link #getDefaultSuccessUpdateActionsList(TransactionState, Payment, String, Map, AddInterfaceInteraction)}
+     * Additionally to {@link #getDefaultSuccessUpdateActions(TransactionState, Payment, String, Map, AddInterfaceInteraction)}
      * updates redirect specific custom fields.
      */
-    protected List<UpdateActionImpl<Payment>> getRedirectUpdateActionsList(@Nonnull TransactionState newState,
-                                                                           @Nonnull Payment updatedPayment,
-                                                                           @Nonnull String transactionId,
-                                                                           @Nonnull Map<String, String> response,
-                                                                           @Nonnull AddInterfaceInteraction interfaceInteraction) {
+    protected List<UpdateActionImpl<Payment>> getRedirectUpdateActions(@Nonnull TransactionState newState,
+                                                                       @Nonnull Payment updatedPayment,
+                                                                       @Nonnull String transactionId,
+                                                                       @Nonnull Map<String, String> response,
+                                                                       @Nonnull AddInterfaceInteraction interfaceInteraction) {
 
         List<UpdateActionImpl<Payment>> updateActions =
-                getDefaultSuccessUpdateActionsList(newState, updatedPayment, transactionId, response, interfaceInteraction);
+                getDefaultSuccessUpdateActions(newState, updatedPayment, transactionId, response, interfaceInteraction);
 
         updateActions.add(SetCustomField.ofObject(CustomFieldKeys.REDIRECT_URL_FIELD, response.get(PayoneResponseFields.REDIRECT_URL)));
 
@@ -138,17 +138,17 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
     }
 
     /**
-     * Additionally to {@link #getDefaultUpdateActionsList(TransactionState, Payment, String, Map, AddInterfaceInteraction)}
+     * Additionally to {@link #getDefaultUpdateActions(TransactionState, Payment, String, Map, AddInterfaceInteraction)}
      * adds payment interface id from the {@code response} ({@link PayoneResponseFields#TXID} field).
      * <p>
      * This update actions list is used for all success payment handling (including redirect, approved and pending)
      */
-    protected List<UpdateActionImpl<Payment>> getDefaultSuccessUpdateActionsList(@Nonnull TransactionState newState,
-                                                                                 @Nonnull Payment updatedPayment,
-                                                                                 @Nonnull String transactionId,
-                                                                                 @Nonnull Map<String, String> response,
-                                                                                 @Nonnull AddInterfaceInteraction interfaceInteraction) {
-        List<UpdateActionImpl<Payment>> updateActions = getDefaultUpdateActionsList(newState, updatedPayment, transactionId, response, interfaceInteraction);
+    protected List<UpdateActionImpl<Payment>> getDefaultSuccessUpdateActions(@Nonnull TransactionState newState,
+                                                                             @Nonnull Payment updatedPayment,
+                                                                             @Nonnull String transactionId,
+                                                                             @Nonnull Map<String, String> response,
+                                                                             @Nonnull AddInterfaceInteraction interfaceInteraction) {
+        List<UpdateActionImpl<Payment>> updateActions = getDefaultUpdateActions(newState, updatedPayment, transactionId, response, interfaceInteraction);
         updateActions.add(SetInterfaceId.of(response.get(TXID)));
 
         return updateActions;
@@ -165,11 +165,11 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
      * the transaction has right now.</li>
      * </ul>
      */
-    protected List<UpdateActionImpl<Payment>> getDefaultUpdateActionsList(@Nonnull TransactionState newState,
-                                                                          @Nonnull Payment updatedPayment,
-                                                                          @Nonnull String transactionId,
-                                                                          @Nonnull Map<String, String> response,
-                                                                          @Nonnull AddInterfaceInteraction interfaceInteraction) {
+    protected List<UpdateActionImpl<Payment>> getDefaultUpdateActions(@Nonnull TransactionState newState,
+                                                                      @Nonnull Payment updatedPayment,
+                                                                      @Nonnull String transactionId,
+                                                                      @Nonnull Map<String, String> response,
+                                                                      @Nonnull AddInterfaceInteraction interfaceInteraction) {
         ArrayList<UpdateActionImpl<Payment>> updateActions = Lists.newArrayList(
                 interfaceInteraction,
                 setStatusInterfaceCode(response),

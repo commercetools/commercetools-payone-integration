@@ -131,7 +131,7 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
                                 CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                                 CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
 
-                return update(paymentWithCartLike, updatedPayment, getRedirectUpdateActionsList(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
+                return update(paymentWithCartLike, updatedPayment, getRedirectUpdateActions(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
 
             } else {
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
@@ -141,15 +141,15 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
 
                 if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
 
-                    return update(paymentWithCartLike, updatedPayment, getDefaultSuccessUpdateActionsList(TransactionState.SUCCESS, updatedPayment, transactionId, response, interfaceInteraction));
+                    return update(paymentWithCartLike, updatedPayment, getDefaultSuccessUpdateActions(TransactionState.SUCCESS, updatedPayment, transactionId, response, interfaceInteraction));
 
                 } else if (ResponseStatus.ERROR.getStateCode().equals(status)) {
 
-                    return update(paymentWithCartLike, updatedPayment, getDefaultUpdateActionsList(TransactionState.FAILURE, updatedPayment, transactionId, response, interfaceInteraction));
+                    return update(paymentWithCartLike, updatedPayment, getDefaultUpdateActions(TransactionState.FAILURE, updatedPayment, transactionId, response, interfaceInteraction));
 
                 } else if (ResponseStatus.PENDING.getStateCode().equals(status)) {
 
-                    return update(paymentWithCartLike, updatedPayment, getDefaultSuccessUpdateActionsList(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
+                    return update(paymentWithCartLike, updatedPayment, getDefaultSuccessUpdateActions(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
 
                 }
             }
