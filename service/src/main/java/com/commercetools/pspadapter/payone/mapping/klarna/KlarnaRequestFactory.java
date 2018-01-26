@@ -48,10 +48,12 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
      * @see KlarnaAuthorizationRequest
      */
     @Override
+    @Nonnull
     public KlarnaAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
         return createRequestInternal(paymentWithCartLike, KlarnaAuthorizationRequest::new);
     }
 
+    @Nonnull
     protected <BKR extends BaseKlarnaRequest> BKR createRequestInternal(final PaymentWithCartLike paymentWithCartLike,
                                                                         final TriFunction<PayoneConfig, String, PaymentWithCartLike, BKR> requestConstructor) {
         final Payment ctPayment = paymentWithCartLike.getPayment();

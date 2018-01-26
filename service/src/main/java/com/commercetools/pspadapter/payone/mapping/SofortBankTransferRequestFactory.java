@@ -34,6 +34,7 @@ public class SofortBankTransferRequestFactory extends BankTransferWithoutIbanBic
     }
 
     @Override
+    @Nonnull
     public BankTransferAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");

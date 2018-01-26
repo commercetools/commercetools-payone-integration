@@ -35,6 +35,7 @@ public class ChargeTransactionExecutor extends BaseDefaultTransactionExecutor {
     }
 
     @Override
+    @Nonnull
     protected BaseRequest createRequest(@Nonnull PaymentWithCartLike paymentWithCartLike) {
         return requestFactory.createAuthorizationRequest(paymentWithCartLike);
     }

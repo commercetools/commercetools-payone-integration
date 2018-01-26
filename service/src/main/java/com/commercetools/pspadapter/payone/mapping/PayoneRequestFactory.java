@@ -45,6 +45,7 @@ public abstract class PayoneRequestFactory {
         throw new UnsupportedOperationException("this request type is not supported by this payment method.");
     }
 
+    @Nonnull
     public AuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
         throw new UnsupportedOperationException("this request type is not supported by this payment method.");
     }

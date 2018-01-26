@@ -36,6 +36,7 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
     }
 
     @Override
+    @Nonnull
     public WalletAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
