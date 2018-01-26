@@ -97,18 +97,18 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
                 .orElseGet(() -> addChargePendingTransaction(notification));
     }
 
-    private static AddTransaction addAuthorizationTransaction(final Notification notification) {
+    private static AddTransaction addAuthorizationTransaction(@Nonnull final Notification notification) {
         return addTransactionFromNotification(notification,
                 TransactionType.AUTHORIZATION, notification.getTransactionStatus().getCtTransactionState());
     }
 
-    private static AddTransaction addChargePendingTransaction(final Notification notification) {
+    private static AddTransaction addChargePendingTransaction(@Nonnull final Notification notification) {
         return addTransactionFromNotification(notification, TransactionType.CHARGE, TransactionState.PENDING);
     }
 
-    private static AddTransaction addTransactionFromNotification(final Notification notification,
-                                                                 final TransactionType transactionType,
-                                                                 final TransactionState transactionState) {
+    private static AddTransaction addTransactionFromNotification(@Nonnull final Notification notification,
+                                                                 @Nonnull final TransactionType transactionType,
+                                                                 @Nonnull final TransactionState transactionState) {
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         return AddTransaction.of(TransactionDraftBuilder.of(transactionType, amount)
                 .timestamp(toZonedDateTime(notification))
