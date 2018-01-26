@@ -49,8 +49,10 @@ import javax.money.MonetaryAmount;
 import javax.money.format.MonetaryAmountFormat;
 import javax.money.format.MonetaryFormats;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -597,6 +599,27 @@ public abstract class BaseFixture {
      */
     public final boolean containsSubstring(final CharSequence seq, final CharSequence searchSeq) {
         return StringUtils.contains(seq, searchSeq);
+    }
+
+    /**
+     * Concatenate URL paths parts to single URL. This method is used to generate test <i>Success</i>, <i>Error</i>,
+     * <i>Cancel</i> etc URL.
+     * <p>
+     * The implementation replaces spaces " " with dashes "-" and then performs URL encoding on
+     * {@code paymentName} and {@code redirectType}.
+     *
+     * @param baseUrl      base URL part in format {@code protocol://host.name[:port]/base_path/}
+     * @param paymentName  payment name to embed (concat) to URL
+     * @param redirectType redirect type to embed (concat) to URL. Usually smth like <i>Success</i>, <i>Error</i>,
+     *                     <i>Cancel</i> to show explicitly which URL it is
+     * @return URL encoded concatenated URL
+     */
+    public final String createRedirectUrl(final String baseUrl, final String paymentName, final String redirectType) {
+        try {
+            return baseUrl + URLEncoder.encode((paymentName + " " + redirectType).replace(" ", "-"), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalArgumentException("Can't create redirect URL: ", e);
+        }
     }
 }
 

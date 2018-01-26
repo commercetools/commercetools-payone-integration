@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutionException;
  *
  */
 @RunWith(ConcordionRunner.class)
-public class PreauthorizationFixture extends BasePaymentFixture {
+public class ChargeFixture extends BasePaymentFixture {
 
 
     public String  createPayment(

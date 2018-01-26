@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
+import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
@@ -14,9 +15,9 @@ import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractio
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 import io.sphere.sdk.utils.MoneyImpl;
 
+import javax.annotation.Nonnull;
 import javax.money.MonetaryAmount;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * An implementation of a NotificationProcessor specifically for notifications with txaction 'appointed'.
@@ -28,13 +29,9 @@ import java.util.Optional;
  */
 public class AppointedNotificationProcessor extends NotificationProcessorBase {
 
-    /**
-     * Initializes a new instance.
-     *
-     * @param serviceFactory the services factory for commercetools platform API
-     */
-    public AppointedNotificationProcessor(TenantFactory serviceFactory, TenantConfig tenantConfig) {
-        super(serviceFactory, tenantConfig);
+    public AppointedNotificationProcessor(TenantFactory tenantFactory, TenantConfig tenantConfig,
+                                          TransactionStateResolver transactionStateResolver) {
+        super(tenantFactory, tenantConfig, transactionStateResolver);
     }
 
     @Override
@@ -45,25 +42,23 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
     @Override
     protected ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
                                                                         final Notification notification) {
-        final ImmutableList.Builder<UpdateAction<Payment>> listBuilder = ImmutableList.builder();
-        listBuilder.addAll(super.createPaymentUpdates(payment, notification));
+        final ImmutableList.Builder<UpdateAction<Payment>> actionsBuilder = ImmutableList.builder();
+        actionsBuilder.addAll(super.createPaymentUpdates(payment, notification));
 
         final List<Transaction> transactions = payment.getTransactions();
         final String sequenceNumber = toSequenceNumber(notification.getSequencenumber());
 
         if (findMatchingTransaction(transactions, TransactionType.CHARGE, sequenceNumber).isPresent()) {
-            return listBuilder.build();
+            // TODO: https://github.com/commercetools/commercetools-payone-integration/issues/196
+            // also: never tested (either unit nor functional)
+            return actionsBuilder.build();
         }
 
         if (sequenceNumber.equals("1")) {
-            final Optional<Transaction> transaction =
-                    findMatchingTransaction(transactions, TransactionType.CHARGE, "0");
-            if (transaction.isPresent()) {
-                listBuilder.add(ChangeTransactionInteractionId.of(sequenceNumber, transaction.get().getId()));
-            } else {
-                addPaymentUpdatesForNewChargeTransaction(notification, listBuilder);
-            }
-            return listBuilder.build();
+
+            actionsBuilder.add(matchingChangeInteractionOrChargeTransaction(notification, transactions, sequenceNumber));
+
+            return actionsBuilder.build();
         }
 
         final MonetaryAmount balance = MoneyImpl.of(notification.getBalance(), notification.getCurrency());
@@ -72,49 +67,53 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
                     .filter(t -> t.getType().equals(TransactionType.AUTHORIZATION))
                     .findFirst()
                     .map(transaction -> {
-                        //set transactionState if still pending and notification has status "complete"
-                        if (transaction.getState().equals(TransactionState.PENDING) &&
+                        //set transactionState if is still not completed and notification has status "complete"
+                        if (isNotCompletedTransaction(transaction) &&
                                 notification.getTransactionStatus().equals(TransactionStatus.COMPLETED)) {
-                            listBuilder.add(ChangeTransactionState.of(
+                            actionsBuilder.add(ChangeTransactionState.of(
                                     notification.getTransactionStatus().getCtTransactionState(), transaction.getId()));
                         }
 
-                        return listBuilder;
+                        return actionsBuilder;
                     })
                     .orElseGet(() -> {
-                        addPaymentUpdatesForNewAuthorizationTransaction(notification, listBuilder);
-                        return listBuilder;
+                        actionsBuilder.add(addAuthorizationTransaction(notification));
+                        return actionsBuilder;
                     })
                     .build();
         }
 
-        addPaymentUpdatesForNewChargeTransaction(notification, listBuilder);
-        return listBuilder.build();
+        actionsBuilder.add(addChargePendingTransaction(notification));
+        return actionsBuilder.build();
     }
 
-    private static void addPaymentUpdatesForNewAuthorizationTransaction(
-            final Notification notification,
-            final ImmutableList.Builder<UpdateAction<Payment>> listBuilder) {
-        final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-
-        final TransactionState ctTransactionState = notification.getTransactionStatus().getCtTransactionState();
-
-        listBuilder.add(AddTransaction.of(TransactionDraftBuilder.of(TransactionType.AUTHORIZATION, amount)
-                .timestamp(toZonedDateTime(notification))
-                .state(ctTransactionState)
-                .interactionId(notification.getSequencenumber())
-                .build()));
+    private UpdateAction<Payment> matchingChangeInteractionOrChargeTransaction(@Nonnull final Notification notification,
+                                                                               @Nonnull final List<Transaction> transactions,
+                                                                               @Nonnull final String sequenceNumber) {
+        // if a CHARGE transaction with "0" interaction id found - update interaction id,
+        // otherwise -  create ad new Charge-Pending transaction with interactionId == notification.sequencenumber
+        return findMatchingTransaction(transactions, TransactionType.CHARGE, "0")
+                .map(transaction -> (UpdateAction<Payment>) ChangeTransactionInteractionId.of(sequenceNumber, transaction.getId()))
+                .orElseGet(() -> addChargePendingTransaction(notification));
     }
 
-    private static void addPaymentUpdatesForNewChargeTransaction(
-            final Notification notification,
-            final ImmutableList.Builder<UpdateAction<Payment>> listBuilder) {
-        final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
+    private static AddTransaction addAuthorizationTransaction(@Nonnull final Notification notification) {
+        return addTransactionFromNotification(notification,
+                TransactionType.AUTHORIZATION, notification.getTransactionStatus().getCtTransactionState());
+    }
 
-        listBuilder.add(AddTransaction.of(TransactionDraftBuilder.of(TransactionType.CHARGE, amount)
+    private static AddTransaction addChargePendingTransaction(@Nonnull final Notification notification) {
+        return addTransactionFromNotification(notification, TransactionType.CHARGE, TransactionState.PENDING);
+    }
+
+    private static AddTransaction addTransactionFromNotification(@Nonnull final Notification notification,
+                                                                 @Nonnull final TransactionType transactionType,
+                                                                 @Nonnull final TransactionState transactionState) {
+        final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
+        return AddTransaction.of(TransactionDraftBuilder.of(transactionType, amount)
                 .timestamp(toZonedDateTime(notification))
-                .state(TransactionState.PENDING)
+                .state(transactionState)
                 .interactionId(notification.getSequencenumber())
-                .build()));
+                .build());
     }
 }

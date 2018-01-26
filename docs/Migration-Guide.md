@@ -4,15 +4,16 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [Migrating from v1 to v2 (Multitenancy)](#migrating-from-v1-to-v2-multitenancy)
+- [To v2+ (Multitenancy)](#to-v2-multitenancy)
   - [1. Integration Service changes](#1-integration-service-changes)
   - [2. Payone portal changes](#2-payone-portal-changes)
   - [3. Changes in the shops which uses the service](#3-changes-in-the-shops-which-uses-the-service)
   - [4. Setup a new tenant (branch,shop,merchant)](#4-setup-a-new-tenant-branchshopmerchant)
+- [To v2.2+ (`Initial` transaction state)](#to-v22-initial-transaction-state)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Migrating from v1 to v2 (Multitenancy)
+## To v2+ (Multitenancy)
 
 Version 2 introduced multi-tenancy feature. This is a ***breaking-change*** thus requires additional steps in the 
 service and Payone provider setup.
@@ -85,15 +86,21 @@ You have to change the payment handling URL:
     (like <code>**MERCHANT1**/commercetools/handle/payments/</code>)
 
 
-## Migrating from v2.1.0 to v2.2.0 (Multitenancy)
+## To v2.2+ (`Initial` transaction state)
 
-  1. `Initial` state should be explicitly used as default transaction state now. 
+  1. It is strongly recommended by CTP platform developers that new transactions are added to a payment with explicitly
+  set `Initial` transaction state. In version v2.2.+ the service still supports handling both `Initial` and `Pending` 
+  transaction states for payments handling, but this will be changed in the next releases, 
+  so only transactions with `Initial` will be handled and sent to Payone service, when `Pending` transaction will be 
+  expected as processed by Payone already. 
+  
+      For more info see:
       
-      See [issue #175](https://github.com/commercetools/commercetools-payone-integration/pull/175) 
-      
-      See [Release Notes](http://dev.commercetools.com/release-notes.html#release-notes---commercetools-platform---version-release-29-september-2017)
-      
-      See [Transaction States](https://dev.commercetools.com/http-api-projects-payments.html#transactionstate) documentation
+      - [Transaction States](https://dev.commercetools.com/http-api-projects-payments.html#transactionstate) documentation
+    
+      - [Release Notes](http://dev.commercetools.com/release-notes.html#release-notes---commercetools-platform---version-release-29-september-2017)
+
+      - [issue #175](https://github.com/commercetools/commercetools-payone-integration/pull/175)
   
   1. All references and update actions for `amountAuthorized`, `amountPaid` and `amountRefunded` are removed 
   since they are deprecated. The service consumers should not rely on them any more.  

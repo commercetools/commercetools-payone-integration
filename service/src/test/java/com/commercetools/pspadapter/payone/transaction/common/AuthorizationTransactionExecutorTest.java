@@ -1,8 +1,4 @@
-package com.commercetools.pspadapter.payone.transaction.creditcard;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
+package com.commercetools.pspadapter.payone.transaction.common;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
@@ -26,6 +22,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+import static util.JvmSdkMockUtil.pagedQueryResultsMock;
 
 
 /**
@@ -56,13 +57,13 @@ public class AuthorizationTransactionExecutorTest {
             PagedQueryResult<Type> customTypes = testHelper.getCustomTypes();
             String queryString = Arrays.asList(a.getArguments()).get(0).toString();
             if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE)) {
-                return PagedQueryResult.of(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE, customTypes));
+                return pagedQueryResultsMock(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE, customTypes));
             } else if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)) {
-                return PagedQueryResult.of(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION, customTypes));
+                return pagedQueryResultsMock(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION, customTypes));
             } else if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT)) {
-                return PagedQueryResult.of(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT, customTypes));
+                return pagedQueryResultsMock(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT, customTypes));
             } else if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST)) {
-                return PagedQueryResult.of(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST, customTypes));
+                return pagedQueryResultsMock(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST, customTypes));
             }
             return PagedQueryResult.empty();
         });

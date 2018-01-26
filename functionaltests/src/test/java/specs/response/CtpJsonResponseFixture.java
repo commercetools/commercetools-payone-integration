@@ -16,9 +16,7 @@ import org.junit.runner.RunWith;
 
 import javax.money.MonetaryAmount;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.concurrent.ExecutionException;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
@@ -27,13 +25,15 @@ import static com.commercetools.pspadapter.payone.domain.payone.model.common.Pay
  * Test Payone integration service sets "response" custom field for executed transactions as a valid JSON string
  * with values returned from payment provider.
  * "response" custom field should contain JSON string in both error and success cases:<ul>
- *     <li>in case of error: contains error description (errorcode, errormessage, customermessage)</li>
- *     <li>in case of success: contains payment type related vales (status, redirecturl, txid, userid and so on)</li>
+ * <li>in case of error: contains error description (errorcode, errormessage, customermessage)</li>
+ * <li>in case of success: contains payment type related vales (status, redirecturl, txid, userid and so on)</li>
  * </ul>
  */
 @RunWith(ConcordionRunner.class)
 @FullOGNL
 public class CtpJsonResponseFixture extends BasePaymentFixture {
+
+    public static final String baseRedirectUrl = "https://www.example.com/json_response/";
 
     public String createCardPayment(String paymentName,
                                     String paymentMethod,
@@ -52,13 +52,13 @@ public class CtpJsonResponseFixture extends BasePaymentFixture {
             final String transactionType,
             final String centAmount,
             final String currencyCode,
-            final String languageCode) throws ExecutionException, InterruptedException, UnsupportedEncodingException {
+            final String languageCode) {
 
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
 
-        final String successUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8");
-        final String errorUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8");
-        final String cancelUrl = baseRedirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8");
+        final String successUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Success");
+        final String errorUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Error");
+        final String cancelUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Cancel");
         final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
                 .paymentMethodInfo(PaymentMethodInfoBuilder.of()
                         .method(paymentMethod)

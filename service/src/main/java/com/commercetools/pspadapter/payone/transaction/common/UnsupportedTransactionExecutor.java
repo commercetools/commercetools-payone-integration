@@ -14,11 +14,12 @@ import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 
+import javax.annotation.Nonnull;
 import java.time.ZonedDateTime;
 
 /**
  * @author Jan Wolter
- *
+ * <p>
  * "Executes" a transaction by setting the status to Failure.
  */
 public class UnsupportedTransactionExecutor implements TransactionExecutor {
@@ -26,6 +27,7 @@ public class UnsupportedTransactionExecutor implements TransactionExecutor {
 
     /**
      * Initializes the executor.
+     *
      * @param client the commercetools platform client
      */
     public UnsupportedTransactionExecutor(final BlockingSphereClient client) {
@@ -33,7 +35,9 @@ public class UnsupportedTransactionExecutor implements TransactionExecutor {
     }
 
     @Override
-    public PaymentWithCartLike executeTransaction(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction) {
+    @Nonnull
+    public PaymentWithCartLike executeTransaction(@Nonnull final PaymentWithCartLike paymentWithCartLike,
+                                                  @Nonnull final Transaction transaction) {
         final Payment payment = paymentWithCartLike.getPayment();
         final ChangeTransactionState changeTransactionState = ChangeTransactionState.of(
                 TransactionState.FAILURE,

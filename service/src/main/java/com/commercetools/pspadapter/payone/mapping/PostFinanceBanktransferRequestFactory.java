@@ -16,6 +16,7 @@ public class PostFinanceBanktransferRequestFactory extends BankTransferWithoutIb
     }
 
     @Override
+    @Nonnull
     public BankTransferAuthorizationRequest createAuthorizationRequest(PaymentWithCartLike paymentWithCartLike) {
         final BankTransferAuthorizationRequest request = super.createAuthorizationRequest(paymentWithCartLike);
         //Despite declared as optional in PayOne Server API documentation. this is required!

@@ -1,5 +1,7 @@
 package com.commercetools.pspadapter.tenant;
 
+import com.commercetools.payments.TransactionStateResolver;
+import com.commercetools.payments.TransactionStateResolverImpl;
 import com.commercetools.pspadapter.payone.PaymentDispatcher;
 import com.commercetools.pspadapter.payone.PaymentHandler;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
@@ -19,9 +21,9 @@ import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.common.*;
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
-import com.commercetools.pspadapter.payone.transaction.common.DefaultChargeTransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.common.ChargeTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.UnsupportedTransactionExecutor;
-import com.commercetools.pspadapter.payone.transaction.creditcard.AuthorizationTransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.common.AuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.paymentinadvance.BankTransferInAdvanceChargeTransactionExecutor;
 import com.commercetools.service.OrderService;
 import com.commercetools.service.OrderServiceImpl;
@@ -67,6 +69,8 @@ public class TenantFactory {
     private final CustomTypeBuilder customTypeBuilder;
     private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
 
+    private final TransactionStateResolver transactionStateResolver;
+
 
     public TenantFactory(String payoneInterfaceName, TenantConfig tenantConfig) {
         this.payoneInterfaceName = payoneInterfaceName;
@@ -82,9 +86,12 @@ public class TenantFactory {
         this.paymentService = createPaymentService(blockingSphereClient);
         this.orderService = createOrderService(blockingSphereClient);
 
-        this.paymentDispatcher = createPaymentDispatcher(tenantConfig, createTypeCache(blockingSphereClient), blockingSphereClient);
+        this.transactionStateResolver = createTransactionStateResolver();
 
-        this.notificationDispatcher = createNotificationDispatcher(tenantConfig);
+        this.paymentDispatcher = createPaymentDispatcher(tenantConfig, createTypeCache(blockingSphereClient),
+                blockingSphereClient, transactionStateResolver);
+
+        this.notificationDispatcher = createNotificationDispatcher(tenantConfig, transactionStateResolver);
 
         this.commercetoolsQueryExecutor = new CommercetoolsQueryExecutor(blockingSphereClient);
 
@@ -168,14 +175,16 @@ public class TenantFactory {
         return new DefaultPaymentToOrderStateMapper();
     }
 
-    protected NotificationDispatcher createNotificationDispatcher(TenantConfig tenantConfig) {
-        final NotificationProcessor defaultNotificationProcessor = new DefaultNotificationProcessor(this, tenantConfig);
+    protected NotificationDispatcher createNotificationDispatcher(TenantConfig tenantConfig,
+                                                                  TransactionStateResolver transactionStateResolver) {
+        final NotificationProcessor defaultNotificationProcessor =
+                new DefaultNotificationProcessor(this, tenantConfig, transactionStateResolver);
 
         final ImmutableMap.Builder<NotificationAction, NotificationProcessor> builder = ImmutableMap.builder();
-        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(this, tenantConfig));
-        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(this, tenantConfig));
-        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(this, tenantConfig));
-        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(this, tenantConfig));
+        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(this, tenantConfig, transactionStateResolver));
+        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(this, tenantConfig, transactionStateResolver));
+        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(this, tenantConfig, transactionStateResolver));
+        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(this, tenantConfig, transactionStateResolver));
 
         return new NotificationDispatcher(defaultNotificationProcessor, builder.build(), this, tenantConfig.getPayoneConfig());
     }
@@ -188,7 +197,8 @@ public class TenantFactory {
 
     protected PaymentDispatcher createPaymentDispatcher(final TenantConfig tenantConfig,
                                                         final LoadingCache<String, Type> typeCache,
-                                                        final BlockingSphereClient client) {
+                                                        final BlockingSphereClient client,
+                                                        final TransactionStateResolver transactionStateResolver) {
 
         final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
 
@@ -216,7 +226,8 @@ public class TenantFactory {
 
                 executors.put(type, executor);
             }
-            methodDispatcherMap.put(paymentMethod, new PaymentMethodDispatcher(defaultExecutor, executors.build()));
+            methodDispatcherMap.put(paymentMethod,
+                    new PaymentMethodDispatcher(defaultExecutor, executors.build(), transactionStateResolver));
         }
         return new PaymentDispatcher(methodDispatcherMap, getPayoneInterfaceName());
     }
@@ -239,7 +250,7 @@ public class TenantFactory {
                     case BANK_TRANSFER_ADVANCE:
                         return new BankTransferInAdvanceChargeTransactionExecutor(typeCache, requestFactory, postService, client);
                     default:
-                        return new DefaultChargeTransactionExecutor(typeCache, requestFactory, postService, client);
+                        return new ChargeTransactionExecutor(typeCache, requestFactory, postService, client);
                 }
             case REFUND:
                 break;
@@ -289,5 +300,10 @@ public class TenantFactory {
     @Nonnull
     protected CountryToLanguageMapper createCountryToLanguageMapper() {
         return new PayoneKlarnaCountryToLanguageMapper();
+    }
+
+    @Nonnull
+    protected TransactionStateResolver createTransactionStateResolver() {
+        return new TransactionStateResolverImpl();
     }
 }

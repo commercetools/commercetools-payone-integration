@@ -55,6 +55,14 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentNoTransaction20EuroPlanned.json");
     }
 
+    public Payment dummyPaymentOneAuthFailure20EuroCC() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneAuthFailure20Euro_CC.json");
+    }
+
+    public Payment dummyPaymentOneAuthInitial20EuroCC() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneAuthInitial20Euro_CC.json");
+    }
+
     public Payment dummyPaymentOneAuthPending20EuroCC() throws Exception {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_CC.json");
     }
@@ -111,8 +119,16 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentOneChargePending20Euro.json");
     }
 
+    public Payment dummyPaymentOneChargeSuccess20Euro() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneChargeSuccess20Euro.json");
+    }
+
     public Payment dummyPaymentOneChargeFailure20Euro() throws Exception {
         return getPaymentFromFile("dummyPaymentOneChargeFailure20Euro.json");
+    }
+
+    public Payment dummyPaymentOneChargeInitial20Euro() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneChargeInitial20Euro.json");
     }
 
     public Payment dummyPaymentAuthSuccess() throws Exception {
@@ -139,10 +155,46 @@ public class PaymentTestHelper {
         return getCartFromFile(KLARNA_DIR + "dummyKlarnaCartWithoutDiscounts.json");
     }
 
+    /**
+     * Note, the transactions in this payment expected to be "updated" later using
+     * {@link #dummyPaymentTwoTransactionsSuccessInitial()} mock, thus the payment an the transactions have respectively
+     * same IDs.
+     *
+     * @see #dummyPaymentTwoTransactionsSuccessInitial()
+     */
+    public Payment dummyPaymentTwoTransactionsInitial() throws Exception {
+        return getPaymentFromFile("dummyPaymentTwoTransactionsInitial.json");
+    }
+
+    /**
+     * Note, this payment contains kind of "updated" transactions from the
+     * {@link #dummyPaymentTwoTransactionsInitial()}, thus the payment an the transactions have respectively
+     * same IDs.
+     *
+     * @see #dummyPaymentTwoTransactionsInitial()
+     */
+    public Payment dummyPaymentTwoTransactionsSuccessInitial() throws Exception {
+        return getPaymentFromFile("dummyPaymentTwoTransactionsSuccessInitial.json");
+    }
+
+    /**
+     * Note, the transactions in this payment expected to be "updated" later using
+     * {@link #dummyPaymentTwoTransactionsSuccessPending()} mock, thus the payment an the transactions have respectively
+     * same IDs.
+     *
+     * @see #dummyPaymentTwoTransactionsSuccessPending()
+     */
     public Payment dummyPaymentTwoTransactionsPending() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsPending.json");
     }
 
+    /**
+     * Note, this payment contains kind of "updated" transactions from the
+     * {@link #dummyPaymentTwoTransactionsPending()}, thus the payment an the transactions have respectively
+     * same IDs.
+     *
+     * @see #dummyPaymentTwoTransactionsPending()
+     */
     public Payment dummyPaymentTwoTransactionsSuccessPending() throws Exception {
         return getPaymentFromFile("dummyPaymentTwoTransactionsSuccessPending.json");
     }

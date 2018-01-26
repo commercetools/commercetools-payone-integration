@@ -3,6 +3,7 @@ package com.commercetools.pspadapter.payone.notification.common;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
+import com.google.common.collect.ImmutableList;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.payments.*;
@@ -17,6 +18,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.money.MonetaryAmount;
 import java.util.List;
 
+import static io.sphere.sdk.payments.TransactionType.CHARGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -112,6 +114,52 @@ public class PaidNotificationProcessorTest extends BaseChargedNotificationProces
 
         processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccessWireframe();
         verifyUpdateOrderActionsNotCalled();
+    }
+
+    @Test
+    public void whenChargeTransactionIsInitial_ChangeTransactionStateISAdded() throws Exception {
+        Payment paymentChargeInitial = testHelper.dummyPaymentOneChargeInitial20Euro();
+        Transaction firstTransaction = paymentChargeInitial.getTransactions().get(0);
+        notification.setSequencenumber(firstTransaction.getInteractionId());
+        ImmutableList<UpdateAction<Payment>> authPendingUpdates = testee.createPaymentUpdates(paymentChargeInitial, notification);
+        assertThat(authPendingUpdates).containsOnlyOnce(ChangeTransactionState.of(
+                notification.getTransactionStatus().getCtTransactionState(), firstTransaction.getId()));
+
+        verify_isNotCompletedTransaction_called(TransactionState.INITIAL, CHARGE);
+    }
+
+    @Test
+    public void whenChargeTransactionIsPending_ChangeTransactionStateISAdded() throws Exception {
+        Payment paymentChargePending = testHelper.dummyPaymentOneChargePending20Euro();
+        Transaction firstTransaction = paymentChargePending.getTransactions().get(0);
+        notification.setSequencenumber(firstTransaction.getInteractionId());
+        ImmutableList<UpdateAction<Payment>> authPendingUpdates = testee.createPaymentUpdates(paymentChargePending, notification);
+        assertThat(authPendingUpdates).containsOnlyOnce(ChangeTransactionState.of(
+                notification.getTransactionStatus().getCtTransactionState(), firstTransaction.getId()));
+
+        verify_isNotCompletedTransaction_called(TransactionState.PENDING, CHARGE);
+    }
+
+    @Test
+    public void whenChargeTransactionIsSuccess_ChangeTransactionStateNOTAdded() throws Exception {
+        Payment paymentAuthSuccess = testHelper.dummyPaymentOneChargeSuccess20Euro();
+        Transaction firstTransaction = paymentAuthSuccess.getTransactions().get(0);
+        notification.setSequencenumber(firstTransaction.getInteractionId());
+        ImmutableList<UpdateAction<Payment>> authSuccessUpdates = testee.createPaymentUpdates(paymentAuthSuccess, notification);
+        assertTransactionOfTypeIsNotAdded(authSuccessUpdates, ChangeTransactionState.class);
+
+        verify_isNotCompletedTransaction_called(TransactionState.SUCCESS, CHARGE);
+    }
+
+    @Test
+    public void whenChargeTransactionIsFailure_ChangeTransactionStateNOTAdded() throws Exception {
+        Payment paymentChargeFailure = testHelper.dummyPaymentOneChargeFailure20Euro();
+        Transaction firstTransaction = paymentChargeFailure.getTransactions().get(0);
+        notification.setSequencenumber(firstTransaction.getInteractionId());
+        ImmutableList<UpdateAction<Payment>> authFailureUpdates = testee.createPaymentUpdates(paymentChargeFailure, notification);
+        assertTransactionOfTypeIsNotAdded(authFailureUpdates, ChangeTransactionState.class);
+
+        verify_isNotCompletedTransaction_called(TransactionState.FAILURE, CHARGE);
     }
 
     @SuppressWarnings("unchecked")

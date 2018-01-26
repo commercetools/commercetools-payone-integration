@@ -1,9 +1,5 @@
 package com.commercetools.pspadapter.payone.transaction;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
@@ -25,8 +21,15 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static util.JvmSdkMockUtil.pagedQueryResultsMock;
 
 /**
  * @author fhaertig
@@ -50,13 +53,13 @@ public class IdempotentTransactionExecutorTest {
             PagedQueryResult<Type> customTypes = testHelper.getCustomTypes();
             String queryString = Arrays.asList(a.getArguments()).get(0).toString();
             if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE)) {
-                return PagedQueryResult.of(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE, customTypes));
+                return pagedQueryResultsMock(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE, customTypes));
             } else if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION)) {
-                return PagedQueryResult.of(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION, customTypes));
+                return pagedQueryResultsMock(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION, customTypes));
             } else if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT)) {
-                return PagedQueryResult.of(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT, customTypes));
+                return pagedQueryResultsMock(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT, customTypes));
             } else if (queryString.contains(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST)) {
-                return PagedQueryResult.of(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST, customTypes));
+                return pagedQueryResultsMock(findCustomTypeByKey(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST, customTypes));
             }
             return PagedQueryResult.empty();
         });
@@ -132,8 +135,11 @@ public class IdempotentTransactionExecutorTest {
         }
 
         @Override
-        protected PaymentWithCartLike retryLastExecutionAttempt(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction, final CustomFields lastExecutionAttempt) {
-            return null;
+        @Nonnull
+        protected PaymentWithCartLike retryLastExecutionAttempt(@Nonnull final PaymentWithCartLike paymentWithCartLike,
+                                                                @Nonnull final Transaction transaction,
+                                                                @Nonnull final CustomFields lastExecutionAttempt) {
+            return mock(PaymentWithCartLike.class);
         }
     }
 

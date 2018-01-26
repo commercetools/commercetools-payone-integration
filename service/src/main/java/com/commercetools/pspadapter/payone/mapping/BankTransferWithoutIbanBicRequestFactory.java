@@ -18,6 +18,7 @@ public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFacto
     }
 
     @Override
+    @Nonnull
     public BankTransferAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();

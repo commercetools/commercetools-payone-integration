@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.notification.common;
 
+import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
@@ -22,13 +23,9 @@ import java.util.List;
  */
 public class CaptureNotificationProcessor extends NotificationProcessorBase {
 
-    /**
-     * Initializes a new instance.
-     *
-     * @param serviceFactory the services factory for commercetools platform API
-     */
-    public CaptureNotificationProcessor(TenantFactory serviceFactory, TenantConfig tenantConfig) {
-        super(serviceFactory, tenantConfig);
+    public CaptureNotificationProcessor(TenantFactory tenantFactory, TenantConfig tenantConfig,
+                                        TransactionStateResolver transactionStateResolver) {
+        super(tenantFactory, tenantConfig, transactionStateResolver);
     }
 
         @Override
