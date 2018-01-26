@@ -77,7 +77,7 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
                         return actionsBuilder;
                     })
                     .orElseGet(() -> {
-                        addPaymentUpdatesForNewAuthorizationTransaction(notification, actionsBuilder);
+                        actionsBuilder.add(addAuthorizationTransaction(notification));
                         return actionsBuilder;
                     })
                     .build();
@@ -97,26 +97,22 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
                 .orElseGet(() -> addChargePendingTransaction(notification));
     }
 
-    private static void addPaymentUpdatesForNewAuthorizationTransaction(
-            final Notification notification,
-            final ImmutableList.Builder<UpdateAction<Payment>> listBuilder) {
-        final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-
-        final TransactionState ctTransactionState = notification.getTransactionStatus().getCtTransactionState();
-
-        listBuilder.add(AddTransaction.of(TransactionDraftBuilder.of(TransactionType.AUTHORIZATION, amount)
-                .timestamp(toZonedDateTime(notification))
-                .state(ctTransactionState)
-                .interactionId(notification.getSequencenumber())
-                .build()));
+    private static AddTransaction addAuthorizationTransaction(final Notification notification) {
+        return addTransactionFromNotification(notification,
+                TransactionType.AUTHORIZATION, notification.getTransactionStatus().getCtTransactionState());
     }
 
     private static AddTransaction addChargePendingTransaction(final Notification notification) {
-        final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
+        return addTransactionFromNotification(notification, TransactionType.CHARGE, TransactionState.PENDING);
+    }
 
-        return AddTransaction.of(TransactionDraftBuilder.of(TransactionType.CHARGE, amount)
+    private static AddTransaction addTransactionFromNotification(final Notification notification,
+                                                                 final TransactionType transactionType,
+                                                                 final TransactionState transactionState) {
+        final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
+        return AddTransaction.of(TransactionDraftBuilder.of(transactionType, amount)
                 .timestamp(toZonedDateTime(notification))
-                .state(TransactionState.PENDING)
+                .state(transactionState)
                 .interactionId(notification.getSequencenumber())
                 .build());
     }
