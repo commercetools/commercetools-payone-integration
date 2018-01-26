@@ -51,7 +51,9 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
             throw new IllegalArgumentException("Unsupported Transaction Type");
         }
 
-        if (wasExecuted(paymentWithCartLike, transaction)) return paymentWithCartLike;
+        if (wasExecuted(paymentWithCartLike, transaction)) {
+            return paymentWithCartLike;
+        }
 
         return findLastExecutionAttempt(paymentWithCartLike, transaction)
                 .map(attempt -> retryLastExecutionAttempt(paymentWithCartLike, transaction, attempt))
