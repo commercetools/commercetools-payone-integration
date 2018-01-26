@@ -151,6 +151,9 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
      */
     protected abstract boolean canProcess(Notification notification);
 
+    /**
+     * @see TransactionStateResolver#isNotCompletedTransaction(io.sphere.sdk.payments.Transaction)
+     */
     protected boolean isNotCompletedTransaction(@Nonnull Transaction transaction) {
         return transactionStateResolver.isNotCompletedTransaction(transaction);
     }

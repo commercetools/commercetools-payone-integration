@@ -67,7 +67,7 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
                     .filter(t -> t.getType().equals(TransactionType.AUTHORIZATION))
                     .findFirst()
                     .map(transaction -> {
-                        //set transactionState if still pending and notification has status "complete"
+                        //set transactionState if is still not completed and notification has status "complete"
                         if (isNotCompletedTransaction(transaction) &&
                                 notification.getTransactionStatus().equals(TransactionStatus.COMPLETED)) {
                             actionsBuilder.add(ChangeTransactionState.of(
