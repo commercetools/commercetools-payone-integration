@@ -53,7 +53,7 @@ public class CaptureNotificationProcessor extends NotificationProcessorBase {
                     if (ClearingType.PAYONE_VOR != ClearingType.getClearingTypeByCode(notification.getClearingtype())) {
                     listBuilder.add(AddTransaction.of(TransactionDraftBuilder.of(TransactionType.CHARGE, amount)
                             .timestamp(toZonedDateTime(notification))
-                            .state(TransactionState.PENDING)
+                            .state(notification.getTransactionStatus().getCtTransactionState())
                             .interactionId(sequenceNumber)
                             .build()));
                     }

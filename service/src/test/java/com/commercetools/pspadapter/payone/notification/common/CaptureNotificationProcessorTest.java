@@ -66,12 +66,21 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
     @Test
     @SuppressWarnings("unchecked")
     public void processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending() throws Exception {
+        // note, this case tests un-documented (actually, documented, but not clearly) feature:
+        // it is not clear, could it ever be that txaction=capture has transaction_state=pending.
+        // Doc says [PAYONE Platform Channel Server API, Edition: 2017-08-29, Version: 2.92, Chapter 4.2.2 List of status (transaction_status)]:
+        //   > The parameter “transaction_status” is currently introduced with event-txaction “appointed” only.
+        // but later:
+        //   > Other event-txaction with parameter “transaction_status” may follow (e.g. “paid”, “debit”, ...).
+        //   > The new “txaction” can then be “paid/pending”, “paid/completed”, ... or “failed/completed”.
+        //
+        // So, even if Payone changes API and such case happens - we expect to switch CT transaction state to PENDING, not SUCCESS.
         super.processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending(testee, ORDER_PAYMENT_STATE);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void processingCompletedNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending() throws Exception {
+    public void processingCompletedNotificationAboutUnknownTransactionAddsChargeTransactionWithStateSuccess() throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneAuthPending20EuroCC();
         payment.getTransactions().clear();
@@ -85,7 +94,7 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
                 .of(TransactionType.CHARGE, amount, timestamp)
-                .state(TransactionState.PENDING)
+                .state(TransactionState.SUCCESS)
                 .interactionId(notification.getSequencenumber())
                 .build());
 
