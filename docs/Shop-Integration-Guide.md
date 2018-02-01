@@ -64,7 +64,7 @@
 
 ### Validate cart state
 Check if current cart has been ordered already (`Cart#cartState` = `Ordered`).
-In this case load order by ordered cart ID and show oder confirmation page.
+In this case load order by ordered cart ID and show order confirmation page.
 This might happen if  cart has been already ordered in different tab or by asynchronous process like
 [commercetools-payment-to-order-processor](https://github.com/commercetools/commercetools-payment-to-order-processor) job.
 
