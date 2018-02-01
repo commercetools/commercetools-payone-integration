@@ -52,7 +52,7 @@ public class BaseChargedNotificationProcessorTest extends BaseNotificationProces
         final List<? extends UpdateAction<Payment>> updateActions = updatePaymentAndGetUpdateActions(payment);
 
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
-        final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
+        final AddTransaction addChargeTransaction = AddTransaction.of(TransactionDraftBuilder
                 .of(TransactionType.CHARGE, amount, timestamp)
                 .state(TransactionState.PENDING)
                 .interactionId(notification.getSequencenumber())
@@ -67,13 +67,17 @@ public class BaseChargedNotificationProcessorTest extends BaseNotificationProces
                 .filteredOn(u -> u.getAction().equals("addTransaction"))
                 .usingElementComparatorOnFields(
                         "transaction.type", "transaction.amount", "transaction.state", "transaction.timestamp")
-                .containsOnlyOnce(transaction);
+                .containsOnlyOnce(addChargeTransaction);
 
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
 
         verifyUpdateOrderActions(payment, expectedPaymentState);
     }
 
+    /**
+     * Cases when the updated by notification transaction is already in expected state, so only status and interface
+     * interaction actions should be added, change transaction state should not be in the updates list.
+     */
     protected void processingPendingNotificationForPendingChargeTransactionDoesNotChangeState(NotificationProcessorBase testee,
                                                                                               PaymentState expectedPaymentState)
             throws Exception {

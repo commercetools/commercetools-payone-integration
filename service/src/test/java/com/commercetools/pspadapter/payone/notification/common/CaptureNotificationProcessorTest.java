@@ -6,10 +6,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Transactio
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.payments.*;
-import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
-import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
-import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
-import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
+import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -122,22 +119,26 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
 
     @Test
     @SuppressWarnings("unchecked")
-    public void processingCompletedNotificationForPendingChargeTransactionDoesNotChangeState() throws Exception {
-        final Payment payment = processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe();
+    public void processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccess() throws Exception {
+        final Payment payment = processingCompletedNotificationForPendingChargeTransactionChangesStateWireframe();
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
     public void orderServiceIsNotCalledWhenIsUpdateOrderPaymentStateFalse() throws Exception {
-        // this test is similar to #processingCompletedNotificationForPendingChargeTransactionDoesNotChangeState(),
+        // this test is similar to #processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccess(),
         // but #isUpdateOrderPaymentState() is false, so update order actions should be skipped
         when(tenantConfig.isUpdateOrderPaymentState()).thenReturn(false);
 
-        processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe();
+        processingCompletedNotificationForPendingChargeTransactionChangesStateWireframe();
         verifyUpdateOrderActionsNotCalled();
     }
 
-    private Payment processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe() throws Exception {
+    /**
+     * Verify that complete notification for pended Charge transaction generates standard interface interaction
+     * and status update actions, plus change transaction state to success.
+     */
+    private Payment processingCompletedNotificationForPendingChargeTransactionChangesStateWireframe() throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneChargePending20Euro();
         final Transaction chargeTransaction = payment.getTransactions().get(0);
@@ -154,8 +155,14 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-        assertThat(updateActions).as("# of payment update actions").hasSize(3);
+        assertThat(updateActions).as("# of payment update actions").hasSize(4);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+
+        // additionally to standard update actions this case contains update transaction state to SUCCESS,
+        // if CHARGE transaction exists and still not SUCCESS
+        final ChangeTransactionState changeTransactionState = ChangeTransactionState.of(TransactionState.SUCCESS, chargeTransaction.getId());
+        assertThat(updateActions).containsOnlyOnce(changeTransactionState);
+
         return payment;
     }
 }
