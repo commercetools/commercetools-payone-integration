@@ -381,7 +381,7 @@ The matching transaction is found by sequencenumber = interactionId.
 | **`appointed`** | **`pending`** |  **`Authorization`** (must be single transaction in the list) |  **`Pending`** | create an **`Authorization`** if none there | |
 | **`appointed`** | **`completed`** | **`Authorization`** (must be single transaction in the list) | **`Success`** | create an **`Authorization`** if none there | It's important to save transaction **`Success`** state right after `appointed/completed` notification because in most of the shops the orders are created if the last Authorization/Charge transaction is success |
 | **`appointed`** | **`completed`** | *NOT* **`Authorization`** | **`Pending`**  | | |
-| **`capture`** | not set or **`completed`** | **`Charge`** | usually a **`paid`** follows separately (CT **`Pending`**), but on direct debit the **`capture`** already means money flow -> CT **`Success`** | create a **`Charge`** if none with matching sequencenumber there | |
+| **`capture`** | not set or **`completed`** | **`Charge`** | CT **`Success`** | create a **`Charge#Success`** if none with matching sequencenumber there | |
 | **`paid`** | not set or **`completed`** | **`Charge`** | **`Success`** | create a **`Charge`** if no matching one is found. Does not count up the sequence number | |
 | **`underpaid`** | not set or **`completed`** | **`Charge`** | **`Pending`** | create a **`Charge`** if no matching one found | |
 | **`cancelation`** | not set or **`completed`** | new **`Chargeback`** | **`Success`** | see 4.2.6 Sample: authorization, ELV with cancelation to derive formula for amount | |
