@@ -71,7 +71,7 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
         //   > Other event-txaction with parameter “transaction_status” may follow (e.g. “paid”, “debit”, ...).
         //   > The new “txaction” can then be “paid/pending”, “paid/completed”, ... or “failed/completed”.
         //
-        // So, even if Payone changes API and such case happens - we expect to switch CT transaction state to PENDING, not SUCCESS.
+        // So, even if Payone changes API and such case happens - we set CT transaction state to PENDING, not SUCCESS.
         super.processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending(testee, ORDER_PAYMENT_STATE);
     }
 
