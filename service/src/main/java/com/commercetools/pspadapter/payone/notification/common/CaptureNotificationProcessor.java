@@ -52,7 +52,7 @@ public class CaptureNotificationProcessor extends NotificationProcessorBase {
 
     /**
      * Add {@link ChangeTransactionState} action to {@code actionsBuilder} if current transaction is still in different
-     * state.
+     * from state in {@code notification}.
      */
     protected ImmutableList.Builder<UpdateAction<Payment>> updateChargeTransactionState(
             @Nonnull final Transaction transaction,
