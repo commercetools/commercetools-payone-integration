@@ -109,9 +109,8 @@ public class InitialPendingMigrationFixture extends BaseNotifiablePaymentFixture
                                       final String birthDay,
                                       final String telephonenumber) {
         Cart cart = createTemplateCartKlarna(lastName);
-        Order order = createOrderForCart(cart);
 
-        Payment payment = createAndSaveKlarnaPayment(cart, order, paymentName, transactionType,
+        Payment payment = createAndSaveKlarnaPayment(cart, paymentName, transactionType,
                 MoneyImpl.centAmountOf(cart.getTotalPrice()).toString(),
                 cart.getTotalPrice().getCurrency().getCurrencyCode(),
                 ip, birthDay, telephonenumber);

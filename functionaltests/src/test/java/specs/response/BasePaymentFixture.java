@@ -23,7 +23,6 @@ import io.sphere.sdk.customers.Customer;
 import io.sphere.sdk.customers.queries.CustomerQueryBuilder;
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.models.Address;
-import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.OrderFromCartDraft;
 import io.sphere.sdk.orders.commands.OrderFromCartCreateCommand;
 import io.sphere.sdk.payments.*;
@@ -211,7 +210,6 @@ public class BasePaymentFixture extends BaseFixture {
      */
     public Payment createAndSaveKlarnaPayment(
             final Cart cart,
-            final Order order,
             final String paymentName,
             final String transactionType,
             final String centAmount,
@@ -226,6 +224,8 @@ public class BasePaymentFixture extends BaseFixture {
                 .predicates(customerModel -> customerModel.lowercaseEmail().is("youremail@email.com"))
                 .build())
                 .head().orElseThrow(() -> new IllegalStateException("Customer youremail@email.com for klarna test payment has not found"));
+
+        String orderNumber = getRandomOrderNumber();
 
         final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
                 .paymentMethodInfo(PaymentMethodInfoBuilder.of()
@@ -246,8 +246,7 @@ public class BasePaymentFixture extends BaseFixture {
                                         ofNullable(cart.getLocale())
                                                 .map(Locale::getLanguage)
                                                 .orElseGet(Locale.GERMAN::getLanguage))
-                                .put(REFERENCE_FIELD, ofNullable(order.getOrderNumber())
-                                        .orElseThrow(() -> new IllegalStateException("Order must have a number")))
+                                .put(REFERENCE_FIELD, orderNumber)
                                 .put(GENDER_FIELD, "m")
                                 .put(IP_FIELD, ip)
                                 .put(BIRTHDAY_FIELD, birthDay)
@@ -261,7 +260,9 @@ public class BasePaymentFixture extends BaseFixture {
 
         // set payment to the Cart#paymentInfo
         executeBlocking(ctpClient().execute(CartByIdGet.of(cart))
-                .thenCompose(newCart -> ctpClient().execute(CartUpdateCommand.of(newCart, AddPayment.of(payment)))));
+                .thenCompose(newCart -> ctpClient().execute(CartUpdateCommand.of(newCart, AddPayment.of(payment))))
+                .thenAccept(updatedCart -> OrderFromCartCreateCommand.of(
+                OrderFromCartDraft.of(updatedCart, orderNumber, null))));
 
         return payment;
 
@@ -316,12 +317,6 @@ public class BasePaymentFixture extends BaseFixture {
                 .build();
 
         return ctpClient().executeBlocking(CartCreateCommand.of(cartDraftDsl));
-    }
-
-    public Order createOrderForCart(Cart cart) {
-        String orderNumber = getRandomOrderNumber();
-        return ctpClient().executeBlocking(OrderFromCartCreateCommand.of(
-                OrderFromCartDraft.of(cart, orderNumber, null)));
     }
 
     /**

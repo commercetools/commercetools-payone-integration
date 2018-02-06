@@ -33,9 +33,8 @@ public class KlarnaRequest extends BaseNotifiablePaymentFixture {
 
         Cart cart = createTemplateCartKlarna(lastName);
         cart = applyDiscounts(cart, DISCOUNT_999_CENT, DISCOUNT_10_PERCENT);
-        Order order = createOrderForCart(cart);
 
-        Payment payment = createAndSaveKlarnaPayment(cart, order, paymentName, transactionType,
+        Payment payment = createAndSaveKlarnaPayment(cart, paymentName, transactionType,
                 MoneyImpl.centAmountOf(cart.getTotalPrice()).toString(),
                 cart.getTotalPrice().getCurrency().getCurrencyCode(),
                 ip, birthDay, telephonenumber);
