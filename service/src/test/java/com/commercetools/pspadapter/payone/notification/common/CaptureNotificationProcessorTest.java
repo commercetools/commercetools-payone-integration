@@ -6,10 +6,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Transactio
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.payments.*;
-import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
-import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
-import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
-import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
+import io.sphere.sdk.payments.commands.updateactions.*;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,12 +63,21 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
     @Test
     @SuppressWarnings("unchecked")
     public void processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending() throws Exception {
+        // note, this case tests un-documented (actually, documented, but not clearly) feature:
+        // it is not clear, could it ever be that txaction=capture has transaction_state=pending.
+        // Doc says [PAYONE Platform Channel Server API, Edition: 2017-08-29, Version: 2.92, Chapter 4.2.2 List of status (transaction_status)]:
+        //   > The parameter “transaction_status” is currently introduced with event-txaction “appointed” only.
+        // but later:
+        //   > Other event-txaction with parameter “transaction_status” may follow (e.g. “paid”, “debit”, ...).
+        //   > The new “txaction” can then be “paid/pending”, “paid/completed”, ... or “failed/completed”.
+        //
+        // So, even if Payone changes API and such case happens - we set CT transaction state to PENDING, not SUCCESS.
         super.processingPendingNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending(testee, ORDER_PAYMENT_STATE);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void processingCompletedNotificationAboutUnknownTransactionAddsChargeTransactionWithStatePending() throws Exception {
+    public void processingCompletedNotificationAboutUnknownTransactionAddsChargeTransactionWithStateSuccess() throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneAuthPending20EuroCC();
         payment.getTransactions().clear();
@@ -85,7 +91,7 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
         final AddTransaction transaction = AddTransaction.of(TransactionDraftBuilder
                 .of(TransactionType.CHARGE, amount, timestamp)
-                .state(TransactionState.PENDING)
+                .state(TransactionState.SUCCESS)
                 .interactionId(notification.getSequencenumber())
                 .build());
 
@@ -113,22 +119,26 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
 
     @Test
     @SuppressWarnings("unchecked")
-    public void processingCompletedNotificationForPendingChargeTransactionDoesNotChangeState() throws Exception {
-        final Payment payment = processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe();
+    public void processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccess() throws Exception {
+        final Payment payment = processingCompletedNotificationForPendingChargeTransactionChangesStateWireframe();
         verifyUpdateOrderActions(payment, ORDER_PAYMENT_STATE);
     }
 
     @Test
     public void orderServiceIsNotCalledWhenIsUpdateOrderPaymentStateFalse() throws Exception {
-        // this test is similar to #processingCompletedNotificationForPendingChargeTransactionDoesNotChangeState(),
+        // this test is similar to #processingCompletedNotificationForPendingChargeTransactionChangesStateToSuccess(),
         // but #isUpdateOrderPaymentState() is false, so update order actions should be skipped
         when(tenantConfig.isUpdateOrderPaymentState()).thenReturn(false);
 
-        processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe();
+        processingCompletedNotificationForPendingChargeTransactionChangesStateWireframe();
         verifyUpdateOrderActionsNotCalled();
     }
 
-    private Payment processingCompletedNotificationForPendingChargeTransactionDoesNotChangeStateWireframe() throws Exception {
+    /**
+     * Verify that complete notification for pended Charge transaction generates standard interface interaction
+     * and status update actions, plus change transaction state to success.
+     */
+    private Payment processingCompletedNotificationForPendingChargeTransactionChangesStateWireframe() throws Exception {
         // arrange
         final Payment payment = testHelper.dummyPaymentOneChargePending20Euro();
         final Transaction chargeTransaction = payment.getTransactions().get(0);
@@ -145,8 +155,14 @@ public class CaptureNotificationProcessorTest extends BaseChargedNotificationPro
         final SetStatusInterfaceCode statusInterfaceCode = getSetStatusInterfaceCode(notification);
         final SetStatusInterfaceText statusInterfaceText = getSetStatusInterfaceText(notification);
 
-        assertThat(updateActions).as("# of payment update actions").hasSize(3);
+        assertThat(updateActions).as("# of payment update actions").hasSize(4);
         assertStandardUpdateActions(updateActions, interfaceInteraction, statusInterfaceCode, statusInterfaceText);
+
+        // additionally to standard update actions this case contains update transaction state to SUCCESS,
+        // if CHARGE transaction exists and still not SUCCESS
+        final ChangeTransactionState changeTransactionState = ChangeTransactionState.of(TransactionState.SUCCESS, chargeTransaction.getId());
+        assertThat(updateActions).containsOnlyOnce(changeTransactionState);
+
         return payment;
     }
 }
