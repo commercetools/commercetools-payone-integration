@@ -9,6 +9,7 @@
   - [2. Payone portal changes](#2-payone-portal-changes)
   - [3. Changes in the shops which uses the service](#3-changes-in-the-shops-which-uses-the-service)
   - [4. Setup a new tenant (branch,shop,merchant)](#4-setup-a-new-tenant-branchshopmerchant)
+  - [5. Importan notes](#5-importan-notes)
 - [To v2.2+ (`Initial` transaction state)](#to-v22-initial-transaction-state)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -84,6 +85,13 @@ You have to change the payment handling URL:
   1. In the service settings (environment variables) add the same properties, but with `MERCHANT1_` prefix instead of `MAIN_SHOP_`
   1. In the new shop configure payment checkout service to connect to the new merchant URL 
     (like <code>**MERCHANT1**/commercetools/handle/payments/</code>)
+    
+### 5. Importan notes
+  - For every tenant you should use separate Payone Portal ID,
+  otherwise you won't be able to receive property payment update nofications,
+  because notification URL is configured on portal level
+  (see [2. Payone portal changes](#2-payone-portal-changes) and 
+  [4. Setup a new tenant (branch,shop,merchant)](#4-setup-a-new-tenant-branchshopmerchant) above)
 
 
 ## To v2.2+ (`Initial` transaction state)
