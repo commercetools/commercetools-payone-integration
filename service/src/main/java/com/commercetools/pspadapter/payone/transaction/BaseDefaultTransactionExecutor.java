@@ -17,14 +17,17 @@ import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
-import io.sphere.sdk.payments.commands.updateactions.*;
+import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
+import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractionId;
+import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -91,12 +94,12 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
         ZonedDateTime fieldAsDateTime = lastExecutionAttempt.getFieldAsDateTime(CustomFieldKeys.TIMESTAMP_FIELD);
         if (fieldAsDateTime == null || fieldAsDateTime.isBefore(ZonedDateTime.now().minusMinutes(5))) {
             return attemptExecution(paymentWithCartLike, transaction);
-        } else {
+        } /*else {
             if (fieldAsDateTime.isAfter(ZonedDateTime.now().minusMinutes(1)))
                 throw new ConcurrentModificationException(String.format(
                         "A processing of payment with ID \"%s\" started during the last 60 seconds and is likely to be finished soon, no need to retry now.",
                         paymentWithCartLike.getPayment().getId()));
-        }
+        }*/
         return paymentWithCartLike;
     }
 
