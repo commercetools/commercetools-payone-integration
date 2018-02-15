@@ -1,5 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?><html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
-    <head><style>* {
+    <head><script type="text/javascript">/* Stack Trace Toggling */
+
+function getElementById(id) {
+  var element;
+
+  if (document.getElementById) { // standard
+    return document.getElementById(id);
+  } else if (document.all) { // old IE versions
+    return document.all[id];
+  } else if (document.layers) { // nn4
+    return document.layers[id];
+  }
+  alert("Sorry, but your web browser is not supported by Concordion.");
+}
+
+function isVisible(element) {
+  return element.style.display;
+}
+
+function makeVisible(element) {
+  element.style.display = "block";
+}
+
+function makeInvisible(element) {
+  element.style.display = "";
+}
+
+function toggleStackTrace(stackTraceNumber) {
+  var stackTrace = getElementById("stackTrace" + stackTraceNumber);
+  var stackTraceButton = getElementById("stackTraceButton" + stackTraceNumber);
+  if (isVisible(stackTrace)) {
+    makeInvisible(stackTrace);
+    stackTraceButton.value = "View Stack";
+  } else {
+    makeVisible(stackTrace);
+    stackTraceButton.value = "Hide Stack";
+  }
+}
+</script><style>* {
   font-family: Arial;
 }
 body {
@@ -208,25 +246,25 @@ ins {
                     <td class="inputvalue">Payment 1</td>
                     <td class="inputvalue">406</td>
                     <td class="inputvalue">EUR</td>
-                    <td>c89b1f54-aec1-4564-8557-eff0e781adb5</td>
+                    <td>6a7acb19-2cc2-4f97-9605-dfeeff52a60d</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
                     <td class="inputvalue">91341</td>
                     <td class="inputvalue">USD</td>
-                    <td>c65ea554-8910-44c3-9156-0149a26e0a10</td>
+                    <td>57e71514-d5f2-4bec-872e-0a7b16a75d33</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
                     <td class="inputvalue">6113</td>
                     <td class="inputvalue">EUR</td>
-                    <td>8f1ce3ec-fb96-4cf2-ba4a-5092d92a295c</td>
+                    <td>c46504f8-6270-42b2-90d3-f7b6fbd0bf86</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
                     <td class="inputvalue">111283</td>
                     <td class="inputvalue">EUR</td>
-                    <td>50ed8814-edb9-498e-b78f-4558cb9f18ae</td>
+                    <td>940dc13a-09cb-48af-9269-8df1031e2cc3</td>
                 </tr>
             </table>
             <p>
@@ -307,12 +345,23 @@ ins {
             </p>
             <p>
                 If I follow the 3-D Secure process for <span c:set="#successfulPayments" class="inputvalue">Payment 1, Payment 3, Payment 4</span> and
-                <span c:assertTrue="executeRedirectForPayments(#successfulPayments)" class="success">verify them successfully</span> with this credit card,
+                <span c:assertTrue="executeRedirectForPayments(#successfulPayments)"><span class="failure"><del class="expected">verify them successfully</del></span><span class="exceptionMessage">org.openqa.selenium.TimeoutException: java.net.SocketTimeoutException: Read timed out
+Build info: version: '3.6.0', revision: '6fbf3ec767', time: '2017-09-27T15:28:36.4Z'
+System info: host: 'travis-job-093cf769-c546-46ad-b4b4-310948ab6fa7', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '4.4.0-101-generic', java.version: '1.8.0_151'
+Driver info: driver.version: HtmlUnitDriver</span><input class="stackTraceButton" id="stackTraceButton1" type="button" onclick="javascript:toggleStackTrace('1')" value="View Stack" /><div class="stackTrace" id="stackTrace1"><p>While evaluating expression: <code>executeRedirectForPayments(#successfulPayments)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: org.openqa.selenium.TimeoutException: java.net.SocketTimeoutException: Read timed out
+Build info: version: '3.6.0', revision: '6fbf3ec767', time: '2017-09-27T15:28:36.4Z'
+System info: host: 'travis-job-093cf769-c546-46ad-b4b4-310948ab6fa7', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '4.4.0-101-generic', java.version: '1.8.0_151'
+Driver info: driver.version: HtmlUnitDriver</div><div class="stackTraceEntry">at org.openqa.selenium.htmlunit.HtmlUnitMouse.click (HtmlUnitMouse.java:97)</div><div class="stackTraceEntry">at org.openqa.selenium.htmlunit.HtmlUnitDriver.lambda$1 (HtmlUnitDriver.java:436)</div><div class="stackTraceEntry">at org.openqa.selenium.htmlunit.HtmlUnitDriver.lambda$0 (HtmlUnitDriver.java:412)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">org.openqa.selenium.TimeoutException: java.net.SocketTimeoutException: Read timed out
+Build info: version: '3.6.0', revision: '6fbf3ec767', time: '2017-09-27T15:28:36.4Z'
+System info: host: 'travis-job-093cf769-c546-46ad-b4b4-310948ab6fa7', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '4.4.0-101-generic', java.version: '1.8.0_151'
+Driver info: driver.version: HtmlUnitDriver</div><div class="stackTraceEntry">at org.openqa.selenium.htmlunit.HtmlUnitMouse.click (HtmlUnitMouse.java:97)</div><div class="stackTraceEntry">at org.openqa.selenium.htmlunit.HtmlUnitDriver.lambda$1 (HtmlUnitDriver.java:436)</div><div class="stackTraceEntry">at org.openqa.selenium.htmlunit.HtmlUnitDriver.lambda$0 (HtmlUnitDriver.java:412)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">java.net.SocketTimeoutException: Read timed out</div><div class="stackTraceEntry">at java.net.SocketInputStream.socketRead0 (SocketInputStream.java:-2)</div><div class="stackTraceEntry">at java.net.SocketInputStream.socketRead (SocketInputStream.java:116)</div><div class="stackTraceEntry">at java.net.SocketInputStream.read (SocketInputStream.java:171)</div><div class="stackTraceEntry">at java.net.SocketInputStream.read (SocketInputStream.java:141)</div><div class="stackTraceEntry">at sun.security.ssl.InputRecord.readFully (InputRecord.java:465)</div><div class="stackTraceEntry">at sun.security.ssl.InputRecord.read (InputRecord.java:503)</div><div class="stackTraceEntry">at sun.security.ssl.SSLSocketImpl.readRecord (SSLSocketImpl.java:983)</div><div class="stackTraceEntry">at sun.security.ssl.SSLSocketImpl.readDataRecord (SSLSocketImpl.java:940)</div><div class="stackTraceEntry">at sun.security.ssl.AppInputStream.read (AppInputStream.java:105)</div><div class="stackTraceEntry">at org.apache.http.impl.io.SessionInputBufferImpl.streamRead (SessionInputBufferImpl.java:137)</div><div class="stackTraceEntry">at org.apache.http.impl.io.SessionInputBufferImpl.fillBuffer (SessionInputBufferImpl.java:153)</div><div class="stackTraceEntry">at org.apache.http.impl.io.SessionInputBufferImpl.readLine (SessionInputBufferImpl.java:282)</div><div class="stackTraceEntry">at org.apache.http.impl.conn.DefaultHttpResponseParser.parseHead (DefaultHttpResponseParser.java:138)</div><div class="stackTraceEntry">at org.apache.http.impl.conn.DefaultHttpResponseParser.parseHead (DefaultHttpResponseParser.java:56)</div><div class="stackTraceEntry">at org.apache.http.impl.io.AbstractMessageParser.parse (AbstractMessageParser.java:259)</div><div class="stackTraceEntry">at org.apache.http.impl.DefaultBHttpClientConnection.receiveResponseHeader (DefaultBHttpClientConnection.java:163)</div><div class="stackTraceEntry">at org.apache.http.impl.conn.CPoolProxy.receiveResponseHeader (CPoolProxy.java:165)</div><div class="stackTraceEntry">at org.apache.http.protocol.HttpRequestExecutor.doReceiveResponse (HttpRequestExecutor.java:273)</div><div class="stackTraceEntry">at org.apache.http.protocol.HttpRequestExecutor.execute (HttpRequestExecutor.java:125)</div><div class="stackTraceEntry">at org.apache.http.impl.execchain.MainClientExec.execute (MainClientExec.java:272)</div><div class="stackTraceEntry">at org.apache.http.impl.execchain.ProtocolExec.execute (ProtocolExec.java:185)</div><div class="stackTraceEntry">at org.apache.http.impl.execchain.RetryExec.execute (RetryExec.java:89)</div><div class="stackTraceEntry">at org.apache.http.impl.execchain.RedirectExec.execute (RedirectExec.java:111)</div><div class="stackTraceEntry">at org.apache.http.impl.client.InternalHttpClient.doExecute (InternalHttpClient.java:185)</div><div class="stackTraceEntry">at org.apache.http.impl.client.CloseableHttpClient.execute (CloseableHttpClient.java:72)</div><div class="stackTraceEntry">at com.gargoylesoftware.htmlunit.HttpWebConnection.getResponse (HttpWebConnection.java:194)</div><div class="stackTraceEntry">at com.gargoylesoftware.htmlunit.WebClient.loadWebResponseFromWebConnection (WebClient.java:1379)</div><div class="stackTraceEntry">at com.gargoylesoftware.htmlunit.WebClient.loadWebResponse (WebClient.java:1298)</div><div class="stackTraceEntry">at com.gargoylesoftware.htmlunit.WebClient.download (WebClient.java:2131)</div><div class="stackTraceEntry">at com.gargoylesoftware.htmlunit.html.HtmlForm.submit (HtmlForm.java:146)</div><div class="stackTraceEntry">at com.gargoylesoftware.htmlunit.html.HtmlSubmitInput.doClickStateUpdate (HtmlSubmitInput.java:90)</div><div class="stackTraceEntry">at com.gargoylesoftware.htmlunit.html.DomElement.click (DomElement.java:984)</div><div class="stackTraceEntry">at com.gargoylesoftware.htmlunit.html.DomElement.click (DomElement.java:929)</div><div class="stackTraceEntry">at com.gargoylesoftware.htmlunit.html.DomElement.click (DomElement.java:869)</div><div class="stackTraceEntry">at org.openqa.selenium.htmlunit.HtmlUnitMouse.click (HtmlUnitMouse.java:84)</div><div class="stackTraceEntry">at org.openqa.selenium.htmlunit.HtmlUnitDriver.lambda$1 (HtmlUnitDriver.java:436)</div><div class="stackTraceEntry">at org.openqa.selenium.htmlunit.HtmlUnitDriver.lambda$0 (HtmlUnitDriver.java:412)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></span> with this credit card,
                 I get forwarded to a predefined success url and for each of the payments the following notifications will be received:
             </p>
             <ol>
-                <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="success">received</span> -&gt; has no effect, just as a confirmation</li>
-                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="success">received</span>
+                <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="failure"><del class="expected">received</del>
+<ins class="actual">== false</ins></span> -&gt; has no effect, just as a confirmation</li>
+                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="failure"><del class="expected">received</del>
+<ins class="actual">== false</ins></span>
                     -&gt;  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
             </ol>
             <table c:execute="#result = fetchPaymentDetails(#paymentName)">
@@ -326,27 +375,38 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
-                    <td class="success">Success</td>
+                    <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
                     <td class="success">1</td>
-                    <td class="success">1</td>
-                    <td class="success">[...]Payment-1-Success</td>
-                    <td>18</td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
+                    <td class="failure"><del class="expected">[...]Payment-1-Success</del>
+<ins class="actual"> </ins></td>
+                    <td>14</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
-                    <td class="success">Success</td>
-                    <td class="success">1</td>
-                    <td class="success">1</td>
-                    <td class="success">[...]Payment-3-Success</td>
-                    <td>18</td>
+                    <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
+                    <td class="failure"><del class="expected">[...]Payment-3-Success</del>
+<ins class="actual"> </ins></td>
+                    <td>11</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
-                    <td class="success">Success</td>
-                    <td class="success">1</td>
-                    <td class="success">1</td>
-                    <td class="success">[...]Payment-4-Success</td>
-                    <td>18</td>
+                    <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
+                    <td class="failure"><del class="expected">[...]Payment-4-Success</del>
+<ins class="actual"> </ins></td>
+                    <td>11</td>
                 </tr>
             </table>
 
@@ -360,7 +420,8 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
-                    <td class="success">Paid</td>
+                    <td class="failure"><del class="expected">Paid</del>
+<ins class="actual">Pending</ins></td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
@@ -368,11 +429,13 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
-                    <td class="success">Paid</td>
+                    <td class="failure"><del class="expected">Paid</del>
+<ins class="actual">(null)</ins></td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
-                    <td class="success">Paid</td>
+                    <td class="failure"><del class="expected">Paid</del>
+<ins class="actual">(null)</ins></td>
                 </tr>
             </table>
 
@@ -387,5 +450,5 @@ ins {
             The checkout implementation needs to take care of failed verifications - the user will be redirected to
             the <em>errorUrl</em> specified in the Payment object.
         </p>
-    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 501672 ms on 15-Feb-2018 at 12:01:13 UTC</div></div></body>
+    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 937566 ms on 15-Feb-2018 at 12:51:31 UTC</div></div></body>
 </html>
