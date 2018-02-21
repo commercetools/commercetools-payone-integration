@@ -2,8 +2,6 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPreauthorizationRequest;
@@ -13,9 +11,6 @@ import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import java.time.format.DateTimeFormatter;
@@ -24,15 +19,10 @@ import java.util.Optional;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
 import static org.javamoney.moneta.function.MonetaryQueries.convertMinorPart;
 
-/**
- * @author fhaertig
- * @since 20.01.16
- */
-@RunWith(MockitoJUnitRunner.class)
-public class WalletRequestFactoryTest extends BaseTenantPropertyTest {
+public class BaseWalletRequestFactoryTest extends BaseTenantPropertyTest {
 
-    private final PaymentTestHelper payments = new PaymentTestHelper();
-    private WalletRequestFactory factory;
+    protected final PaymentTestHelper payments = new PaymentTestHelper();
+    protected WalletRequestFactory factory;
 
 
     @Before
@@ -41,10 +31,9 @@ public class WalletRequestFactoryTest extends BaseTenantPropertyTest {
         factory = new WalletRequestFactory(tenantConfig);
     }
 
-    @Test
-    public void createFullPreauthorizationRequestFromValidPayment() throws Exception {
-
-        Payment payment = payments.dummyPaymentOneAuthPending20EuroPPE();
+    protected final void createFullPreauthorizationRequestFromValidPayment(Payment payment,
+                                                                           String expectedClearingtype,
+                                                                           String expectedWalletType) throws Exception {
         Order order = payments.dummyOrderMapToPayoneRequest();
         Customer customer = payment.getCustomer().getObj();
 
@@ -67,9 +56,8 @@ public class WalletRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(result.getIntegratorVersion()).isEqualTo(payoneConfig.getIntegratorVersion());
 
         //clearing type
-        ClearingType clearingType = ClearingType.getClearingTypeByKey(MethodKeys.WALLET_PAYPAL);
-        softly.assertThat(result.getClearingtype()).isEqualTo(clearingType.getPayoneCode());
-        softly.assertThat(result.getWallettype()).isEqualTo(clearingType.getSubType());
+        softly.assertThat(result.getClearingtype()).isEqualTo(expectedClearingtype);
+        softly.assertThat(result.getWallettype()).isEqualTo(expectedWalletType);
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
@@ -118,10 +106,10 @@ public class WalletRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertAll();
     }
 
-    @Test
-    public void createFullAuthorizationRequestFromValidPayment() throws Exception {
+    protected void createFullAuthorizationRequestFromValidPayment(Payment payment,
+                                                                  String expectedClearingtype,
+                                                                  String expectedWalletType) throws Exception {
 
-        Payment payment = payments.dummyPaymentOneAuthPending20EuroPPE();
         Order order = payments.dummyOrderMapToPayoneRequest();
         Customer customer = payment.getCustomer().getObj();
 
@@ -144,9 +132,8 @@ public class WalletRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(result.getIntegratorVersion()).isEqualTo(payoneConfig.getIntegratorVersion());
 
         //clearing type
-        ClearingType clearingType = ClearingType.getClearingTypeByKey(MethodKeys.WALLET_PAYPAL);
-        softly.assertThat(result.getWallettype()).isEqualTo(clearingType.getSubType());
-        softly.assertThat(result.getClearingtype()).isEqualTo(clearingType.getPayoneCode());
+        softly.assertThat(result.getClearingtype()).isEqualTo(expectedClearingtype);
+        softly.assertThat(result.getWallettype()).isEqualTo(expectedWalletType);
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
