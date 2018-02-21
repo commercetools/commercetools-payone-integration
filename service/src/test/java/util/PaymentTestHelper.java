@@ -230,4 +230,12 @@ public class PaymentTestHelper {
     public PaymentWithCartLike createKlarnaPaymentWithCartLikeWithoutDiscount() throws Exception {
         return createDummyPaymentWithCartLike(dummyPaymentForKlarnaCartWithoutDiscounts_KLV(), dummyKlarnaCartWithoutDiscounts());
     }
+
+    public PaymentWithCartLike createPaypalPaymentWithCartLike() throws Exception {
+        return createDummyPaymentWithCartLike(dummyPaymentOneAuthPending20EuroPPE(), dummyCart());
+    }
+
+    public PaymentWithCartLike createPaydirektPaymentWithCartLike() throws Exception {
+        return createDummyPaymentWithCartLike(dummyPaymentOneAuthPending20EuroPDT(), dummyCart());
+    }
 }
