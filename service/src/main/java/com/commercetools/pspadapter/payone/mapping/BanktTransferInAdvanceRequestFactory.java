@@ -24,6 +24,7 @@ public class BanktTransferInAdvanceRequestFactory extends PayoneRequestFactory {
     }
 
     @Override
+    @Nonnull
     public BankTransferInAdvancePreautorizationRequest createPreauthorizationRequest(PaymentWithCartLike paymentWithCartLike) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
 

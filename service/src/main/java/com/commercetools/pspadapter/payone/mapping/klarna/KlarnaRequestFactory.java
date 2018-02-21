@@ -40,6 +40,7 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
     }
 
     @Override
+    @Nonnull
     public KlarnaPreauthorizationRequest createPreauthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
         return createRequestInternal(paymentWithCartLike, KlarnaPreauthorizationRequest::new);
     }

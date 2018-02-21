@@ -21,9 +21,9 @@ import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.common.*;
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.common.AuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.ChargeTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.UnsupportedTransactionExecutor;
-import com.commercetools.pspadapter.payone.transaction.common.AuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.paymentinadvance.BankTransferInAdvanceChargeTransactionExecutor;
 import com.commercetools.service.OrderService;
 import com.commercetools.service.OrderServiceImpl;
@@ -208,6 +208,7 @@ public class TenantFactory {
         final ImmutableSet<PaymentMethod> supportedMethods = ImmutableSet.of(
                 PaymentMethod.CREDIT_CARD,
                 PaymentMethod.WALLET_PAYPAL,
+                PaymentMethod.WALLET_PAYDIREKT,
                 PaymentMethod.BANK_TRANSFER_SOFORTUEBERWEISUNG,
                 PaymentMethod.BANK_TRANSFER_ADVANCE,
                 PaymentMethod.BANK_TRANSFER_POSTFINANCE_CARD,
@@ -272,17 +273,24 @@ public class TenantFactory {
         switch (method) {
             case CREDIT_CARD:
                 return new CreditCardRequestFactory(tenantConfig);
+
             case WALLET_PAYPAL:
-                return new PaypalRequestFactory(tenantConfig);
+            case WALLET_PAYDIREKT:
+                return new WalletRequestFactory(tenantConfig);
+
             case BANK_TRANSFER_SOFORTUEBERWEISUNG:
                 return new SofortBankTransferRequestFactory(tenantConfig);
+
             case BANK_TRANSFER_POSTFINANCE_CARD:
             case BANK_TRANSFER_POSTFINANCE_EFINANCE:
                 return new PostFinanceBanktransferRequestFactory(tenantConfig);
+
             case BANK_TRANSFER_ADVANCE:
                 return new BanktTransferInAdvanceRequestFactory(tenantConfig);
+
             case INVOICE_KLARNA:
                 return new KlarnaRequestFactory(tenantConfig, createCountryToLanguageMapper());
+
             default:
                 throw new IllegalArgumentException(format("No PayoneRequestFactory could be created for payment method %s", method));
         }

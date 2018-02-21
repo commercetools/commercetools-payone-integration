@@ -24,6 +24,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
     }
 
     @Override
+    @Nonnull
     public CreditCardPreauthorizationRequest createPreauthorizationRequest(
             final PaymentWithCartLike paymentWithCartLike) {
 

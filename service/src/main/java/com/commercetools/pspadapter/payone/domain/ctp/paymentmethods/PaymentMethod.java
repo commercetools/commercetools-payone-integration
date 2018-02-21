@@ -37,6 +37,13 @@ public enum PaymentMethod {
                     TransactionType.CHARGE),
 
     /**
+     * @see MethodKeys#WALLET_PAYDIREKT
+     */
+    WALLET_PAYDIREKT(MethodKeys.WALLET_PAYDIREKT,
+            TransactionType.AUTHORIZATION,
+            TransactionType.CHARGE),
+
+    /**
      * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
      */
     BANK_TRANSFER_SOFORTUEBERWEISUNG(MethodKeys.BANK_TRANSFER_SOFORTUEBERWEISUNG,

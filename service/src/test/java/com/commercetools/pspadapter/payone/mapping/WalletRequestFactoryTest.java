@@ -29,16 +29,16 @@ import static org.javamoney.moneta.function.MonetaryQueries.convertMinorPart;
  * @since 20.01.16
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PaypalRequestFactoryTest extends BaseTenantPropertyTest {
+public class WalletRequestFactoryTest extends BaseTenantPropertyTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
-    private PaypalRequestFactory factory;
+    private WalletRequestFactory factory;
 
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        factory = new PaypalRequestFactory(tenantConfig);
+        factory = new WalletRequestFactory(tenantConfig);
     }
 
     @Test
