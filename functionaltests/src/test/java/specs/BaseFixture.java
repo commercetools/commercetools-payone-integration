@@ -143,7 +143,7 @@ public abstract class BaseFixture {
         typeCache = CacheBuilder.newBuilder().build(new TypeCacheLoader(ctpClient));
     }
 
-    public String getHandlePaymentUrl(final String paymentId) throws MalformedURLException {
+    public String getHandlePaymentUrl(final String paymentId) {
         return getServiceUrl(getHandlePaymentPath(paymentId));
     }
 
@@ -151,7 +151,7 @@ public abstract class BaseFixture {
         return format("/%s/commercetools/handle/payments/%s", getTenantName(), paymentId);
     }
 
-    public String getNotificationUrl() throws MalformedURLException {
+    public String getNotificationUrl() {
         return getServiceUrl(getNotificationPath());
     }
 
@@ -159,17 +159,21 @@ public abstract class BaseFixture {
         return format("/%s/payone/notification", getTenantName());
     }
 
-    public String getHealthUrl() throws MalformedURLException {
+    public String getHealthUrl() {
         return getServiceUrl("/health");
     }
 
-    final String getServiceUrl(String suffix) throws MalformedURLException {
-        return new URL(
-                ctPayoneIntegrationBaseUrl.getProtocol(),
-                ctPayoneIntegrationBaseUrl.getHost(),
-                ctPayoneIntegrationBaseUrl.getPort(),
-                suffix)
-                .toExternalForm();
+    final String getServiceUrl(String suffix) {
+        try {
+            return new URL(
+                    ctPayoneIntegrationBaseUrl.getProtocol(),
+                    ctPayoneIntegrationBaseUrl.getHost(),
+                    ctPayoneIntegrationBaseUrl.getPort(),
+                    suffix)
+                    .toExternalForm();
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public HttpResponse sendGetRequestToUrl(final String url) throws IOException {

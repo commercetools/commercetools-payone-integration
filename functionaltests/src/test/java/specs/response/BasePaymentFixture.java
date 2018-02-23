@@ -38,7 +38,6 @@ import specs.BaseFixture;
 
 import javax.money.MonetaryAmount;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -75,21 +74,22 @@ public class BasePaymentFixture extends BaseFixture {
     /**
      * Creates credit card payment (PAYMENT_CREDIT_CARD) and saves it to commercetools service. Also created payment is
      * saved in {@code #payments} map and may be reused in further sequental tests.
-     * @param paymentName Unique payment name to use inside this test fixture
-     * @param paymentMethod see {@link com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod}
-     * @param transactionType  see {@link TransactionType}
-     * @param centAmount amount to process (charge, authorize, refund etc)
-     * @param currencyCode 3 letters currency code. The tested product should have this currency type, otherwise the
-     *                     payment won't be created.
-     * @param languageCode 2 letters ISO 639 code
+     *
+     * @param paymentName     Unique payment name to use inside this test fixture
+     * @param paymentMethod   see {@link com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod}
+     * @param transactionType see {@link TransactionType}
+     * @param centAmount      amount to process (charge, authorize, refund etc)
+     * @param currencyCode    3 letters currency code. The tested product should have this currency type, otherwise the
+     *                        payment won't be created.
+     * @param languageCode    2 letters ISO 639 code
      * @return String id of created payment.
      */
     public Payment createAndSaveCardPayment(String paymentName,
-                                              String paymentMethod,
-                                              String transactionType,
-                                              String centAmount,
-                                              String currencyCode,
-                                              String languageCode) throws Exception {
+                                            String paymentMethod,
+                                            String transactionType,
+                                            String centAmount,
+                                            String currencyCode,
+                                            String languageCode) {
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
         final String pseudocardpan = getUnconfirmedVisaPseudoCardPan();
 
@@ -111,40 +111,57 @@ public class BasePaymentFixture extends BaseFixture {
     }
 
     public Payment createAndSaveCardPayment(String paymentName,
-                                               String paymentMethod,
-                                               String transactionType,
-                                               String centAmount,
-                                               String currencyCode) throws Exception {
+                                            String paymentMethod,
+                                            String transactionType,
+                                            String centAmount,
+                                            String currencyCode) {
         return createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, Locale.ENGLISH.getLanguage());
     }
 
     public Payment createAndSavePayment(String paymentName,
-                                           String paymentMethod,
-                                           String transactionType,
-                                           String centAmount,
-                                           String currencyCode) throws Exception {
+                                        String paymentMethod,
+                                        String transactionType,
+                                        String centAmount,
+                                        String currencyCode) throws Exception {
         switch (paymentMethod) {
-            case CREDIT_CARD: return createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
-            case WALLET_PAYPAL: return createAndSavePaypalPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
-            case BANK_TRANSFER_ADVANCE: return createAndSaveBankTransferAdvancedPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
-            default: throw new IllegalArgumentException(format("Payment method [%s] is not implemented", paymentMethod));
+            case CREDIT_CARD:
+                return createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
+
+            case WALLET_PAYPAL:
+            case WALLET_PAYDIREKT:
+                return createAndSaveWalletPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
+
+            case BANK_TRANSFER_ADVANCE:
+                return createAndSaveBankTransferAdvancedPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
+
+            default:
+                throw new IllegalArgumentException(format("Payment method [%s] is not implemented", paymentMethod));
         }
     }
 
-    public Payment createAndSavePaypalPayment(
+    public Payment createAndSaveWalletPayment(
             final String paymentName,
             final String paymentMethod,
             final String transactionType,
             final String centAmount,
-            final String currencyCode) throws Exception {
+            final String currencyCode) {
+        return createAndSaveWalletPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode,
+                format("https://example.com/%s_%s/", paymentMethod, transactionType));
+    }
+
+    public Payment createAndSaveWalletPayment(
+            final String paymentName,
+            final String paymentMethod,
+            final String transactionType,
+            final String centAmount,
+            final String currencyCode,
+            final String baseRedirectUrl) {
 
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
 
-        final String redirectUrl = "https://example.com/paypal_authorization/";
-
-        final String successUrl = redirectUrl + URLEncoder.encode(paymentName + " Success", "UTF-8");
-        final String errorUrl = redirectUrl + URLEncoder.encode(paymentName + " Error", "UTF-8");
-        final String cancelUrl = redirectUrl + URLEncoder.encode(paymentName + " Cancel", "UTF-8");
+        final String successUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Success");
+        final String errorUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Error");
+        final String cancelUrl = createRedirectUrl(baseRedirectUrl, paymentName, "Cancel");
 
         final PaymentDraft paymentDraft = PaymentDraftBuilder.of(monetaryAmount)
                 .paymentMethodInfo(PaymentMethodInfoBuilder.of()
