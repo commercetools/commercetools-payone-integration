@@ -11,6 +11,7 @@
   - [4. Setup a new tenant (branch,shop,merchant)](#4-setup-a-new-tenant-branchshopmerchant)
   - [5. Importan notes](#5-importan-notes)
 - [To v2.2+ (`Initial` transaction state)](#to-v22-initial-transaction-state)
+- [To v2.3+ (`Paydirekt` payment method)](#to-v23-paydirekt-payment-method)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
