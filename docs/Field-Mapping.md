@@ -33,22 +33,23 @@ With PAYONE:
 
 See also: [CT Method field convention](https://github.com/nkuehn/payment-integration-specifications/blob/master/Method-Keys.md)
  
-| CT `method` field value |  PAYONE `clearingtype` | Additional PAYONE parameter | common name | CT payment type key |
-|---|---|---|---|---|
-| `DIRECT_DEBIT-SEPA` | `elv` |  | Lastschrift / Direct Debit | `payment-DIRECT_DEBIT-SEPA` |
-| `CREDIT_CARD` | `cc` | (card network and specific card data are trasnferred on the client API only -> PCI DSS !) | Credit Card | `payment-CREDIT_CARD` |
-| `BANK_TRANSFER-SOFORTUEBERWEISUNG` | `sb` | `onlinebanktransfertype=PNT` |  Sofortbanking / Sofortüberweisung (DE) | `payment-BANK_TRANSFER` |
-| `BANK_TRANSFER-GIROPAY` | `sb` | `onlinebanktransfertype=GPY` |  Giropay (DE) | `payment-BANK_TRANSFER` |
-| `BANK_TRANSFER-EPS` | `sb` | `onlinebanktransfertype=EPS` | eps / STUZZA (AT)  | `payment-BANK_TRANSFER` |
-| `BANK_TRANSFER-POSTFINANCE_EFINANCE` | `sb` | `onlinebanktransfertype=PFF` | PostFinance e-Finance (CH)  | `payment-BANK_TRANSFER` |
-| `BANK_TRANSFER-POSTFINANCE_CARD` | `sb` | `onlinebanktransfertype=PFC` | PostFinance Card (CH) | `payment-BANK_TRANSFER` |
-| `BANK_TRANSFER-IDEAL` | `sb` | `onlinebanktransfertype=IDL` | iDEAL (NL) | `payment-BANK_TRANSFER` |
-| `CASH_ADVANCE` | `vor` |  | Prepayment (PAYONE has access to the merchant's account to see if the money has arrived) | `payment-CASH_ADVANCE` |
-| `INVOICE-DIRECT` | `rec` |  | Direct Invoice (PAYONE has access to the merchant's account to see if the money has arrived) | `payment-INVOICE` |
-| `CASH_ON_DELIVERY` | `cod` | `shippingprovider` needs to be set, see below in the field mappings | Cash on Delivery | `payment-CASH_ON_DELIVERY` |
-| `WALLET-PAYPAL` | `wlt` | `wallettype=PPE` | PayPal | `payment-WALLET`  |
-| `INSTALLMENT-KLARNA` | `fnc` | `financingtype=KLS` |  Consumer Credit / Installment via Klarna | `payment-INVOICE-KLARNA` XXX TODO the fields are the same, but would it be better to differentiate? looks like a bug  |
-| `INVOICE-KLARNA` | `fnc` | `financingtype=KLV` | Klarna Invoice | `payment-INVOICE-KLARNA` |
+| CT `method` field value              |  PAYONE `clearingtype` | Additional PAYONE parameter | common name       | CT payment type key           |
+|--------------------------------------|-------|------------------------------|-----------------------------------|-------------------------------|
+| `DIRECT_DEBIT-SEPA`                  | `elv` |                              | Lastschrift / Direct Debit        | `payment-DIRECT_DEBIT-SEPA`   |
+| `CREDIT_CARD`                        | `cc`  | (card network and specific card data are trasnferred on the client API only -> PCI DSS !) | Credit Card | `payment-CREDIT_CARD` |
+| `BANK_TRANSFER-SOFORTUEBERWEISUNG`   | `sb`  | `onlinebanktransfertype=PNT` |  Sofortbanking / Sofortüberweisung (DE) | `payment-BANK_TRANSFER` |
+| `BANK_TRANSFER-GIROPAY`              | `sb`  | `onlinebanktransfertype=GPY` |  Giropay (DE)                     | `payment-BANK_TRANSFER` |
+| `BANK_TRANSFER-EPS`                  | `sb`  | `onlinebanktransfertype=EPS` | eps / STUZZA (AT)                 | `payment-BANK_TRANSFER` |
+| `BANK_TRANSFER-POSTFINANCE_EFINANCE` | `sb`  | `onlinebanktransfertype=PFF` | PostFinance e-Finance (CH)        | `payment-BANK_TRANSFER` |
+| `BANK_TRANSFER-POSTFINANCE_CARD`     | `sb`  | `onlinebanktransfertype=PFC` | PostFinance Card (CH)             | `payment-BANK_TRANSFER` |
+| `BANK_TRANSFER-IDEAL`                | `sb`  | `onlinebanktransfertype=IDL` | iDEAL (NL)                        | `payment-BANK_TRANSFER` |
+| `CASH_ADVANCE`                       | `vor` |                              | Prepayment (PAYONE has access to the merchant's account to see if the money has arrived) | `payment-CASH_ADVANCE` |
+| `INVOICE-DIRECT`                     | `rec` |                              | Direct Invoice (PAYONE has access to the merchant's account to see if the money has arrived) | `payment-INVOICE` |
+| `CASH_ON_DELIVERY`                   | `cod` | `shippingprovider` needs to be set, see below in the field mappings | Cash on Delivery | `payment-CASH_ON_DELIVERY` |
+| `WALLET-PAYPAL`                      | `wlt` | `wallettype=PPE`             | [PayPal](https://paypal.com)      | `payment-WALLET`              |
+| `WALLET-PAYDIREKT`                   | `wlt` | `wallettype=PDT`             | [Paydirekt](https://paydirekt.de) | `payment-WALLET`              |
+| `INSTALLMENT-KLARNA`                 | `fnc` | `financingtype=KLS`          |  Consumer Credit / Installment via Klarna | `payment-INVOICE-KLARNA` XXX TODO the fields are the same, but would it be better to differentiate? looks like a bug  |
+| `INVOICE-KLARNA`                     | `fnc` | `financingtype=KLV`          | Klarna Invoice                    | `payment-INVOICE-KLARNA`      |
 
 BillSAFE has been deprecated by PAYONE and is not supported. 
 
@@ -56,16 +57,16 @@ BillSAFE has been deprecated by PAYONE and is not supported.
 
 WORK IN PROGRESS (only active calls to PO here, no status notifications yet)
  
-| common name |  PAYONE `clearingtype` | PAYONE status notification beahavior (money flow in bold). XXX müsste separat für auth /capture etc sein?  | PO calls with actual money flows | CT Authorization supported (money really reserved)? | Cancelation can happen (=Chargeback) |
-|---|---|---|---|---|---|
-| `DIRECT_DEBIT-SEPA` | `elv` | *capture*: appointed -> **capture** (TODO auch noch **paid**?)| auth, capture, refund, **any** debit  | NO | YES |
-| `CREDIT_CARD` | `cc` | *capture*: appointed -> capture -> **paid** | auth, capture, refund, **any** debit | **YES** | YES |
-| `BANK_TRANSFER_*` (all) | `sb` |  | **preauth**, auth, refund, reimbursing debit  (preauth sets no receivable, auth does) | NO | NO |
-| `CASH_ADVANCE` | `vor` |  | refund, reimbursing debit | NO | NO |
-| `INVOICE-DIRECT` | `rec` |  | refund, reimbursing debit | NO | NO |
-| `CASH_ON_DELIVERY` | `cod` |  | refund, reimbursing debit | NO | NO |
-| `WALLET-PAYPAL` | `wlt` |  | auth, capture, refund, reimbursing debit  | **YES** | YES |
-| `INSTALLMENT-KLARNA` & `INVOICE-KLARNA`| `fnc` |  | refund, reimbursing debit | NO | NO |
+| common name                            |  PAYONE `clearingtype` | PAYONE status notification beahavior (money flow in bold). XXX müsste separat für auth /capture etc sein?  | PO calls with actual money flows | CT Authorization supported (money really reserved)? | Cancelation can happen (=Chargeback) |
+|----------------------------------------|-------|---|-------------------------------------------|---------|----|
+| `DIRECT_DEBIT-SEPA`                    | `elv` | *capture*: appointed -> **capture** (TODO auch noch **paid**?)| auth, capture, refund, **any** debit  | NO | YES |
+| `CREDIT_CARD`                          | `cc`  | *capture*: appointed -> capture -> **paid** | auth, capture, refund, **any** debit | **YES** | YES |
+| `BANK_TRANSFER_*` (all)                | `sb`  |   | **preauth**, auth, refund, reimbursing debit  (preauth sets no receivable, auth does) | NO | NO |
+| `CASH_ADVANCE`                         | `vor` |   | refund, reimbursing debit                 | NO      | NO  |
+| `INVOICE-DIRECT`                       | `rec` |   | refund, reimbursing debit                 | NO      | NO  |
+| `CASH_ON_DELIVERY`                     | `cod` |   | refund, reimbursing debit                 | NO      | NO  |
+| `WALLET-PAYPAL` & `WALLET-PAYDIREKT`   | `wlt` |   | auth, capture, refund, reimbursing debit  | **YES** | YES |
+| `INSTALLMENT-KLARNA` & `INVOICE-KLARNA`| `fnc` |   | refund, reimbursing debit                 | NO      | NO  |
 
 # API Data Mapping between PAYONE and the commercetools platform
   
@@ -204,12 +205,21 @@ Please use the commercetools custom payment types (per method) from the [method 
 
 All payment methods:
 
-  * _Required_ `reference`: Directly taken over from a custom field `reference` of type String. Should be filled by the Order Number in the checkout / solution code.
+  * _Required_:
+    * `clearingtype`: defined from `Payment#paymentMethodInfo#method` 
+    (see [PaymentMethod](/service/src/main/java/com/commercetools/pspadapter/payone/domain/ctp/paymentmethods/PaymentMethod.java))
+    * `reference`: directly taken over from a custom field `reference` of type String. 
+       Should be filled by the Order Number in the checkout / solution code.
+    * `currency` <- `Payment#amountPlanned#currency#currencyCode`
+    * `amount` <- `Payment#amountPlanned#currency#amount` (in minor units, e.g. cents)
+  
+  * _Optional_:
+    * `userid` <- `Payment#custom#payoneUserId`
+    * `narrative_text` <- `Payment#custom#referenceText`
  
 `DIRECT_DEBIT`*:
   * general:
     * `bankaccountholder` -> `accountHolderName` of type String
-    * `narrative_text` -> `referenceText` of type String on the Payment
     * `due_time` -> `executionTime`  of type DateTime on the Payment. CT master. convert to Unix timestamp. 
   * new data:
     * `iban` -> `IBAN` of type String (CT master)
@@ -229,7 +239,6 @@ All payment methods:
 `BANK_TRANSFER`*:
   * general:
     * `bankaccountholder` -> `accountHolderName` of type String
-    * `narrative_text` -> `referenceText` of type String on the Payment
   * new data:
     * `iban` -> `IBAN` of type String (CT initial, but overridden by PAYONE)
     * `bic`  -> custom `BIC` (CT initial, but overridden by PAYONE)
@@ -247,7 +256,6 @@ All payment methods:
     * `backurl`  -> custom field `cancelUrl` Type String on Payment, CT master
   
 `CREDIT_CARD`*:
-  * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment
   * card data:
     * `pseudocardpan` -> `cardDataPlaceholder` of type String (CT initial, PAYONE overrides)
     * `ecommercemode` ("internet" or "3dsecure") -> `force3DSecure` of type Boolean (CT master, PAYONE can force a redirect anyways)
@@ -307,7 +315,19 @@ All payment methods:
    * `backurl`  -> custom field `canceUrl` Type String on Payment, CT master
   
 `WALLET`:
-  * `narrative_text` : text on the account statements -> `referenceText` of type String on the Payment     
+  * _Required_ for all wallet payments:
+    * `wallettype`: defined from `Payment#paymentMethodInfo#method` 
+       (see [PaymentMethod](/service/src/main/java/com/commercetools/pspadapter/payone/domain/ctp/paymentmethods/PaymentMethod.java))
+    * `redirecturl`, `successurl`, `errorurl`, `backurl` - like for all other redirect-based methods described above.
+    
+  * **`WALLET-PAYDIREKT`** specific _Required_ fields mapping 
+  (see _TECHNICAL REFERENCE Add-On for Paydirekt v 1.5_ internal documentation):
+    * `shipping_firstname` <- `Cart#shippingAddress#firstName`
+    * `shipping_lastname`  <- `Cart#shippingAddress#lastName`
+    * `shipping_zip`       <- `Cart#shippingAddress#postalCode`
+    * `shipping_city`      <- `Cart#shippingAddress#city`
+    * `shipping_country`   <- `Cart#shippingAddress#country` (**note**: this is independent from `Cart#country` and may be different)
+    
    
 ## PAYONE fields that map to custom Fields on CT Payment, CT Cart, CT Customer or CT Order
 
@@ -330,7 +350,7 @@ Since service version [`v2.2.+`](https://github.com/commercetools/commercetools-
 ([when `Initial` CTP transaction stage was introduced](http://dev.commercetools.com/release-notes.html#release-notes---commercetools-platform---version-release-29-september-2017)) 
 `Pending` state means that the transaction was accepted/processed by Payone service, but still not completed.
 This might happen in following cases:
-  - _redirect_ payments: buyer was redirected to payment provider page (PayPal, Credit Card verification, Sofortüberweisung etc),
+  - _redirect_ payments: buyer was redirected to payment provider page (PayPal, Paydirekt, Credit Card verification, Sofortüberweisung etc),
   but still not completed/approved the payment
   - _bank transfer_, like `CASH_ADVANCE` or other bank transfer methods. This means the bill was issued,
   but still not completed by customer

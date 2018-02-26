@@ -31,7 +31,7 @@ public class PaydirektFixture extends BaseWalletFixture {
     }
 
     /**
-     * Paydirekt has required mandatory shipping address values. See <i>TECHNICAL REFERENCE Add-On for Paydirekt (v 1.2)</i>
+     * Paydirekt has required mandatory shipping address values. See <i>TECHNICAL REFERENCE Add-On for Paydirekt (v 1.5)</i>
      * for more details
      *
      * @param currencyCode  default cart currency.
@@ -45,8 +45,6 @@ public class PaydirektFixture extends BaseWalletFixture {
                 .shippingAddress(Address.of(DE)
                         .withFirstName("PaydirektPayerName")
                         .withLastName("PaydirektPayerLastName")
-                        .withCompany("PaydirektPayerCompany")
-                        .withStreetName("PaydirektPayerStr.")
                         .withPostalCode("01001")
                         .withCity("PaydirektPayerCity"));
     }
