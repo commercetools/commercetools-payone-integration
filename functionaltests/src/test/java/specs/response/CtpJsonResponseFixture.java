@@ -40,7 +40,7 @@ public class CtpJsonResponseFixture extends BasePaymentFixture {
                                     String transactionType,
                                     String centAmount,
                                     String currencyCode,
-                                    String languageCode) throws Exception {
+                                    String languageCode) {
 
         return createAndSaveCardPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode, languageCode)
                 .getId();

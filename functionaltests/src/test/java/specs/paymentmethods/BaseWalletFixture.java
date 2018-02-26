@@ -1,4 +1,4 @@
-package specs.paymentmethods.paypal;
+package specs.paymentmethods;
 
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import io.sphere.sdk.payments.Payment;

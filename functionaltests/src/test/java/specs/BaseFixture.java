@@ -20,8 +20,6 @@ import io.sphere.sdk.carts.commands.CartCreateCommand;
 import io.sphere.sdk.carts.commands.CartUpdateCommand;
 import io.sphere.sdk.carts.commands.updateactions.AddLineItem;
 import io.sphere.sdk.carts.commands.updateactions.AddPayment;
-import io.sphere.sdk.carts.commands.updateactions.SetBillingAddress;
-import io.sphere.sdk.carts.commands.updateactions.SetShippingAddress;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.models.Address;
@@ -44,6 +42,7 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import javax.money.format.MonetaryAmountFormat;
@@ -62,6 +61,7 @@ import java.util.regex.Pattern;
 
 import static com.commercetools.util.HttpRequestUtil.*;
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.DOTALL;
 
@@ -230,25 +230,35 @@ public abstract class BaseFixture {
         // create cart and order with product
         final Product product = ctpClient().executeBlocking(ProductQuery.of()).getResults().get(0);
 
-        final CartDraft cardDraft = CartDraftBuilder.of(Monetary.getCurrency(currencyCode)).build();
-
-        if (buyerLastName == null) {
-            buyerLastName = BUYER_LAST_NAME;
-        }
+        final CartDraft cardDraft = createDefaultCartDraftBuilder(currencyCode, ofNullable(buyerLastName).orElse(BUYER_LAST_NAME))
+                .build();
 
         final Cart cart = ctpClient().executeBlocking(CartUpdateCommand.of(
                 ctpClient().executeBlocking(CartCreateCommand.of(cardDraft)),
                 ImmutableList.of(
                         AddPayment.of(payment),
-                        AddLineItem.of(LineItemDraft.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1)),
-                        SetShippingAddress.of(Address.of(CountryCode.DE)),
-                        SetBillingAddress.of(Address.of(CountryCode.DE).withLastName(buyerLastName))
+                        AddLineItem.of(LineItemDraft.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1))
                 )));
 
         final String orderNumber = getRandomOrderNumber();
 
         return ctpClient().executeBlocking(OrderFromCartCreateCommand.of(
                 OrderFromCartDraft.of(cart, orderNumber, paymentState)));
+    }
+
+    /**
+     * Default cart draft used in {@link #createAndGetOrder(Payment, String, String, PaymentState)}.
+     *
+     * @param currencyCode  default cart currency to set. May be overridden in subclasses.
+     * @param buyerLastName default buyer name in shipping/billing address. May be overridden in subclasses.
+     * @return {@link CountryCode#DE} cart draft with default currency code and shipping/billing address buyer name
+     * (which may be overridden in subclasses)
+     */
+    @Nonnull
+    protected CartDraftBuilder createDefaultCartDraftBuilder(@Nonnull String currencyCode, @Nonnull String buyerLastName) {
+        return CartDraftBuilder.of(Monetary.getCurrency(currencyCode))
+                .shippingAddress(Address.of(CountryCode.DE))
+                .billingAddress(Address.of(CountryCode.DE).withLastName(buyerLastName));
     }
 
     private static String PSEUDO_CARD_PAN;

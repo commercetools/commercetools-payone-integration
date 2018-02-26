@@ -3,6 +3,7 @@ package specs.paymentmethods.paypal;
 import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
+import specs.paymentmethods.BaseWalletFixture;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;

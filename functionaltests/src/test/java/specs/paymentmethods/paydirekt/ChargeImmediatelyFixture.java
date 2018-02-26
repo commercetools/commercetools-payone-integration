@@ -1,39 +1,13 @@
 package specs.paymentmethods.paydirekt;
 
-import org.concordion.api.MultiValueResult;
+import org.concordion.api.FullOGNL;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
-import specs.paymentmethods.paypal.BaseWalletFixture;
-
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 @RunWith(ConcordionRunner.class)
-public class ChargeImmediatelyFixture extends BaseWalletFixture {
+@FullOGNL // required by containsSubstring() for redirect URL matching
+public class ChargeImmediatelyFixture extends PaydirektFixture {
 
-    public MultiValueResult createPayment(final String paymentName,
-                                          final String paymentMethod,
-                                          final String transactionType,
-                                          final String centAmount,
-                                          final String currencyCode) {
+    // see base PaydirektFixture for implementation
 
-        return super.createPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode,
-                "https://example.com/paydirek_charge/");
-    }
-
-    @Override
-    public MultiValueResult handlePayment(final String paymentName,
-                                          final String requestType) throws ExecutionException, IOException {
-        return super.handlePayment(paymentName, requestType);
-    }
-
-    @Override
-    public MultiValueResult fetchPaymentDetails(final String paymentName) throws ExecutionException {
-        return super.fetchPaymentDetails(paymentName);
-    }
-
-    @Override
-    public boolean isInteractionRedirectPresent(final String paymentName) throws ExecutionException {
-        return super.isInteractionRedirectPresent(paymentName);
-    }
 }
