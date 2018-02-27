@@ -117,10 +117,10 @@ public class ScheduledJobFixtureHelper {
      * scheduled transactions.</li>
      * </ul>
      *
-     * @return 40 (seconds)
+     * @return 59 (seconds)
      */
     public static long waitSecondsTimeout() {
-        return Math.round(30 * 0.95);
+        return Math.round(30 * 1.95);
     }
 
 }
