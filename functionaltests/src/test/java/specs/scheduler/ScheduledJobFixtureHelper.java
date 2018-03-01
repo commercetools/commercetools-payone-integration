@@ -71,7 +71,7 @@ public class ScheduledJobFixtureHelper {
     public MultiValueResult verifyPaymentIsHandled(String paymentName) throws Exception {
         Payment payment = paymentFixture.fetchPaymentByLegibleName(paymentName);
 
-        logger.info("Current payment [{}] create at {}, now is {}",
+        logger.info("Payment id={} created at {}. The current time now is {}",
                 payment.getId(), payment.getCreatedAt().toInstant(), ZonedDateTime.now().toInstant());
 
         // wait once, if necessary
