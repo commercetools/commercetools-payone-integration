@@ -1,8 +1,5 @@
 package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
 
-import com.google.common.collect.ImmutableSet;
-import io.sphere.sdk.payments.TransactionType;
-
 import javax.annotation.Nonnull;
 
 import static java.util.Arrays.stream;
@@ -17,83 +14,56 @@ public enum PaymentMethod {
     /**
      * @see MethodKeys#DIRECT_DEBIT_SEPA
      */
-    DIRECT_DEBIT_SEPA(MethodKeys.DIRECT_DEBIT_SEPA,
-                    TransactionType.AUTHORIZATION
-    ),
+    DIRECT_DEBIT_SEPA(MethodKeys.DIRECT_DEBIT_SEPA),
 
     /**
      * @see MethodKeys#CREDIT_CARD
      */
-    CREDIT_CARD(MethodKeys.CREDIT_CARD,
-                    TransactionType.AUTHORIZATION,
-                    TransactionType.CHARGE
-    ),
+    CREDIT_CARD(MethodKeys.CREDIT_CARD),
 
     /**
      * @see MethodKeys#WALLET_PAYPAL
      */
-    WALLET_PAYPAL(MethodKeys.WALLET_PAYPAL,
-                    TransactionType.AUTHORIZATION,
-                    TransactionType.CHARGE),
+    WALLET_PAYPAL(MethodKeys.WALLET_PAYPAL),
 
     /**
      * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
      */
-    BANK_TRANSFER_SOFORTUEBERWEISUNG(MethodKeys.BANK_TRANSFER_SOFORTUEBERWEISUNG,
-                    TransactionType.CHARGE
-    ),
+    BANK_TRANSFER_SOFORTUEBERWEISUNG(MethodKeys.BANK_TRANSFER_SOFORTUEBERWEISUNG),
 
     /**
      * @see MethodKeys#BANK_TRANSFER_ADVANCE
      */
-    BANK_TRANSFER_ADVANCE(MethodKeys.BANK_TRANSFER_ADVANCE,
-                    TransactionType.CHARGE
-    ),
+    BANK_TRANSFER_ADVANCE(MethodKeys.BANK_TRANSFER_ADVANCE),
 
     /**
      * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
      */
-    BANK_TRANSFER_POSTFINANCE_EFINANCE(MethodKeys.BANK_TRANSFER_POSTFINANCE_EFINANCE,
-            TransactionType.CHARGE
-    ),
+    BANK_TRANSFER_POSTFINANCE_EFINANCE(MethodKeys.BANK_TRANSFER_POSTFINANCE_EFINANCE),
 
     /**
      * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
      */
-    BANK_TRANSFER_POSTFINANCE_CARD(MethodKeys.BANK_TRANSFER_POSTFINANCE_CARD,
-            TransactionType.CHARGE
-    ),
+    BANK_TRANSFER_POSTFINANCE_CARD(MethodKeys.BANK_TRANSFER_POSTFINANCE_CARD),
 
     /**
      * @see MethodKeys#INVOICE_KLARNA
      */
-    INVOICE_KLARNA(MethodKeys.INVOICE_KLARNA,
-            // based on Payone support talk: only "preauthorization" transaction type should be use
-            TransactionType.AUTHORIZATION
-    );
+    INVOICE_KLARNA(MethodKeys.INVOICE_KLARNA);
 
     private String key;
-    private ImmutableSet<TransactionType> supportedTransactionTypes;
 
-    PaymentMethod(final String key, final TransactionType... supportedTransactionTypes) {
+    PaymentMethod(final String key) {
         this.key = key;
-        this.supportedTransactionTypes = ImmutableSet.copyOf(supportedTransactionTypes);
     }
 
     /**
      * Gets the method key.
+     *
      * @return the method key, never null
      */
     public String getKey() {
         return key;
-    }
-
-    /**
-     * Gets the transaction types supported by this payment method.
-     * @return the supported transaction types, never null
-     */
-    public ImmutableSet<TransactionType> getSupportedTransactionTypes() {
-        return supportedTransactionTypes;
     }
 
     /**

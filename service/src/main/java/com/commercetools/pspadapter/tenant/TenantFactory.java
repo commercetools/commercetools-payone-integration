@@ -21,9 +21,9 @@ import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
 import com.commercetools.pspadapter.payone.notification.common.*;
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.common.AuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.ChargeTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.UnsupportedTransactionExecutor;
-import com.commercetools.pspadapter.payone.transaction.common.AuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.paymentinadvance.BankTransferInAdvanceChargeTransactionExecutor;
 import com.commercetools.service.OrderService;
 import com.commercetools.service.OrderServiceImpl;
@@ -42,8 +42,9 @@ import io.sphere.sdk.types.Type;
 import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.Optional;
 
+import static io.sphere.sdk.payments.TransactionType.AUTHORIZATION;
+import static io.sphere.sdk.payments.TransactionType.CHARGE;
 import static java.lang.String.format;
 
 public class TenantFactory {
@@ -218,14 +219,12 @@ public class TenantFactory {
         for (final PaymentMethod paymentMethod : supportedMethods) {
             final PayoneRequestFactory requestFactory = createRequestFactory(paymentMethod, tenantConfig);
             final ImmutableMap.Builder<TransactionType, TransactionExecutor> executors = ImmutableMap.builder();
-            for (final TransactionType type : paymentMethod.getSupportedTransactionTypes()) {
-                // FIXME jw: shouldn't be nullable anymore when payment method is implemented completely
-                final TransactionExecutor executor = Optional
-                        .ofNullable(createTransactionExecutor(type, typeCache, client, requestFactory, postService, paymentMethod))
-                        .orElse(defaultExecutor);
 
-                executors.put(type, executor);
-            }
+            // solving https://github.com/commercetools/commercetools-payone-integration/issues/217 :
+            // now we support any AUTHORIZATION or CHARGE transaction for all payment methods
+            executors.put(AUTHORIZATION, createTransactionExecutor(AUTHORIZATION, typeCache, client, requestFactory, postService, paymentMethod));
+            executors.put(CHARGE, createTransactionExecutor(CHARGE, typeCache, client, requestFactory, postService, paymentMethod));
+
             methodDispatcherMap.put(paymentMethod,
                     new PaymentMethodDispatcher(defaultExecutor, executors.build(), transactionStateResolver));
         }
@@ -243,8 +242,6 @@ public class TenantFactory {
         switch (transactionType) {
             case AUTHORIZATION:
                 return new AuthorizationTransactionExecutor(typeCache, requestFactory, postService, client);
-            case CANCEL_AUTHORIZATION:
-                break;
             case CHARGE:
                 switch (paymentMethod) {
                     case BANK_TRANSFER_ADVANCE:
@@ -252,12 +249,8 @@ public class TenantFactory {
                     default:
                         return new ChargeTransactionExecutor(typeCache, requestFactory, postService, client);
                 }
-            case REFUND:
-                break;
-            case CHARGEBACK:
-                break;
         }
-        return null;
+        throw new IllegalArgumentException(format("Transaction type \"%s\" is not supported", transactionType));
     }
 
     /**
