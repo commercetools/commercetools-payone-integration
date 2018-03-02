@@ -8,9 +8,8 @@ import io.sphere.sdk.payments.PaymentMethodInfo;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
-public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
+public class PaymentDispatcher {
 
     private final Map<PaymentMethod, PaymentMethodDispatcher> methodDispatcher;
 
@@ -20,11 +19,6 @@ public class PaymentDispatcher implements Consumer<PaymentWithCartLike> {
                              final String payoneInterfaceName) {
         this.methodDispatcher = methodDispatcher;
         this.payoneInterfaceName = payoneInterfaceName;
-    }
-
-    @Override
-    public void accept(PaymentWithCartLike paymentWithCartLike) {
-        dispatchPayment(paymentWithCartLike);
     }
 
     public PaymentWithCartLike dispatchPayment(PaymentWithCartLike paymentWithCartLike) {
