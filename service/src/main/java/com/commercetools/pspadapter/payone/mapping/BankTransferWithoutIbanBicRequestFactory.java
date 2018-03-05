@@ -1,13 +1,19 @@
 package com.commercetools.pspadapter.payone.mapping;
 
+import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.tenant.TenantConfig;
+import com.commercetools.util.function.TriFunction;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
 
 import javax.annotation.Nonnull;
+
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType.AUTHORIZATION;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType.PREAUTHORIZATION;
 
 /**
  * Created by mht on 15.08.16.
@@ -19,14 +25,27 @@ public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFacto
 
     @Override
     @Nonnull
-    public BankTransferAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
+    public BankTransferRequest createPreauthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
+        return createRequestInternal(PREAUTHORIZATION, paymentWithCartLike, BankTransferRequest::new);
+    }
+
+    @Override
+    @Nonnull
+    public BankTransferRequest createAuthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
+        return createRequestInternal(AUTHORIZATION, paymentWithCartLike, BankTransferRequest::new);
+    }
+
+    @Nonnull
+    public BankTransferRequest createRequestInternal(@Nonnull final RequestType requestType,
+                                                     @Nonnull final PaymentWithCartLike paymentWithCartLike,
+                                                     @Nonnull final TriFunction<RequestType, PayoneConfig, String, BankTransferRequest> requestConstructor) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
 
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
-        BankTransferAuthorizationRequest request = new BankTransferAuthorizationRequest(getPayoneConfig(), clearingSubType);
+        final BankTransferRequest request = requestConstructor.apply(requestType, getPayoneConfig(), clearingSubType);
 
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
 

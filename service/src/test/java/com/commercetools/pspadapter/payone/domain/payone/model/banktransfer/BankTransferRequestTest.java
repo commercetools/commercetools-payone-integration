@@ -1,10 +1,5 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.banktransfer;
 
-import static com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType.PAYONE_PNT;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.MapEntry.entry;
-import static org.mockito.Mockito.when;
-
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.util.ClearSecuredValuesSerializer;
 import org.junit.Before;
@@ -13,12 +8,18 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType.PAYONE_PNT;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType.AUTHORIZATION;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.MapEntry.entry;
+import static org.mockito.Mockito.when;
+
 /**
  * @author fhaertig
  * @since 19.04.16
  */
 @RunWith(MockitoJUnitRunner.class)
-public class BankTransferAuthorizationRequestTest {
+public class BankTransferRequestTest {
     private static final String onlinebanktransfertype = "test-type";
     private static final String merchantId = "merchant X";
     private static final String portalId = "portal 23";
@@ -43,7 +44,7 @@ public class BankTransferAuthorizationRequestTest {
     @Test
     public void createsFullMap() {
         //create with required properties
-        final BankTransferAuthorizationRequest request = new BankTransferAuthorizationRequest(payoneConfig, onlinebanktransfertype);
+        final BankTransferRequest request = new BankTransferRequest(AUTHORIZATION, payoneConfig, onlinebanktransfertype);
         request.setIban(iban);
         request.setBic(bic);
 
@@ -64,7 +65,7 @@ public class BankTransferAuthorizationRequestTest {
     @Test
     public void createsMapWithHiddenSecrets() {
         //create with required properties
-        final BankTransferAuthorizationRequest request = new BankTransferAuthorizationRequest(payoneConfig, onlinebanktransfertype);
+        final BankTransferRequest request = new BankTransferRequest(AUTHORIZATION, payoneConfig, onlinebanktransfertype);
         request.setIban(iban);
         request.setBic(bic);
 

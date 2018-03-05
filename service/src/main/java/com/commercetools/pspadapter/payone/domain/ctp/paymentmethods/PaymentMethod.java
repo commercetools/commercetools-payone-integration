@@ -1,20 +1,27 @@
 package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
 
-import javax.annotation.Nonnull;
+import com.google.common.collect.ImmutableSet;
+import io.sphere.sdk.payments.TransactionType;
 
+import javax.annotation.Nonnull;
+import java.util.EnumSet;
+
+import static io.sphere.sdk.payments.TransactionType.AUTHORIZATION;
+import static io.sphere.sdk.payments.TransactionType.CHARGE;
 import static java.util.Arrays.stream;
 
 /**
- * Enumerates the payment methods available for Payone.
+ * Enumerates the payment methods available for Payone and <b>supported by current service</b>.
  *
  * @see MethodKeys
  */
 public enum PaymentMethod {
 
-    /**
-     * @see MethodKeys#DIRECT_DEBIT_SEPA
-     */
-    DIRECT_DEBIT_SEPA(MethodKeys.DIRECT_DEBIT_SEPA),
+//    /**
+//     * <b>Neither implemented, nor tested yet!</b>
+//     * @see MethodKeys#DIRECT_DEBIT_SEPA
+//     */
+//    DIRECT_DEBIT_SEPA(MethodKeys.DIRECT_DEBIT_SEPA),
 
     /**
      * @see MethodKeys#CREDIT_CARD
@@ -50,6 +57,25 @@ public enum PaymentMethod {
      * @see MethodKeys#INVOICE_KLARNA
      */
     INVOICE_KLARNA(MethodKeys.INVOICE_KLARNA);
+
+    /**
+     * Set of payment methods supported by the integration service.
+     * Other payment methods are not supported so far and will throw an exception.
+     */
+    public static final EnumSet<PaymentMethod> supportedPaymentMethods = EnumSet.allOf(PaymentMethod.class);
+
+    /**
+     * Set of supported CTP transaction types.
+     * <p>
+     * <b>Note:</b> solving issue
+     * <i><a href="https://github.com/commercetools/commercetools-payone-integration/issues/217">
+     * Make transaction type handling transparent</a></i>
+     * we support any {@link TransactionType#AUTHORIZATION AUTHORIZATION} or {@link TransactionType#CHARGE CHARGE}
+     * transaction for all payment methods: the Payone request will be sent without additional validation.
+     * It is a responsibility of
+     * Although, other transaction types (like {@code REFUND} or {@code CANCEL_AUTHORIZATION}) are not supported yet.
+     */
+    public static final ImmutableSet<TransactionType> supportedTransactionTypes = ImmutableSet.of(AUTHORIZATION, CHARGE);
 
     private String key;
 

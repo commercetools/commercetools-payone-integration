@@ -10,8 +10,8 @@ import org.junit.Test;
  */
 public class PaymentMethodTest {
     @Test
-    public void getsDirectDebitSepaPaymentMethodFromMethodKey() {
-        assertThat(PaymentMethod.fromMethodKey(MethodKeys.DIRECT_DEBIT_SEPA)).isSameAs(PaymentMethod.DIRECT_DEBIT_SEPA);
+    public void getsPostfinanceEfinancePaymentMethodFromMethodKey() {
+        assertThat(PaymentMethod.fromMethodKey(MethodKeys.BANK_TRANSFER_POSTFINANCE_EFINANCE)).isSameAs(PaymentMethod.BANK_TRANSFER_POSTFINANCE_EFINANCE);
     }
 
     @Test

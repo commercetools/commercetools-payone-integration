@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvanceCaptureRequest;
@@ -24,7 +25,8 @@ public class BanktTransferInAdvanceRequestFactory extends PayoneRequestFactory {
     }
 
     @Override
-    public BankTransferInAdvancePreautorizationRequest createPreauthorizationRequest(PaymentWithCartLike paymentWithCartLike) {
+    @Nonnull
+    public BankTransferInAdvancePreautorizationRequest createPreauthorizationRequest(@Nonnull PaymentWithCartLike paymentWithCartLike) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
 
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");

@@ -32,7 +32,6 @@ import com.commercetools.service.PaymentServiceImpl;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.client.SphereClient;
 import io.sphere.sdk.client.SphereClientFactory;
@@ -43,8 +42,8 @@ import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.HashMap;
 
-import static io.sphere.sdk.payments.TransactionType.AUTHORIZATION;
-import static io.sphere.sdk.payments.TransactionType.CHARGE;
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.supportedPaymentMethods;
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.supportedTransactionTypes;
 import static java.lang.String.format;
 
 public class TenantFactory {
@@ -58,6 +57,8 @@ public class TenantFactory {
     private final String urlPrefix;
 
     private final BlockingSphereClient blockingSphereClient;
+
+    private final PayonePostService payonePostService;
 
     private final PaymentHandler paymentHandler;
     private final PaymentDispatcher paymentDispatcher;
@@ -83,6 +84,7 @@ public class TenantFactory {
         this.paymentToOrderStateMapper = createPaymentToOrderStateMapper();
 
         this.blockingSphereClient = createBlockingSphereClient(tenantConfig);
+        this.payonePostService = getPayonePostService(tenantConfig);
 
         this.paymentService = createPaymentService(blockingSphereClient);
         this.orderService = createOrderService(blockingSphereClient);
@@ -90,7 +92,7 @@ public class TenantFactory {
         this.transactionStateResolver = createTransactionStateResolver();
 
         this.paymentDispatcher = createPaymentDispatcher(tenantConfig, createTypeCache(blockingSphereClient),
-                blockingSphereClient, transactionStateResolver);
+                blockingSphereClient, payonePostService, transactionStateResolver);
 
         this.notificationDispatcher = createNotificationDispatcher(tenantConfig, transactionStateResolver);
 
@@ -158,10 +160,16 @@ public class TenantFactory {
     // Encapsulated Factory Creators
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @Nonnull
     protected BlockingSphereClient createBlockingSphereClient(TenantConfig tenantConfig) {
         return BlockingSphereClient.of(
                 SphereClientFactory.of().createClient(tenantConfig.getSphereClientConfig()),
                 DEFAULT_CTP_CLIENT_TIMEOUT);
+    }
+
+    @Nonnull
+    protected PayonePostService getPayonePostService(TenantConfig tenantConfig) {
+        return PayonePostServiceImpl.of(tenantConfig.getPayoneConfig().getApiUrl());
     }
 
     protected PaymentService createPaymentService(SphereClient sphereClient) {
@@ -199,31 +207,21 @@ public class TenantFactory {
     protected PaymentDispatcher createPaymentDispatcher(final TenantConfig tenantConfig,
                                                         final LoadingCache<String, Type> typeCache,
                                                         final BlockingSphereClient client,
+                                                        final PayonePostService payonePostService,
                                                         final TransactionStateResolver transactionStateResolver) {
 
         final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
 
         final TransactionExecutor defaultExecutor = new UnsupportedTransactionExecutor(client);
-        final PayonePostServiceImpl postService = PayonePostServiceImpl.of(tenantConfig.getPayoneConfig().getApiUrl());
 
-        final ImmutableSet<PaymentMethod> supportedMethods = ImmutableSet.of(
-                PaymentMethod.CREDIT_CARD,
-                PaymentMethod.WALLET_PAYPAL,
-                PaymentMethod.BANK_TRANSFER_SOFORTUEBERWEISUNG,
-                PaymentMethod.BANK_TRANSFER_ADVANCE,
-                PaymentMethod.BANK_TRANSFER_POSTFINANCE_CARD,
-                PaymentMethod.BANK_TRANSFER_POSTFINANCE_EFINANCE,
-                PaymentMethod.INVOICE_KLARNA
-        );
-
-        for (final PaymentMethod paymentMethod : supportedMethods) {
+        for (final PaymentMethod paymentMethod : supportedPaymentMethods) {
             final PayoneRequestFactory requestFactory = createRequestFactory(paymentMethod, tenantConfig);
             final ImmutableMap.Builder<TransactionType, TransactionExecutor> executors = ImmutableMap.builder();
 
-            // solving https://github.com/commercetools/commercetools-payone-integration/issues/217 :
-            // now we support any AUTHORIZATION or CHARGE transaction for all payment methods
-            executors.put(AUTHORIZATION, createTransactionExecutor(AUTHORIZATION, typeCache, client, requestFactory, postService, paymentMethod));
-            executors.put(CHARGE, createTransactionExecutor(CHARGE, typeCache, client, requestFactory, postService, paymentMethod));
+            supportedTransactionTypes
+                    .forEach(transactionType ->
+                            executors.put(transactionType,
+                                    createTransactionExecutor(transactionType, typeCache, client, requestFactory, payonePostService, paymentMethod)));
 
             methodDispatcherMap.put(paymentMethod,
                     new PaymentMethodDispatcher(defaultExecutor, executors.build(), transactionStateResolver));
@@ -244,8 +242,8 @@ public class TenantFactory {
                 return new AuthorizationTransactionExecutor(typeCache, requestFactory, postService, client);
             case CHARGE:
                 switch (paymentMethod) {
-                    case BANK_TRANSFER_ADVANCE:
-                        return new BankTransferInAdvanceChargeTransactionExecutor(typeCache, requestFactory, postService, client);
+//                    case BANK_TRANSFER_ADVANCE:
+//                        return new BankTransferInAdvanceChargeTransactionExecutor(typeCache, requestFactory, postService, client);
                     default:
                         return new ChargeTransactionExecutor(typeCache, requestFactory, postService, client);
                 }
