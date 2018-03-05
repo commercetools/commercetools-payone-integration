@@ -4,103 +4,97 @@ import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.payments.TransactionType;
 
 import javax.annotation.Nonnull;
+import java.util.EnumSet;
 
+import static io.sphere.sdk.payments.TransactionType.AUTHORIZATION;
+import static io.sphere.sdk.payments.TransactionType.CHARGE;
 import static java.util.Arrays.stream;
 
 /**
- * Enumerates the payment methods available for Payone.
+ * Enumerates the payment methods available for Payone and <b>supported by current service</b>.
  *
  * @see MethodKeys
  */
 public enum PaymentMethod {
 
-    /**
-     * @see MethodKeys#DIRECT_DEBIT_SEPA
-     */
-    DIRECT_DEBIT_SEPA(MethodKeys.DIRECT_DEBIT_SEPA,
-                    TransactionType.AUTHORIZATION
-    ),
+//    /**
+//     * <b>Neither implemented, nor tested yet!</b>
+//     * @see MethodKeys#DIRECT_DEBIT_SEPA
+//     */
+//    DIRECT_DEBIT_SEPA(MethodKeys.DIRECT_DEBIT_SEPA),
 
     /**
      * @see MethodKeys#CREDIT_CARD
      */
-    CREDIT_CARD(MethodKeys.CREDIT_CARD,
-                    TransactionType.AUTHORIZATION,
-                    TransactionType.CHARGE
-    ),
+    CREDIT_CARD(MethodKeys.CREDIT_CARD),
 
     /**
      * @see MethodKeys#WALLET_PAYPAL
      */
-    WALLET_PAYPAL(MethodKeys.WALLET_PAYPAL,
-                    TransactionType.AUTHORIZATION,
-                    TransactionType.CHARGE),
+    WALLET_PAYPAL(MethodKeys.WALLET_PAYPAL),
 
     /**
      * @see MethodKeys#WALLET_PAYDIREKT
      */
-    WALLET_PAYDIREKT(MethodKeys.WALLET_PAYDIREKT,
-            TransactionType.AUTHORIZATION,
-            TransactionType.CHARGE),
+    WALLET_PAYDIREKT(MethodKeys.WALLET_PAYDIREKT),
 
     /**
      * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
      */
-    BANK_TRANSFER_SOFORTUEBERWEISUNG(MethodKeys.BANK_TRANSFER_SOFORTUEBERWEISUNG,
-                    TransactionType.CHARGE
-    ),
+    BANK_TRANSFER_SOFORTUEBERWEISUNG(MethodKeys.BANK_TRANSFER_SOFORTUEBERWEISUNG),
 
     /**
      * @see MethodKeys#BANK_TRANSFER_ADVANCE
      */
-    BANK_TRANSFER_ADVANCE(MethodKeys.BANK_TRANSFER_ADVANCE,
-                    TransactionType.CHARGE
-    ),
+    BANK_TRANSFER_ADVANCE(MethodKeys.BANK_TRANSFER_ADVANCE),
 
     /**
      * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
      */
-    BANK_TRANSFER_POSTFINANCE_EFINANCE(MethodKeys.BANK_TRANSFER_POSTFINANCE_EFINANCE,
-            TransactionType.CHARGE
-    ),
+    BANK_TRANSFER_POSTFINANCE_EFINANCE(MethodKeys.BANK_TRANSFER_POSTFINANCE_EFINANCE),
 
     /**
      * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
      */
-    BANK_TRANSFER_POSTFINANCE_CARD(MethodKeys.BANK_TRANSFER_POSTFINANCE_CARD,
-            TransactionType.CHARGE
-    ),
+    BANK_TRANSFER_POSTFINANCE_CARD(MethodKeys.BANK_TRANSFER_POSTFINANCE_CARD),
 
     /**
      * @see MethodKeys#INVOICE_KLARNA
      */
-    INVOICE_KLARNA(MethodKeys.INVOICE_KLARNA,
-            // based on Payone support talk: only "preauthorization" transaction type should be use
-            TransactionType.AUTHORIZATION
-    );
+    INVOICE_KLARNA(MethodKeys.INVOICE_KLARNA);
+
+    /**
+     * Set of payment methods supported by the integration service.
+     * Other payment methods are not supported so far and will throw an exception.
+     */
+    public static final EnumSet<PaymentMethod> supportedPaymentMethods = EnumSet.allOf(PaymentMethod.class);
+
+    /**
+     * Set of supported CTP transaction types.
+     * <p>
+     * <b>Note:</b> solving issue
+     * <i><a href="https://github.com/commercetools/commercetools-payone-integration/issues/217">
+     * Make transaction type handling transparent</a></i>
+     * we support any {@link TransactionType#AUTHORIZATION AUTHORIZATION} or {@link TransactionType#CHARGE CHARGE}
+     * transaction for all payment methods: the Payone request will be sent without additional validation.
+     * It is a responsibility of payment creator (shop developers).
+     * Although, other transaction types (like {@code REFUND} or {@code CANCEL_AUTHORIZATION}) are not supported yet.
+     */
+    public static final ImmutableSet<TransactionType> supportedTransactionTypes = ImmutableSet.of(AUTHORIZATION, CHARGE);
 
     private String key;
-    private ImmutableSet<TransactionType> supportedTransactionTypes;
 
-    PaymentMethod(final String key, final TransactionType... supportedTransactionTypes) {
+    PaymentMethod(final String key) {
         this.key = key;
-        this.supportedTransactionTypes = ImmutableSet.copyOf(supportedTransactionTypes);
     }
 
     /**
      * Gets the method key.
+     *
      * @return the method key, never null
      */
     public String getKey() {
         return key;
-    }
-
-    /**
-     * Gets the transaction types supported by this payment method.
-     * @return the supported transaction types, never null
-     */
-    public ImmutableSet<TransactionType> getSupportedTransactionTypes() {
-        return supportedTransactionTypes;
     }
 
     /**
