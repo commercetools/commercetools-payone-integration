@@ -2,7 +2,6 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvanceCaptureRequest;
@@ -34,7 +33,7 @@ public class BanktTransferInAdvanceRequestFactory extends PayoneRequestFactory {
 
     @Nonnull
     @Override
-    public AuthorizationRequest createAuthorizationRequest(@Nonnull PaymentWithCartLike paymentWithCartLike) {
+    public BankTransferInAdvanceRequest createAuthorizationRequest(@Nonnull PaymentWithCartLike paymentWithCartLike) {
         return createRequestInternal(RequestType.AUTHORIZATION, paymentWithCartLike, BankTransferInAdvanceRequest::new);
     }
 

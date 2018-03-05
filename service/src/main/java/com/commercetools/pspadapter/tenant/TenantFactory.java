@@ -24,6 +24,7 @@ import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.AuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.ChargeTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.UnsupportedTransactionExecutor;
+import com.commercetools.pspadapter.payone.transaction.paymentinadvance.BankTransferInAdvanceAuthorizationTransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.paymentinadvance.BankTransferInAdvanceChargeTransactionExecutor;
 import com.commercetools.service.OrderService;
 import com.commercetools.service.OrderServiceImpl;
@@ -239,7 +240,12 @@ public class TenantFactory {
 
         switch (transactionType) {
             case AUTHORIZATION:
-                return new AuthorizationTransactionExecutor(typeCache, requestFactory, postService, client);
+                switch (paymentMethod) {
+                    case BANK_TRANSFER_ADVANCE:
+                        return new BankTransferInAdvanceAuthorizationTransactionExecutor(typeCache, requestFactory, postService, client);
+                    default:
+                        return new AuthorizationTransactionExecutor(typeCache, requestFactory, postService, client);
+                }
             case CHARGE:
                 switch (paymentMethod) {
                     case BANK_TRANSFER_ADVANCE:
