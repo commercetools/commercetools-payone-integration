@@ -72,7 +72,7 @@ public enum PaymentMethod {
      * Make transaction type handling transparent</a></i>
      * we support any {@link TransactionType#AUTHORIZATION AUTHORIZATION} or {@link TransactionType#CHARGE CHARGE}
      * transaction for all payment methods: the Payone request will be sent without additional validation.
-     * It is a responsibility of
+     * It is a responsibility of payment creator (shop developers).
      * Although, other transaction types (like {@code REFUND} or {@code CANCEL_AUTHORIZATION}) are not supported yet.
      */
     public static final ImmutableSet<TransactionType> supportedTransactionTypes = ImmutableSet.of(AUTHORIZATION, CHARGE);
