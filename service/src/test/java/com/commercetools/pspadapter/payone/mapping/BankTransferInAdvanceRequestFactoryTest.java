@@ -4,7 +4,7 @@ import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
-import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvancePreautorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvanceRequest;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.orders.Order;
@@ -54,7 +54,7 @@ public class BankTransferInAdvanceRequestFactoryTest extends BaseTenantPropertyT
         Order order = payments.dummyOrderMapToPayoneRequest();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
-        BankTransferInAdvancePreautorizationRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
+        BankTransferInAdvanceRequest result = factory.createPreauthorizationRequest(paymentWithCartLike);
         SoftAssertions softly = new SoftAssertions();
 
         //base values

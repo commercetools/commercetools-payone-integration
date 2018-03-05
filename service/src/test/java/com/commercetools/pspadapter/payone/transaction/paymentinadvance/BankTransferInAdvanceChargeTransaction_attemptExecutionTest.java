@@ -1,7 +1,7 @@
 package com.commercetools.pspadapter.payone.transaction.paymentinadvance;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields;
-import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvancePreautorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvanceRequest;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.transaction.BaseTransaction_attemptExecutionTest;
 import com.google.common.collect.ImmutableMap;
@@ -28,7 +28,7 @@ public class BankTransferInAdvanceChargeTransaction_attemptExecutionTest extends
     private BankTransferInAdvanceChargeTransactionExecutor executor;
 
     @Mock
-    protected BankTransferInAdvancePreautorizationRequest preAuthorizationRequest;
+    protected BankTransferInAdvanceRequest preAuthorizationRequest;
 
 
     @Override
