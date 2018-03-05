@@ -242,8 +242,8 @@ public class TenantFactory {
                 return new AuthorizationTransactionExecutor(typeCache, requestFactory, postService, client);
             case CHARGE:
                 switch (paymentMethod) {
-//                    case BANK_TRANSFER_ADVANCE:
-//                        return new BankTransferInAdvanceChargeTransactionExecutor(typeCache, requestFactory, postService, client);
+                    case BANK_TRANSFER_ADVANCE:
+                        return new BankTransferInAdvanceChargeTransactionExecutor(typeCache, requestFactory, postService, client);
                     default:
                         return new ChargeTransactionExecutor(typeCache, requestFactory, postService, client);
                 }
