@@ -25,8 +25,8 @@ public class BanktTransferInAdvanceRequestFactory extends PayoneRequestFactory {
         super(tenantConfig);
     }
 
-    @Override
     @Nonnull
+    @Override
     public BankTransferInAdvanceRequest createPreauthorizationRequest(@Nonnull PaymentWithCartLike paymentWithCartLike) {
         return createRequestInternal(RequestType.PREAUTHORIZATION, paymentWithCartLike, BankTransferInAdvanceRequest::new);
     }
