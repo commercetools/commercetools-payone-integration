@@ -21,7 +21,8 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
     }
 
     @Override
-    public WalletPreauthorizationRequest createPreauthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
+    @Nonnull
+    public WalletPreauthorizationRequest createPreauthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
 
@@ -37,7 +38,7 @@ public class PaypalRequestFactory extends PayoneRequestFactory {
 
     @Override
     @Nonnull
-    public WalletAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
+    public WalletAuthorizationRequest createAuthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
 

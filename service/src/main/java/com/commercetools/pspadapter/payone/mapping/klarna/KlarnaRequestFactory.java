@@ -11,6 +11,7 @@ import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
 import com.commercetools.pspadapter.payone.mapping.MappingUtil;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.commercetools.pspadapter.tenant.TenantConfig;
+import com.commercetools.util.function.TriFunction;
 import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.models.Address;
@@ -40,7 +41,8 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
     }
 
     @Override
-    public KlarnaPreauthorizationRequest createPreauthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
+    @Nonnull
+    public KlarnaPreauthorizationRequest createPreauthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
         return createRequestInternal(paymentWithCartLike, KlarnaPreauthorizationRequest::new);
     }
 
@@ -49,13 +51,13 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
      */
     @Override
     @Nonnull
-    public KlarnaAuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
+    public KlarnaAuthorizationRequest createAuthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
         return createRequestInternal(paymentWithCartLike, KlarnaAuthorizationRequest::new);
     }
 
     @Nonnull
-    protected <BKR extends BaseKlarnaRequest> BKR createRequestInternal(final PaymentWithCartLike paymentWithCartLike,
-                                                                        final TriFunction<PayoneConfig, String, PaymentWithCartLike, BKR> requestConstructor) {
+    protected <BKR extends BaseKlarnaRequest> BKR createRequestInternal(@Nonnull final PaymentWithCartLike paymentWithCartLike,
+                                                                        @Nonnull final TriFunction<PayoneConfig, String, PaymentWithCartLike, BKR> requestConstructor) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 
@@ -156,10 +158,5 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
                                 .flatMap(countryToLanguageMapper::mapCountryToLanguage))
                 .map(Locale::getLanguage)
                 .ifPresent(request::setLanguage);
-    }
-
-    @FunctionalInterface
-    private interface TriFunction<T, U, V, R> {
-        R apply(T t, U u, V v);
     }
 }
