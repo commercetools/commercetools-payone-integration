@@ -5,16 +5,15 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Authorizat
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 
+import javax.annotation.Nonnull;
+
 /**
- * Due to the type of the CTP-Transaction we create a
  * @author mht@dotsource.de
- *
  */
-public class BankTransferInAdvancePreautorizationRequest extends AuthorizationRequest {
+public class BankTransferInAdvanceRequest extends AuthorizationRequest {
 
-
-    //CashInAdvance only allow PreAuthorization in the wording of payone
-    public BankTransferInAdvancePreautorizationRequest(PayoneConfig config, String clearingtype) {
-        super(config, RequestType.PREAUTHORIZATION.getType(), ClearingType.PAYONE_VOR.getPayoneCode());
+    public BankTransferInAdvanceRequest(@Nonnull RequestType requestType,
+                                        @Nonnull PayoneConfig config) {
+        super(config, requestType.getType(), ClearingType.PAYONE_VOR.getPayoneCode());
     }
 }

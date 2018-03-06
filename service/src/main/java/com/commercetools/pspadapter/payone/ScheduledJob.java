@@ -43,7 +43,7 @@ public abstract class ScheduledJob implements Job {
             final Consumer<Payment> paymentConsumer = payment -> {
                 try {
                     final PaymentWithCartLike paymentWithCartLike = queryExecutor.getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
-                    paymentDispatcher.accept(paymentWithCartLike);
+                    paymentDispatcher.dispatchPayment(paymentWithCartLike);
                 } catch (final NoCartLikeFoundException ex) {
                     LOG.debug(LOG_PREFIX + " Could not dispatch payment with ID \"{}\": {}",
                             tenantFactory.getTenantName(),  payment.getId(), ex.getMessage());

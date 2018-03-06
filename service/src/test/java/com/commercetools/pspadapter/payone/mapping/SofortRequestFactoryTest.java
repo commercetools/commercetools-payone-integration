@@ -3,7 +3,7 @@ package com.commercetools.pspadapter.payone.mapping;
 import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.tenant.TenantConfig;
@@ -56,7 +56,7 @@ public class SofortRequestFactoryTest extends BaseTenantPropertyTest {
         Customer customer = payment.getCustomer().getObj();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
-        BankTransferAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
+        BankTransferRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
         SoftAssertions softly = new SoftAssertions();
 
         //base values
@@ -145,7 +145,7 @@ public class SofortRequestFactoryTest extends BaseTenantPropertyTest {
         Order order = payments.dummyOrderMapToPayoneRequest();
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
-        BankTransferAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
+        BankTransferRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
         SoftAssertions softly = new SoftAssertions();
 
         //base values

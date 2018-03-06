@@ -6,11 +6,15 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingTy
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.util.ClearSecuredValuesSerializer;
 
+import javax.annotation.Nonnull;
+
 /**
+ * Common bank-transfer specific Payone requests.
+ *
  * @author fhaertig
  * @since 22.01.16
  */
-public class BankTransferAuthorizationRequest extends AuthorizationRequest {
+public class BankTransferRequest extends AuthorizationRequest {
 
     private String onlinebanktransfertype;
 
@@ -22,8 +26,18 @@ public class BankTransferAuthorizationRequest extends AuthorizationRequest {
     @ClearSecuredValuesSerializer.Apply
     private String bic;
 
-    public BankTransferAuthorizationRequest(final PayoneConfig config, final String onlinebanktransfertype) {
-        super(config, RequestType.AUTHORIZATION.getType(), ClearingType.PAYONE_PNT.getPayoneCode());
+    /**
+     * Create basic bank-transfer specific request.
+     *
+     * @param requestType            now only {@link RequestType#PREAUTHORIZATION} and
+     *                               {@link RequestType#AUTHORIZATION} supported.
+     * @param config                 Payone config to use
+     * @param onlinebanktransfertype {@code onlinebanktransfertype} of the Payone bank-transfer request
+     */
+    public BankTransferRequest(@Nonnull final RequestType requestType,
+                               @Nonnull final PayoneConfig config,
+                               @Nonnull final String onlinebanktransfertype) {
+        super(config, requestType.getType(), ClearingType.PAYONE_PNT.getPayoneCode());
 
         this.onlinebanktransfertype = onlinebanktransfertype;
     }

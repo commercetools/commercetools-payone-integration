@@ -1,7 +1,7 @@
 package com.commercetools.pspadapter.payone.transaction.paymentinadvance;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields;
-import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvancePreautorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvanceRequest;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.transaction.BaseTransaction_attemptExecutionTest;
 import com.google.common.collect.ImmutableMap;
@@ -25,10 +25,10 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class BankTransferInAdvanceChargeTransaction_attemptExecutionTest extends BaseTransaction_attemptExecutionTest {
 
-    private BankTransferInAdvanceChargeTransactionExecutor executor;
+    private BaseBankTransferInAdvanceTransactionExecutor executor;
 
     @Mock
-    protected BankTransferInAdvancePreautorizationRequest preAuthorizationRequest;
+    protected BankTransferInAdvanceRequest bankTransferInAdvanceRequest;
 
 
     @Override
@@ -37,14 +37,15 @@ public class BankTransferInAdvanceChargeTransaction_attemptExecutionTest extends
         super.setUp();
         executor = new BankTransferInAdvanceChargeTransactionExecutor(typeCache, requestFactory, payonePostService, client);
 
-        when(preAuthorizationRequest.toStringMap(anyBoolean())).thenReturn(ImmutableMap.of("testRequestKey1", "testRequestValue2",
+        when(bankTransferInAdvanceRequest.toStringMap(anyBoolean())).thenReturn(ImmutableMap.of("testRequestKey1", "testRequestValue2",
                 "testRequestKey2", "testRequestValue2"));
-        when(requestFactory.createPreauthorizationRequest(paymentWithCartLike)).thenReturn(preAuthorizationRequest);
+        when(requestFactory.createPreauthorizationRequest(paymentWithCartLike)).thenReturn(bankTransferInAdvanceRequest);
+        when(requestFactory.createAuthorizationRequest(paymentWithCartLike)).thenReturn(bankTransferInAdvanceRequest);
     }
 
     @Test
     public void attemptExecution_withApprovedResponse_createsUpdateActions() throws Exception {
-        when(payonePostService.executePost(preAuthorizationRequest)).thenReturn(ImmutableMap.of(
+        when(payonePostService.executePost(bankTransferInAdvanceRequest)).thenReturn(ImmutableMap.of(
                 PayoneResponseFields.STATUS, APPROVED.getStateCode(),
                 PayoneResponseFields.TXID, "responseTxid",
 
@@ -73,22 +74,22 @@ public class BankTransferInAdvanceChargeTransaction_attemptExecutionTest extends
 
     @Test
     public void attemptExecution_withErrorResponse_createsUpdateActions() throws Exception {
-        super.attemptExecution_withErrorResponse_createsUpdateActions(preAuthorizationRequest, executor);
+        super.attemptExecution_withErrorResponse_createsUpdateActions(bankTransferInAdvanceRequest, executor);
     }
 
     @Test
     public void attemptExecution_withPendingResponse_createsUpdateActions() throws Exception {
-        super.attemptExecution_withPendingResponse_createsUpdateActions(preAuthorizationRequest, executor);
+        super.attemptExecution_withPendingResponse_createsUpdateActions(bankTransferInAdvanceRequest, executor);
     }
 
     @Test
     public void attemptExecution_withPayoneException_createsUpdateActions() throws Exception {
-        super.attemptExecution_withPayoneException_createsUpdateActions(preAuthorizationRequest, executor);
+        super.attemptExecution_withPayoneException_createsUpdateActions(bankTransferInAdvanceRequest, executor);
     }
 
     @Test
     public void attemptExecution_withUnexpectedResponseStatus_throwsException() throws Exception {
-        super.attemptExecution_withUnexpectedResponseStatus_throwsException(preAuthorizationRequest, executor);
+        super.attemptExecution_withUnexpectedResponseStatus_throwsException(bankTransferInAdvanceRequest, executor);
     }
 
     /**
@@ -98,7 +99,7 @@ public class BankTransferInAdvanceChargeTransaction_attemptExecutionTest extends
      */
     @Test
     public void attemptExecution_withRedirectResponse_throwsException() throws Exception {
-        when(payonePostService.executePost(preAuthorizationRequest)).thenReturn(ImmutableMap.of(
+        when(payonePostService.executePost(bankTransferInAdvanceRequest)).thenReturn(ImmutableMap.of(
                 PayoneResponseFields.STATUS, REDIRECT.getStateCode(),
                 PayoneResponseFields.REDIRECT_URL, "http://mock-redirect.url",
                 PayoneResponseFields.TXID, "responseTxid"

@@ -88,11 +88,11 @@ public class PaymentDispatcherTest {
         final Transaction firstInitTransaction = paymentPendingOrInitial.getTransactions().get(0);
 
         final CountingPaymentMethodDispatcher creditCardDispatcher = new CountingPaymentMethodDispatcher();
-        final CountingPaymentMethodDispatcher sepaDispatcher = new CountingPaymentMethodDispatcher();
+        final CountingPaymentMethodDispatcher postFinanceDispatcher = new CountingPaymentMethodDispatcher();
 
         final HashMap<PaymentMethod, PaymentMethodDispatcher> methodDispatcherMap = new HashMap<>();
         methodDispatcherMap.put(PaymentMethod.CREDIT_CARD, creditCardDispatcher);
-        methodDispatcherMap.put(PaymentMethod.DIRECT_DEBIT_SEPA, sepaDispatcher);
+        methodDispatcherMap.put(PaymentMethod.BANK_TRANSFER_POSTFINANCE_EFINANCE, postFinanceDispatcher);
 
         PaymentDispatcher dispatcher = new PaymentDispatcher(methodDispatcherMap, PAYONE);
         dispatcher.dispatchPayment(paymentPendingOrInitialWithCartLike);
@@ -105,7 +105,7 @@ public class PaymentDispatcherTest {
         // credit card is dispatched ones, cos it has only one CC payment
         assertThat(creditCardDispatcher.count).isEqualTo(1);
         // sepa is not called, because there were no sepa payments
-        assertThat(sepaDispatcher.count).isEqualTo(0);
+        assertThat(postFinanceDispatcher.count).isEqualTo(0);
 
         // PaymentMethodDispatcher#dispatchPayment() filters in first in-completed (Initial/Pending) transaction,
         // and then verifies updated transaction, which is the same in our case.
@@ -121,6 +121,6 @@ public class PaymentDispatcherTest {
         // second (accumulated) with test above CC dispatch call
         assertThat(creditCardDispatcher.count).isEqualTo(1 + 1);
         // sepa still never called
-        assertThat(sepaDispatcher.count).isEqualTo(0);
+        assertThat(postFinanceDispatcher.count).isEqualTo(0);
     }
 }

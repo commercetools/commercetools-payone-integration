@@ -41,12 +41,13 @@ public abstract class PayoneRequestFactory {
         this.logger = LoggerFactory.getLogger(createLoggerName(this.getClass(), tenantConfig.getName()));
     }
 
-    public AuthorizationRequest createPreauthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
+    @Nonnull
+    public AuthorizationRequest createPreauthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
         throw new UnsupportedOperationException("this request type is not supported by this payment method.");
     }
 
     @Nonnull
-    public AuthorizationRequest createAuthorizationRequest(final PaymentWithCartLike paymentWithCartLike) {
+    public AuthorizationRequest createAuthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
         throw new UnsupportedOperationException("this request type is not supported by this payment method.");
     }
 
