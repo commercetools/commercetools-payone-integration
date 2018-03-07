@@ -103,7 +103,7 @@ public class HttpRequestUtilTimeoutTest {
     public void tearDown() {
         if (server != null) {
             server.removeContext("/");
-            server.stop(1);
+            server.stop(0);
             server = null;
         }
     }
