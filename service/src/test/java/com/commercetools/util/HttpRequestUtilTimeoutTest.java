@@ -43,7 +43,7 @@ public class HttpRequestUtilTimeoutTest {
      * @see <a href="https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpServer.html">
      * HttpServer</a>
      */
-    private HttpServer server;
+    private HttpServer server = null;
 
 
     /**
@@ -52,7 +52,6 @@ public class HttpRequestUtilTimeoutTest {
     @Before
     public void setUp() {
         int retries = 3;
-        server = null;
 
         // run the server on random port
         do {
@@ -102,7 +101,6 @@ public class HttpRequestUtilTimeoutTest {
     @After
     public void tearDown() {
         if (server != null) {
-            server.removeContext("/");
             server.stop(0);
             server = null;
         }
