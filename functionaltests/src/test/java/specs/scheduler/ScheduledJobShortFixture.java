@@ -26,7 +26,7 @@ public class ScheduledJobShortFixture extends BasePaymentFixture {
         return helper.createPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
     }
 
-    public static int waitSecondsTimeout() {
+    public static long waitSecondsTimeout() {
         return ScheduledJobFixtureHelper.waitSecondsTimeout();
     }
 

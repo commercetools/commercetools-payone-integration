@@ -2,7 +2,7 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferAuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferRequest;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.payments.Payment;
 import org.junit.Before;
@@ -29,7 +29,7 @@ public class SofortWithIbanRequestFactoryTest extends BaseTenantPropertyTest {
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
 
         SofortBankTransferRequestFactory factory = new SofortBankTransferRequestFactory(tenantConfig);
-        BankTransferAuthorizationRequest authorizationRequest = factory.createAuthorizationRequest(paymentWithCartLike);
+        BankTransferRequest authorizationRequest = factory.createAuthorizationRequest(paymentWithCartLike);
 
         assertThat(authorizationRequest.getIban()).isEqualTo("DE66778899");
         assertThat(authorizationRequest.getBic()).isEqualTo("BIC_TEST_TEST");
@@ -45,7 +45,7 @@ public class SofortWithIbanRequestFactoryTest extends BaseTenantPropertyTest {
         when(tenantConfig.getSecureKey()).thenReturn("qwertyuiopasdfgh");
 
         SofortBankTransferRequestFactory factory = new SofortBankTransferRequestFactory(tenantConfig);
-        BankTransferAuthorizationRequest authorizationRequest = factory.createAuthorizationRequest(paymentWithCartLike);
+        BankTransferRequest authorizationRequest = factory.createAuthorizationRequest(paymentWithCartLike);
 
         assertThat(authorizationRequest.getIban()).isEqualTo("DE66778899");
         assertThat(authorizationRequest.getBic()).isEqualTo("BIC_TEST_TEST");
