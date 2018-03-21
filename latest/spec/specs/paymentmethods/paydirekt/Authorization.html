@@ -165,10 +165,10 @@ ins {
 </style><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta charset="UTF-8" />
     <link href="../../../concordion.css" rel="stylesheet" type="text/css" />
-    <title>Authorization via PayPal</title>
+    <title>Authorization via Paydirekt</title>
 <link type="text/css" rel="stylesheet" href="../../../inputstyle.css" /></head>
-<body><span class="breadcrumbs"><a href="../../Specs.html">commercetools - PAYONE - Integration Service</a> &gt; <a href="../Paymentmethods.html">Payment Methods</a> &gt; <a href="Paypal.html">Payments via PayPal</a> &gt;</span>
-<h1>Authorization via PayPal</h1>
+<body><span class="breadcrumbs"><a href="../../Specs.html">commercetools - PAYONE - Integration Service</a> &gt; <a href="../Paymentmethods.html">Payment Methods</a> &gt; <a href="Paydirekt.html">Payments via Paydirekt</a> &gt;</span>
+<h1>Authorization via Paydirekt</h1>
 <p>
     The integration service allows to reserve an amount of money to be charged later on.
 </p>
@@ -181,13 +181,13 @@ ins {
 <h2>Examples</h2>
 <h3>Common Setup</h3>
 <ul>
-    <li>payment.paymentMethodInfo.method: <span c:set="#paymentMethod" class="inputvalue">WALLET-PAYPAL</span></li>
+    <li>payment.paymentMethodInfo.method: <span c:set="#paymentMethod" class="inputvalue">WALLET-PAYDIREKT</span></li>
     <li>payment.transactions[0].type: <span c:set="#transactionType" class="inputvalue">AUTHORIZATION</span></li>
 </ul>
 <div class="example">
     <h3>Authorization</h3>
     <p>
-        Given the following payments for a PayPal account:
+        Given the following payments for a Paydirekt account:
     </p>
     <table c:execute="#result = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
         <tr>
@@ -203,37 +203,37 @@ ins {
             <td class="inputvalue">Payment 1</td>
             <td class="inputvalue">7</td>
             <td class="inputvalue">EUR</td>
-            <td>48042390-b8be-4881-b418-e7d9316fc456</td>
-            <td>https://example.com/paypal_authorization/Payment-1-Success</td>
-            <td>https://example.com/paypal_authorization/Payment-1-Error</td>
-            <td>https://example.com/paypal_authorization/Payment-1-Cancel</td>
+            <td>6fc9aa07-a178-4082-b16e-55e0c34f112d</td>
+            <td>https://example.com/paydirek_authorization/Payment-1-Success</td>
+            <td>https://example.com/paydirek_authorization/Payment-1-Error</td>
+            <td>https://example.com/paydirek_authorization/Payment-1-Cancel</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
             <td class="inputvalue">2234</td>
             <td class="inputvalue">USD</td>
-            <td>04bb1057-c7fc-464c-be07-fdadfed3ff5e</td>
-            <td>https://example.com/paypal_authorization/Payment-2-Success</td>
-            <td>https://example.com/paypal_authorization/Payment-2-Error</td>
-            <td>https://example.com/paypal_authorization/Payment-2-Cancel</td>
+            <td>6c4a6e73-2da6-4bc1-8d5b-8bc463c21454</td>
+            <td>https://example.com/paydirek_authorization/Payment-2-Success</td>
+            <td>https://example.com/paydirek_authorization/Payment-2-Error</td>
+            <td>https://example.com/paydirek_authorization/Payment-2-Cancel</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 3</td>
             <td class="inputvalue">43434</td>
             <td class="inputvalue">EUR</td>
-            <td>a040f182-8a72-4632-8c05-90b8dcb7bb68</td>
-            <td>https://example.com/paypal_authorization/Payment-3-Success</td>
-            <td>https://example.com/paypal_authorization/Payment-3-Error</td>
-            <td>https://example.com/paypal_authorization/Payment-3-Cancel</td>
+            <td>55d202a1-eb56-44a1-9397-8df9b9c5fbbf</td>
+            <td>https://example.com/paydirek_authorization/Payment-3-Success</td>
+            <td>https://example.com/paydirek_authorization/Payment-3-Error</td>
+            <td>https://example.com/paydirek_authorization/Payment-3-Cancel</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 4</td>
             <td class="inputvalue">715431</td>
             <td class="inputvalue">EUR</td>
-            <td>ef2335b9-2ef2-48c8-8eab-9d43053857b1</td>
-            <td>https://example.com/paypal_authorization/Payment-4-Success</td>
-            <td>https://example.com/paypal_authorization/Payment-4-Error</td>
-            <td>https://example.com/paypal_authorization/Payment-4-Cancel</td>
+            <td>b1178679-d31e-4df2-8fb7-7325d277c225</td>
+            <td>https://example.com/paydirek_authorization/Payment-4-Success</td>
+            <td>https://example.com/paydirek_authorization/Payment-4-Error</td>
+            <td>https://example.com/paydirek_authorization/Payment-4-Cancel</td>
         </tr>
     </table>
     <p>
@@ -284,29 +284,30 @@ ins {
         <tr>
             <th c:set="#paymentName">Payment Name</th>
             <th c:assertEquals="#result.transactionState">Transaction State </th>
-            <th c:assertEquals="#result.responseRedirectUrlStart">redirect URL starts with</th>
+            <th c:assertEquals="containsSubstring(#result.responseRedirectUrlFull, 'https://sandbox.paydirekt.de/checkout/#/checkout/')">
+                redirect URL contains 'https://sandbox.paydirekt.de/checkout/#/checkout/'</th>
             <th c:echo="#result.responseRedirectUrlFull">full redirect URL (for information only)</th>
             <th c:echo="#result.version">Version (for information only)</th>
         </tr>
         <tr>
             <td class="inputvalue">Payment 1</td>
             <td class="success">Pending</td>
-            <td class="success">https://www.sandbox.paypal.com/webscr</td>
-            <td>https://www.sandbox.paypal.com/webscr?useraction=commit&amp;cmd=_express-checkout&amp;token=EC-0E9345080N6151453</td>
+            <td class="success">true</td>
+            <td>https://sandbox.paydirekt.de/checkout/#/checkout/3fda31ba-18f2-44d1-ad7a-fe7a1afd48c9</td>
             <td>11</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 3</td>
             <td class="success">Pending</td>
-            <td class="success">https://www.sandbox.paypal.com/webscr</td>
-            <td>https://www.sandbox.paypal.com/webscr?useraction=commit&amp;cmd=_express-checkout&amp;token=EC-4L469238U4411883Y</td>
+            <td class="success">true</td>
+            <td>https://sandbox.paydirekt.de/checkout/#/checkout/3c14fab4-9371-4984-ba91-2c5f74103344</td>
             <td>11</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 4</td>
             <td class="success">Pending</td>
-            <td class="success">https://www.sandbox.paypal.com/webscr</td>
-            <td>https://www.sandbox.paypal.com/webscr?useraction=commit&amp;cmd=_express-checkout&amp;token=EC-0NM74190DM071013A</td>
+            <td class="success">true</td>
+            <td>https://sandbox.paydirekt.de/checkout/#/checkout/eafcb302-8d78-4700-af1b-a86c75f014ef</td>
             <td>11</td>
         </tr>
     </table>
@@ -358,26 +359,11 @@ ins {
         responses of type PAYONE_INTERACTION_REDIRECT.
     </p>
     <p>
-        If I follow the URL and complete the PayPal verification process, I get forwarded to the predefined success URL
+        If I follow the URL and complete the Paydirekt verification process, I get forwarded to the predefined success URL
         and for each of the payments <em>Payment 1</em>, <em>Payment 3</em> and <em>Payment 4</em>
         an <em>appointed/completed</em> notification will be received and as a consequence the transaction state will be
         set to <em>Success</em>.
     </p>
-    <h4>Note</h4>
-    <p>
-        Due to inconsistent behavior of PayPal's sandbox test system, the redirect and any follow-up verifications
-        must be performed manually.
-    </p>
 </div>
-<h2>Further Details</h2>
-<h3>What happens if the verification fails?</h3>
-<p>
-    That's out of the Integration Service's scope.<br />
-    The Integration Service is notified by PAYONE only in case of a successful verification.
-</p>
-<p>
-    The checkout implementation needs to take care of failed verifications - the user will be redirected to
-    the <em>backUrl</em> or the <em>errorUrl</em> specified in the Payment object.
-</p>
-<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 32189 ms on 21-Mar-2018 at 13:39:16 UTC</div></div></body>
+<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 18019 ms on 21-Mar-2018 at 13:39:03 UTC</div></div></body>
 </html>
