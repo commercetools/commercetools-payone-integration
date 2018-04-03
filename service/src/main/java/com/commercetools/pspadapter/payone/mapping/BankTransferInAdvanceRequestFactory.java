@@ -44,7 +44,7 @@ public class BankTransferInAdvanceRequestFactory extends PayoneRequestFactory {
     @Nonnull
     @Override
     public BankTransferInAdvanceRequest createAuthorizationRequest(@Nonnull PaymentWithCartLike paymentWithCartLike) {
-        LOG.warn("Unsupported transaction type \"{}\" for payment method \"\".\n" +
+        LOG.warn("Unsupported transaction type \"{}\" for payment method \"{}\".\n" +
                         "\t\tNote: this payment/transaction type officially isn't supported by Payone " +
                         "and thus the behavior of such transaction handling is undefined.\n" +
                         "Either change the transaction type or update the service if the Payone API has changed.",
