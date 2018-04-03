@@ -22,8 +22,7 @@ import static io.sphere.sdk.payments.TransactionType.CHARGE;
  * </pre>
  * <p>
  * Looks like it is accepted by Payone service, but might be switched off in the future any time, also some logistic
- * companies might have issues handling these transaction types for this method
- * (see <a href="https://jira.commercetools.com/browse/CAR-2189">payment request for "Vorkasse" orders has wrong request type</a>)
+ * companies might have issues handling these transaction types for this method.
  */
 public class BankTransferInAdvanceChargeTransactionExecutor extends BaseBankTransferInAdvanceTransactionExecutor {
 
