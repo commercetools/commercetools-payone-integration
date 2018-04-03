@@ -37,7 +37,7 @@ public class BankTransferInAdvanceRequestFactory extends PayoneRequestFactory {
     }
 
     /**
-     * <b>NOTE:</b> this is potentially dangerous transaction type for this payment method. See more in
+     * <b>NOTE:</b> this is a potentially dangerous transaction type for this payment method. See more in
      * {@link com.commercetools.pspadapter.payone.transaction.paymentinadvance.BankTransferInAdvanceChargeTransactionExecutor BankTransferInAdvanceChargeTransactionExecutor}
      * @see com.commercetools.pspadapter.payone.transaction.paymentinadvance.BankTransferInAdvanceChargeTransactionExecutor
      */
@@ -45,7 +45,7 @@ public class BankTransferInAdvanceRequestFactory extends PayoneRequestFactory {
     @Override
     public BankTransferInAdvanceRequest createAuthorizationRequest(@Nonnull PaymentWithCartLike paymentWithCartLike) {
         LOG.warn("Unsupported transaction type \"{}\" for payment method \"\".\n" +
-                        "\t\tNote: this payment/transaction type officially not supported by Payone " +
+                        "\t\tNote: this payment/transaction type officially isn't supported by Payone " +
                         "and thus the behavior of such transaction handling is undefined.\n" +
                         "Either change the created transaction type or update the service if the Payone API has changed.",
                 RequestType.AUTHORIZATION, BANK_TRANSFER_ADVANCE.getKey());

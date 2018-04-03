@@ -21,7 +21,7 @@ import static io.sphere.sdk.payments.TransactionType.CHARGE;
  *     Prepayment   Not supported by this request!
  * </pre>
  * <p>
- * Looks like it is accepted by Payone service, but might be switch off in the future any time, also some logistic
+ * Looks like it is accepted by Payone service, but might be switched off in the future any time, also some logistic
  * companies might have issues handling these transaction types for this method
  * (see <a href="https://jira.commercetools.com/browse/CAR-2189">payment request for "Vorkasse" orders has wrong request type</a>)
  */
