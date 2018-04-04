@@ -197,28 +197,28 @@ ins {
             <td class="inputvalue">400</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">Payer</td>
-            <td>7feea585-d284-41d6-9191-22fa7307deca</td>
+            <td>9b46e535-53bb-4bbc-9b59-845ab2ca8174</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
             <td class="inputvalue">400</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">Underpayer</td>
-            <td>fb43880f-d808-4429-83cc-b971f4ac0094</td>
+            <td>aa4c2d07-a501-452a-a03a-1fd4130c1dae</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 3</td>
             <td class="inputvalue">400</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">Overpayer</td>
-            <td>22189432-58f8-4aac-8695-8c2640eaba81</td>
+            <td>d595b1d7-3b94-48c9-b66a-f045d3099154</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 4</td>
             <td class="inputvalue">400</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">Splitpayer</td>
-            <td>e227dfb5-17b5-4e4f-b27c-fa70c45e9f3a</td>
+            <td>64720d33-078c-4102-95fb-012b2a1235dc</td>
         </tr>
     </table>
     <p>
@@ -263,10 +263,8 @@ ins {
         When I then waiting for the notification for <span c:set="#successfulPayments" class="inputvalue">Payment 1, Payment 3, Payment 4</span>. I will get the following charged results:
     </p>
     <ol>
-        <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#partlySuccessfulPayments, #txactionAppointed)" class="failure"><del class="expected">received</del>
-<ins class="actual">== false</ins></span> -&gt; has no effect, just as a confirmation</li>
-        <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="failure"><del class="expected">received</del>
-<ins class="actual">== false</ins></span>
+        <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#partlySuccessfulPayments, #txactionAppointed)" class="success">received</span> -&gt; has no effect, just as a confirmation</li>
+        <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="success">received</span>
             -&gt;  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
     </ol>
     <table c:execute="#result = fetchPaymentDetails(#paymentName)">
@@ -278,37 +276,27 @@ ins {
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 1</td>
-            <td class="success failure"><del class="expected">Success</del>
-<ins class="actual">Pending</ins></td>
-            <td class="success failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
-            <td class="success failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
+            <td class="success success">Success</td>
+            <td class="success success">1</td>
+            <td class="success success">1</td>
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 2</td>
             <td class="success success">Pending</td>
-            <td class="success failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
+            <td class="success success">1</td>
             <td class="success success">0</td>
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 3</td>
-            <td class="success failure"><del class="expected">Success</del>
-<ins class="actual">Pending</ins></td>
-            <td class="success failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
-            <td class="success failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
+            <td class="success success">Success</td>
+            <td class="success success">1</td>
+            <td class="success success">1</td>
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 4</td>
-            <td class="success failure"><del class="expected">Success</del>
-<ins class="actual">Pending</ins></td>
-            <td class="success failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
-            <td class="success failure"><del class="expected">1</del>
-<ins class="actual">0</ins></td>
+            <td class="success success">Success</td>
+            <td class="success success">1</td>
+            <td class="success success">1</td>
         </tr>
     </table>
 
@@ -322,25 +310,21 @@ ins {
         </tr>
         <tr>
             <td class="inputvalue">Payment 1</td>
-            <td class="failure"><del class="expected">Paid</del>
-<ins class="actual">(null)</ins></td>
+            <td class="success">Paid</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
-            <td class="failure"><del class="expected">Pending</del>
-<ins class="actual">(null)</ins></td>
+            <td class="success">Pending</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 3</td>
-            <td class="failure"><del class="expected">Paid</del>
-<ins class="actual">(null)</ins></td>
+            <td class="success">Paid</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 4</td>
-            <td class="failure"><del class="expected">Paid</del>
-<ins class="actual">(null)</ins></td>
+            <td class="success">Paid</td>
         </tr>
     </table>
 </div>
-<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 931276 ms on 04-Apr-2018 at 12:33:15 UTC</div></div></body>
+<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 603977 ms on 04-Apr-2018 at 15:18:41 UTC</div></div></body>
 </html>
