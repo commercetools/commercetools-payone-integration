@@ -277,7 +277,7 @@ public class TenantFactory {
             case BANK_TRANSFER_POSTFINANCE_EFINANCE:
                 return new PostFinanceBanktransferRequestFactory(tenantConfig);
             case BANK_TRANSFER_ADVANCE:
-                return new BanktTransferInAdvanceRequestFactory(tenantConfig);
+                return new BankTransferInAdvanceRequestFactory(tenantConfig);
             case INVOICE_KLARNA:
                 return new KlarnaRequestFactory(tenantConfig, createCountryToLanguageMapper());
             default:
