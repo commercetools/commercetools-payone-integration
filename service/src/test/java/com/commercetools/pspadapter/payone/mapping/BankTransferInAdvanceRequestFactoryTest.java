@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 public class BankTransferInAdvanceRequestFactoryTest extends BaseTenantPropertyTest {
 
     private final PaymentTestHelper payments = new PaymentTestHelper();
-    private BanktTransferInAdvanceRequestFactory factory;
+    private BankTransferInAdvanceRequestFactory factory;
 
     @Before
     public void setUp() throws Exception {
@@ -48,7 +48,7 @@ public class BankTransferInAdvanceRequestFactoryTest extends BaseTenantPropertyT
         //clear secure key to force unencrypted data
         when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.SECURE_KEY)).thenReturn(Optional.of(""));
 
-        factory = new BanktTransferInAdvanceRequestFactory(tenantConfig);
+        factory = new BankTransferInAdvanceRequestFactory(tenantConfig);
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroVOR();
         Order order = payments.dummyOrderMapToPayoneRequest();

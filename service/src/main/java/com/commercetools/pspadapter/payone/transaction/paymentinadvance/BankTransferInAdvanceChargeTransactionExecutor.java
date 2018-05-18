@@ -12,6 +12,17 @@ import javax.annotation.Nonnull;
 
 import static io.sphere.sdk.payments.TransactionType.CHARGE;
 
+/**
+ * <b>Note:</b>: according to <i>TECHNICAL REFERENCE PAYONE Platform Channel Server API v2.92</i>
+ * (chapter <i>3.2.2 Initiating payment process (authorization)</i>)
+ * and <i>Sequenzdiagramme20170130</i> (chapter <i>Retailer – Zahlart Vorkasse mit Vorautorisierung</i>)
+ * this transaction type (Payone <i>authorization</i>) is <b>not</b> supported for this payment method:
+ * <pre>
+ *     Prepayment   Not supported by this request!
+ * </pre>
+ * <p>
+ * Looks like it is accepted by Payone service, but might be switched off in the future any time.
+ */
 public class BankTransferInAdvanceChargeTransactionExecutor extends BaseBankTransferInAdvanceTransactionExecutor {
 
     public BankTransferInAdvanceChargeTransactionExecutor(@Nonnull LoadingCache<String, Type> typeCache,
