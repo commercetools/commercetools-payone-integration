@@ -1,43 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
-<head><script type="text/javascript">/* Stack Trace Toggling */
-
-function getElementById(id) {
-  var element;
-
-  if (document.getElementById) { // standard
-    return document.getElementById(id);
-  } else if (document.all) { // old IE versions
-    return document.all[id];
-  } else if (document.layers) { // nn4
-    return document.layers[id];
-  }
-  alert("Sorry, but your web browser is not supported by Concordion.");
-}
-
-function isVisible(element) {
-  return element.style.display;
-}
-
-function makeVisible(element) {
-  element.style.display = "block";
-}
-
-function makeInvisible(element) {
-  element.style.display = "";
-}
-
-function toggleStackTrace(stackTraceNumber) {
-  var stackTrace = getElementById("stackTrace" + stackTraceNumber);
-  var stackTraceButton = getElementById("stackTraceButton" + stackTraceNumber);
-  if (isVisible(stackTrace)) {
-    makeInvisible(stackTrace);
-    stackTraceButton.value = "View Stack";
-  } else {
-    makeVisible(stackTrace);
-    stackTraceButton.value = "Hide Stack";
-  }
-}
-</script><style>* {
+<head><style>* {
   font-family: Arial;
 }
 body {
@@ -233,7 +195,7 @@ This tests verify that the application works properly in mode of migration, e.g.
             <th c:set="#currencyCode">Currency Code</th>
             <th c:echo="#paymentId">Payment ID (for information only)</th>
         </tr>
-        <tr><span class="failure"><del class="expected">
+        <tr>
             <td class="inputvalue">CreditCard Authorization Initial Without 3ds</td>
             <td class="inputvalue">CREDIT_CARD</td>
             <td class="inputvalue">payment-CREDIT_CARD</td>
@@ -241,95 +203,8 @@ This tests verify that the application works properly in mode of migration, e.g.
             <td class="inputvalue">INITIAL</td>
             <td class="inputvalue">111</td>
             <td class="inputvalue">EUR</td>
-            <td />
-        </del></span><span class="exceptionMessage">io.sphere.sdk.client.ConcurrentModificationException: detailMessage: Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments/d3b1f64a-6369-47f3-8beb-ad842ce427e8 failed  with response code 409 with X-Correlation-ID `payone-integration-tests-heroku-17/c0a8fa51-af93-4b93-aa28-c0d5c450625e` on 2018-05-18T14:41:31.085Z
-http response formatted body: {
-  "statusCode" : 409,
-  "message" : "Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.",
-  "errors" : [ {
-    "code" : "ConcurrentModification",
-    "message" : "Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.",
-    "currentVersion" : 3
-  } ]
-}
-http response: io.sphere.sdk.http.HttpResponseImpl@63829330[statusCode=409,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[payone-integration-tests-heroku-17/c0a8fa51-af93-4b93-aa28-c0d5c450625e], Server-Timing=[projects;dur=3], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Fri, 18 May 2018 14:41:30 GMT], Via=[1.1 google], X-Served-By=[api-gce-de8742bd.sphere.prod.commercetools.de], X-Served-Config=[sphere-projects-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[322], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={"statusCode":409,"message":"Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.","errors":[{"code":"ConcurrentModification","message":"Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.","currentVersion":3}]}]
-SDK: 1.29.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments/d3b1f64a-6369-47f3-8beb-ad842ce427e8
-Java: 1.8.0_151
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentUpdateCommandImpl[versioned=PaymentImpl[amountAuthorized=&lt;null&gt;,amountPaid=&lt;null&gt;,amountPlanned=EUR 1.11,amountRefunded=&lt;null&gt;,authorizedUntil=&lt;null&gt;,createdAt=2018-05-18T14:41:29.493Z,custom=CustomFieldsImpl[type=Reference{typeId='type', id='b16889f7-a900-4558-a7db-26ba86a7703e', obj=null},fields={reference="&lt;placeholder&gt;", cardDataPlaceholder="9410010000036855526", languageCode="en"}],customer=&lt;null&gt;,externalId=&lt;null&gt;,id=d3b1f64a-6369-47f3-8beb-ad842ce427e8,interfaceId=&lt;null&gt;,interfaceInteractions=[],key=&lt;null&gt;,lastModifiedAt=2018-05-18T14:41:29.493Z,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=CREDIT_CARD,name=&lt;null&gt;],paymentStatus=PaymentStatusImpl[interfaceCode=&lt;null&gt;,interfaceText=&lt;null&gt;,state=&lt;null&gt;],transactions=[TransactionImpl[amount=EUR 1.11,id=80f0d6d8-00c7-4a2f-92d5-2334091cde9a,interactionId=&lt;null&gt;,state=INITIAL,timestamp=&lt;null&gt;,type=AUTHORIZATION]],version=1],updateActions=[SetCustomField[name=reference,value="304268742624",action=setCustomField]],javaType=[simple type, class io.sphere.sdk.payments.Payment],baseEndpointWithoutId=/payments,creationFunction=io.sphere.sdk.payments.commands.PaymentUpdateCommandImpl$$Lambda$232/1970421897@70d07935,expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],expansionPaths=[],additionalHttpQueryParameters=[]]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/d3b1f64a-6369-47f3-8beb-ad842ce427e8,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.29.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], Accept-Encoding=[gzip], X-Correlation-ID=[payone-integration-tests-heroku-17/c0a8fa51-af93-4b93-aa28-c0d5c450625e]},body=io.sphere.sdk.http.StringHttpRequestBody@6f5ba6d7[body={"version":1,"actions":[{"action":"setCustomField","name":"reference","value":"304268742624"}]}]]
-http request formatted body: {
-  "version" : 1,
-  "actions" : [ {
-    "action" : "setCustomField",
-    "name" : "reference",
-    "value" : "304268742624"
-  } ]
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/ConcurrentModificationException.html
-</span><input class="stackTraceButton" id="stackTraceButton1" type="button" onclick="javascript:toggleStackTrace('1')" value="View Stack" /><div class="stackTrace" id="stackTrace1"><p>While evaluating expression: <code>#paymentId = createPaymentCreditCardWithout3ds(#paymentName, #paymentMethod, #paymentCustomType, #transactionType, #transactionState, #centAmount, #currencyCode)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: io.sphere.sdk.client.ConcurrentModificationException: detailMessage: Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments/d3b1f64a-6369-47f3-8beb-ad842ce427e8 failed  with response code 409 with X-Correlation-ID `payone-integration-tests-heroku-17/c0a8fa51-af93-4b93-aa28-c0d5c450625e` on 2018-05-18T14:41:31.085Z
-http response formatted body: {
-  "statusCode" : 409,
-  "message" : "Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.",
-  "errors" : [ {
-    "code" : "ConcurrentModification",
-    "message" : "Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.",
-    "currentVersion" : 3
-  } ]
-}
-http response: io.sphere.sdk.http.HttpResponseImpl@63829330[statusCode=409,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[payone-integration-tests-heroku-17/c0a8fa51-af93-4b93-aa28-c0d5c450625e], Server-Timing=[projects;dur=3], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Fri, 18 May 2018 14:41:30 GMT], Via=[1.1 google], X-Served-By=[api-gce-de8742bd.sphere.prod.commercetools.de], X-Served-Config=[sphere-projects-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[322], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={"statusCode":409,"message":"Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.","errors":[{"code":"ConcurrentModification","message":"Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.","currentVersion":3}]}]
-SDK: 1.29.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments/d3b1f64a-6369-47f3-8beb-ad842ce427e8
-Java: 1.8.0_151
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentUpdateCommandImpl[versioned=PaymentImpl[amountAuthorized=&lt;null&gt;,amountPaid=&lt;null&gt;,amountPlanned=EUR 1.11,amountRefunded=&lt;null&gt;,authorizedUntil=&lt;null&gt;,createdAt=2018-05-18T14:41:29.493Z,custom=CustomFieldsImpl[type=Reference{typeId='type', id='b16889f7-a900-4558-a7db-26ba86a7703e', obj=null},fields={reference="&lt;placeholder&gt;", cardDataPlaceholder="9410010000036855526", languageCode="en"}],customer=&lt;null&gt;,externalId=&lt;null&gt;,id=d3b1f64a-6369-47f3-8beb-ad842ce427e8,interfaceId=&lt;null&gt;,interfaceInteractions=[],key=&lt;null&gt;,lastModifiedAt=2018-05-18T14:41:29.493Z,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=CREDIT_CARD,name=&lt;null&gt;],paymentStatus=PaymentStatusImpl[interfaceCode=&lt;null&gt;,interfaceText=&lt;null&gt;,state=&lt;null&gt;],transactions=[TransactionImpl[amount=EUR 1.11,id=80f0d6d8-00c7-4a2f-92d5-2334091cde9a,interactionId=&lt;null&gt;,state=INITIAL,timestamp=&lt;null&gt;,type=AUTHORIZATION]],version=1],updateActions=[SetCustomField[name=reference,value="304268742624",action=setCustomField]],javaType=[simple type, class io.sphere.sdk.payments.Payment],baseEndpointWithoutId=/payments,creationFunction=io.sphere.sdk.payments.commands.PaymentUpdateCommandImpl$$Lambda$232/1970421897@70d07935,expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],expansionPaths=[],additionalHttpQueryParameters=[]]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/d3b1f64a-6369-47f3-8beb-ad842ce427e8,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.29.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], Accept-Encoding=[gzip], X-Correlation-ID=[payone-integration-tests-heroku-17/c0a8fa51-af93-4b93-aa28-c0d5c450625e]},body=io.sphere.sdk.http.StringHttpRequestBody@6f5ba6d7[body={"version":1,"actions":[{"action":"setCustomField","name":"reference","value":"304268742624"}]}]]
-http request formatted body: {
-  "version" : 1,
-  "actions" : [ {
-    "action" : "setCustomField",
-    "name" : "reference",
-    "value" : "304268742624"
-  } ]
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/ConcurrentModificationException.html
-</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$11 (ExceptionFactory.java:52)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:149)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:134)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:128)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$4 (SphereClientImpl.java:85)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">io.sphere.sdk.client.ConcurrentModificationException: detailMessage: Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.
-summary: POST https://api.sphere.io/payone-integration-tests-heroku-17/payments/d3b1f64a-6369-47f3-8beb-ad842ce427e8 failed  with response code 409 with X-Correlation-ID `payone-integration-tests-heroku-17/c0a8fa51-af93-4b93-aa28-c0d5c450625e` on 2018-05-18T14:41:31.085Z
-http response formatted body: {
-  "statusCode" : 409,
-  "message" : "Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.",
-  "errors" : [ {
-    "code" : "ConcurrentModification",
-    "message" : "Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.",
-    "currentVersion" : 3
-  } ]
-}
-http response: io.sphere.sdk.http.HttpResponseImpl@63829330[statusCode=409,headers={Alt-Svc=[clear], Server=[nginx], Access-Control-Allow-Origin=[*], Access-Control-Allow-Methods=[GET, POST, DELETE, OPTIONS], X-Correlation-ID=[payone-integration-tests-heroku-17/c0a8fa51-af93-4b93-aa28-c0d5c450625e], Server-Timing=[projects;dur=3], Access-Control-Allow-Headers=[Accept, Authorization, Content-Type, Origin, User-Agent], Date=[Fri, 18 May 2018 14:41:30 GMT], Via=[1.1 google], X-Served-By=[api-gce-de8742bd.sphere.prod.commercetools.de], X-Served-Config=[sphere-projects-ws-1.0], Access-Control-Max-Age=[299], Content-Length=[322], Content-Type=[application/json; charset=utf-8]},associatedRequest=&lt;null&gt;,textInterpretedBody={"statusCode":409,"message":"Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.","errors":[{"code":"ConcurrentModification","message":"Object d3b1f64a-6369-47f3-8beb-ad842ce427e8 has a different version than expected. Expected: 1 - Actual: 3.","currentVersion":3}]}]
-SDK: 1.29.0
-project: payone-integration-tests-heroku-17
-endpoint: POST /payments/d3b1f64a-6369-47f3-8beb-ad842ce427e8
-Java: 1.8.0_151
-cwd: /home/travis/build/commercetools/commercetools-payone-integration/functionaltests
-sphere request: PaymentUpdateCommandImpl[versioned=PaymentImpl[amountAuthorized=&lt;null&gt;,amountPaid=&lt;null&gt;,amountPlanned=EUR 1.11,amountRefunded=&lt;null&gt;,authorizedUntil=&lt;null&gt;,createdAt=2018-05-18T14:41:29.493Z,custom=CustomFieldsImpl[type=Reference{typeId='type', id='b16889f7-a900-4558-a7db-26ba86a7703e', obj=null},fields={reference="&lt;placeholder&gt;", cardDataPlaceholder="9410010000036855526", languageCode="en"}],customer=&lt;null&gt;,externalId=&lt;null&gt;,id=d3b1f64a-6369-47f3-8beb-ad842ce427e8,interfaceId=&lt;null&gt;,interfaceInteractions=[],key=&lt;null&gt;,lastModifiedAt=2018-05-18T14:41:29.493Z,paymentMethodInfo=PaymentMethodInfoImpl[paymentInterface=PAYONE,method=CREDIT_CARD,name=&lt;null&gt;],paymentStatus=PaymentStatusImpl[interfaceCode=&lt;null&gt;,interfaceText=&lt;null&gt;,state=&lt;null&gt;],transactions=[TransactionImpl[amount=EUR 1.11,id=80f0d6d8-00c7-4a2f-92d5-2334091cde9a,interactionId=&lt;null&gt;,state=INITIAL,timestamp=&lt;null&gt;,type=AUTHORIZATION]],version=1],updateActions=[SetCustomField[name=reference,value="304268742624",action=setCustomField]],javaType=[simple type, class io.sphere.sdk.payments.Payment],baseEndpointWithoutId=/payments,creationFunction=io.sphere.sdk.payments.commands.PaymentUpdateCommandImpl$$Lambda$232/1970421897@70d07935,expansionModel=PaymentExpansionModelImpl[pathExpressions=[]],expansionPaths=[],additionalHttpQueryParameters=[]]
-http request: HttpRequestImpl[httpMethod=POST,url=https://api.sphere.io/payone-integration-tests-heroku-17/payments/d3b1f64a-6369-47f3-8beb-ad842ce427e8,headers={Authorization=[**removed from output**], User-Agent=[commercetools-jvm-sdk/1.29.0 (AHC/2.0) Java/1.8.0_151-b12 (Linux; amd64)], Accept-Encoding=[gzip], X-Correlation-ID=[payone-integration-tests-heroku-17/c0a8fa51-af93-4b93-aa28-c0d5c450625e]},body=io.sphere.sdk.http.StringHttpRequestBody@6f5ba6d7[body={"version":1,"actions":[{"action":"setCustomField","name":"reference","value":"304268742624"}]}]]
-http request formatted body: {
-  "version" : 1,
-  "actions" : [ {
-    "action" : "setCustomField",
-    "name" : "reference",
-    "value" : "304268742624"
-  } ]
-}
-additional notes: []
-Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/sdk/client/ConcurrentModificationException.html
-</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$of$11 (ExceptionFactory.java:52)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.lambda$whenStatus$1 (ExceptionFactory.java:31)</div><div class="stackTraceEntry">at io.sphere.sdk.client.ExceptionFactory.createException (ExceptionFactory.java:76)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.createExceptionFor (SphereClientImpl.java:149)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.parse (SphereClientImpl.java:134)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.processHttpResponse (SphereClientImpl.java:128)</div><div class="stackTraceEntry">at io.sphere.sdk.client.SphereClientImpl.lambda$executeWithRecover$4 (SphereClientImpl.java:85)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture.uniApply (CompletableFuture.java:602)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$UniApply.tryFire (CompletableFuture.java:577)</div><div class="stackTraceEntry">at java.util.concurrent.CompletableFuture$Completion.run (CompletableFuture.java:442)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></tr>
+            <td>0485ffc3-cf77-4a7b-95cb-72e07ff9f318</td>
+        </tr>
         <tr>
             <td class="inputvalue">CreditCard Authorization Pending Without 3ds</td>
             <td class="inputvalue">CREDIT_CARD</td>
@@ -338,7 +213,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">PENDING</td>
             <td class="inputvalue">112</td>
             <td class="inputvalue">EUR</td>
-            <td>db998f47-6e07-4ce4-9bce-d93fc1560335</td>
+            <td>23ebdf3a-d1fc-48a0-b42b-a8e362f1ce59</td>
         </tr>
         <tr>
             <td class="inputvalue">CreditCard Charge Initial Without 3ds</td>
@@ -348,7 +223,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">INITIAL</td>
             <td class="inputvalue">121</td>
             <td class="inputvalue">EUR</td>
-            <td>c07e0eb2-dee1-4601-98f1-efa4c58081b1</td>
+            <td>a15b4c5d-5cbb-4484-956c-3691a5f3a84f</td>
         </tr>
         <tr>
             <td class="inputvalue">CreditCard Charge Pending Without 3ds</td>
@@ -358,7 +233,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">PENDING</td>
             <td class="inputvalue">122</td>
             <td class="inputvalue">EUR</td>
-            <td>d126f948-a6fb-492c-a183-0219dc68685c</td>
+            <td>3caf22f2-0661-4cdc-847f-70eaddec4778</td>
         </tr>
     </table>
 
@@ -382,7 +257,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">INITIAL</td>
             <td class="inputvalue">11199</td>
             <td class="inputvalue">EUR</td>
-            <td>1d04c4bd-d754-40dd-a00a-ad6cf23f0822</td>
+            <td>40e52733-f7fb-4ed1-8619-ea712a7c299c</td>
         </tr>
         <tr>
             <td class="inputvalue">CreditCard Authorization Pending 3ds</td>
@@ -392,7 +267,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">PENDING</td>
             <td class="inputvalue">11299</td>
             <td class="inputvalue">EUR</td>
-            <td>95aa68aa-ec09-49d1-8f6d-abf146094fbe</td>
+            <td>c6b3785b-7049-4c8a-bd92-dc25e10fd467</td>
         </tr>
         <tr>
             <td class="inputvalue">CreditCard Charge Initial 3ds</td>
@@ -402,7 +277,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">INITIAL</td>
             <td class="inputvalue">12199</td>
             <td class="inputvalue">EUR</td>
-            <td>42e43a7a-5505-45b5-84c6-7ddb7a6daf01</td>
+            <td>8a8dc646-b534-454c-b534-136e5b0ec2bd</td>
         </tr>
         <tr>
             <td class="inputvalue">CreditCard Charge Pending 3ds</td>
@@ -412,7 +287,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">PENDING</td>
             <td class="inputvalue">12299</td>
             <td class="inputvalue">EUR</td>
-            <td>1dc23f1a-29b0-4f97-92a7-30a4377dc9b3</td>
+            <td>dfa144ae-264b-4aaa-9bc8-69ca3b1b9ca3</td>
         </tr>
     </table>
 
@@ -436,7 +311,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">INITIAL</td>
             <td class="inputvalue">211</td>
             <td class="inputvalue">EUR</td>
-            <td>af925752-c9f1-45b3-a2b0-df865381985e</td>
+            <td>9413cb91-3513-4a12-8869-0a0f0857ebce</td>
         </tr>
         <tr>
             <td class="inputvalue">Paypal Authorization Pending</td>
@@ -446,7 +321,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">PENDING</td>
             <td class="inputvalue">212</td>
             <td class="inputvalue">EUR</td>
-            <td>4d9c1b77-eafb-406b-bdd0-11c6a8735911</td>
+            <td>1202284c-7435-4a2e-a6a6-1b50754f4476</td>
         </tr>
         <tr>
             <td class="inputvalue">Paypal Charge Initial</td>
@@ -456,7 +331,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">INITIAL</td>
             <td class="inputvalue">221</td>
             <td class="inputvalue">EUR</td>
-            <td>33d11f7f-57d1-46f0-854f-d0746b1ab24f</td>
+            <td>520a6542-aa18-4ecf-9b72-3007ffb4868e</td>
         </tr>
         <tr>
             <td class="inputvalue">Paypal Charge Pending</td>
@@ -466,7 +341,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">PENDING</td>
             <td class="inputvalue">111</td>
             <td class="inputvalue">EUR</td>
-            <td>46c3ec84-663b-45b8-9410-fc63b2bdc9dc</td>
+            <td>34d7cd5e-7612-4951-a3a5-447afacd16b8</td>
         </tr>
     </table>
 
@@ -490,7 +365,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">INITIAL</td>
             <td class="inputvalue">321</td>
             <td class="inputvalue">EUR</td>
-            <td>a3b544aa-4cd7-4fee-8f6e-92642682063e</td>
+            <td>84c568e3-ce5e-46f1-a820-34a57ee4b2dc</td>
         </tr>
         <tr>
             <td class="inputvalue">BankTransfer Charge Pending</td>
@@ -500,7 +375,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">PENDING</td>
             <td class="inputvalue">322</td>
             <td class="inputvalue">EUR</td>
-            <td>c0fda663-8126-47c7-a26e-61a96bfd7410</td>
+            <td>216c4aae-500d-44eb-b1d3-9cc9c4f0f5aa</td>
         </tr>
     </table>
 
@@ -522,7 +397,7 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">1960-07-07</td>
             <td class="inputvalue">192.168.0.45</td>
             <td class="inputvalue">034568557</td>
-            <td>76498de2-8642-4538-83c8-e88527cdb890</td>
+            <td>cf954011-5e60-4560-af4f-0deb1a42d4ec</td>
         </tr>
     </table>
 
@@ -551,11 +426,9 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
             <td class="inputvalue">CreditCard Authorization Initial Without 3ds</td>
             <td class="inputvalue">authorization</td>
             <td class="success">200</td>
-            <td class="failure"><del class="expected">Success</del>
-<ins class="actual">Failure</ins></td>
-            <td class="failure"><del class="expected">APPROVED</del>
-<ins class="actual">ERROR 1003</ins></td>
-            <td>8</td>
+            <td class="success">Success</td>
+            <td class="success">APPROVED</td>
+            <td>10</td>
         </tr>
         <tr>
             <td class="inputvalue">CreditCard Authorization Pending Without 3ds</td>
@@ -730,5 +603,5 @@ Javadoc: http://commercetools.github.io/commercetools-jvm-sdk/apidocs/io/sphere/
     </table>
 
 </div>
-<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 47832 ms on 18-May-2018 at 14:42:14 UTC</div></div></body>
+<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 45152 ms on 18-May-2018 at 14:59:17 UTC</div></div></body>
 </html>
