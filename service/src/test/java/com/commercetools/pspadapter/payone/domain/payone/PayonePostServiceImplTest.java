@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,12 +26,13 @@ public class PayonePostServiceImplTest {
 
     @Before
     public void setup() throws PayoneException {
-        payonePostService = PayonePostServiceImpl.of(PAYONE_SERVER_API_URL);
+        payonePostService = PayonePostServiceImpl.of(PAYONE_SERVER_API_URL,
+                Collections.singletonList("removeThisField"));
     }
 
     @Test
     public void shouldThrowConfigurationExceptionIfUrlIsEmptyOnInitialization() {
-        final Throwable throwable = catchThrowable(() -> PayonePostServiceImpl.of(""));
+        final Throwable throwable = catchThrowable(() -> PayonePostServiceImpl.of("", Collections.emptyList()));
 
         assertThat(throwable)
                 .isInstanceOf(IllegalArgumentException.class)
@@ -39,7 +41,7 @@ public class PayonePostServiceImplTest {
 
     @Test
     public void shouldThrowConfigurationExceptionIfUrlIsNullOnInitialization() {
-        final Throwable throwable = catchThrowable(() -> PayonePostServiceImpl.of(null));
+        final Throwable throwable = catchThrowable(() -> PayonePostServiceImpl.of(null, Collections.emptyList()));
 
         assertThat(throwable)
                 .isInstanceOf(IllegalArgumentException.class)
@@ -118,5 +120,17 @@ public class PayonePostServiceImplTest {
         assertThat(withEmptyLists).containsExactlyInAnyOrder(
                 new BasicNameValuePair("foo[]", ""),
                 new BasicNameValuePair("bar[]", ""));
+    }
+
+    @Test
+    public void shouldRemovePersonalData() {
+        List<BasicNameValuePair> list = payonePostService.getNameValuePairsWithExpandedLists(
+                ImmutableMap.<String, Object>builder()
+                        .put("removeThisField", "bar")
+                        .put("keepThisField", "keepThisField")
+                        .build());
+
+        assertThat(list).hasSize(1);
+        assertThat(list.get(0).getName()).isEqualTo("keepThisField");
     }
 }

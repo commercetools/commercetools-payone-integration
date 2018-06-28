@@ -49,7 +49,7 @@ public class IntegrationService {
         this.tenantFactories = serviceConfig.getTenants().stream()
                 .map(tenantName -> new TenantPropertyProvider(tenantName, propertyProvider))
                 .map(tenantPropertyProvider -> new TenantConfig(tenantPropertyProvider, new PayoneConfig(tenantPropertyProvider)))
-                .map(tenantConfig -> new TenantFactory(PAYONE, tenantConfig))
+                .map(tenantConfig -> new TenantFactory(PAYONE, tenantConfig, serviceConfig))
                 .collect(toList());
 
         if (CollectionUtils.isEmpty(this.tenantFactories)) {

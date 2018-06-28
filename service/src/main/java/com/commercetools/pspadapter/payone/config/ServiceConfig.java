@@ -3,7 +3,10 @@ package com.commercetools.pspadapter.payone.config;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.commercetools.pspadapter.payone.config.PropertyProvider.*;
 import static java.lang.String.format;
@@ -26,6 +29,8 @@ public class ServiceConfig {
     private final String applicationName;
     private final String applicationVersion;
 
+    private final List<String> personalDataToRemove;
+
     /**
      * Initializes the configuration.
      *
@@ -47,6 +52,14 @@ public class ServiceConfig {
                 propertyProvider.getProperty(LONG_TIME_FRAME_SCHEDULED_JOB_CRON)
                         .map(String::valueOf)
                         .orElse("5 0 0/1 * * ? *");
+
+        this.personalDataToRemove = propertyProvider.getProperty(PERSONAL_DATA_TO_REMOVE)
+                .map(dataString ->
+                        Stream.of(dataString.trim().split("\\s*(,|;)\\s*"))
+                        .distinct()
+                        .collect(Collectors.toList())
+                )
+                .orElse(Collections.emptyList());
     }
 
     /**
@@ -88,6 +101,14 @@ public class ServiceConfig {
     @Nonnull
     public String getScheduledJobCronForLongTimeFramePoll() {
         return scheduledJobCronLongTimeFrame;
+    }
+
+    /**
+     * Gets the array of key names that should be removed from a map before logging this map.
+     */
+    @Nonnull
+    public List<String> getPersonalDataToRemove() {
+        return personalDataToRemove;
     }
 
     /**

@@ -25,17 +25,20 @@ public class PayonePostServiceImpl implements PayonePostService {
 
     private static final Logger LOG = LoggerFactory.getLogger(PayonePostServiceImpl.class);
     private static final String ENCODING_UTF8 = "UTF-8";
+    private final List<String> personalDataToRemove;
 
     private String serverAPIURL;
 
     private int connectionTimeout = 3000;
 
 
-    private PayonePostServiceImpl(final String serverAPIURL) {
+    private PayonePostServiceImpl(final String serverAPIURL,
+                                  final List<String> personalDataToRemove) {
         Preconditions.checkArgument(
                 serverAPIURL != null && !serverAPIURL.isEmpty(),
                 "The server api url must not be null or empty.");
         this.serverAPIURL = serverAPIURL;
+        this.personalDataToRemove = personalDataToRemove;
     }
 
     /**
@@ -45,8 +48,9 @@ public class PayonePostServiceImpl implements PayonePostService {
      * @return new instance of PayonePostServiceImpl.class
      * @throws IllegalArgumentException if the provided {@code payoneServerApiUrl} is invalid
      */
-    public static PayonePostServiceImpl of(final String payoneServerApiUrl) throws IllegalArgumentException {
-        return new PayonePostServiceImpl(payoneServerApiUrl);
+    public static PayonePostServiceImpl of(final String payoneServerApiUrl,
+                                           final List<String> personalDataToRemove) throws IllegalArgumentException {
+        return new PayonePostServiceImpl(payoneServerApiUrl, personalDataToRemove);
     }
 
     @Override
@@ -72,6 +76,7 @@ public class PayonePostServiceImpl implements PayonePostService {
     /**
      * Expand entries with list values to key-value pairs where the keys are transformed to set of {@code key[i]} with
      * respective values from the list. Non-list arguments remain the same.
+     * Entries which are in {@code this.personalDataToRemove} are removed.
      * <p>
      * The indices origin is <b>1</b>.
      * <p>
@@ -89,6 +94,7 @@ public class PayonePostServiceImpl implements PayonePostService {
     @Nonnull
     List<BasicNameValuePair> getNameValuePairsWithExpandedLists(Map<String, Object> parameters) {
         return parameters.entrySet().stream()
+                .filter(entry -> !this.personalDataToRemove.contains(entry.getKey()))
                 .flatMap(entry -> {
                     Object value = entry.getValue();
                     if (value instanceof List) {
