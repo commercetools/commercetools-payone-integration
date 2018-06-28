@@ -114,7 +114,7 @@ Name | Is tenant specific | Content | Default
 `TENANT1_CT_START_FROM_SCRATCH`       | Yes | **WARNING** _**Handle with care!**_ If and only if equal, ignoring case, to `"true"` the service will create the custom types it needs. _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. If not yet in the project, the Custom Types are created independently of this parameter (but only deleted and recreated if this parameter is set).  Related: [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34). | `"false"`
 `TENANT1_SECURE_KEY`                  | Yes | if provided and not empty, the value is used as the key for decrypting data from fields "IBAN" and "BIC" for payments with CustomType "PAYMENT_BANK_TRANSFER". The data must be the result of a Blowfish ECB encryption with said key and encoded in HEX. | "" (empty String)
 `TENANT1_UPDATE_ORDER_PAYMENT_STATE`  | Yes | if _true_ - `Order#paymentState` will be updated when payment status notification is received from Payone. By default the order's state remains unchanged. See [Order Payment Status Mapping](/docs/Order-Payment-Status-Mapping.md) for more details. | "false"
-`PERSONAL_DATA_TO_REMOVE`             | No  | if provided and not empty, the values are used as keys of values that won't be logged | "firstname,lastname,email,country,telephonenumber,city,shipping_city,salutation,title,company,birthday,state,zip,addressaddition,vatid,personalid,shipping_country,shipping_state,shipping_city,shipping_zip,shipping_street,shipping_company,shipping_lastname,shipping_firstname,ip,street"
+`PERSONAL_DATA_TO_REMOVE`             | No  | if provided and not empty, the values are used as keys of values that won't be logged | "" (empty String)
 
 #### Docker run
 
