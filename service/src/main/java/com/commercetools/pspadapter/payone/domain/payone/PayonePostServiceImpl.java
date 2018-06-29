@@ -37,6 +37,8 @@ public class PayonePostServiceImpl implements PayonePostService {
         Preconditions.checkArgument(
                 serverAPIURL != null && !serverAPIURL.isEmpty(),
                 "The server api url must not be null or empty.");
+        Preconditions.checkArgument(personalDataToRemove != null,
+                "personalDataToRemove cannot be null");
         this.serverAPIURL = serverAPIURL;
         this.personalDataToRemove = personalDataToRemove;
     }
