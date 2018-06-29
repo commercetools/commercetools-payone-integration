@@ -47,6 +47,7 @@ public class PayonePostServiceImpl implements PayonePostService {
      * Initialize new service with url.
      *
      * @param payoneServerApiUrl - the payone server api url, must not be null or empty
+     * @param personalDataToRemove - list of parameters that should be removed from the logs
      * @return new instance of PayonePostServiceImpl.class
      * @throws IllegalArgumentException if the provided {@code payoneServerApiUrl} is invalid
      */
@@ -90,6 +91,7 @@ public class PayonePostServiceImpl implements PayonePostService {
      * </pre>
      *
      * @param parameters Set of key-value pairs to expand
+     * @param removePersonalData true if personal data should be removed from the returned list
      * @return new {@link List} with respective {@link BasicNameValuePair} values from {@code parameters}.
      * Note: the items order in the list is undefined.
      */
