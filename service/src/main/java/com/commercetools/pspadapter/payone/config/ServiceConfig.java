@@ -28,7 +28,6 @@ public class ServiceConfig {
     private final String scheduledJobCronLongTimeFrame;
     private final String applicationName;
     private final String applicationVersion;
-
     private final List<String> personalDataToRemove;
 
     /**
