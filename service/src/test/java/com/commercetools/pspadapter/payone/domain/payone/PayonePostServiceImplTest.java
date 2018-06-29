@@ -74,9 +74,9 @@ public class PayonePostServiceImplTest {
 
     @Test
     public void getObjectMapWithExpandedLists() {
-        assertThat(payonePostService.getNameValuePairsWithExpandedLists(ImmutableMap.of())).hasSize(0);
+        assertThat(payonePostService.getNameValuePairsWithExpandedLists(ImmutableMap.of(), false)).hasSize(0);
 
-        final List<BasicNameValuePair> simple = payonePostService.getNameValuePairsWithExpandedLists(ImmutableMap.of("foo", "bar"));
+        final List<BasicNameValuePair> simple = payonePostService.getNameValuePairsWithExpandedLists(ImmutableMap.of("foo", "bar"), false);
         assertThat(simple).hasSize(1);
         assertThat(simple).contains(new BasicNameValuePair("foo", "bar"));
 
@@ -93,7 +93,7 @@ public class PayonePostServiceImplTest {
                         .put("boolFalse", false)
                         .put("listString", new LinkedList<>(ImmutableList.of("ein", "zwei", "drei")))
                         .put("listDoubles", asList(3.14, 2.71, 9.81))
-                        .build());
+                        .build(), false);
 
         assertThat(withExpandedLists).containsExactlyInAnyOrder(
                 new BasicNameValuePair("foo", "bar"),
@@ -115,7 +115,7 @@ public class PayonePostServiceImplTest {
 
         final List<BasicNameValuePair> withEmptyLists = payonePostService.getNameValuePairsWithExpandedLists(
                 ImmutableMap.of("foo", new ArrayList<>(),
-                        "bar", new LinkedList<>()));
+                        "bar", new LinkedList<>()), false);
 
         assertThat(withEmptyLists).containsExactlyInAnyOrder(
                 new BasicNameValuePair("foo[]", ""),
@@ -123,14 +123,24 @@ public class PayonePostServiceImplTest {
     }
 
     @Test
-    public void shouldRemovePersonalData() {
+    public void whenRemovePersonalDataFlagIsTrue_shouldRemovePersonalData() {
         List<BasicNameValuePair> list = payonePostService.getNameValuePairsWithExpandedLists(
                 ImmutableMap.<String, Object>builder()
                         .put("removeThisField", "bar")
                         .put("keepThisField", "keepThisField")
-                        .build());
+                        .build(), true);
 
         assertThat(list).hasSize(1);
         assertThat(list.get(0).getName()).isEqualTo("keepThisField");
+
+        list = payonePostService.getNameValuePairsWithExpandedLists(
+                ImmutableMap.<String, Object>builder()
+                        .put("removeThisField", "bar")
+                        .put("keepThisField", "keepThisField")
+                        .build(), false);
+
+        assertThat(list).hasSize(2);
+        assertThat(list.get(0).getName()).isEqualTo("keepThisField");
+        assertThat(list.get(1).getName()).isEqualTo("removeThisField");
     }
 }

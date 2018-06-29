@@ -60,13 +60,13 @@ public class PayonePostServiceImpl implements PayonePostService {
 
         try {
             List<BasicNameValuePair> mappedListParameters =
-                    getNameValuePairsWithExpandedLists(baseRequest.toStringMap(false));
+                    getNameValuePairsWithExpandedLists(baseRequest.toStringMap(false), false);
 
             String serverResponse = executePostRequestToString(this.serverAPIURL, mappedListParameters);
 
             if (serverResponse.contains("status=ERROR")) {
                 LOG.error("-> Payone POST request parameters: {}",
-                        getNameValuePairsWithExpandedLists(baseRequest.toStringMap(true)).toString());
+                        getNameValuePairsWithExpandedLists(baseRequest.toStringMap(true), true).toString());
                 LOG.error("Payone POST response: {}", serverResponse);
             }
             return buildMapFromResultParams(serverResponse);
@@ -94,9 +94,10 @@ public class PayonePostServiceImpl implements PayonePostService {
      * Note: the items order in the list is undefined.
      */
     @Nonnull
-    List<BasicNameValuePair> getNameValuePairsWithExpandedLists(Map<String, Object> parameters) {
+    List<BasicNameValuePair> getNameValuePairsWithExpandedLists(Map<String, Object> parameters,
+                                                                boolean removePersonalData) {
         return parameters.entrySet().stream()
-                .filter(entry -> !this.personalDataToRemove.contains(entry.getKey()))
+                .filter(entry -> !removePersonalData || !this.personalDataToRemove.contains(entry.getKey()))
                 .flatMap(entry -> {
                     Object value = entry.getValue();
                     if (value instanceof List) {
