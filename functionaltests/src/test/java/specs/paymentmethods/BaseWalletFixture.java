@@ -16,7 +16,7 @@ import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.*;
 /**
  * Basic fixture Authorization and Charge test case of wallet payment types (PayPal, Paydirekt)
  */
-public class BaseWalletFixture extends BasePaymentFixture {
+public class BaseWalletFixture extends  BaseNotifiablePaymentFixture{
 
     public MultiValueResult createPayment(
             final String paymentName,

@@ -199,21 +199,53 @@
                 <span c:assertTrue="customStringFieldIsNull(#failedPaymentName, #fieldName)">must be null</span>.
             </p>
             <p>
-                If I follow the Paydirekt redirect process for <em>Payment 1</em>, <em>Payment 3</em> and <em>Payment 4</em>
-                and verify them successfully with this account, I get forwarded to the success URL and for each of the
-                payments the following notifications will be received:
+                If I follow the Paydirect  process for <span c:set="#successfulPayments">Payment 1, Payment 3, Payment 4</span> and
+                <span c:assertTrue="executeRedirectForPayments(#successfulPayments)">verify them successfully</span> by entering my bank account information,
+                I get forwarded to a predefined success url and for each of the payments the following notifications will be received:
             </p>
             <ol>
-                <li>
-                    (txaction=<b c:set="#txactionAppointed">appointed</b>, transactionstatus=<b>completed</b>)
-                    -> has no effect, just as a confirmation
-                </li>
-                <li>
-                    (txaction=<b c:set="#txactionPaid">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>)
-                    ->  The state of the Charge transaction, the authorized amount and the paid amount should be set
-                    correctly not later than now.
-                </li>
+                <li>(txaction=<b c:set="#txactionAppointed">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)">received</span> -> has no effect, just as a confirmation</li>
+                <li>(txaction=<b c:set="#txactionPaid">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)">received</span>
+                    ->  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
             </ol>
+            <table c:execute="#result = fetchPaymentDetails(#paymentName)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:assertEquals="#result.transactionState">Transaction State</th>
+                    <th c:assertEquals="#result.appointedNotificationCount">total # of <br/><em>appointed/completed</em> notifications</th>
+                    <th c:assertEquals="#result.paidNotificationCount">total # of <br/><em>paid/completed</em> notifications</th>
+                    <th c:assertEquals="#result.successUrl">url called after successful verification</th>
+                    <th c:echo="#result.version">Version (for information only)</th>
+                </tr>
+                <tr>
+                    <td>Payment 1</td>
+                    <td>Success</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>[...]Payment-1-Success</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 3</td>
+                    <td>Success</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>[...]Payment-3-Success</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Payment 4</td>
+                    <td>Success</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>[...]Payment-4-Success</td>
+                    <td></td>
+                </tr>
+                <p>
+                    See <a href="https://github.com/commercetools/commercetools-payone-integration/issues/68">issue #68</a>.
+                </p>
+            </table>
+
         </div>
     </body>
 </html>
