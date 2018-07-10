@@ -10,6 +10,7 @@ import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.WebDriverPaydirekt;
 import util.WebDriverSofortueberweisung;
 
 import java.util.Collection;
@@ -42,8 +43,8 @@ public class ChargeImmediatelyFixture extends PaydirektFixture {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(toMap(Pair::getKey, Pair::getValue));
-        return true;
-       //return successUrlForPayment.size() == paymentNamesList.size();
+
+       return successUrlForPayment.size() == paymentNamesList.size();
     }
 
     /**
@@ -54,19 +55,18 @@ public class ChargeImmediatelyFixture extends PaydirektFixture {
      */
     private Optional<Pair<String, String>> approvePaymentAsCustomer(String paymentName) {
         final Payment payment = fetchPaymentByLegibleName(paymentName);
-        final WebDriverSofortueberweisung webDriver = new WebDriverSofortueberweisung();
+        final WebDriverPaydirekt webDriver = new WebDriverPaydirekt();
         try {
             return Optional.ofNullable(payment.getCustom())
                     .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
-                    .map(redirectCustomField -> webDriver.executeSofortueberweisungRedirect(redirectCustomField,
-                            getTestDataSwBankTransferIban(),
-                            getTestDataSwBankTransferPin(),
-                            getTestDataSwBankTransferTan())
+                    .map(redirectCustomField -> webDriver.executePayDirectRedirect(redirectCustomField,
+                            "WorkinProgressTextilhandelsGmbH_SDE-Kaeufer",
+                            "SDE-Kaeufer2$")
                             .replace(baseRedirectUrl, "[...]"))
                     .map(successUrl -> Pair.of(paymentName, successUrl));
 
         } catch (Exception e) {
-            LOG.error("Error redirect for Sofortüberweisung Charge Immediate for payment name [{}], id = [{}]",
+            LOG.error("Error redirect for Paydirect Charge Immediate for payment name [{}], id = [{}]",
                     paymentName, payment.getId(), e);
         } finally {
             webDriver.manage().deleteAllCookies();

@@ -7,6 +7,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Wait;
@@ -23,33 +24,17 @@ import static util.constant.WebDriverSofortueberweisungConstants.*;
  * @author fhaertig
  * @since 14.03.16
  */
-public class WebDriverSofortueberweisung extends HtmlUnitDriver {
+public class WebDriverSofortueberweisung extends CustomWebDriver {
 
     private static final int DEFAULT_TIMEOUT = 5;
 
-    private final Wait<WebDriver> wait;
+
+
+    ChromeDriver driver;
 
     public WebDriverSofortueberweisung() {
-        super(BrowserVersion.CHROME, true);
+    driver=getChromeDriver();
 
-        final Timeouts timeouts = manage().timeouts();
-        timeouts.implicitlyWait(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
-        timeouts.pageLoadTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
-        timeouts.setScriptTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
-
-        manage().window().fullscreen();
-
-        final WebClient webClient = getWebClient();
-        webClient.setJavaScriptTimeout(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT));
-        webClient.getOptions().setThrowExceptionOnScriptError(false);
-        webClient.getOptions().setPopupBlockerEnabled(true);
-
-        webClient.setIncorrectnessListener((message, origin) -> {
-            //swallow these messages
-        });
-        webClient.setCssErrorHandler(new SilentCssErrorHandler());
-
-        this.wait = new WebDriverWait(this, 20);
     }
 
     private void doLogin(String userid, String pin) {
@@ -86,7 +71,7 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
 
 
     private void selectAccount() {
-        final WebElement senderAccountInput = findElement(By.id(SU_TEST_ACCOUNT_RADIO_BUTTON));
+        final WebElement senderAccountInput = driver.findElement(By.id(SU_TEST_ACCOUNT_RADIO_BUTTON));
 
         wait.until(ExpectedConditions.elementToBeClickable(senderAccountInput));
         senderAccountInput.click();
@@ -116,8 +101,8 @@ public class WebDriverSofortueberweisung extends HtmlUnitDriver {
      * @return the URL the browser was redirected to after submitting the {@code password}
      */
     public String executeSofortueberweisungRedirect(final String url, final String userid, final String pin, final String tan) {
-        navigate().to(url);
-        doLogin(userid, pin);
+       driver.get(url);
+       doLogin(userid, pin);
 
         wait.until(ExpectedConditions.urlContains(SU_URL_SELECT_ACCOUNT_PATTERN));
         selectAccount();

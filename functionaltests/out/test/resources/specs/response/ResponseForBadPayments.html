@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link href="../../concordion.css" rel="stylesheet" type="text/css"/>
+    <title>Response from handle payment URL with wrong arguments</title>
+</head>
+<body onload="document.getElementById('handlePaymentPath').href = document.getElementById('handlePaymentUrlValue').innerHTML">
+
+<!-- Invisible value to read from java Fixture -->
+<span id="handlePaymentUrlValue" c:echo="getHandlePaymentUrl(':id')"  style="display:none"></span>
+
+<h1>Responses from <code><span c:echo="getHandlePaymentPath(':id')"></span></code> URL with bad <code>paymentId</code> values</h1>
+Test we get correct response statuses <a id="handlePaymentPath" target="_blank"><span c:echo="getHandlePaymentPath(':id')"></span></a> for bad payment IDs.
+<div class="example">
+    <table c:execute="#result = handleBadPaymentResponses(#paymentId)">
+        <tr>
+            <th c:set="#paymentId">Payment Id</th>
+            <th>Comment</th>
+            <th c:assertEquals="#result">Status</th>
+        </tr>
+        <tr>
+            <td>XXXX</td>
+            <td>Mal formed id</td>
+            <td>400</td>
+        </tr>
+        <tr>
+            <td>00000000-0000-0000-0000-000000000000</td>
+            <td>Non existent id</td>
+            <td>404</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>Empty Id</td>
+            <td>404</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

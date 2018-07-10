@@ -1,0 +1,110 @@
+<html xmlns:c="http://www.concordion.org/2007/concordion">
+<head>
+    <title>Scheduled Job Short</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<h1>Scheduled Job Short</h1>
+<p>
+    Test the scheduled job has been run
+</p>
+
+<h3>Examples</h3>
+
+<p>
+    Create payments, wait some time and validate the payments are handled by the service.
+    <br/>
+    Waiting time should be adjusted with service's <code><b>SHORT_TIME_FRAME_SCHEDULED_JOB_CRON</b></code> environment
+    variable (last time it was <code>0/30 * * * * ? *</code>, aka <i>every 30 seconds</i>)
+</p>
+
+<div c:example="scheduledJobExample" class="example">
+    <h4>Create the payments:</h4>
+    <table c:execute="#paymentResult = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#paymentMethod">Payment Method</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#centAmount">Cent Amount</th>
+            <th c:set="#currencyCode">Currency Code</th>
+            <th c:echo="#paymentResult.id">Payment ID (for information only)</th>
+            <th c:assertEquals="#paymentResult.version">Version</th>
+            <th c:assertEquals="#paymentResult.paymentStatus">Payment Status</th>
+            <th c:assertEquals="#paymentResult.interfaceInteractionsSize">Interface Interactions</th>
+            <th c:assertEquals="#paymentResult.transactionsSize">Transactions</th>
+            <th c:echo="#paymentResult.createdAt">Created at (FIO)</th>
+            <th c:echo="#paymentResult.lastModifiedAt">Last Modified at (FIO)</th>
+            <th c:assertEquals="#paymentResult.isNotModified">Is not modified?</th>
+        </tr>
+        <tr>
+            <td>Scheduled Payment 1</td>
+            <td>CREDIT_CARD</td>
+            <td>CHARGE</td>
+            <td>44556677</td>
+            <td>EUR</td>
+            <td></td>
+            <td>1</td>
+            <td>(null)</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td></td>
+            <td>true</td>
+        </tr>
+        <tr>
+            <td>Scheduled Payment 2</td>
+            <td>WALLET-PAYPAL</td>
+            <td>AUTHORIZATION</td>
+            <td>99887766</td>
+            <td>EUR</td>
+            <td></td>
+            <td>1</td>
+            <td>(null)</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+            <td></td>
+            <td>true</td>
+        </tr>
+    </table>
+
+    <h4>Wait <span c:echo="waitSecondsTimeout()"></span> seconds and verify the payments states:</h4>
+    <table c:execute="#verifyResult = verifyPaymentIsHandled(#paymentName)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:echo="#verifyResult.version">Version</th>
+            <th c:assertEquals="#verifyResult.paymentStatus">Payment Status</th>
+            <th c:assertEquals="#verifyResult.interfaceInteractionsSize">Interface Interactions</th>
+            <th c:assertEquals="#verifyResult.transactionsSize">Transactions</th>
+            <th c:echo="#verifyResult.createdAt">Created at (FIO)</th>
+            <th c:echo="#verifyResult.lastModifiedAt">Last Modified at (FIO)</th>
+            <th c:echo="#verifyResult.verifiedAt">Verified at (FIO)</th>
+            <th c:assertEquals="#verifyResult.hasBeenModified">Has been modified?</th>
+        </tr>
+        <tr>
+            <td>Scheduled Payment 1</td>
+            <td></td>
+            <td>APPROVED</td>
+            <td>2</td>
+            <td>1</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>true</td>
+        </tr>
+        <tr>
+            <td>Scheduled Payment 2</td>
+            <td></td>
+            <td>REDIRECT</td>
+            <td>2</td>
+            <td>1</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>true</td>
+        </tr>
+    </table>
+</div>
+
+</body>
+</html>

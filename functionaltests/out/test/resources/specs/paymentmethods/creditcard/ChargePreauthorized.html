@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <link href="../../../concordion.css" rel="stylesheet" type="text/css" />
+        <title>Charge Preauthorized</title>
+    </head>
+    <body>
+        <h1>Charge Credit Card Preauthorized</h1>
+        <p>
+            The integration service allows to charge a credit card assuming that a separate authorization was done before.
+        </p>
+        <p>
+            <i>
+                Note: Currently this transaction type is not supported. To charge a credit card, have a look at
+                <a href="ChargeImmediatelyWithout3ds.html">"Charge Immediately"</a>.
+            </i>
+        </p>
+        <h2>Examples</h2>
+        <h3>Common Setup</h3>
+        <ul>
+            <li>payment.paymentMethodInfo.method: <span c:set="#paymentMethod">CREDIT_CARD</span></li>
+            <li>payment.transactions[0].type: <span c:set="#transactionType">CHARGE</span></li>
+            <li>payment.amountPlanned.centAmount: <span c:set="#centAmount">2000</span></li>
+            <li>payment.amountPlanned.currencyCode: <span c:set="#currencyCode">EUR</span></li>
+        </ul>
+        <div class="example">
+            <h3>Successful Charge of authorized amount</h3>
+            <p>
+                If the charge for a
+                <span c:execute="#paymentId = createPayment(#paymentMethod, #transactionType, #centAmount, #currencyCode)">payment</span>
+                has response <span c:assertEquals="handlePayment(#paymentId)">200</span>, then
+            <ul>
+                <li>
+                    the number of <span c:set="#interactionType">PAYONE_INTERACTION_REQUEST</span>
+                    <span c:set="#requestType">capture</span> requests for that
+                    <span c:execute="#transactionId = getIdOfLastTransactionByPaymentId(#paymentId)">transaction</span>
+                    is
+                    <span c:assertEquals="getInterfaceInteractionCount(#paymentId, #transactionId, #interactionType, #requestType)">1</span>,
+                </li>
+                <li>
+                    the transaction state is
+                    <span c:assertEquals="getTransactionStateByPaymentId(#paymentId, #transactionId)">Success</span>.
+                </li>
+            </ul>
+            </p>
+        </div>
+    </body>
+</html>
