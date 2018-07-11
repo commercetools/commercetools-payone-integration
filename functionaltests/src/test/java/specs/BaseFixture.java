@@ -70,27 +70,17 @@ import static java.util.regex.Pattern.DOTALL;
  * @since 10.12.15
  */
 public abstract class BaseFixture {
-    private static final Logger LOG = LoggerFactory.getLogger(BaseFixture.class);
-
-    protected final MonetaryAmountFormat currencyFormatterDe = MonetaryFormats.getAmountFormat(Locale.GERMANY);
-
+    public static final String BUYER_LAST_NAME = "TestBuyer";
     protected static final String EMPTY_STRING = "";
     protected static final String NULL_STRING = "null";
-    public static final String BUYER_LAST_NAME = "TestBuyer";
-
     protected static final long PAYONE_NOTIFICATION_TIMEOUT = TimeUnit.MINUTES.toMillis(15);
     protected static final long RETRY_DELAY = TimeUnit.SECONDS.toMillis(15);
     protected static final long INTERMEDIATE_REPORT_DELAY = TimeUnit.MINUTES.toMillis(3);
-
     protected static final Duration CTP_REQUEST_TIMEOUT = Duration.ofMinutes(2);
-
     protected static final Splitter thePaymentNamesSplitter = Splitter.on(",").trimResults().omitEmptyStrings();
-
     protected static final PropertyProvider propertyProvider = new PropertyProvider();
-
     // Environment variables names
     protected static final String TEST_DATA_CT_PAYONE_INTEGRATION_URL = "TEST_DATA_CT_PAYONE_INTEGRATION_URL";
-
     protected static final String TEST_DATA_TENANT_NAME = "TEST_DATA_TENANT_NAME";
     protected static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
     protected static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_3DS";
@@ -99,33 +89,32 @@ public abstract class BaseFixture {
     protected static final String TEST_DATA_SW_BANK_TRANSFER_BIC = "TEST_DATA_SW_BANK_TRANSFER_BIC";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_PIN = "TEST_DATA_SW_BANK_TRANSFER_PIN";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_TAN = "TEST_DATA_SW_BANK_TRANSFER_TAN";
-
+    protected static final String TEST_DATA_PAYDIRECT_LOGIN = "TEST_DATA_PAYDIRECT_LOGIN";
+    protected static final String TEST_DATA_PAYDIRECT_PIN = "TEST_DATA_PAYDIRECT_PIN";
     protected static final String TEST_DATA_PAYONE_MERCHANT_ID = "TEST_DATA_PAYONE_MERCHANT_ID";
     protected static final String TEST_DATA_PAYONE_SUBACC_ID = "TEST_DATA_PAYONE_SUBACC_ID";
     protected static final String TEST_DATA_PAYONE_PORTAL_ID = "TEST_DATA_PAYONE_PORTAL_ID";
     protected static final String TEST_DATA_PAYONE_KEY = "TEST_DATA_PAYONE_KEY";
-
     protected static final String TEST_DATA_CT_PROJECT_KEY = "TEST_DATA_CT_PROJECT_KEY";
     protected static final String TEST_DATA_CT_CLIENT_ID = "TEST_DATA_CT_CLIENT_ID";
     protected static final String TEST_DATA_CT_CLIENT_SECRET = "TEST_DATA_CT_CLIENT_SECRET";
+    protected static final Random randomSource = new Random();
+    private static final Logger LOG = LoggerFactory.getLogger(BaseFixture.class);
 
     // other TEST_DATA_ variables see in BaseTenant2Fixture
-
-    protected static final Random randomSource = new Random();
-
     /**
      * Only for creation of test data
      */
     private static BlockingSphereClient ctpClient;
     private static LoadingCache<String, Type> typeCache;
-
     private static URL ctPayoneIntegrationBaseUrl;
-
+    private static String PSEUDO_CARD_PAN;
+    private static String PSEUDO_CARD_PAN_3DS;
+    protected final MonetaryAmountFormat currencyFormatterDe = MonetaryFormats.getAmountFormat(Locale.GERMANY);
     /**
      * maps legible payment names to payment IDs (and vice versa)
      */
     private BiMap<String, String> payments = HashBiMap.create();
-
 
     @BeforeClass
     static public void initializeCommercetoolsClient() throws MalformedURLException {
@@ -141,6 +130,60 @@ public abstract class BaseFixture {
         );
 
         typeCache = CacheBuilder.newBuilder().build(new TypeCacheLoader(ctpClient));
+    }
+
+    protected static String getConfigurationParameter(final String configParameterName) {
+        final String envVariable = System.getenv(configParameterName);
+        if (!Strings.isNullOrEmpty(envVariable)) {
+            return envVariable;
+        }
+
+        final String sysProperty = System.getProperty(configParameterName);
+        if (!Strings.isNullOrEmpty(sysProperty)) {
+            return sysProperty;
+        }
+
+        throw new RuntimeException(format(
+                "Environment variable required for configuration must not be null or empty: %s",
+                configParameterName));
+    }
+
+    protected static String getTestDataVisaCreditCardNo3Ds() {
+        return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
+    }
+
+    protected static String getTestVisaCreditCard3Ds() {
+        return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_3_DS);
+    }
+
+    protected static String getTestData3DsPassword() {
+        return getConfigurationParameter(TEST_DATA_3_DS_PASSWORD);
+    }
+
+    protected static String getTestDataSwBankTransferIban() {
+        return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_IBAN);
+    }
+
+    protected static String getTestDataSwBankTransferBic() {
+        return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_BIC);
+    }
+
+    protected static String getTestDataSwBankTransferPin() {
+        return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_PIN);
+    }
+
+    protected static String getTestDataSwBankTransferTan() {
+        return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_TAN);
+    }
+    public static String getTestDataPaydirectLogin() {
+        return getConfigurationParameter(TEST_DATA_PAYDIRECT_LOGIN);
+    }
+
+    public static String getTestDataPaydirectPin() {
+        return getConfigurationParameter(TEST_DATA_PAYDIRECT_PIN);
+    }
+    protected static String getRandomOrderNumber() {
+        return String.valueOf(randomSource.nextInt() + System.nanoTime());
     }
 
     public String getHandlePaymentUrl(final String paymentId) {
@@ -180,22 +223,6 @@ public abstract class BaseFixture {
         return executeGetRequest(url);
     }
 
-    protected static String getConfigurationParameter(final String configParameterName) {
-        final String envVariable = System.getenv(configParameterName);
-        if (!Strings.isNullOrEmpty(envVariable)) {
-            return envVariable;
-        }
-
-        final String sysProperty = System.getProperty(configParameterName);
-        if (!Strings.isNullOrEmpty(sysProperty)) {
-            return sysProperty;
-        }
-
-        throw new RuntimeException(format(
-                "Environment variable required for configuration must not be null or empty: %s",
-                configParameterName));
-    }
-
     protected MonetaryAmount createMonetaryAmountFromCent(final Long centAmount, final String currencyCode) {
         return MoneyImpl.ofCents(centAmount, currencyCode);
     }
@@ -204,15 +231,18 @@ public abstract class BaseFixture {
         return createCartAndOrderForPayment(payment, currencyCode, BUYER_LAST_NAME, null);
     }
 
-    protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final PaymentState paymentState) {
+    protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final
+    PaymentState paymentState) {
         return createCartAndOrderForPayment(payment, currencyCode, BUYER_LAST_NAME, paymentState);
     }
 
-    protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final String buyerLastName) {
+    protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final String
+            buyerLastName) {
         return createCartAndOrderForPayment(payment, currencyCode, buyerLastName, null);
     }
 
-    protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final String buyerLastName,
+    protected String createCartAndOrderForPayment(final Payment payment, final String currencyCode, final String
+            buyerLastName,
                                                   final PaymentState paymentState) {
         Order order = createAndGetOrder(payment, currencyCode, buyerLastName, paymentState);
         return order.getOrderNumber();
@@ -226,18 +256,21 @@ public abstract class BaseFixture {
         return createAndGetOrder(payment, currencyCode, BUYER_LAST_NAME, paymentState);
     }
 
-    protected Order createAndGetOrder(Payment payment, String currencyCode, String buyerLastName, PaymentState paymentState) {
+    protected Order createAndGetOrder(Payment payment, String currencyCode, String buyerLastName, PaymentState
+            paymentState) {
         // create cart and order with product
         final Product product = ctpClient().executeBlocking(ProductQuery.of()).getResults().get(0);
 
-        final CartDraft cardDraft = createDefaultCartDraftBuilder(currencyCode, ofNullable(buyerLastName).orElse(BUYER_LAST_NAME))
+        final CartDraft cardDraft = createDefaultCartDraftBuilder(currencyCode, ofNullable(buyerLastName).orElse
+                (BUYER_LAST_NAME))
                 .build();
 
         final Cart cart = ctpClient().executeBlocking(CartUpdateCommand.of(
                 ctpClient().executeBlocking(CartCreateCommand.of(cardDraft)),
                 ImmutableList.of(
                         AddPayment.of(payment),
-                        AddLineItem.of(LineItemDraft.of(product.getId(), product.getMasterData().getCurrent().getMasterVariant().getId(), 1))
+                        AddLineItem.of(LineItemDraft.of(product.getId(), product.getMasterData().getCurrent()
+                                .getMasterVariant().getId(), 1))
                 )));
 
         final String orderNumber = getRandomOrderNumber();
@@ -255,15 +288,12 @@ public abstract class BaseFixture {
      * (which may be overridden in subclasses)
      */
     @Nonnull
-    protected CartDraftBuilder createDefaultCartDraftBuilder(@Nonnull String currencyCode, @Nonnull String buyerLastName) {
+    protected CartDraftBuilder createDefaultCartDraftBuilder(@Nonnull String currencyCode, @Nonnull String
+            buyerLastName) {
         return CartDraftBuilder.of(Monetary.getCurrency(currencyCode))
                 .shippingAddress(Address.of(CountryCode.DE))
                 .billingAddress(Address.of(CountryCode.DE).withLastName(buyerLastName));
     }
-
-    private static String PSEUDO_CARD_PAN;
-
-    private static String PSEUDO_CARD_PAN_3DS;
 
     /**
      * Fetch new or get cached pseudocardpan from Payone service based on supplied test VISA card number
@@ -290,7 +320,7 @@ public abstract class BaseFixture {
                 LOG.info("Unconfirmed pseudocardpan fetched successfully");
             }
         }
-      return PSEUDO_CARD_PAN;
+        return PSEUDO_CARD_PAN;
     }
 
     /**
@@ -327,15 +357,18 @@ public abstract class BaseFixture {
      * you get "pseudocardpan is not found" response from Payone.
      *
      * @param cardPan Visa card number (expected to be test Visa number from Payone)
-     * @param mid Payone Merchant Id
-     * @param aid Payone Sub-Account Id
-     * @param pid Payone Portal Id
-     * @param key Payone Key (Access Token)
+     * @param mid     Payone Merchant Id
+     * @param aid     Payone Sub-Account Id
+     * @param pid     Payone Portal Id
+     * @param key     Payone Key (Access Token)
      * @return pseudocardpan string, registered in Payone merchant center
      * @throws RuntimeException if the response from Payone can't be parsed
      */
     protected String fetchPseudoCardPan(String cardPan, String mid, String aid, String pid, String key) {
-        //curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key=$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www.example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan=<VISA_CREDIT_CARD_3DS_NUMBER>"
+        //curl --data "request=3dscheck&mid=$PAYONE_MERCHANT_ID&aid=$PAYONE_SUBACC_ID&portalid=$PAYONE_PORTAL_ID&key
+        // =$(md5 -qs $PAYONE_KEY)&mode=test&api_version=3.9&amount=2&currency=EUR&clearingtype=cc&exiturl=http://www
+        // .example.com&storecarddata=yes&cardexpiredate=2512&cardcvc2=123&cardtype=V&cardpan
+        // =<VISA_CREDIT_CARD_3DS_NUMBER>"
 
         String cardPanResponse = null;
         try {
@@ -365,7 +398,7 @@ public abstract class BaseFixture {
         Matcher m = p.matcher(cardPanResponse);
 
         if (!m.matches()) {
-          throw new RuntimeException(format("Unexpected pseudocardpan response: %s", cardPanResponse));
+            throw new RuntimeException(format("Unexpected pseudocardpan response: %s", cardPanResponse));
         }
 
         return m.group(1);
@@ -373,34 +406,6 @@ public abstract class BaseFixture {
 
     public String getTenantName() {
         return getConfigurationParameter(TEST_DATA_TENANT_NAME);
-    }
-
-    protected static String getTestDataVisaCreditCardNo3Ds() {
-        return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_NO_3_DS);
-    }
-
-    protected static String getTestVisaCreditCard3Ds() {
-        return getConfigurationParameter(TEST_DATA_VISA_CREDIT_CARD_3_DS);
-    }
-
-    protected static String getTestData3DsPassword() {
-        return getConfigurationParameter(TEST_DATA_3_DS_PASSWORD);
-    }
-
-    protected static String getTestDataSwBankTransferIban() {
-        return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_IBAN);
-    }
-
-    protected static String getTestDataSwBankTransferBic() {
-        return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_BIC);
-    }
-
-    protected static String getTestDataSwBankTransferPin() {
-        return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_PIN);
-    }
-
-    protected static String getTestDataSwBankTransferTan() {
-        return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_TAN);
     }
 
     protected String getTestDataPayoneMerchantId() {
@@ -419,10 +424,6 @@ public abstract class BaseFixture {
         return getConfigurationParameter(TEST_DATA_PAYONE_KEY);
     }
 
-    protected static String getRandomOrderNumber() {
-        return String.valueOf(randomSource.nextInt() + System.nanoTime());
-    }
-
     protected BlockingSphereClient ctpClient() {
         return ctpClient;
     }
@@ -433,6 +434,7 @@ public abstract class BaseFixture {
 
     /**
      * Gets the latest version of the payment via its legible name - a name that exits only in this test context.
+     *
      * @param paymentName legible name of the payment
      * @return the payment fetched from the commercetools client, can be null!
      * @see #fetchPaymentById(String)
@@ -443,6 +445,7 @@ public abstract class BaseFixture {
 
     /**
      * Gets the latest version of the payment via its ID.
+     *
      * @param paymentId unique ID of the payment
      * @return the payment fetched from the commercetools client, can be null!
      * @see #fetchPaymentByLegibleName(String)
@@ -454,6 +457,7 @@ public abstract class BaseFixture {
 
     /**
      * Gets the ID of the type with name (aka key) {@code typeName}.
+     *
      * @param typeName the name (key) of a type
      * @return the type's ID
      * @throws ExecutionException if a checked exception was thrown while loading the value.
@@ -482,13 +486,15 @@ public abstract class BaseFixture {
 
     protected String getIdOfLastTransaction(final Payment payment) {
         Preconditions.checkNotNull(payment,
-                "payment is null. This could be due to a restarting service instance which has not finished cleaning the platform from custom types, payments, orders and carts!");
+                "payment is null. This could be due to a restarting service instance which has not finished cleaning " +
+                        "the platform from custom types, payments, orders and carts!");
         return Iterables.getLast(payment.getTransactions()).getId();
     }
 
     protected String getIdOfFirstTransaction(final Payment payment) {
         return Objects.requireNonNull(payment,
-                "payment is null. This could be due to a restarting service instance which has not finished cleaning the platform from custom types, payments, orders and carts!")
+                "payment is null. This could be due to a restarting service instance which has not finished cleaning " +
+                        "the platform from custom types, payments, orders and carts!")
                 .getTransactions().get(0).getId();
     }
 
@@ -576,7 +582,8 @@ public abstract class BaseFixture {
         return result;
     }
 
-    protected long getTotalNotificationCountOfAction(final Payment payment, final String txaction) throws ExecutionException {
+    protected long getTotalNotificationCountOfAction(final Payment payment, final String txaction) throws
+            ExecutionException {
         final String interactionTypeId = typeIdFromTypeName(CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION);
 
         return payment.getInterfaceInteractions().stream()
@@ -600,9 +607,9 @@ public abstract class BaseFixture {
      * Use this method to match substring in the HTML test specs.
      * <p>
      * <b>Note:</b> <ul>
-     *     <li>according to Concordion limitations, to use string literals directly in the function calls,
-     *         {@code @FullOGNL} annotation for the test spec should be use.</li>
-     *     <li></li>
+     * <li>according to Concordion limitations, to use string literals directly in the function calls,
+     * {@code @FullOGNL} annotation for the test spec should be use.</li>
+     * <li></li>
      * </ul>
      * </p>
      *

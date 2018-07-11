@@ -10,8 +10,8 @@ import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import specs.BaseFixture;
 import util.WebDriverPaydirekt;
-import util.WebDriverSofortueberweisung;
 
 import java.util.Collection;
 import java.util.Map;
@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
+import static specs.BaseFixture.getTestDataPaydirectLogin;
+import static specs.BaseFixture.getTestDataPaydirectPin;
 
 @RunWith(ConcordionRunner.class)
 @FullOGNL // required by containsSubstring() for redirect URL matching
@@ -36,9 +38,8 @@ public class ChargeImmediatelyFixture extends PaydirektFixture {
     public boolean executeRedirectForPayments(final String paymentNames) throws ExecutionException {
         final Collection<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 
-        // run all 3 payments approval in parallel, aka 3 different sessions
-        // and collect successfully approved redirect URLs
-        successUrlForPayment = paymentNamesList.stream().parallel()
+
+        successUrlForPayment = paymentNamesList.stream()
                 .map(this::approvePaymentAsCustomer)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -60,8 +61,8 @@ public class ChargeImmediatelyFixture extends PaydirektFixture {
             return Optional.ofNullable(payment.getCustom())
                     .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
                     .map(redirectCustomField -> webDriver.executePayDirectRedirect(redirectCustomField,
-                            "WorkinProgressTextilhandelsGmbH_SDE-Kaeufer",
-                            "SDE-Kaeufer2$")
+                            getTestDataPaydirectLogin(),
+                            getTestDataPaydirectPin())
                             .replace(baseRedirectUrl, "[...]"))
                     .map(successUrl -> Pair.of(paymentName, successUrl));
 
@@ -69,7 +70,7 @@ public class ChargeImmediatelyFixture extends PaydirektFixture {
             LOG.error("Error redirect for Paydirect Charge Immediate for payment name [{}], id = [{}]",
                     paymentName, payment.getId(), e);
         } finally {
-            webDriver.manage().deleteAllCookies();
+            webDriver.deleteCookies();
             webDriver.quit();
         }
 
