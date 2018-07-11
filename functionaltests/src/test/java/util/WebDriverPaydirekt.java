@@ -29,10 +29,10 @@ public class WebDriverPaydirekt extends CustomWebDriver {
         final WebElement useridInput = findElement(By.id(LOGIN_FORM_USERNAME_FIELD_ID));
 
         useridInput.clear();
-        useridInput.sendKeys(userid);
+        useridInput.sendKeys(userid.trim());
 
         final WebElement pinInput = findElement(By.id(LOGIN_FORM_PASSWORD_FIELD_ID));
-        pinInput.sendKeys(pin);
+        pinInput.sendKeys(pin.trim());
 
         final WebElement submitButton = findSubmitButtonByName(LOGIN_FORM_SUBMIT_BUTTON_NAME);
         submitButton.click();
@@ -48,15 +48,11 @@ public class WebDriverPaydirekt extends CustomWebDriver {
      * @return the URL the browser was redirected to after submitting the {@code password}
      */
     public String executePayDirectRedirect(final String url, final String userid, final String pin) {
-        System.out.println("#################### current " + url);
         getDriver().get(url);
         doLogin(userid, pin);
         WebDriverWait wait = new WebDriverWait(getDriver(), 10);
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath(PAYMENT_SUBMIT_BUTTON_XPATH))).click();
-
         Boolean waitToSuccess = wait.until(ExpectedConditions.urlContains("-Success"));
-
-
         return waitToSuccess ? getUrl() : "";
     }
 

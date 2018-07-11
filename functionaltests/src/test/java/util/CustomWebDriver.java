@@ -60,7 +60,7 @@ public class CustomWebDriver {
 
 
     public void quit() {
-        driver.quit();
+       driver.quit();
     }
 
     public void deleteCookies() {
