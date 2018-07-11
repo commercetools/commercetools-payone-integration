@@ -3,6 +3,8 @@ package util;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
 
@@ -86,10 +88,10 @@ public class WebDriverSofortueberweisung extends CustomWebDriver {
         selectAccount();
 
         provideTan(tan);
-
-
-        return getUrl();
-    }
+        WebDriverWait wait = new WebDriverWait(getDriver(), 10);
+        Boolean waitToSuccess = wait.until(ExpectedConditions.urlContains("-Success"));
+        return waitToSuccess ? getUrl() : "";
+}
 
 
 }

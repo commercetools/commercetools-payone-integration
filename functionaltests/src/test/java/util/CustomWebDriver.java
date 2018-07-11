@@ -9,12 +9,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.util.concurrent.TimeUnit;
 
-/**
- * @author fhaertig
- * @since 14.03.16
- */
 public class CustomWebDriver {
     private ChromeDriver driver;
 
@@ -23,7 +18,7 @@ public class CustomWebDriver {
         System.setProperty("webdriver.chrome.driver", getClass().getClassLoader().getResource
                 ("webdriver/" + currentDriver).getPath());
         driver = new ChromeDriver(getChromeOptions());
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        //(driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
     }
 
     private static ChromeOptions getChromeOptions() {
@@ -60,7 +55,7 @@ public class CustomWebDriver {
 
 
     public void quit() {
-       driver.quit();
+        driver.quit();
     }
 
     public void deleteCookies() {
