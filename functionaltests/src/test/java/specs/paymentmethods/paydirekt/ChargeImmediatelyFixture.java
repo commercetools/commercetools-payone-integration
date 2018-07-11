@@ -10,7 +10,6 @@ import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import specs.BaseFixture;
 import util.WebDriverPaydirekt;
 
 import java.util.Collection;
@@ -22,18 +21,15 @@ import java.util.stream.Collectors;
 import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
-import static specs.BaseFixture.getTestDataPaydirectLogin;
-import static specs.BaseFixture.getTestDataPaydirectPin;
 
 @RunWith(ConcordionRunner.class)
 @FullOGNL // required by containsSubstring() for redirect URL matching
 public class ChargeImmediatelyFixture extends PaydirektFixture {
 
 
-    private Map<String, String> successUrlForPayment;
     private static final String baseRedirectUrl = "https://www.example.com/paydirekt_charge_immediately/";
-
     private static Logger LOG = LoggerFactory.getLogger(specs.paymentmethods.paydirekt.ChargeImmediatelyFixture.class);
+    private Map<String, String> successUrlForPayment;
 
     public boolean executeRedirectForPayments(final String paymentNames) throws ExecutionException {
         final Collection<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
@@ -45,7 +41,7 @@ public class ChargeImmediatelyFixture extends PaydirektFixture {
                 .map(Optional::get)
                 .collect(toMap(Pair::getKey, Pair::getValue));
 
-       return successUrlForPayment.size() == paymentNamesList.size();
+        return successUrlForPayment.size() == paymentNamesList.size();
     }
 
     /**
@@ -95,7 +91,8 @@ public class ChargeImmediatelyFixture extends PaydirektFixture {
     }
 
     @Override
-    public boolean receivedNextNotificationOfActionFor(String paymentNames, String txaction, String prevTxaction) throws Exception {
+    public boolean receivedNextNotificationOfActionFor(String paymentNames, String txaction, String prevTxaction)
+            throws Exception {
         // we keep this overriding just to easily see which test methods are run in this fixture
         return super.receivedNextNotificationOfActionFor(paymentNames, txaction, prevTxaction);
     }
