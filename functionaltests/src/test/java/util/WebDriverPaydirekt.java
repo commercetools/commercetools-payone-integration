@@ -12,9 +12,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  */
 public class WebDriverPaydirekt extends CustomWebDriver {
 
-    public static final String SU_URL_PAY_1_PATTERN = "pay1";
-    private static final int DEFAULT_TIMEOUT = 20;
-    private static final String LOGIN_FORM_NAME = "loginForm";
     private static String LOGIN_FORM_USERNAME_FIELD_ID = "username";
     private static String LOGIN_FORM_PASSWORD_FIELD_ID = "password";
     private static String LOGIN_FORM_SUBMIT_BUTTON_NAME = "loginBtn";
