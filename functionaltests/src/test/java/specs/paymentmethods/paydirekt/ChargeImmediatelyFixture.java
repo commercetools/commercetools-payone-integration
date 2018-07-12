@@ -24,7 +24,7 @@ import static java.util.stream.StreamSupport.stream;
 
 @RunWith(ConcordionRunner.class)
 @FullOGNL // required by containsSubstring() for redirect URL matching
-public class ChargeImmediatelyFixture extends PaydirektFixture {
+public class ChargeImmediatelyFixture extends PaydiretFixture {
 
 
     private static final String baseRedirectUrl = "https://www.example.com/paydirekt_charge_immediately/";
