@@ -397,6 +397,14 @@ public abstract class BaseFixture {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_BIC);
     }
 
+    public static String getTestDataPaydirectLogin() {
+        return getConfigurationParameter(TEST_DATA_PAYDIRECT_LOGIN);
+    }
+
+    public static String getTestDataPaydirectPin() {
+        return getConfigurationParameter(TEST_DATA_PAYDIRECT_PIN);
+    }
+
     protected static String getTestDataSwBankTransferPin() {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_PIN);
     }
