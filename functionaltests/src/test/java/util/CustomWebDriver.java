@@ -13,7 +13,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class CustomWebDriver {
     private ChromeDriver driver;
 
-    protected CustomWebDriver() {
+    CustomWebDriver() {
         String currentDriver = SystemUtils.IS_OS_MAC ? "chromedriver_ios_2.4" : "chromedriver_unix_2.4";
         System.setProperty("webdriver.chrome.driver", getClass().getClassLoader().getResource
                 ("webdriver/" + currentDriver).getPath());
@@ -40,19 +40,16 @@ public class CustomWebDriver {
      * @throws RuntimeException if submit button can't be found or multiply buttons exist on the page
      */
     protected WebElement findSubmitButtonByName(String name) {
-
         WebElement elements = findElement(By.name(name));
         if (elements == null) {
             throw new RuntimeException("Submit button not found on the page");
         }
-
         return elements;
     }
 
     public ChromeDriver getDriver() {
         return driver;
     }
-
 
     public void quit() {
         driver.quit();
