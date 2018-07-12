@@ -18,7 +18,7 @@ public class CustomWebDriver {
         System.setProperty("webdriver.chrome.driver", getClass().getClassLoader().getResource
                 ("webdriver/" + currentDriver).getPath());
         driver = new ChromeDriver(getChromeOptions());
-        //(driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        //driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
     }
 
     private static ChromeOptions getChromeOptions() {
