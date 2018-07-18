@@ -1,15 +1,13 @@
 package com.commercetools.util;
 
-import org.apache.http.Consts;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -17,8 +15,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import javax.annotation.Nonnull;
@@ -60,7 +60,7 @@ import java.util.Objects;
  */
 public final class HttpRequestUtil {
 
-    static final int REQUEST_TIMEOUT = 30000;
+    static final int REQUEST_TIMEOUT = 10000;
 
     static final int RETRY_TIMES = 5;
 
@@ -90,6 +90,31 @@ public final class HttpRequestUtil {
                 // Thus the implementation is empty.
             };
 
+
+    private static final BasicResponseHandler BASIC_RESPONSE_HANDLER = new BasicResponseHandler();
+
+    private static ConnectionKeepAliveStrategy keepAliveStrategy = new ConnectionKeepAliveStrategy() {
+
+        public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
+            // Honor 'keep-alive' header
+            HeaderElementIterator it = new BasicHeaderElementIterator(
+                    response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+            while (it.hasNext()) {
+                HeaderElement he = it.nextElement();
+                String param = he.getName();
+                String value = he.getValue();
+                if (value != null && param.equalsIgnoreCase("timeout")) {
+                    try {
+                        return Long.parseLong(value) * 1000;
+                    } catch (NumberFormatException ignore) {
+                    }
+                }
+            }
+            // Keep alive for 5 seconds only
+            return 5000;
+        }
+ };
+
     private static final CloseableHttpClient CLIENT = HttpClientBuilder.create()
             .setDefaultRequestConfig(RequestConfig.custom()
                     .setConnectionRequestTimeout(REQUEST_TIMEOUT)
@@ -97,10 +122,12 @@ public final class HttpRequestUtil {
                     .setConnectTimeout(REQUEST_TIMEOUT)
                     .build())
             .setRetryHandler(HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT)
+            .setKeepAliveStrategy(keepAliveStrategy)
             .setConnectionManager(buildDefaultConnectionManager())
             .build();
 
-    private static final BasicResponseHandler BASIC_RESPONSE_HANDLER = new BasicResponseHandler();
+    private HttpRequestUtil() {
+    }
 
     private static PoolingHttpClientConnectionManager buildDefaultConnectionManager() {
         final PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
@@ -141,7 +168,8 @@ public final class HttpRequestUtil {
      * @return response from the {@code url}
      * @throws IOException in case of a problem or the connection was aborted
      */
-    public static HttpResponse executePostRequest(@Nonnull String url, @Nullable Iterable<? extends NameValuePair> parameters)
+    public static HttpResponse executePostRequest(@Nonnull String url, @Nullable Iterable<? extends NameValuePair>
+            parameters)
             throws IOException {
         final HttpPost request = new HttpPost(url);
         if (parameters != null) {
@@ -160,7 +188,8 @@ public final class HttpRequestUtil {
      * @return response string from the request
      * @throws IOException in case of a problem or the connection was aborted
      */
-    public static String executePostRequestToString(@Nonnull String url, @Nullable Iterable<? extends NameValuePair> parameters)
+    public static String executePostRequestToString(@Nonnull String url, @Nullable Iterable<? extends NameValuePair>
+            parameters)
             throws IOException {
         return responseToString(executePostRequest(url, parameters));
     }
@@ -180,7 +209,8 @@ public final class HttpRequestUtil {
      * Short {@link BasicNameValuePair} factory alias.
      *
      * @param name  request argument name
-     * @param value request argument value. If value is <b>null</b> - {@link BasicNameValuePair#value} set to <b>null</b>,
+     * @param value request argument value. If value is <b>null</b> - {@link BasicNameValuePair#value} set to
+     *              <b>null</b>,
      *              otherwise {@link Object#toString()} is applied.
      * @return new instance of {@link BasicNameValuePair} with {@code name} and {@code value}
      */
@@ -195,11 +225,13 @@ public final class HttpRequestUtil {
      * The connection will be closed even if read exception occurs.
      *
      * @param request GET/POST/other request to execute, read and close
-     * @return read and closed {@link CloseableHttpResponse} instance from {@link CloseableHttpClient#execute(HttpUriRequest)}
+     * @return read and closed {@link CloseableHttpResponse} instance from
+     * {@link CloseableHttpClient#execute(HttpUriRequest)}
      * where {@link HttpResponse#getEntity()} is set to read string value.
      * @throws IOException if reading failed. Note, even in case of exception the {@code response} will be closed.
      */
-    private static CloseableHttpResponse executeReadAndCloseRequest(@Nonnull final HttpUriRequest request) throws IOException {
+    private static CloseableHttpResponse executeReadAndCloseRequest(@Nonnull final HttpUriRequest request) throws
+            IOException {
         final CloseableHttpResponse response = CLIENT.execute(request);
         try {
             final HttpEntity entity = response.getEntity();
@@ -214,8 +246,5 @@ public final class HttpRequestUtil {
         }
 
         return response;
-    }
-
-    private HttpRequestUtil() {
     }
 }
