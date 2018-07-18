@@ -60,7 +60,7 @@ import java.util.Objects;
  */
 public final class HttpRequestUtil {
 
-    static final int REQUEST_TIMEOUT = 10000;
+    static final int REQUEST_TIMEOUT = 30000;
 
     static final int RETRY_TIMES = 3;
 
