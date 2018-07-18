@@ -62,7 +62,7 @@ public final class HttpRequestUtil {
 
     static final int REQUEST_TIMEOUT = 30000;
 
-    static final int RETRY_TIMES = 3;
+    static final int RETRY_TIMES = 5;
 
     static final int CONNECTION_MAX_TOTAL = 200;
 
