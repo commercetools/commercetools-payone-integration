@@ -132,7 +132,7 @@ public final class HttpRequestUtil {
     private static PoolingHttpClientConnectionManager buildDefaultConnectionManager() {
         final PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
         connectionManager.setMaxTotal(CONNECTION_MAX_TOTAL);
-        connectionManager.setValidateAfterInactivity(0);
+        connectionManager.setValidateAfterInactivity(100);
         connectionManager.setDefaultMaxPerRoute(CONNECTION_MAX_PER_ROUTE);
 
         return connectionManager;
