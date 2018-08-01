@@ -32,22 +32,7 @@ public class CustomWebDriver {
         return wait.until(ExpectedConditions.elementToBeClickable(condition));
     }
 
-    /**
-     * Search for the single submit button on the page by className pattern from
-     * {@link util.constant.WebDriverCommon#CLASS_NAME_PRIMARY}
-     *
-     * @return found button.
-     * @throws RuntimeException if submit button can't be found or multiply buttons exist on the page
-     */
-    protected WebElement findSubmitButtonByName(String name) {
-        WebElement elements = findElement(By.name(name));
-        if (elements == null) {
-            throw new RuntimeException("Submit button not found on the page");
-        }
-        return elements;
-    }
-
-    public ChromeDriver getDriver() {
+  public ChromeDriver getDriver() {
         return driver;
     }
 

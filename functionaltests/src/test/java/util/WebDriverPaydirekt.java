@@ -31,7 +31,11 @@ public class WebDriverPaydirekt extends CustomWebDriver {
         final WebElement pinInput = findElement(By.id(LOGIN_FORM_PASSWORD_FIELD_ID));
         pinInput.sendKeys(pin.trim());
 
-        final WebElement submitButton = findSubmitButtonByName(LOGIN_FORM_SUBMIT_BUTTON_NAME);
+        final WebElement submitButton = findElement(By.name(LOGIN_FORM_SUBMIT_BUTTON_NAME));
+        if (submitButton == null) {
+            throw new RuntimeException(String.format("Submit button with name %S not found on the page",
+                    LOGIN_FORM_SUBMIT_BUTTON_NAME));
+        }
         submitButton.click();
     }
 
