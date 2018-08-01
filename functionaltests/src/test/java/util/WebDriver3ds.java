@@ -17,7 +17,10 @@ import static util.constant.WebDriverCommon.CSS_SELECTOR_SEND;
  */
 public class WebDriver3ds extends CustomWebDriver {
 
-     public WebDriver3ds() {
+
+    public static final String SUCCESS_PATTERN = "-Success";
+
+    public WebDriver3ds() {
         super();
     }
 
@@ -40,7 +43,7 @@ public class WebDriver3ds extends CustomWebDriver {
         // Wait for redirect to complete
         WebDriverWait wait = new WebDriverWait(getDriver(), 10);
         wait.until(not(ExpectedConditions.urlContains(URL_3DS_PATTERN)));
-        Boolean waitToSuccess = wait.until(ExpectedConditions.urlContains("-Success"));
+        Boolean waitToSuccess = wait.until(ExpectedConditions.urlContains(SUCCESS_PATTERN));
         return waitToSuccess ? getUrl() : "";
     }
 
