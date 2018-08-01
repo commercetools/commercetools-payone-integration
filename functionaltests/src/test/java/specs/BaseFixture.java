@@ -99,8 +99,8 @@ public abstract class BaseFixture {
     protected static final String TEST_DATA_SW_BANK_TRANSFER_BIC = "TEST_DATA_SW_BANK_TRANSFER_BIC";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_PIN = "TEST_DATA_SW_BANK_TRANSFER_PIN";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_TAN = "TEST_DATA_SW_BANK_TRANSFER_TAN";
-    protected static final String TEST_DATA_PAYDIRECT_LOGIN = "TEST_DATA_PAYDIRECT_LOGIN";
-    protected static final String TEST_DATA_PAYDIRECT_PIN = "TEST_DATA_PAYDIRECT_PIN";
+    protected static final String TEST_DATA_PAYDIREKT_LOGIN = "TEST_DATA_PAYDIRECT_LOGIN";
+    protected static final String TEST_DATA_PAYDIREKT_PIN = "TEST_DATA_PAYDIRECT_PIN";
 
     protected static final String TEST_DATA_PAYONE_MERCHANT_ID = "TEST_DATA_PAYONE_MERCHANT_ID";
     protected static final String TEST_DATA_PAYONE_SUBACC_ID = "TEST_DATA_PAYONE_SUBACC_ID";
@@ -397,13 +397,6 @@ public abstract class BaseFixture {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_BIC);
     }
 
-    public static String getTestDataPaydirectLogin() {
-        return getConfigurationParameter(TEST_DATA_PAYDIRECT_LOGIN);
-    }
-
-    public static String getTestDataPaydirectPin() {
-        return getConfigurationParameter(TEST_DATA_PAYDIRECT_PIN);
-    }
 
     protected static String getTestDataSwBankTransferPin() {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_PIN);

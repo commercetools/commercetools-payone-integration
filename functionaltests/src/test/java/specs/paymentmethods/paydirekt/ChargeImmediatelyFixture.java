@@ -57,8 +57,8 @@ public class ChargeImmediatelyFixture extends PaydirektFixture {
             return Optional.ofNullable(payment.getCustom())
                     .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
                     .map(redirectCustomField -> webDriver.executePayDirectRedirect(redirectCustomField,
-                            getTestDataPaydirectLogin(),
-                            getTestDataPaydirectPin())
+                            getTestDataPaydirektLogin(),
+                            getTestDataPaydirektPin())
                             .replace(baseRedirectUrl, "[...]"))
                     .map(successUrl -> Pair.of(paymentName, successUrl));
 
@@ -97,4 +97,11 @@ public class ChargeImmediatelyFixture extends PaydirektFixture {
         return super.receivedNextNotificationOfActionFor(paymentNames, txaction, prevTxaction);
     }
 
+    public static String getTestDataPaydirektLogin() {
+        return getConfigurationParameter(TEST_DATA_PAYDIREKT_LOGIN);
+    }
+
+    public static String getTestDataPaydirektPin() {
+        return getConfigurationParameter(TEST_DATA_PAYDIREKT_PIN);
+    }
 }
