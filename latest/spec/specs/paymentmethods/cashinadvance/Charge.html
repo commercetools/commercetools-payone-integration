@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?><html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+<head><style>* {
+  font-family: Arial;
+}
+body {
+  padding: 32px;  
+}
+pre {
+  padding: 6px 28px 6px 28px;
+  background-color: #E8EEF7;
+}
+pre, pre *, code, code *, kbd {
+  font-family: Courier New, Courier;
+  font-size: 10pt;
+}
+h1, h1 * {
+  font-size: 24pt;	
+}
+p, td, th, li, .breadcrumbs {
+  font-size: 10pt;
+}
+p, li {
+  line-height: 140%;
+  max-width: 720px;
+}
+table {
+  border-collapse: collapse;
+  empty-cells: show;
+  margin: 8px 0px 8px 0px;
+}
+th, td {
+  border: 1px solid black;
+  padding: 3px;
+}
+td {
+  background-color: white;
+  vertical-align: top;
+}
+th {
+  background-color: #C3D9FF;
+}
+li {
+  margin-top: 6px;
+  margin-bottom: 6px; 
+}
+
+.example {
+  padding: 6px 16px 6px 16px;
+  border: 1px solid #C3D9FF;
+  margin: 6px 0px 28px 0px;
+  background-color: #F5F9FD;
+}
+.example h3 {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  font-size: 12pt;
+}
+
+p.success {
+  padding: 2px;
+}
+.success, .success * {
+  background-color: #afa !important;
+}
+.success pre {
+  background-color: #bbffbb;
+}
+.failure, .failure * {
+  background-color: #ffb0b0;
+  padding: 1px;
+}
+.failure .expected {
+  text-decoration: line-through;
+  color: #bb5050;
+}
+.ignored, .ignored * {
+  background-color: #f0f0f0 !important;	
+}
+
+ins {
+  text-decoration: none;	
+}
+
+.exceptionMessage {
+  background-color: #fdd;
+  font-family: Courier New, Courier, Monospace;
+  font-size: 10pt;
+  display: block;
+  font-weight: normal;
+  padding: 4px;
+  text-decoration: none !important;
+}
+.stackTrace, .stackTrace * {
+  font-weight: normal;
+}
+.stackTrace {
+  display: none;
+  padding: 1px 4px 4px 4px;
+  background-color: #fdd;
+  border-top: 1px dotted black;
+}
+.stackTraceExceptionMessage {
+  display: block;
+  font-family: Courier New, Courier, Monospace;
+  font-size: 8pt;
+  white-space: wrap;
+  padding: 1px 0px 1px 0px;
+}
+.stackTraceEntry {
+  white-space: nowrap;
+  font-family: Courier New, Courier, Monospace;
+  display: block;
+  font-size: 8pt;
+  padding: 1px 0px 1px 32px;
+}
+.stackTraceButton {
+  font-size: 8pt;
+  margin: 2px 8px 2px 0px;
+  font-weight: normal;
+  font-family: Arial;
+}
+
+.special {
+  font-style: italic;
+}
+.missing, .missing * {
+  background-color: #ff9999;
+  color:#bb5050;
+  text-decoration: line-through;
+}
+.surplus, .surplus * {
+  background-color: #ff9999;
+}
+.footer {
+  text-align: right;
+  margin-top: 40px;
+  font-size: 8pt;
+  width: 100%;
+  color: #999;
+}
+.footer .testTime {
+  padding: 2px 10px 0px 0px;
+}
+
+.idea {
+  font-size: 9pt;
+  color: #888;
+  font-style: italic;	
+}
+.tight li {
+  margin-top: 1px;
+  margin-bottom: 1px; 
+}
+.commentary {
+  float: right;
+  width: 200px;
+  background-color: #ffffd0;
+  padding:8px;
+  border: 3px solid #eeeeb0;	 
+  margin: 10px 0px 10px 10px;	 
+}
+.commentary, .commentary * {
+  font-size: 8pt;
+}
+</style><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta charset="UTF-8" />
+    <link href="../../../concordion.css" rel="stylesheet" type="text/css" />
+    <title>Cash in Advance creating the Pre-Authorization</title>
+<link type="text/css" rel="stylesheet" href="../../../inputstyle.css" /></head>
+<body><span class="breadcrumbs"><a href="../../Specs.html">commercetools - PAYONE - Integration Service</a> &gt; <a href="../Paymentmethods.html">Payment Methods</a> &gt; <a href="Cashinadvance.html">Payments via Cash in advance</a> &gt;</span>
+<h1>Cash in Advance creating the Pre Authorization</h1>
+<p>
+    The integration service allows to initiate the payment. The wording of <em>PayOne</em> differ to <em>Commercetools</em>.
+    Due to the delay till the payment will not be able to charge immediately.
+</p>
+<p>
+    It will do so by sending an <em c:set="#requestType" class="inputvalue">pre authorization</em> request to the PAYONE platform.
+    <br />
+    It will store information about such a request as an interface interaction of type
+    <em>PAYONE_INTERACTION_REQUEST</em>.
+</p>
+<h3>Common Setup</h3>
+<ul>
+    <li>payment.paymentMethodInfo.method: <span c:set="#paymentMethod" class="inputvalue">BANK_TRANSFER-ADVANCE</span></li>
+    <li>payment.transactions[0].type: <span c:set="#transactionType" class="inputvalue">CHARGE</span></li>
+</ul>
+<div class="example">
+    <h3>Charge</h3>
+    <p>
+        Given the following payments for a bank account
+        <em>that </em> and <em>does <b>not</b> support charges for currencies other than EUR</em>:
+    </p>
+    <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#centAmount">Cent Amount</th>
+            <th c:set="#currencyCode">Currency Code</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">Payment 1</td>
+            <td class="inputvalue">406</td>
+            <td class="inputvalue">EUR</td>
+            <td>29386f91-f584-450e-89b5-bf1611ad0bd0</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Payment 2</td>
+            <td class="inputvalue">91341</td>
+            <td class="inputvalue">USD</td>
+            <td>7ab80f06-994e-45ce-a7d8-a63cc9276ab4</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Payment 3</td>
+            <td class="inputvalue">8231</td>
+            <td class="inputvalue">EUR</td>
+            <td>ef67fe21-ae55-4b6e-b869-787eb506c2d1</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Payment 4</td>
+            <td class="inputvalue">123411</td>
+            <td class="inputvalue">EUR</td>
+            <td>b8b2e3d7-68b0-46ca-9740-c7e16f2c4c73</td>
+        </tr>
+    </table>
+    <p>
+        When I request the integration service to handle them I will get the following results:
+    </p>
+    <table c:execute="#result = handlePayment(#paymentName, #requestType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#result.statusCode">Response <br />Status Code</th>
+            <th c:assertEquals="#result.interactionCount">total # of <br /><em>authorization</em> requests sent</th>
+            <th c:assertEquals="#result.transactionState">Transaction State </th>
+        </tr>
+        <tr>
+            <td class="inputvalue inputvalue">Payment 1</td>
+            <td class="success success">200</td>
+            <td class="success success">0</td>
+            <td class="success success">Pending</td>
+        </tr>
+        <tr>
+            <td class="inputvalue inputvalue">Payment 2</td>
+            <td class="success success">200</td>
+            <td class="success success">0</td>
+            <td class="success success">Failure</td>
+        </tr>
+        <tr>
+            <td class="inputvalue inputvalue">Payment 3</td>
+            <td class="success success">200</td>
+            <td class="success success">0</td>
+            <td class="success success">Pending</td>
+        </tr>
+        <tr>
+            <td class="inputvalue inputvalue">Payment 4</td>
+            <td class="success success">200</td>
+            <td class="success success">0</td>
+            <td class="success success">Pending</td>
+        </tr>
+    </table>
+</div>
+<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 14026 ms on 01-Aug-2018 at 09:57:59 UTC</div></div></body>
+</html>
