@@ -35,7 +35,7 @@ public class ChargeImmediatelyFixture extends PaydirektFixture {
         final Collection<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 
 
-        successUrlForPayment = paymentNamesList.stream()
+        successUrlForPayment = paymentNamesList.stream().parallel()
                 .map(this::approvePaymentAsCustomer)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
