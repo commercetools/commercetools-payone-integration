@@ -14,7 +14,7 @@ public class CustomWebDriver {
     private ChromeDriver driver;
 
     CustomWebDriver() {
-        String currentDriver = SystemUtils.IS_OS_MAC ? "chromedriver_ios_2.4" : "chromedriver_unix_2.4";
+        String currentDriver = SystemUtils.IS_OS_MAC ? "chromedriver_ios_2.40" : "chromedriver_unix_2.40";
         System.setProperty("webdriver.chrome.driver", getClass().getClassLoader().getResource
                 ("webdriver/" + currentDriver).getPath());
         driver = new ChromeDriver(getChromeOptions());
