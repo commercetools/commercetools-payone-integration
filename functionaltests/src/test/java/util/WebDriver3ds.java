@@ -47,7 +47,5 @@ public class WebDriver3ds extends CustomWebDriver {
         return waitToSuccess ? getUrl() : "";
     }
 
-    public void quit() {
-        super.quit();
-    }
+
 }

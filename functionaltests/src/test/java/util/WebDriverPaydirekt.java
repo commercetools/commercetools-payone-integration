@@ -57,7 +57,4 @@ public class WebDriverPaydirekt extends CustomWebDriver {
         return waitToSuccess ? getUrl() : "";
     }
 
-    public void quit() {
-        super.quit();
-    }
 }
