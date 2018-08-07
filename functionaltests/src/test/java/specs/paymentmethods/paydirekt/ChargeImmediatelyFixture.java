@@ -26,7 +26,8 @@ import static java.util.stream.StreamSupport.stream;
 @FullOGNL // required by containsSubstring() for redirect URL matching
 public class ChargeImmediatelyFixture extends PaydirektFixture {
 
-
+    protected static final String TEST_DATA_PAYDIREKT_LOGIN = "TEST_DATA_PAYDIRECT_LOGIN";
+    protected static final String TEST_DATA_PAYDIREKT_PIN = "TEST_DATA_PAYDIRECT_PIN";
     private static final String baseRedirectUrl = "https://www.example.com/paydirekt_charge_immediately/";
     private static Logger LOG = LoggerFactory.getLogger(specs.paymentmethods.paydirekt.ChargeImmediatelyFixture.class);
     private Map<String, String> successUrlForPayment;
