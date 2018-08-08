@@ -5,6 +5,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author fhaertig
@@ -16,13 +18,14 @@ public class WebDriverPaydirekt extends CustomWebDriver {
     private static String LOGIN_FORM_PASSWORD_FIELD_ID = "password";
     private static String LOGIN_FORM_SUBMIT_BUTTON_NAME = "loginBtn";
     private static String PAYMENT_SUBMIT_BUTTON_XPATH = "//BUTTON[@type='submit'][text()=' Jetzt bezahlen ']";
-
+    private static Logger LOG = LoggerFactory.getLogger(WebDriverPaydirekt.class);
 
     public WebDriverPaydirekt() {
         super();
     }
 
-    private void doLogin(String userid, String pin) {
+    private boolean doLogin(String userid, String pin) {
+        boolean loggedIn = false;
         final WebElement useridInput = findElement(By.id(LOGIN_FORM_USERNAME_FIELD_ID));
 
         useridInput.clear();
@@ -33,10 +36,14 @@ public class WebDriverPaydirekt extends CustomWebDriver {
 
         final WebElement submitButton = findElement(By.name(LOGIN_FORM_SUBMIT_BUTTON_NAME));
         if (submitButton == null) {
-            throw new RuntimeException(String.format("Submit button with name %S not found on the page",
+            LOG.error(String.format("Submit button with name %S not found on the page",
                     LOGIN_FORM_SUBMIT_BUTTON_NAME));
+        } else {
+            loggedIn = true;
+            submitButton.click();
+
         }
-        submitButton.click();
+        return loggedIn;
     }
 
 
@@ -49,12 +56,14 @@ public class WebDriverPaydirekt extends CustomWebDriver {
      * @return the URL the browser was redirected to after submitting the {@code password}
      */
     public String executePayDirectRedirect(final String url, final String userid, final String pin) {
+        boolean success = false;
         getDriver().get(url);
-        doLogin(userid, pin);
-        WebDriverWait wait = new WebDriverWait(getDriver(), 10);
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(PAYMENT_SUBMIT_BUTTON_XPATH))).click();
-        Boolean waitToSuccess = wait.until(ExpectedConditions.urlContains("-Success"));
-        return waitToSuccess ? getUrl() : "";
+        if (doLogin(userid, pin)) {
+            WebDriverWait wait = new WebDriverWait(getDriver(), 10);
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(PAYMENT_SUBMIT_BUTTON_XPATH))).click();
+            success = wait.until(ExpectedConditions.urlContains("-Success"));
+        }
+        return success ? getUrl() : "";
     }
 
 }
