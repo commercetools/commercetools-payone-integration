@@ -67,7 +67,7 @@
                 </tr>
                 <tr>
                     <td>Payment 4</td>
-                    <td>111283</td>
+                    <td>11283</td>
                     <td>EUR</td>
                     <td></td>
                     <td></td>
@@ -211,41 +211,34 @@
             <table c:execute="#result = fetchPaymentDetails(#paymentName)">
                 <tr>
                     <th c:set="#paymentName">Payment Name</th>
-                    <th c:assertEquals="#result.transactionState">Transaction State</th>
-                    <th c:assertEquals="#result.appointedNotificationCount">total # of <br/><em>appointed/completed</em> notifications</th>
-                    <th c:assertEquals="#result.paidNotificationCount">total # of <br/><em>paid/completed</em> notifications</th>
-                    <th c:assertEquals="#result.successUrl">url called after successful verification</th>
+                    <th c:assertEquals="#result.transactionState">Transaction State </th>
+                    <th c:assertEquals="containsSubstring(#result.responseRedirectUrlFull, 'https://sandbox.paydirekt.de/checkout/#/checkout/')">
+                        redirect URL contains 'https://sandbox.paydirekt.de/checkout/#/checkout/'</th>
+                    <th c:echo="#result.responseRedirectUrlFull">full redirect URL (for information only)</th>
                     <th c:echo="#result.version">Version (for information only)</th>
                 </tr>
                 <tr>
                     <td>Payment 1</td>
                     <td>Success</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>[...]Payment-1-Success</td>
+                    <td>true</td>
+                    <td></td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Payment 3</td>
                     <td>Success</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>[...]Payment-3-Success</td>
+                    <td>true</td>
+                    <td></td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Payment 4</td>
                     <td>Success</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>[...]Payment-4-Success</td>
+                    <td>true</td>
+                    <td></td>
                     <td></td>
                 </tr>
-                <p>
-                    See <a href="https://github.com/commercetools/commercetools-payone-integration/issues/68">issue #68</a>.
-                </p>
             </table>
-
         </div>
     </body>
 </html>

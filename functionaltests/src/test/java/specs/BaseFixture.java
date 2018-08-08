@@ -290,7 +290,7 @@ public abstract class BaseFixture {
                 LOG.info("Unconfirmed pseudocardpan fetched successfully");
             }
         }
-      return PSEUDO_CARD_PAN;
+        return PSEUDO_CARD_PAN;
     }
 
     /**
@@ -365,7 +365,7 @@ public abstract class BaseFixture {
         Matcher m = p.matcher(cardPanResponse);
 
         if (!m.matches()) {
-          throw new RuntimeException(format("Unexpected pseudocardpan response: %s", cardPanResponse));
+            throw new RuntimeException(format("Unexpected pseudocardpan response: %s", cardPanResponse));
         }
 
         return m.group(1);
@@ -394,6 +394,7 @@ public abstract class BaseFixture {
     protected static String getTestDataSwBankTransferBic() {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_BIC);
     }
+
 
     protected static String getTestDataSwBankTransferPin() {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_PIN);

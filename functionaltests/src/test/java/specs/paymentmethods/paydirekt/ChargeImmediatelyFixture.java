@@ -10,7 +10,7 @@ import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.WebDriverSofortueberweisung;
+import util.WebDriverPaydirekt;
 
 import java.util.Collection;
 import java.util.Map;
@@ -26,24 +26,23 @@ import static java.util.stream.StreamSupport.stream;
 @FullOGNL // required by containsSubstring() for redirect URL matching
 public class ChargeImmediatelyFixture extends PaydirektFixture {
 
-
-    private Map<String, String> successUrlForPayment;
+    protected static final String TEST_DATA_PAYDIREKT_LOGIN = "TEST_DATA_PAYDIRECT_LOGIN";
+    protected static final String TEST_DATA_PAYDIREKT_PIN = "TEST_DATA_PAYDIRECT_PIN";
     private static final String baseRedirectUrl = "https://www.example.com/paydirekt_charge_immediately/";
-
     private static Logger LOG = LoggerFactory.getLogger(specs.paymentmethods.paydirekt.ChargeImmediatelyFixture.class);
+    private Map<String, String> successUrlForPayment;
 
     public boolean executeRedirectForPayments(final String paymentNames) throws ExecutionException {
         final Collection<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 
-        // run all 3 payments approval in parallel, aka 3 different sessions
-        // and collect successfully approved redirect URLs
+
         successUrlForPayment = paymentNamesList.stream().parallel()
                 .map(this::approvePaymentAsCustomer)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(toMap(Pair::getKey, Pair::getValue));
-        return true;
-       //return successUrlForPayment.size() == paymentNamesList.size();
+
+        return successUrlForPayment.size() == paymentNamesList.size();
     }
 
     /**
@@ -54,22 +53,21 @@ public class ChargeImmediatelyFixture extends PaydirektFixture {
      */
     private Optional<Pair<String, String>> approvePaymentAsCustomer(String paymentName) {
         final Payment payment = fetchPaymentByLegibleName(paymentName);
-        final WebDriverSofortueberweisung webDriver = new WebDriverSofortueberweisung();
+        final WebDriverPaydirekt webDriver = new WebDriverPaydirekt();
         try {
             return Optional.ofNullable(payment.getCustom())
                     .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
-                    .map(redirectCustomField -> webDriver.executeSofortueberweisungRedirect(redirectCustomField,
-                            getTestDataSwBankTransferIban(),
-                            getTestDataSwBankTransferPin(),
-                            getTestDataSwBankTransferTan())
+                    .map(redirectCustomField -> webDriver.executePayDirectRedirect(redirectCustomField,
+                            getTestDataPaydirektLogin(),
+                            getTestDataPaydirektPin())
                             .replace(baseRedirectUrl, "[...]"))
                     .map(successUrl -> Pair.of(paymentName, successUrl));
 
         } catch (Exception e) {
-            LOG.error("Error redirect for Sofortüberweisung Charge Immediate for payment name [{}], id = [{}]",
+            LOG.error("Error redirect for Paydirect Charge Immediate for payment name [{}], id = [{}]",
                     paymentName, payment.getId(), e);
         } finally {
-            webDriver.manage().deleteAllCookies();
+            webDriver.deleteCookies();
             webDriver.quit();
         }
 
@@ -94,9 +92,17 @@ public class ChargeImmediatelyFixture extends PaydirektFixture {
     }
 
     @Override
-    public boolean receivedNextNotificationOfActionFor(String paymentNames, String txaction, String prevTxaction) throws Exception {
+    public boolean receivedNextNotificationOfActionFor(String paymentNames, String txaction, String prevTxaction)
+            throws Exception {
         // we keep this overriding just to easily see which test methods are run in this fixture
         return super.receivedNextNotificationOfActionFor(paymentNames, txaction, prevTxaction);
     }
 
+    public static String getTestDataPaydirektLogin() {
+        return getConfigurationParameter(TEST_DATA_PAYDIREKT_LOGIN);
+    }
+
+    public static String getTestDataPaydirektPin() {
+        return getConfigurationParameter(TEST_DATA_PAYDIREKT_PIN);
+    }
 }
