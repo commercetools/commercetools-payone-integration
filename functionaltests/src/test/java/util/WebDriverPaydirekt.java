@@ -8,6 +8,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+
 /**
  * @author fhaertig
  * @since 14.03.16
@@ -17,7 +19,9 @@ public class WebDriverPaydirekt extends CustomWebDriver {
     private static String LOGIN_FORM_USERNAME_FIELD_ID = "username";
     private static String LOGIN_FORM_PASSWORD_FIELD_ID = "password";
     private static String LOGIN_FORM_SUBMIT_BUTTON_NAME = "loginBtn";
-    private static String PAYMENT_SUBMIT_BUTTON_XPATH = "//BUTTON[@type='submit'][text()=' Jetzt bezahlen ']";
+    private static String CONFIRM_FORM_NAME = "firstFactorAuthForm";
+    private static String CONFIRM_BUTTON_CLASSNAME = "button--full";
+    private static String URL_SUCCESS_PATTERN = "-Success";
     private static Logger LOG = LoggerFactory.getLogger(WebDriverPaydirekt.class);
 
     public WebDriverPaydirekt() {
@@ -60,10 +64,18 @@ public class WebDriverPaydirekt extends CustomWebDriver {
         getDriver().get(url);
         if (doLogin(userid, pin)) {
             WebDriverWait wait = new WebDriverWait(getDriver(), 10);
-            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(PAYMENT_SUBMIT_BUTTON_XPATH))).click();
-            success = wait.until(ExpectedConditions.urlContains("-Success"));
+            final WebElement formToSubmit = findElement(By.name(CONFIRM_FORM_NAME));
+            if (formToSubmit == null) {
+                LOG.error(String.format("Submit button with name %S not found on the page", CONFIRM_FORM_NAME));
+            } else {
+                wait.until(elementToBeClickable(
+                        formToSubmit.findElement(By.className(CONFIRM_BUTTON_CLASSNAME))))
+                        .click();
+                success = wait.until(ExpectedConditions.urlContains(URL_SUCCESS_PATTERN));
+            }
         }
         return success ? getUrl() : "";
     }
+
 
 }
