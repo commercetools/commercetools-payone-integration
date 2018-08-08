@@ -34,6 +34,11 @@ public enum PaymentMethod {
     WALLET_PAYPAL(MethodKeys.WALLET_PAYPAL),
 
     /**
+     * @see MethodKeys#WALLET_PAYDIREKT
+     */
+    WALLET_PAYDIREKT(MethodKeys.WALLET_PAYDIREKT),
+
+    /**
      * @see MethodKeys#BANK_TRANSFER_SOFORTUEBERWEISUNG
      */
     BANK_TRANSFER_SOFORTUEBERWEISUNG(MethodKeys.BANK_TRANSFER_SOFORTUEBERWEISUNG),

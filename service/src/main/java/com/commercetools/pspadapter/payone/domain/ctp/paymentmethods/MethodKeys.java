@@ -86,6 +86,11 @@ public class MethodKeys {
     public static final String WALLET_PAYPAL = "WALLET-PAYPAL";
 
     /**
+     * Paydirekt
+     */
+    public static final String WALLET_PAYDIREKT = "WALLET-PAYDIREKT";
+
+    /**
      * Skrill Digital Wallet
      */
     public static final String WALLET_SKRILL = "WALLET-SKRILL";

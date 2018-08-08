@@ -15,16 +15,18 @@ public class Authorization2Fixture extends BaseTenant2Fixture {
             final String paymentMethod,
             final String transactionType,
             final String centAmount,
-            final String currencyCode) throws Exception {
+            final String currencyCode) {
 
-        Payment payment = createAndSavePaypalPayment(paymentName, paymentMethod, transactionType, centAmount, currencyCode);
+        Payment payment = createAndSaveWalletPayment(paymentName, paymentMethod, transactionType,
+                centAmount, currencyCode,
+                "https://example.com/migration/paypal_authorization/");
 
         return MultiValueResult.multiValueResult()
                 .with("paymentId", payment.getId());
     }
 
     public MultiValueResult handlePayment(final String paymentName,
-                                             final String requestType) throws Exception {
+                                          final String requestType) throws Exception {
         final HttpResponse response = requestToHandlePaymentByLegibleName(paymentName);
 
         // explicitly fetch from second tenant CTP client instance

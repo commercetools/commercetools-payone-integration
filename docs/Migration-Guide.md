@@ -11,6 +11,7 @@
   - [4. Setup a new tenant (branch,shop,merchant)](#4-setup-a-new-tenant-branchshopmerchant)
   - [5. Importan notes](#5-importan-notes)
 - [To v2.2+ (`Initial` transaction state)](#to-v22-initial-transaction-state)
+- [To v2.3+ (`Paydirekt` payment method)](#to-v23-paydirekt-payment-method)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -120,3 +121,24 @@ You have to change the payment handling URL:
   is responsible only for _client API_. As talked to Payone support, server API remains on MD5 and 
   there is no any plans to update it soon.
   
+## To v2.3+ (`Paydirekt` payment method)
+  
+  _This section could be skipped if this payment method is not used_
+  
+  1. Create Paydirekt Merchant account.
+  1. Contact Payone Merchant support and activate Paydirekt payment method in your account, 
+  supply them required values from Paydirekt Merchant account.
+  1. Ensure the following values are always specified in `Cart#shippingAddress` before payment handling:
+     * **`firstName`**
+     * **`lastName`**
+     * **`postalCode`**
+     * **`city`**
+     * **`country`** (**note**: this is independent from `Cart#country` and may be different)
+     
+     These fields are mandatory for Paydirekt payments according to  _TECHNICAL REFERENCE Add-On for Paydirekt v 1.5_.
+     This is different from other Wallet payments, like PayPal.
+     
+     The rest of the payment integration is similar to other redirect based payments, like PayPal or Sofortüberweisung.
+     
+     See more in [Field Mapping Guide](/docs/Field-Mapping.md)
+     

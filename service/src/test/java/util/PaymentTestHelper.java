@@ -79,6 +79,10 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_PPE.json");
     }
 
+    public Payment dummyPaymentOneAuthPending20EuroPDT() throws Exception {
+        return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_PDT.json");
+    }
+
     public Payment dummyPaymentOneAuthPending20EuroPNT() throws IOException {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_PNT.json");
     }
@@ -225,5 +229,13 @@ public class PaymentTestHelper {
 
     public PaymentWithCartLike createKlarnaPaymentWithCartLikeWithoutDiscount() throws Exception {
         return createDummyPaymentWithCartLike(dummyPaymentForKlarnaCartWithoutDiscounts_KLV(), dummyKlarnaCartWithoutDiscounts());
+    }
+
+    public PaymentWithCartLike createPaypalPaymentWithCartLike() throws Exception {
+        return createDummyPaymentWithCartLike(dummyPaymentOneAuthPending20EuroPPE(), dummyCart());
+    }
+
+    public PaymentWithCartLike createPaydirektPaymentWithCartLike() throws Exception {
+        return createDummyPaymentWithCartLike(dummyPaymentOneAuthPending20EuroPDT(), dummyCart());
     }
 }
