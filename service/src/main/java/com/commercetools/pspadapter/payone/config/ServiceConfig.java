@@ -53,7 +53,7 @@ public class ServiceConfig {
 
         this.personalDataToRemove = propertyProvider.getProperty(PERSONAL_DATA_TO_REMOVE)
                 .map(dataString ->
-                        Stream.of(splitList(dataString))
+                        Stream.of(trimAndSplit(dataString))
                         .distinct()
                         .collect(Collectors.toList())
                 )
@@ -121,7 +121,7 @@ public class ServiceConfig {
      */
     private List<String> getMandatoryTenantNames(PropertyProvider propertyProvider) {
         final String tenantsList = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.TENANTS);
-        final List<String> result = asList(splitList(tenantsList));
+        final List<String> result = asList(trimAndSplit(tenantsList));
 
         if (result.size() < 1 || result.stream().anyMatch(StringUtils::isBlank)) {
             throw new IllegalStateException(format("Tenants list is invalid, pls check \"%s\" variable",
@@ -131,7 +131,7 @@ public class ServiceConfig {
         return result;
     }
 
-    private String[] splitList(String tenantsList) {
-        return tenantsList.trim().split("\\s*(,|;)\\s*");
+    private String[] trimAndSplit(String configurationProperty) {
+        return configurationProperty.trim().split("\\s*(,|;)\\s*");
     }
 }
