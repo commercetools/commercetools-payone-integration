@@ -49,7 +49,8 @@ public class PayonePostServiceImpl implements PayonePostService {
      * @param payoneServerApiUrl - the payone server api url, must not be null or empty
      * @param personalDataToRemove - list of parameters that should be removed from the logs
      * @return new instance of PayonePostServiceImpl.class
-     * @throws IllegalArgumentException if the provided {@code payoneServerApiUrl} is invalid
+     * @throws IllegalArgumentException if the provided {@code payoneServerApiUrl}
+     * or {@code personalDataToRemove} is invalid
      */
     public static PayonePostServiceImpl of(final String payoneServerApiUrl,
                                            final List<String> personalDataToRemove) throws IllegalArgumentException {
