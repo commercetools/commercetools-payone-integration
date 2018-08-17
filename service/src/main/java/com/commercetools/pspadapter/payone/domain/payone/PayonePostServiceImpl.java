@@ -53,7 +53,7 @@ public class PayonePostServiceImpl implements PayonePostService {
      * or {@code personalDataToRemove} is invalid
      */
     public static PayonePostServiceImpl of(final String payoneServerApiUrl,
-                                           final List<String> personalDataToRemove) throws IllegalArgumentException {
+                                           final List<String> personalDataToRemove) {
         return new PayonePostServiceImpl(payoneServerApiUrl, personalDataToRemove);
     }
 
