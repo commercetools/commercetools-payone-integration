@@ -49,6 +49,15 @@ public class PayonePostServiceImplTest {
     }
 
     @Test
+    public void shouldThrowConfigurationExceptionIfPersonalDataToRemoveIsNullOnInitialization() {
+        final Throwable throwable = catchThrowable(() -> PayonePostServiceImpl.of("non.empty/url", null));
+
+        assertThat(throwable)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("personalDataToRemove cannot be null");
+    }
+
+    @Test
     public void shouldInitServiceWithCorrectUrl() {
         assertThat(payonePostService.getServerAPIURL()).isEqualTo(PAYONE_SERVER_API_URL);
     }
