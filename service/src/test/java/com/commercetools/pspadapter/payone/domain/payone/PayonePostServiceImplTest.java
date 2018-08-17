@@ -133,23 +133,20 @@ public class PayonePostServiceImplTest {
 
     @Test
     public void whenRemovePersonalDataFlagIsTrue_shouldRemovePersonalData() {
-        List<BasicNameValuePair> list = payonePostService.getNameValuePairsWithExpandedLists(
-                ImmutableMap.<String, Object>builder()
-                        .put("removeThisField", "bar")
-                        .put("keepThisField", "keepThisField")
-                        .build(), true);
+        ImmutableMap<String, Object> parameters = ImmutableMap.<String, Object>builder()
+                .put("removeThisField", "bar")
+                .put("keepThisField", "keepThisField")
+                .build();
+
+
+        List<BasicNameValuePair> list = payonePostService.getNameValuePairsWithExpandedLists(parameters, true);
 
         assertThat(list).hasSize(1);
         assertThat(list.get(0).getName()).isEqualTo("keepThisField");
 
-        list = payonePostService.getNameValuePairsWithExpandedLists(
-                ImmutableMap.<String, Object>builder()
-                        .put("removeThisField", "bar")
-                        .put("keepThisField", "keepThisField")
-                        .build(), false);
+        list = payonePostService.getNameValuePairsWithExpandedLists(parameters, false);
 
-        assertThat(list).hasSize(2);
-        assertThat(list.get(0).getName()).isEqualTo("keepThisField");
-        assertThat(list.get(1).getName()).isEqualTo("removeThisField");
+        assertThat(list).extracting(BasicNameValuePair::getName)
+                .containsExactlyInAnyOrder("removeThisField", "keepThisField");
     }
 }
