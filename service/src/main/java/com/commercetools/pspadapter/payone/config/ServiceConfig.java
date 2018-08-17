@@ -23,12 +23,11 @@ public class ServiceConfig {
 
 
     private final List<String> tenants;
-
+    private final List<String> personalDataToRemove;
     private final String scheduledJobCronShortTimeFrame;
     private final String scheduledJobCronLongTimeFrame;
     private final String applicationName;
     private final String applicationVersion;
-    private final List<String> personalDataToRemove;
 
     /**
      * Initializes the configuration.
