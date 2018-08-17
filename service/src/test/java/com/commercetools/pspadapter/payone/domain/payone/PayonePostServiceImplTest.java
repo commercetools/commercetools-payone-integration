@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,12 +26,13 @@ public class PayonePostServiceImplTest {
 
     @Before
     public void setup() throws PayoneException {
-        payonePostService = PayonePostServiceImpl.of(PAYONE_SERVER_API_URL);
+        payonePostService = PayonePostServiceImpl.of(PAYONE_SERVER_API_URL,
+                Collections.singletonList("removeThisField"));
     }
 
     @Test
     public void shouldThrowConfigurationExceptionIfUrlIsEmptyOnInitialization() {
-        final Throwable throwable = catchThrowable(() -> PayonePostServiceImpl.of(""));
+        final Throwable throwable = catchThrowable(() -> PayonePostServiceImpl.of("", Collections.emptyList()));
 
         assertThat(throwable)
                 .isInstanceOf(IllegalArgumentException.class)
@@ -39,11 +41,20 @@ public class PayonePostServiceImplTest {
 
     @Test
     public void shouldThrowConfigurationExceptionIfUrlIsNullOnInitialization() {
-        final Throwable throwable = catchThrowable(() -> PayonePostServiceImpl.of(null));
+        final Throwable throwable = catchThrowable(() -> PayonePostServiceImpl.of(null, Collections.emptyList()));
 
         assertThat(throwable)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("The server api url must not be null or empty.");
+    }
+
+    @Test
+    public void shouldThrowConfigurationExceptionIfPersonalDataToRemoveIsNullOnInitialization() {
+        final Throwable throwable = catchThrowable(() -> PayonePostServiceImpl.of("non.empty/url", null));
+
+        assertThat(throwable)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("personalDataToRemove cannot be null");
     }
 
     @Test
@@ -72,9 +83,9 @@ public class PayonePostServiceImplTest {
 
     @Test
     public void getObjectMapWithExpandedLists() {
-        assertThat(payonePostService.getNameValuePairsWithExpandedLists(ImmutableMap.of())).hasSize(0);
+        assertThat(payonePostService.getNameValuePairsWithExpandedLists(ImmutableMap.of(), false)).hasSize(0);
 
-        final List<BasicNameValuePair> simple = payonePostService.getNameValuePairsWithExpandedLists(ImmutableMap.of("foo", "bar"));
+        final List<BasicNameValuePair> simple = payonePostService.getNameValuePairsWithExpandedLists(ImmutableMap.of("foo", "bar"), false);
         assertThat(simple).hasSize(1);
         assertThat(simple).contains(new BasicNameValuePair("foo", "bar"));
 
@@ -91,7 +102,7 @@ public class PayonePostServiceImplTest {
                         .put("boolFalse", false)
                         .put("listString", new LinkedList<>(ImmutableList.of("ein", "zwei", "drei")))
                         .put("listDoubles", asList(3.14, 2.71, 9.81))
-                        .build());
+                        .build(), false);
 
         assertThat(withExpandedLists).containsExactlyInAnyOrder(
                 new BasicNameValuePair("foo", "bar"),
@@ -113,10 +124,29 @@ public class PayonePostServiceImplTest {
 
         final List<BasicNameValuePair> withEmptyLists = payonePostService.getNameValuePairsWithExpandedLists(
                 ImmutableMap.of("foo", new ArrayList<>(),
-                        "bar", new LinkedList<>()));
+                        "bar", new LinkedList<>()), false);
 
         assertThat(withEmptyLists).containsExactlyInAnyOrder(
                 new BasicNameValuePair("foo[]", ""),
                 new BasicNameValuePair("bar[]", ""));
+    }
+
+    @Test
+    public void whenRemovePersonalDataFlagIsTrue_shouldRemovePersonalData() {
+        ImmutableMap<String, Object> parameters = ImmutableMap.<String, Object>builder()
+                .put("removeThisField", "bar")
+                .put("keepThisField", "keepThisField")
+                .build();
+
+
+        List<BasicNameValuePair> list = payonePostService.getNameValuePairsWithExpandedLists(parameters, true);
+
+        assertThat(list).hasSize(1);
+        assertThat(list.get(0).getName()).isEqualTo("keepThisField");
+
+        list = payonePostService.getNameValuePairsWithExpandedLists(parameters, false);
+
+        assertThat(list).extracting(BasicNameValuePair::getName)
+                .containsExactlyInAnyOrder("removeThisField", "keepThisField");
     }
 }

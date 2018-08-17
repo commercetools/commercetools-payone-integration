@@ -3,7 +3,10 @@ package com.commercetools.pspadapter.payone.config;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.commercetools.pspadapter.payone.config.PropertyProvider.*;
 import static java.lang.String.format;
@@ -20,7 +23,7 @@ public class ServiceConfig {
 
 
     private final List<String> tenants;
-
+    private final List<String> personalDataToRemove;
     private final String scheduledJobCronShortTimeFrame;
     private final String scheduledJobCronLongTimeFrame;
     private final String applicationName;
@@ -47,6 +50,14 @@ public class ServiceConfig {
                 propertyProvider.getProperty(LONG_TIME_FRAME_SCHEDULED_JOB_CRON)
                         .map(String::valueOf)
                         .orElse("5 0 0/1 * * ? *");
+
+        this.personalDataToRemove = propertyProvider.getProperty(PERSONAL_DATA_TO_REMOVE)
+                .map(dataString ->
+                        Stream.of(trimAndSplit(dataString))
+                        .distinct()
+                        .collect(Collectors.toList())
+                )
+                .orElse(Collections.emptyList());
     }
 
     /**
@@ -91,6 +102,14 @@ public class ServiceConfig {
     }
 
     /**
+     * Gets the array of key names that should be removed from a map before logging this map.
+     */
+    @Nonnull
+    public List<String> getPersonalDataToRemove() {
+        return personalDataToRemove;
+    }
+
+    /**
      * Split comma or semicolon separated list of the tenants names.
      * <p>
      * All trailing/leading whitespaces are ignored.
@@ -102,7 +121,7 @@ public class ServiceConfig {
      */
     private List<String> getMandatoryTenantNames(PropertyProvider propertyProvider) {
         final String tenantsList = propertyProvider.getMandatoryNonEmptyProperty(PropertyProvider.TENANTS);
-        final List<String> result = asList(tenantsList.trim().split("\\s*(,|;)\\s*"));
+        final List<String> result = asList(trimAndSplit(tenantsList));
 
         if (result.size() < 1 || result.stream().anyMatch(StringUtils::isBlank)) {
             throw new IllegalStateException(format("Tenants list is invalid, pls check \"%s\" variable",
@@ -110,5 +129,9 @@ public class ServiceConfig {
         }
 
         return result;
+    }
+
+    private String[] trimAndSplit(String configurationProperty) {
+        return configurationProperty.trim().split("\\s*(,|;)\\s*");
     }
 }

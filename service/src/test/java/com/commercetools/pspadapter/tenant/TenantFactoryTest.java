@@ -4,6 +4,7 @@ import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.payments.TransactionStateResolverImpl;
 import com.commercetools.pspadapter.payone.PaymentDispatcher;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
@@ -63,6 +64,9 @@ public class TenantFactoryTest {
     @Mock
     private TenantConfig tenantConfig;
 
+    @Mock
+    private ServiceConfig serviceConfig;
+
     private TenantFactory factory;
 
     private final PaymentTestHelper testHelper = new PaymentTestHelper();
@@ -77,7 +81,7 @@ public class TenantFactoryTest {
         when(tenantConfig.getSphereClientConfig())
                 .thenReturn(SphereClientConfig.of("test-key", "test-client-id", "test-client-secret"));
 
-        factory = new TenantFactory("testPayoneInterfaceName", tenantConfig);
+        factory = new TenantFactory("testPayoneInterfaceName", tenantConfig, serviceConfig);
     }
 
     @Test
@@ -113,7 +117,7 @@ public class TenantFactoryTest {
     public void getsCustomTypeBuilderWithGrantedPermission() throws Exception {
         when(tenantConfig.getStartFromScratch()).thenReturn(true);
 
-        TenantFactory localFactory = new TenantFactory("testPayoneInterfaceName", tenantConfig);
+        TenantFactory localFactory = new TenantFactory("testPayoneInterfaceName", tenantConfig, serviceConfig);
         CustomTypeBuilder customTypeBuilder = localFactory.getCustomTypeBuilder();
 
         assertThat(customTypeBuilder).isNotNull();
@@ -295,7 +299,7 @@ public class TenantFactoryTest {
      * @return instance of {@link TenantFactory} with injected values from above.
      */
     private static TenantFactory mockTenantFactory(TenantConfig tenantConfig, BlockingSphereClient blockingSphereClient, PayonePostService payonePostService) {
-        return new TenantFactory("testPayoneInterfaceName", tenantConfig) {
+        return new TenantFactory("testPayoneInterfaceName", tenantConfig, null) {
             @Nonnull
             @Override
             protected BlockingSphereClient createBlockingSphereClient(TenantConfig tenantConfig) {
@@ -304,7 +308,7 @@ public class TenantFactoryTest {
 
             @Nonnull
             @Override
-            protected PayonePostService getPayonePostService(TenantConfig tenantConfig) {
+            protected PayonePostService getPayonePostService(TenantConfig tenantConfig, ServiceConfig serviceConfig) {
                 return payonePostService;
             }
         };

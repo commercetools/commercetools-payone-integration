@@ -4,6 +4,7 @@ import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.payments.TransactionStateResolverImpl;
 import com.commercetools.pspadapter.payone.PaymentDispatcher;
 import com.commercetools.pspadapter.payone.PaymentHandler;
+import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
@@ -75,7 +76,7 @@ public class TenantFactory {
     private final TransactionStateResolver transactionStateResolver;
 
 
-    public TenantFactory(String payoneInterfaceName, TenantConfig tenantConfig) {
+    public TenantFactory(String payoneInterfaceName, TenantConfig tenantConfig, ServiceConfig serviceConfig) {
         this.payoneInterfaceName = payoneInterfaceName;
 
         this.tenantName = tenantConfig.getName();
@@ -85,7 +86,7 @@ public class TenantFactory {
         this.paymentToOrderStateMapper = createPaymentToOrderStateMapper();
 
         this.blockingSphereClient = createBlockingSphereClient(tenantConfig);
-        this.payonePostService = getPayonePostService(tenantConfig);
+        this.payonePostService = getPayonePostService(tenantConfig, serviceConfig);
 
         this.paymentService = createPaymentService(blockingSphereClient);
         this.orderService = createOrderService(blockingSphereClient);
@@ -169,8 +170,8 @@ public class TenantFactory {
     }
 
     @Nonnull
-    protected PayonePostService getPayonePostService(TenantConfig tenantConfig) {
-        return PayonePostServiceImpl.of(tenantConfig.getPayoneConfig().getApiUrl());
+    protected PayonePostService getPayonePostService(TenantConfig tenantConfig, ServiceConfig serviceConfig) {
+        return PayonePostServiceImpl.of(tenantConfig.getPayoneConfig().getApiUrl(), serviceConfig.getPersonalDataToRemove());
     }
 
     protected PaymentService createPaymentService(SphereClient sphereClient) {
