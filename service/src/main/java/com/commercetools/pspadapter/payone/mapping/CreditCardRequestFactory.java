@@ -42,7 +42,8 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
 
     @Override
     @Nonnull
-    public CreditCardAuthorizationRequest createAuthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
+    public CreditCardAuthorizationRequest createAuthorizationRequest(
+            @Nonnull final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
 

@@ -270,17 +270,23 @@ public class TenantFactory {
         switch (method) {
             case CREDIT_CARD:
                 return new CreditCardRequestFactory(tenantConfig);
+
             case WALLET_PAYPAL:
-                return new PaypalRequestFactory(tenantConfig);
+            case WALLET_PAYDIREKT:
+                return new WalletRequestFactory(tenantConfig);
+
             case BANK_TRANSFER_SOFORTUEBERWEISUNG:
                 return new SofortBankTransferRequestFactory(tenantConfig);
+
             case BANK_TRANSFER_POSTFINANCE_CARD:
             case BANK_TRANSFER_POSTFINANCE_EFINANCE:
                 return new PostFinanceBanktransferRequestFactory(tenantConfig);
+
             case BANK_TRANSFER_ADVANCE:
                 return new BankTransferInAdvanceRequestFactory(tenantConfig);
             case INVOICE_KLARNA:
                 return new KlarnaRequestFactory(tenantConfig, createCountryToLanguageMapper());
+
             default:
                 throw new IllegalArgumentException(format("No PayoneRequestFactory could be created for payment method %s", method));
         }

@@ -186,7 +186,7 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
             LOG.error("Error redirect for Sofortüberweisung Charge Immediate for payment name [{}], id = [{}]",
                     paymentName, payment.getId(), e);
         } finally {
-            webDriver.manage().deleteAllCookies();
+            webDriver.deleteCookies();
             webDriver.quit();
         }
 

@@ -13,10 +13,10 @@ public class WalletAuthorizationRequest extends AuthorizationRequest {
 
     private String wallettype;
 
-    public WalletAuthorizationRequest(final PayoneConfig config, final String wallettype) {
-        super(config, RequestType.AUTHORIZATION.getType(), ClearingType.PAYONE_PPE.getPayoneCode());
+    public WalletAuthorizationRequest(final PayoneConfig config, final ClearingType clearingType) {
+        super(config, RequestType.AUTHORIZATION.getType(), clearingType.getPayoneCode());
 
-        this.wallettype = wallettype;
+        this.wallettype = clearingType.getSubType();
     }
 
     //**************************************************************
