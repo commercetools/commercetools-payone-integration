@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.commercetools.pspadapter.payone.util.ClearSecuredValuesSerializer;
 
 /**
  * @author fhaertig
@@ -21,66 +22,96 @@ public class AuthorizationRequest extends BaseRequest {
 
     private String currency;
 
+    @ClearSecuredValuesSerializer.Apply
     private String lastname;
 
+    @ClearSecuredValuesSerializer.Apply
     private String country;
 
+    @ClearSecuredValuesSerializer.Apply
     private String param;
 
+    @ClearSecuredValuesSerializer.Apply
     private String narrative_text;
 
+    @ClearSecuredValuesSerializer.Apply
     private String customerid;
 
+    @ClearSecuredValuesSerializer.Apply
     private String userid;
 
+    @ClearSecuredValuesSerializer.Apply
     private String salutation;
 
+    @ClearSecuredValuesSerializer.Apply
     private String title;
 
+    @ClearSecuredValuesSerializer.Apply
     private String firstname;
 
+    @ClearSecuredValuesSerializer.Apply
     private String company;
 
+    @ClearSecuredValuesSerializer.Apply
     private String street;
 
+    @ClearSecuredValuesSerializer.Apply
     private String zip;
 
+    @ClearSecuredValuesSerializer.Apply
     private String city;
 
+    @ClearSecuredValuesSerializer.Apply
     private String addressaddition;
 
+    @ClearSecuredValuesSerializer.Apply
     private String state;
 
+    @ClearSecuredValuesSerializer.Apply
     private String email;
 
+    @ClearSecuredValuesSerializer.Apply
     private String telephonenumber;
 
+    @ClearSecuredValuesSerializer.Apply
     private String birthday;
 
+    @ClearSecuredValuesSerializer.Apply
     private String language;
 
     private String vatid;
 
+    @ClearSecuredValuesSerializer.Apply
     private String gender;
 
+    @ClearSecuredValuesSerializer.Apply
     private String personalid;
 
+    @ClearSecuredValuesSerializer.Apply
     private String ip;
 
+    @ClearSecuredValuesSerializer.Apply
     private String shipping_firstname;
 
+    @ClearSecuredValuesSerializer.Apply
     private String shipping_lastname;
 
+    @ClearSecuredValuesSerializer.Apply
     private String shipping_company;
 
+    @ClearSecuredValuesSerializer.Apply
     private String shipping_street;
 
+    @ClearSecuredValuesSerializer.Apply
     private String shipping_zip;
 
+    @ClearSecuredValuesSerializer.Apply
     private String shipping_city;
 
+    @ClearSecuredValuesSerializer.Apply
     private String shipping_state;
 
+    @ClearSecuredValuesSerializer.Apply
     private String shipping_country;
 
     private String successurl;
