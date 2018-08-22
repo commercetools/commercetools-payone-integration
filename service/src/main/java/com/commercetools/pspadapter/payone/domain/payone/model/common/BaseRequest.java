@@ -16,7 +16,6 @@ import java.util.Map;
 public class BaseRequest implements Serializable {
 
     private static final long serialVersionUID = 2L;
-
     /**
      * ID of the merchant
      */
@@ -30,7 +29,7 @@ public class BaseRequest implements Serializable {
     /**
      * Configurable key of payment portal
      */
-    @ClearSecuredValuesSerializer.Apply
+    @ClearSecuredValuesSerializer.Apply(true)
     private String key;
 
     /**
