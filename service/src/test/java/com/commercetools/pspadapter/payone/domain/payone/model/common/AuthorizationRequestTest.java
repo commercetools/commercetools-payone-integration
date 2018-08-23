@@ -2,12 +2,14 @@ package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.util.ClearSecuredValuesSerializer;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static com.commercetools.pspadapter.payone.config.PropertyProvider.HIDE_CUSTOMER_PERSONAL_DATA;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
 import static org.mockito.Mockito.when;
@@ -111,6 +113,11 @@ public class AuthorizationRequestTest {
         request.setZip(zip);
     }
 
+    @After
+    public void tearDown() {
+        System.clearProperty(HIDE_CUSTOMER_PERSONAL_DATA);
+    }
+
     @Test
     public void createsFullMap() {
         assertThat(request.toStringMap(false)).containsOnly(
@@ -212,7 +219,7 @@ public class AuthorizationRequestTest {
 
     @Test
     public void createsMapWithHiddenSecretsWithoutHidingPersonalData() {
-        System.setProperty("HIDE_CUSTOMER_PERSONAL_DATA", "false");
+        System.setProperty(HIDE_CUSTOMER_PERSONAL_DATA, "false");
 
         assertThat(request.toStringMap(true)).containsOnly(
                 entry("narrative_text", narrativeText),
