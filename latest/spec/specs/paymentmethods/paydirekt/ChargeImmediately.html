@@ -204,7 +204,7 @@ ins {
                     <td class="inputvalue">Payment 1</td>
                     <td class="inputvalue">406</td>
                     <td class="inputvalue">EUR</td>
-                    <td>7bdeff2e-4ede-4907-8c2c-ef74a02032bf</td>
+                    <td>976f1d71-2340-4ef0-99e7-3fb489a1483c</td>
                     <td>https://example.com/paydirek_charge/Payment-1-Success</td>
                     <td>https://example.com/paydirek_charge/Payment-1-Error</td>
                     <td>https://example.com/paydirek_charge/Payment-1-Cancel</td>
@@ -213,7 +213,7 @@ ins {
                     <td class="inputvalue">Payment 2</td>
                     <td class="inputvalue">91341</td>
                     <td class="inputvalue">USD</td>
-                    <td>f7fe32aa-d2d9-4380-a6be-abaf0e523895</td>
+                    <td>3cb41147-1c73-4da3-852e-2d0be77b4d8e</td>
                     <td>https://example.com/paydirek_charge/Payment-2-Success</td>
                     <td>https://example.com/paydirek_charge/Payment-2-Error</td>
                     <td>https://example.com/paydirek_charge/Payment-2-Cancel</td>
@@ -222,7 +222,7 @@ ins {
                     <td class="inputvalue">Payment 3</td>
                     <td class="inputvalue">6113</td>
                     <td class="inputvalue">EUR</td>
-                    <td>4cca3bff-0a79-4319-8a13-759f3e51edfa</td>
+                    <td>500937fd-03c7-44ef-bfc2-9ddab6ae7a9c</td>
                     <td>https://example.com/paydirek_charge/Payment-3-Success</td>
                     <td>https://example.com/paydirek_charge/Payment-3-Error</td>
                     <td>https://example.com/paydirek_charge/Payment-3-Cancel</td>
@@ -231,7 +231,7 @@ ins {
                     <td class="inputvalue">Payment 4</td>
                     <td class="inputvalue">11283</td>
                     <td class="inputvalue">EUR</td>
-                    <td>abf9379c-0b49-405e-8c3a-6c6c11140518</td>
+                    <td>3cdd98f3-733a-4b76-9630-d08b251e8d4c</td>
                     <td>https://example.com/paydirek_charge/Payment-4-Success</td>
                     <td>https://example.com/paydirek_charge/Payment-4-Error</td>
                     <td>https://example.com/paydirek_charge/Payment-4-Cancel</td>
@@ -294,21 +294,21 @@ ins {
                     <td class="inputvalue">Payment 1</td>
                     <td class="success">Pending</td>
                     <td class="success">true</td>
-                    <td>https://sandbox.paydirekt.de/checkout/#/checkout/5f29be9f-0c00-4ea1-9081-e56f3bc8ff4c</td>
+                    <td>https://sandbox.paydirekt.de/checkout/#/checkout/ca98658d-686f-4ff9-a8b9-309100866f1f</td>
                     <td>11</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
                     <td class="success">Pending</td>
                     <td class="success">true</td>
-                    <td>https://sandbox.paydirekt.de/checkout/#/checkout/080d2385-5f01-4151-8d6c-2f46ffd822a2</td>
+                    <td>https://sandbox.paydirekt.de/checkout/#/checkout/389110e7-1427-4f59-b8e8-2580000f712c</td>
                     <td>11</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
                     <td class="success">Pending</td>
                     <td class="success">true</td>
-                    <td>https://sandbox.paydirekt.de/checkout/#/checkout/a15e2990-fc7f-433d-956c-1a3e9d47ff15</td>
+                    <td>https://sandbox.paydirekt.de/checkout/#/checkout/6e345161-07b3-4663-bf2f-6cb811b09685</td>
                     <td>11</td>
                 </tr>
             </table>
@@ -362,15 +362,12 @@ ins {
             </p>
             <p>
                 If I follow the Paydirect  process for <span c:set="#successfulPayments" class="inputvalue">Payment 1, Payment 3, Payment 4</span> and
-                <span c:assertTrue="executeRedirectForPayments(#successfulPayments)" class="failure"><del class="expected">verify them successfully</del>
-<ins class="actual">== false</ins></span> by entering my bank account information,
+                <span c:assertTrue="executeRedirectForPayments(#successfulPayments)" class="success">verify them successfully</span> by entering my bank account information,
                 I get forwarded to a predefined success url and for each of the payments the following notifications will be received:
             </p>
             <ol>
-                <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="failure"><del class="expected">received</del>
-<ins class="actual">== false</ins></span> -&gt; has no effect, just as a confirmation</li>
-                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="failure"><del class="expected">received</del>
-<ins class="actual">== false</ins></span>
+                <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="success">received</span> -&gt; has no effect, just as a confirmation</li>
+                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="success">received</span>
                     -&gt;  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
             </ol>
             <table c:execute="#result = fetchPaymentDetails(#paymentName)">
@@ -384,29 +381,26 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
-                    <td class="failure"><del class="expected">Success</del>
-<ins class="actual">Pending</ins></td>
+                    <td class="success">Success</td>
                     <td class="success">true</td>
-                    <td>https://sandbox.paydirekt.de/checkout/#/checkout/5f29be9f-0c00-4ea1-9081-e56f3bc8ff4c</td>
-                    <td>15</td>
+                    <td>https://sandbox.paydirekt.de/checkout/#/checkout/ca98658d-686f-4ff9-a8b9-309100866f1f</td>
+                    <td>19</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
-                    <td class="failure"><del class="expected">Success</del>
-<ins class="actual">Pending</ins></td>
+                    <td class="success">Success</td>
                     <td class="success">true</td>
-                    <td>https://sandbox.paydirekt.de/checkout/#/checkout/080d2385-5f01-4151-8d6c-2f46ffd822a2</td>
-                    <td>11</td>
+                    <td>https://sandbox.paydirekt.de/checkout/#/checkout/389110e7-1427-4f59-b8e8-2580000f712c</td>
+                    <td>19</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
-                    <td class="failure"><del class="expected">Success</del>
-<ins class="actual">Pending</ins></td>
+                    <td class="success">Success</td>
                     <td class="success">true</td>
-                    <td>https://sandbox.paydirekt.de/checkout/#/checkout/a15e2990-fc7f-433d-956c-1a3e9d47ff15</td>
-                    <td>15</td>
+                    <td>https://sandbox.paydirekt.de/checkout/#/checkout/6e345161-07b3-4663-bf2f-6cb811b09685</td>
+                    <td>19</td>
                 </tr>
             </table>
         </div>
-    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 39659 ms on 22-Aug-2018 at 15:00:23 UTC</div></div></body>
+    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 417383 ms on 23-Aug-2018 at 14:22:10 UTC</div></div></body>
 </html>
