@@ -209,4 +209,55 @@ public class AuthorizationRequestTest {
                 entry("shipping_zip", ClearSecuredValuesSerializer.PLACEHOLDER),
                 entry("email", ClearSecuredValuesSerializer.PLACEHOLDER));
     }
+
+    @Test
+    public void createsMapWithHiddenSecretsWithoutHidingPersonalData() {
+        System.setProperty("HIDE_CUSTOMER_PERSONAL_DATA", "false");
+
+        assertThat(request.toStringMap(true)).containsOnly(
+                entry("narrative_text", narrativeText),
+                entry("param", param),
+                entry("key", ClearSecuredValuesSerializer.PLACEHOLDER),
+                entry("clearingtype", clearingType),
+                entry("errorurl", errorUrl),
+                entry("vatid", vatId),
+                entry("request", requestType),
+                entry("backurl", backUrl),
+                entry("successurl", successUrl),
+                entry("mode", mode),
+                entry("amount", amount),
+                entry("reference", reference),
+                entry("currency", currency),
+                entry("api_version", apiVersion),
+                entry("portalid", portalId),
+                entry("mid", merchantId),
+                entry("userid", userId),
+                entry("customerid", customerId),
+                entry("personalid", personalId),
+                entry("language", language),
+                entry("birthday", birthday),
+                entry("gender", gender),
+                entry("salutation", salutation),
+                entry("title", title),
+                entry("lastname", lastName),
+                entry("firstname", firstName),
+                entry("country", country),
+                entry("state", state),
+                entry("city", city),
+                entry("street", street),
+                entry("company", company),
+                entry("addressaddition", addressAddition),
+                entry("zip", zip),
+                entry("telephonenumber", telephoneNumber),
+                entry("ip", ip),
+                entry("shipping_firstname", shippingFirstName),
+                entry("shipping_lastname", shippingLastName),
+                entry("shipping_country", shippingCountry),
+                entry("shipping_state", shippingState),
+                entry("shipping_city", shippingCity),
+                entry("shipping_street", shippingStreet),
+                entry("shipping_company", shippingCompany),
+                entry("shipping_zip", shippingZip),
+                entry("email", email));
+    }
 }
