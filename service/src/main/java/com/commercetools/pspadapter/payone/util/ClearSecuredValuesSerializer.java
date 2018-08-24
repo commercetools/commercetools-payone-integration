@@ -20,7 +20,7 @@ import static com.commercetools.pspadapter.payone.config.PropertyProvider.HIDE_C
  * {@code Apply} accepts 1 boolean parameter. If the parameter is {@code true} then the value will be hidden.
  * If the parameter is {@code false} or was not provided then the code will check environment variable
  * {@code HIDE_CUSTOMER_PERSONAL_DATA}. If the value of the environment variable is {@code true} then the
- * field will be hidden
+ * field will be hidden. If the value of environment variable is not provided then it will be counted as {@code true}
  *
  * @author fhaertig
  * @since 19.04.16
