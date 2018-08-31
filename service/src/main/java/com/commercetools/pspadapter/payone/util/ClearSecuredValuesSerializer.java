@@ -2,9 +2,7 @@ package com.commercetools.pspadapter.payone.util;
 
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
@@ -39,7 +37,7 @@ public class ClearSecuredValuesSerializer extends JsonSerializer<String> impleme
     }
 
     @Override
-    public void serialize(final String value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException, JsonProcessingException {
+    public void serialize(final String value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException {
         final PropertyProvider propertyProvider = new PropertyProvider();
         final boolean hideCustomerPersonalData = propertyProvider.getProperty(HIDE_CUSTOMER_PERSONAL_DATA)
                 .map(dataString -> !dataString.equals("false"))
@@ -52,7 +50,7 @@ public class ClearSecuredValuesSerializer extends JsonSerializer<String> impleme
     }
 
     @Override
-    public JsonSerializer<?> createContextual(final SerializerProvider prov, final BeanProperty property) throws JsonMappingException {
+    public JsonSerializer<?> createContextual(final SerializerProvider prov, final BeanProperty property) {
         return new ClearSecuredValuesSerializer(property);
     }
 
