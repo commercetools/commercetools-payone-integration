@@ -20,10 +20,10 @@ public class BankTransferRequest extends AuthorizationRequest {
 
     private String bankcountry;
 
-    @ClearSecuredValuesSerializer.Apply
+    @ClearSecuredValuesSerializer.Apply(true)
     private String iban;
 
-    @ClearSecuredValuesSerializer.Apply
+    @ClearSecuredValuesSerializer.Apply(true)
     private String bic;
 
     /**

@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.commercetools.pspadapter.payone.util.ClearSecuredValuesSerializer;
 
 /**
  * @author fhaertig
@@ -16,10 +17,12 @@ public class CaptureRequest extends BaseRequest {
 
     private String currency;
 
+    @ClearSecuredValuesSerializer.Apply
     private String narrative_text;
 
     private String capturemode;
 
+    @ClearSecuredValuesSerializer.Apply
     private String invoiceid;
 
     private String invoice_deliverymode;
@@ -28,6 +31,7 @@ public class CaptureRequest extends BaseRequest {
 
     private String invoice_deliveryenddate;
 
+    @ClearSecuredValuesSerializer.Apply
     private String invoiceappendix;
 
     protected CaptureRequest(final PayoneConfig config) {
