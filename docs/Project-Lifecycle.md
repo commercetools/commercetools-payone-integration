@@ -182,8 +182,6 @@ The test service run in Heroku expects to have the next values:
 
 <table>
   <tr><th>Name</th><th>Content</th></tr>
-  <tr><td><code>LONG_TIME_FRAME_SCHEDULED_JOB_CRON</code></td>               <td>3 3 3 * * ? *</td></tr>
-  <tr><td><code>SHORT_TIME_FRAME_SCHEDULED_JOB_CRON</code></td>              <td>0/30 * * * * ? *</td></tr>
   <tr><td><code>TENANTS</code></td>                                          <td>HEROKU_FIRST_TENANT, HEROKU_SECOND_TENANT</td>
   <tr><td><code>HEROKU_FIRST_TENANT_CT_CLIENT_ID</code></td>                 <td rowspan="6">Should be adjusted with Travis setup below</td></tr>
   <tr><td><code>HEROKU_SECOND_TENANT_CT_CLIENT_ID</code></td>                </tr>
@@ -210,9 +208,6 @@ The test service run in Heroku expects to have the next values:
 **Note**: 
   * `*_UPDATE_ORDER_PAYMENT_STATE` has different values for the test tenants, 
     thus the first tenant updates order state when the second one - **should not**.
-  * the Integration tests validate only short scheduled job, e.g, from `SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` 
-    (the test creates payments without explicit handle call, then waits 30 seconds and validates the payments are handled, 
-    see `ScheduledJobFactoryTest` for more details) 
 
 #### Known Heroku issues
 

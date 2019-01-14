@@ -57,8 +57,7 @@ Old variable name               | New variable name (for single tenant with name
 `UPDATE_ORDER_PAYMENT_STATE`    | `MAIN_SHOP_UPDATE_ORDER_PAYMENT_STATE`                     | No
 `SECURE_KEY`                    | `MAIN_SHOP_SECURE_KEY`                                     | No
 
-`SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` and `LONG_TIME_FRAME_SCHEDULED_JOB_CRON` are common to the whole service 
-thus do not require tenant specific configuration.
+
 
 ### 2. Payone portal changes
 

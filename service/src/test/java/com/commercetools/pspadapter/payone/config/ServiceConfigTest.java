@@ -27,42 +27,6 @@ public class ServiceConfigTest {
     private PropertyProvider propertyProvider;
 
     @Test
-    public void getsScheduledJobCronForShortTimeFramePoll() {
-        mockDummyDefault(propertyProvider);
-        when(propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON))
-                .thenReturn(Optional.of("short cron"));
-        assertThat(new ServiceConfig(propertyProvider).getScheduledJobCronForShortTimeFramePoll())
-                .isEqualTo("short cron");
-    }
-
-    @Test
-    public void getsDefaultScheduledJobCronForShortTimeFramePollIfPropertyIsNotProvided() {
-        mockDummyDefault(propertyProvider);
-        when(propertyProvider.getProperty(PropertyProvider.SHORT_TIME_FRAME_SCHEDULED_JOB_CRON))
-                .thenReturn(Optional.empty());
-        assertThat(new ServiceConfig(propertyProvider).getScheduledJobCronForShortTimeFramePoll())
-                .isEqualTo("0/30 * * * * ? *");
-    }
-
-    @Test
-    public void getsScheduledJobCronForLongTimeFramePoll() {
-        mockDummyDefault(propertyProvider);
-        when(propertyProvider.getProperty(PropertyProvider.LONG_TIME_FRAME_SCHEDULED_JOB_CRON))
-                .thenReturn(Optional.of("long cron"));
-        assertThat(new ServiceConfig(propertyProvider).getScheduledJobCronForLongTimeFramePoll())
-                .isEqualTo("long cron");
-    }
-
-    @Test
-    public void getsDefaultScheduledJobCronForLongTimeFramePollIfPropertyIsNotProvided() {
-        mockDummyDefault(propertyProvider);
-        when(propertyProvider.getProperty(PropertyProvider.LONG_TIME_FRAME_SCHEDULED_JOB_CRON))
-                .thenReturn(Optional.empty());
-        assertThat(new ServiceConfig(propertyProvider).getScheduledJobCronForLongTimeFramePoll())
-                .isEqualTo("5 0 0/1 * * ? *");
-    }
-
-    @Test
     public void getsSingleTenantName() {
         when(propertyProvider.getProperty(TENANTS)).thenReturn(Optional.of("testTenantName"));
         assertThat(new ServiceConfig(propertyProvider).getTenants()).containsOnly("testTenantName");

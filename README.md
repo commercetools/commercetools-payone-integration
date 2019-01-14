@@ -27,7 +27,6 @@ It is a standalone Microservice that connects the two platforms and provides a s
     - [Docker run](#docker-run)
 - [Shop integration guide](#shop-integration-guide)
 - [Multitenancy](#multitenancy)
-  - [Scheduled tasks](#scheduled-tasks)
 - [Other resources](#other-resources)
 - [For developers and contributors](#for-developers-and-contributors)
 
@@ -108,8 +107,6 @@ These values can be found in the [PAYONE Merchant Interface](https://pmi.pay1.de
 
 Name | Is tenant specific | Content | Default
 ---- | ------- | ------ | --------
-`SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` | No  | [QUARTZ cron expression](http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger) to specify when the service will poll for commercetools messages generated in the past 10 minutes like [PaymentTransactionAdded](http://dev.commercetools.com/http-api-projects-messages.html#paymenttransactionadded-message) and [PaymentCreated](http://dev.commercetools.com/http-api-projects-messages.html#paymentcreated-message)| poll every 30 seconds (`0/30 * * * * ? *`)
-`LONG_TIME_FRAME_SCHEDULED_JOB_CRON`  | No  | same as `SHORT_TIME_FRAME_SCHEDULED_JOB_CRON`, but polls messages for the past 2 days | poll every hour on 5th second (`5 0 0/1 * * ? *`)
 `TENANT1_PAYONE_MODE`                 | Yes | the mode of operation with PAYONE <ul><li>`"live"` for production mode, (i.e. _actual payments_) or</li><li>`"test"` for test mode</li></ul> | `"test"`  
 `TENANT1_CT_START_FROM_SCRATCH`       | Yes | **WARNING** _**Handle with care!**_ If and only if equal, ignoring case, to `"true"` the service will create the custom types it needs. _**Therefor it first deletes all Order, Cart, Payment and Type entities**_. If not yet in the project, the Custom Types are created independently of this parameter (but only deleted and recreated if this parameter is set).  Related: [issue #34](https://github.com/commercetools/commercetools-payone-integration/issues/34). | `"false"`
 `TENANT1_SECURE_KEY`                  | Yes | if provided and not empty, the value is used as the key for decrypting data from fields "IBAN" and "BIC" for payments with CustomType "PAYMENT_BANK_TRANSFER". The data must be the result of a Blowfish ECB encryption with said key and encoded in HEX. | "" (empty String)
@@ -155,21 +152,6 @@ When the service is started it initializes separate URL handlers for all specifi
     * POST <code>https://{your-service-instance.example.com}/**BOOTS**/payone/notification</code>
     * POST <code>https://{your-service-instance.example.com}/**BIKES**/payone/notification</code>
 
-### Scheduled tasks
-
-The service also provides scheduled tasks to handle those notification which were created but never handled
-(because of connection, lags, down-times etc issues).
-
-There are two scheduled jobs:
-
-  * short term - handles unprocessed payment transactions for last 10 minutes.
-  * long term -  handles unprocessed payment transactions for last 2 days.
-
-This jobs are run periodically based on `SHORT_TIME_FRAME_SCHEDULED_JOB_CRON` and `LONG_TIME_FRAME_SCHEDULED_JOB_CRON`
-runtime values respectively.
-
-The job is processing every tenant payments sequentially one-by-one in order they are described in `TENANTS` property,
-thus you don't need to setup the schedule for every tenant separately.
 
 ## Other resources
   * commercetools general payment conventions, esp. for the payment type modeling https://github.com/nkuehn/payment-specs
