@@ -10,7 +10,8 @@ import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import io.sphere.sdk.http.HttpStatusCode;
+import io.sphere.sdk.payments.queries.PaymentQuery;
+import javafx.util.Pair;
 import org.apache.http.entity.ContentType;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
@@ -21,11 +22,16 @@ import spark.utils.CollectionUtils;
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
 import static io.sphere.sdk.json.SphereJsonUtils.toJsonString;
 import static io.sphere.sdk.json.SphereJsonUtils.toPrettyJsonString;
+import static io.sphere.sdk.utils.CompletableFutureUtils.listOfFuturesToFutureOfList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * @author fhaertig
@@ -36,19 +42,18 @@ public class IntegrationService {
     public static final Logger LOG = LoggerFactory.getLogger(IntegrationService.class);
 
     private static final String HEROKU_ASSIGNED_PORT = "PORT";
-
+    private static final int ERROR_STATUS = HttpStatus.SERVICE_UNAVAILABLE_503;
     private final List<TenantFactory> tenantFactories;
+    private ServiceConfig serviceConfig = null;
 
-    // cached health response object, which contains:
-    // status (200), tenants (names list), applicationInfo (version, name)
-    private final ImmutableMap<String, Object> healthResponse;
 
-    public IntegrationService(@Nonnull final ServiceConfig serviceConfig,
+    public IntegrationService(@Nonnull final ServiceConfig config,
                               @Nonnull final PropertyProvider propertyProvider) {
-
+        this.serviceConfig = config;
         this.tenantFactories = serviceConfig.getTenants().stream()
                 .map(tenantName -> new TenantPropertyProvider(tenantName, propertyProvider))
-                .map(tenantPropertyProvider -> new TenantConfig(tenantPropertyProvider, new PayoneConfig(tenantPropertyProvider)))
+                .map(tenantPropertyProvider -> new TenantConfig(tenantPropertyProvider,
+                        new PayoneConfig(tenantPropertyProvider)))
                 .map(tenantConfig -> new TenantFactory(PAYONE, tenantConfig))
                 .collect(toList());
 
@@ -56,42 +61,7 @@ public class IntegrationService {
             throw new IllegalArgumentException("Tenants list must be non-empty");
         }
 
-        this.healthResponse = createHealthResponse(serviceConfig);
-    }
-
-    /**
-     * @return Unmodifiable view of tenant factories list which are used for the service run.
-     */
-    public List<TenantFactory> getTenantFactories() {
-        return Collections.unmodifiableList(tenantFactories);
-    }
-
-    public void start() {
-        initSparkService();
-
-        for (TenantFactory tenantFactory : tenantFactories) {
-            initTenantServiceResources(tenantFactory);
-        }
-
-        Spark.awaitInitialization();
-    }
-
-    private void initSparkService() {
-        Spark.port(port());
-
-        // This is a temporary jerry-rig for the load balancer to check connection with the service itself.
-        // For now it just returns a JSON response with status code, tenants list and static application info.
-        // It should be expanded to a more real health-checker service, which really performs PAYONE status check.
-        // But don't forget, a load balancer may call this URL very often (like 1 per sec),
-        // so don't make this request processor heavy, or implement is as independent background service.
-        LOG.info("Register /health URL");
-        LOG.info("Use /health?pretty to pretty-print output JSON");
-        Spark.get("/health", (req, res) -> {
-            res.status(HttpStatusCode.OK_200);
-            res.type(ContentType.APPLICATION_JSON.getMimeType());
-
-            return req.queryParams("pretty") != null ? toPrettyJsonString(healthResponse) : toJsonString(healthResponse);
-        });
+        ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig);
     }
 
     private static void initTenantServiceResources(TenantFactory tenantFactory) {
@@ -108,7 +78,8 @@ public class IntegrationService {
         Spark.get(paymentHandlerUrl, (req, res) -> {
             final PaymentHandleResult paymentHandleResult = paymentHandler.handlePayment(req.params("id"));
             if (!paymentHandleResult.body().isEmpty()) {
-                LOG.debug("--> Result body of ${getTenantName()}/commercetools/handle/payments/{}: {}", req.params("id"), paymentHandleResult.body());
+                LOG.debug("--> Result body of ${getTenantName()}/commercetools/handle/payments/{}: {}", req.params(
+                        "id"), paymentHandleResult.body());
             }
             res.status(paymentHandleResult.statusCode());
             return res;
@@ -140,6 +111,43 @@ public class IntegrationService {
         });
     }
 
+    /**
+     * @return Unmodifiable view of tenant factories list which are used for the service run.
+     */
+    public List<TenantFactory> getTenantFactories() {
+        return Collections.unmodifiableList(tenantFactories);
+    }
+
+    public void start() {
+        initSparkService();
+
+        for (TenantFactory tenantFactory : tenantFactories) {
+            initTenantServiceResources(tenantFactory);
+        }
+
+        Spark.awaitInitialization();
+    }
+
+    private void initSparkService() {
+        Spark.port(port());
+
+        // This is a temporary jerry-rig for the load balancer to check connection with the service itself.
+        // For now it just returns a JSON response with status code, tenants list and static application info.
+        // It should be expanded to a more real health-checker service, which really performs PAYONE status check.
+        // But don't forget, a load balancer may call this URL very often (like 1 per sec),
+        // so don't make this request processor heavy, or implement is as independent background service.
+        LOG.info("Register /health URL");
+        LOG.info("Use /health?pretty to pretty-print output JSON");
+        Spark.get("/health", (req, res) -> {
+            ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig);
+            res.status((Integer) healthResponse.getOrDefault("status", ERROR_STATUS));
+            res.type(ContentType.APPLICATION_JSON.getMimeType());
+
+            return req.queryParams("pretty") != null ? toPrettyJsonString(healthResponse) :
+                    toJsonString(healthResponse);
+        });
+    }
+
     public void stop() {
         Spark.stop();
     }
@@ -159,13 +167,43 @@ public class IntegrationService {
                 "version", serviceConfig.getApplicationVersion(),
                 "title", serviceConfig.getApplicationName());
 
-        final List<String> tenants = tenantFactories.stream()
-                .map(TenantFactory::getTenantName)
-                .collect(toList());
+
+        final Map<String, Integer> statusMap = listOfFuturesToFutureOfList
+                (tenantFactories
+                .stream()
+                .map(this::checkTenantStatus)
+                .collect(toList())
+                )
+                .toCompletableFuture()
+                .join()
+                .stream()
+                .collect(toMap(Pair::getKey, Pair::getValue));
+
+
+        Optional<Map.Entry<String, Integer>> errorCode =
+                statusMap.entrySet().stream().filter(status -> status.getValue() == ERROR_STATUS).findAny();
 
         return ImmutableMap.of(
-                "status", HttpStatus.OK_200,
-                "tenants", tenants,
+                "status", !errorCode.isPresent() ? HttpStatus.OK_200 : ERROR_STATUS,
+                "tenants", statusMap,
                 "applicationInfo", applicationInfo);
+    }
+
+    private CompletionStage<Pair<String, Integer>> checkTenantStatus(TenantFactory tenantFactory) {
+        return tenantFactory.getBlockingSphereClient().execute(PaymentQuery.of().withLimit(0l))
+                .thenApply(result -> {
+                            int status = HttpStatus.OK_200;
+                            final String tenantName = tenantFactory.getTenantName();
+                            try {
+                                result.getCount();
+                            } catch (Exception e) {
+                                LOG.error("Cannot query payments for the tenant {}", tenantName, e);
+                                status = ERROR_STATUS;
+                            }
+                            return new Pair<>(tenantName, status);
+                        }
+                );
+
+
     }
 }

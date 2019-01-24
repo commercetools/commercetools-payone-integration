@@ -185,6 +185,10 @@ public class TenantFactory {
         return new DefaultPaymentToOrderStateMapper();
     }
 
+    public BlockingSphereClient getBlockingSphereClient() {
+        return blockingSphereClient;
+    }
+
     protected NotificationDispatcher createNotificationDispatcher(TenantConfig tenantConfig,
                                                                   TransactionStateResolver transactionStateResolver) {
         final NotificationProcessor defaultNotificationProcessor =
