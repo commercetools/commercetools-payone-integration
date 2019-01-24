@@ -11,7 +11,6 @@ import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.queries.PaymentQuery;
-import javafx.util.Pair;
 import org.apache.http.entity.ContentType;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
@@ -20,10 +19,10 @@ import spark.Spark;
 import spark.utils.CollectionUtils;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
@@ -168,42 +167,37 @@ public class IntegrationService {
                 "title", serviceConfig.getApplicationName());
 
 
-        final Map<String, Integer> statusMap = listOfFuturesToFutureOfList
-                (tenantFactories
-                .stream()
-                .map(this::checkTenantStatus)
-                .collect(toList())
-                )
-                .toCompletableFuture()
-                .join()
-                .stream()
-                .collect(toMap(Pair::getKey, Pair::getValue));
+        Map<String, CompletionStage<Integer>> tenantMap = checkTenantStati(tenantFactories);
+        //resolve all completable stages
+        listOfFuturesToFutureOfList(new ArrayList(tenantMap.values()));
+        //unpack completable features
+        Map<String, Integer> statusMap = tenantMap.keySet().stream()
+                .collect(toMap(v -> v, v -> tenantMap.get(v).toCompletableFuture().join()));
 
-
-        Optional<Map.Entry<String, Integer>> errorCode =
-                statusMap.entrySet().stream().filter(status -> status.getValue() == ERROR_STATUS).findAny();
 
         return ImmutableMap.of(
-                "status", !errorCode.isPresent() ? HttpStatus.OK_200 : ERROR_STATUS,
+                "status", !statusMap.containsKey(ERROR_STATUS) ? HttpStatus.OK_200 : ERROR_STATUS,
                 "tenants", statusMap,
                 "applicationInfo", applicationInfo);
     }
 
-    private CompletionStage<Pair<String, Integer>> checkTenantStatus(TenantFactory tenantFactory) {
-        return tenantFactory.getBlockingSphereClient().execute(PaymentQuery.of().withLimit(0l))
-                .thenApply(result -> {
-                            int status = HttpStatus.OK_200;
-                            final String tenantName = tenantFactory.getTenantName();
-                            try {
-                                result.getCount();
-                            } catch (Exception e) {
-                                LOG.error("Cannot query payments for the tenant {}", tenantName, e);
-                                status = ERROR_STATUS;
-                            }
-                            return new Pair<>(tenantName, status);
-                        }
-                );
-
-
+    private Map<String, CompletionStage<Integer>> checkTenantStati(List<TenantFactory> tenants) {
+        return tenants.stream().collect(toMap(TenantFactory::getTenantName, tenantFactory -> {
+                    return tenantFactory.getBlockingSphereClient().
+                            execute(PaymentQuery.of().withLimit(0l))
+                            .thenApply(result -> {
+                                        int status = HttpStatus.OK_200;
+                                        final String tenantName = tenantFactory.getTenantName();
+                                        try {
+                                            result.getCount();
+                                        } catch (Exception e) {
+                                            LOG.error("Cannot query payments for the tenant {}", tenantName, e);
+                                            status = ERROR_STATUS;
+                                        }
+                                        return status;
+                                    }
+                            );
+                }
+        ));
     }
 }
