@@ -146,7 +146,7 @@ public class IntegrationService {
         Spark.get("/health", (req, res) -> {
             ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig.getApplicationVersion(),
                     serviceConfig.getApplicationName(), tenantFactories);
-            res.status((Integer) healthResponse.getOrDefault("status", ERROR_STATUS));
+            res.status((Integer) healthResponse.getOrDefault(STATUS_KEY, ERROR_STATUS));
             res.type(ContentType.APPLICATION_JSON.getMimeType());
 
             return req.queryParams("pretty") != null ? toPrettyJsonString(healthResponse) :
