@@ -39,11 +39,18 @@ import static java.util.stream.Collectors.toMap;
 public class IntegrationService {
 
     public static final Logger LOG = LoggerFactory.getLogger(IntegrationService.class);
+    static final int ERROR_STATUS = HttpStatus.SERVICE_UNAVAILABLE_503;
+    static final int SUCCESS_STATUS = HttpStatus.OK_200;
+    static final String STATUS_KEY = "status";
+    static final String TENANTS_KEY ="tenants";
+    static final String APPLICATIONINFO_KEY ="applicationInfo";
 
     private static final String HEROKU_ASSIGNED_PORT = "PORT";
-    private static final int ERROR_STATUS = HttpStatus.SERVICE_UNAVAILABLE_503;
-    private final List<TenantFactory> tenantFactories;
+    private List<TenantFactory> tenantFactories = null;
     private ServiceConfig serviceConfig = null;
+
+    public IntegrationService() {
+    }
 
 
     public IntegrationService(@Nonnull final ServiceConfig config,
@@ -60,7 +67,6 @@ public class IntegrationService {
             throw new IllegalArgumentException("Tenants list must be non-empty");
         }
 
-        ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig);
     }
 
     private static void initTenantServiceResources(TenantFactory tenantFactory) {
@@ -138,7 +144,8 @@ public class IntegrationService {
         LOG.info("Register /health URL");
         LOG.info("Use /health?pretty to pretty-print output JSON");
         Spark.get("/health", (req, res) -> {
-            ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig);
+            ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig.getApplicationVersion(),
+                    serviceConfig.getApplicationName(), tenantFactories);
             res.status((Integer) healthResponse.getOrDefault("status", ERROR_STATUS));
             res.type(ContentType.APPLICATION_JSON.getMimeType());
 
@@ -161,42 +168,37 @@ public class IntegrationService {
         return Integer.parseInt(systemProperty);
     }
 
-    private ImmutableMap<String, Object> createHealthResponse(@Nonnull final ServiceConfig serviceConfig) {
+    ImmutableMap<String, Object> createHealthResponse(@Nonnull final String version, @Nonnull final String title,
+                                                      List<TenantFactory> tenants) {
         final ImmutableMap<String, String> applicationInfo = ImmutableMap.of(
-                "version", serviceConfig.getApplicationVersion(),
-                "title", serviceConfig.getApplicationName());
-
-
-        Map<String, CompletionStage<Integer>> tenantMap = checkTenantStati(tenantFactories);
+                "version", version,
+                "title", title);
+        Map<String, CompletionStage<Integer>> tenantMap = checkTenantStati(tenants);
         //resolve all completable stages
         listOfFuturesToFutureOfList(new ArrayList<>(tenantMap.values()));
         //unpack completable features
         Map<String, Integer> statusMap = tenantMap.keySet().stream()
                 .collect(toMap(v -> v, v -> tenantMap.get(v).toCompletableFuture().join()));
-
-
         return ImmutableMap.of(
-                "status", !statusMap.containsKey(ERROR_STATUS) ? HttpStatus.OK_200 : ERROR_STATUS,
-                "tenants", statusMap,
-                "applicationInfo", applicationInfo);
+                STATUS_KEY, !statusMap.containsValue(ERROR_STATUS) ? SUCCESS_STATUS : ERROR_STATUS,
+                TENANTS_KEY, statusMap,
+                APPLICATIONINFO_KEY, applicationInfo);
     }
 
     private Map<String, CompletionStage<Integer>> checkTenantStati(List<TenantFactory> tenants) {
         return tenants.stream().collect(toMap(TenantFactory::getTenantName, tenantFactory -> {
-                    return tenantFactory.getBlockingSphereClient().
-                            execute(PaymentQuery.of().withLimit(0l))
-                            .thenApply(result -> {
-                                        int status = HttpStatus.OK_200;
-                                        final String tenantName = tenantFactory.getTenantName();
-                                        try {
-                                            result.getCount();
-                                        } catch (Exception e) {
-                                            LOG.error("Cannot query payments for the tenant {}", tenantName, e);
-                                            status = ERROR_STATUS;
+                    int status = SUCCESS_STATUS;
+                    final String tenantName = tenantFactory.getTenantName();
+                    return tenantFactory.getBlockingSphereClient().execute(PaymentQuery.of().withLimit(0l))
+                            .handle((result, exception) -> {
+                                        if (result != null) {
+                                            return status;
                                         }
-                                        return status;
+                                        LOG.error("Cannot query payments for the tenant {}", tenantName, exception);
+                                        return ERROR_STATUS;
                                     }
                             );
+
                 }
         ));
     }
