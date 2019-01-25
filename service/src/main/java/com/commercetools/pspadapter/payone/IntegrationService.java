@@ -42,8 +42,8 @@ public class IntegrationService {
     static final int ERROR_STATUS = HttpStatus.SERVICE_UNAVAILABLE_503;
     static final int SUCCESS_STATUS = HttpStatus.OK_200;
     static final String STATUS_KEY = "status";
-    static final String TENANTS_KEY ="tenants";
-    static final String APPLICATIONINFO_KEY ="applicationInfo";
+    static final String TENANTS_KEY = "tenants";
+    static final String APPLICATIONINFO_KEY = "applicationInfo";
 
     private static final String HEROKU_ASSIGNED_PORT = "PORT";
     private List<TenantFactory> tenantFactories = null;
@@ -173,7 +173,7 @@ public class IntegrationService {
         final ImmutableMap<String, String> applicationInfo = ImmutableMap.of(
                 "version", version,
                 "title", title);
-        Map<String, CompletionStage<Integer>> tenantMap = checkTenantStati(tenants);
+        Map<String, CompletionStage<Integer>> tenantMap = checkTenantStatuses(tenants);
         //resolve all completable stages
         listOfFuturesToFutureOfList(new ArrayList<>(tenantMap.values()));
         //unpack completable features
@@ -185,21 +185,18 @@ public class IntegrationService {
                 APPLICATIONINFO_KEY, applicationInfo);
     }
 
-    private Map<String, CompletionStage<Integer>> checkTenantStati(List<TenantFactory> tenants) {
+    private Map<String, CompletionStage<Integer>> checkTenantStatuses(List<TenantFactory> tenants) {
         return tenants.stream().collect(toMap(TenantFactory::getTenantName, tenantFactory -> {
-                    int status = SUCCESS_STATUS;
-                    final String tenantName = tenantFactory.getTenantName();
-                    return tenantFactory.getBlockingSphereClient().execute(PaymentQuery.of().withLimit(0l))
-                            .handle((result, exception) -> {
-                                        if (result != null) {
-                                            return status;
-                                        }
-                                        LOG.error("Cannot query payments for the tenant {}", tenantName, exception);
-                                        return ERROR_STATUS;
-                                    }
-                            );
-
-                }
-        ));
+            int status = SUCCESS_STATUS;
+            final String tenantName = tenantFactory.getTenantName();
+            return tenantFactory.getBlockingSphereClient().execute(PaymentQuery.of().withLimit(0l))
+                    .handle((result, exception) -> {
+                        if (result != null) {
+                            return status;
+                        }
+                        LOG.error("Cannot query payments for the tenant {}", tenantName, exception);
+                        return ERROR_STATUS;
+                    });
+        }));
     }
 }
