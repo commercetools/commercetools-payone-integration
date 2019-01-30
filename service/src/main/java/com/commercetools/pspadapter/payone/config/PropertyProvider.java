@@ -40,7 +40,7 @@ public class PropertyProvider {
 
     public PropertyProvider() {
         String implementationTitle = ofNullable(getClass().getPackage().getImplementationTitle()).orElse("DEBUG-TITLE");
-        String implementationVersion = ofNullable(getClass().getPackage().getImplementationVersion()).orElse("DEBUG-VERSION");
+        String implementationVersion = ofNullable(getClass().getPackage().getImplementationVersion()).orElse("DEBUG-VRSION");
         internalProperties = ImmutableMap.<String, String>builder()
                 .put(PAYONE_API_VERSION, "3.9")
                 .put(PAYONE_REQUEST_ENCODING, "UTF-8")
