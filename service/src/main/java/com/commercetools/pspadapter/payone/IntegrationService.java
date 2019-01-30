@@ -44,7 +44,7 @@ public class IntegrationService {
     static final int SUCCESS_STATUS = HttpStatus.OK_200;
     static final String STATUS_KEY = "status";
     static final String TENANTS_KEY = "tenants";
-    static final String APPLICATIONINFO_KEY = "applicationInfo";
+    static final String APPLICATION_INFO_KEY = "applicationInfo";
 
     private static final String HEROKU_ASSIGNED_PORT = "PORT";
     private List<TenantFactory> tenantFactories = null;
@@ -191,7 +191,7 @@ public class IntegrationService {
         return ImmutableMap.of(
                 STATUS_KEY, !statusMap.containsValue(ERROR_STATUS) ? SUCCESS_STATUS : ERROR_STATUS,
                 TENANTS_KEY, statusMap,
-                APPLICATIONINFO_KEY, applicationInfo);
+                APPLICATION_INFO_KEY, applicationInfo);
     }
 
     private Map<String, CompletionStage<Integer>> checkTenantStatuses(List<TenantFactory> tenants) {
