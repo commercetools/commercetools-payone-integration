@@ -187,7 +187,7 @@ public class IntegrationService {
         listOfFuturesToFutureOfList(new ArrayList<>(tenantMap.values())).join();
         //unpack completable features
         Map<String, Integer> statusMap = tenantMap.keySet().stream()
-                .collect(toMap(v -> v, v -> tenantMap.get(v).toCompletableFuture().join()));
+                .collect(toMap(tenant -> tenant, tenant -> tenantMap.get(tenant).toCompletableFuture().join()));
         return ImmutableMap.of(
                 STATUS_KEY, !statusMap.containsValue(ERROR_STATUS) ? SUCCESS_STATUS : ERROR_STATUS,
                 TENANTS_KEY, statusMap,
