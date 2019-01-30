@@ -196,12 +196,11 @@ public class IntegrationService {
 
     private Map<String, CompletionStage<Integer>> checkTenantStatuses(List<TenantFactory> tenants) {
         return tenants.stream().collect(toMap(TenantFactory::getTenantName, tenantFactory -> {
-            int status = SUCCESS_STATUS;
             final String tenantName = tenantFactory.getTenantName();
             return tenantFactory.getBlockingSphereClient().execute(PaymentQuery.of().withLimit(0l))
                     .handle((result, exception) -> {
                         if (result != null) {
-                            return status;
+                            return SUCCESS_STATUS;
                         }
                         LOG.error("Cannot query payments for the tenant {}", tenantName, exception);
                         return ERROR_STATUS;
