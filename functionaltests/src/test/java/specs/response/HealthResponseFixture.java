@@ -1,6 +1,5 @@
 package specs.response;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -37,8 +36,11 @@ public class HealthResponseFixture extends BasePaymentFixture {
 
         JsonObject rootNode = parser.parse(responseString).getAsJsonObject();
         String bodyStatus = rootNode.get("status").getAsString();
-        Optional<Set<Map.Entry<String, JsonElement>>> tenantNames = ofNullable(rootNode.get("tenants")).map(e -> e.getAsJsonObject().entrySet());
-        Optional<JsonObject> applicationInfo = ofNullable(rootNode.getAsJsonObject("applicationInfo")).filter(JsonObject::isJsonObject);
+        Set<Map.Entry<String, JsonElement>> tenantNames = ofNullable(rootNode.get("tenants"))
+                .map(e -> e.getAsJsonObject().entrySet())
+                .orElse(Collections.emptySet());
+        Optional<JsonObject> applicationInfo =
+                ofNullable(rootNode.getAsJsonObject("applicationInfo")).filter(JsonObject::isJsonObject);
         String title = applicationInfo.map(node -> node.get("title")).map(JsonElement::getAsString).orElse("");
         String version = applicationInfo.map(node -> node.get("version")).map(JsonElement::getAsString).orElse("");
 
@@ -46,8 +48,8 @@ public class HealthResponseFixture extends BasePaymentFixture {
                 .with("statusCode", httpResponse.getStatusLine().getStatusCode())
                 .with("mimeType", ContentType.getOrDefault(httpResponse.getEntity()).getMimeType())
                 .with("bodyStatus", bodyStatus)
-                .with("bodyTenants", tenantNames.map(names-> names.toString()).orElse("")) // info only
-                .with("bodyTenantsSize", tenantNames.map(tenants->tenants.size()).orElse(0))
+                .with("bodyTenants", tenantNames.toString()) // info only
+                .with("bodyTenantsSize", tenantNames.size())
                 .with("bodyApplicationName", title)
                 .with("bodyApplicationVersion", version)
                 .with("versionIsEmpty", version.isEmpty());
