@@ -184,7 +184,7 @@ public class IntegrationService {
                 "title", serviceConfig.getApplicationName());
         Map<String, CompletionStage<Integer>> tenantMap = checkTenantStatuses(tenants);
         //resolve all completable stages
-        listOfFuturesToFutureOfList(new ArrayList<>(tenantMap.values()));
+        listOfFuturesToFutureOfList(new ArrayList<>(tenantMap.values())).join();
         //unpack completable features
         Map<String, Integer> statusMap = tenantMap.keySet().stream()
                 .collect(toMap(v -> v, v -> tenantMap.get(v).toCompletableFuture().join()));
