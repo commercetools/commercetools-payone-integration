@@ -164,7 +164,7 @@ public class IntegrationService {
     }
 
     public void stop() {
-        Spark.stop();;
+        Spark.stop();
     }
 
     public int port() {
