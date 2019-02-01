@@ -24,6 +24,7 @@ import static io.sphere.sdk.utils.CompletableFutureUtils.exceptionallyCompletedF
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static spark.Spark.awaitStop;
 
 public class IntegrationServiceTest {
 
@@ -66,7 +67,7 @@ public class IntegrationServiceTest {
     @After
     public void tearDown() throws Exception {
         integrationService.stop();
-        waitUntilServerStops();
+        awaitStop();
     }
 
     @Test
@@ -124,21 +125,6 @@ public class IntegrationServiceTest {
     private String expectedBody(int globalStatus, int tenant1Status, int tenant2Status) {
         return "{\"status\":" + globalStatus + ",\"tenants\":{\"tenant2\":" + tenant2Status + ",\"tenant1\":" + tenant1Status + "}," +
                 "\"applicationInfo\":{\"version\":\"1.0\",\"title\":\"applicationTitle\"}}";
-    }
-
-    /**
-     * This assures that the sparkserver has successfully stopped, before the next test is executed.
-     * For more info, please refer: https://github.com/perwendel/spark/issues/731
-     */
-    private void waitUntilServerStops() {
-        while (true) {
-            try {
-                Spark.port();
-                Thread.sleep(1000l);
-            } catch (Exception ignored) {
-                break;
-            }
-        }
     }
 
     private static class HealthResponse {
