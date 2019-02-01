@@ -204,7 +204,7 @@ ins {
                     <td class="inputvalue">Payment 1</td>
                     <td class="inputvalue">406</td>
                     <td class="inputvalue">EUR</td>
-                    <td>c334d2ba-2723-4f9b-a444-a0f8aea99232</td>
+                    <td>53af80f9-ea68-4940-8902-4e401d33f73e</td>
                     <td>https://example.com/paydirek_charge/Payment-1-Success</td>
                     <td>https://example.com/paydirek_charge/Payment-1-Error</td>
                     <td>https://example.com/paydirek_charge/Payment-1-Cancel</td>
@@ -213,7 +213,7 @@ ins {
                     <td class="inputvalue">Payment 2</td>
                     <td class="inputvalue">91341</td>
                     <td class="inputvalue">USD</td>
-                    <td>dcf134e2-4635-4d1b-9709-5fca5d2efdb4</td>
+                    <td>646c02ee-3eb2-45ac-873e-d0718319139a</td>
                     <td>https://example.com/paydirek_charge/Payment-2-Success</td>
                     <td>https://example.com/paydirek_charge/Payment-2-Error</td>
                     <td>https://example.com/paydirek_charge/Payment-2-Cancel</td>
@@ -222,7 +222,7 @@ ins {
                     <td class="inputvalue">Payment 3</td>
                     <td class="inputvalue">6113</td>
                     <td class="inputvalue">EUR</td>
-                    <td>c00a7db5-b8d3-4f6d-accf-09b6c8b7ed42</td>
+                    <td>1044452c-db0e-406b-beaa-438df8dfc94d</td>
                     <td>https://example.com/paydirek_charge/Payment-3-Success</td>
                     <td>https://example.com/paydirek_charge/Payment-3-Error</td>
                     <td>https://example.com/paydirek_charge/Payment-3-Cancel</td>
@@ -231,7 +231,7 @@ ins {
                     <td class="inputvalue">Payment 4</td>
                     <td class="inputvalue">11283</td>
                     <td class="inputvalue">EUR</td>
-                    <td>3a8e49a2-5286-4c84-b8c7-335eb5c3c01c</td>
+                    <td>b27f710b-3091-4fc3-be9c-51831746ffee</td>
                     <td>https://example.com/paydirek_charge/Payment-4-Success</td>
                     <td>https://example.com/paydirek_charge/Payment-4-Error</td>
                     <td>https://example.com/paydirek_charge/Payment-4-Cancel</td>
@@ -295,7 +295,7 @@ ins {
                     <td class="success">Pending</td>
                     <td class="failure"><del class="expected">true</del>
 <ins class="actual">false</ins></td>
-                    <td>https://sandbox.paydirekt.de/checkout/?p=a5d7a239-de9b-4291-94a5-4706a94d3eea#/checkout/a5d7a239-de9b-4291-94a5-4706a94d3eea</td>
+                    <td>https://sandbox.paydirekt.de/checkout/?p=7786bf4a-6c87-4c15-8040-c95618da2f69#/checkout/7786bf4a-6c87-4c15-8040-c95618da2f69</td>
                     <td>11</td>
                 </tr>
                 <tr>
@@ -303,7 +303,7 @@ ins {
                     <td class="success">Pending</td>
                     <td class="failure"><del class="expected">true</del>
 <ins class="actual">false</ins></td>
-                    <td>https://sandbox.paydirekt.de/checkout/?p=bebb5c81-7870-48ef-bf39-d3103e996849#/checkout/bebb5c81-7870-48ef-bf39-d3103e996849</td>
+                    <td>https://sandbox.paydirekt.de/checkout/?p=452fa02c-4446-482e-abad-ae9835c7f2b0#/checkout/452fa02c-4446-482e-abad-ae9835c7f2b0</td>
                     <td>11</td>
                 </tr>
                 <tr>
@@ -311,7 +311,7 @@ ins {
                     <td class="success">Pending</td>
                     <td class="failure"><del class="expected">true</del>
 <ins class="actual">false</ins></td>
-                    <td>https://sandbox.paydirekt.de/checkout/?p=6c3899d5-ca7a-40d9-bdf1-fdd2ca95659e#/checkout/6c3899d5-ca7a-40d9-bdf1-fdd2ca95659e</td>
+                    <td>https://sandbox.paydirekt.de/checkout/?p=f144c75b-2dd7-49f3-9560-c82c79617045#/checkout/f144c75b-2dd7-49f3-9560-c82c79617045</td>
                     <td>11</td>
                 </tr>
             </table>
@@ -365,12 +365,15 @@ ins {
             </p>
             <p>
                 If I follow the Paydirect  process for <span c:set="#successfulPayments" class="inputvalue">Payment 1, Payment 3, Payment 4</span> and
-                <span c:assertTrue="executeRedirectForPayments(#successfulPayments)" class="success">verify them successfully</span> by entering my bank account information,
+                <span c:assertTrue="executeRedirectForPayments(#successfulPayments)" class="failure"><del class="expected">verify them successfully</del>
+<ins class="actual">== false</ins></span> by entering my bank account information,
                 I get forwarded to a predefined success url and for each of the payments the following notifications will be received:
             </p>
             <ol>
-                <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="success">received</span> -&gt; has no effect, just as a confirmation</li>
-                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="success">received</span>
+                <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="failure"><del class="expected">received</del>
+<ins class="actual">== false</ins></span> -&gt; has no effect, just as a confirmation</li>
+                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="failure"><del class="expected">received</del>
+<ins class="actual">== false</ins></span>
                     -&gt;  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
             </ol>
             <table c:execute="#result = fetchPaymentDetails(#paymentName)">
@@ -384,29 +387,32 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
-                    <td class="success">Success</td>
+                    <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
                     <td class="failure"><del class="expected">true</del>
 <ins class="actual">false</ins></td>
-                    <td>https://sandbox.paydirekt.de/checkout/?p=a5d7a239-de9b-4291-94a5-4706a94d3eea#/checkout/a5d7a239-de9b-4291-94a5-4706a94d3eea</td>
-                    <td>19</td>
+                    <td>https://sandbox.paydirekt.de/checkout/?p=7786bf4a-6c87-4c15-8040-c95618da2f69#/checkout/7786bf4a-6c87-4c15-8040-c95618da2f69</td>
+                    <td>15</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
-                    <td class="success">Success</td>
+                    <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
                     <td class="failure"><del class="expected">true</del>
 <ins class="actual">false</ins></td>
-                    <td>https://sandbox.paydirekt.de/checkout/?p=bebb5c81-7870-48ef-bf39-d3103e996849#/checkout/bebb5c81-7870-48ef-bf39-d3103e996849</td>
-                    <td>19</td>
+                    <td>https://sandbox.paydirekt.de/checkout/?p=452fa02c-4446-482e-abad-ae9835c7f2b0#/checkout/452fa02c-4446-482e-abad-ae9835c7f2b0</td>
+                    <td>15</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
-                    <td class="success">Success</td>
+                    <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
                     <td class="failure"><del class="expected">true</del>
 <ins class="actual">false</ins></td>
-                    <td>https://sandbox.paydirekt.de/checkout/?p=6c3899d5-ca7a-40d9-bdf1-fdd2ca95659e#/checkout/6c3899d5-ca7a-40d9-bdf1-fdd2ca95659e</td>
-                    <td>19</td>
+                    <td>https://sandbox.paydirekt.de/checkout/?p=f144c75b-2dd7-49f3-9560-c82c79617045#/checkout/f144c75b-2dd7-49f3-9560-c82c79617045</td>
+                    <td>11</td>
                 </tr>
             </table>
         </div>
-    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 467167 ms on 01-Feb-2019 at 11:27:19 UTC</div></div></body>
+    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 33128 ms on 01-Feb-2019 at 11:47:45 UTC</div></div></body>
 </html>
