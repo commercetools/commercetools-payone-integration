@@ -167,11 +167,16 @@ public class TenantFactory {
                 SphereClientFactory.of().createClient(tenantConfig.getSphereClientConfig()),
                 DEFAULT_CTP_CLIENT_TIMEOUT);
     }
+    public BlockingSphereClient getBlockingSphereClient() {
+        return blockingSphereClient;
+    }
 
     @Nonnull
     protected PayonePostService getPayonePostService(TenantConfig tenantConfig) {
         return PayonePostServiceImpl.of(tenantConfig.getPayoneConfig().getApiUrl());
     }
+
+
 
     protected PaymentService createPaymentService(SphereClient sphereClient) {
         return new PaymentServiceImpl(sphereClient);

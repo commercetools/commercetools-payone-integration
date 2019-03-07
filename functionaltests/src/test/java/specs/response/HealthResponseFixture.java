@@ -1,6 +1,5 @@
 package specs.response;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -10,7 +9,10 @@ import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.commercetools.util.HttpRequestUtil.executeGetRequest;
 import static com.commercetools.util.HttpRequestUtil.responseToString;
@@ -34,8 +36,11 @@ public class HealthResponseFixture extends BasePaymentFixture {
 
         JsonObject rootNode = parser.parse(responseString).getAsJsonObject();
         String bodyStatus = rootNode.get("status").getAsString();
-        Optional<JsonArray> tenantNames = ofNullable(rootNode.get("tenants")).filter(JsonElement::isJsonArray).map(JsonElement::getAsJsonArray);
-        Optional<JsonObject> applicationInfo = ofNullable(rootNode.getAsJsonObject("applicationInfo")).filter(JsonObject::isJsonObject);
+        Set<Map.Entry<String, JsonElement>> tenantNames = ofNullable(rootNode.get("tenants"))
+                .map(e -> e.getAsJsonObject().entrySet())
+                .orElse(Collections.emptySet());
+        Optional<JsonObject> applicationInfo =
+                ofNullable(rootNode.getAsJsonObject("applicationInfo")).filter(JsonObject::isJsonObject);
         String title = applicationInfo.map(node -> node.get("title")).map(JsonElement::getAsString).orElse("");
         String version = applicationInfo.map(node -> node.get("version")).map(JsonElement::getAsString).orElse("");
 
@@ -43,8 +48,8 @@ public class HealthResponseFixture extends BasePaymentFixture {
                 .with("statusCode", httpResponse.getStatusLine().getStatusCode())
                 .with("mimeType", ContentType.getOrDefault(httpResponse.getEntity()).getMimeType())
                 .with("bodyStatus", bodyStatus)
-                .with("bodyTenants", tenantNames.map(JsonArray::toString).orElse("<<undefined>>")) // info only
-                .with("bodyTenantsSize", tenantNames.map(JsonArray::size).orElse(0))
+                .with("bodyTenants", tenantNames.toString()) // info only
+                .with("bodyTenantsSize", tenantNames.size())
                 .with("bodyApplicationName", title)
                 .with("bodyApplicationVersion", version)
                 .with("versionIsEmpty", version.isEmpty());
