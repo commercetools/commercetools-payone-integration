@@ -19,7 +19,7 @@ import static org.assertj.core.data.MapEntry.entry;
 
 public class HttpRequestUtilTest {
 
-    static final String HTTP_HTTPBIN_ORG = "http://httpbin.org/";
+    static final String HTTP_HTTPBIN_ORG = "https://httpbin.org/";
     static final String HTTP_HTTPBIN_ORG_GET = HTTP_HTTPBIN_ORG + "get";
     static final String HTTP_HTTPBIN_ORG_POST = HTTP_HTTPBIN_ORG + "post";
 
