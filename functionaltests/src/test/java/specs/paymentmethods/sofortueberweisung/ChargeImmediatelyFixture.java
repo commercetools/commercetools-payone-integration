@@ -154,7 +154,7 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
 
         // run all 3 payments approval in parallel, aka 3 different sessions
         // and collect successfully approved redirect URLs
-        successUrlForPayment = paymentNamesList.stream().parallel()
+        successUrlForPayment = paymentNamesList.stream()
                 .map(this::approvePaymentAsCustomer)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
