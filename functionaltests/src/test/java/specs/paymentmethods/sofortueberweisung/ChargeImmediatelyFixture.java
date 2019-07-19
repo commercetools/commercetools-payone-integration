@@ -152,9 +152,9 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
     public boolean executeRedirectForPayments(final String paymentNames) throws ExecutionException {
         final Collection<String> paymentNamesList = ImmutableList.copyOf(thePaymentNamesSplitter.split(paymentNames));
 
-        // run all 3 payments approval in parallel, aka 3 different sessions
+        // run all 3 payments approval, aka 3 different sessions
         // and collect successfully approved redirect URLs
-        successUrlForPayment = paymentNamesList.stream().parallel()
+        successUrlForPayment = paymentNamesList.stream()
                 .map(this::approvePaymentAsCustomer)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
