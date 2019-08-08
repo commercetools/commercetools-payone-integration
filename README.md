@@ -173,7 +173,7 @@ thus you don't need to setup the schedule for every tenant separately.
 
 ## Other resources
   * commercetools general payment conventions, esp. for the payment type modeling https://github.com/nkuehn/payment-specs
-  * PAYONE API documentation https://pmi.pay1.de/merchants/?navi=downloads
+  * PAYONE API documentation https://docs.payone.com/#all-updates
 
 ## For developers and contributors
 
