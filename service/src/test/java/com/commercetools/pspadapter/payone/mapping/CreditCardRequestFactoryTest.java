@@ -22,6 +22,7 @@ import util.PaymentTestHelper;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import static com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaItemTypeEnum.*;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static org.javamoney.moneta.function.MonetaryQueries.convertMinorPart;
@@ -185,6 +186,15 @@ public class CreditCardRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(result.getShipping_country()).isEqualTo(shippingAddress.getCountry().toLocale().getCountry());
         softly.assertThat(result.getShipping_state()).isEqualTo(shippingAddress.getState());
         softly.assertThat(result.getShipping_company()).isEqualTo(shippingAddress.getCompany() + " " + shippingAddress.getDepartment());
+        // but then below the order of the items' properties should be also changed
+        softly.assertThat(result.getIt()).containsExactly(goods.toString());
+        softly.assertThat(result.getId()).containsExactly("MATE-1");
+        softly.assertThat(result.getPr()).containsExactly(1190L);
+
+        softly.assertThat(result.getNo()).containsExactly(1L);
+
+        softly.assertThat(result.getDe()).containsExactly("Some Product");
+        softly.assertThat(result.getVa()).containsExactly(19);
 
         softly.assertAll();
     }

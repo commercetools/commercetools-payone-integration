@@ -1,9 +1,11 @@
-package com.commercetools.pspadapter.payone.domain.payone.model.klarna;
+package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
+import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaConstants;
+import com.commercetools.pspadapter.payone.domain.payone.model.klarna.PricesAggregator;
 import io.sphere.sdk.cartdiscounts.DiscountedLineItemPrice;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.carts.CartShippingInfo;
@@ -35,16 +37,17 @@ import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 
 /**
- * Base class for Klarna <i>authorisation</i> and <i>preauthorisation</i> requests.
+ * Base class for creditcard and Klarna <i>authorisation</i> and <i>preauthorisation</i> requests.
  * <p>
  * Opposite to most of other requests, this requests has high level requirements for sold items description,
  * thus we map all the line items, custom items, discounts and shipment costs in
- * {@link #mapKlarnaPropertiesFromPaymentCart(PaymentWithCartLike)} from the {@link PaymentWithCartLike}.
+ * {@link #mapPropertiesFromPaymentCart(PaymentWithCartLike)} from the {@link PaymentWithCartLike}.
  * <p>
- * See <i>PAYONE_Platform_Klarna_Addon_EN</i> for more details.
+ * See <i>https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+3-D+Secure</i> and
+ * <i>PAYONE_Platform_Klarna_Addon_EN</i>   for more details.
  * The latest implemented API version is from <b>2016-11-30</b>.
  */
-public abstract class BaseKlarnaRequest extends AuthorizationRequest {
+public abstract class ExtendedAuthorizationRequest extends AuthorizationRequest {
 
     private String financingtype;
 
@@ -60,13 +63,16 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
 
     private List<Integer> va;
 
-    protected BaseKlarnaRequest(final PayoneConfig config, final String requestType,
-                                final String financingtype, final PaymentWithCartLike paymentWithCartLike) {
-        super(config, requestType, ClearingType.PAYONE_KLV.getPayoneCode());
-
-        this.financingtype = financingtype;
-
-        mapKlarnaPropertiesFromPaymentCart(paymentWithCartLike);
+    protected ExtendedAuthorizationRequest(final PayoneConfig config,
+                                           final String requestType,
+                                           final String financingtype,
+                                           final String clearingType,
+                                           final PaymentWithCartLike paymentWithCartLike) {
+        super(config, requestType, clearingType);
+        if (StringUtils.isNotBlank(financingtype)) {
+            this.financingtype = financingtype;
+        }
+        mapPropertiesFromPaymentCart(paymentWithCartLike);
     }
 
     /**
@@ -171,7 +177,7 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
      *
      * @param paymentWithCartLike instance from which all the prices are fetched.
      */
-    protected void mapKlarnaPropertiesFromPaymentCart(@Nonnull PaymentWithCartLike paymentWithCartLike) {
+    protected void mapPropertiesFromPaymentCart(@Nonnull PaymentWithCartLike paymentWithCartLike) {
         // create an ordered list of preferred locales to fetch from localized items properties,
         // like sku, description etc.
         // The idea is: try first to fetch the locale mentioned in the paymentWithCartLike,
@@ -212,7 +218,7 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
     }
 
     /**
-     * Populate "goods" of the Klarna request. This function is used for {@link LineItem} of CTP.
+     * Populate "goods" of the  request. This function is used for {@link LineItem} of CTP.
      *
      * @param lineItems list of line items to populate
      * @param locales   applicable order locale
@@ -234,12 +240,13 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
                     final long fullPriceCents = centAmountOf(lineItem.getPrice().getValue());
                     pr.add(fullPriceCents);
 
-                    return new PricesAggregator(fullPriceCents * lineItem.getQuantity(), getActualPricePerLineItem(lineItem));
+                    return new PricesAggregator(fullPriceCents * lineItem.getQuantity(),
+                            getActualPricePerLineItem(lineItem));
                 }).collect(PricesAggregator.pricesCollector());
     }
 
     /**
-     * Populate "goods" of the Klarna request. This function is used for {@link CustomLineItem} of CTP.
+     * Populate "goods" of the request. This function is used for {@link CustomLineItem} of CTP.
      *
      * @param customLineItems list of custom line items to populate
      * @param locales         applicable order locale
@@ -260,7 +267,8 @@ public abstract class BaseKlarnaRequest extends AuthorizationRequest {
                     final long fullPriceCents = centAmountOf(customLineItem.getMoney());
                     pr.add(fullPriceCents);
 
-                    return new PricesAggregator(fullPriceCents * customLineItem.getQuantity(), getActualPricePerLineItem(customLineItem));
+                    return new PricesAggregator(fullPriceCents * customLineItem.getQuantity(),
+                            getActualPricePerLineItem(customLineItem));
                 })
                 .collect(PricesAggregator.pricesCollector());
     }

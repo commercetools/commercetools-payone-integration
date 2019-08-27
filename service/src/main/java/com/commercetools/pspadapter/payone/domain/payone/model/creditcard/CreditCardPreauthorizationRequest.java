@@ -1,15 +1,16 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.creditcard;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
+import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.ExtendedAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 
 /**
  * @author fhaertig
  * @since 11.12.15
  */
-public class CreditCardPreauthorizationRequest extends AuthorizationRequest {
+public class CreditCardPreauthorizationRequest extends ExtendedAuthorizationRequest {
 
     /**
      * pseudo card number
@@ -18,8 +19,11 @@ public class CreditCardPreauthorizationRequest extends AuthorizationRequest {
 
     private String ecommercemode;
 
-    public CreditCardPreauthorizationRequest(final PayoneConfig config, final String pseudocardpan) {
-        super(config, RequestType.PREAUTHORIZATION.getType(), ClearingType.PAYONE_CC.getPayoneCode());
+    public CreditCardPreauthorizationRequest(final PayoneConfig config,
+                                             final String pseudocardpan,
+                                             final PaymentWithCartLike paymentWithCartLike) {
+        super(config, RequestType.PREAUTHORIZATION.getType(), null, ClearingType.PAYONE_CC.getPayoneCode(),
+                paymentWithCartLike);
 
         this.pseudocardpan = pseudocardpan;
     }
