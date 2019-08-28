@@ -18,7 +18,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import util.PaymentTestHelper;
 
 import java.time.LocalDate;
 import java.util.Locale;
@@ -62,6 +64,8 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        final PaymentTestHelper payments = new PaymentTestHelper();
+       when((CartLike) paymentWithCartLike.getCartLike()).thenReturn(payments.dummyOrderMapToPayoneRequest());
         softly = new SoftAssertions();
     }
 
@@ -72,8 +76,12 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         Address addressUS = Address.of(CountryCode.US)
                 .withState("AK");
 
-        CreditCardAuthorizationRequest authorizationRequestDE = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",paymentWithCartLike);
-        CreditCardAuthorizationRequest authorizationRequestUS = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",paymentWithCartLike);
+        CreditCardAuthorizationRequest authorizationRequestDE =
+                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+                        paymentWithCartLike);
+        CreditCardAuthorizationRequest authorizationRequestUS =
+                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+                        paymentWithCartLike);
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestDE, addressDE);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestDE, addressDE);
@@ -94,7 +102,9 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
                 .withStreetName("Test Street")
                 .withStreetNumber("2");
 
-        CreditCardAuthorizationRequest authorizationRequestWithNameNumber = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",paymentWithCartLike);
+        CreditCardAuthorizationRequest authorizationRequestWithNameNumber =
+                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+                        paymentWithCartLike);
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestWithNameNumber, addressWithNameNumber);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestWithNameNumber, addressWithNameNumber);
@@ -110,7 +120,9 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         Address addressNoNumber = Address.of(DE)
                 .withStreetName("Test Street");
 
-        CreditCardAuthorizationRequest authorizationRequestNoNumber = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123", paymentWithCartLike);
+        CreditCardAuthorizationRequest authorizationRequestNoNumber =
+                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+                        paymentWithCartLike);
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestNoNumber, addressNoNumber);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestNoNumber, addressNoNumber);
@@ -126,13 +138,16 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         Address addressNoName = Address.of(DE)
                 .withStreetNumber("5");
 
-        CreditCardAuthorizationRequest authorizationRequestNoName = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123", paymentWithCartLike);
+        CreditCardAuthorizationRequest authorizationRequestNoName =
+                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+                        paymentWithCartLike);
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestNoName, addressNoName);
         MappingUtil.mapShippingAddressToRequest(authorizationRequestNoName, addressNoName);
 
         softly.assertThat(authorizationRequestNoName.getStreet()).as("DE billing address state").isEqualTo("5");
-        softly.assertThat(authorizationRequestNoName.getShipping_street()).as("DE shipping address state").isEqualTo("5");
+        softly.assertThat(authorizationRequestNoName.getShipping_street()).as("DE shipping address state").isEqualTo(
+                "5");
 
         softly.assertAll();
     }
@@ -142,7 +157,9 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         when(customer.getCustomerNumber()).thenReturn("01234567890123456789");
         Reference<Customer> customerReference = Reference.of(Customer.referenceTypeId(), customer);
 
-        CreditCardAuthorizationRequest authorizationRequest = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123", paymentWithCartLike);
+        CreditCardAuthorizationRequest authorizationRequest =
+                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+                        paymentWithCartLike);
 
         MappingUtil.mapCustomerToRequest(authorizationRequest, customerReference);
 
@@ -155,7 +172,9 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         when(customer.getId()).thenReturn("276829bd-6fa3-450f-9e2a-9a8715a9a104");
         Reference<Customer> customerReference = Reference.of(Customer.referenceTypeId(), customer);
 
-        CreditCardAuthorizationRequest authorizationRequest = new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",paymentWithCartLike);
+        CreditCardAuthorizationRequest authorizationRequest =
+                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+                        paymentWithCartLike);
 
         MappingUtil.mapCustomerToRequest(authorizationRequest, customerReference);
 
@@ -164,6 +183,7 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     @Test
     public void getPaymentLanguageTest() {
+        when((CartLike) paymentWithCartLike.getCartLike()).thenReturn(mock(CartLike.class));
 
         // base cases: null arguments
         softly.assertThat(getPaymentLanguage(null).isPresent()).isFalse();
@@ -204,6 +224,7 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     @Test
     public void getPaymentLanguageTagOrFallback() throws Exception {
+        when((CartLike) paymentWithCartLike.getCartLike()).thenReturn(mock(CartLike.class));
         // base cases: null arguments
         softly.assertThat(MappingUtil.getPaymentLanguageTagOrFallback(null)).isEqualTo("en");
         softly.assertThat(MappingUtil.getPaymentLanguageTagOrFallback(paymentWithCartLike)).isEqualTo("en");
@@ -243,7 +264,8 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     @Test
     public void mapAmountPlannedFromPayment_withoutPrice() throws Exception {
-        AuthorizationRequest request = new AuthorizationRequestImplTest(new PayoneConfig(tenantPropertyProvider), "testReqType", "testClearType");
+        AuthorizationRequest request = new AuthorizationRequestImplTest(new PayoneConfig(tenantPropertyProvider),
+                "testReqType", "testClearType");
 
         when(payment.getAmountPlanned()).thenReturn(null);
 
@@ -254,7 +276,8 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     @Test
     public void mapAmountPlannedFromPayment_withPrice() throws Exception {
-        AuthorizationRequest request = new AuthorizationRequestImplTest(new PayoneConfig(tenantPropertyProvider), "testReqType", "testClearType");
+        AuthorizationRequest request = new AuthorizationRequestImplTest(new PayoneConfig(tenantPropertyProvider),
+                "testReqType", "testClearType");
 
         when(payment.getAmountPlanned()).thenReturn(Money.of(18, "EUR"));
 
@@ -275,14 +298,14 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         when(paymentCustomFields.getFieldAsString(GENDER_FIELD)).thenReturn("paymentGender");
         CustomFields customerCustomFields = mock(CustomFields.class);
         when(customerCustomFields.getFieldAsString(GENDER_FIELD)).thenReturn("USER_GENDER");
-
+        cartLike = Mockito.mock(CartLike.class);
 
         when(cartLike.getCustom()).thenReturn(cartCustomFields);
         when(payment.getCustom()).thenReturn(paymentCustomFields);
         Reference<Customer> of = Reference.of("test-id", customer);
         when(payment.getCustomer()).thenReturn(of);
         when(customer.getCustom()).thenReturn(customerCustomFields);
-
+        when((CartLike) paymentWithCartLike.getCartLike()).thenReturn(cartLike);
         // payment custom field in the result
         softly.assertThat(MappingUtil.getGenderFromPaymentCart(paymentWithCartLike)).hasValue("p");
 
@@ -329,7 +352,7 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
                 .contains(DE);
 
         assertThat(MappingUtil.getFirstValueFromAddresses(asList(Address.of(AL).withCompany("xxx"),
-                                        Address.of(NL).withCompany("ggg")), Address::getCompany))
+                Address.of(NL).withCompany("ggg")), Address::getCompany))
                 .contains("xxx");
 
         assertThat(MappingUtil.getFirstValueFromAddresses(asList(Address.of(AL).withCompany("xxx").withEmail("TTT"),
