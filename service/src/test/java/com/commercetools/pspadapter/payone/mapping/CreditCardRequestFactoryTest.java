@@ -190,9 +190,7 @@ public class CreditCardRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(result.getIt()).containsExactly(goods.toString());
         softly.assertThat(result.getId()).containsExactly("MATE-1");
         softly.assertThat(result.getPr()).containsExactly(1190L);
-
         softly.assertThat(result.getNo()).containsExactly(1L);
-
         softly.assertThat(result.getDe()).containsExactly("Some Product");
         softly.assertThat(result.getVa()).containsExactly(19);
 
