@@ -10,6 +10,6 @@ public class KlarnaPreauthorizationRequest extends ExtendedAuthorizationRequest 
 
     public KlarnaPreauthorizationRequest(final PayoneConfig config, final String financingtype,
                                          final PaymentWithCartLike paymentWithCartLike) {
-        super(config, RequestType.PREAUTHORIZATION.getType(), financingtype, ClearingType.PAYONE_KLV.getPayoneCode(),paymentWithCartLike);
+        super(config, RequestType.PREAUTHORIZATION.getType(), financingtype, ClearingType.PAYONE_KLV.getPayoneCode(), paymentWithCartLike);
     }
 }
