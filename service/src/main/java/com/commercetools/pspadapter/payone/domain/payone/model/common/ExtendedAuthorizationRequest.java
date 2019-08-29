@@ -218,7 +218,7 @@ public abstract class ExtendedAuthorizationRequest extends AuthorizationRequest 
     }
 
     /**
-     * Populate "goods" of the  request. This function is used for {@link LineItem} of CTP.
+     * Populate "goods" of the request. This function is used for {@link LineItem} of CTP.
      *
      * @param lineItems list of line items to populate
      * @param locales   applicable order locale
