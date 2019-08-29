@@ -47,7 +47,7 @@ import static java.util.Optional.ofNullable;
  * <i>PAYONE_Platform_Klarna_Addon_EN</i>   for more details.
  * The latest implemented API version is from <b>2016-11-30</b>.
  */
-public abstract class ExtendedAuthorizationRequest extends AuthorizationRequest {
+public abstract class AuthorizationRequestWithCart extends AuthorizationRequest {
 
     private String financingtype;
 
@@ -63,7 +63,7 @@ public abstract class ExtendedAuthorizationRequest extends AuthorizationRequest 
 
     private List<Integer> va;
 
-    protected ExtendedAuthorizationRequest(final PayoneConfig config,
+    protected AuthorizationRequestWithCart(final PayoneConfig config,
                                            final String requestType,
                                            final String financingtype,
                                            final String clearingType,
