@@ -37,7 +37,7 @@ import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 
 /**
- * Base class for creditcard and Klarna <i>authorisation</i> and <i>preauthorisation</i> requests.
+ * Base class for credit card and Klarna <i>authorisation</i> and <i>preauthorisation</i> requests.
  * <p>
  * Opposite to most of other requests, this requests has high level requirements for sold items description,
  * thus we map all the line items, custom items, discounts and shipment costs in
