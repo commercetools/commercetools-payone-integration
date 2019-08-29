@@ -63,11 +63,11 @@ public abstract class AuthorizationRequestWithCart extends AuthorizationRequest 
 
     private List<Integer> va;
 
-    protected AuthorizationRequestWithCart(final PayoneConfig config,
-                                           final String requestType,
-                                           final String financingtype,
-                                           final String clearingType,
-                                           final PaymentWithCartLike paymentWithCartLike) {
+    protected AuthorizationRequestWithCart(@Nonnull final PayoneConfig config,
+                                           @Nonnull final String requestType,
+                                           @Nullable final String financingtype,
+                                           @Nonnull final String clearingType,
+                                           @Nonnull final PaymentWithCartLike paymentWithCartLike) {
         super(config, requestType, clearingType);
         if (StringUtils.isNotBlank(financingtype)) {
             this.financingtype = financingtype;
