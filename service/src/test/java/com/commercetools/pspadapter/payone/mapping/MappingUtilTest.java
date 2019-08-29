@@ -65,7 +65,7 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
     public void setUp() throws Exception {
         super.setUp();
         final PaymentTestHelper payments = new PaymentTestHelper();
-       when((CartLike) paymentWithCartLike.getCartLike()).thenReturn(payments.dummyOrderMapToPayoneRequest());
+        when((CartLike) paymentWithCartLike.getCartLike()).thenReturn(payments.dummyOrderMapToPayoneRequest());
         softly = new SoftAssertions();
     }
 
