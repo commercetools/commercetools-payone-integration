@@ -69,9 +69,7 @@ public abstract class AuthorizationRequestWithCart extends AuthorizationRequest 
                                            @Nonnull final String clearingType,
                                            @Nonnull final PaymentWithCartLike paymentWithCartLike) {
         super(config, requestType, clearingType);
-        if (StringUtils.isNotBlank(financingtype)) {
-            this.financingtype = financingtype;
-        }
+        this.financingtype = financingtype;
         mapPropertiesFromPaymentCart(paymentWithCartLike);
     }
 
