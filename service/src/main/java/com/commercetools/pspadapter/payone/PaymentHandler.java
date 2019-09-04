@@ -73,7 +73,7 @@ public class PaymentHandler {
                     format("The payment couldn't be processed after %s retries", RETRIES_LIMIT));
 
         } catch (final NotFoundException | NoCartLikeFoundException e) {
-            return handleNotFoundException(paymentId);
+            return handleNotFoundException(paymentId, e);
         } catch (final ErrorResponseException e) {
             return errorResponseHandler(e, paymentId);
         } catch (final CompletionException e) {
@@ -83,8 +83,10 @@ public class PaymentHandler {
         }
     }
 
-    private PaymentHandleResult handleNotFoundException(@Nonnull String paymentId) {
-        final String body = format("Could not process payment with ID [%s]: order or cart not found", paymentId);
+     private PaymentHandleResult handleNotFoundException(@Nonnull String paymentId, @Nonnull Exception exception ) {
+        final String body = format("Error on processing payment with ID [%s] as payment or cart could not be found", paymentId);
+        // Temporary adding the exception to error log to simplify debugging.
+        logger.error(body, exception);
         return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
     }
 
