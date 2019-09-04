@@ -85,7 +85,7 @@ public class PaymentHandler {
 
      private PaymentHandleResult handleNotFoundException(@Nonnull String paymentId, @Nonnull Exception exception ) {
         final String body = format("Could not process payment with ID [%s], paymentId");
-        // Temporary adding the exception to error log, to simplify debugging
+        // Temporary adding the exception to error log to simplify debugging.
         logger.error(body, exception);
         return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
     }
