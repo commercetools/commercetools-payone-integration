@@ -149,7 +149,7 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
-        assertThat(paymentHandleResult.body()).contains(format("Could not process payment with ID [%s]: order or cart not found", paymentId));
+        assertThat(paymentHandleResult.body()).contains(format("Error on processing payment with ID [%s] as payment or cart could not be found", paymentId));
     }
 
     @Test
@@ -166,7 +166,7 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
-        assertThat(paymentHandleResult.body()).contains(format("Could not process payment with ID [%s]: order or cart not found", paymentId));
+        assertThat(paymentHandleResult.body()).contains(format("Error on processing payment with ID [%s] as payment or cart could not be found", paymentId));
     }
 
     @Test
