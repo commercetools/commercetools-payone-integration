@@ -13,6 +13,7 @@ import java.net.URL;
 
 import static com.commercetools.pspadapter.payone.IntegrationService.SUCCESS_STATUS;
 import static com.google.common.collect.ImmutableList.of;
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static spark.Spark.awaitStop;
@@ -27,9 +28,9 @@ public class IntegrationServiceTest {
 
     private ServiceConfig serviceConfig = null;
 
-    private static HealthResponse requestHealth() {
+    private static HealthResponse requestHealth(boolean isPretty) {
         try {
-            URL url = new URL("http://localhost:8080/health");
+            URL url = new URL(format("http://localhost:8080/health%s", isPretty ? "?pretty" : ""));
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setDoOutput(true);
@@ -62,28 +63,47 @@ public class IntegrationServiceTest {
     }
 
     @Test
-    public void createHealthResponse_tenantConfigIsWorking_shouldReturnOkStatus() {
+    public void createHealthResponse_WithoutPrettyOutputQuery_shouldReturnOkStatus() {
         integrationService = new IntegrationService(serviceConfig, of(
                 createMockTenantFactory(TENANTNAME1),
                 createMockTenantFactory(TENANTNAME2)));
 
         integrationService.start();
 
-        final HealthResponse result = requestHealth();
+        final HealthResponse result = requestHealth(false);
 
         assertThat(result.status).isEqualTo(SUCCESS_STATUS);
-        assertThat(result.body).isEqualTo(expectedBody(SUCCESS_STATUS, SUCCESS_STATUS, SUCCESS_STATUS));
+        assertThat(result.body).isEqualTo(
+            "{\"status\":200,\"applicationInfo\":{\"version\":\"1.0\",\"title\":\"applicationTitle\"}}"
+        );
+    }
+
+    @Test
+    public void createHealthResponse_WithPrettyOutputQuery_shouldReturnOkStatus() {
+        integrationService = new IntegrationService(serviceConfig, of(
+                createMockTenantFactory(TENANTNAME1),
+                createMockTenantFactory(TENANTNAME2)));
+
+        integrationService.start();
+
+        final HealthResponse result = requestHealth(true);
+
+        assertThat(result.status).isEqualTo(SUCCESS_STATUS);
+        assertThat(result.body).isEqualTo(
+          "{\n" +
+          "  \"status\" : 200,\n" +
+          "  \"applicationInfo\" : {\n" +
+          "    \"version\" : \"1.0\",\n" +
+          "    \"title\" : \"applicationTitle\"\n" +
+          "  }\n" +
+          "}"
+        );
     }
 
     private TenantFactory createMockTenantFactory(String tenantName) {
         TenantFactory tenantFactory = Mockito.mock(TenantFactory.class);
         when(tenantFactory.getTenantName()).thenReturn(tenantName);
         return tenantFactory;
-    }
-
-    private String expectedBody(int globalStatus, int tenant1Status, int tenant2Status) {
-        return "{\"status\":" + globalStatus + ",\"tenants\":{\"tenant2\":" + tenant2Status + ",\"tenant1\":" + tenant1Status + "}," +
-                "\"applicationInfo\":{\"version\":\"1.0\",\"title\":\"applicationTitle\"}}";
     }
 
     private static class HealthResponse {

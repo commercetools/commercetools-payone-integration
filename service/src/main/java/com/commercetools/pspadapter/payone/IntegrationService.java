@@ -20,9 +20,7 @@ import spark.utils.CollectionUtils;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
 import static io.sphere.sdk.json.SphereJsonUtils.toJsonString;
@@ -38,8 +36,7 @@ public class IntegrationService {
     public static final Logger LOG = LoggerFactory.getLogger(IntegrationService.class);
     static final int SUCCESS_STATUS = HttpStatus.OK_200;
     private static final String STATUS_KEY = "status";
-    static final String TENANTS_KEY = "tenants";
-    static final String APPLICATION_INFO_KEY = "applicationInfo";
+    private static final String APPLICATION_INFO_KEY = "applicationInfo";
 
     private static final String HEROKU_ASSIGNED_PORT = "PORT";
     private List<TenantFactory> tenantFactories = null;
@@ -143,7 +140,7 @@ public class IntegrationService {
 
         final ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig, tenantFactories);
         final String healthRequestContent = toJsonString(healthResponse);
-        final String healthRequestFormattedContent = toPrettyJsonString(healthResponse);
+        final String healthRequestPrettyContent = toPrettyJsonString(healthResponse);
 
         // This is a temporary jerry-rig for the load balancer to check connection with the service itself.
         // For now it just returns a JSON response with status code, tenants list and static application info.
@@ -155,7 +152,7 @@ public class IntegrationService {
         Spark.get("/health", (req, res) -> {
             res.status(SUCCESS_STATUS);
             res.type(ContentType.APPLICATION_JSON.getMimeType());
-            return req.queryParams("pretty") != null ? healthRequestFormattedContent : healthRequestContent;
+            return req.queryParams("pretty") != null ? healthRequestPrettyContent : healthRequestContent;
         });
     }
 
@@ -179,14 +176,8 @@ public class IntegrationService {
                 "version", serviceConfig.getApplicationVersion(),
                 "title", serviceConfig.getApplicationName());
 
-        final Map<String, Integer> tenantStatutes = new HashMap<>();
-        for (TenantFactory tenant : tenants) {
-            tenantStatutes.put(tenant.getTenantName(), SUCCESS_STATUS);
-        }
-
         return ImmutableMap.of(
                 STATUS_KEY, SUCCESS_STATUS,
-                TENANTS_KEY, tenantStatutes,
                 APPLICATION_INFO_KEY, applicationInfo);
     }
 }
