@@ -22,9 +22,12 @@ import spark.utils.CollectionUtils;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
 import static io.sphere.sdk.json.SphereJsonUtils.toJsonString;
@@ -40,9 +43,8 @@ import static java.util.stream.Collectors.toMap;
 public class IntegrationService {
 
     public static final Logger LOG = LoggerFactory.getLogger(IntegrationService.class);
-    static final int ERROR_STATUS = HttpStatus.SERVICE_UNAVAILABLE_503;
     static final int SUCCESS_STATUS = HttpStatus.OK_200;
-    static final String STATUS_KEY = "status";
+    private static final String STATUS_KEY = "status";
     static final String TENANTS_KEY = "tenants";
     static final String APPLICATION_INFO_KEY = "applicationInfo";
 
@@ -146,6 +148,10 @@ public class IntegrationService {
     private void initSparkService() {
         Spark.port(port());
 
+        final ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig, tenantFactories);
+        final String healthRequestContent = toJsonString(healthResponse);
+        final String healthRequestFormattedContent = toPrettyJsonString(healthResponse);
+
         // This is a temporary jerry-rig for the load balancer to check connection with the service itself.
         // For now it just returns a JSON response with status code, tenants list and static application info.
         // It should be expanded to a more real health-checker service, which really performs PAYONE status check.
@@ -154,12 +160,9 @@ public class IntegrationService {
         LOG.info("Register /health URL");
         LOG.info("Use /health?pretty to pretty-print output JSON");
         Spark.get("/health", (req, res) -> {
-            ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig, tenantFactories);
-            res.status((Integer) healthResponse.getOrDefault(STATUS_KEY, ERROR_STATUS));
+            res.status(SUCCESS_STATUS);
             res.type(ContentType.APPLICATION_JSON.getMimeType());
-
-            return req.queryParams("pretty") != null ? toPrettyJsonString(healthResponse) :
-                    toJsonString(healthResponse);
+            return req.queryParams("pretty") != null ? healthRequestFormattedContent : healthRequestContent;
         });
     }
 
@@ -182,29 +185,15 @@ public class IntegrationService {
         final ImmutableMap<String, String> applicationInfo = ImmutableMap.of(
                 "version", serviceConfig.getApplicationVersion(),
                 "title", serviceConfig.getApplicationName());
-        Map<String, CompletionStage<Integer>> tenantMap = checkTenantStatuses(tenants);
-        //resolve all completable stages
-        listOfFuturesToFutureOfList(new ArrayList<>(tenantMap.values())).join();
-        //unpack completable features
-        Map<String, Integer> statusMap = tenantMap.keySet().stream()
-                .collect(toMap(tenant -> tenant, tenant -> tenantMap.get(tenant).toCompletableFuture().join()));
-        return ImmutableMap.of(
-                STATUS_KEY, !statusMap.containsValue(ERROR_STATUS) ? SUCCESS_STATUS : ERROR_STATUS,
-                TENANTS_KEY, statusMap,
-                APPLICATION_INFO_KEY, applicationInfo);
-    }
 
-    private Map<String, CompletionStage<Integer>> checkTenantStatuses(List<TenantFactory> tenants) {
-        return tenants.stream().collect(toMap(TenantFactory::getTenantName, tenantFactory -> {
-            final String tenantName = tenantFactory.getTenantName();
-            return tenantFactory.getBlockingSphereClient().execute(PaymentQuery.of().withLimit(0l))
-                    .handle((result, exception) -> {
-                        if (result != null) {
-                            return SUCCESS_STATUS;
-                        }
-                        LOG.error("Cannot query payments for the tenant {}", tenantName, exception);
-                        return ERROR_STATUS;
-                    });
-        }));
+        final Map<String, Integer> tenantStatues = new HashMap<>();
+        for (TenantFactory tenant : tenants) {
+            tenantStatues.put(tenant.getTenantName(), SUCCESS_STATUS);
+        }
+
+        return ImmutableMap.of(
+                STATUS_KEY, SUCCESS_STATUS,
+                TENANTS_KEY, tenantStatues,
+                APPLICATION_INFO_KEY, applicationInfo);
     }
 }
