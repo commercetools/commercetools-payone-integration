@@ -186,14 +186,14 @@ public class IntegrationService {
                 "version", serviceConfig.getApplicationVersion(),
                 "title", serviceConfig.getApplicationName());
 
-        final Map<String, Integer> tenantStatues = new HashMap<>();
+        final Map<String, Integer> tenantStatutes = new HashMap<>();
         for (TenantFactory tenant : tenants) {
-            tenantStatues.put(tenant.getTenantName(), SUCCESS_STATUS);
+            tenantStatutes.put(tenant.getTenantName(), SUCCESS_STATUS);
         }
 
         return ImmutableMap.of(
                 STATUS_KEY, SUCCESS_STATUS,
-                TENANTS_KEY, tenantStatues,
+                TENANTS_KEY, tenantStatutes,
                 APPLICATION_INFO_KEY, applicationInfo);
     }
 }
