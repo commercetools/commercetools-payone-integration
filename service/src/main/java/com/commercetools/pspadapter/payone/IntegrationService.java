@@ -10,7 +10,6 @@ import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import io.sphere.sdk.payments.queries.PaymentQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.eclipse.jetty.http.HttpStatus;
@@ -20,21 +19,15 @@ import spark.Spark;
 import spark.utils.CollectionUtils;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
 import static io.sphere.sdk.json.SphereJsonUtils.toJsonString;
 import static io.sphere.sdk.json.SphereJsonUtils.toPrettyJsonString;
-import static io.sphere.sdk.utils.CompletableFutureUtils.listOfFuturesToFutureOfList;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * @author fhaertig
