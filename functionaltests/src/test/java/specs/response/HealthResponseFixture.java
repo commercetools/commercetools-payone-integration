@@ -36,9 +36,6 @@ public class HealthResponseFixture extends BasePaymentFixture {
 
         JsonObject rootNode = parser.parse(responseString).getAsJsonObject();
         String bodyStatus = rootNode.get("status").getAsString();
-        Set<Map.Entry<String, JsonElement>> tenantNames = ofNullable(rootNode.get("tenants"))
-                .map(e -> e.getAsJsonObject().entrySet())
-                .orElse(Collections.emptySet());
         Optional<JsonObject> applicationInfo =
                 ofNullable(rootNode.getAsJsonObject("applicationInfo")).filter(JsonObject::isJsonObject);
         String title = applicationInfo.map(node -> node.get("title")).map(JsonElement::getAsString).orElse("");
@@ -48,8 +45,6 @@ public class HealthResponseFixture extends BasePaymentFixture {
                 .with("statusCode", httpResponse.getStatusLine().getStatusCode())
                 .with("mimeType", ContentType.getOrDefault(httpResponse.getEntity()).getMimeType())
                 .with("bodyStatus", bodyStatus)
-                .with("bodyTenants", tenantNames.toString()) // info only
-                .with("bodyTenantsSize", tenantNames.size())
                 .with("bodyApplicationName", title)
                 .with("bodyApplicationVersion", version)
                 .with("versionIsEmpty", version.isEmpty());
