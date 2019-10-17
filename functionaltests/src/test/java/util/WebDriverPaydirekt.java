@@ -19,7 +19,6 @@ public class WebDriverPaydirekt extends CustomWebDriver {
     private static String LOGIN_FORM_USERNAME_FIELD_ID = "username";
     private static String LOGIN_FORM_PASSWORD_FIELD_ID = "password";
     private static String LOGIN_FORM_SUBMIT_BUTTON_NAME = "loginBtn";
-    private static String CONFIRM_FORM_NAME = "firstFactorAuthForm";
     private static String CONFIRM_BUTTON_NAME = "confirmPaymentButton";
     private static String URL_SUCCESS_PATTERN = "-Success";
     private static Logger LOG = LoggerFactory.getLogger(WebDriverPaydirekt.class);
