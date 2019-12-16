@@ -165,30 +165,37 @@ ins {
 </style><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
         <meta charset="UTF-8" />
         <link href="../../../concordion.css" rel="stylesheet" type="text/css" />
-        <title>Authorization</title>
+        <title>Charge Immediately</title>
     <link type="text/css" rel="stylesheet" href="../../../inputstyle.css" /></head>
     <body><span class="breadcrumbs"><a href="../../Specs.html">commercetools - PAYONE - Integration Service</a> &gt; <a href="../Paymentmethods.html">Payment Methods</a> &gt; <a href="Creditcard.html">Credit Card Payments</a> &gt;</span>
-        <h1>Credit Card Authorization</h1>
+        <h1>Charge Credit Card Immediately (verified by 3-D Secure)</h1>
         <p>
-            The integration service allows to reserve an amount of money to be charged later on.
+            The integration service allows to charge a credit card in a one step process without initiating a separate
+            authorization before.
         </p>
         <p>
-            It will do so by sending a <em c:set="#requestType" class="inputvalue">preauthorization</em> request to the PAYONE platform.
+            It will do so by sending an <em c:set="#requestType" class="inputvalue">authorization</em> request to the PAYONE platform.
             <br />
             It will store information about such a request as an interface interaction of type
             <em>PAYONE_INTERACTION_REQUEST</em>.
         </p>
+        <p>
+            If a verification by 3-D Secure is required, it will store the response from PAYONE
+            as an interface interaction of type <em>PAYONE_INTERACTION_REDIRECT</em> with a field "redirectUrl" containing the actual
+            redirect url to follow.
+        </p>
+
         <h2>Examples</h2>
         <h3>Common Setup</h3>
         <ul>
             <li>payment.paymentMethodInfo.method: <span c:set="#paymentMethod" class="inputvalue">CREDIT_CARD</span></li>
-            <li>payment.transactions[0].type: <span c:set="#transactionType" class="inputvalue">AUTHORIZATION</span></li>
+            <li>payment.transactions[0].type: <span c:set="#transactionType" class="inputvalue">CHARGE</span></li>
         </ul>
         <div class="example">
-            <h3>Authorization (without 3-D Secure)</h3>
+            <h3>Charge immediately</h3>
             <p>
                 Given the following payments for
-                <em>a credit card that does <b>not</b> support charges for currencies other than EUR and without 3-D Secure verification</em>:
+                <em>a credit card that does <b>not</b> support charges for currencies other than EUR and is taking part in 3-D Secure verification</em>:
             </p>
             <table c:execute="#paymentId = createPayment(#paymentName, #paymentMethod, #transactionType, #centAmount, #currencyCode)">
                 <tr>
@@ -199,27 +206,27 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
-                    <td class="inputvalue">2000</td>
+                    <td class="inputvalue">2800</td>
                     <td class="inputvalue">EUR</td>
-                    <td>f4743ce1-b70e-469d-a3bc-304e5b763d7e</td>
+                    <td>e73013ea-2b91-4bf4-8fb6-e753d727bc13</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
-                    <td class="inputvalue">123498</td>
+                    <td class="inputvalue">2800</td>
                     <td class="inputvalue">USD</td>
-                    <td>057024a4-74d9-4d90-90e4-3ce432a5bb87</td>
+                    <td>63be3f41-dfdd-4817-a676-56ca8447754d</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
-                    <td class="inputvalue">4711</td>
+                    <td class="inputvalue">2800</td>
                     <td class="inputvalue">EUR</td>
-                    <td>faf968cb-186b-4da6-b791-8fbcb3bd6181</td>
+                    <td>779fab07-19a9-431b-b491-7a92b1250cf4</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
-                    <td class="inputvalue">270713</td>
+                    <td class="inputvalue">2800</td>
                     <td class="inputvalue">EUR</td>
-                    <td>4dcce36e-8848-4b12-98de-746c14ef7297</td>
+                    <td>3a096cfd-a465-4316-a14a-c56ce7975c27</td>
                 </tr>
             </table>
             <p>
@@ -230,97 +237,15 @@ ins {
                     <th c:set="#paymentName">Payment Name</th>
                     <th c:assertEquals="#result.statusCode">Response Status Code</th>
                     <th c:assertEquals="#result.interactionCount">total # of <em>preauthorization</em> requests sent</th>
-                    <th c:echo="#result.transactionState">Transaction State </th>
+                    <th c:assertEquals="#result.transactionState">Transaction State </th>
                     <th c:echo="#result.version">Version (for information only)</th>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
                     <td class="success">200</td>
                     <td class="success">1</td>
-                    <td>Success</td>
+                    <td class="success">Pending</td>
                     <td>11</td>
-                </tr>
-                <tr>
-                    <td class="inputvalue">Payment 2</td>
-                    <td class="success">200</td>
-                    <td class="success">1</td>
-                    <td>Failure</td>
-                    <td>10</td>
-                </tr>
-                <tr>
-                    <td class="inputvalue">Payment 3</td>
-                    <td class="success">200</td>
-                    <td class="success">1</td>
-                    <td>Success</td>
-                    <td>11</td>
-                </tr>
-                <tr>
-                    <td class="inputvalue">Payment 4</td>
-                    <td class="success">200</td>
-                    <td class="success">1</td>
-                    <td>Success</td>
-                    <td>11</td>
-                </tr>
-            </table>
-            <p>
-                A successful request and a response status code 20X does not mean that the transaction is in state Success.
-            </p>
-            <p c:execute="#receivedAllNotifications = receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)">
-                After a certain amount of time the Integration Service will have
-                <span c:assertTrue="#receivedAllNotifications" class="success">processed a notification from PAYONE</span>
-                with the txaction <b c:set="#txactionAppointed" class="inputvalue">appointed</b> and the transactionstatus <b>completed</b> (or <b>null</b>)
-                for each of the payments <span c:set="#successfulPayments" class="inputvalue">Payment 1, Payment 3, Payment 4</span>.
-                The transaction state and the authorized amount should be set correctly not later than now.
-            </p>
-            <table c:execute="#result = fetchPaymentDetails(#paymentName)">
-                <tr>
-                    <th c:set="#paymentName">Payment Name</th>
-                    <th c:assertEquals="#result.notificationCount">total # of <em>appointed/completed</em> notifications</th>
-                    <th c:assertEquals="#result.transactionState">Transaction State</th>
-                    <th c:echo="#result.version">Version (for information only)</th>
-                </tr>
-                <tr>
-                    <td class="inputvalue">Payment 1</td>
-                    <td class="success">1</td>
-                    <td class="success">Success</td>
-                    <td>14</td>
-                </tr>
-                <tr>
-                    <td class="inputvalue">Payment 3</td>
-                    <td class="success">1</td>
-                    <td class="success">Success</td>
-                    <td>14</td>
-                </tr>
-                <tr>
-                    <td class="inputvalue">Payment 4</td>
-                    <td class="success">1</td>
-                    <td class="success">Success</td>
-                    <td>14</td>
-                </tr>
-            </table>
-            <p>
-                The failed payment <span c:set="#failedPaymentName" class="inputvalue">Payment 2</span>
-                must have received <span c:assertEquals="getInteractionNotificationOfActionCount(#failedPaymentName, #txactionAppointed)" class="success">0</span> notifications.
-            </p>
-            <p>
-                The service ensures idempotence, hence when I request it to handle the same payments again then I
-                will get the same results as before, especially the total number of <em>preauthorization</em> requests sent
-                per payment must not change:
-            </p>
-            <table c:execute="#result = handlePayment(#paymentName, #requestType)">
-                <tr>
-                    <th c:set="#paymentName">Payment Name</th>
-                    <th c:assertEquals="#result.statusCode">Response Status Code</th>
-                    <th c:assertEquals="#result.interactionCount">total # of <em>preauthorization</em> requests sent</th>
-                    <th c:assertEquals="#result.transactionState">Transaction State</th>
-                    <th c:echo="#result.version">Version (for information only)</th>
-                </tr>
-                <tr>
-                    <td class="inputvalue">Payment 1</td>
-                    <td class="success">200</td>
-                    <td class="success">1</td>
-                    <td class="success">Success</td>
-                    <td>14</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
@@ -333,20 +258,100 @@ ins {
                     <td class="inputvalue">Payment 3</td>
                     <td class="success">200</td>
                     <td class="success">1</td>
-                    <td class="success">Success</td>
-                    <td>14</td>
+                    <td class="success">Pending</td>
+                    <td>11</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
                     <td class="success">200</td>
                     <td class="success">1</td>
+                    <td class="success">Pending</td>
+                    <td>11</td>
+                </tr>
+            </table>
+            <p>
+                Since a valid payment with this credit card requires a verification by 3-D Secure, the transaction will stay in state Pending
+                as long as we don't follow the received redirect url and type in the password.
+            </p>
+            <table c:execute="#result = fetchPaymentDetails(#paymentName)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:assertEquals="#result.transactionState">Transaction State </th>
+                    <th c:assertEquals="#result.responseRedirectUrl">redirect url starts with</th>
+                    <th c:echo="#result.version">Version (for information only)</th>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 1</td>
+                    <td class="success">Pending</td>
+                    <td class="success">https://secure.pay1.de/3ds/redirect.php</td>
+                    <td>11</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 3</td>
+                    <td class="success">Pending</td>
+                    <td class="success">https://secure.pay1.de/3ds/redirect.php</td>
+                    <td>11</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 4</td>
+                    <td class="success">Pending</td>
+                    <td class="success">https://secure.pay1.de/3ds/redirect.php</td>
+                    <td>11</td>
+                </tr>
+            </table>
+            <p>
+                The failed payment <span c:set="#failedPaymentName" class="inputvalue">Payment 2</span>
+                must have received <span c:assertFalse="isInteractionRedirectPresent(#failedPaymentName)" class="success">0</span>
+                responses of type PAYONE_INTERACTION_REDIRECT and its custom field <span c:set="#fieldName" class="inputvalue">redirectUrl</span>
+                <span c:assertTrue="customStringFieldIsNull(#failedPaymentName, #fieldName)" class="success">must be null</span>.
+            </p>
+            <p>
+                If I follow the 3-D Secure process for <span c:set="#successfulPayments" class="inputvalue">Payment 1, Payment 3, Payment 4</span> and
+                <span c:assertTrue="executeRedirectForPayments(#successfulPayments)" class="success">verify them successfully</span> with this credit card,
+                I get forwarded to a predefined success url and for each of the payments the following notifications will be received:
+            </p>
+            <ol>
+                <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="success">received</span> -&gt; has no effect, just as a confirmation</li>
+                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="success">received</span>
+                    -&gt;  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
+            </ol>
+            <table c:execute="#result = fetchPaymentDetails(#paymentName)">
+                <tr>
+                    <th c:set="#paymentName">Payment Name</th>
+                    <th c:assertEquals="#result.transactionState">Transaction State</th>
+                    <th c:assertEquals="#result.appointedNotificationCount">total # of <br /><em>appointed/completed</em> notifications</th>
+                    <th c:assertEquals="#result.paidNotificationCount">total # of <br /><em>paid/completed</em> notifications</th>
+                    <th c:assertEquals="#result.successUrl">url called after successful verification</th>
+                    <th c:echo="#result.version">Version (for information only)</th>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 1</td>
                     <td class="success">Success</td>
-                    <td>14</td>
+                    <td class="success">1</td>
+                    <td class="success">1</td>
+                    <td class="success">[...]Payment-1-Success</td>
+                    <td>21</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 3</td>
+                    <td class="success">Success</td>
+                    <td class="success">1</td>
+                    <td class="success">1</td>
+                    <td class="success">[...]Payment-3-Success</td>
+                    <td>21</td>
+                </tr>
+                <tr>
+                    <td class="inputvalue">Payment 4</td>
+                    <td class="success">Success</td>
+                    <td class="success">1</td>
+                    <td class="success">1</td>
+                    <td class="success">[...]Payment-4-Success</td>
+                    <td>21</td>
                 </tr>
             </table>
 
             <h3>Verify Order#paymentState</h3>
-            <p>For <b>appointed</b> payments it expected to be <b>Pending</b>,
+            <p>For <b>paid</b> payments it expected to be <b>Paid</b>,
                 for failed <i>Payment 2</i> - unchanged (null)</p>
             <table c:execute="#orderPaymentState = fetchOrderPaymentState(#paymentName)">
                 <tr>
@@ -355,7 +360,7 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
-                    <td class="success">Pending</td>
+                    <td class="success">Paid</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
@@ -363,13 +368,24 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
-                    <td class="success">Pending</td>
+                    <td class="success">Paid</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
-                    <td class="success">Pending</td>
+                    <td class="success">Paid</td>
                 </tr>
             </table>
+
         </div>
-    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 144002 ms on 16-Dec-2019 at 16:27:30 UTC</div></div></body>
+        <h2>Further Details</h2>
+        <h3>What happens if the verification fails?</h3>
+        <p>
+            That's out of the Integration Service's scope.<br />
+            The Integration Service is notified by PAYONE only in case of a successful verification.
+        </p>
+        <p>
+            The checkout implementation needs to take care of failed verifications - the user will be redirected to
+            the <em>errorUrl</em> specified in the Payment object.
+        </p>
+    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 594645 ms on 16-Dec-2019 at 16:35:04 UTC</div></div></body>
 </html>
