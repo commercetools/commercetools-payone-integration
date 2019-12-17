@@ -36,16 +36,9 @@ public class Main {
         ScheduledJobFactory scheduledJobFactory = new ScheduledJobFactory();
 
         scheduledJobFactory.setAllScheduledItemsStartedListener(() ->
-                LOG.info(format("%n%s %n" +
-                                "Payone Integration Service is STARTED %n" +
-                                "%-10s %s %n" +
-                                "%-10s %s %n" +
-                                "%s",
-                        "============================================================",
-                        "Name:", serviceConfig.getApplicationName(),
-                        "Version:", serviceConfig.getApplicationVersion(),
-                        "============================================================"
-                ))
+                LOG.info(format("Application has started with name:[%s] and version:[%s].",
+                    serviceConfig.getApplicationName(),
+                    serviceConfig.getApplicationVersion()))
         );
 
         scheduledJobFactory.createScheduledJob(
