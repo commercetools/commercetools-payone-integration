@@ -22,43 +22,12 @@
         </encoder>
     </appender>
 
-    <appender name="JSON-STDERR" class="ch.qos.logback.core.ConsoleAppender">
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>ERROR</level>
-        </filter>
-        <target>System.err</target>
-        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <providers>
-                <timestamp/>
-                <loggerName/>
-                <logLevel>
-                    <fieldName>severity</fieldName>
-                </logLevel>
-                <message/>
-                <stackHash/>
-                <stackTrace>
-                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
-                        <maxDepthPerThrowable>30</maxDepthPerThrowable>
-                        <maxLength>2048</maxLength>
-                        <shortenedClassNameLength>20</shortenedClassNameLength>
-                        <rootCauseFirst>true</rootCauseFirst>
-                    </throwableConverter>
-                </stackTrace>
-            </providers>
-        </encoder>
-    </appender>
-
     <appender name="ASYNCSTDOUT" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="JSON-STDOUT" />
     </appender>
 
-    <appender name="ASYNCSTDERR" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="JSON-STDERR" />
-    </appender>
-
     <root level="INFO">
         <appender-ref ref="ASYNCSTDOUT" />
-        <appender-ref ref="ASYNCSTDERR" />
     </root>
 
     <!-- skip info logs for unmapped routes -->
