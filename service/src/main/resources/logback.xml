@@ -1,5 +1,6 @@
 <configuration>
-    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="JSON-STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <providers>
                 <timestamp/>
@@ -21,14 +22,27 @@
         </encoder>
     </appender>
 
-    <appender name="JSON-STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <target>System.out</target>
-        <appender-ref ref="JSON" />
-    </appender>
-
     <appender name="JSON-STDERR" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.err</target>
-        <appender-ref ref="JSON" />
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <providers>
+                <timestamp/>
+                <loggerName/>
+                <logLevel>
+                    <fieldName>severity</fieldName>
+                </logLevel>
+                <message/>
+                <stackHash/>
+                <stackTrace>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                        <maxLength>2048</maxLength>
+                        <shortenedClassNameLength>20</shortenedClassNameLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+            </providers>
+        </encoder>
     </appender>
 
     <appender name="ASYNCSTDOUT" class="ch.qos.logback.classic.AsyncAppender">
