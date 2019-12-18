@@ -95,7 +95,6 @@ public class PaymentHandler {
      private PaymentHandleResult handleNotFoundException(@Nonnull String paymentId, @Nonnull Exception exception ) {
         final String body = format("Failed to process the commercetools Payment with id [%s], as the payment or "
             + "the cart could not be found.", paymentId);
-        // Temporary adding the exception to error log to simplify debugging.
         logger.error(
             append(TENANT_NAME_LOG_FIELD_KEY, tenantName), body, exception);
         return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
