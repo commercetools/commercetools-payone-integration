@@ -101,7 +101,7 @@ public class PaymentHandler {
     }
 
     private PaymentHandleResult errorResponseHandler(@Nonnull ErrorResponseException e, @Nonnull String paymentId) {
-        logger.warn(
+        logger.error(
             append(TENANT_NAME_LOG_FIELD_KEY, tenantName),
             format("Failed to process the commercetools Payment with id [%s] due to an error response from the "
             + "commercetools platform.", paymentId), e);
