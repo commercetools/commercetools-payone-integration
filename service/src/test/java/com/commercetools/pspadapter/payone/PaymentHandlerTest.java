@@ -149,7 +149,8 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
-        assertThat(paymentHandleResult.body()).contains(format("Error on processing payment with ID [%s] as payment or cart could not be found", paymentId));
+        assertThat(paymentHandleResult.body()).contains(format("Failed to process the commercetools Payment with id "
+            + "[%s], as the payment or the cart could not be found", paymentId));
     }
 
     @Test
@@ -166,7 +167,8 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
-        assertThat(paymentHandleResult.body()).contains(format("Error on processing payment with ID [%s] as payment or cart could not be found", paymentId));
+        assertThat(paymentHandleResult.body()).contains(format("Failed to process the commercetools Payment with id "
+            + "[%s], as the payment or the cart could not be found", paymentId));
     }
 
     @Test
@@ -221,7 +223,8 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
-        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId));
+        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing commercetools"
+            + " Payment with id [%s]. See the service logs", paymentId));
     }
 
     @Test
@@ -242,7 +245,8 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
-        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId));
+        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing commercetools"
+            + " Payment with id [%s]. See the service logs", paymentId));
     }
 
     private static PaymentMethodInfo paymentMethodInfo(final String paymentInterface) {
