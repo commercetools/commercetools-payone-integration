@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import static java.lang.String.format;
+import static net.logstash.logback.argument.StructuredArguments.value;
 
 public class Main {
 
@@ -38,9 +38,9 @@ public class Main {
         ScheduledJobFactory scheduledJobFactory = new ScheduledJobFactory();
 
         scheduledJobFactory.setAllScheduledItemsStartedListener(() ->
-                LOG.info(format("Application has started with name:[%s] and version:[%s].",
-                    serviceConfig.getApplicationName(),
-                    serviceConfig.getApplicationVersion()))
+                LOG.info("{} has started with version {}",
+                    value("applicationName", serviceConfig.getApplicationName()),
+                    value("version", serviceConfig.getApplicationVersion()))
         );
 
         scheduledJobFactory.createScheduledJob(

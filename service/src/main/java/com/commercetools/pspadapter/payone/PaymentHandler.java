@@ -17,6 +17,7 @@ import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createLoggerN
 import static io.sphere.sdk.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static net.logstash.logback.marker.Markers.append;
 
 public class PaymentHandler {
 
@@ -26,8 +27,9 @@ public class PaymentHandler {
     private static final int RETRIES_LIMIT = 20;
     private static final int RETRY_DELAY = 100; // msec
 
+    private static final String TENANT_NAME_LOG_FIELD_KEY = "tenantName";
     private final String payoneInterfaceName;
-
+    private final String tenantName;
     private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
     private final PaymentDispatcher paymentDispatcher;
 
@@ -36,9 +38,10 @@ public class PaymentHandler {
     public PaymentHandler(String payoneInterfaceName, String tenantName,
                           CommercetoolsQueryExecutor commercetoolsQueryExecutor, PaymentDispatcher paymentDispatcher) {
         this.payoneInterfaceName = payoneInterfaceName;
-
+        this.tenantName = tenantName;
         this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
         this.paymentDispatcher = paymentDispatcher;
+
 
         this.logger = LoggerFactory.getLogger(createLoggerName(this.getClass(), tenantName));
     }
@@ -56,19 +59,25 @@ public class PaymentHandler {
                     final PaymentWithCartLike paymentWithCartLike = commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
                     String paymentInterface = paymentWithCartLike.getPayment().getPaymentMethodInfo().getPaymentInterface();
                     if (!payoneInterfaceName.equals(paymentInterface)) {
-                        logger.warn("Wrong payment interface name: expected [{}], found [{}]", payoneInterfaceName, paymentInterface);
+                        logger.warn(
+                            append(TENANT_NAME_LOG_FIELD_KEY, tenantName),
+                            "Wrong payment interface name: expected [{}], found [{}]", payoneInterfaceName, paymentInterface);
                         return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
                     }
 
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
                     return new PaymentHandleResult(HttpStatusCode.OK_200);
                 } catch (final ConcurrentModificationException cme) {
-                    logger.warn("Exception on dispatchPayment with id [{}]. Retry {} of {}", paymentId, i + 1, RETRIES_LIMIT);
+                    logger.warn(
+                        append(TENANT_NAME_LOG_FIELD_KEY, tenantName),
+                        "Exception on dispatchPayment with id [{}]. Retry {} of {}", paymentId, i + 1, RETRIES_LIMIT);
                     Thread.sleep(RETRY_DELAY);
                 }
             }
 
-            logger.error("The payment [{}] couldn't be processed after {} retries", paymentId, RETRIES_LIMIT);
+            logger.error(
+                append(TENANT_NAME_LOG_FIELD_KEY, tenantName),
+                "The payment [{}] couldn't be processed after {} retries", paymentId, RETRIES_LIMIT);
             return new PaymentHandleResult(HttpStatusCode.ACCEPTED_202,
                     format("The payment couldn't be processed after %s retries", RETRIES_LIMIT));
 
@@ -84,16 +93,22 @@ public class PaymentHandler {
     }
 
      private PaymentHandleResult handleNotFoundException(@Nonnull String paymentId, @Nonnull Exception exception ) {
-        final String body = format("Error on processing payment with ID [%s] as payment or cart could not be found", paymentId);
+        final String body = format("Failed to process the commercetools Payment with id [%s], as the payment or "
+            + "the cart could not be found.", paymentId);
         // Temporary adding the exception to error log to simplify debugging.
-        logger.error(body, exception);
+        logger.error(
+            append(TENANT_NAME_LOG_FIELD_KEY, tenantName), body, exception);
         return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
     }
 
     private PaymentHandleResult errorResponseHandler(@Nonnull ErrorResponseException e, @Nonnull String paymentId) {
-        logger.warn("An Error Response from commercetools platform", e);
+        logger.warn(
+            append(TENANT_NAME_LOG_FIELD_KEY, tenantName),
+            format("Failed to process the commercetools Payment with id [%s] due to an error response from the "
+            + "commercetools platform.", paymentId), e);
         return new PaymentHandleResult(e.getStatusCode(),
-                format("An Error Response from commercetools platform when processing payment [%s]. Try again later.", paymentId));
+                format("Failed to process the commercetools payment with id [%s], due to an error response from the "
+                    + "commercetools platform. Try again later.", paymentId));
     }
 
     /**
@@ -104,14 +119,19 @@ public class PaymentHandler {
      */
     private PaymentHandleResult completionExceptionHandler(@Nonnull CompletionException e, @Nonnull String paymentId) {
         String causeMessage = ofNullable(e.getCause()).map(Throwable::toString).orElse("null");
-        logger.error("Completion exception error: {}\nCause: {}", e.toString(), causeMessage);
+        logger.error(
+            append(TENANT_NAME_LOG_FIELD_KEY, tenantName),
+            "Completion exception error: {}\nCause: {}", e.toString(), causeMessage);
         return new PaymentHandleResult(INTERNAL_SERVER_ERROR_500,
                 format("An error occurred during communication with the commercetools platform when processing [%s] payment. See the service logs", paymentId));
     }
 
     private PaymentHandleResult handleThrowableInResponse(@Nonnull Throwable throwable, @Nonnull String paymentId) {
-        logger.error("Error in response: ", throwable);
+        logger.error(
+            append(TENANT_NAME_LOG_FIELD_KEY, tenantName),
+            "Error in response: ", throwable);
         return new PaymentHandleResult(INTERNAL_SERVER_ERROR_500,
-                format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId));
+                format("Unexpected error occurred when processing commercetools Payment with id [%s]. "
+                    + "See the service logs", paymentId));
     }
 }
