@@ -1,5 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?><html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
-<head><style>* {
+<head><script type="text/javascript">/* Stack Trace Toggling */
+
+function getElementById(id) {
+  var element;
+
+  if (document.getElementById) { // standard
+    return document.getElementById(id);
+  } else if (document.all) { // old IE versions
+    return document.all[id];
+  } else if (document.layers) { // nn4
+    return document.layers[id];
+  }
+  alert("Sorry, but your web browser is not supported by Concordion.");
+}
+
+function isVisible(element) {
+  return element.style.display;
+}
+
+function makeVisible(element) {
+  element.style.display = "block";
+}
+
+function makeInvisible(element) {
+  element.style.display = "";
+}
+
+function toggleStackTrace(stackTraceNumber) {
+  var stackTrace = getElementById("stackTrace" + stackTraceNumber);
+  var stackTraceButton = getElementById("stackTraceButton" + stackTraceNumber);
+  if (isVisible(stackTrace)) {
+    makeInvisible(stackTrace);
+    stackTraceButton.value = "View Stack";
+  } else {
+    makeVisible(stackTrace);
+    stackTraceButton.value = "Hide Stack";
+  }
+}
+</script><style>* {
   font-family: Arial;
 }
 body {
@@ -197,28 +235,28 @@ ins {
             <td class="inputvalue">400</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">Payer</td>
-            <td>4a836d05-976b-4b45-9bba-e295168b4843</td>
+            <td>2dd3a07f-9be5-47cc-a260-598248a861b6</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
             <td class="inputvalue">400</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">Underpayer</td>
-            <td>d7de23d4-5b0a-474c-9891-e854c36285d5</td>
+            <td>505d5d1e-d239-4519-ad0b-8c2d955eb764</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 3</td>
             <td class="inputvalue">400</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">Overpayer</td>
-            <td>9865b587-04fb-4330-80eb-7fbc88253032</td>
+            <td>da91e5d3-0861-444e-a896-1aa6ea70c13c</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 4</td>
             <td class="inputvalue">400</td>
             <td class="inputvalue">EUR</td>
             <td class="inputvalue">Splitpayer</td>
-            <td>d490a46e-8a63-4538-a9c6-3d78ba15b42c</td>
+            <td>e4fa454f-a12e-4420-8aac-53a46afb1eb0</td>
         </tr>
     </table>
     <p>
@@ -235,25 +273,29 @@ ins {
             <td class="inputvalue inputvalue">Payment 1</td>
             <td class="success success">200</td>
             <td class="success success">0</td>
-            <td class="success success">Pending</td>
+            <td class="success failure"><del class="expected">Pending</del>
+<ins class="actual">Failure</ins></td>
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 2</td>
             <td class="success success">200</td>
             <td class="success success">0</td>
-            <td class="success success">Pending</td>
+            <td class="success failure"><del class="expected">Pending</del>
+<ins class="actual">Failure</ins></td>
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 3</td>
             <td class="success success">200</td>
             <td class="success success">0</td>
-            <td class="success success">Pending</td>
+            <td class="success failure"><del class="expected">Pending</del>
+<ins class="actual">Failure</ins></td>
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 4</td>
             <td class="success success">200</td>
             <td class="success success">0</td>
-            <td class="success success">Pending</td>
+            <td class="success failure"><del class="expected">Pending</del>
+<ins class="actual">Failure</ins></td>
         </tr>
     </table>
     <p>
@@ -263,7 +305,7 @@ ins {
         When I then waiting for the notification for <span c:set="#successfulPayments" class="inputvalue">Payment 1, Payment 3, Payment 4</span>. I will get the following charged results:
     </p>
     <ol>
-        <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#partlySuccessfulPayments, #txactionAppointed)" class="success">received</span> -&gt; has no effect, just as a confirmation</li>
+        <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#partlySuccessfulPayments, #txactionAppointed)"><span class="failure"><del class="expected">received</del></span><span class="exceptionMessage">IllegalStateException: Payment [da91e5d3-0861-444e-a896-1aa6ea70c13c] transaction is FAILURE, payment status is [ERROR 2010]</span><input class="stackTraceButton" id="stackTraceButton1" type="button" onclick="javascript:toggleStackTrace('1')" value="View Stack" /><div class="stackTrace" id="stackTrace1"><p>While evaluating expression: <code>receivedNotificationOfActionFor(#partlySuccessfulPayments, #txactionAppointed)</code></p><div class="stackTraceExceptionMessage">org.concordion.internal.InvalidExpressionException: IllegalStateException: Payment [da91e5d3-0861-444e-a896-1aa6ea70c13c] transaction is FAILURE, payment status is [ERROR 2010]</div><div class="stackTraceEntry">at specs.response.BasePaymentFixture.lambda$validatePaymentsNotFailed$5 (BasePaymentFixture.java:383)</div><div class="stackTraceEntry">at java.util.stream.ForEachOps$ForEachOp$OfRef.accept (ForEachOps.java:184)</div><div class="stackTraceEntry">at java.util.ArrayList$ArrayListSpliterator.forEachRemaining (ArrayList.java:1380)</div><div class="stackTraceEntry">at java.util.stream.AbstractPipeline.copyInto (AbstractPipeline.java:481)</div><div class="stackTraceEntry">at java.util.stream.ForEachOps$ForEachTask.compute (ForEachOps.java:291)</div><div class="stackTraceEntry">at java.util.concurrent.CountedCompleter.exec (CountedCompleter.java:731)</div><div class="stackTraceEntry">at java.util.concurrent.ForkJoinTask.doExec (ForkJoinTask.java:289)</div><div class="stackTraceEntry">at java.util.concurrent.ForkJoinTask.doInvoke (ForkJoinTask.java:401)</div><div class="stackTraceEntry">at java.util.concurrent.ForkJoinTask.invoke (ForkJoinTask.java:734)</div><div class="stackTraceEntry">at java.util.stream.ForEachOps$ForEachOp.evaluateParallel (ForEachOps.java:160)</div><div class="stackTraceEntry">at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateParallel (ForEachOps.java:174)</div><div class="stackTraceEntry">at java.util.stream.AbstractPipeline.evaluate (AbstractPipeline.java:233)</div><div class="stackTraceEntry">at java.util.stream.ReferencePipeline.forEach (ReferencePipeline.java:418)</div><div class="stackTraceEntry">at java.util.stream.ReferencePipeline$Head.forEach (ReferencePipeline.java:583)</div><div class="stackTraceEntry">at specs.response.BasePaymentFixture.validatePaymentsNotFailed (BasePaymentFixture.java:378)</div><div class="stackTraceEntry">at specs.paymentmethods.BaseNotifiablePaymentFixture.receivedNotificationOfActionFor (BaseNotifiablePaymentFixture.java:41)</div><div class="stackTraceEntry">at specs.paymentmethods.cashinadvance.CustomerPaymentFixture.receivedNotificationOfActionFor (CustomerPaymentFixture.java:53)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke0 (NativeMethodAccessorImpl.java:-2)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)</div><div class="stackTraceEntry">at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)</div><div class="stackTraceEntry">at java.lang.reflect.Method.invoke (Method.java:498)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.invokeMethod (OgnlRuntime.java:872)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callAppropriateMethod (OgnlRuntime.java:1295)</div><div class="stackTraceEntry">at ognl.ObjectMethodAccessor.callMethod (ObjectMethodAccessor.java:68)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callMethod (OgnlRuntime.java:1371)</div><div class="stackTraceEntry">at ognl.ASTMethod.getValueBody (ASTMethod.java:90)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:212)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:258)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:494)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:596)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:566)</div><div class="stackTraceEntry">at org.concordion.internal.OgnlEvaluator.evaluate (OgnlEvaluator.java:25)</div><div class="stackTraceEntry">at org.concordion.internal.SimpleEvaluator.evaluate (SimpleEvaluator.java:14)</div><div class="stackTraceEntry">at org.concordion.internal.command.BooleanCommand.verify (BooleanCommand.java:33)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$3.run (AbstractCommandDecorator.java:33)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.verify (AbstractCommandDecorator.java:31)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$3.run (AbstractCommandDecorator.java:33)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:38)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.verify (AbstractCommandDecorator.java:31)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.verify (CommandCall.java:76)</div><div class="stackTraceEntry">at org.concordion.api.CommandCallList.processSequentially (CommandCallList.java:34)</div><div class="stackTraceEntry">at org.concordion.internal.command.SpecificationCommand.execute (SpecificationCommand.java:36)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:72)</div><div class="stackTraceEntry">at org.concordion.internal.XMLSpecification.processNode (XMLSpecification.java:60)</div><div class="stackTraceEntry">at org.concordion.internal.XMLSpecification.processExample (XMLSpecification.java:69)</div><div class="stackTraceEntry">at org.concordion.Concordion.processExample (Concordion.java:92)</div><div class="stackTraceEntry">at org.concordion.internal.FixtureRunner.run (FixtureRunner.java:41)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.invoke (ConcordionRunner.java:207)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner$1.invoke (ConcordionRunner.java:31)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionFrameworkMethod.invokeExplosively (ConcordionFrameworkMethod.java:58)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.InvokeMethod.evaluate (InvokeMethod.java:17)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.RunBefores.evaluate (RunBefores.java:26)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runLeaf (ParentRunner.java:325)</div><div class="stackTraceEntry">at org.junit.runners.BlockJUnit4ClassRunner.runChild (BlockJUnit4ClassRunner.java:78)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:191)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:23)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.RunBefores.evaluate (RunBefores.java:26)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.run (ConcordionRunner.java:150)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:128)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:27)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:137)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:115)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:105)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:62)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:49)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runJUnitClass (DefaultConcordionRunner.java:78)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runTestClass (DefaultConcordionRunner.java:44)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.execute (DefaultConcordionRunner.java:19)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:122)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:117)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleTask.runInterruptibly (TrustedListenableFutureTask.java:125)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.InterruptibleTask.run (InterruptibleTask.java:57)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask.run (TrustedListenableFutureTask.java:78)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor.runWorker (ThreadPoolExecutor.java:1149)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor$Worker.run (ThreadPoolExecutor.java:624)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div><div class="stackTraceExceptionMessage">java.lang.IllegalStateException: Payment [da91e5d3-0861-444e-a896-1aa6ea70c13c] transaction is FAILURE, payment status is [ERROR 2010]</div><div class="stackTraceEntry">at specs.response.BasePaymentFixture.lambda$validatePaymentsNotFailed$5 (BasePaymentFixture.java:383)</div><div class="stackTraceEntry">at java.util.stream.ForEachOps$ForEachOp$OfRef.accept (ForEachOps.java:184)</div><div class="stackTraceEntry">at java.util.ArrayList$ArrayListSpliterator.forEachRemaining (ArrayList.java:1380)</div><div class="stackTraceEntry">at java.util.stream.AbstractPipeline.copyInto (AbstractPipeline.java:481)</div><div class="stackTraceEntry">at java.util.stream.ForEachOps$ForEachTask.compute (ForEachOps.java:291)</div><div class="stackTraceEntry">at java.util.concurrent.CountedCompleter.exec (CountedCompleter.java:731)</div><div class="stackTraceEntry">at java.util.concurrent.ForkJoinTask.doExec (ForkJoinTask.java:289)</div><div class="stackTraceEntry">at java.util.concurrent.ForkJoinTask.doInvoke (ForkJoinTask.java:401)</div><div class="stackTraceEntry">at java.util.concurrent.ForkJoinTask.invoke (ForkJoinTask.java:734)</div><div class="stackTraceEntry">at java.util.stream.ForEachOps$ForEachOp.evaluateParallel (ForEachOps.java:160)</div><div class="stackTraceEntry">at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateParallel (ForEachOps.java:174)</div><div class="stackTraceEntry">at java.util.stream.AbstractPipeline.evaluate (AbstractPipeline.java:233)</div><div class="stackTraceEntry">at java.util.stream.ReferencePipeline.forEach (ReferencePipeline.java:418)</div><div class="stackTraceEntry">at java.util.stream.ReferencePipeline$Head.forEach (ReferencePipeline.java:583)</div><div class="stackTraceEntry">at specs.response.BasePaymentFixture.validatePaymentsNotFailed (BasePaymentFixture.java:378)</div><div class="stackTraceEntry">at specs.paymentmethods.BaseNotifiablePaymentFixture.receivedNotificationOfActionFor (BaseNotifiablePaymentFixture.java:41)</div><div class="stackTraceEntry">at specs.paymentmethods.cashinadvance.CustomerPaymentFixture.receivedNotificationOfActionFor (CustomerPaymentFixture.java:53)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke0 (NativeMethodAccessorImpl.java:-2)</div><div class="stackTraceEntry">at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)</div><div class="stackTraceEntry">at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)</div><div class="stackTraceEntry">at java.lang.reflect.Method.invoke (Method.java:498)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.invokeMethod (OgnlRuntime.java:872)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callAppropriateMethod (OgnlRuntime.java:1295)</div><div class="stackTraceEntry">at ognl.ObjectMethodAccessor.callMethod (ObjectMethodAccessor.java:68)</div><div class="stackTraceEntry">at ognl.OgnlRuntime.callMethod (OgnlRuntime.java:1371)</div><div class="stackTraceEntry">at ognl.ASTMethod.getValueBody (ASTMethod.java:90)</div><div class="stackTraceEntry">at ognl.SimpleNode.evaluateGetValueBody (SimpleNode.java:212)</div><div class="stackTraceEntry">at ognl.SimpleNode.getValue (SimpleNode.java:258)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:494)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:596)</div><div class="stackTraceEntry">at ognl.Ognl.getValue (Ognl.java:566)</div><div class="stackTraceEntry">at org.concordion.internal.OgnlEvaluator.evaluate (OgnlEvaluator.java:25)</div><div class="stackTraceEntry">at org.concordion.internal.SimpleEvaluator.evaluate (SimpleEvaluator.java:14)</div><div class="stackTraceEntry">at org.concordion.internal.command.BooleanCommand.verify (BooleanCommand.java:33)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$3.run (AbstractCommandDecorator.java:33)</div><div class="stackTraceEntry">at org.concordion.internal.command.LocalTextDecorator.process (LocalTextDecorator.java:26)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.verify (AbstractCommandDecorator.java:31)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator$3.run (AbstractCommandDecorator.java:33)</div><div class="stackTraceEntry">at org.concordion.internal.command.ThrowableCatchingDecorator.process (ThrowableCatchingDecorator.java:38)</div><div class="stackTraceEntry">at org.concordion.api.AbstractCommandDecorator.verify (AbstractCommandDecorator.java:31)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.verify (CommandCall.java:76)</div><div class="stackTraceEntry">at org.concordion.api.CommandCallList.processSequentially (CommandCallList.java:34)</div><div class="stackTraceEntry">at org.concordion.internal.command.SpecificationCommand.execute (SpecificationCommand.java:36)</div><div class="stackTraceEntry">at org.concordion.api.CommandCall.execute (CommandCall.java:72)</div><div class="stackTraceEntry">at org.concordion.internal.XMLSpecification.processNode (XMLSpecification.java:60)</div><div class="stackTraceEntry">at org.concordion.internal.XMLSpecification.processExample (XMLSpecification.java:69)</div><div class="stackTraceEntry">at org.concordion.Concordion.processExample (Concordion.java:92)</div><div class="stackTraceEntry">at org.concordion.internal.FixtureRunner.run (FixtureRunner.java:41)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.invoke (ConcordionRunner.java:207)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner$1.invoke (ConcordionRunner.java:31)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionFrameworkMethod.invokeExplosively (ConcordionFrameworkMethod.java:58)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.InvokeMethod.evaluate (InvokeMethod.java:17)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.RunBefores.evaluate (RunBefores.java:26)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runLeaf (ParentRunner.java:325)</div><div class="stackTraceEntry">at org.junit.runners.BlockJUnit4ClassRunner.runChild (BlockJUnit4ClassRunner.java:78)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:191)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.runChild (ConcordionRunner.java:23)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.internal.runners.statements.RunBefores.evaluate (RunBefores.java:26)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.concordion.integration.junit4.ConcordionRunner.run (ConcordionRunner.java:150)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:128)</div><div class="stackTraceEntry">at org.junit.runners.Suite.runChild (Suite.java:27)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$3.run (ParentRunner.java:290)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$1.schedule (ParentRunner.java:71)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.runChildren (ParentRunner.java:288)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.access$000 (ParentRunner.java:58)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner$2.evaluate (ParentRunner.java:268)</div><div class="stackTraceEntry">at org.junit.runners.ParentRunner.run (ParentRunner.java:363)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:137)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:115)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.run (JUnitCore.java:105)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:62)</div><div class="stackTraceEntry">at org.junit.runner.JUnitCore.runClasses (JUnitCore.java:49)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runJUnitClass (DefaultConcordionRunner.java:78)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.runTestClass (DefaultConcordionRunner.java:44)</div><div class="stackTraceEntry">at org.concordion.internal.runner.DefaultConcordionRunner.execute (DefaultConcordionRunner.java:19)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:122)</div><div class="stackTraceEntry">at org.concordion.ext.run.parallel.ParallelRunStrategy$1.call (ParallelRunStrategy.java:117)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask$TrustedFutureInterruptibleTask.runInterruptibly (TrustedListenableFutureTask.java:125)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.InterruptibleTask.run (InterruptibleTask.java:57)</div><div class="stackTraceEntry">at com.google.common.util.concurrent.TrustedListenableFutureTask.run (TrustedListenableFutureTask.java:78)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor.runWorker (ThreadPoolExecutor.java:1149)</div><div class="stackTraceEntry">at java.util.concurrent.ThreadPoolExecutor$Worker.run (ThreadPoolExecutor.java:624)</div><div class="stackTraceEntry">at java.lang.Thread.run (Thread.java:748)</div></div></span> -&gt; has no effect, just as a confirmation</li>
         <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="failure"><del class="expected">received</del>
 <ins class="actual">== false</ins></span>
             -&gt;  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
@@ -278,30 +320,35 @@ ins {
         <tr>
             <td class="inputvalue inputvalue">Payment 1</td>
             <td class="success failure"><del class="expected">Success</del>
-<ins class="actual">Pending</ins></td>
-            <td class="success success">1</td>
+<ins class="actual">Failure</ins></td>
+            <td class="success failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
             <td class="success failure"><del class="expected">1</del>
 <ins class="actual">0</ins></td>
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 2</td>
-            <td class="success success">Pending</td>
-            <td class="success success">1</td>
+            <td class="success failure"><del class="expected">Pending</del>
+<ins class="actual">Failure</ins></td>
+            <td class="success failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
             <td class="success success">0</td>
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 3</td>
             <td class="success failure"><del class="expected">Success</del>
-<ins class="actual">Pending</ins></td>
-            <td class="success success">1</td>
+<ins class="actual">Failure</ins></td>
+            <td class="success failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
             <td class="success failure"><del class="expected">1</del>
 <ins class="actual">0</ins></td>
         </tr>
         <tr>
             <td class="inputvalue inputvalue">Payment 4</td>
             <td class="success failure"><del class="expected">Success</del>
-<ins class="actual">Pending</ins></td>
-            <td class="success success">1</td>
+<ins class="actual">Failure</ins></td>
+            <td class="success failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
             <td class="success failure"><del class="expected">1</del>
 <ins class="actual">0</ins></td>
         </tr>
@@ -318,23 +365,24 @@ ins {
         <tr>
             <td class="inputvalue">Payment 1</td>
             <td class="failure"><del class="expected">Paid</del>
-<ins class="actual">Pending</ins></td>
+<ins class="actual">(null)</ins></td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
-            <td class="success">Pending</td>
+            <td class="failure"><del class="expected">Pending</del>
+<ins class="actual">(null)</ins></td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 3</td>
             <td class="failure"><del class="expected">Paid</del>
-<ins class="actual">Pending</ins></td>
+<ins class="actual">(null)</ins></td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 4</td>
             <td class="failure"><del class="expected">Paid</del>
-<ins class="actual">Pending</ins></td>
+<ins class="actual">(null)</ins></td>
         </tr>
     </table>
 </div>
-<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 1212220 ms on 19-Dec-2019 at 15:01:26 UTC</div></div></body>
+<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 14621 ms on 19-Dec-2019 at 16:05:55 UTC</div></div></body>
 </html>
