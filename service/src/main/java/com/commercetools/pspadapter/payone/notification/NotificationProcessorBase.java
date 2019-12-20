@@ -126,8 +126,8 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
 
         if (newPaymentState == null && updatedPayment.getPaymentStatus() != null) {
             // TODO do we need this warning?
-            logger.warn(createTenantKeyValue(tenantConfig.getName()),
-                "Payment with id [{}] has paymentStatus [{}] which can't be mapped to Order#paymentState. "
+            logger.warn(
+                createTenantKeyValue(tenantConfig.getName()), "Payment with id [{}] has paymentStatus [{}] which can't be mapped to Order#paymentState. "
                     + "The order's state remains unchanged.", updatedPayment.getId(),
                 updatedPayment.getPaymentStatus().getInterfaceCode());
         }
