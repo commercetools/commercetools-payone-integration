@@ -16,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
+import static java.lang.String.format;
 
 /**
  * @author fhaertig
@@ -44,15 +45,20 @@ public abstract class ScheduledJob implements Job {
                         .getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
                 } catch (final NoCartLikeFoundException ex) {
-                    LOG.debug(createTenantKeyValue(tenantFactory.getTenantName()),
-                        "Could not dispatch payment with id \"{}\": {}", payment.getId(), ex.getMessage());
+                    LOG.debug(
+                        createTenantKeyValue(tenantFactory.getTenantName()),
+                        format("Could not dispatch payment with id '%s'", payment.getId()),
+                        ex);
                 } catch (final ConcurrentModificationException ex) {
-                    LOG.info(createTenantKeyValue(tenantFactory.getTenantName()),
-                        "Could not dispatch payment with id \"{}\": The payment is currently processed by someone else.",
-                        payment.getId());
+                    LOG.info(
+                        createTenantKeyValue(tenantFactory.getTenantName()),
+                        format("Could not dispatch payment with id '%s': The payment is currently processed by someone else.", payment.getId()),
+                        ex);
                 } catch (final Exception ex) {
-                    LOG.error(createTenantKeyValue(tenantFactory.getTenantName()),
-                        "Error dispatching payment with id \"{}\"", payment.getId(), ex);
+                    LOG.error(
+                        createTenantKeyValue(tenantFactory.getTenantName()),
+                        format("Error dispatching payment with id '%s'", payment.getId()),
+                        ex);
                 }
             };
 
