@@ -14,11 +14,10 @@ import javax.annotation.Nonnull;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletionException;
 
-import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createLoggerName;
+import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
 import static io.sphere.sdk.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
-import static net.logstash.logback.marker.Markers.append;
 
 public class PaymentHandler {
 
@@ -43,8 +42,8 @@ public class PaymentHandler {
         this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
         this.paymentDispatcher = paymentDispatcher;
 
-        this.logger = LoggerFactory.getLogger(createLoggerName(this.getClass(), tenantName));
-        tenantNameKeyValue = append("tenantName", tenantName);
+        this.logger = LoggerFactory.getLogger(this.getClass());
+        tenantNameKeyValue = createTenantKeyValue(tenantName);
     }
 
     /**

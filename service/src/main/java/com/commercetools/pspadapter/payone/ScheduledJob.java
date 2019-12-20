@@ -7,7 +7,6 @@ import io.sphere.sdk.payments.Payment;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +15,7 @@ import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.LOG_PREFIX;
+import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
 
 /**
  * @author fhaertig
@@ -29,11 +28,10 @@ public abstract class ScheduledJob implements Job {
     public static final String INTEGRATION_SERVICE = "INTEGRATION_SERVICE";
 
     @Override
-    public void execute(final JobExecutionContext context) throws JobExecutionException {
-        JobDataMap dataMap = context.getMergedJobDataMap();
+    public void execute(final JobExecutionContext context) {
 
+        final JobDataMap dataMap = context.getMergedJobDataMap();
         final IntegrationService integrationService = (IntegrationService) dataMap.get(INTEGRATION_SERVICE);
-
         final ZonedDateTime sinceDate = getSinceDateTime();
 
         integrationService.getTenantFactories().forEach(tenantFactory -> {
@@ -42,17 +40,19 @@ public abstract class ScheduledJob implements Job {
 
             final Consumer<Payment> paymentConsumer = payment -> {
                 try {
-                    final PaymentWithCartLike paymentWithCartLike = queryExecutor.getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
+                    final PaymentWithCartLike paymentWithCartLike = queryExecutor
+                        .getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
                 } catch (final NoCartLikeFoundException ex) {
-                    LOG.debug(LOG_PREFIX + " Could not dispatch payment with ID \"{}\": {}",
-                            tenantFactory.getTenantName(),  payment.getId(), ex.getMessage());
+                    LOG.debug(createTenantKeyValue(tenantFactory.getTenantName()),
+                        "Could not dispatch payment with id \"{}\": {}", payment.getId(), ex.getMessage());
                 } catch (final ConcurrentModificationException ex) {
-                    LOG.info(LOG_PREFIX + " Could not dispatch payment with ID \"{}\": The payment is currently processed by someone else.",
-                            tenantFactory.getTenantName(), payment.getId());
-                } catch (final Throwable ex) {
-                    LOG.error(LOG_PREFIX + " Error dispatching payment with ID \"{}\"",
-                            tenantFactory.getTenantName(), payment.getId(), ex);
+                    LOG.info(createTenantKeyValue(tenantFactory.getTenantName()),
+                        "Could not dispatch payment with id \"{}\": The payment is currently processed by someone else.",
+                        payment.getId());
+                } catch (final Exception ex) {
+                    LOG.error(createTenantKeyValue(tenantFactory.getTenantName()),
+                        "Error dispatching payment with id \"{}\"", payment.getId(), ex);
                 }
             };
 

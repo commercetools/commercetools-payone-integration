@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getGenderFromPaymentCart;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguage;
-import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createLoggerName;
+import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
 
 /**
  * @author fhaertig
@@ -38,7 +38,7 @@ public abstract class PayoneRequestFactory {
 
     protected PayoneRequestFactory(@Nonnull final TenantConfig tenantConfig) {
         this.tenantConfig = tenantConfig;
-        this.logger = LoggerFactory.getLogger(createLoggerName(this.getClass(), tenantConfig.getName()));
+        this.logger = LoggerFactory.getLogger(this.getClass());
     }
 
     @Nonnull
@@ -82,22 +82,25 @@ public abstract class PayoneRequestFactory {
         try {
             MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
         } catch (final IllegalArgumentException ex) {
-            logger.debug("Could not fully map customer in payment with ID {} {}",
-                    paymentWithCartLike.getPayment().getId(), ex.getMessage());
+            logger.debug(createTenantKeyValue(tenantConfig.getName()),
+                "Could not fully map customer in payment with ID {} {}",
+                paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
         try {
             MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
         } catch (final IllegalArgumentException ex) {
-            logger.error("Could not fully map billing address in payment with ID {} {}",
-                    paymentWithCartLike.getPayment().getId(), ex.getMessage());
+            logger.error(createTenantKeyValue(tenantConfig.getName()),
+                "Could not fully map billing address in payment with ID {} {}",
+                paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
         try {
             MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
         } catch (final IllegalArgumentException ex) {
-            logger.debug("Could not fully map shipping address in payment with ID {} {}",
-                    paymentWithCartLike.getPayment().getId(), ex.getMessage());
+            logger.debug(createTenantKeyValue(tenantConfig.getName()),
+                "Could not fully map shipping address in payment with ID {} {}",
+                paymentWithCartLike.getPayment().getId(), ex.getMessage());
         }
 
         //customer's locale, if set in custom field or cartLike
