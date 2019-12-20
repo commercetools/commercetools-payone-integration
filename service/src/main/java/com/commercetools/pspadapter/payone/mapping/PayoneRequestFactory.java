@@ -83,24 +83,24 @@ public abstract class PayoneRequestFactory {
             MappingUtil.mapCustomerToRequest(request, ctPayment.getCustomer());
         } catch (final IllegalArgumentException ex) {
             logger.debug(createTenantKeyValue(tenantConfig.getName()),
-                "Could not fully map customer in payment with ID {} {}",
-                paymentWithCartLike.getPayment().getId(), ex.getMessage());
+                "Could not fully map customer in payment with id '{}'",
+                paymentWithCartLike.getPayment().getId(), ex);
         }
 
         try {
             MappingUtil.mapBillingAddressToRequest(request, ctCartLike.getBillingAddress());
         } catch (final IllegalArgumentException ex) {
             logger.error(createTenantKeyValue(tenantConfig.getName()),
-                "Could not fully map billing address in payment with ID {} {}",
-                paymentWithCartLike.getPayment().getId(), ex.getMessage());
+                "Could not fully map billing address in payment with id '{}'",
+                paymentWithCartLike.getPayment().getId(), ex);
         }
 
         try {
             MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
         } catch (final IllegalArgumentException ex) {
             logger.debug(createTenantKeyValue(tenantConfig.getName()),
-                "Could not fully map shipping address in payment with ID {} {}",
-                paymentWithCartLike.getPayment().getId(), ex.getMessage());
+                "Could not fully map shipping address in payment with id '{}'",
+                paymentWithCartLike.getPayment().getId(), ex);
         }
 
         //customer's locale, if set in custom field or cartLike

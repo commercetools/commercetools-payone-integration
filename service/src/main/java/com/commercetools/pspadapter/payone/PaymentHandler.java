@@ -12,12 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.ConcurrentModificationException;
-import java.util.concurrent.CompletionException;
 
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
 import static io.sphere.sdk.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
 import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
 
 public class PaymentHandler {
 
@@ -66,7 +64,9 @@ public class PaymentHandler {
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
                     return new PaymentHandleResult(HttpStatusCode.OK_200);
                 } catch (final ConcurrentModificationException cme) {
-                    logger.warn(tenantNameKeyValue, "Exception on dispatchPayment with id [{}]. Retry {} of {}", paymentId, i + 1, RETRIES_LIMIT);
+                    logger.warn(tenantNameKeyValue,
+                        "Exception on dispatchPayment with id [{}]. Retry {} of {}", paymentId, i + 1, RETRIES_LIMIT,
+                        cme);
                     Thread.sleep(RETRY_DELAY);
                 }
             }
@@ -81,10 +81,8 @@ public class PaymentHandler {
             return handleNotFoundException(paymentId, e);
         } catch (final ErrorResponseException e) {
             return errorResponseHandler(e, paymentId);
-        } catch (final CompletionException e) {
-            return completionExceptionHandler(e, paymentId);
         } catch (final Exception e) {
-            return handleThrowableInResponse(e, paymentId);
+            return handleException(e, paymentId);
         }
     }
 
@@ -95,27 +93,16 @@ public class PaymentHandler {
     }
 
     private PaymentHandleResult errorResponseHandler(@Nonnull ErrorResponseException e, @Nonnull String paymentId) {
-        logger.error(tenantNameKeyValue, format("Failed to process the commercetools Payment with id [%s] due to an error response from the commercetools platform.", paymentId), e);
+        logger.error(tenantNameKeyValue,
+            format("Failed to process the commercetools Payment with id [%s] due to an error response from the commercetools platform.", paymentId), e);
         return new PaymentHandleResult(e.getStatusCode(),
                 format("Failed to process the commercetools payment with id [%s], due to an error response from the "
                     + "commercetools platform. Try again later.", paymentId));
     }
 
-    /**
-     * Completion exceptions used to tell nothing, thus we should try to report the exception cause.
-     *
-     * @param e Exception to report
-     * @return {@link PaymentHandleResult} with 500 status and message which refers to the logs.
-     */
-    private PaymentHandleResult completionExceptionHandler(@Nonnull CompletionException e, @Nonnull String paymentId) {
-        String causeMessage = ofNullable(e.getCause()).map(Throwable::toString).orElse("null");
-        logger.error(tenantNameKeyValue, "Completion exception error: {}\nCause: {}", e.toString(), causeMessage);
-        return new PaymentHandleResult(INTERNAL_SERVER_ERROR_500,
-                format("An error occurred during communication with the commercetools platform when processing [%s] payment. See the service logs", paymentId));
-    }
-
-    private PaymentHandleResult handleThrowableInResponse(@Nonnull Throwable throwable, @Nonnull String paymentId) {
-        logger.error(tenantNameKeyValue, "Error in response: ", throwable);
+    private PaymentHandleResult handleException(@Nonnull Exception throwable, @Nonnull String paymentId) {
+        logger.error(tenantNameKeyValue,
+            format("Unexpected error occurred when processing commercetools Payment with id [%s].", paymentId), throwable);
         return new PaymentHandleResult(INTERNAL_SERVER_ERROR_500,
                 format("Unexpected error occurred when processing commercetools Payment with id [%s]. "
                     + "See the service logs", paymentId));

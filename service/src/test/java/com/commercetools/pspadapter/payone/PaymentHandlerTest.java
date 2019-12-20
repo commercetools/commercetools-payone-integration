@@ -204,7 +204,7 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
-        assertThat(paymentHandleResult.body()).contains(format("An error occurred during communication with the commercetools platform when processing [%s] payment. See the service logs", paymentId));
+        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing commercetools Payment with id [%s]. See the service logs", paymentId));
     }
 
     @Test
