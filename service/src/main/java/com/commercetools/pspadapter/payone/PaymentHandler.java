@@ -52,31 +52,30 @@ public class PaymentHandler {
      */
     public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
         try {
+            ConcurrentModificationException lastConcurrentModificationException = null;
             for (int i = 0; i < RETRIES_LIMIT; i++) {
                 try {
-                    final PaymentWithCartLike paymentWithCartLike = commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
-                    String paymentInterface = paymentWithCartLike.getPayment().getPaymentMethodInfo().getPaymentInterface();
+                    final PaymentWithCartLike paymentWithCartLike = commercetoolsQueryExecutor
+                        .getPaymentWithCartLike(paymentId);
+                    String paymentInterface = paymentWithCartLike.getPayment().getPaymentMethodInfo()
+                                                                 .getPaymentInterface();
                     if (!payoneInterfaceName.equals(paymentInterface)) {
-                        logger.warn(tenantNameKeyValue, "Wrong payment interface name: expected [{}], found [{}]", payoneInterfaceName, paymentInterface);
+                        logger.warn(tenantNameKeyValue, "Wrong payment interface name: expected [{}], found [{}]",
+                            payoneInterfaceName, paymentInterface);
                         return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
                     }
 
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
                     return new PaymentHandleResult(HttpStatusCode.OK_200);
-                } catch (final ConcurrentModificationException cme) {
-                    logger.warn(tenantNameKeyValue,
-                        "Exception on dispatchPayment with id [{}]. Retry {} of {}", paymentId, i + 1, RETRIES_LIMIT,
-                        cme);
+                } catch (final ConcurrentModificationException concurrentModificationException) {
+                    lastConcurrentModificationException = concurrentModificationException;
                     Thread.sleep(RETRY_DELAY);
                 }
             }
-
-            logger.error(
-                tenantNameKeyValue,
-                "The payment [{}] couldn't be processed after {} retries", paymentId, RETRIES_LIMIT);
-            return new PaymentHandleResult(HttpStatusCode.ACCEPTED_202,
-                    format("The payment couldn't be processed after %s retries", RETRIES_LIMIT));
-
+            throw lastConcurrentModificationException;
+        }
+        catch (final ConcurrentModificationException concurrentModificationException) {
+            return handleConcurrentModificationException(paymentId, concurrentModificationException);
         } catch (final NotFoundException | NoCartLikeFoundException e) {
             return handleNotFoundException(paymentId, e);
         } catch (final ErrorResponseException e) {
@@ -86,7 +85,17 @@ public class PaymentHandler {
         }
     }
 
-     private PaymentHandleResult handleNotFoundException(@Nonnull String paymentId, @Nonnull Exception exception ) {
+    private PaymentHandleResult handleConcurrentModificationException(
+        @Nonnull final String paymentId,
+        @Nonnull final ConcurrentModificationException concurrentModificationException) {
+
+        final String errorMessage = format("The payment with id '%s' couldn't be processed after %s retries.",
+            paymentId, RETRIES_LIMIT);
+        logger.error(errorMessage, concurrentModificationException);
+        return new PaymentHandleResult(HttpStatusCode.ACCEPTED_202, errorMessage);
+    }
+
+    private PaymentHandleResult handleNotFoundException(@Nonnull String paymentId, @Nonnull Exception exception ) {
         final String body = format("Failed to process the commercetools Payment with id [%s], as the payment or the cart could not be found.", paymentId);
         logger.error(tenantNameKeyValue, body, exception);
         return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
