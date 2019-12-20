@@ -35,7 +35,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlocking;
-import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createLoggerName;
+import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
 
 /**
  * Base for notification processor implementations.
@@ -65,8 +65,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
         this.tenantFactory = tenantFactory;
         this.tenantConfig = tenantConfig;
         this.transactionStateResolver = transactionStateResolver;
-
-        this.logger = LoggerFactory.getLogger(createLoggerName(this.getClass(), tenantConfig.getName()));
+        this.logger = LoggerFactory.getLogger(this.getClass());
     }
 
     @Override
@@ -121,23 +120,20 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
      * the same instance.
      */
     private CompletionStage<Order> updateOrderIfExists(Order order, Payment updatedPayment) {
-        if (order != null) {
-            PaymentState newPaymentState = getPaymentToOrderStateMapper().mapPaymentToOrderState(updatedPayment);
 
-            if (newPaymentState == null && updatedPayment.getPaymentStatus() != null) {
-                logger.warn("Payment [{}] has paymentStatus [{}] which can't be mapped to Order#paymentState. "
-                                + "The order's state remains unchanged.",
-                        updatedPayment.getId(), updatedPayment.getPaymentStatus().getInterfaceCode());
-            }
+        final PaymentState newPaymentState = getPaymentToOrderStateMapper()
+            .mapPaymentToOrderState(updatedPayment);
 
-            // skip update for undefined or unchanged payment state
-            if (newPaymentState != null && !newPaymentState.equals(order.getPaymentState())) {
-                return getOrderService().updateOrderPaymentState(order, newPaymentState);
-            }
-        } else {
-            // This may happen when Payone sends the notification faster then user was redirected back to the shop
-            // and the order has not been created yet.
-            logger.info("Payment [{}] is updated, but respective order is not found!", updatedPayment.getId());
+        if (newPaymentState == null && updatedPayment.getPaymentStatus() != null) {
+            // TODO do we need this warning?
+            logger.warn(createTenantKeyValue(tenantConfig.getName()),
+                "Payment with id [{}] has paymentStatus [{}] which can't be mapped to Order#paymentState. "
+                    + "The order's state remains unchanged.", updatedPayment.getId(),
+                updatedPayment.getPaymentStatus().getInterfaceCode());
+        }
+
+        if (order != null && newPaymentState != null && !newPaymentState.equals(order.getPaymentState())) {
+            return getOrderService().updateOrderPaymentState(order, newPaymentState);
         }
 
         return CompletableFuture.completedFuture(order);
