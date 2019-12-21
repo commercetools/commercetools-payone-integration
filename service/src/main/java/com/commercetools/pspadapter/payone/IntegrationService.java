@@ -8,6 +8,7 @@ import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
+import com.commercetools.util.spark.filter.CorrelationIdFilter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +39,7 @@ public class IntegrationService {
     private static final String STATUS_KEY = "status";
     private static final String APPLICATION_INFO_KEY = "applicationInfo";
 
+
     private static final String HEROKU_ASSIGNED_PORT = "PORT";
     private List<TenantFactory> tenantFactories = null;
     private ServiceConfig serviceConfig = null;
@@ -67,7 +69,7 @@ public class IntegrationService {
 
     }
 
-    private static void initTenantServiceResources(TenantFactory tenantFactory) {
+    private static void initTenantServiceResources(final TenantFactory tenantFactory) {
 
         // create custom types
         if (tenantFactory.getCustomTypeBuilder() != null) {
@@ -81,14 +83,15 @@ public class IntegrationService {
         if (StringUtils.isNotEmpty(paymentHandlerUrl)) {
             LOG.info("Register payment handler URL {}", paymentHandlerUrl);
             Spark.get(paymentHandlerUrl, (req, res) -> {
-                final PaymentHandleResult paymentHandleResult = paymentHandler.handlePayment(req.params("id"));
-                if (!paymentHandleResult.body().isEmpty()) {
-                    LOG.debug("--> Result body of ${getTenantName()}/commercetools/handle/payments/{}: {}", req.params(
-                            "id"), paymentHandleResult.body());
-                }
-                res.status(paymentHandleResult.statusCode());
-                return res;
-            }, new HandlePaymentResponseTransformer());
+                    final PaymentHandleResult paymentHandleResult = paymentHandler.handlePayment(req.params("id"));
+                    if (!paymentHandleResult.body().isEmpty()) {
+                        LOG.debug("--> Result body of ${getTenantName()}/commercetools/handle/payments/{}: {}",
+                            req.params("id"), paymentHandleResult.body());
+                    }
+                    res.status(paymentHandleResult.statusCode());
+                    return res;
+                },
+                new HandlePaymentResponseTransformer());
         }
         // register Payone notifications URL
         String payoneNotificationUrl = tenantFactory.getPayoneNotificationUrl();
@@ -137,6 +140,7 @@ public class IntegrationService {
 
     private void initSparkService() {
         Spark.port(port());
+        Spark.before(CorrelationIdFilter.of());
 
         final ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig, tenantFactories);
         final String healthRequestContent = toJsonString(healthResponse);
