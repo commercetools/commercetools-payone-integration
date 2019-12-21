@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8"?><html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+<head><style>* {
+  font-family: Arial;
+}
+body {
+  padding: 32px;  
+}
+pre {
+  padding: 6px 28px 6px 28px;
+  background-color: #E8EEF7;
+}
+pre, pre *, code, code *, kbd {
+  font-family: Courier New, Courier;
+  font-size: 10pt;
+}
+h1, h1 * {
+  font-size: 24pt;	
+}
+p, td, th, li, .breadcrumbs {
+  font-size: 10pt;
+}
+p, li {
+  line-height: 140%;
+  max-width: 720px;
+}
+table {
+  border-collapse: collapse;
+  empty-cells: show;
+  margin: 8px 0px 8px 0px;
+}
+th, td {
+  border: 1px solid black;
+  padding: 3px;
+}
+td {
+  background-color: white;
+  vertical-align: top;
+}
+th {
+  background-color: #C3D9FF;
+}
+li {
+  margin-top: 6px;
+  margin-bottom: 6px; 
+}
+
+.example, :not(th)[c\:example] {
+  padding: 6px 16px 6px 16px;
+  border: 1px solid #C3D9FF;
+  margin: 6px 0px 28px 0px;
+  background-color: #F5F9FD;
+}
+.example h3, [c\:example] h3 {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  font-size: 12pt;
+}
+
+p.success {
+  padding: 2px;
+}
+.success, .success * {
+  background-color: #afa !important;
+}
+.success pre {
+  background-color: #bbffbb;
+}
+.failure, .failure * {
+  background-color: #ffb0b0;
+  padding: 1px;
+}
+.failure .expected {
+  text-decoration: line-through;
+  color: #bb5050;
+}
+.ignored, .ignored * {
+  background-color: #f0f0f0 !important;	
+}
+
+ins {
+  text-decoration: none;	
+}
+
+.exceptionMessage {
+  background-color: #fdd;
+  font-family: Courier New, Courier, Monospace;
+  font-size: 10pt;
+  display: block;
+  font-weight: normal;
+  padding: 4px;
+  text-decoration: none !important;
+}
+.stackTrace, .stackTrace * {
+  font-weight: normal;
+}
+.stackTrace {
+  display: none;
+  padding: 1px 4px 4px 4px;
+  background-color: #fdd;
+  border-top: 1px dotted black;
+}
+.stackTraceExceptionMessage {
+  display: block;
+  font-family: Courier New, Courier, Monospace;
+  font-size: 8pt;
+  white-space: wrap;
+  padding: 1px 0px 1px 0px;
+}
+.stackTraceEntry {
+  white-space: nowrap;
+  font-family: Courier New, Courier, Monospace;
+  display: block;
+  font-size: 8pt;
+  padding: 1px 0px 1px 32px;
+}
+.stackTraceButton {
+  font-size: 8pt;
+  margin: 2px 8px 2px 0px;
+  font-weight: normal;
+  font-family: Arial;
+}
+
+.special {
+  font-style: italic;
+}
+.missing, .missing * {
+  background-color: #ff9999;
+  color:#bb5050;
+  text-decoration: line-through;
+}
+.surplus, .surplus * {
+  background-color: #ff9999;
+}
+.footer {
+  text-align: right;
+  margin-top: 40px;
+  font-size: 8pt;
+  width: 100%;
+  color: #999;
+}
+.footer .testTime {
+  padding: 2px 10px 0px 0px;
+}
+
+.idea {
+  font-size: 9pt;
+  color: #888;
+  font-style: italic;	
+}
+.tight li {
+  margin-top: 1px;
+  margin-bottom: 1px; 
+}
+.commentary {
+  float: right;
+  width: 200px;
+  background-color: #ffffd0;
+  padding:8px;
+  border: 3px solid #eeeeb0;	 
+  margin: 10px 0px 10px 10px;	 
+}
+.commentary, .commentary * {
+  font-size: 8pt;
+}
+</style><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta charset="UTF-8" />
+    <link href="../../concordion.css" rel="stylesheet" type="text/css" />
+    <title>CTP Initial Payment State Migration Tests</title>
+<link type="text/css" rel="stylesheet" href="../../inputstyle.css" /></head>
+<body><span class="breadcrumbs"><a href="../Specs.html">commercetools - PAYONE - Integration Service</a> &gt;</span>
+<h1>CTP Initial Payment State Migration Tests</h1>
+
+This tests verify that the application works properly in mode of migration, e.g. it handles CTP payments with
+<b>both</b> <b><i>Initial</i></b> and <b><i>Pending</i></b> transaction states.
+
+<p style="font-size: large; background-color: #FFCCCC">
+    <b>Note:</b> the tests with <b><i>Pending</i></b> transaction states won't be valid any more when full CTP
+    completely migrates to <b><i>Initial</i></b> default transaction state.
+    <br />
+    See <a href="http://dev.commercetools.com/release-notes.html#release-notes---commercetools-platform---version-release-29-september-2017">
+    Release Notes - commercetools platform - Version Release 29 September 2017
+</a>
+</p>
+
+<div class="example">
+    <h3>Credit Card Without 3ds</h3>
+    <table c:execute="#paymentId = createPaymentCreditCardWithout3ds(#paymentName, #paymentMethod, #paymentCustomType, #transactionType, #transactionState, #centAmount, #currencyCode)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#paymentMethod">Payment Method</th>
+            <th c:set="#paymentCustomType">Payment Custom Type</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#transactionState">Transaction State</th>
+            <th c:set="#centAmount">Cent Amount</th>
+            <th c:set="#currencyCode">Currency Code</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Authorization Initial Without 3ds</td>
+            <td class="inputvalue">CREDIT_CARD</td>
+            <td class="inputvalue">payment-CREDIT_CARD</td>
+            <td class="inputvalue">AUTHORIZATION</td>
+            <td class="inputvalue">INITIAL</td>
+            <td class="inputvalue">111</td>
+            <td class="inputvalue">EUR</td>
+            <td>7c831410-0102-474d-bef7-df63c15d6cec</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Authorization Pending Without 3ds</td>
+            <td class="inputvalue">CREDIT_CARD</td>
+            <td class="inputvalue">payment-CREDIT_CARD</td>
+            <td class="inputvalue">AUTHORIZATION</td>
+            <td class="inputvalue">PENDING</td>
+            <td class="inputvalue">112</td>
+            <td class="inputvalue">EUR</td>
+            <td>32b396e8-8f15-4096-8d6a-66d2d8233e7c</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Charge Initial Without 3ds</td>
+            <td class="inputvalue">CREDIT_CARD</td>
+            <td class="inputvalue">payment-CREDIT_CARD</td>
+            <td class="inputvalue">CHARGE</td>
+            <td class="inputvalue">INITIAL</td>
+            <td class="inputvalue">2800</td>
+            <td class="inputvalue">EUR</td>
+            <td>fbbb2c5e-43bb-4424-8ec8-81313ab09a86</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Charge Pending Without 3ds</td>
+            <td class="inputvalue">CREDIT_CARD</td>
+            <td class="inputvalue">payment-CREDIT_CARD</td>
+            <td class="inputvalue">CHARGE</td>
+            <td class="inputvalue">PENDING</td>
+            <td class="inputvalue">2800</td>
+            <td class="inputvalue">EUR</td>
+            <td>2053c112-09f5-40be-b077-2f9008c1e120</td>
+        </tr>
+    </table>
+
+    <h3>Credit Card 3ds</h3>
+    <table c:execute="#paymentId = createPaymentCreditCard3ds(#paymentName, #paymentMethod, #paymentCustomType, #transactionType, #transactionState, #centAmount, #currencyCode)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#paymentMethod">Payment Method</th>
+            <th c:set="#paymentCustomType">Payment Custom Type</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#transactionState">Transaction State</th>
+            <th c:set="#centAmount">Cent Amount</th>
+            <th c:set="#currencyCode">Currency Code</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Authorization Initial 3ds</td>
+            <td class="inputvalue">CREDIT_CARD</td>
+            <td class="inputvalue">payment-CREDIT_CARD</td>
+            <td class="inputvalue">AUTHORIZATION</td>
+            <td class="inputvalue">INITIAL</td>
+            <td class="inputvalue">11199</td>
+            <td class="inputvalue">EUR</td>
+            <td>fe60e0ba-b9b6-439a-b1b2-496914ef443e</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Authorization Pending 3ds</td>
+            <td class="inputvalue">CREDIT_CARD</td>
+            <td class="inputvalue">payment-CREDIT_CARD</td>
+            <td class="inputvalue">AUTHORIZATION</td>
+            <td class="inputvalue">PENDING</td>
+            <td class="inputvalue">11299</td>
+            <td class="inputvalue">EUR</td>
+            <td>4a86b358-33f4-4c2a-87ef-0c4c3c2cbf89</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Charge Initial 3ds</td>
+            <td class="inputvalue">CREDIT_CARD</td>
+            <td class="inputvalue">payment-CREDIT_CARD</td>
+            <td class="inputvalue">CHARGE</td>
+            <td class="inputvalue">INITIAL</td>
+            <td class="inputvalue">2800</td>
+            <td class="inputvalue">EUR</td>
+            <td>a8fceb81-6cbc-41fa-9df8-9e42535156a5</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Charge Pending 3ds</td>
+            <td class="inputvalue">CREDIT_CARD</td>
+            <td class="inputvalue">payment-CREDIT_CARD</td>
+            <td class="inputvalue">CHARGE</td>
+            <td class="inputvalue">PENDING</td>
+            <td class="inputvalue">2800</td>
+            <td class="inputvalue">EUR</td>
+            <td>f4442bb5-63f2-4b8f-872b-1b5eeb5e4d14</td>
+        </tr>
+    </table>
+
+    <h3>Paypal (Wallet)</h3>
+    <table c:execute="#paymentId = createPaymentPaypal(#paymentName, #paymentMethod, #paymentCustomType, #transactionType, #transactionState, #centAmount, #currencyCode)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#paymentMethod">Payment Method</th>
+            <th c:set="#paymentCustomType">Payment Custom Type</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#transactionState">Transaction State</th>
+            <th c:set="#centAmount">Cent Amount</th>
+            <th c:set="#currencyCode">Currency Code</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">Paypal Authorization Initial</td>
+            <td class="inputvalue">WALLET-PAYPAL</td>
+            <td class="inputvalue">payment-WALLET</td>
+            <td class="inputvalue">AUTHORIZATION</td>
+            <td class="inputvalue">INITIAL</td>
+            <td class="inputvalue">211</td>
+            <td class="inputvalue">EUR</td>
+            <td>dbd51a56-e262-4b10-b237-70c5a4c9e89e</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Paypal Authorization Pending</td>
+            <td class="inputvalue">WALLET-PAYPAL</td>
+            <td class="inputvalue">payment-WALLET</td>
+            <td class="inputvalue">AUTHORIZATION</td>
+            <td class="inputvalue">PENDING</td>
+            <td class="inputvalue">212</td>
+            <td class="inputvalue">EUR</td>
+            <td>875d798a-c6f6-49b8-a15a-e0f657e990e2</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Paypal Charge Initial</td>
+            <td class="inputvalue">WALLET-PAYPAL</td>
+            <td class="inputvalue">payment-WALLET</td>
+            <td class="inputvalue">CHARGE</td>
+            <td class="inputvalue">INITIAL</td>
+            <td class="inputvalue">221</td>
+            <td class="inputvalue">EUR</td>
+            <td>a436815c-af3a-4d1e-941c-c08d01c52e5a</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Paypal Charge Pending</td>
+            <td class="inputvalue">WALLET-PAYPAL</td>
+            <td class="inputvalue">payment-WALLET</td>
+            <td class="inputvalue">CHARGE</td>
+            <td class="inputvalue">PENDING</td>
+            <td class="inputvalue">111</td>
+            <td class="inputvalue">EUR</td>
+            <td>146ea8ad-2541-4262-af2f-138113349a00</td>
+        </tr>
+    </table>
+
+    <h3>Bank Transfer Advanced (Vorkasse)</h3>
+    <table c:execute="#paymentId = createSimplePayment(#paymentName, #paymentMethod, #paymentCustomType, #transactionType, #transactionState, #centAmount, #currencyCode)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#paymentMethod">Payment Method</th>
+            <th c:set="#paymentCustomType">Payment Custom Type</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#transactionState">Transaction State</th>
+            <th c:set="#centAmount">Cent Amount</th>
+            <th c:set="#currencyCode">Currency Code</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">BankTransfer Charge Initial</td>
+            <td class="inputvalue">BANK_TRANSFER-ADVANCE</td>
+            <td class="inputvalue">payment-CASH-ADVANCE</td>
+            <td class="inputvalue">CHARGE</td>
+            <td class="inputvalue">INITIAL</td>
+            <td class="inputvalue">321</td>
+            <td class="inputvalue">EUR</td>
+            <td>b219c091-3c36-4a6c-8289-51273c828909</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">BankTransfer Charge Pending</td>
+            <td class="inputvalue">BANK_TRANSFER-ADVANCE</td>
+            <td class="inputvalue">payment-CASH-ADVANCE</td>
+            <td class="inputvalue">CHARGE</td>
+            <td class="inputvalue">PENDING</td>
+            <td class="inputvalue">322</td>
+            <td class="inputvalue">EUR</td>
+            <td>807f574e-6cab-4d23-b3b0-b3fd6070b682</td>
+        </tr>
+    </table>
+
+    <h3>Klarna</h3>
+    <table c:execute="#paymentId = createKlarnaPayment(#paymentName, #transactionType, #ip, #buyerLastName, #birthDay, #telephonenumber)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#buyerLastName">Buyer surname<sup><a href="#buyer-lastname-description">[1]</a></sup></th>
+            <th c:set="#birthDay">Buyer birth day</th>
+            <th c:set="#ip">IP address</th>
+            <th c:set="#telephonenumber">Telephone</th>
+            <th c:echo="#paymentId">Payment ID (for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">Klarna Payment 1</td>
+            <td class="inputvalue">AUTHORIZATION</td>
+            <td class="inputvalue">Approved</td> <!-- It's a buyer surname, see https://developers.klarna.com/en/de/kpm/test-credentials-->
+            <td class="inputvalue">1960-07-07</td>
+            <td class="inputvalue">192.168.0.45</td>
+            <td class="inputvalue">034568557</td>
+            <td>20b5fbfd-820b-4cad-8453-ac8babb12fea</td>
+        </tr>
+    </table>
+
+    <p>
+        <sup><a name="buyer-lastname-description" href="#buyer-lastname-description">[1]</a></sup><i>See more
+        information on
+        <a href="https://developers.klarna.com/en/de/kpm/test-credentials" target="_blank">Klarna test credentials</a>
+        page</i>
+    </p>
+
+    <hr />
+
+    <h2>When request the integration service to handle them - get the following results:</h2>
+
+    <h3>Credit Card Without 3ds</h3>
+    <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:assertEquals="#result.interfaceStatusCode">Payment Status Code</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Authorization Initial Without 3ds</td>
+            <td class="inputvalue">authorization</td>
+            <td class="success">200</td>
+            <td class="success">Success</td>
+            <td class="success">APPROVED</td>
+            <td>10</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Authorization Pending Without 3ds</td>
+            <td class="inputvalue">authorization</td>
+            <td class="success">200</td>
+            <td class="success">Success</td>
+            <td class="success">APPROVED</td>
+            <td>10</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Charge Initial Without 3ds</td>
+            <td class="inputvalue">charge</td>
+            <td class="success">200</td>
+            <td class="success">Success</td>
+            <td class="success">APPROVED</td>
+            <td>10</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Charge Pending Without 3ds</td>
+            <td class="inputvalue">charge</td>
+            <td class="success">200</td>
+            <td class="success">Success</td>
+            <td class="success">APPROVED</td>
+            <td>10</td>
+        </tr>
+    </table>
+
+    <h3>Credit Card 3ds</h3>
+    <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:assertEquals="#result.interfaceStatusCode">Payment Status Code</th>
+            <th c:assertEquals="#result.responseRedirectUrl">Redirect URL root</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Authorization Initial 3ds</td>
+            <td class="inputvalue">authorization</td>
+            <td class="success">200</td>
+            <td class="success">Pending</td>
+            <td class="success">REDIRECT</td>
+            <td class="success">https://secure.pay1.de/3ds/redirect.php</td>
+            <td>11</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Authorization Pending 3ds</td>
+            <td class="inputvalue">authorization</td>
+            <td class="success">200</td>
+            <td class="success">Pending</td>
+            <td class="success">REDIRECT</td>
+            <td class="success">https://secure.pay1.de/3ds/redirect.php</td>
+            <td>10</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Charge Initial 3ds</td>
+            <td class="inputvalue">charge</td>
+            <td class="success">200</td>
+            <td class="success">Pending</td>
+            <td class="success">REDIRECT</td>
+            <td class="success">https://secure.pay1.de/3ds/redirect.php</td>
+            <td>11</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">CreditCard Charge Pending 3ds</td>
+            <td class="inputvalue">charge</td>
+            <td class="success">200</td>
+            <td class="success">Pending</td>
+            <td class="success">REDIRECT</td>
+            <td class="success">https://secure.pay1.de/3ds/redirect.php</td>
+            <td>10</td>
+        </tr>
+    </table>
+
+    <h3>Paypal (Wallet)</h3>
+    <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:assertEquals="#result.interfaceStatusCode">Payment Status Code</th>
+            <th c:assertEquals="#result.responseRedirectUrl">Redirect URL root</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">Paypal Authorization Initial</td>
+            <td class="inputvalue">authorization</td>
+            <td class="success">200</td>
+            <td class="success">Pending</td>
+            <td class="success">REDIRECT</td>
+            <td class="success">https://www.sandbox.paypal.com/webscr</td>
+            <td>11</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Paypal Authorization Pending</td>
+            <td class="inputvalue">authorization</td>
+            <td class="success">200</td>
+            <td class="success">Pending</td>
+            <td class="success">REDIRECT</td>
+            <td class="success">https://www.sandbox.paypal.com/webscr</td>
+            <td>10</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Paypal Charge Initial</td>
+            <td class="inputvalue">charge</td>
+            <td class="success">200</td>
+            <td class="success">Pending</td>
+            <td class="success">REDIRECT</td>
+            <td class="success">https://www.sandbox.paypal.com/webscr</td>
+            <td>11</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Paypal Charge Pending</td>
+            <td class="inputvalue">charge</td>
+            <td class="success">200</td>
+            <td class="success">Pending</td>
+            <td class="success">REDIRECT</td>
+            <td class="success">https://www.sandbox.paypal.com/webscr</td>
+            <td>10</td>
+        </tr>
+    </table>
+
+    <h3>Bank Transfer Advanced (Vorkasse)</h3>
+    <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:assertEquals="#result.interfaceStatusCode">Payment Status Code</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">BankTransfer Charge Initial</td>
+            <td class="inputvalue">charge</td>
+            <td class="success">200</td>
+            <td class="success">Pending</td>
+            <td class="success">APPROVED</td>
+            <td>13</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">BankTransfer Charge Pending</td>
+            <td class="inputvalue">charge</td>
+            <td class="success">200</td>
+            <td class="success">Pending</td>
+            <td class="success">APPROVED</td>
+            <td>12</td>
+        </tr>
+    </table>
+
+    <h3>Klarna</h3>
+    <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:assertEquals="#result.interfaceStatusCode">Payment Status Code</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">Klarna Payment 1</td>
+            <td class="inputvalue">preauthorization</td>
+            <td class="success">200</td>
+            <td class="success">Success</td>
+            <td class="success">APPROVED</td>
+            <td>9</td>
+        </tr>
+    </table>
+
+</div>
+<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 34071 ms on 21-Dec-2019 at 20:41:11 UTC</div></div></body>
+</html>
