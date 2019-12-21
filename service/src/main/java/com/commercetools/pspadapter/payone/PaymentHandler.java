@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.ConcurrentModificationException;
+import java.util.Optional;
 
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
 import static io.sphere.sdk.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
@@ -51,35 +52,20 @@ public class PaymentHandler {
      * @return the result of handling the payment
      */
     public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
+        logger.info("handlePayment");
+        return handlePayment(paymentId, 0);
+    }
+
+    public PaymentHandleResult handlePayment(@Nonnull final String paymentId, final int currentAttemptCount) {
         try {
-            for (int i = 0; i < RETRIES_LIMIT; i++) {
-                try {
-                    final PaymentWithCartLike paymentWithCartLike =
-                        commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
-
-                    final String paymentInterface = paymentWithCartLike
-                        .getPayment()
-                        .getPaymentMethodInfo()
-                        .getPaymentInterface();
-
-                    if (!payoneInterfaceName.equals(paymentInterface)) {
-                        logger.warn(tenantNameKeyValue,
-                            "Wrong payment interface name: expected [{}], found [{}]",
-                            payoneInterfaceName, paymentInterface);
-                        return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
-                    }
-
-                    paymentDispatcher.dispatchPayment(paymentWithCartLike);
-                    return new PaymentHandleResult(HttpStatusCode.OK_200);
-                } catch (final ConcurrentModificationException concurrentModificationException) {
-                    if (i == RETRIES_LIMIT - 1) {
-                        return handleConcurrentModificationException(paymentId, concurrentModificationException);
-                    }
-                    Thread.sleep(RETRY_DELAY);
-                }
+            if (currentAttemptCount < RETRIES_LIMIT) {
+                return attemptToProcessPayment(paymentId, currentAttemptCount)
+                    .orElseGet(() -> handlePayment(paymentId, currentAttemptCount -1));
             }
             throw new IllegalStateException("Unexpected logical path. This line should be unreachable as long as "
                 + "RETRIES_LIMIT > 0");
+        } catch (final ConcurrentModificationException concurrentModificationException) {
+            return handleConcurrentModificationException(paymentId, concurrentModificationException);
         } catch (final NotFoundException | NoCartLikeFoundException e) {
             return handleNotFoundException(paymentId, e);
         } catch (final ErrorResponseException e) {
@@ -87,6 +73,42 @@ public class PaymentHandler {
         } catch (final Exception e) {
             return handleException(e, paymentId);
         }
+    }
+
+    private Optional<PaymentHandleResult> attemptToProcessPayment(
+        @Nonnull final String paymentId,
+        final int currentAttemptCount) throws InterruptedException {
+
+        try {
+            return Optional.of(processPayment(paymentId));
+        } catch (final ConcurrentModificationException concurrentModificationException) {
+            if (currentAttemptCount == RETRIES_LIMIT - 1) {
+                throw concurrentModificationException;
+            }
+            Thread.sleep(RETRY_DELAY);
+        }
+        return Optional.empty();
+    }
+
+    private PaymentHandleResult processPayment(@Nonnull final String paymentId) {
+        final PaymentWithCartLike paymentWithCartLike =
+            commercetoolsQueryExecutor
+                .getPaymentWithCartLike(paymentId);
+
+        final String paymentInterface = paymentWithCartLike
+            .getPayment()
+            .getPaymentMethodInfo()
+            .getPaymentInterface();
+
+        if (!payoneInterfaceName.equals(paymentInterface)) {
+            logger.warn(tenantNameKeyValue,
+                "Wrong payment interface name: expected [{}], found [{}]",
+                payoneInterfaceName, paymentInterface);
+            return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
+        }
+
+        paymentDispatcher.dispatchPayment(paymentWithCartLike);
+        return new PaymentHandleResult(HttpStatusCode.OK_200);
     }
 
     private PaymentHandleResult handleConcurrentModificationException(
