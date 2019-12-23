@@ -91,10 +91,9 @@ public class PaymentHandler {
             .getPaymentInterface();
 
         if (!payoneInterfaceName.equals(paymentInterface)) {
-            logger.warn(tenantNameKeyValue,
-                "Wrong payment interface name: expected [{}], found [{}]",
+            final String errorMessage = format("Wrong payment interface name: expected '%s', found '%s'",
                 payoneInterfaceName, paymentInterface);
-            return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400);
+            return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400, errorMessage);
         }
 
         paymentDispatcher.dispatchPayment(paymentWithCartLike);
