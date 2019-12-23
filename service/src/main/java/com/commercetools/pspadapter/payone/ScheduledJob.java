@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.LOG_PREFIX;
+import static com.commercetools.util.CorrelationIdUtil.generateUniqueCorrelationId;
 
 /**
  * @author fhaertig
@@ -30,6 +31,7 @@ public abstract class ScheduledJob implements Job {
 
     @Override
     public void execute(final JobExecutionContext context) throws JobExecutionException {
+        final String correlationId = generateUniqueCorrelationId();
         JobDataMap dataMap = context.getMergedJobDataMap();
 
         final IntegrationService integrationService = (IntegrationService) dataMap.get(INTEGRATION_SERVICE);
@@ -40,9 +42,12 @@ public abstract class ScheduledJob implements Job {
             final CommercetoolsQueryExecutor queryExecutor = tenantFactory.getCommercetoolsQueryExecutor();
             final PaymentDispatcher paymentDispatcher = tenantFactory.getPaymentDispatcher();
 
+
             final Consumer<Payment> paymentConsumer = payment -> {
                 try {
-                    final PaymentWithCartLike paymentWithCartLike = queryExecutor.getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
+                    final PaymentWithCartLike paymentWithCartLike = queryExecutor
+                        .getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment),
+                            correlationId);
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
                 } catch (final NoCartLikeFoundException ex) {
                     LOG.debug(LOG_PREFIX + " Could not dispatch payment with ID \"{}\": {}",
@@ -56,8 +61,9 @@ public abstract class ScheduledJob implements Job {
                 }
             };
 
-            queryExecutor.consumePaymentCreatedMessages(sinceDate, paymentConsumer);
-            queryExecutor.consumePaymentTransactionAddedMessages(sinceDate, paymentConsumer);
+            queryExecutor.consumePaymentCreatedMessages(sinceDate, paymentConsumer, correlationId);
+            queryExecutor.consumePaymentTransactionAddedMessages(sinceDate, paymentConsumer,
+                correlationId);
         });
     }
 

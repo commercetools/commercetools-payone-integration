@@ -53,11 +53,12 @@ public class PaymentHandler {
      * @param paymentId identifies the payment to be processed
      * @return the result of handling the payment
      */
-    public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
+    public PaymentHandleResult handlePayment(@Nonnull final String paymentId, @Nonnull final String correlationId) {
         try {
             for (int i = 0; i < RETRIES_LIMIT; i++) {
                 try {
-                    final PaymentWithCartLike paymentWithCartLike = commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
+                    final PaymentWithCartLike paymentWithCartLike = commercetoolsQueryExecutor
+                        .getPaymentWithCartLike(paymentId, correlationId);
                     String paymentInterface = paymentWithCartLike.getPayment().getPaymentMethodInfo().getPaymentInterface();
                     if (!payoneInterfaceName.equals(paymentInterface)) {
                         logger.warn(tenantNameKeyValue, "Wrong payment interface name: expected [{}], found [{}]", payoneInterfaceName, paymentInterface);

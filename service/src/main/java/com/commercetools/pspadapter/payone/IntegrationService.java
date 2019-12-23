@@ -8,7 +8,7 @@ import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
-import com.commercetools.util.spark.filter.CorrelationIdFilter;
+import com.commercetools.util.CorrelationIdUtil;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +16,7 @@ import org.apache.http.entity.ContentType;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import spark.Spark;
 import spark.utils.CollectionUtils;
 
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
+import static com.commercetools.util.CorrelationIdUtil.CORRELATION_ID_LOG_VAR_NAME;
 import static io.sphere.sdk.json.SphereJsonUtils.toJsonString;
 import static io.sphere.sdk.json.SphereJsonUtils.toPrettyJsonString;
 import static java.util.stream.Collectors.toList;
@@ -83,7 +85,8 @@ public class IntegrationService {
         if (StringUtils.isNotEmpty(paymentHandlerUrl)) {
             LOG.info("Register payment handler URL {}", paymentHandlerUrl);
             Spark.get(paymentHandlerUrl, (req, res) -> {
-                    final PaymentHandleResult paymentHandleResult = paymentHandler.handlePayment(req.params("id"));
+                    final PaymentHandleResult paymentHandleResult = paymentHandler.handlePayment(req.params("id"),
+                        CorrelationIdUtil.getOrGenerate(req));
                     if (!paymentHandleResult.body().isEmpty()) {
                         LOG.debug("--> Result body of ${getTenantName()}/commercetools/handle/payments/{}: {}",
                             req.params("id"), paymentHandleResult.body());
@@ -140,7 +143,7 @@ public class IntegrationService {
 
     private void initSparkService() {
         Spark.port(port());
-        Spark.before(CorrelationIdFilter.of());
+        attachCorrelationId();
 
         final ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig, tenantFactories);
         final String healthRequestContent = toJsonString(healthResponse);
@@ -158,6 +161,13 @@ public class IntegrationService {
             res.type(ContentType.APPLICATION_JSON.getMimeType());
             return req.queryParams("pretty") != null ? healthRequestPrettyContent : healthRequestContent;
         });
+    }
+
+    private void attachCorrelationId() {
+        Spark.before(((request, response) ->
+            MDC.put(CORRELATION_ID_LOG_VAR_NAME, CorrelationIdUtil.getOrGenerate(request))));
+        Spark.after(((request, response) ->
+            MDC.clear()));
     }
 
     public void stop() {

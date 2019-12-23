@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.domain.ctp;
 
 import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
+import com.heshammassoud.correlationiddecorator.Request;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.queries.CartQuery;
 import io.sphere.sdk.client.BlockingSphereClient;
@@ -35,21 +36,35 @@ public class CommercetoolsQueryExecutor {
         this.client = client;
     }
 
-    public PaymentWithCartLike getPaymentWithCartLike(final String paymentId) {
-        final CompletionStage<Payment> paymentStage = client.execute(PaymentByIdGet.of(paymentId)
-                // customer is used to parse some properties,
-                // see com.commercetools.pspadapter.payone.mapping.MappingUtil#mapCustomerToRequest()
-                .plusExpansionPaths(PaymentExpansionModel::customer));
+    public PaymentWithCartLike getPaymentWithCartLike(final String paymentId, final String correlationId) {
+        // customer is used to parse some properties,
+        // see com.commercetools.pspadapter.payone.mapping.MappingUtil#mapCustomerToRequest()
 
-        return getPaymentWithCartLike(paymentId, paymentStage);
+
+        final PaymentByIdGet getPaymentRequest = PaymentByIdGet
+            .of(paymentId)
+            .plusExpansionPaths(PaymentExpansionModel::customer);
+
+        final CompletionStage<Payment> paymentStage = client
+            .execute(Request.of(getPaymentRequest, correlationId));
+
+        return getPaymentWithCartLike(paymentId, paymentStage, correlationId);
     }
 
-    public PaymentWithCartLike getPaymentWithCartLike(String paymentId, CompletionStage<Payment> paymentFuture)  {
+    public PaymentWithCartLike getPaymentWithCartLike(
+        final String paymentId,
+        final CompletionStage<Payment> paymentFuture,
+        final String correlationId)  {
+
         final CompletionStage<PagedQueryResult<Order>> orderFuture =
-                client.execute(OrderQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)));
+                client.execute(
+                    Request.of(OrderQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)),
+                        correlationId));
 
         final CompletionStage<PagedQueryResult<Cart>> cartFuture =
-                client.execute(CartQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)));
+                client.execute(
+                    Request.of(CartQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)),
+                        correlationId));
 
         final CompletionStage<PaymentWithCartLike> paymentWithCartLikeFuture = paymentFuture.thenCompose(payment ->
             orderFuture.thenCompose(orderResult -> {
@@ -82,18 +97,28 @@ public class CommercetoolsQueryExecutor {
         }
     }
 
-    public void consumePaymentCreatedMessages(final ZonedDateTime sinceDate, final Consumer<Payment> paymentConsumer) {
-        consumeAllMessages(sinceDate, paymentConsumer, PaymentCreatedMessage.MESSAGE_HINT);
+    public void consumePaymentCreatedMessages(
+        final ZonedDateTime sinceDate,
+        final Consumer<Payment> paymentConsumer,
+        final String correlationId) {
+
+        consumeAllMessages(sinceDate, paymentConsumer, PaymentCreatedMessage.MESSAGE_HINT, correlationId);
     }
 
-    public void consumePaymentTransactionAddedMessages(final ZonedDateTime sinceDate,
-                                                       final Consumer<Payment> paymentConsumer) {
-        consumeAllMessages(sinceDate, paymentConsumer, PaymentTransactionAddedMessage.MESSAGE_HINT);
+    public void consumePaymentTransactionAddedMessages(
+        final ZonedDateTime sinceDate,
+        final Consumer<Payment> paymentConsumer,
+        final String correlationId) {
+
+        consumeAllMessages(sinceDate, paymentConsumer, PaymentTransactionAddedMessage.MESSAGE_HINT, correlationId);
     }
 
-    private <T extends GenericMessageImpl<Payment>> void consumeAllMessages(final ZonedDateTime sinceDate,
-                                                                            final Consumer<Payment> paymentConsumer,
-                                                                            final MessageDerivateHint<T> messageHint) {
+    private <T extends GenericMessageImpl<Payment>> void consumeAllMessages(
+        final ZonedDateTime sinceDate,
+        final Consumer<Payment> paymentConsumer,
+        final MessageDerivateHint<T> messageHint,
+        final String correlationId) {
+
         final MessageQuery baseQuery = MessageQuery.of()
             .withPredicates(m -> m.createdAt().isGreaterThanOrEqualTo(sinceDate))
             .withSort(m -> m.createdAt().sort().asc())
@@ -107,7 +132,10 @@ public class CommercetoolsQueryExecutor {
             Query<T> query = baseQuery
                 .withOffset(processed)
                 .forMessageType(messageHint);
-            final PagedQueryResult<T> result = client.executeBlocking(query);
+            final PagedQueryResult<T> result =
+                this.client
+                .execute(Request.of(query, correlationId))
+                .toCompletableFuture().join();
 
             result.getResults()
                     .stream()
