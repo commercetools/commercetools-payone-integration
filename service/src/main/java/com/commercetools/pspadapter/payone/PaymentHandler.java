@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.ConcurrentModificationException;
-import java.util.Optional;
 
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
 import static io.sphere.sdk.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
@@ -52,18 +51,8 @@ public class PaymentHandler {
      * @return the result of handling the payment
      */
     public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
-        logger.info("handlePayment");
-        return handlePayment(paymentId, 0);
-    }
-
-    private PaymentHandleResult handlePayment(@Nonnull final String paymentId, final int currentAttemptCount) {
         try {
-            if (currentAttemptCount < RETRIES_LIMIT) {
-                return attemptToProcessPayment(paymentId, currentAttemptCount)
-                    .orElseGet(() -> handlePayment(paymentId, currentAttemptCount + 1));
-            }
-            throw new IllegalStateException("Unexpected logical path. This line should be unreachable as long as "
-                + "RETRIES_LIMIT > 0");
+            return attemptToProcessPayment(paymentId, 0);
         } catch (final ConcurrentModificationException concurrentModificationException) {
             return handleConcurrentModificationException(paymentId, concurrentModificationException);
         } catch (final NotFoundException | NoCartLikeFoundException e) {
@@ -75,19 +64,20 @@ public class PaymentHandler {
         }
     }
 
-    private Optional<PaymentHandleResult> attemptToProcessPayment(
+    private PaymentHandleResult attemptToProcessPayment(
         @Nonnull final String paymentId,
         final int currentAttemptCount) throws InterruptedException {
 
         try {
-            return Optional.of(processPayment(paymentId));
+            return processPayment(paymentId);
         } catch (final ConcurrentModificationException concurrentModificationException) {
             if (currentAttemptCount == RETRIES_LIMIT - 1) {
                 throw concurrentModificationException;
+            } else {
+                Thread.sleep(RETRY_DELAY);
+                return attemptToProcessPayment(paymentId, currentAttemptCount + 1);
             }
-            Thread.sleep(RETRY_DELAY);
         }
-        return Optional.empty();
     }
 
     private PaymentHandleResult processPayment(@Nonnull final String paymentId) {
