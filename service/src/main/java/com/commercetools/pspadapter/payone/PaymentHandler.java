@@ -56,11 +56,11 @@ public class PaymentHandler {
         return handlePayment(paymentId, 0);
     }
 
-    public PaymentHandleResult handlePayment(@Nonnull final String paymentId, final int currentAttemptCount) {
+    private PaymentHandleResult handlePayment(@Nonnull final String paymentId, final int currentAttemptCount) {
         try {
             if (currentAttemptCount < RETRIES_LIMIT) {
                 return attemptToProcessPayment(paymentId, currentAttemptCount)
-                    .orElseGet(() -> handlePayment(paymentId, currentAttemptCount -1));
+                    .orElseGet(() -> handlePayment(paymentId, currentAttemptCount + 1));
             }
             throw new IllegalStateException("Unexpected logical path. This line should be unreachable as long as "
                 + "RETRIES_LIMIT > 0");
