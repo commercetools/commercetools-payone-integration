@@ -91,8 +91,8 @@ public class PaymentHandler {
             .getPaymentInterface();
 
         if (!payoneInterfaceName.equals(paymentInterface)) {
-            final String errorMessage = format("Wrong payment interface name: expected '%s', found '%s'",
-                payoneInterfaceName, paymentInterface);
+            final String errorMessage = format("Wrong payment interface name: expected '%s', found '%s' for the "
+                + "commercetools Payment with id '%s'.", payoneInterfaceName, paymentInterface, paymentId);
             return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400, errorMessage);
         }
 
@@ -126,7 +126,7 @@ public class PaymentHandler {
         logger.error(tenantNameKeyValue,
             format("Failed to process the commercetools Payment with id [%s] due to an error response from the commercetools platform.", paymentId), e);
         return new PaymentHandleResult(e.getStatusCode(),
-                format("Failed to process the commercetools payment with id [%s], due to an error response from the "
+                format("Failed to process the commercetools Payment with id [%s], due to an error response from the "
                     + "commercetools platform. Try again later.", paymentId));
     }
 
