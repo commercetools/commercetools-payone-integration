@@ -52,7 +52,7 @@ public class PaymentHandler {
      */
     public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
         try {
-            return attemptToProcessPayment(paymentId, 0);
+            return processPaymentOrRetry(paymentId, 0);
         } catch (final ConcurrentModificationException concurrentModificationException) {
             return handleConcurrentModificationException(paymentId, concurrentModificationException);
         } catch (final NotFoundException | NoCartLikeFoundException e) {
@@ -64,7 +64,7 @@ public class PaymentHandler {
         }
     }
 
-    private PaymentHandleResult attemptToProcessPayment(
+    private PaymentHandleResult processPaymentOrRetry(
         @Nonnull final String paymentId,
         final int currentAttemptCount) throws InterruptedException {
 
@@ -75,7 +75,7 @@ public class PaymentHandler {
                 throw concurrentModificationException;
             } else {
                 Thread.sleep(RETRY_DELAY);
-                return attemptToProcessPayment(paymentId, currentAttemptCount + 1);
+                return processPaymentOrRetry(paymentId, currentAttemptCount + 1);
             }
         }
     }
