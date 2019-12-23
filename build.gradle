@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
         classpath 'org.ajoberstar:gradle-git-publish:0.3.2'
         classpath 'org.ajoberstar:grgit:2.3.0'
     }
@@ -93,16 +93,16 @@ project(":service") {
     mainClassName = 'com.commercetools.Main'
 
     dependencies {
-        implementation("com.sparkjava:spark-core:${depVersions.sparkCore}")
-        implementation ("org.quartz-scheduler:quartz:${depVersions.quartz}")
+        implementation "com.sparkjava:spark-core:${depVersions.sparkCore}"
+        implementation "org.quartz-scheduler:quartz:${depVersions.quartz}"
         testImplementation "junit:junit:${depVersions.jUnit}"
         testImplementation "org.assertj:assertj-core:${depVersions.assertJ}"
         testImplementation "org.mockito:mockito-core:${depVersions.mockito}"
     }
 
     shadowJar {
-        baseName = rootProject.name
-        classifier = null
+        archiveBaseName.set(rootProject.name)
+        archiveClassifier.set(null)
         version = null
         mainClassName = project.mainClassName
 
@@ -113,7 +113,7 @@ project(":service") {
         }
 
         doLast {
-            println "Packaged JAR to ${destinationDir}/${archiveName}"
+            println "Packaged JAR to ${destinationDirectory.getAsFile().getOrNull()}/${archiveFileName.getOrNull()}"
         }
     }
 
