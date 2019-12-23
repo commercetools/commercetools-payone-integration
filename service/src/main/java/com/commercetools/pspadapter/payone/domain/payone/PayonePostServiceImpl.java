@@ -59,7 +59,7 @@ public class PayonePostServiceImpl implements PayonePostService {
             String serverResponse = executePostRequestToString(this.serverAPIURL, mappedListParameters);
             return buildMapFromResultParams(serverResponse);
         } catch (Exception e) {
-            throw new PayoneException("Payone POST request failed. Cause: " + e.toString(), e);
+            throw new PayoneException("Payone POST request failed." , e);
         }
     }
 

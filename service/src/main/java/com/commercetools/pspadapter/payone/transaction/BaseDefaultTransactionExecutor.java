@@ -26,6 +26,8 @@ import javax.annotation.Nonnull;
 import java.time.ZonedDateTime;
 import java.util.*;
 
+import static java.lang.String.format;
+
 
 /**
  * Base class for validating/executing/re-trying preauthorization/authorization (authorization/charge) transactions.
@@ -93,7 +95,7 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
             return attemptExecution(paymentWithCartLike, transaction);
         } else {
             if (fieldAsDateTime.isAfter(ZonedDateTime.now().minusMinutes(1)))
-                throw new ConcurrentModificationException(String.format(
+                throw new ConcurrentModificationException(format(
                         "A processing of payment with ID \"%s\" started during the last 60 seconds and is likely to be finished soon, no need to retry now.",
                         paymentWithCartLike.getPayment().getId()));
         }
@@ -155,12 +157,14 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
             }
 
             // TODO: https://github.com/commercetools/commercetools-payone-integration/issues/199
-            throw new IllegalStateException("Unknown PayOne status: " + status);
-        } catch (PayoneException pe) {
-            getClassLogger().error("Payone request exception: ", pe);
+            throw new IllegalStateException("Unknown Payone status: " + status);
+        } catch (PayoneException paymentException) {
+            getClassLogger().error(
+                format("Request to Payone failed for commercetools Payment with id '%s' and Transaction with id '%s'.",
+                    paymentWithCartLike.getPayment().getId(), transactionId), paymentException);
 
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(pe),
+                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(paymentException),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
 
