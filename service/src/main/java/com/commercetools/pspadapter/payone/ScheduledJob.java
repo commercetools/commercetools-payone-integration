@@ -45,7 +45,7 @@ public abstract class ScheduledJob implements Job {
                         .getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
                 } catch (final NoCartLikeFoundException ex) {
-                    LOG.error(//TODO: Ask Roman why it was info
+                    LOG.error(
                         createTenantKeyValue(tenantFactory.getTenantName()),
                         format("Could not dispatch payment with id '%s'", payment.getId()),
                         ex);
