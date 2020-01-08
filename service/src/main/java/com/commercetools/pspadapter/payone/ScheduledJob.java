@@ -2,6 +2,7 @@ package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
 import io.sphere.sdk.payments.Payment;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.ZonedDateTime;
+import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -42,6 +44,19 @@ public abstract class ScheduledJob implements Job {
                     final PaymentWithCartLike paymentWithCartLike = queryExecutor
                         .getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
+                } catch (final NoCartLikeFoundException | ConcurrentModificationException ex) {
+                    /**
+                     * Both exceptions are valid cases which are not considered errors (thus logged in debug).
+                     * NoCartLikeFoundException could happen if the payment was made through a different point of sale
+                     * (i.e. there is no cart) but with the same payone account.
+                     *
+                     * ConcurrentModificationException could happen if the job tries to process a payment which is being
+                     * processed by the /handlePayment endpoint.
+                     */
+                    LOG.debug(
+                        createTenantKeyValue(tenantFactory.getTenantName()),
+                        format("Error dispatching payment with id '%s'", payment.getId()),
+                        ex);
                 } catch (final Exception ex) {
                     LOG.error(
                         createTenantKeyValue(tenantFactory.getTenantName()),
