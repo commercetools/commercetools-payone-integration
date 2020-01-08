@@ -2,7 +2,6 @@ package com.commercetools.pspadapter.payone;
 
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
 import io.sphere.sdk.payments.Payment;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -11,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.ZonedDateTime;
-import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -26,7 +24,7 @@ public abstract class ScheduledJob implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledJob.class);
 
-    public static final String INTEGRATION_SERVICE = "INTEGRATION_SERVICE";
+    static final String INTEGRATION_SERVICE = "INTEGRATION_SERVICE";
 
     @Override
     public void execute(final JobExecutionContext context) {
@@ -44,16 +42,6 @@ public abstract class ScheduledJob implements Job {
                     final PaymentWithCartLike paymentWithCartLike = queryExecutor
                         .getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
-                } catch (final NoCartLikeFoundException ex) {
-                    LOG.error(
-                        createTenantKeyValue(tenantFactory.getTenantName()),
-                        format("Could not dispatch payment with id '%s'", payment.getId()),
-                        ex);
-                } catch (final ConcurrentModificationException ex) {
-                    LOG.info(
-                        createTenantKeyValue(tenantFactory.getTenantName()),
-                        format("Could not dispatch payment with id '%s': The payment is currently processed by someone else.", payment.getId()),
-                        ex);
                 } catch (final Exception ex) {
                     LOG.error(
                         createTenantKeyValue(tenantFactory.getTenantName()),
