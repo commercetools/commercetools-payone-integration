@@ -51,8 +51,19 @@ public class PaymentHandler {
      * @return the result of handling the payment
      */
     public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
+        PaymentHandleResult result = null;
         try {
-            return processPaymentOrRetry(paymentId, 0);
+            for (int i = 0; i < RETRIES_LIMIT; i++) {
+                try {
+                    result = processPayment(paymentId);
+                } catch (final ConcurrentModificationException concurrentModificationException) {
+                    if (i == RETRIES_LIMIT - 1) {
+                        throw concurrentModificationException;
+                    } else {
+                        Thread.sleep(RETRY_DELAY);
+                    }
+                }
+            }
         } catch (final ConcurrentModificationException concurrentModificationException) {
             return handleConcurrentModificationException(paymentId, concurrentModificationException);
         } catch (final NotFoundException | NoCartLikeFoundException e) {
@@ -62,22 +73,7 @@ public class PaymentHandler {
         } catch (final Exception e) {
             return handleException(e, paymentId);
         }
-    }
-
-    private PaymentHandleResult processPaymentOrRetry(
-        @Nonnull final String paymentId,
-        final int currentAttemptCount) throws InterruptedException {
-
-        try {
-            return processPayment(paymentId);
-        } catch (final ConcurrentModificationException concurrentModificationException) {
-            if (currentAttemptCount == RETRIES_LIMIT - 1) {
-                throw concurrentModificationException;
-            } else {
-                Thread.sleep(RETRY_DELAY);
-                return processPaymentOrRetry(paymentId, currentAttemptCount + 1);
-            }
-        }
+        return result;
     }
 
     private PaymentHandleResult processPayment(@Nonnull final String paymentId) throws ConcurrentModificationException {
