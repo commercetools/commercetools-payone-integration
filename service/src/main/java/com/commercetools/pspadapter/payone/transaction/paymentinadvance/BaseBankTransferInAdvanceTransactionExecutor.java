@@ -158,7 +158,7 @@ abstract class BaseBankTransferInAdvanceTransactionExecutor extends TransactionB
             }
 
             // TODO: https://github.com/commercetools/commercetools-payone-integration/issues/199
-            throw new IllegalStateException("Unknown PayOne status: " + status);
+            throw new IllegalStateException("Unknown Payone status: " + status);
         } catch (PayoneException paymentException) {
             LOGGER.error(format("Request to Payone failed for commercetools Payment with id '%s' and "
                     + "Transaction with id '%s'.", paymentWithCartLike.getPayment().getId(), transactionId),
