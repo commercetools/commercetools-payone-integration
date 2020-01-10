@@ -2,6 +2,8 @@ package com.commercetools.pspadapter.payone.domain.payone.model.klarna;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequestWithCart;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 
 /**
@@ -10,11 +12,11 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestTyp
  * Preferable way is to make <i>{@link KlarnaPreauthorizationRequest preauthorization}</i> request and then
  * make direct <i>capture</i>, when the goods are packaged, shipped or delivered.
  */
-public class KlarnaAuthorizationRequest extends BaseKlarnaRequest {
+public class KlarnaAuthorizationRequest extends AuthorizationRequestWithCart {
 
     public KlarnaAuthorizationRequest(final PayoneConfig config, final String financingtype,
                                       final PaymentWithCartLike paymentWithCartLike) {
-        super(config, RequestType.AUTHORIZATION.getType(), financingtype, paymentWithCartLike);
+        super(config, RequestType.AUTHORIZATION.getType(), financingtype, ClearingType.PAYONE_KLV.getPayoneCode(), paymentWithCartLike);
     }
 
 }

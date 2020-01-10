@@ -1,21 +1,58 @@
-<configuration>
-    <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
-
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%date{HH:mm:ss.SSS} %highlight([%-5level]) %cyan(%logger{16}) [%thread] - %message%n%xException{10}</pattern>
+<!-- Enabling output of status data, via debug="true", will go a long way in helping you diagnose logback issues.
+As such, enabling logback status data is very highly recommended and should be considered as a recourse of first resort. -->
+<configuration debug="false">
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+    <appender name="JSON-STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <message/>
+                <arguments/>
+                <logstashMarkers/>
+                <!-- Some fields are mapped to camel-case for consistency -->
+                <timestamp>
+                    <!-- Map default "@timestamp" to "timestamp" -->
+                    <fieldName>timestamp</fieldName>
+                </timestamp>
+                <loggerName>
+                    <!-- Map default "logger_name" to "loggerName" -->
+                    <fieldName>loggerName</fieldName>
+                </loggerName>
+                <logLevel>
+                    <!-- Map default "logLevel" to "severity" for GCP Stackdriver -->
+                    <fieldName>severity</fieldName>
+                </logLevel>
+                <stackHash>
+                    <!-- Map default "stack_hash" to "stackHash" -->
+                    <fieldName>stackHash</fieldName>
+                </stackHash>
+                <stackTrace>
+                    <!-- Map default "stack_trace" to "stackTrace" -->
+                    <fieldName>stackTrace</fieldName>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                        <maxLength>2048</maxLength>
+                        <shortenedClassNameLength>20</shortenedClassNameLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+            </providers>
         </encoder>
     </appender>
 
     <appender name="ASYNCSTDOUT" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="JSON-STDOUT"/>
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="ASYNCSTDOUT" />
+        <appender-ref ref="ASYNCSTDOUT"/>
     </root>
 
     <!-- skip info logs for unmapped routes -->
     <logger name="spark.http.matching.MatcherFilter" level="WARN"/>
 
 </configuration>
+
+

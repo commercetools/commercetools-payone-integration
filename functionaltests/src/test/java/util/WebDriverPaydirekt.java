@@ -19,8 +19,7 @@ public class WebDriverPaydirekt extends CustomWebDriver {
     private static String LOGIN_FORM_USERNAME_FIELD_ID = "username";
     private static String LOGIN_FORM_PASSWORD_FIELD_ID = "password";
     private static String LOGIN_FORM_SUBMIT_BUTTON_NAME = "loginBtn";
-    private static String CONFIRM_FORM_NAME = "firstFactorAuthForm";
-    private static String CONFIRM_BUTTON_CLASSNAME = "button--full";
+    private static String CONFIRM_BUTTON_NAME = "confirmPaymentButton";
     private static String URL_SUCCESS_PATTERN = "-Success";
     private static Logger LOG = LoggerFactory.getLogger(WebDriverPaydirekt.class);
 
@@ -64,18 +63,9 @@ public class WebDriverPaydirekt extends CustomWebDriver {
         getDriver().get(url);
         if (doLogin(userid, pin)) {
             WebDriverWait wait = new WebDriverWait(getDriver(), 10);
-            final WebElement formToSubmit = findElement(By.name(CONFIRM_FORM_NAME));
-            if (formToSubmit == null) {
-                LOG.error(String.format("Submit button with name %S not found on the page", CONFIRM_FORM_NAME));
-            } else {
-                wait.until(elementToBeClickable(
-                        formToSubmit.findElement(By.className(CONFIRM_BUTTON_CLASSNAME))))
-                        .click();
-                success = wait.until(ExpectedConditions.urlContains(URL_SUCCESS_PATTERN));
-            }
+            wait.until(elementToBeClickable(findElement(By.name(CONFIRM_BUTTON_NAME)))).click();
+            success = wait.until(ExpectedConditions.urlContains(URL_SUCCESS_PATTERN));
         }
         return success ? getUrl() : "";
     }
-
-
 }

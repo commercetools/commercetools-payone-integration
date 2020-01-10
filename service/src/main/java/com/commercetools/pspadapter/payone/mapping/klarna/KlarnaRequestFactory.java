@@ -4,7 +4,7 @@ import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
-import com.commercetools.pspadapter.payone.domain.payone.model.klarna.BaseKlarnaRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequestWithCart;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaPreauthorizationRequest;
 import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
@@ -56,8 +56,8 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
     }
 
     @Nonnull
-    protected <BKR extends BaseKlarnaRequest> BKR createRequestInternal(@Nonnull final PaymentWithCartLike paymentWithCartLike,
-                                                                        @Nonnull final TriFunction<PayoneConfig, String, PaymentWithCartLike, BKR> requestConstructor) {
+    protected <BKR extends AuthorizationRequestWithCart> BKR createRequestInternal(@Nonnull final PaymentWithCartLike paymentWithCartLike,
+                                                                                   @Nonnull final TriFunction<PayoneConfig, String, PaymentWithCartLike, BKR> requestConstructor) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
         Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
 

@@ -107,7 +107,7 @@ public class BankTransferInAdvanceChargeTransaction_attemptExecutionTest extends
 
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> executor.attemptExecution(paymentWithCartLike, transaction))
-                .withMessageContaining("Unknown PayOne status");
+                .withMessageContaining("Unknown Payone status");
 
         assertRequestInterfaceInteraction(1);
     }
