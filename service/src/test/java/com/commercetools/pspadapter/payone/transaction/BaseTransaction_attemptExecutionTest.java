@@ -191,7 +191,7 @@ public class BaseTransaction_attemptExecutionTest {
 
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> executor.attemptExecution(paymentWithCartLike, transaction))
-                .withMessageContaining("Unknown PayOne status");
+                .withMessageContaining("Unknown Payone status");
 
         assertRequestInterfaceInteraction(1);
     }
