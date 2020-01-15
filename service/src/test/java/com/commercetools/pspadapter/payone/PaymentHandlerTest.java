@@ -21,6 +21,7 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ConcurrentModificationException;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.CompletionException;
 
 import static java.lang.String.format;
@@ -71,14 +72,15 @@ public class PaymentHandlerTest
     public void returnsStatusCodeOk200InCaseOfSuccessfulPaymentHandling() {
         // arrange
         final String paymentId = randomString();
+        final String correlationId = UUID.randomUUID().toString();
         final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
         final PaymentWithCartLike processedPaymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
 
-        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), anyString())).thenReturn(paymentWithCartLike);
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), eq(correlationId))).thenReturn(paymentWithCartLike);
         when(paymentDispatcher.dispatchPayment(same(paymentWithCartLike))).thenReturn(processedPaymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, anyString());
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, correlationId);
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
@@ -90,6 +92,7 @@ public class PaymentHandlerTest
     public void returnsStatusCodeOk200InCaseOfSuccessfulConcurrentPaymentHandling() {
         // arrange
         final String paymentId = randomString();
+        final String correlationId = UUID.randomUUID().toString();
         final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
         final Payment modifiedPayment = mock(Payment.class, "modified payment");
         when(modifiedPayment.getCustom()).thenReturn(customFields("dummyReferenceValue"));
@@ -103,11 +106,11 @@ public class PaymentHandlerTest
                 .thenThrow(ConcurrentModificationException.class);
 
         when(modifiedPayment.getVersion()).thenReturn(3L);
-        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), anyString()))
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), eq(correlationId)))
                 .thenReturn(paymentWithCartLike, paymentWithCartLike, paymentWithCartLike, modifiedPaymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, anyString());
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, correlationId);
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
@@ -119,15 +122,16 @@ public class PaymentHandlerTest
     public void handlePayment_WithAlwaysConcurrentModificationException_ShouldReturn202() {
         // arrange
         final String paymentId = randomString();
+        final String correlationId = UUID.randomUUID().toString();
         final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
 
         when(paymentDispatcher.dispatchPayment(same(paymentWithCartLike)))
                 .thenThrow(ConcurrentModificationException.class);
 
-        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), anyString())).thenReturn(paymentWithCartLike);
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), eq(correlationId))).thenReturn(paymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, anyString());
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, correlationId);
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.ACCEPTED_202);
@@ -140,6 +144,7 @@ public class PaymentHandlerTest
     public void handlePayment_WithLessThanLimitConcurrentModificationException_ShouldReturn200() {
         // arrange
         final String paymentId = randomString();
+        final String correlationId = UUID.randomUUID().toString();
         final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
 
         when(paymentDispatcher.dispatchPayment(same(paymentWithCartLike)))
@@ -147,10 +152,10 @@ public class PaymentHandlerTest
             .thenThrow(ConcurrentModificationException.class)
             .thenReturn(new PaymentWithCartLike(payment, UNUSED_CART));
 
-        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), anyString())).thenReturn(paymentWithCartLike);
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), eq(correlationId))).thenReturn(paymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, anyString());
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, correlationId);
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
@@ -162,6 +167,7 @@ public class PaymentHandlerTest
     public void handlePayment_WithLessThanLimitConcurrentModificationExceptionButNotFound_ShouldReturn404() {
         // arrange
         final String paymentId = randomString();
+        final String correlationId = UUID.randomUUID().toString();
         final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
 
         when(paymentDispatcher.dispatchPayment(same(paymentWithCartLike)))
@@ -169,10 +175,10 @@ public class PaymentHandlerTest
             .thenThrow(ConcurrentModificationException.class)
             .thenThrow(new NotFoundException());
 
-        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), anyString())).thenReturn(paymentWithCartLike);
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), eq(correlationId))).thenReturn(paymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, anyString());
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, correlationId);
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
@@ -185,6 +191,7 @@ public class PaymentHandlerTest
     public void handlePayment_WithLessThanLimitConcurrentModificationExceptionErrorResponseException_ShouldReturn502() {
         // arrange
         final String paymentId = randomString();
+        final String correlationId = UUID.randomUUID().toString();
         final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
 
         when(paymentDispatcher.dispatchPayment(same(paymentWithCartLike)))
@@ -193,10 +200,10 @@ public class PaymentHandlerTest
             .thenThrow(new ErrorResponseException(ErrorResponse.of(HttpStatusCode.BAD_GATEWAY_502,
                 "commercetools is unavailable", emptyList())));
 
-        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), anyString())).thenReturn(paymentWithCartLike);
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), eq(correlationId))).thenReturn(paymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, anyString());
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, correlationId);
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.BAD_GATEWAY_502);
@@ -208,13 +215,14 @@ public class PaymentHandlerTest
     public void returnsStatusCodeNotFound404InCaseOfUnknownPayment() {
         // arrange
         final String paymentId = randomString();
-
+        final String correlationId = UUID.randomUUID().toString();
         final NotFoundException notFoundException = new NotFoundException();
 
-        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), anyString())).thenThrow(notFoundException);
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), eq(correlationId)))
+            .thenThrow(notFoundException);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, anyString());
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, correlationId);
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
@@ -226,13 +234,13 @@ public class PaymentHandlerTest
     public void returnsStatusCodeNotFound404InCaseOfCartLikeMissing() {
         // arrange
         final String paymentId = randomString();
-
+        final String correlationId = UUID.randomUUID().toString();
         final NoCartLikeFoundException noCartLikeFoundException = new NoCartLikeFoundException();
 
-        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), anyString())).thenThrow(noCartLikeFoundException);
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), eq(correlationId))).thenThrow(noCartLikeFoundException);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, anyString());
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, correlationId);
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
@@ -244,14 +252,15 @@ public class PaymentHandlerTest
     public void returnsStatusCodeBadRequest400InCaseOfPaymentWithOtherPaymentInterface() {
         // arrange
         final String paymentId = randomString();
+        final String correlationId = UUID.randomUUID().toString();
         final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
         final PaymentMethodInfo paymentMethodInfo = paymentMethodInfo("other than TestIntegrationServicePaymentMethodName");
 
         when(payment.getPaymentMethodInfo()).thenReturn(paymentMethodInfo);
-        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), anyString())).thenReturn(paymentWithCartLike);
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId), eq(correlationId))).thenReturn(paymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, anyString());
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId, correlationId);
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST_400);
