@@ -207,6 +207,7 @@ public class PaymentHandlerTest
     public void returnsStatusCodeNotFound404InCaseOfUnknownPayment() {
         // arrange
         final String paymentId = randomString();
+
         final NotFoundException notFoundException = new NotFoundException();
 
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenThrow(notFoundException);
@@ -224,6 +225,7 @@ public class PaymentHandlerTest
     public void returnsStatusCodeNotFound404InCaseOfCartLikeMissing() {
         // arrange
         final String paymentId = randomString();
+
         final NoCartLikeFoundException noCartLikeFoundException = new NoCartLikeFoundException();
 
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenThrow(noCartLikeFoundException);
