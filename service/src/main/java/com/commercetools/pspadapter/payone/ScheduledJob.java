@@ -7,7 +7,6 @@ import io.sphere.sdk.payments.Payment;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +15,9 @@ import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.LOG_PREFIX;
+import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
 import static com.commercetools.util.CorrelationIdUtil.generateUniqueCorrelationId;
+import static java.lang.String.format;
 
 /**
  * @author fhaertig
@@ -27,15 +27,14 @@ public abstract class ScheduledJob implements Job {
 
     private static final Logger LOG = LoggerFactory.getLogger(ScheduledJob.class);
 
-    public static final String INTEGRATION_SERVICE = "INTEGRATION_SERVICE";
+    static final String INTEGRATION_SERVICE = "INTEGRATION_SERVICE";
 
     @Override
-    public void execute(final JobExecutionContext context) throws JobExecutionException {
+    public void execute(final JobExecutionContext context) {
         final String correlationId = generateUniqueCorrelationId();
-        JobDataMap dataMap = context.getMergedJobDataMap();
+        final JobDataMap dataMap = context.getMergedJobDataMap();
 
         final IntegrationService integrationService = (IntegrationService) dataMap.get(INTEGRATION_SERVICE);
-
         final ZonedDateTime sinceDate = getSinceDateTime();
 
         integrationService.getTenantFactories().forEach(tenantFactory -> {
@@ -49,15 +48,24 @@ public abstract class ScheduledJob implements Job {
                         .getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment),
                             correlationId);
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
-                } catch (final NoCartLikeFoundException ex) {
-                    LOG.debug(LOG_PREFIX + " Could not dispatch payment with ID \"{}\": {}",
-                            tenantFactory.getTenantName(),  payment.getId(), ex.getMessage());
-                } catch (final ConcurrentModificationException ex) {
-                    LOG.info(LOG_PREFIX + " Could not dispatch payment with ID \"{}\": The payment is currently processed by someone else.",
-                            tenantFactory.getTenantName(), payment.getId());
-                } catch (final Throwable ex) {
-                    LOG.error(LOG_PREFIX + " Error dispatching payment with ID \"{}\"",
-                            tenantFactory.getTenantName(), payment.getId(), ex);
+                } catch (final NoCartLikeFoundException | ConcurrentModificationException ex) {
+                    /**
+                     * Both exceptions are valid cases which are not considered errors (thus logged in debug).
+                     * NoCartLikeFoundException could happen if the payment was made through a different point of sale
+                     * (i.e. there is no cart) but with the same payone account.
+                     *
+                     * ConcurrentModificationException could happen if the job tries to process a payment which is being
+                     * processed by the /handlePayment endpoint.
+                     */
+                    LOG.debug(
+                        createTenantKeyValue(tenantFactory.getTenantName()),
+                        format("Error dispatching payment with id '%s'", payment.getId()),
+                        ex);
+                } catch (final Exception ex) {
+                    LOG.error(
+                        createTenantKeyValue(tenantFactory.getTenantName()),
+                        format("Error dispatching payment with id '%s'", payment.getId()),
+                        ex);
                 }
             };
 

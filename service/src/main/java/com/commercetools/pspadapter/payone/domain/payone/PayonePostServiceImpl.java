@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 
 import static com.commercetools.util.HttpRequestUtil.executePostRequestToString;
 import static com.commercetools.util.HttpRequestUtil.nameValue;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 public class PayonePostServiceImpl implements PayonePostService {
@@ -53,19 +54,17 @@ public class PayonePostServiceImpl implements PayonePostService {
     public Map<String, String> executePost(final BaseRequest baseRequest) throws PayoneException {
 
         try {
-            List<BasicNameValuePair> mappedListParameters =
+            final List<BasicNameValuePair> mappedListParameters =
                     getNameValuePairsWithExpandedLists(baseRequest.toStringMap(false));
 
-            String serverResponse = executePostRequestToString(this.serverAPIURL, mappedListParameters);
+            final String serverResponse = executePostRequestToString(this.serverAPIURL, mappedListParameters);
 
-            if (serverResponse.contains("status=ERROR")) {
-                LOG.error("-> Payone POST request parameters: {}",
-                        getNameValuePairsWithExpandedLists(baseRequest.toStringMap(true)).toString());
-                LOG.error("Payone POST response: {}", serverResponse);
-            }
             return buildMapFromResultParams(serverResponse);
         } catch (Exception e) {
-            throw new PayoneException("Payone POST request failed. Cause: " + e.toString(), e);
+            final String requestBody =
+                getNameValuePairsWithExpandedLists(baseRequest.toStringMap(true)).toString();
+            final String exceptionMessage = format("Payone POST request with body (%s) failed.", requestBody);
+            throw new PayoneException(exceptionMessage, e);
         }
     }
 

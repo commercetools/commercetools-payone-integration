@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
+import static java.lang.String.format;
 
 /**
  * Responsible to create the PayOne Request (PreAuthorization) and check if answer is approved or Error
@@ -157,12 +158,15 @@ abstract class BaseBankTransferInAdvanceTransactionExecutor extends TransactionB
             }
 
             // TODO: https://github.com/commercetools/commercetools-payone-integration/issues/199
-            throw new IllegalStateException("Unknown PayOne status: " + status);
-        } catch (PayoneException pe) {
-            LOGGER.error("Payone request exception: ", pe);
+            throw new IllegalStateException("Unknown Payone status: " + status);
+        } catch (PayoneException paymentException) {
+            LOGGER.error(format("Request to Payone failed for commercetools Payment with id '%s' and "
+                    + "Transaction with id '%s'.", paymentWithCartLike.getPayment().getId(), transactionId),
+                paymentException);
+
 
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(pe),
+                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(paymentException),
                             CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
                             CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now()));
 
