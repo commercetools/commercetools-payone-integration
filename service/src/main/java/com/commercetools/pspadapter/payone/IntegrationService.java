@@ -8,7 +8,6 @@ import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
-import com.commercetools.util.CorrelationIdUtil;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
-import static com.commercetools.util.CorrelationIdUtil.CORRELATION_ID_LOG_VAR_NAME;
 import static io.sphere.sdk.json.SphereJsonUtils.toJsonString;
 import static io.sphere.sdk.json.SphereJsonUtils.toPrettyJsonString;
 import static java.util.stream.Collectors.toList;
@@ -85,8 +83,7 @@ public class IntegrationService {
         if (StringUtils.isNotEmpty(paymentHandlerUrl)) {
             LOG.info("Register payment handler URL {}", paymentHandlerUrl);
             Spark.get(paymentHandlerUrl, (req, res) -> {
-                    final PaymentHandleResult paymentHandleResult = paymentHandler.handlePayment(req.params("id"),
-                        CorrelationIdUtil.getOrGenerate(req));
+                    final PaymentHandleResult paymentHandleResult = paymentHandler.handlePayment(req.params("id"));
                     if (!paymentHandleResult.body().isEmpty()) {
                         LOG.debug("--> Result body of ${getTenantName()}/commercetools/handle/payments/{}: {}",
                             req.params("id"), paymentHandleResult.body());
@@ -143,7 +140,7 @@ public class IntegrationService {
 
     private void initSparkService() {
         Spark.port(port());
-        attachCorrelationId();
+        doAfterResponse();
 
         final ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig, tenantFactories);
         final String healthRequestContent = toJsonString(healthResponse);
@@ -163,11 +160,8 @@ public class IntegrationService {
         });
     }
 
-    private void attachCorrelationId() {
-        Spark.before(((request, response) ->
-            MDC.put(CORRELATION_ID_LOG_VAR_NAME, CorrelationIdUtil.getOrGenerate(request))));
-        Spark.after(((request, response) ->
-            MDC.clear()));
+    private void doAfterResponse() {
+        Spark.after(((request, response) -> MDC.clear()));
     }
 
     public void stop() {

@@ -23,6 +23,8 @@ import java.time.ZonedDateTime;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
+import static com.commercetools.util.CorrelationIdUtil.getFromMDCOrGenerateNew;
+
 /**
  * @author fhaertig
  * @since 02.12.15
@@ -36,35 +38,32 @@ public class CommercetoolsQueryExecutor {
         this.client = client;
     }
 
-    public PaymentWithCartLike getPaymentWithCartLike(final String paymentId, final String correlationId) {
+    public PaymentWithCartLike getPaymentWithCartLike(final String paymentId) {
         // customer is used to parse some properties,
         // see com.commercetools.pspadapter.payone.mapping.MappingUtil#mapCustomerToRequest()
-
-
         final PaymentByIdGet getPaymentRequest = PaymentByIdGet
             .of(paymentId)
             .plusExpansionPaths(PaymentExpansionModel::customer);
 
         final CompletionStage<Payment> paymentStage = client
-            .execute(Request.of(getPaymentRequest, correlationId));
+            .execute(Request.of(getPaymentRequest, getFromMDCOrGenerateNew()));
 
-        return getPaymentWithCartLike(paymentId, paymentStage, correlationId);
+        return getPaymentWithCartLike(paymentId, paymentStage);
     }
 
     public PaymentWithCartLike getPaymentWithCartLike(
         final String paymentId,
-        final CompletionStage<Payment> paymentFuture,
-        final String correlationId)  {
+        final CompletionStage<Payment> paymentFuture)  {
 
         final CompletionStage<PagedQueryResult<Order>> orderFuture =
                 client.execute(
                     Request.of(OrderQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)),
-                        correlationId));
+                        getFromMDCOrGenerateNew()));
 
         final CompletionStage<PagedQueryResult<Cart>> cartFuture =
                 client.execute(
                     Request.of(CartQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)),
-                        correlationId));
+                        getFromMDCOrGenerateNew()));
 
         final CompletionStage<PaymentWithCartLike> paymentWithCartLikeFuture = paymentFuture.thenCompose(payment ->
             orderFuture.thenCompose(orderResult -> {
@@ -99,25 +98,22 @@ public class CommercetoolsQueryExecutor {
 
     public void consumePaymentCreatedMessages(
         final ZonedDateTime sinceDate,
-        final Consumer<Payment> paymentConsumer,
-        final String correlationId) {
+        final Consumer<Payment> paymentConsumer) {
 
-        consumeAllMessages(sinceDate, paymentConsumer, PaymentCreatedMessage.MESSAGE_HINT, correlationId);
+        consumeAllMessages(sinceDate, paymentConsumer, PaymentCreatedMessage.MESSAGE_HINT);
     }
 
     public void consumePaymentTransactionAddedMessages(
         final ZonedDateTime sinceDate,
-        final Consumer<Payment> paymentConsumer,
-        final String correlationId) {
+        final Consumer<Payment> paymentConsumer) {
 
-        consumeAllMessages(sinceDate, paymentConsumer, PaymentTransactionAddedMessage.MESSAGE_HINT, correlationId);
+        consumeAllMessages(sinceDate, paymentConsumer, PaymentTransactionAddedMessage.MESSAGE_HINT);
     }
 
     private <T extends GenericMessageImpl<Payment>> void consumeAllMessages(
         final ZonedDateTime sinceDate,
         final Consumer<Payment> paymentConsumer,
-        final MessageDerivateHint<T> messageHint,
-        final String correlationId) {
+        final MessageDerivateHint<T> messageHint) {
 
         final MessageQuery baseQuery = MessageQuery.of()
             .withPredicates(m -> m.createdAt().isGreaterThanOrEqualTo(sinceDate))
@@ -134,7 +130,7 @@ public class CommercetoolsQueryExecutor {
                 .forMessageType(messageHint);
             final PagedQueryResult<T> result =
                 this.client
-                .execute(Request.of(query, correlationId))
+                .execute(Request.of(query, getFromMDCOrGenerateNew()))
                 .toCompletableFuture().join();
 
             result.getResults()

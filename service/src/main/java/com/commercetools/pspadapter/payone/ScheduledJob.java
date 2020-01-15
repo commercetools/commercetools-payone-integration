@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
-import static com.commercetools.util.CorrelationIdUtil.generateUniqueCorrelationId;
+import static com.commercetools.util.CorrelationIdUtil.getFromMDCOrGenerateNew;
 import static java.lang.String.format;
 
 /**
@@ -31,7 +31,7 @@ public abstract class ScheduledJob implements Job {
 
     @Override
     public void execute(final JobExecutionContext context) {
-        final String correlationId = generateUniqueCorrelationId();
+
         final JobDataMap dataMap = context.getMergedJobDataMap();
 
         final IntegrationService integrationService = (IntegrationService) dataMap.get(INTEGRATION_SERVICE);
@@ -46,7 +46,7 @@ public abstract class ScheduledJob implements Job {
                 try {
                     final PaymentWithCartLike paymentWithCartLike = queryExecutor
                         .getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment),
-                            correlationId);
+                            getFromMDCOrGenerateNew());
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
                 } catch (final NoCartLikeFoundException | ConcurrentModificationException ex) {
                     /**
@@ -69,9 +69,8 @@ public abstract class ScheduledJob implements Job {
                 }
             };
 
-            queryExecutor.consumePaymentCreatedMessages(sinceDate, paymentConsumer, correlationId);
-            queryExecutor.consumePaymentTransactionAddedMessages(sinceDate, paymentConsumer,
-                correlationId);
+            queryExecutor.consumePaymentCreatedMessages(sinceDate, paymentConsumer);
+            queryExecutor.consumePaymentTransactionAddedMessages(sinceDate, paymentConsumer);
         });
     }
 

@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.ConcurrentModificationException;
 
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
+import static com.commercetools.util.CorrelationIdUtil.getFromMDCOrGenerateNew;
 import static io.sphere.sdk.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
 import static java.lang.String.format;
 
@@ -50,12 +51,12 @@ public class PaymentHandler {
      * @param paymentId identifies the payment to be processed
      * @return the result of handling the payment
      */
-    public PaymentHandleResult handlePayment(@Nonnull final String paymentId, @Nonnull final String correlationId) {
+    public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
         PaymentHandleResult result = null;
         try {
             for (int i = 0; i < RETRIES_LIMIT; i++) {
                 try {
-                    result = processPayment(paymentId, correlationId);
+                    result = processPayment(paymentId);
                 } catch (final ConcurrentModificationException concurrentModificationException) {
                     if (i == RETRIES_LIMIT - 1) {
                         throw concurrentModificationException;
@@ -76,12 +77,12 @@ public class PaymentHandler {
         return result;
     }
 
-    private PaymentHandleResult processPayment(@Nonnull final String paymentId, @Nonnull final String correlationId)
+    private PaymentHandleResult processPayment(@Nonnull final String paymentId)
         throws ConcurrentModificationException {
 
         final PaymentWithCartLike paymentWithCartLike =
             commercetoolsQueryExecutor
-                .getPaymentWithCartLike(paymentId, correlationId);
+                .getPaymentWithCartLike(paymentId, getFromMDCOrGenerateNew());
 
         final String paymentInterface = paymentWithCartLike
             .getPayment()
