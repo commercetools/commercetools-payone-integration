@@ -38,13 +38,7 @@ public class Main {
      */
     public static void main(String[] args) throws SchedulerException {
         bridgeJULToSLF4J();
-
-        final RequestLogImpl requestLog = new RequestLogImpl();
-        requestLog.setFileName(Resources.getResource("logback-access.xml").getPath());
-        requestLog.start();
-        final JettyServerWithRequestLogFactory serverFactory = new JettyServerWithRequestLogFactory(requestLog);
-        final EmbeddedServerFactory embeddedServerFactory = new EmbeddedJettyFactory(serverFactory);
-        EmbeddedServers.add(EmbeddedServers.Identifiers.JETTY, embeddedServerFactory);
+        configureAccessLogs();
 
         final PropertyProvider propertyProvider = new PropertyProvider();
         final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
@@ -69,6 +63,15 @@ public class Main {
                 CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForLongTimeFramePoll()),
                 ScheduledJobLongTimeframe.class,
                 integrationService);
+    }
+
+    private static void configureAccessLogs() {
+        final RequestLogImpl requestLog = new RequestLogImpl();
+        requestLog.setFileName(Resources.getResource("logback-access.xml").getPath());
+        requestLog.start();
+        final JettyServerWithRequestLogFactory serverFactory = new JettyServerWithRequestLogFactory(requestLog);
+        final EmbeddedServerFactory embeddedServerFactory = new EmbeddedJettyFactory(serverFactory);
+        EmbeddedServers.add(EmbeddedServers.Identifiers.JETTY, embeddedServerFactory);
     }
 
     /**
