@@ -14,7 +14,6 @@ import javax.annotation.Nonnull;
 import java.util.ConcurrentModificationException;
 
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
-import static com.commercetools.util.CorrelationIdUtil.getFromMDCOrGenerateNew;
 import static io.sphere.sdk.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
 import static java.lang.String.format;
 
@@ -81,8 +80,7 @@ public class PaymentHandler {
         throws ConcurrentModificationException {
 
         final PaymentWithCartLike paymentWithCartLike =
-            commercetoolsQueryExecutor
-                .getPaymentWithCartLike(paymentId, getFromMDCOrGenerateNew());
+            commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
 
         final String paymentInterface = paymentWithCartLike
             .getPayment()
