@@ -10,12 +10,12 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,7 +53,7 @@ public class ScheduledJobTest {
     }
 
     @Test
-    public void createScheduledJob() throws JobExecutionException {
+    public void createScheduledJob() {
         final ZonedDateTime zonedDateTime = ZonedDateTime.now().minusMinutes(2);
 
         final ScheduledJob job = new ScheduledJob() {
@@ -77,11 +77,11 @@ public class ScheduledJobTest {
         // verify the job called consumePaymentCreatedMessages and consumePaymentTransactionAddedMessages
         // for both tenant executors called from factories with expected zonedDateTime
 
-        verify(commercetoolsQueryExecutorOne).consumePaymentCreatedMessages(eq(zonedDateTime), any());
-        verify(commercetoolsQueryExecutorOne).consumePaymentTransactionAddedMessages(eq(zonedDateTime), any());
+        verify(commercetoolsQueryExecutorOne).consumePaymentCreatedMessages(eq(zonedDateTime), any(), anyString());
+        verify(commercetoolsQueryExecutorOne).consumePaymentTransactionAddedMessages(eq(zonedDateTime), any(), anyString());
 
-        verify(commercetoolsQueryExecutorTwo).consumePaymentCreatedMessages(eq(zonedDateTime), any());
-        verify(commercetoolsQueryExecutorTwo).consumePaymentTransactionAddedMessages(eq(zonedDateTime), any());
+        verify(commercetoolsQueryExecutorTwo).consumePaymentCreatedMessages(eq(zonedDateTime), any(), anyString());
+        verify(commercetoolsQueryExecutorTwo).consumePaymentTransactionAddedMessages(eq(zonedDateTime), any(), anyString());
 
     }
 }
