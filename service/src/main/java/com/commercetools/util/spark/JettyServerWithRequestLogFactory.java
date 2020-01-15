@@ -7,8 +7,6 @@ import org.eclipse.jetty.util.thread.ThreadPool;
 import spark.embeddedserver.jetty.JettyServerFactory;
 
 public class JettyServerWithRequestLogFactory implements JettyServerFactory {
-
-
     private final RequestLog requestLog;
 
     public JettyServerWithRequestLogFactory(final RequestLog requestLog) {
