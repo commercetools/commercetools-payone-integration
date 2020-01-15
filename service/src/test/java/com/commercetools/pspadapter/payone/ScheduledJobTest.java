@@ -15,7 +15,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -77,11 +76,11 @@ public class ScheduledJobTest {
         // verify the job called consumePaymentCreatedMessages and consumePaymentTransactionAddedMessages
         // for both tenant executors called from factories with expected zonedDateTime
 
-        verify(commercetoolsQueryExecutorOne).consumePaymentCreatedMessages(eq(zonedDateTime), any(), anyString());
-        verify(commercetoolsQueryExecutorOne).consumePaymentTransactionAddedMessages(eq(zonedDateTime), any(), anyString());
+        verify(commercetoolsQueryExecutorOne).consumePaymentCreatedMessages(eq(zonedDateTime), any());
+        verify(commercetoolsQueryExecutorOne).consumePaymentTransactionAddedMessages(eq(zonedDateTime), any());
 
-        verify(commercetoolsQueryExecutorTwo).consumePaymentCreatedMessages(eq(zonedDateTime), any(), anyString());
-        verify(commercetoolsQueryExecutorTwo).consumePaymentTransactionAddedMessages(eq(zonedDateTime), any(), anyString());
+        verify(commercetoolsQueryExecutorTwo).consumePaymentCreatedMessages(eq(zonedDateTime), any());
+        verify(commercetoolsQueryExecutorTwo).consumePaymentTransactionAddedMessages(eq(zonedDateTime), any());
 
     }
 }
