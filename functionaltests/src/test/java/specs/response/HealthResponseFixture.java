@@ -24,25 +24,31 @@ import static java.util.Optional.ofNullable;
 @RunWith(ConcordionRunner.class)
 public class HealthResponseFixture extends BasePaymentFixture {
 
-    public String getUrl() throws Exception {
+    public String getUrl() {
         return getHealthUrl();
     }
 
     public MultiValueResult handleHealthResponse() throws Exception {
-        HttpResponse httpResponse = executeGetRequest(getHealthUrl());
-        String responseString = responseToString(httpResponse);
+        final HttpResponse httpResponse = executeGetRequest(getHealthUrl());
+        final String responseString = responseToString(httpResponse);
 
-        JsonParser parser = new JsonParser();
+        final JsonObject rootNode = JsonParser.parseString(responseString).getAsJsonObject();
+        final String bodyStatus = rootNode.get("status").getAsString();
 
-        JsonObject rootNode = parser.parse(responseString).getAsJsonObject();
-        String bodyStatus = rootNode.get("status").getAsString();
-        Set<Map.Entry<String, JsonElement>> tenantNames = ofNullable(rootNode.get("tenants"))
+        final Set<Map.Entry<String, JsonElement>> tenantNames = ofNullable(rootNode.get("tenants"))
                 .map(e -> e.getAsJsonObject().entrySet())
                 .orElse(Collections.emptySet());
-        Optional<JsonObject> applicationInfo =
+
+        final Optional<JsonObject> applicationInfo =
                 ofNullable(rootNode.getAsJsonObject("applicationInfo")).filter(JsonObject::isJsonObject);
-        String title = applicationInfo.map(node -> node.get("title")).map(JsonElement::getAsString).orElse("");
-        String version = applicationInfo.map(node -> node.get("version")).map(JsonElement::getAsString).orElse("");
+
+        final String title = applicationInfo
+            .map(node -> node.get("title"))
+            .map(JsonElement::getAsString).orElse("");
+
+        final String version = applicationInfo
+            .map(node -> node.get("version"))
+            .map(JsonElement::getAsString).orElse("");
 
         return MultiValueResult.multiValueResult()
                 .with("statusCode", httpResponse.getStatusLine().getStatusCode())
