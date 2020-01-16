@@ -16,7 +16,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
-import static com.commercetools.util.CorrelationIdUtil.getFromMDCOrGenerateNew;
 import static java.lang.String.format;
 
 /**
@@ -45,8 +44,7 @@ public abstract class ScheduledJob implements Job {
             final Consumer<Payment> paymentConsumer = payment -> {
                 try {
                     final PaymentWithCartLike paymentWithCartLike = queryExecutor
-                        .getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment),
-                            getFromMDCOrGenerateNew());
+                        .getPaymentWithCartLike(payment.getId(), CompletableFuture.completedFuture(payment));
                     paymentDispatcher.dispatchPayment(paymentWithCartLike);
                 } catch (final NoCartLikeFoundException | ConcurrentModificationException ex) {
                     /**
