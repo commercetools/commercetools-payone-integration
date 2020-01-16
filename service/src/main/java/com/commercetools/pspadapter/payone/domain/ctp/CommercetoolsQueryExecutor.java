@@ -1,10 +1,10 @@
 package com.commercetools.pspadapter.payone.domain.ctp;
 
 import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
-import com.heshammassoud.correlationiddecorator.Request;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.queries.CartQuery;
 import io.sphere.sdk.client.BlockingSphereClient;
+import io.sphere.sdk.client.correlationid.CorrelationIdRequestDecorator;
 import io.sphere.sdk.messages.GenericMessageImpl;
 import io.sphere.sdk.messages.MessageDerivateHint;
 import io.sphere.sdk.messages.expansion.MessageExpansionModel;
@@ -45,8 +45,10 @@ public class CommercetoolsQueryExecutor {
             .of(paymentId)
             .plusExpansionPaths(PaymentExpansionModel::customer);
 
+
+
         final CompletionStage<Payment> paymentStage = client
-            .execute(Request.of(getPaymentRequest, getFromMDCOrGenerateNew()));
+            .execute(CorrelationIdRequestDecorator.of(getPaymentRequest, getFromMDCOrGenerateNew()));
 
         return getPaymentWithCartLike(paymentId, paymentStage);
     }
@@ -57,12 +59,12 @@ public class CommercetoolsQueryExecutor {
 
         final CompletionStage<PagedQueryResult<Order>> orderFuture =
                 client.execute(
-                    Request.of(OrderQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)),
+                    CorrelationIdRequestDecorator.of(OrderQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)),
                         getFromMDCOrGenerateNew()));
 
         final CompletionStage<PagedQueryResult<Cart>> cartFuture =
                 client.execute(
-                    Request.of(CartQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)),
+                    CorrelationIdRequestDecorator.of(CartQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)),
                         getFromMDCOrGenerateNew()));
 
         final CompletionStage<PaymentWithCartLike> paymentWithCartLikeFuture = paymentFuture.thenCompose(payment ->
@@ -130,7 +132,7 @@ public class CommercetoolsQueryExecutor {
                 .forMessageType(messageHint);
             final PagedQueryResult<T> result =
                 this.client
-                .execute(Request.of(query, getFromMDCOrGenerateNew()))
+                .execute(CorrelationIdRequestDecorator.of(query, getFromMDCOrGenerateNew()))
                 .toCompletableFuture().join();
 
             result.getResults()

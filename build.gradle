@@ -14,10 +14,6 @@ allprojects {
     repositories {
         jcenter()
         mavenCentral()
-        maven {
-            // TODO: remove when JVM SDK is bumped tp 1.49.0
-            url "https://dl.bintray.com/heshammassoud/maven/"
-        }
     }
 }
 
@@ -25,12 +21,10 @@ apply from: "$rootDir/gradle-scripts/git-publish.gradle"
 
 def depVersions = [
         //all
-        commercetoolsSdkJvm: '1.48.0',
+        commercetoolsSdkJvm: '1.49.0',
         guava: '25.1-jre',
         logStashLogbackEncoder: '6.3',
         logbackClassic: '1.2.3',
-        // TODO: remove when JVM SDK is bumped tp 1.49.0
-        correlationIdDecorator: '0.1.0',
         julToSlf4j: '1.7.30',
         apacheHttp: '4.5.10',
 
@@ -73,7 +67,7 @@ subprojects {
         implementation "com.google.guava:guava:${depVersions.guava}"
         implementation "com.commercetools.sdk.jvm.core:commercetools-java-client:${depVersions.commercetoolsSdkJvm}"
         implementation "com.commercetools.sdk.jvm.core:commercetools-models:${depVersions.commercetoolsSdkJvm}"
-        implementation "com.heshammassoud:commercetools-correlation-id-decorator:${depVersions.correlationIdDecorator}"
+        implementation "com.commercetools.sdk.jvm.core:commercetools-convenience:${depVersions.commercetoolsSdkJvm}"
         implementation "net.logstash.logback:logstash-logback-encoder:${depVersions.logStashLogbackEncoder}"
         implementation "ch.qos.logback:logback-classic:${depVersions.logbackClassic}"
         implementation "ch.qos.logback:logback-access:${depVersions.logbackClassic}"
