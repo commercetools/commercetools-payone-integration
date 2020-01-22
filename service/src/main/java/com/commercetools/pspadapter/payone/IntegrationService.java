@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
+import static com.commercetools.util.CorrelationIdUtil.attachFromRequestOrGenerateNew;
 import static io.sphere.sdk.json.SphereJsonUtils.toJsonString;
 import static io.sphere.sdk.json.SphereJsonUtils.toPrettyJsonString;
 import static java.util.stream.Collectors.toList;
@@ -140,7 +141,7 @@ public class IntegrationService {
 
     private void initSparkService() {
         Spark.port(port());
-        doAfterResponse();
+        injectCorrelationIdIntoContext();
 
         final ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig, tenantFactories);
         final String healthRequestContent = toJsonString(healthResponse);
@@ -160,7 +161,8 @@ public class IntegrationService {
         });
     }
 
-    private void doAfterResponse() {
+    private void injectCorrelationIdIntoContext() {
+        Spark.before(((request, response) -> attachFromRequestOrGenerateNew(request)));
         Spark.after(((request, response) -> MDC.clear()));
     }
 
