@@ -32,12 +32,14 @@ public abstract class ScheduledJob implements Job {
     public void execute(final JobExecutionContext context) {
 
         final JobDataMap dataMap = context.getMergedJobDataMap();
+
         final IntegrationService integrationService = (IntegrationService) dataMap.get(INTEGRATION_SERVICE);
         final ZonedDateTime sinceDate = getSinceDateTime();
 
         integrationService.getTenantFactories().forEach(tenantFactory -> {
             final CommercetoolsQueryExecutor queryExecutor = tenantFactory.getCommercetoolsQueryExecutor();
             final PaymentDispatcher paymentDispatcher = tenantFactory.getPaymentDispatcher();
+
 
             final Consumer<Payment> paymentConsumer = payment -> {
                 try {

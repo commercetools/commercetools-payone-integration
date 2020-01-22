@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Enabling output of status data, via debug="true", will go a long way in helping you diagnose logback issues.
+As such, enabling logback status data is very highly recommended and should be considered as a recourse of first resort. -->
+<configuration debug="false">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder
+                class="net.logstash.logback.encoder.AccessEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <timeZone>UTC</timeZone>
+                    <fieldName>timestamp</fieldName>
+                </timestamp>
+                <method/>
+                <protocol/>
+                <statusCode>
+                    <fieldName>statusCode</fieldName>
+                </statusCode>
+                <requestedUrl>
+                    <fieldName>requestedUrl</fieldName>
+                </requestedUrl>
+                <requestedUri>
+                    <fieldName>requestedUri</fieldName>
+                </requestedUri>
+                <remoteHost>
+                    <fieldName>remoteHost</fieldName>
+                </remoteHost>
+                <contentLength>
+                    <fieldName>contentLength</fieldName>
+                </contentLength>
+                <elapsedTime>
+                    <fieldName>elapsedTime</fieldName>
+                </elapsedTime>
+                <pattern>
+                    <pattern>
+                        {
+                        "queryString": "%q"
+                        }
+                    </pattern>
+                </pattern>
+
+                <requestHeaders>
+                    <fieldName>request_headers</fieldName>
+                    <lowerCaseHeaderNames>true</lowerCaseHeaderNames>
+                    <filter>
+                        <include>content-type</include>
+                        <include>user-agent</include>
+                        <include>accept</include>
+                        <include>referer</include>
+                    </filter>
+                </requestHeaders>
+            </providers>
+        </encoder>
+    </appender>
+
+    <appender-ref ref="console"/>
+
+</configuration>

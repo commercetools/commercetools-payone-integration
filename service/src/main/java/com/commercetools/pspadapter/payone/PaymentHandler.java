@@ -76,10 +76,11 @@ public class PaymentHandler {
         return result;
     }
 
-    private PaymentHandleResult processPayment(@Nonnull final String paymentId) throws ConcurrentModificationException {
+    private PaymentHandleResult processPayment(@Nonnull final String paymentId)
+        throws ConcurrentModificationException {
+
         final PaymentWithCartLike paymentWithCartLike =
-            commercetoolsQueryExecutor
-                .getPaymentWithCartLike(paymentId);
+            commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
 
         final String paymentInterface = paymentWithCartLike
             .getPayment()

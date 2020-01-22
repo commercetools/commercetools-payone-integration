@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -53,7 +52,7 @@ public class ScheduledJobTest {
     }
 
     @Test
-    public void createScheduledJob() throws JobExecutionException {
+    public void createScheduledJob() {
         final ZonedDateTime zonedDateTime = ZonedDateTime.now().minusMinutes(2);
 
         final ScheduledJob job = new ScheduledJob() {
