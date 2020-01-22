@@ -10,6 +10,7 @@ import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import io.sphere.sdk.http.HttpHeaders;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.eclipse.jetty.http.HttpStatus;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
+import static com.commercetools.util.CorrelationIdUtil.CORRELATION_ID_LOG_VAR_NAME;
 import static io.sphere.sdk.json.SphereJsonUtils.toJsonString;
 import static io.sphere.sdk.json.SphereJsonUtils.toPrettyJsonString;
 import static java.util.stream.Collectors.toList;
@@ -140,7 +142,7 @@ public class IntegrationService {
 
     private void initSparkService() {
         Spark.port(port());
-        doAfterResponse();
+        injectCorrelationIdIntoContext();
 
         final ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig, tenantFactories);
         final String healthRequestContent = toJsonString(healthResponse);
@@ -160,8 +162,12 @@ public class IntegrationService {
         });
     }
 
-    private void doAfterResponse() {
-        Spark.after(((request, response) -> MDC.clear()));
+    private void injectCorrelationIdIntoContext() {
+        Spark.before(((request, response) ->
+            MDC.put(CORRELATION_ID_LOG_VAR_NAME, request.headers(HttpHeaders.X_CORRELATION_ID))));
+
+        Spark.after(((request, response) ->
+            MDC.clear()));
     }
 
     public void stop() {
