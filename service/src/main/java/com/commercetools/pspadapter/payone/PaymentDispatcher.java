@@ -39,6 +39,7 @@ public class PaymentDispatcher {
                     try {
                         return dispatcher.dispatchPayment(paymentWithCartLike);
                     } catch (final ConcurrentModificationException cme) {
+                        //todo(ahmetoz) what is the reason using a java.util.ConcurrentModificationException ?
                         throw new java.util.ConcurrentModificationException("The payment could not be dispatched: "
                                 + cme.getMessage(), cme);
                     }

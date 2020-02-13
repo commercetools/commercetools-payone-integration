@@ -5,6 +5,9 @@ import io.sphere.sdk.payments.Transaction;
 import javax.annotation.Nonnull;
 
 /**
+ * todo(ahmetoz) : do we need this interface. it looks like an overkill, also migration is done.
+ *
+ *
  * This interface is implemented to support migrating from default
  * {@link io.sphere.sdk.payments.TransactionState#PENDING} to default
  * {@link io.sphere.sdk.payments.TransactionState#INITIAL}.
