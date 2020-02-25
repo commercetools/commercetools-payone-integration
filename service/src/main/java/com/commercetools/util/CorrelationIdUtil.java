@@ -11,7 +11,7 @@ import java.util.UUID;
 import static net.logstash.logback.encoder.org.apache.commons.lang3.StringUtils.isBlank;
 
 public final class CorrelationIdUtil {
-    public static final String CORRELATION_ID_LOG_VAR_NAME = "correlationId";
+    private static final String CORRELATION_ID_LOG_VAR_NAME = "correlationId";
 
     public static void attachFromRequestOrGenerateNew(@Nonnull final Request request) {
         MDC.put(CORRELATION_ID_LOG_VAR_NAME, getOrGenerate(request.headers(HttpHeaders.X_CORRELATION_ID)));
