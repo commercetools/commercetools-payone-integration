@@ -6,6 +6,8 @@ import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.types.Type;
 import io.sphere.sdk.types.queries.TypeQuery;
 
+import javax.annotation.Nonnull;
+
 public class TypeCacheLoader extends CacheLoader<String, Type> {
     private final BlockingSphereClient client;
 
@@ -14,7 +16,7 @@ public class TypeCacheLoader extends CacheLoader<String, Type> {
     }
 
     @Override
-    public Type load(String typeKey) throws Exception {
+    public Type load(@Nonnull final String typeKey) {
         final PagedQueryResult<Type> result = client.executeBlocking(
             TypeQuery.of()
                     .withPredicates(m -> m.key().is(typeKey))
