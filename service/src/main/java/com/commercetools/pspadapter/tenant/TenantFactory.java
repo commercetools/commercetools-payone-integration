@@ -30,6 +30,7 @@ import com.commercetools.service.OrderService;
 import com.commercetools.service.OrderServiceImpl;
 import com.commercetools.service.PaymentService;
 import com.commercetools.service.PaymentServiceImpl;
+import com.commercetools.util.ClientConfigurationUtils;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
@@ -48,9 +49,6 @@ import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.Paym
 import static java.lang.String.format;
 
 public class TenantFactory {
-
-    private static final Duration DEFAULT_CTP_CLIENT_TIMEOUT = Duration.ofSeconds(10);
-
     private final String payoneInterfaceName;
 
     private final String tenantName;
@@ -163,11 +161,10 @@ public class TenantFactory {
 
     @Nonnull
     protected BlockingSphereClient createBlockingSphereClient(TenantConfig tenantConfig) {
-        return BlockingSphereClient.of(
-                SphereClientFactory.of().createClient(tenantConfig.getSphereClientConfig()),
-                DEFAULT_CTP_CLIENT_TIMEOUT);
+        return ClientConfigurationUtils.createClient(tenantConfig.getSphereClientConfig());
     }
-    public BlockingSphereClient getBlockingSphereClient() {
+
+    protected BlockingSphereClient getBlockingSphereClient() {
         return blockingSphereClient;
     }
 
