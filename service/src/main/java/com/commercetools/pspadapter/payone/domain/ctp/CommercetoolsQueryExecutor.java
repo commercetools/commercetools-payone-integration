@@ -41,61 +41,52 @@ public class CommercetoolsQueryExecutor {
     public PaymentWithCartLike getPaymentWithCartLike(final String paymentId) {
         // customer is used to parse some properties,
         // see com.commercetools.pspadapter.payone.mapping.MappingUtil#mapCustomerToRequest()
-        final PaymentByIdGet getPaymentRequest = PaymentByIdGet
-            .of(paymentId)
+        final PaymentByIdGet getPaymentRequest = PaymentByIdGet.of(paymentId)
             .plusExpansionPaths(PaymentExpansionModel::customer);
 
+        final Payment payment = client.executeBlocking(
+                CorrelationIdRequestDecorator.of(getPaymentRequest, getFromMDCOrGenerateNew()));
 
+        // handle payment not found.
 
-        final CompletionStage<Payment> paymentStage = client
-            .execute(CorrelationIdRequestDecorator.of(getPaymentRequest, getFromMDCOrGenerateNew()));
-
-        return getPaymentWithCartLike(paymentId, paymentStage);
+        return getPaymentWithCartLike(paymentId, payment);
     }
 
-    public PaymentWithCartLike getPaymentWithCartLike(
-        final String paymentId,
-        final CompletionStage<Payment> paymentFuture)  {
-
+    public PaymentWithCartLike getPaymentWithCartLike(final String paymentId,
+                                                      final Payment payment) {
         final CompletionStage<PagedQueryResult<Order>> orderFuture =
                 client.execute(
-                    CorrelationIdRequestDecorator.of(OrderQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)),
+                    CorrelationIdRequestDecorator.of(OrderQuery.of()
+                                    .withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)),
                         getFromMDCOrGenerateNew()));
 
-        final CompletionStage<PagedQueryResult<Cart>> cartFuture =
-                client.execute(
-                    CorrelationIdRequestDecorator.of(CartQuery.of().withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)),
-                        getFromMDCOrGenerateNew()));
 
-        final CompletionStage<PaymentWithCartLike> paymentWithCartLikeFuture = paymentFuture.thenCompose(payment ->
+        final CompletionStage<PaymentWithCartLike> paymentWithCartLikeFuture =
             orderFuture.thenCompose(orderResult -> {
                 if (orderResult.getTotal() > 0) {
                     final Order order = orderResult.getResults().get(0);
                     return CompletableFuture.completedFuture(new PaymentWithCartLike(payment, order));
                 } else {
-                    return cartFuture.thenApply(cartResult -> {
-                        if (cartResult.getTotal() > 0) {
-                            return new PaymentWithCartLike(payment, cartResult.getResults().get(0));
-                        } else {
-                            throw new NoCartLikeFoundException();
-                        }
-                    });
+                    return getCartResource(payment);
                 }
             }
-        ));
+        );
 
-        //TODO: refactor since BlockingClient is available
-        try {
-            return paymentWithCartLikeFuture
-                .toCompletableFuture()
-                .get(10, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            final Throwable cause =
-                e.getCause() != null && e instanceof ExecutionException
-                    ? e.getCause()
-                    : e;
-            throw cause instanceof RuntimeException? (RuntimeException) cause : new CompletionException(cause);
-        }
+        return paymentWithCartLikeFuture.toCompletableFuture().join();
+    }
+
+    private CompletionStage<PaymentWithCartLike> getCartResource(Payment payment) {
+        final CompletionStage<PagedQueryResult<Cart>> cartFuture = client.execute(
+                CorrelationIdRequestDecorator.of(CartQuery.of()
+                                .withPredicates(m -> m.paymentInfo().payments().id().is(payment.getId())),
+                        getFromMDCOrGenerateNew()));
+        return cartFuture.thenApply(cartResult -> {
+            if (cartResult.getTotal() > 0) {
+                return new PaymentWithCartLike(payment, cartResult.getResults().get(0));
+            } else {
+                throw new NoCartLikeFoundException();
+            }
+        });
     }
 
     public void consumePaymentCreatedMessages(

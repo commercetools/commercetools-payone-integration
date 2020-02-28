@@ -53,6 +53,7 @@ public class PaymentHandler {
     public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
         PaymentHandleResult result = null;
         try {
+            // todo: handle retry with client.
             for (int i = 0; i < RETRIES_LIMIT; i++) {
                 try {
                     result = processPayment(paymentId);
