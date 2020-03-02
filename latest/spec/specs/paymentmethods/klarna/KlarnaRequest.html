@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?><html xmlns:c="http://www.concordion.org/2007/concordion" lang="en">
+<head><style>* {
+  font-family: Arial;
+}
+body {
+  padding: 32px;  
+}
+pre {
+  padding: 6px 28px 6px 28px;
+  background-color: #E8EEF7;
+}
+pre, pre *, code, code *, kbd {
+  font-family: Courier New, Courier;
+  font-size: 10pt;
+}
+h1, h1 * {
+  font-size: 24pt;	
+}
+p, td, th, li, .breadcrumbs {
+  font-size: 10pt;
+}
+p, li {
+  line-height: 140%;
+  max-width: 720px;
+}
+table {
+  border-collapse: collapse;
+  empty-cells: show;
+  margin: 8px 0px 8px 0px;
+}
+th, td {
+  border: 1px solid black;
+  padding: 3px;
+}
+td {
+  background-color: white;
+  vertical-align: top;
+}
+th {
+  background-color: #C3D9FF;
+}
+li {
+  margin-top: 6px;
+  margin-bottom: 6px; 
+}
+
+.example, :not(th)[c\:example] {
+  padding: 6px 16px 6px 16px;
+  border: 1px solid #C3D9FF;
+  margin: 6px 0px 28px 0px;
+  background-color: #F5F9FD;
+}
+.example h3, [c\:example] h3 {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  font-size: 12pt;
+}
+
+p.success {
+  padding: 2px;
+}
+.success, .success * {
+  background-color: #afa !important;
+}
+.success pre {
+  background-color: #bbffbb;
+}
+.failure, .failure * {
+  background-color: #ffb0b0;
+  padding: 1px;
+}
+.failure .expected {
+  text-decoration: line-through;
+  color: #bb5050;
+}
+.ignored, .ignored * {
+  background-color: #f0f0f0 !important;	
+}
+
+ins {
+  text-decoration: none;	
+}
+
+.exceptionMessage {
+  background-color: #fdd;
+  font-family: Courier New, Courier, Monospace;
+  font-size: 10pt;
+  display: block;
+  font-weight: normal;
+  padding: 4px;
+  text-decoration: none !important;
+}
+.stackTrace, .stackTrace * {
+  font-weight: normal;
+}
+.stackTrace {
+  display: none;
+  padding: 1px 4px 4px 4px;
+  background-color: #fdd;
+  border-top: 1px dotted black;
+}
+.stackTraceExceptionMessage {
+  display: block;
+  font-family: Courier New, Courier, Monospace;
+  font-size: 8pt;
+  white-space: wrap;
+  padding: 1px 0px 1px 0px;
+}
+.stackTraceEntry {
+  white-space: nowrap;
+  font-family: Courier New, Courier, Monospace;
+  display: block;
+  font-size: 8pt;
+  padding: 1px 0px 1px 32px;
+}
+.stackTraceButton {
+  font-size: 8pt;
+  margin: 2px 8px 2px 0px;
+  font-weight: normal;
+  font-family: Arial;
+}
+
+.special {
+  font-style: italic;
+}
+.missing, .missing * {
+  background-color: #ff9999;
+  color:#bb5050;
+  text-decoration: line-through;
+}
+.surplus, .surplus * {
+  background-color: #ff9999;
+}
+.footer {
+  text-align: right;
+  margin-top: 40px;
+  font-size: 8pt;
+  width: 100%;
+  color: #999;
+}
+.footer .testTime {
+  padding: 2px 10px 0px 0px;
+}
+
+.idea {
+  font-size: 9pt;
+  color: #888;
+  font-style: italic;	
+}
+.tight li {
+  margin-top: 1px;
+  margin-bottom: 1px; 
+}
+.commentary {
+  float: right;
+  width: 200px;
+  background-color: #ffffd0;
+  padding:8px;
+  border: 3px solid #eeeeb0;	 
+  margin: 10px 0px 10px 10px;	 
+}
+.commentary, .commentary * {
+  font-size: 8pt;
+}
+</style><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta charset="UTF-8" />
+    <link href="../../../concordion.css" rel="stylesheet" type="text/css" />
+    <title>Preauthorization via Klarna Invoice</title>
+<link type="text/css" rel="stylesheet" href="../../../inputstyle.css" /></head>
+<body><span class="breadcrumbs"><a href="../../Specs.html">commercetools - PAYONE - Integration Service</a> &gt; <a href="../Paymentmethods.html">Payment Methods</a> &gt; <a href="Klarna.html">Payments via Klarna Invoice (KLV)</a> &gt;</span>
+<h1>Preauthorization via Klarna Invoice</h1>
+<p>
+    It will store information about such a request as an interface interaction of type
+    <em>PAYONE_INTERACTION_REQUEST</em>.
+</p>
+<h2>Examples</h2>
+<h3>Common Setup</h3>
+<ul>
+    <li>payment.paymentMethodInfo.method: <span>INVOICE-KLARNA</span></li>
+</ul>
+<p>
+    Since Klarna has
+    <a href="https://developers.klarna.com/en/de/kpm/test-credentials">
+        very strict requirements to the payment request</a>,
+    the main cart payment properties are mocked in respective JSON files
+    (see <code>mocks/paymentmethods/klarna/KlarnaCartWithDiscounts.json</code>)
+    <br />
+    Below we customize the following payment properties for a Klarna Invoice.
+</p>
+<div class="example">
+    <h3>Create the payments</h3>
+    <table c:execute="#result = createPayment(#paymentName, #transactionType, #ip, #buyerLastName, #birthDay, #telephonenumber)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:set="#transactionType">Transaction Type</th>
+            <th c:set="#buyerLastName">Buyer surname<sup><a href="#buyer-lastname-description">[1]</a></sup></th>
+            <th c:set="#birthDay">Buyer birth day</th>
+            <th c:set="#ip">IP address</th>
+            <th c:set="#telephonenumber">Telephone</th>
+            <th c:echo="#result.paymentId">Payment ID (for information only)</th>
+            <th c:assertEquals="#result.birthday">Birthday</th>
+            <th c:assertEquals="#result.ip">IP</th>
+            <th c:assertEquals="#result.telephonenumber">Telephone</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">Payment 1</td>
+            <td class="inputvalue">AUTHORIZATION</td>
+            <td class="inputvalue">Approved</td> <!-- It's a buyer surname, see https://developers.klarna.com/en/de/kpm/test-credentials-->
+            <td class="inputvalue">1960-07-07</td>
+            <td class="inputvalue">192.168.0.45</td>
+            <td class="inputvalue">034568557</td>
+            <td>8938d543-cfea-4910-8e44-c37deb90a37a</td>
+            <td class="success">1960-07-07</td>
+            <td class="success">192.168.0.45</td>
+            <td class="success">034568557</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Payment 2</td>
+            <td class="inputvalue">AUTHORIZATION</td>
+            <td class="inputvalue">Approved</td> <!-- It's a buyer surname, see https://developers.klarna.com/en/de/kpm/test-credentials-->
+            <td class="inputvalue">1960-07-07</td>
+            <td class="inputvalue">2001:0db8:7777:0000:6666:8a2e:0370:7334</td>
+            <td class="inputvalue">0399874789345</td>
+            <td>f84d2345-c923-4bb7-a91c-78a2054f88ca</td>
+            <td class="success">1960-07-07</td>
+            <td class="success">2001:0db8:7777:0000:6666:8a2e:0370:7334</td>
+            <td class="success">0399874789345</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Payment 3</td>
+            <td class="inputvalue">AUTHORIZATION</td>
+            <td class="inputvalue">Denied</td> <!-- It's a buyer surname, see https://developers.klarna.com/en/de/kpm/test-credentials-->
+            <td class="inputvalue">1960-07-07</td>
+            <td class="inputvalue">1.1.1.1</td>
+            <td class="inputvalue">099776655</td>
+            <td>56a9b404-c8c5-4a1f-b330-23dac28e15c4</td>
+            <td class="success">1960-07-07</td>
+            <td class="success">1.1.1.1</td>
+            <td class="success">099776655</td>
+        </tr>
+    </table>
+    <p>
+        <sup><a name="buyer-lastname-description" href="#buyer-lastname-description">[1]</a></sup><i>See more
+        information on
+        <a href="https://developers.klarna.com/en/de/kpm/test-credentials" target="_blank">Klarna test credentials</a>
+        page</i>
+    </p>
+
+    <h3>Handle the payments</h3>
+
+    <p>
+        When I request the integration service to handle them I will get the following results:
+    </p>
+    <table c:execute="#result = handlePayment(#paymentName, #requestType)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#result.statusCode">Response Status Code</th>
+            <th c:set="#requestType">Request type</th>
+            <th c:assertEquals="#result.interactionCount">total # of requests sent</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:assertEquals="#result.interfaceCode">Interface Code</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+            <th c:echo="#result.interfaceId">Transaction Id(for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">Payment 1</td>
+            <td class="success">200</td>
+            <td class="inputvalue">preauthorization</td>
+            <td class="success">1</td>
+            <td class="success">Success</td>
+            <td class="success">APPROVED</td>
+            <td>9</td>
+            <td>399898638</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Payment 2</td>
+            <td class="success">200</td>
+            <td class="inputvalue">preauthorization</td>
+            <td class="success">1</td>
+            <td class="success">Success</td>
+            <td class="success">APPROVED</td>
+            <td>9</td>
+            <td>399898664</td>
+        </tr>
+    </table>
+
+    <p><code><b><span c:set="#payment3" class="inputvalue">Payment 3</span></b></code> (with <i>Denied</i> last name) expected to have
+        <span c:set="#payment3Request" class="inputvalue">preauthorization</span> transaction with following values:
+        <span c:execute="#payment3Handle = handlePayment(#payment3, #payment3Request)" />
+    <ul>
+        <li>Status <span c:assertEquals="#payment3Handle.statusCode" class="success">200</span></li>
+    <li>total # of requests sent <span c:assertEquals="#payment3Handle.interactionCount" class="success">1</span></li>
+    <li>Transaction State <span c:assertEquals="#payment3Handle.transactionState" class="success">Failure</span></li>
+    <li>Interface Code <code><b><span c:echo="#payment3Handle.interfaceCode">ERROR 945</span></b></code>
+        <span c:assertTrue="containsSubstring(#payment3Handle.interfaceCode, 'ERROR')" class="success">
+            <i>contains <code>ERROR</code></i> substring</span>
+        <sup><b><a href="#error-code-description">[2]</a></b></sup>
+    </li>
+    </ul>
+    </p>
+    <p>
+        <sup><a name="error-code-description" href="#error-code-description">[2]</a></sup>
+        <i>For now <code><b>ERROR 945 (Amount too high)</b> </code> is expected,
+            but this is not explicitly specified by Payone or Klarna.</i>
+    </p>
+
+    <h3>Wait for payment notifications:</h3>
+
+    <p c:execute="#receivedAllNotifications = receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)">
+        After a certain amount of time the Integration Service will have
+        <span c:assertTrue="#receivedAllNotifications" class="success">processed a notification from PAYONE</span>
+        with the txaction <b c:set="#txactionAppointed" class="inputvalue">appointed</b> and the transactionstatus <b>completed</b> (or <b>null</b>)
+        for each of the payments <span c:set="#successfulPayments" class="inputvalue">Payment 1, Payment 2</span>.
+        The transaction state and the authorized amount should be set correctly not later than now.
+    </p>
+    <table c:execute="#result = fetchPaymentDetails(#paymentName)">
+        <tr>
+            <th c:set="#paymentName">Payment Name</th>
+            <th c:assertEquals="#result.notificationCount">total # of <em>appointed/completed</em> notifications</th>
+            <th c:assertEquals="#result.transactionState">Transaction State</th>
+            <th c:echo="#result.version">Version (for information only)</th>
+        </tr>
+        <tr>
+            <td class="inputvalue">Payment 1</td>
+            <td class="success">1</td>
+            <td class="success">Success</td>
+            <td>12</td>
+        </tr>
+        <tr>
+            <td class="inputvalue">Payment 2</td>
+            <td class="success">1</td>
+            <td class="success">Success</td>
+            <td>12</td>
+        </tr>
+    </table>
+    <p>
+        The failed payment <span c:set="#failedPaymentName" class="inputvalue">Payment 3</span>
+        must have received <span c:assertEquals="getInteractionNotificationOfActionCount(#failedPaymentName, #txactionAppointed)" class="success">0</span> notifications.
+    </p>
+</div>
+<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 276629 ms on 02-Mar-2020 at 11:08:29 UTC</div></div></body>
+</html>
