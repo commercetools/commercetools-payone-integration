@@ -68,7 +68,7 @@ public class NotificationDispatcherTest extends BaseTenantPropertyTest {
         when(paymentServiceImpl.getByPaymentMethodAndInterfaceId(anyString(), anyString()))
                 .then(a -> {
 
-                    String interfaceId = a.getArgumentAt(1, String.class);
+                    String interfaceId = a.getArgument(1, String.class);
                     Optional<Payment> payment = dummyInterfaceId.equals(interfaceId)
                             ? testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head()
                             : Optional.empty();
