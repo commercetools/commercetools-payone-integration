@@ -73,7 +73,7 @@ public class BaseNotificationProcessorTest {
     public void setUp() throws Exception {
         when(tenantFactory.getPaymentService()).thenReturn(paymentService);
         when(paymentService.updatePayment(any(Payment.class), anyObject()))
-                .then(answer -> CompletableFuture.completedFuture(answer.getArgumentAt(0, Payment.class)));
+                .then(answer -> CompletableFuture.completedFuture(answer.getArgument(0, Payment.class)));
 
         when(tenantFactory.getOrderService()).thenReturn(orderService);
         when(orderService.getOrderByPaymentId(anyString()))

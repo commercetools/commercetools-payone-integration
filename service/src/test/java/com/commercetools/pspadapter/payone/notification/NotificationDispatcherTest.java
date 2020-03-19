@@ -68,7 +68,7 @@ public class NotificationDispatcherTest extends BaseTenantPropertyTest {
         when(paymentServiceImpl.getByPaymentMethodAndInterfaceId(anyString(), anyString()))
                 .then(a -> {
 
-                    String interfaceId = a.getArgumentAt(1, String.class);
+                    String interfaceId = a.getArgument(1, String.class);
                     Optional<Payment> payment = dummyInterfaceId.equals(interfaceId)
                             ? testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head()
                             : Optional.empty();
@@ -78,7 +78,7 @@ public class NotificationDispatcherTest extends BaseTenantPropertyTest {
 
         when(paymentServiceImpl.createPayment(anyObject())).then(
                 answer -> {
-                    PaymentDraft draft = answer.getArgumentAt(0, PaymentDraft.class);
+                    PaymentDraft draft = answer.getArgument(0, PaymentDraft.class);
                     Payment payment = dummyInterfaceId.equals(draft.getInterfaceId())
                             ? testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head().get()
                             : testHelper.dummyPaymentCreatedByNotification();
