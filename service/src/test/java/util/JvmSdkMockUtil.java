@@ -1,6 +1,7 @@
 package util;
 
 import io.sphere.sdk.queries.PagedQueryResult;
+import org.mockito.Mockito;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -31,12 +32,12 @@ public final class JvmSdkMockUtil {
     public static <T> PagedQueryResult pagedQueryResultsMock(final T... results) {
         List<T> list = asList(results);
         PagedQueryResult res = mock(PagedQueryResult.class);
-        when(res.getCount()).thenReturn((long) list.size());
-        when(res.getLimit()).thenReturn((long) list.size());
-        when(res.getTotal()).thenReturn((long) list.size());
-        when(res.getOffset()).thenReturn(0L);
-        when(res.getResults()).thenReturn(list);
-        when(res.head()).thenReturn(list.stream().findFirst());
+        Mockito.lenient().when(res.getCount()).thenReturn((long) list.size());
+        Mockito.lenient().when(res.getLimit()).thenReturn((long) list.size());
+        Mockito.lenient().when(res.getTotal()).thenReturn((long) list.size());
+        Mockito.lenient().when(res.getOffset()).thenReturn(0L);
+        Mockito.lenient().when(res.getResults()).thenReturn(list);
+        Mockito.lenient().when(res.head()).thenReturn(list.stream().findFirst());
         return res;
     }
 

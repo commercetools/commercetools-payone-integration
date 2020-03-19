@@ -23,13 +23,13 @@ public class BaseTenantPropertyTest {
     protected static final String dummyPropertyValue = "123";
     protected static final String dummyTenantValue = "456";
 
-    @Mock
+    @Mock(lenient = true)
     protected TenantPropertyProvider tenantPropertyProvider;
 
-    @Mock
+    @Mock(lenient = true)
     protected PropertyProvider propertyProvider;
 
-    @Mock
+    @Mock(lenient = true)
     protected TenantConfig tenantConfig;
 
     protected PayoneConfig payoneConfig;

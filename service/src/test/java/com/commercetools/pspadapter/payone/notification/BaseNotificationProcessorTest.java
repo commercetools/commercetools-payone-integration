@@ -34,19 +34,19 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class BaseNotificationProcessorTest {
-    @Mock
+    @Mock(lenient = true)
     protected PaymentService paymentService;
 
-    @Mock
+    @Mock(lenient = true)
     protected OrderService orderService;
 
     @Mock
     protected PaymentToOrderStateMapper paymentToOrderStateMapper;
 
-    @Mock
+    @Mock(lenient = true)
     protected TenantFactory tenantFactory;
 
-    @Mock
+    @Mock(lenient = true)
     protected TenantConfig tenantConfig;
 
     // it is used for injection to "@InjectMocks *NotificationProcessor testee" instances in the child classes

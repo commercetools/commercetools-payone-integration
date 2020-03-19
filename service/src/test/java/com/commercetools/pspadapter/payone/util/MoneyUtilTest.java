@@ -9,6 +9,7 @@ import io.sphere.sdk.taxcategories.TaxRate;
 import org.javamoney.moneta.Money;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static java.util.Collections.emptyList;
@@ -51,7 +52,7 @@ public class MoneyUtilTest {
     @Test
     public void getTotalDiscountedPricePerQuantity() throws Exception {
         LineItemLike lineItemLike = mock(LineItemLike.class);
-        when(lineItemLike.getTotalPrice()).thenReturn(Money.of(42.5, "EUR"));
+        Mockito.lenient().when(lineItemLike.getTotalPrice()).thenReturn(Money.of(42.5, "EUR"));
         assertThat(MoneyUtil.getTotalDiscountedPricePerQuantity(lineItemLike)).isEmpty();
 
         when(lineItemLike.getDiscountedPricePerQuantity()).thenReturn(emptyList());
@@ -75,7 +76,7 @@ public class MoneyUtilTest {
     @Test
     public void getTotalDiscountedPriceMonetaryPerQuantity() throws Exception {
         LineItemLike lineItemLike = mock(LineItemLike.class);
-        when(lineItemLike.getTotalPrice()).thenReturn(Money.of(42.5, "EUR"));
+        Mockito.lenient().when(lineItemLike.getTotalPrice()).thenReturn(Money.of(42.5, "EUR"));
         assertThat(MoneyUtil.getTotalDiscountedPriceMonetaryPerQuantity(lineItemLike)).isEmpty();
 
         when(lineItemLike.getDiscountedPricePerQuantity()).thenReturn(emptyList());

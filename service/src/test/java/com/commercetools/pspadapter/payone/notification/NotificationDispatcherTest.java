@@ -42,7 +42,7 @@ public class NotificationDispatcherTest extends BaseTenantPropertyTest {
     @Mock
     private TenantFactory tenantFactory;
 
-    @Mock
+    @Mock(lenient = true)
     private PaymentServiceImpl paymentServiceImpl;
 
     @Mock
