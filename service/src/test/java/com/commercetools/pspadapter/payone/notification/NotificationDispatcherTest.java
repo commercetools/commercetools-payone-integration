@@ -78,7 +78,7 @@ public class NotificationDispatcherTest extends BaseTenantPropertyTest {
 
         when(paymentServiceImpl.createPayment(anyObject())).then(
                 answer -> {
-                    PaymentDraft draft = answer.getArgumentAt(0, PaymentDraft.class);
+                    PaymentDraft draft = answer.getArgument(0, PaymentDraft.class);
                     Payment payment = dummyInterfaceId.equals(draft.getInterfaceId())
                             ? testHelper.getPaymentQueryResultFromFile("dummyPaymentQueryResult.json").head().get()
                             : testHelper.dummyPaymentCreatedByNotification();
