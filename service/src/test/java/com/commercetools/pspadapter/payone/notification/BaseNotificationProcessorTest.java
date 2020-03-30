@@ -34,19 +34,19 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class BaseNotificationProcessorTest {
-    @Mock
+    @Mock(lenient = true)
     protected PaymentService paymentService;
 
-    @Mock
+    @Mock(lenient = true)
     protected OrderService orderService;
 
     @Mock
     protected PaymentToOrderStateMapper paymentToOrderStateMapper;
 
-    @Mock
+    @Mock(lenient = true)
     protected TenantFactory tenantFactory;
 
-    @Mock
+    @Mock(lenient = true)
     protected TenantConfig tenantConfig;
 
     // it is used for injection to "@InjectMocks *NotificationProcessor testee" instances in the child classes
@@ -73,7 +73,7 @@ public class BaseNotificationProcessorTest {
     public void setUp() throws Exception {
         when(tenantFactory.getPaymentService()).thenReturn(paymentService);
         when(paymentService.updatePayment(any(Payment.class), anyObject()))
-                .then(answer -> CompletableFuture.completedFuture(answer.getArgumentAt(0, Payment.class)));
+                .then(answer -> CompletableFuture.completedFuture(answer.getArgument(0, Payment.class)));
 
         when(tenantFactory.getOrderService()).thenReturn(orderService);
         when(orderService.getOrderByPaymentId(anyString()))
