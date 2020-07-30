@@ -22,6 +22,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.client.BlockingSphereClient;
+import io.sphere.sdk.client.SphereClient;
 import io.sphere.sdk.client.SphereClientConfig;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentMethodInfoBuilder;
