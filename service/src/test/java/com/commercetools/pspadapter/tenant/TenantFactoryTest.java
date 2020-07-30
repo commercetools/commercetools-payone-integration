@@ -284,6 +284,13 @@ public class TenantFactoryTest {
         assertThat(paymentDispatcher).isNotNull();
     }
 
+    @Test
+    public void createBlockingSphereClient() throws Exception {
+        SphereClient client = factory.createBlockingSphereClient(tenantConfig);
+        assertThat(client).isNotNull();
+        assertThat(BlockingSphereClient.class.isInstance(client)).isTrue();
+    }
+
     /**
      * Because {@link TenantFactory} initializes {@link com.commercetools.pspadapter.payone.PaymentHandler}
      * and {@link PaymentDispatcher} inside constructor, we can't easily mock an instance, thus we make this anonymous
