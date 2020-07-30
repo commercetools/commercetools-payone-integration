@@ -166,11 +166,12 @@ public class TenantFactory {
 
     @Nonnull
     protected BlockingSphereClient createBlockingSphereClient(TenantConfig tenantConfig) {
-        SphereClient delegate = SphereClientFactory.of().createClient(tenantConfig.getSphereClientConfig());
-        SphereClient delegateWithLimitedParallelReq = QueueSphereClientDecorator.of(delegate, MAX_PARALLEL_REQUESTS);
+        SphereClient sphereClient = SphereClientFactory.of().createClient(tenantConfig.getSphereClientConfig());
+        SphereClient delegateWithLimitedParallelReq =
+                QueueSphereClientDecorator.of(sphereClient, MAX_PARALLEL_REQUESTS);
         return BlockingSphereClient.of(delegateWithLimitedParallelReq, DEFAULT_CTP_CLIENT_TIMEOUT);
     }
-    
+
     public BlockingSphereClient getBlockingSphereClient() {
         return blockingSphereClient;
     }
