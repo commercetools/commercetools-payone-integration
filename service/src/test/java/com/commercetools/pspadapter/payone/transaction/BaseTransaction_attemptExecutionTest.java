@@ -68,7 +68,7 @@ public class BaseTransaction_attemptExecutionTest {
     @Mock
     protected Transaction transaction;
 
-    @Mock
+    @Mock(lenient = true)
     protected PayoneRequestFactory requestFactory;
 
     @Mock
