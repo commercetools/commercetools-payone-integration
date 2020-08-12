@@ -46,7 +46,7 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     private SoftAssertions softly;
 
-    @Mock
+    @Mock(lenient = true)
     private Customer customer;
 
     @Mock
@@ -326,8 +326,8 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         softly.assertThat(MappingUtil.getGenderFromPaymentCart(paymentWithCartLike)).isEmpty();
 
         // custom field is set, but customer#getCustom() is null
-        when(customerCustomFields.getFieldAsString(GENDER_FIELD)).thenReturn("XXX");
-        when(customer.getCustom()).thenReturn(null);
+        Mockito.lenient().when(customerCustomFields.getFieldAsString(GENDER_FIELD)).thenReturn("XXX");
+        Mockito.lenient().when(customer.getCustom()).thenReturn(null);
         softly.assertThat(MappingUtil.getGenderFromPaymentCart(paymentWithCartLike)).isEmpty();
 
         softly.assertAll();
