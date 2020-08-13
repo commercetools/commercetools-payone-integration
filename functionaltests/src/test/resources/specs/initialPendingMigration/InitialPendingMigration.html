@@ -251,50 +251,6 @@ This tests verify that the application works properly in mode of migration, e.g.
 
     <h2>When request the integration service to handle them - get the following results:</h2>
 
-    <h3>Credit Card Without 3ds</h3>
-    <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
-        <tr>
-            <th c:set="#paymentName">Payment Name</th>
-            <th c:set="#transactionType">Transaction Type</th>
-            <th c:assertEquals="#result.statusCode">Response Status Code</th>
-            <th c:assertEquals="#result.transactionState">Transaction State</th>
-            <th c:assertEquals="#result.interfaceStatusCode">Payment Status Code</th>
-            <th c:echo="#result.version">Version (for information only)</th>
-        </tr>
-        <tr>
-            <td>CreditCard Authorization Initial Without 3ds</td>
-            <td>authorization</td>
-            <td>200</td>
-            <td>Success</td>
-            <td>APPROVED</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>CreditCard Authorization Pending Without 3ds</td>
-            <td>authorization</td>
-            <td>200</td>
-            <td>Success</td>
-            <td>APPROVED</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>CreditCard Charge Initial Without 3ds</td>
-            <td>charge</td>
-            <td>200</td>
-            <td>Success</td>
-            <td>APPROVED</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>CreditCard Charge Pending Without 3ds</td>
-            <td>charge</td>
-            <td>200</td>
-            <td>Success</td>
-            <td>APPROVED</td>
-            <td></td>
-        </tr>
-    </table>
-
     <h3>Credit Card 3ds</h3>
     <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
         <tr>
@@ -312,7 +268,7 @@ This tests verify that the application works properly in mode of migration, e.g.
             <td>200</td>
             <td>Pending</td>
             <td>REDIRECT</td>
-            <td>https://secure.pay1.de/3ds/redirect.php</td>
+            <td>https://threedssvc.pay1.de:443/3ds/3ds1/challenge</td>
             <td></td>
         </tr>
         <tr>
@@ -321,7 +277,7 @@ This tests verify that the application works properly in mode of migration, e.g.
             <td>200</td>
             <td>Pending</td>
             <td>REDIRECT</td>
-            <td>https://secure.pay1.de/3ds/redirect.php</td>
+            <td>https://threedssvc.pay1.de:443/3ds/3ds1/challenge</td>
             <td></td>
         </tr>
         <tr>
@@ -330,7 +286,7 @@ This tests verify that the application works properly in mode of migration, e.g.
             <td>200</td>
             <td>Pending</td>
             <td>REDIRECT</td>
-            <td>https://secure.pay1.de/3ds/redirect.php</td>
+            <td>https://threedssvc.pay1.de:443/3ds/3ds1/challenge</td>
             <td></td>
         </tr>
         <tr>
@@ -339,7 +295,7 @@ This tests verify that the application works properly in mode of migration, e.g.
             <td>200</td>
             <td>Pending</td>
             <td>REDIRECT</td>
-            <td>https://secure.pay1.de/3ds/redirect.php</td>
+            <td>https://threedssvc.pay1.de:443/3ds/3ds1/challenge</td>
             <td></td>
         </tr>
     </table>

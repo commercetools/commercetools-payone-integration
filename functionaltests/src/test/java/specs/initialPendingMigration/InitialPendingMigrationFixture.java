@@ -23,6 +23,7 @@ import javax.money.MonetaryAmount;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
@@ -168,7 +169,8 @@ public class InitialPendingMigrationFixture extends BaseNotifiablePaymentFixture
         // verified only by REDIRECT payments (paypal, Secure Credit card)
         final String responseRedirectUrl = ofNullable(payment.getCustom())
                 .flatMap(customFields -> ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)))
-                .map(url -> substringBefore(url, "?"))
+                .map(url -> substringBefore(url,
+                    Objects.equals(payment.getPaymentMethodInfo().getMethod(), "CREDIT_CARD") ? "/redirect/" : "?"))
                 .orElse(NULL_STRING);
 
         return MultiValueResult.multiValueResult()
