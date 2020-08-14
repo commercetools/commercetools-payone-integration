@@ -120,7 +120,7 @@ public class ScheduledJobFixtureHelper {
      * @return 59 (seconds)
      */
     public static long waitSecondsTimeout() {
-        return Math.round(30 * 1.95);
+        return Math.round(30 * 3);
     }
 
 }
