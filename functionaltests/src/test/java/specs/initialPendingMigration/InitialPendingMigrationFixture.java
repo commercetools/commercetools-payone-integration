@@ -46,20 +46,6 @@ public class InitialPendingMigrationFixture extends BaseNotifiablePaymentFixture
 
     private static final String baseRedirectUrl = "https://example.com/migration_test/";
 
-    public String createPaymentCreditCardWithout3ds(
-            String paymentName,
-            String paymentMethod,
-            String paymentCustomType,
-            String transactionType,
-            String transactionState,
-            String centAmount,
-            String currencyCode) {
-
-        return createPayment(paymentName, paymentMethod, paymentCustomType,
-                ImmutableMap.of(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan()),
-                transactionType, transactionState, centAmount, currencyCode);
-    }
-
     public String createPaymentCreditCard3ds(
             String paymentName,
             String paymentMethod,
