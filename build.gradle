@@ -42,7 +42,8 @@ def depVersions = [
         concordionParallelRunExtension: '1.1.0',
         seleniumJava: '3.141.59',
         slf4jLog4j: '1.7.30',
-        gson: '2.8.6'
+        gson: '2.8.6',
+        webdrivermanager:'4.1.0'
 ]
 
 subprojects {
@@ -276,7 +277,7 @@ static void assertExecutableSpecRequirementsForTests(Project project, Test test)
 project(":functionaltests") {
     dependencies {
         testImplementation project(":service")
-
+        testImplementation("io.github.bonigarcia:webdrivermanager:${depVersions.webdrivermanager}")
         testImplementation "org.concordion:concordion:${depVersions.concordion}"
         testImplementation "org.concordion:concordion-input-style-extension:${depVersions.concordionInputStyleExtension}"
         testImplementation "org.concordion:concordion-run-totals-extension:${depVersions.concordionConcordionRunTotalsExtension}"
