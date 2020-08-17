@@ -27,8 +27,11 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 /**
  * @author fhaertig
@@ -121,16 +124,17 @@ public class AuthorizationWith3dsFixture extends BaseNotifiablePaymentFixture {
         final Payment payment = fetchPaymentByLegibleName(paymentName);
 
         final String transactionId = getIdOfLastTransaction(payment);
-        final String responseRedirectUrl = Optional.ofNullable(payment.getCustom())
-                .flatMap(customFields ->
-                        Optional.ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)))
-                .orElse(NULL_STRING);
-
-        final int urlTrimAt = responseRedirectUrl.contains("?") ? responseRedirectUrl.indexOf("?") : 0;
+        final String responseRedirectUrl = Optional
+            .ofNullable(payment.getCustom())
+            .flatMap(customFields ->
+                Optional.ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)))
+            .map(url -> substringBefore(url,
+                Objects.equals(payment.getPaymentMethodInfo().getMethod(), "CREDIT_CARD") ? "/redirect/" : "?"))
+            .orElse(NULL_STRING);
 
         return ImmutableMap.<String, String>builder()
                 .put("transactionState", getTransactionState(payment, transactionId))
-                .put("responseRedirectUrl", responseRedirectUrl.substring(0, urlTrimAt))
+                .put("responseRedirectUrl", responseRedirectUrl)
                 .put("version", payment.getVersion().toString())
                 .build();
     }

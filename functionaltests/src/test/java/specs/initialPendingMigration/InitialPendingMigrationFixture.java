@@ -23,6 +23,7 @@ import javax.money.MonetaryAmount;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
@@ -44,20 +45,6 @@ import static org.apache.commons.lang3.StringUtils.substringBefore;
 public class InitialPendingMigrationFixture extends BaseNotifiablePaymentFixture {
 
     private static final String baseRedirectUrl = "https://example.com/migration_test/";
-
-    public String createPaymentCreditCardWithout3ds(
-            String paymentName,
-            String paymentMethod,
-            String paymentCustomType,
-            String transactionType,
-            String transactionState,
-            String centAmount,
-            String currencyCode) {
-
-        return createPayment(paymentName, paymentMethod, paymentCustomType,
-                ImmutableMap.of(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan()),
-                transactionType, transactionState, centAmount, currencyCode);
-    }
 
     public String createPaymentCreditCard3ds(
             String paymentName,
@@ -168,7 +155,8 @@ public class InitialPendingMigrationFixture extends BaseNotifiablePaymentFixture
         // verified only by REDIRECT payments (paypal, Secure Credit card)
         final String responseRedirectUrl = ofNullable(payment.getCustom())
                 .flatMap(customFields -> ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)))
-                .map(url -> substringBefore(url, "?"))
+                .map(url -> substringBefore(url,
+                    Objects.equals(payment.getPaymentMethodInfo().getMethod(), "CREDIT_CARD") ? "/redirect/" : "?"))
                 .orElse(NULL_STRING);
 
         return MultiValueResult.multiValueResult()
