@@ -22,60 +22,6 @@ This tests verify that the application works properly in mode of migration, e.g.
 </p>
 
 <div class="example">
-    <h3>Credit Card Without 3ds</h3>
-    <table c:execute="#paymentId = createPaymentCreditCardWithout3ds(#paymentName, #paymentMethod, #paymentCustomType, #transactionType, #transactionState, #centAmount, #currencyCode)">
-        <tr>
-            <th c:set="#paymentName">Payment Name</th>
-            <th c:set="#paymentMethod">Payment Method</th>
-            <th c:set="#paymentCustomType">Payment Custom Type</th>
-            <th c:set="#transactionType">Transaction Type</th>
-            <th c:set="#transactionState">Transaction State</th>
-            <th c:set="#centAmount">Cent Amount</th>
-            <th c:set="#currencyCode">Currency Code</th>
-            <th c:echo="#paymentId">Payment ID (for information only)</th>
-        </tr>
-        <tr>
-            <td>CreditCard Authorization Initial Without 3ds</td>
-            <td>CREDIT_CARD</td>
-            <td>payment-CREDIT_CARD</td>
-            <td>AUTHORIZATION</td>
-            <td>INITIAL</td>
-            <td>111</td>
-            <td>EUR</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>CreditCard Authorization Pending Without 3ds</td>
-            <td>CREDIT_CARD</td>
-            <td>payment-CREDIT_CARD</td>
-            <td>AUTHORIZATION</td>
-            <td>PENDING</td>
-            <td>112</td>
-            <td>EUR</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>CreditCard Charge Initial Without 3ds</td>
-            <td>CREDIT_CARD</td>
-            <td>payment-CREDIT_CARD</td>
-            <td>CHARGE</td>
-            <td>INITIAL</td>
-            <td>121</td>
-            <td>EUR</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>CreditCard Charge Pending Without 3ds</td>
-            <td>CREDIT_CARD</td>
-            <td>payment-CREDIT_CARD</td>
-            <td>CHARGE</td>
-            <td>PENDING</td>
-            <td>122</td>
-            <td>EUR</td>
-            <td></td>
-        </tr>
-    </table>
-
     <h3>Credit Card 3ds</h3>
     <table c:execute="#paymentId = createPaymentCreditCard3ds(#paymentName, #paymentMethod, #paymentCustomType, #transactionType, #transactionState, #centAmount, #currencyCode)">
         <tr>
@@ -114,7 +60,7 @@ This tests verify that the application works properly in mode of migration, e.g.
             <td>payment-CREDIT_CARD</td>
             <td>CHARGE</td>
             <td>INITIAL</td>
-            <td>12199</td>
+            <td>2800</td>
             <td>EUR</td>
             <td></td>
         </tr>
@@ -124,7 +70,7 @@ This tests verify that the application works properly in mode of migration, e.g.
             <td>payment-CREDIT_CARD</td>
             <td>CHARGE</td>
             <td>PENDING</td>
-            <td>12299</td>
+            <td>2800</td>
             <td>EUR</td>
             <td></td>
         </tr>
@@ -251,50 +197,6 @@ This tests verify that the application works properly in mode of migration, e.g.
 
     <h2>When request the integration service to handle them - get the following results:</h2>
 
-    <h3>Credit Card Without 3ds</h3>
-    <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
-        <tr>
-            <th c:set="#paymentName">Payment Name</th>
-            <th c:set="#transactionType">Transaction Type</th>
-            <th c:assertEquals="#result.statusCode">Response Status Code</th>
-            <th c:assertEquals="#result.transactionState">Transaction State</th>
-            <th c:assertEquals="#result.interfaceStatusCode">Payment Status Code</th>
-            <th c:echo="#result.version">Version (for information only)</th>
-        </tr>
-        <tr>
-            <td>CreditCard Authorization Initial Without 3ds</td>
-            <td>authorization</td>
-            <td>200</td>
-            <td>Success</td>
-            <td>APPROVED</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>CreditCard Authorization Pending Without 3ds</td>
-            <td>authorization</td>
-            <td>200</td>
-            <td>Success</td>
-            <td>APPROVED</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>CreditCard Charge Initial Without 3ds</td>
-            <td>charge</td>
-            <td>200</td>
-            <td>Success</td>
-            <td>APPROVED</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>CreditCard Charge Pending Without 3ds</td>
-            <td>charge</td>
-            <td>200</td>
-            <td>Success</td>
-            <td>APPROVED</td>
-            <td></td>
-        </tr>
-    </table>
-
     <h3>Credit Card 3ds</h3>
     <table c:execute="#result = handlePayment(#paymentName, #transactionType)">
         <tr>
@@ -312,7 +214,7 @@ This tests verify that the application works properly in mode of migration, e.g.
             <td>200</td>
             <td>Pending</td>
             <td>REDIRECT</td>
-            <td>https://secure.pay1.de/3ds/redirect.php</td>
+            <td>https://threedssvc.pay1.de:443/3ds/3ds1/challenge</td>
             <td></td>
         </tr>
         <tr>
@@ -321,7 +223,7 @@ This tests verify that the application works properly in mode of migration, e.g.
             <td>200</td>
             <td>Pending</td>
             <td>REDIRECT</td>
-            <td>https://secure.pay1.de/3ds/redirect.php</td>
+            <td>https://threedssvc.pay1.de:443/3ds/3ds1/challenge</td>
             <td></td>
         </tr>
         <tr>
@@ -330,7 +232,7 @@ This tests verify that the application works properly in mode of migration, e.g.
             <td>200</td>
             <td>Pending</td>
             <td>REDIRECT</td>
-            <td>https://secure.pay1.de/3ds/redirect.php</td>
+            <td>https://threedssvc.pay1.de:443/3ds/3ds1/challenge</td>
             <td></td>
         </tr>
         <tr>
@@ -339,7 +241,7 @@ This tests verify that the application works properly in mode of migration, e.g.
             <td>200</td>
             <td>Pending</td>
             <td>REDIRECT</td>
-            <td>https://secure.pay1.de/3ds/redirect.php</td>
+            <td>https://threedssvc.pay1.de:443/3ds/3ds1/challenge</td>
             <td></td>
         </tr>
     </table>

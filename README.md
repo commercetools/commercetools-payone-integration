@@ -155,7 +155,7 @@ When the service is started it initializes separate URL handlers for all specifi
 
 ## Other resources
   * commercetools general payment conventions, esp. for the payment type modeling https://github.com/nkuehn/payment-specs
-  * PAYONE API documentation https://pmi.pay1.de/merchants/?navi=downloads
+  * PAYONE API documentation https://docs.payone.com/#all-updates
 
 ## For developers and contributors
 

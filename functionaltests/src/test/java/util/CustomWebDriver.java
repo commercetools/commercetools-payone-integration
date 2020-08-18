@@ -14,7 +14,7 @@ public class CustomWebDriver {
     private ChromeDriver driver;
 
     CustomWebDriver() {
-        String currentDriver = SystemUtils.IS_OS_MAC ? "chromedriver_ios_2.40" : "chromedriver_unix_2.40";
+        String currentDriver = SystemUtils.IS_OS_MAC ? "chromedriver_mac_84" : "chromedriver_linux_84";
         System.setProperty("webdriver.chrome.driver", getClass().getClassLoader().getResource
                 ("webdriver/" + currentDriver).getPath());
         driver = new ChromeDriver(getChromeOptions());
@@ -32,7 +32,7 @@ public class CustomWebDriver {
         return wait.until(ExpectedConditions.elementToBeClickable(condition));
     }
 
-  public ChromeDriver getDriver() {
+    public ChromeDriver getDriver() {
         return driver;
     }
 

@@ -19,9 +19,9 @@ import static org.assertj.core.data.MapEntry.entry;
 
 public class HttpRequestUtilTest {
 
-    static final String HTTP_HTTPBIN_ORG = "http://httpbin.org/";
-    static final String HTTP_HTTPBIN_ORG_GET = HTTP_HTTPBIN_ORG + "get";
-    static final String HTTP_HTTPBIN_ORG_POST = HTTP_HTTPBIN_ORG + "post";
+    static final String HTTPS_HTTPBIN_ORG = "https://httpbin.org/";
+    static final String HTTP_HTTPBIN_ORG_GET = HTTPS_HTTPBIN_ORG + "get";
+    static final String HTTPS_HTTPBIN_ORG_POST = HTTPS_HTTPBIN_ORG + "post";
 
     private static final ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -38,22 +38,22 @@ public class HttpRequestUtilTest {
 
     @Test
     public void executePostRequest_isSuccessful() throws Exception {
-        HttpResponse response = executePostRequest(HTTP_HTTPBIN_ORG_POST, singletonList(nameValue("a", "b")));
+        HttpResponse response = executePostRequest(HTTPS_HTTPBIN_ORG_POST, singletonList(nameValue("a", "b")));
         assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_OK);
     }
 
     @Test
     public void executePostRequestToString_returnsStringContainingRequestArguments() throws Exception {
-        assertThat(executePostRequestToString(HTTP_HTTPBIN_ORG_POST, asList(
+        assertThat(executePostRequestToString(HTTPS_HTTPBIN_ORG_POST, asList(
                 nameValue("aaa", "bbb"),
                 nameValue("ccc", 89456677823452345L))))
-                .contains(HTTP_HTTPBIN_ORG_POST, "aaa", "bbb", "ccc", "89456677823452345");
+                .contains(HTTPS_HTTPBIN_ORG_POST, "aaa", "bbb", "ccc", "89456677823452345");
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void shortPostRequestWithArguments_shouldSuccess() throws Exception {
-        final HttpResponse httpResponse = executePostRequest(HTTP_HTTPBIN_ORG_POST, ImmutableList.of(
+        final HttpResponse httpResponse = executePostRequest(HTTPS_HTTPBIN_ORG_POST, ImmutableList.of(
                 nameValue("a", "b"),
                 nameValue("hello", 22),
                 nameValue("Fußgängerübergänge", "Пішохідні переходи"),
@@ -77,7 +77,7 @@ public class HttpRequestUtilTest {
 
     @Test
     public void shortPostRequestWithoutArguments_shouldSuccess() throws Exception {
-        final HttpResponse httpResponse = executePostRequest(HTTP_HTTPBIN_ORG_POST, null);
+        final HttpResponse httpResponse = executePostRequest(HTTPS_HTTPBIN_ORG_POST, null);
         assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(HttpStatusCode.OK_200);
     }
 }

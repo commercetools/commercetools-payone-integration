@@ -34,6 +34,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
+import io.sphere.sdk.client.QueueSphereClientDecorator;
 import io.sphere.sdk.client.SphereClient;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.payments.TransactionType;
@@ -50,6 +51,8 @@ import static java.lang.String.format;
 public class TenantFactory {
 
     private static final Duration DEFAULT_CTP_CLIENT_TIMEOUT = Duration.ofSeconds(10);
+
+    private static final int MAX_PARALLEL_REQUESTS = 30;
 
     private final String payoneInterfaceName;
 
@@ -163,15 +166,22 @@ public class TenantFactory {
 
     @Nonnull
     protected BlockingSphereClient createBlockingSphereClient(TenantConfig tenantConfig) {
-        return BlockingSphereClient.of(
-                SphereClientFactory.of().createClient(tenantConfig.getSphereClientConfig()),
-                DEFAULT_CTP_CLIENT_TIMEOUT);
+        SphereClient sphereClient = SphereClientFactory.of().createClient(tenantConfig.getSphereClientConfig());
+        SphereClient sphereClientWithLimitedParallelReq =
+                QueueSphereClientDecorator.of(sphereClient, MAX_PARALLEL_REQUESTS);
+        return BlockingSphereClient.of(sphereClientWithLimitedParallelReq, DEFAULT_CTP_CLIENT_TIMEOUT);
+    }
+
+    public BlockingSphereClient getBlockingSphereClient() {
+        return blockingSphereClient;
     }
 
     @Nonnull
     protected PayonePostService getPayonePostService(TenantConfig tenantConfig) {
         return PayonePostServiceImpl.of(tenantConfig.getPayoneConfig().getApiUrl());
     }
+
+
 
     protected PaymentService createPaymentService(SphereClient sphereClient) {
         return new PaymentServiceImpl(sphereClient);

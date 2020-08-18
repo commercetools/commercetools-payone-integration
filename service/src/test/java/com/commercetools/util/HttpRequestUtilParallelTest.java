@@ -46,7 +46,7 @@ public class HttpRequestUtilParallelTest {
 
     @Test
     public void executePostRequest_shouldBeParalleled() throws Exception {
-        ExceptionalSupplier<HttpResponse> postRequestSupplier = () -> executePostRequest(HTTP_HTTPBIN_ORG_POST, asList(
+        ExceptionalSupplier<HttpResponse> postRequestSupplier = () -> executePostRequest(HTTPS_HTTPBIN_ORG_POST, asList(
                 nameValue("xxx", "yyy"),
                 nameValue("zzz", 11223344)));
 
@@ -82,7 +82,7 @@ public class HttpRequestUtilParallelTest {
                 do {
                     if (repeatedTimes > 0) {
                         LOGGER.warn("{} \"Request Timeout\" received from [{}]. Retry {} of {} ...",
-                                SC_REQUEST_TIMEOUT, HTTP_HTTPBIN_ORG, repeatedTimes, RETRY_TIMES);
+                                SC_REQUEST_TIMEOUT, HTTPS_HTTPBIN_ORG, repeatedTimes, RETRY_TIMES);
                     }
                     httpResponse = responseSupplier.get();
                     statusCode = httpResponse.getStatusLine().getStatusCode();

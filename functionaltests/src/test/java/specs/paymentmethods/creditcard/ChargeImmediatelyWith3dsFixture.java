@@ -24,6 +24,8 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+import static org.apache.commons.lang3.StringUtils.substringBefore;
+
 /**
  * @author fhaertig
  * @since 20.01.16
@@ -108,19 +110,20 @@ public class ChargeImmediatelyWith3dsFixture extends BaseCreditCardChargeFixture
         final Payment payment = fetchPaymentByLegibleName(paymentName);
 
         final String transactionId = getIdOfLastTransaction(payment);
-        final String responseRedirectUrl = Optional.ofNullable(payment.getCustom())
-                .flatMap(customFields ->
-                        Optional.ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)))
-                .orElse(NULL_STRING);
-
-        final int urlTrimAt = responseRedirectUrl.contains("?") ? responseRedirectUrl.indexOf("?") : 0;
+        final String responseRedirectUrl = Optional
+            .ofNullable(payment.getCustom())
+            .flatMap(customFields ->
+                Optional.ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)))
+            .map(url -> substringBefore(url,
+                Objects.equals(payment.getPaymentMethodInfo().getMethod(), "CREDIT_CARD") ? "/redirect/" : "?"))
+            .orElse(NULL_STRING);
 
         final long appointedNotificationCount = getTotalNotificationCountOfAction(payment, "appointed");
         final long paidNotificationCount = getTotalNotificationCountOfAction(payment, "paid");
 
         return ImmutableMap.<String, String>builder()
                 .put("transactionState", getTransactionState(payment, transactionId))
-                .put("responseRedirectUrl", responseRedirectUrl.substring(0, urlTrimAt))
+                .put("responseRedirectUrl", responseRedirectUrl)
                 .put("successUrl", successUrlForPayment.getOrDefault(paymentName, EMPTY_STRING))
                 .put("appointedNotificationCount", String.valueOf(appointedNotificationCount))
                 .put("paidNotificationCount", String.valueOf(paidNotificationCount))

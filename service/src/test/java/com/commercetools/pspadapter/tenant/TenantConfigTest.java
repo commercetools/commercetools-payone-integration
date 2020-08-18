@@ -22,7 +22,7 @@ public class TenantConfigTest {
 
     private static final String tenantDummyValue = "tyuiieo";
 
-    @Mock
+    @Mock(lenient = true)
     private TenantPropertyProvider tenantPropertyProvider;
 
     @Mock

@@ -4,9 +4,11 @@ import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.exceptions.NoCartLikeFoundException;
 import io.sphere.sdk.carts.Cart;
+import io.sphere.sdk.client.ErrorResponseException;
 import io.sphere.sdk.client.NotFoundException;
 import io.sphere.sdk.http.HttpStatusCode;
 import io.sphere.sdk.json.SphereJsonUtils;
+import io.sphere.sdk.models.errors.ErrorResponse;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentMethodInfo;
 import io.sphere.sdk.types.CustomFields;
@@ -17,14 +19,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.io.IOException;
 import java.util.ConcurrentModificationException;
 import java.util.Random;
 import java.util.concurrent.CompletionException;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
-
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
@@ -44,9 +45,6 @@ public class PaymentHandlerTest
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
-//    @Mock
-//    private CustomTypeBuilder customTypeBuilder;
-
     @Mock
     private CommercetoolsQueryExecutor commercetoolsQueryExecutor;
 
@@ -59,7 +57,7 @@ public class PaymentHandlerTest
     private PaymentHandler testee;
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
         // the last argument in the constructor is a String, that's why we can't use @InjectMocks for this instantiation
         testee = new PaymentHandler("TestIntegrationServicePaymentMethodName", "testTenantName", commercetoolsQueryExecutor, paymentDispatcher);
 
@@ -88,7 +86,7 @@ public class PaymentHandlerTest
 
     @Test
     @SuppressWarnings("unchecked")
-    public void returnsStatusCodeOk200InCaseOfSuccessfulConcurrentPaymentHandling() throws IOException {
+    public void returnsStatusCodeOk200InCaseOfSuccessfulConcurrentPaymentHandling() {
         // arrange
         final String paymentId = randomString();
         final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
@@ -117,7 +115,7 @@ public class PaymentHandlerTest
 
     @Test
     @SuppressWarnings("unchecked")
-    public void returnsStatusCodeAccepted202InCaseOfOngoingConcurrentPaymentHandling() {
+    public void handlePayment_WithAlwaysConcurrentModificationException_ShouldReturn202() {
         // arrange
         final String paymentId = randomString();
         final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
@@ -132,7 +130,77 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.ACCEPTED_202);
-        assertThat(paymentHandleResult.body()).contains("The payment couldn't be processed");
+        assertThat(paymentHandleResult.body())
+            .isEqualTo(format("The payment with id '%s' couldn't be processed after %s retries.", paymentId, 20));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void handlePayment_WithLessThanLimitConcurrentModificationException_ShouldReturn200() {
+        // arrange
+        final String paymentId = randomString();
+        final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
+
+        when(paymentDispatcher.dispatchPayment(same(paymentWithCartLike)))
+            .thenThrow(ConcurrentModificationException.class)
+            .thenThrow(ConcurrentModificationException.class)
+            .thenReturn(new PaymentWithCartLike(payment, UNUSED_CART));
+
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
+
+        // act
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+
+        // assert
+        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
+        assertThat(paymentHandleResult.body()).isEmpty();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void handlePayment_WithLessThanLimitConcurrentModificationExceptionButNotFound_ShouldReturn404() {
+        // arrange
+        final String paymentId = randomString();
+        final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
+
+        when(paymentDispatcher.dispatchPayment(same(paymentWithCartLike)))
+            .thenThrow(ConcurrentModificationException.class)
+            .thenThrow(ConcurrentModificationException.class)
+            .thenThrow(new NotFoundException());
+
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
+
+        // act
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+
+        // assert
+        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
+        assertThat(paymentHandleResult.body()).contains(format("Failed to process the commercetools Payment with id "
+            + "[%s], as the payment or the cart could not be found", paymentId));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void handlePayment_WithLessThanLimitConcurrentModificationExceptionErrorResponseException_ShouldReturn502() {
+        // arrange
+        final String paymentId = randomString();
+        final PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
+
+        when(paymentDispatcher.dispatchPayment(same(paymentWithCartLike)))
+            .thenThrow(ConcurrentModificationException.class)
+            .thenThrow(ConcurrentModificationException.class)
+            .thenThrow(new ErrorResponseException(ErrorResponse.of(HttpStatusCode.BAD_GATEWAY_502,
+                "commercetools is unavailable", emptyList())));
+
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
+
+        // act
+        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+
+        // assert
+        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.BAD_GATEWAY_502);
+        assertThat(paymentHandleResult.body()).contains(format("Failed to process the commercetools Payment with id "
+            + "[%s], due to an error response from the commercetools platform. Try again later.", paymentId));
     }
 
     @Test
@@ -149,7 +217,8 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
-        assertThat(paymentHandleResult.body()).contains(format("Could not process payment with ID [%s]: order or cart not found", paymentId));
+        assertThat(paymentHandleResult.body()).contains(format("Failed to process the commercetools Payment with id "
+            + "[%s], as the payment or the cart could not be found", paymentId));
     }
 
     @Test
@@ -166,7 +235,8 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
-        assertThat(paymentHandleResult.body()).contains(format("Could not process payment with ID [%s]: order or cart not found", paymentId));
+        assertThat(paymentHandleResult.body()).contains(format("Failed to process the commercetools Payment with id "
+            + "[%s], as the payment or the cart could not be found", paymentId));
     }
 
     @Test
@@ -184,7 +254,11 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST_400);
-        assertThat(paymentHandleResult.body()).isEmpty();
+        assertThat(paymentHandleResult.body()).contains(format("Wrong payment interface name: expected '%s', found '%s'"
+                + " for the commercetools Payment with id '%s'.",
+            payonePaymentMethodInfo.getPaymentInterface(),
+            paymentMethodInfo.getPaymentInterface(),
+            paymentId));
     }
 
     @Test
@@ -202,7 +276,7 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
-        assertThat(paymentHandleResult.body()).contains(format("An error occurred during communication with the commercetools platform when processing [%s] payment. See the service logs", paymentId));
+        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing commercetools Payment with id [%s]. See the service logs", paymentId));
     }
 
     @Test
@@ -221,7 +295,8 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
-        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId));
+        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing commercetools"
+            + " Payment with id [%s]. See the service logs", paymentId));
     }
 
     @Test
@@ -242,7 +317,8 @@ public class PaymentHandlerTest
 
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
-        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing payment [%s]. See the service logs", paymentId));
+        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing commercetools"
+            + " Payment with id [%s]. See the service logs", paymentId));
     }
 
     private static PaymentMethodInfo paymentMethodInfo(final String paymentInterface) {
@@ -251,7 +327,7 @@ public class PaymentHandlerTest
                 PaymentMethodInfo.class);
     }
 
-    private static CustomFields customFields(final String referenceValue) throws IOException {
+    private static CustomFields customFields(final String referenceValue) {
         return SphereJsonUtils.readObject(
                 "{\n" +
                         "        \"type\": {\n" +
