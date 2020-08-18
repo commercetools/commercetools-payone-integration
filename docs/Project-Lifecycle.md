@@ -321,11 +321,6 @@ Then you are able to review the tests results in [Test results page](http://comm
   - Web-driver (selenium) tests which are navigating to web-pages (Sofortüberweisung, 3ds secure verification) may fail 
     because of wrong HTML elements names, if the service providers change html structure of their sites. These cases
     require fixed on demand.
-    
-  - Functional tests are using Chrome webdriver. There are specific webdriver for each Chrome version and they needs to match.
-    If Chrome on your machine has a different version from the webdriver, tests will fail. In this case, [download the appropriate webdriver](http://chromedriver.chromium.org/),
-    put it into the [webdriver folder](../functionaltests/src/test/resources/webdriver) and update the [webdriver config file](../functionaltests/src/test/java/util/CustomWebDriver.java).
-    This applies also for Travis, as there is [currently no way to fix the Chrome version there](https://travis-ci.community/t/ability-to-fix-chrome-version/2651/5).   
 
 ### Paypal Sandbox Accounts
 
