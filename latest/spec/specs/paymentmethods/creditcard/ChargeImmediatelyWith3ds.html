@@ -208,25 +208,25 @@ ins {
                     <td class="inputvalue">Payment 1</td>
                     <td class="inputvalue">2800</td>
                     <td class="inputvalue">EUR</td>
-                    <td>3cfe4515-94f7-421b-8510-b8e11b1047f5</td>
+                    <td>8eea5a79-f459-4a9e-af40-0facda8ba633</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
                     <td class="inputvalue">2800</td>
                     <td class="inputvalue">USD</td>
-                    <td>69a0db71-6389-44b4-90ea-0eef6fb979eb</td>
+                    <td>f2c22fdd-ab99-405b-aea8-e0fd921be88c</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
                     <td class="inputvalue">2800</td>
                     <td class="inputvalue">EUR</td>
-                    <td>5ce6dc68-4e56-4875-8527-0d35c2278213</td>
+                    <td>5b05e0a2-87ff-41a2-a8b3-f4ab23e7dd70</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
                     <td class="inputvalue">2800</td>
                     <td class="inputvalue">EUR</td>
-                    <td>372afc5f-9aac-492f-9509-5674530a4fe1</td>
+                    <td>c38a8bd9-c98c-4db5-a2ec-e7383d812925</td>
                 </tr>
             </table>
             <p>
@@ -312,7 +312,8 @@ ins {
             </p>
             <ol>
                 <li>(txaction=<b c:set="#txactionAppointed" class="inputvalue">appointed</b>, transactionstatus=<b>completed</b>) <span c:assertTrue="receivedNotificationOfActionFor(#successfulPayments, #txactionAppointed)" class="success">received</span> -&gt; has no effect, just as a confirmation</li>
-                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="success">received</span>
+                <li>(txaction=<b c:set="#txactionPaid" class="inputvalue">paid</b>, transactionstatus=<b>completed</b> or <b>null</b>) <span c:assertTrue="receivedNextNotificationOfActionFor(#successfulPayments, #txactionPaid, #txactionAppointed)" class="failure"><del class="expected">received</del>
+<ins class="actual">== false</ins></span>
                     -&gt;  The state of the Charge transaction, the authorized amount and the paid amount should be set correctly not later than now.</li>
             </ol>
             <table c:execute="#result = fetchPaymentDetails(#paymentName)">
@@ -326,27 +327,33 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
-                    <td class="success">Success</td>
+                    <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
                     <td class="success">1</td>
-                    <td class="success">1</td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
                     <td class="success">[...]Payment-1-Success</td>
-                    <td>21</td>
+                    <td>14</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
-                    <td class="success">Success</td>
+                    <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
                     <td class="success">1</td>
-                    <td class="success">1</td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
                     <td class="success">[...]Payment-3-Success</td>
-                    <td>21</td>
+                    <td>14</td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
-                    <td class="success">Success</td>
+                    <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
                     <td class="success">1</td>
-                    <td class="success">1</td>
+                    <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
                     <td class="success">[...]Payment-4-Success</td>
-                    <td>21</td>
+                    <td>14</td>
                 </tr>
             </table>
 
@@ -360,7 +367,8 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 1</td>
-                    <td class="success">Paid</td>
+                    <td class="failure"><del class="expected">Paid</del>
+<ins class="actual">Pending</ins></td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 2</td>
@@ -368,11 +376,13 @@ ins {
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 3</td>
-                    <td class="success">Paid</td>
+                    <td class="failure"><del class="expected">Paid</del>
+<ins class="actual">Pending</ins></td>
                 </tr>
                 <tr>
                     <td class="inputvalue">Payment 4</td>
-                    <td class="success">Paid</td>
+                    <td class="failure"><del class="expected">Paid</del>
+<ins class="actual">Pending</ins></td>
                 </tr>
             </table>
 
@@ -387,5 +397,5 @@ ins {
             The checkout implementation needs to take care of failed verifications - the user will be redirected to
             the <em>errorUrl</em> specified in the Payment object.
         </p>
-    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 600206 ms on 19-Aug-2020 at 09:21:12 UTC</div></div></body>
+    <div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 976508 ms on 19-Aug-2020 at 10:25:43 UTC</div></div></body>
 </html>
