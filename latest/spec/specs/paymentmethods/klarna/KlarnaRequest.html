@@ -209,7 +209,7 @@ ins {
             <td class="inputvalue">1960-07-07</td>
             <td class="inputvalue">192.168.0.45</td>
             <td class="inputvalue">034568557</td>
-            <td>143da042-89d1-4fcb-9312-5504a44e7996</td>
+            <td>ea59c80a-bb60-4d00-afc7-8e05fdcccd07</td>
             <td class="success">1960-07-07</td>
             <td class="success">192.168.0.45</td>
             <td class="success">034568557</td>
@@ -221,7 +221,7 @@ ins {
             <td class="inputvalue">1960-07-07</td>
             <td class="inputvalue">2001:0db8:7777:0000:6666:8a2e:0370:7334</td>
             <td class="inputvalue">0399874789345</td>
-            <td>a7f7b120-2f34-4c8c-a8f1-adde24b28fc6</td>
+            <td>076e367c-ee91-40ec-9149-4bf83f7f08e7</td>
             <td class="success">1960-07-07</td>
             <td class="success">2001:0db8:7777:0000:6666:8a2e:0370:7334</td>
             <td class="success">0399874789345</td>
@@ -233,7 +233,7 @@ ins {
             <td class="inputvalue">1960-07-07</td>
             <td class="inputvalue">1.1.1.1</td>
             <td class="inputvalue">099776655</td>
-            <td>6c7712d4-8843-4094-bdad-56480596ac18</td>
+            <td>40f34e12-d9db-4519-bb37-05dc1f401e70</td>
             <td class="success">1960-07-07</td>
             <td class="success">1.1.1.1</td>
             <td class="success">099776655</td>
@@ -264,23 +264,31 @@ ins {
         </tr>
         <tr>
             <td class="inputvalue">Payment 1</td>
-            <td class="success">200</td>
+            <td class="failure"><del class="expected">200</del>
+<ins class="actual">404</ins></td>
             <td class="inputvalue">preauthorization</td>
-            <td class="success">1</td>
-            <td class="success">Success</td>
-            <td class="success">APPROVED</td>
-            <td>9</td>
-            <td>444729372</td>
+            <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
+            <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
+            <td class="failure"><del class="expected">APPROVED</del>
+<ins class="actual">(null)</ins></td>
+            <td>1</td>
+            <td><em>null</em></td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
-            <td class="success">200</td>
+            <td class="failure"><del class="expected">200</del>
+<ins class="actual">404</ins></td>
             <td class="inputvalue">preauthorization</td>
-            <td class="success">1</td>
-            <td class="success">Success</td>
-            <td class="success">APPROVED</td>
-            <td>9</td>
-            <td>444729386</td>
+            <td class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></td>
+            <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
+            <td class="failure"><del class="expected">APPROVED</del>
+<ins class="actual">(null)</ins></td>
+            <td>1</td>
+            <td><em>null</em></td>
         </tr>
     </table>
 
@@ -288,12 +296,16 @@ ins {
         <span c:set="#payment3Request" class="inputvalue">preauthorization</span> transaction with following values:
         <span c:execute="#payment3Handle = handlePayment(#payment3, #payment3Request)" />
     <ul>
-        <li>Status <span c:assertEquals="#payment3Handle.statusCode" class="success">200</span></li>
-    <li>total # of requests sent <span c:assertEquals="#payment3Handle.interactionCount" class="success">1</span></li>
-    <li>Transaction State <span c:assertEquals="#payment3Handle.transactionState" class="success">Failure</span></li>
-    <li>Interface Code <code><b><span c:echo="#payment3Handle.interfaceCode">ERROR 945</span></b></code>
-        <span c:assertTrue="containsSubstring(#payment3Handle.interfaceCode, 'ERROR')" class="success">
-            <i>contains <code>ERROR</code></i> substring</span>
+        <li>Status <span c:assertEquals="#payment3Handle.statusCode" class="failure"><del class="expected">200</del>
+<ins class="actual">404</ins></span></li>
+    <li>total # of requests sent <span c:assertEquals="#payment3Handle.interactionCount" class="failure"><del class="expected">1</del>
+<ins class="actual">0</ins></span></li>
+    <li>Transaction State <span c:assertEquals="#payment3Handle.transactionState" class="failure"><del class="expected">Failure</del>
+<ins class="actual">Pending</ins></span></li>
+    <li>Interface Code <code><b><span c:echo="#payment3Handle.interfaceCode"><em>null</em></span></b></code>
+        <span c:assertTrue="containsSubstring(#payment3Handle.interfaceCode, 'ERROR')" class="failure"><del class="expected">
+            <i>contains <code>ERROR</code></i> substring</del>
+<ins class="actual">== false</ins></span>
         <sup><b><a href="#error-code-description">[2]</a></b></sup>
     </li>
     </ul>
@@ -325,15 +337,17 @@ ins {
             <td class="inputvalue">Payment 1</td>
             <td class="failure"><del class="expected">1</del>
 <ins class="actual">0</ins></td>
-            <td class="success">Success</td>
-            <td>9</td>
+            <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
+            <td>1</td>
         </tr>
         <tr>
             <td class="inputvalue">Payment 2</td>
             <td class="failure"><del class="expected">1</del>
 <ins class="actual">0</ins></td>
-            <td class="success">Success</td>
-            <td>9</td>
+            <td class="failure"><del class="expected">Success</del>
+<ins class="actual">Pending</ins></td>
+            <td>1</td>
         </tr>
     </table>
     <p>
@@ -341,5 +355,5 @@ ins {
         must have received <span c:assertEquals="getInteractionNotificationOfActionCount(#failedPaymentName, #txactionAppointed)" class="success">0</span> notifications.
     </p>
 </div>
-<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 951856 ms on 19-Aug-2020 at 10:25:20 UTC</div></div></body>
+<div class="footer">Results generated by <a href="http://www.concordion.org" style="font-weight: bold; text-decoration: none; color: #89C;">Concordion</a><div class="testTime">in 937285 ms on 19-Aug-2020 at 10:27:01 UTC</div></div></body>
 </html>
