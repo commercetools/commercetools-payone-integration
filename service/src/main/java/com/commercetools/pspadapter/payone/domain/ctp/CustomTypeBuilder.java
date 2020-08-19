@@ -156,8 +156,8 @@ public class CustomTypeBuilder {
         createPaymentCustomType(PAYMENT_BANK_TRANSFER_IDEAL, ImmutableList.of(
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
-                createMultiLineStringFieldDefinition(CustomFieldKeys.BANK_GROUP_TYPE, FieldClassifier.REQUIRED),
-                createMultiLineStringFieldDefinition(CustomFieldKeys.BANK_COUNTRY, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.BANK_GROUP_TYPE, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.BANK_COUNTRY, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REDIRECT_URL_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.SUCCESS_URL_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.ERROR_URL_FIELD, FieldClassifier.OPTIONAL),
