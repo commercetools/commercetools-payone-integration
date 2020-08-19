@@ -1,7 +1,8 @@
 package util;
 
 
-import org.apache.commons.lang3.SystemUtils;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -14,9 +15,7 @@ public class CustomWebDriver {
     private ChromeDriver driver;
 
     CustomWebDriver() {
-        String currentDriver = SystemUtils.IS_OS_MAC ? "chromedriver_mac_84" : "chromedriver_linux_84";
-        System.setProperty("webdriver.chrome.driver", getClass().getClassLoader().getResource
-                ("webdriver/" + currentDriver).getPath());
+        WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver(getChromeOptions());
         //driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
     }
