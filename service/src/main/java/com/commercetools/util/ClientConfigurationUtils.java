@@ -3,9 +3,9 @@ package com.commercetools.util;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.client.QueueSphereClientDecorator;
 import io.sphere.sdk.client.RetrySphereClientDecorator;
-import io.sphere.sdk.client.SphereAccessTokenSupplier;
 import io.sphere.sdk.client.SphereClient;
 import io.sphere.sdk.client.SphereClientConfig;
+import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.http.AsyncHttpClientAdapter;
 import io.sphere.sdk.http.HttpClient;
 import io.sphere.sdk.retry.RetryAction;
@@ -40,10 +40,7 @@ public final class ClientConfigurationUtils {
      * @return the instantiated {@link BlockingSphereClient}.
      */
     public static BlockingSphereClient createClient(@Nonnull final SphereClientConfig clientConfig) {
-        final HttpClient httpClient = getHttpClient();
-        final SphereAccessTokenSupplier tokenSupplier =
-                SphereAccessTokenSupplier.ofAutoRefresh(clientConfig, httpClient, false);
-        final SphereClient underlyingClient = SphereClient.of(clientConfig, httpClient, tokenSupplier);
+        final SphereClient underlyingClient = SphereClientFactory.of().createClient(clientConfig);
         final SphereClient retryClient = withRetry(underlyingClient);
         final SphereClient limitedClient = withLimitedParallelRequests(retryClient);
         return withBlocking(limitedClient);
