@@ -32,6 +32,8 @@ public class CustomTypeBuilder {
     public static final String PAYMENT_CREDIT_CARD = "payment-CREDIT_CARD";
     public static final String PAYMENT_WALLET = "payment-WALLET";
     public static final String PAYMENT_BANK_TRANSFER = "payment-BANK_TRANSFER";
+    public static final String PAYMENT_BANK_TRANSFER_IDEAL = "payment-BANK_TRANSFER_IDEAL";
+    public static final String PAYMENT_BANK_TRANSFER_BANCONTACT = "payment-BANK_TRANSFER_BANCONTACT";
     public static final String PAYMENT_CASH_ADVANCE = "payment-CASH-ADVANCE";
     public static final String PAYMENT_INVOICE_KLARNA = "payment-INVOICE-KLARNA";
 
@@ -143,6 +145,31 @@ public class CustomTypeBuilder {
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
                 createMultiLineStringFieldDefinition(CustomFieldKeys.REFERENCE_TEXT_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REDIRECT_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.SUCCESS_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.ERROR_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.CANCEL_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.IBAN_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.BIC_FIELD, FieldClassifier.OPTIONAL)
+        ));
+
+        createPaymentCustomType(PAYMENT_BANK_TRANSFER_IDEAL, ImmutableList.of(
+                createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
+                createMultiLineStringFieldDefinition(CustomFieldKeys.BANK_GROUP_TYPE, FieldClassifier.REQUIRED),
+                createMultiLineStringFieldDefinition(CustomFieldKeys.BANK_COUNTRY, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REDIRECT_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.SUCCESS_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.ERROR_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.CANCEL_URL_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.IBAN_FIELD, FieldClassifier.OPTIONAL),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.BIC_FIELD, FieldClassifier.OPTIONAL)
+        ));
+
+        createPaymentCustomType(PAYMENT_BANK_TRANSFER_BANCONTACT, ImmutableList.of(
+                createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
+                createSingleLineStringFieldDefinition(CustomFieldKeys.BANK_COUNTRY, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REDIRECT_URL_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.SUCCESS_URL_FIELD, FieldClassifier.OPTIONAL),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.ERROR_URL_FIELD, FieldClassifier.OPTIONAL),
