@@ -6,14 +6,10 @@ import io.sphere.sdk.client.RetrySphereClientDecorator;
 import io.sphere.sdk.client.SphereClient;
 import io.sphere.sdk.client.SphereClientConfig;
 import io.sphere.sdk.client.SphereClientFactory;
-import io.sphere.sdk.http.AsyncHttpClientAdapter;
-import io.sphere.sdk.http.HttpClient;
 import io.sphere.sdk.retry.RetryAction;
 import io.sphere.sdk.retry.RetryPredicate;
 import io.sphere.sdk.retry.RetryRule;
-import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.DefaultAsyncHttpClient;
-import org.asynchttpclient.DefaultAsyncHttpClientConfig;
+
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
@@ -26,7 +22,7 @@ import static io.sphere.sdk.http.HttpStatusCode.BAD_GATEWAY_502;
 import static io.sphere.sdk.http.HttpStatusCode.GATEWAY_TIMEOUT_504;
 import static io.sphere.sdk.http.HttpStatusCode.SERVICE_UNAVAILABLE_503;
 
-public final class ClientConfigurationUtils {
+public final class ClientConfigurationUtil {
     private static final long DEFAULT_TIMEOUT = 10;
     private static final TimeUnit DEFAULT_TIMEOUT_TIME_UNIT = TimeUnit.SECONDS;
     private static final int RETRIES_LIMIT = 20;
@@ -44,21 +40,6 @@ public final class ClientConfigurationUtils {
         final SphereClient retryClient = withRetry(underlyingClient);
         final SphereClient limitedClient = withLimitedParallelRequests(retryClient);
         return withBlocking(limitedClient);
-    }
-
-    /**
-     * Gets an asynchronous {@link HttpClient} to be used by the {@link BlockingSphereClient}. Client
-     * is created during first invocation and then cached.
-     *
-     * @return {@link HttpClient}
-     */
-    public static HttpClient getHttpClient() {
-        final AsyncHttpClient asyncHttpClient =
-                new DefaultAsyncHttpClient(
-                        new DefaultAsyncHttpClientConfig.Builder()
-                                .setHandshakeTimeout((int) DEFAULT_TIMEOUT)
-                                .build());
-        return AsyncHttpClientAdapter.of(asyncHttpClient);
     }
 
     private static SphereClient withRetry(final SphereClient delegate) {
@@ -98,5 +79,5 @@ public final class ClientConfigurationUtils {
         return QueueSphereClientDecorator.of(delegate, MAX_PARALLEL_REQUESTS);
     }
 
-    private ClientConfigurationUtils() {}
+    private ClientConfigurationUtil() {}
 }

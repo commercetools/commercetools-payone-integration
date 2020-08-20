@@ -30,14 +30,12 @@ import com.commercetools.service.OrderService;
 import com.commercetools.service.OrderServiceImpl;
 import com.commercetools.service.PaymentService;
 import com.commercetools.service.PaymentServiceImpl;
-import com.commercetools.util.ClientConfigurationUtils;
+import com.commercetools.util.ClientConfigurationUtil;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
-import io.sphere.sdk.client.QueueSphereClientDecorator;
 import io.sphere.sdk.client.SphereClient;
-import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
 
@@ -164,7 +162,7 @@ public class TenantFactory {
 
     @Nonnull
     protected BlockingSphereClient createBlockingSphereClient(TenantConfig tenantConfig) {
-        return ClientConfigurationUtils.createClient((tenantConfig.getSphereClientConfig()));
+        return ClientConfigurationUtil.createClient((tenantConfig.getSphereClientConfig()));
     }
 
     public BlockingSphereClient getBlockingSphereClient() {
