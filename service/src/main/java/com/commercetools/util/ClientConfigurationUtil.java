@@ -25,7 +25,7 @@ import static io.sphere.sdk.http.HttpStatusCode.SERVICE_UNAVAILABLE_503;
 public final class ClientConfigurationUtil {
     private static final long DEFAULT_TIMEOUT = 10;
     private static final TimeUnit DEFAULT_TIMEOUT_TIME_UNIT = TimeUnit.SECONDS;
-    private static final int RETRIES_LIMIT = 10;
+    private static final int RETRIES_LIMIT = 20;
     private static final int MAX_PARALLEL_REQUESTS = 30;
 
     /**
