@@ -64,6 +64,16 @@ public enum PaymentMethod {
     INVOICE_KLARNA(MethodKeys.INVOICE_KLARNA);
 
     /**
+     * @see MethodKeys#BANK_TRANSFER_IDEAL
+     */
+//    BANK_TRANSFER_IDEAL(MethodKeys.BANK_TRANSFER_IDEAL),
+
+    /**
+     * @see MethodKeys#BANK_TRANSFER_BANCONTACT
+     */
+//    BANK_TRANSFER_BANCONTACT(MethodKeys.BANK_TRANSFER_BANCONTACT);
+
+    /**
      * Set of payment methods supported by the integration service.
      * Other payment methods are not supported so far and will throw an exception.
      */

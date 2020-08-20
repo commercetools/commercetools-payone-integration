@@ -51,6 +51,10 @@ public final class CustomFieldKeys {
     public static final String BIRTHDAY_FIELD = "birthday"; // Date of birth (YYYYMMDD), Mandatory for DE, NE and AT
     public static final String TELEPHONENUMBER_FIELD = "telephonenumber"; // if the value is set - overrides optional value from address.
 
+    // iDeal
+    public static final String BANK_GROUP_TYPE = "bankgrouptype";
+    public static final String BANK_COUNTRY = "bankcountry";
+
     private CustomFieldKeys() {
     }
 }
