@@ -44,7 +44,7 @@ public class BaseNotifiablePaymentFixture extends BasePaymentFixture {
 
         final String simpleClassName = getClass().getSimpleName();
         final int notificationsToWait = paymentNamesList.size();
-            LOG.info("Start waiting {} seconds for {} notifications of action [{}] for payments [{}] in [{}] test:",
+        LOG.info("Start waiting {} seconds for {} notifications of action [{}] for payments [{}] in [{}] test:",
                 msecToSec(timeout), notificationsToWait, txaction,
                 paymentIds,
                 simpleClassName);
