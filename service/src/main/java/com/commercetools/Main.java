@@ -2,16 +2,14 @@ package com.commercetools;
 
 import ch.qos.logback.access.jetty.RequestLogImpl;
 import com.commercetools.pspadapter.payone.IntegrationService;
-import com.commercetools.pspadapter.payone.ScheduledJobFactory;
-import com.commercetools.pspadapter.payone.ScheduledJobLongTimeframe;
-import com.commercetools.pspadapter.payone.ScheduledJobShortTimeframe;
+
 import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.util.spark.JettyServerWithRequestLogFactory;
 import com.google.common.io.Resources;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.SchedulerException;
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -19,7 +17,9 @@ import spark.embeddedserver.EmbeddedServerFactory;
 import spark.embeddedserver.EmbeddedServers;
 import spark.embeddedserver.jetty.EmbeddedJettyFactory;
 
+
 import static net.logstash.logback.argument.StructuredArguments.value;
+
 
 public class Main {
 
@@ -34,9 +34,9 @@ public class Main {
      * See more in {@code Project-Lifecycle.md} documentation.
      *
      * @param args default command line args (ignored so far)
-     * @throws SchedulerException if scheduled quartz jobs can't be started
      */
-    public static void main(String[] args) throws SchedulerException {
+    public static void main(String[] args)  {
+
         bridgeJULToSLF4J();
         configureAccessLogs();
 
@@ -46,23 +46,8 @@ public class Main {
         final IntegrationService integrationService = ServiceFactory.createIntegrationService(propertyProvider, serviceConfig);
         integrationService.start();
 
-        ScheduledJobFactory scheduledJobFactory = new ScheduledJobFactory();
 
-        scheduledJobFactory.setAllScheduledItemsStartedListener(() ->
-                LOG.info("{} has started with version {}",
-                    value("applicationName", serviceConfig.getApplicationName()),
-                    value("version", serviceConfig.getApplicationVersion()))
-        );
 
-        scheduledJobFactory.createScheduledJob(
-                CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForShortTimeFramePoll()),
-                ScheduledJobShortTimeframe.class,
-                integrationService);
-
-        scheduledJobFactory.createScheduledJob(
-                CronScheduleBuilder.cronSchedule(serviceConfig.getScheduledJobCronForLongTimeFramePoll()),
-                ScheduledJobLongTimeframe.class,
-                integrationService);
     }
 
     private static void configureAccessLogs() {

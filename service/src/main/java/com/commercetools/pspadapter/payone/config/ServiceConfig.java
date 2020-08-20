@@ -20,9 +20,6 @@ public class ServiceConfig {
 
 
     private final List<String> tenants;
-
-    private final String scheduledJobCronShortTimeFrame;
-    private final String scheduledJobCronLongTimeFrame;
     private final String applicationName;
     private final String applicationVersion;
 
@@ -39,14 +36,7 @@ public class ServiceConfig {
         this.applicationName = propertyProvider.getMandatoryNonEmptyProperty(PAYONE_INTEGRATOR_NAME);
         this.applicationVersion = propertyProvider.getMandatoryNonEmptyProperty(PAYONE_INTEGRATOR_VERSION);
 
-        this.scheduledJobCronShortTimeFrame =
-                propertyProvider.getProperty(SHORT_TIME_FRAME_SCHEDULED_JOB_CRON)
-                        .map(String::valueOf)
-                        .orElse("0/30 * * * * ? *");
-        this.scheduledJobCronLongTimeFrame =
-                propertyProvider.getProperty(LONG_TIME_FRAME_SCHEDULED_JOB_CRON)
-                        .map(String::valueOf)
-                        .orElse("5 0 0/1 * * ? *");
+
     }
 
     /**
@@ -64,30 +54,6 @@ public class ServiceConfig {
     @Nonnull
     public String getApplicationVersion() {
         return applicationVersion;
-    }
-
-    /**
-     * Gets the
-     * <a href="http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger">QUARTZ cron expression</a>
-     * for polling commercetools messages with a shorter time frame.
-     *
-     * @return the cron expression
-     */
-    @Nonnull
-    public String getScheduledJobCronForShortTimeFramePoll() {
-        return scheduledJobCronShortTimeFrame;
-    }
-
-    /**
-     * Gets the
-     * <a href="http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger">QUARTZ cron expression</a>
-     * for polling commercetools messages with a longer time frame.
-     *
-     * @return the cron expression
-     */
-    @Nonnull
-    public String getScheduledJobCronForLongTimeFramePoll() {
-        return scheduledJobCronLongTimeFrame;
     }
 
     /**
