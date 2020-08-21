@@ -48,8 +48,6 @@ import static java.lang.String.format;
 
 public class TenantFactory {
 
-    private static final int MAX_PARALLEL_REQUESTS = 30;
-
     private final String payoneInterfaceName;
 
     private final String tenantName;
