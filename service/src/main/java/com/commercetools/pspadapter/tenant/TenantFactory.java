@@ -162,7 +162,7 @@ public class TenantFactory {
 
     @Nonnull
     protected BlockingSphereClient createBlockingSphereClient(TenantConfig tenantConfig) {
-        return ClientConfigurationUtil.createClient((tenantConfig.getSphereClientConfig()));
+        return ClientConfigurationUtil.createClient(tenantConfig.getSphereClientConfig());
     }
 
     public BlockingSphereClient getBlockingSphereClient() {
