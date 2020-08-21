@@ -29,8 +29,8 @@ public final class ClientConfigurationUtil {
     private static final int MAX_PARALLEL_REQUESTS = 30;
 
     /**
-     * Creates a {@link BlockingSphereClient} with a custom {@code timeout} with a custom {@link
-     * TimeUnit}.
+     * Creates a {@link BlockingSphereClient} with a custom {@code timeout}  with a custom {@link
+     * TimeUnit} as waiting time limit for blocking SphereClient to complete CTP request .
      *
      * @param clientConfig the client configuration for the client.
      * @return the instantiated {@link BlockingSphereClient}.
