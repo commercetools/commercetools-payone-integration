@@ -42,7 +42,7 @@ public final class ClientConfigurationUtil {
         return withBlocking(limitedClient);
     }
 
-    private static SphereClient withRetry(final SphereClient delegate) {
+    private static SphereClient withRetry(final SphereClient sphereClient) {
         final RetryAction scheduledRetry =
                 RetryAction.ofScheduledRetry(RETRIES_LIMIT, context -> calculateVariableDelay(context.getAttempt()));
         final RetryPredicate http5xxMatcher =
@@ -50,7 +50,7 @@ public final class ClientConfigurationUtil {
                         BAD_GATEWAY_502, SERVICE_UNAVAILABLE_503, GATEWAY_TIMEOUT_504);
         final List<RetryRule> retryRules =
                 Collections.singletonList(RetryRule.of(http5xxMatcher, scheduledRetry));
-        return RetrySphereClientDecorator.of(delegate, retryRules);
+        return RetrySphereClientDecorator.of(sphereClient, retryRules);
     }
 
     private static BlockingSphereClient withBlocking(final SphereClient delegate) {
