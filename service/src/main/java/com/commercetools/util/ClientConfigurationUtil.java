@@ -22,10 +22,10 @@ import static io.sphere.sdk.http.HttpStatusCode.BAD_GATEWAY_502;
 import static io.sphere.sdk.http.HttpStatusCode.GATEWAY_TIMEOUT_504;
 import static io.sphere.sdk.http.HttpStatusCode.SERVICE_UNAVAILABLE_503;
 
-public final class ClientConfigurationUtil extends GenericClientConfigurationUtil {
+public final class ClientConfigurationUtil {
     private static final long DEFAULT_TIMEOUT = 10;
     private static final TimeUnit DEFAULT_TIMEOUT_TIME_UNIT = TimeUnit.SECONDS;
-    protected static final int RETRIES_LIMIT = 5;
+    private static final int RETRIES_LIMIT = 5;
     private static final int MAX_PARALLEL_REQUESTS = 30;
     private static final long DEFAULT_RETRY_INTERVAL_IN_SECOND = 10;
 
@@ -37,7 +37,7 @@ public final class ClientConfigurationUtil extends GenericClientConfigurationUti
      * @return the instantiated {@link BlockingSphereClient}.
      */
     public static BlockingSphereClient createClient(@Nonnull final SphereClientConfig clientConfig) {
-        final SphereClient underlyingClient = createHttpClient(clientConfig);
+        final SphereClient underlyingClient = SphereClientFactory.of().createClient(clientConfig);
         final SphereClient retryClient = withRetry(underlyingClient);
         final SphereClient limitedClient = withLimitedParallelRequests(retryClient);
         return withBlocking(limitedClient);
@@ -76,7 +76,5 @@ public final class ClientConfigurationUtil extends GenericClientConfigurationUti
         return QueueSphereClientDecorator.of(sphereClient, MAX_PARALLEL_REQUESTS);
     }
 
-    private ClientConfigurationUtil() {
-        super();
-    }
+    private ClientConfigurationUtil() {}
 }
