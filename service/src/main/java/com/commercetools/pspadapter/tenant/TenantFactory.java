@@ -296,6 +296,9 @@ public class TenantFactory {
             case INVOICE_KLARNA:
                 return new KlarnaRequestFactory(tenantConfig, createCountryToLanguageMapper());
 
+            case BANK_TRANSFER_BANCONTACT:
+                return new BankTransferWithoutIbanBicRequestFactory(tenantConfig);
+
             default:
                 throw new IllegalArgumentException(format("No PayoneRequestFactory could be created for payment method %s", method));
         }
