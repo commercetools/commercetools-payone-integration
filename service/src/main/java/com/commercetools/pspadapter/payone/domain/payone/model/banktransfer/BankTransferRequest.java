@@ -20,6 +20,8 @@ public class BankTransferRequest extends AuthorizationRequest {
 
     private String bankcountry;
 
+    private String bankGroupType;
+
     @ClearSecuredValuesSerializer.Apply(true)
     private String iban;
 
@@ -37,7 +39,7 @@ public class BankTransferRequest extends AuthorizationRequest {
     public BankTransferRequest(@Nonnull final RequestType requestType,
                                @Nonnull final PayoneConfig config,
                                @Nonnull final String onlinebanktransfertype) {
-        super(config, requestType.getType(), ClearingType.PAYONE_PNT.getPayoneCode());
+        super(config, requestType.getType(), ClearingType.PAYONE_IDL.getPayoneCode());
 
         this.onlinebanktransfertype = onlinebanktransfertype;
     }
@@ -78,5 +80,13 @@ public class BankTransferRequest extends AuthorizationRequest {
 
     public void setBic(final String bic) {
         this.bic = bic;
+    }
+
+    public String getBankGroupType() {
+        return bankGroupType;
+    }
+
+    public void setBankGroupType(String bankGroupType) {
+        this.bankGroupType = bankGroupType;
     }
 }

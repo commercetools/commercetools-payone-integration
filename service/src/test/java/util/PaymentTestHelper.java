@@ -111,6 +111,10 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_PFC.json");
     }
 
+    public Payment dummyPaymentOneAuthPending20EuroIDEAL() throws IOException {
+        return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_IDEAL.json");
+    }
+
     public Payment dummyPaymentOneAuthPending20EuroPendingResponse() throws Exception {
         return getPaymentFromFile("dummyPaymentOneAuthPending20EuroPendingResponse.json");
     }
