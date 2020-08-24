@@ -27,6 +27,7 @@ public final class ClientConfigurationUtil {
     private static final TimeUnit DEFAULT_TIMEOUT_TIME_UNIT = TimeUnit.SECONDS;
     private static final int RETRIES_LIMIT = 5;
     private static final int MAX_PARALLEL_REQUESTS = 30;
+    private static final long DEFAULT_RETRY_INTERVAL_IN_SECOND = 10;
 
     /**
      * Creates a {@link BlockingSphereClient} with a custom {@code timeout}  with a custom {@link
@@ -42,9 +43,9 @@ public final class ClientConfigurationUtil {
         return withBlocking(limitedClient);
     }
 
-    private static SphereClient withRetry(final SphereClient sphereClient) {
+    private static SphereClient withRetry(@Nonnull final SphereClient sphereClient) {
         final RetryAction scheduledRetry =
-                RetryAction.ofScheduledRetry(RETRIES_LIMIT, context -> calculateVariableDelay(context.getAttempt()));
+                RetryAction.ofScheduledRetry(RETRIES_LIMIT, context -> calculateVariableDelay());
         final RetryPredicate http5xxMatcher =
                 RetryPredicate.ofMatchingStatusCodes(
                         BAD_GATEWAY_502, SERVICE_UNAVAILABLE_503, GATEWAY_TIMEOUT_504);
@@ -58,17 +59,13 @@ public final class ClientConfigurationUtil {
     }
 
     /**
-     * Computes a variable delay in seconds (grows with attempts count with a random component).
+     * Computes a variable delay in seconds.
      *
-     * @param triedAttempts the number of attempts already tried by the client.
-     * @return a computed variable delay in seconds, that grows with the number of attempts with a
-     *     random component.
+     * @return a computed variable delay in seconds, which is a random component in addition to a default interval.
      */
-    private static Duration calculateVariableDelay(final long triedAttempts) {
-        final long timeoutInSeconds = TimeUnit.SECONDS.convert(DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
-        final long randomNumberInRange = getRandomNumberInRange(50, timeoutInSeconds);
-        final long timeoutMultipliedByTriedAttempts = timeoutInSeconds * triedAttempts;
-        return Duration.ofSeconds(timeoutMultipliedByTriedAttempts + randomNumberInRange);
+    private static Duration calculateVariableDelay() {
+        final long randomNumberInRange = getRandomNumberInRange(1, DEFAULT_RETRY_INTERVAL_IN_SECOND);
+        return Duration.ofSeconds(DEFAULT_RETRY_INTERVAL_IN_SECOND + randomNumberInRange);
     }
 
     private static long getRandomNumberInRange(final long min, final long max) {
