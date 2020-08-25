@@ -9,9 +9,10 @@
   - [2. Payone portal changes](#2-payone-portal-changes)
   - [3. Changes in the shops which uses the service](#3-changes-in-the-shops-which-uses-the-service)
   - [4. Setup a new tenant (branch,shop,merchant)](#4-setup-a-new-tenant-branchshopmerchant)
-  - [5. Importan notes](#5-importan-notes)
+  - [5. Important notes](#5-important-notes)
 - [To v2.2+ (`Initial` transaction state)](#to-v22-initial-transaction-state)
 - [To v2.3+ (`Paydirekt` payment method)](#to-v23-paydirekt-payment-method)
+- [To use `bancontact` and `iDeal` payment methods](#to-use-bancontact-and-ideal-payment-methods)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -86,7 +87,7 @@ You have to change the payment handling URL:
   1. In the new shop configure payment checkout service to connect to the new merchant URL 
     (like <code>**MERCHANT1**/commercetools/handle/payments/</code>)
     
-### 5. Importan notes
+### 5. Important notes
   - For every tenant you should use separate Payone Portal ID,
   otherwise you won't be able to receive property payment update nofications,
   because notification URL is configured on portal level
@@ -140,4 +141,58 @@ You have to change the payment handling URL:
      The rest of the payment integration is similar to other redirect based payments, like PayPal or Sofortüberweisung.
      
      See more in [Field Mapping Guide](/docs/Field-Mapping.md)
+
+## To use `bancontact` and `iDeal` payment methods
+  
+  _This section could be skipped if this payment method is not used_
+  
+  1. Contact Payone Merchant support and activate `bancontact` and `iDeal` payment method in your account, 
+  supply them required values from Paydirekt Merchant account.
+  1. Ensure the following attributes are added to payment type `payment-BANK_TRANSFER`:
+     * **`bankCountry`**
+     * **`bankGroupType`**
+     If attributes are missing but the payment type already exists, add them by using the following update actions:
+        ```json
+        {
+          "version": xxx,
+          "actions": [
+            {
+              "action": "addFieldDefinition",
+              "fieldDefinition": {
+                "name": "bankCountry",
+                "label": {
+                  "en": "bankCountry",
+                  "de": "bankCountry"
+                },
+                "required": false,
+                "type": {
+                  "name": "String"
+                },
+                "inputHint": "SingleLine"
+              }
+            },
+            {
+              "action": "addFieldDefinition",
+              "fieldDefinition": {
+                "name": "bankCountry",
+                "label": {
+                  "en": "bankCountry",
+                  "de": "bankCountry"
+                },
+                "required": false,
+                "type": {
+                  "name": "String"
+                },
+                "inputHint": "SingleLine"
+              }
+            }
+          ]
+        }
+        ```   
+  1. Ensure the following values are always specified in `Payment#custom#fields` before payment handling:
+     * **`bankCountry`** - this field is mandatory for bancontact and iDeal payments
+     * **`bankGroupType`** - this field is mandatory for iDeal payment
      
+     The rest of the payment integration is similar to other redirect based payments, like PayPal or Sofortüberweisung.
+     
+     See more in [Field Mapping Guide](/docs/Field-Mapping.md)

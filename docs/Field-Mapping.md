@@ -43,6 +43,7 @@ See also: [CT Method field convention](https://github.com/nkuehn/payment-integra
 | `BANK_TRANSFER-POSTFINANCE_EFINANCE` | `sb`  | `onlinebanktransfertype=PFF` | PostFinance e-Finance (CH)        | `payment-BANK_TRANSFER` |
 | `BANK_TRANSFER-POSTFINANCE_CARD`     | `sb`  | `onlinebanktransfertype=PFC` | PostFinance Card (CH)             | `payment-BANK_TRANSFER` |
 | `BANK_TRANSFER-IDEAL`                | `sb`  | `onlinebanktransfertype=IDL` | iDEAL (NL)                        | `payment-BANK_TRANSFER` |
+| `BANK_TRANSFER-BANCONTACT`           | `sb`  | `onlinebanktransfertype=BCT` | bancontact                        | `payment-BANK_TRANSFER` |
 | `CASH_ADVANCE`                       | `vor` |                              | Prepayment (PAYONE has access to the merchant's account to see if the money has arrived) | `payment-CASH_ADVANCE` |
 | `INVOICE-DIRECT`                     | `rec` |                              | Direct Invoice (PAYONE has access to the merchant's account to see if the money has arrived) | `payment-INVOICE` |
 | `CASH_ON_DELIVERY`                   | `cod` | `shippingprovider` needs to be set, see below in the field mappings | Cash on Delivery | `payment-CASH_ON_DELIVERY` |
@@ -243,7 +244,7 @@ All payment methods:
     * `iban` -> `IBAN` of type String (CT initial, but overridden by PAYONE)
     * `bic`  -> custom `BIC` (CT initial, but overridden by PAYONE)
   * traditional identification:
-    * `bankcountry` -> `bankCountry`
+    * `bankcountry` -> custom field `bankCountry` of Type String on the CT Payment (required for bancontact and iDeal) 
     * `bankaccount` -> `bankAccount` 
     * `bankcode` ->  `bankCode` 
     * `bankbranchcode` -> `bankBrachCode` (only for FR, ES, FI, IT)
