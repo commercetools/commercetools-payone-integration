@@ -292,7 +292,7 @@ public class TenantFactory {
                 return new PostFinanceBanktransferRequestFactory(tenantConfig);
 
             case BANK_TRANSFER_IDEAL:
-                return new IDealRequestFactory(tenantConfig);
+                return new BankTransferWithoutIbanBicRequestFactory(tenantConfig);
 
             case BANK_TRANSFER_ADVANCE:
                 return new BankTransferInAdvanceRequestFactory(tenantConfig);

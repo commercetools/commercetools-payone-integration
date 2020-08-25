@@ -13,7 +13,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import java.time.format.DateTimeFormatter;
@@ -21,17 +21,13 @@ import java.util.Optional;
 
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
 import static org.javamoney.moneta.function.MonetaryQueries.convertMinorPart;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Jude Niroshan
- */
 @RunWith(MockitoJUnitRunner.class)
-public class IDealRequestFactoryTest extends BaseTenantPropertyTest {
-
+public class BankTransferWithoutIbanBicRequestFactoryTest extends BaseTenantPropertyTest {
     private final PaymentTestHelper payments = new PaymentTestHelper();
-    private IDealRequestFactory factory;
+    private BankTransferWithoutIbanBicRequestFactory factory;
 
     @Before
     public void setUp() throws Exception {
@@ -39,12 +35,12 @@ public class IDealRequestFactoryTest extends BaseTenantPropertyTest {
     }
 
     @Test
-    public void createFullAuthorizationRequestFromValidPayment() throws Exception {
+    public void createFullAuthorizationRequestFromValidPayment_iDeal() throws Exception {
 
         when(tenantPropertyProvider.getTenantProperty(any())).thenReturn(Optional.of("dummyVal"));
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(any())).thenReturn("dummyVal");
 
-        factory = new IDealRequestFactory(tenantConfig);
+        factory = new BankTransferWithoutIbanBicRequestFactory(tenantConfig);
 
 
         Payment payment = payments.dummyPaymentOneAuthPending20EuroIDEAL();
