@@ -115,6 +115,10 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_PFC.json");
     }
 
+    public Payment dummyPaymentOneAuthPending20EuroIDEAL() throws IOException {
+        return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_IDEAL.json");
+    }
+
     public Payment dummyPaymentOneAuthPending20EuroPendingResponse() throws Exception {
         return getPaymentFromFile("dummyPaymentOneAuthPending20EuroPendingResponse.json");
     }
@@ -245,5 +249,8 @@ public class PaymentTestHelper {
 
     public PaymentWithCartLike createBancontactPaymentWithCartLike() throws Exception {
         return createDummyPaymentWithCartLike(dummyPaymentOneAuthPending20EuroBCT(), dummyCart());
+    }
+    public PaymentWithCartLike createIDealPaymentWithCartLike() throws Exception {
+        return createDummyPaymentWithCartLike(dummyPaymentOneAuthPending20EuroIDEAL(), dummyCart());
     }
 }

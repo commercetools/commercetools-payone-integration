@@ -12,6 +12,8 @@ import io.sphere.sdk.payments.Payment;
 
 import javax.annotation.Nonnull;
 
+import java.util.Optional;
+
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType.AUTHORIZATION;
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType.PREAUTHORIZATION;
 
@@ -50,12 +52,12 @@ public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFacto
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
 
         //Despite declared as optional in PayOne Server API documentation. the Bankcountry is required
-        final String bankCountry = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BANK_COUNTRY);
-        if (bankCountry == null) {
-            request.setBankcountry(request.getCountry());
-        } else {
-            request.setBankcountry(bankCountry);
-        }
+        String bankCountry = Optional.ofNullable(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BANK_COUNTRY))
+                .orElseGet(request::getCountry);
+        request.setBankcountry(bankCountry);
+
+        Optional.ofNullable(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BANK_GROUP_TYPE))
+                .ifPresent(request::setBankgrouptype);
         return request;
     }
 }

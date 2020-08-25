@@ -291,13 +291,14 @@ public class TenantFactory {
             case BANK_TRANSFER_POSTFINANCE_EFINANCE:
                 return new PostFinanceBanktransferRequestFactory(tenantConfig);
 
+            case BANK_TRANSFER_IDEAL:
+            case BANK_TRANSFER_BANCONTACT:
+                return new BankTransferWithoutIbanBicRequestFactory(tenantConfig);
+
             case BANK_TRANSFER_ADVANCE:
                 return new BankTransferInAdvanceRequestFactory(tenantConfig);
             case INVOICE_KLARNA:
                 return new KlarnaRequestFactory(tenantConfig, createCountryToLanguageMapper());
-
-            case BANK_TRANSFER_BANCONTACT:
-                return new BankTransferWithoutIbanBicRequestFactory(tenantConfig);
 
             default:
                 throw new IllegalArgumentException(format("No PayoneRequestFactory could be created for payment method %s", method));

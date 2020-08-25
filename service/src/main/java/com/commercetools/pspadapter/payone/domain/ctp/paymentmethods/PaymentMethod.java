@@ -66,7 +66,7 @@ public enum PaymentMethod {
     /**
      * @see MethodKeys#BANK_TRANSFER_IDEAL
      */
-//    BANK_TRANSFER_IDEAL(MethodKeys.BANK_TRANSFER_IDEAL),
+    BANK_TRANSFER_IDEAL(MethodKeys.BANK_TRANSFER_IDEAL),
 
     /**
      * @see MethodKeys#BANK_TRANSFER_BANCONTACT
