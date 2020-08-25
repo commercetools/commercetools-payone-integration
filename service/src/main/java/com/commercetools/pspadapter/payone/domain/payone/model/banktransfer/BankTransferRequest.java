@@ -39,7 +39,7 @@ public class BankTransferRequest extends AuthorizationRequest {
     public BankTransferRequest(@Nonnull final RequestType requestType,
                                @Nonnull final PayoneConfig config,
                                @Nonnull final String onlinebanktransfertype) {
-        super(config, requestType.getType(), ClearingType.PAYONE_IDL.getPayoneCode());
+        super(config, requestType.getType(), ClearingType.PAYONE_PNT.getPayoneCode());
 
         this.onlinebanktransfertype = onlinebanktransfertype;
     }
