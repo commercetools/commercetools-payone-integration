@@ -212,7 +212,7 @@ public class TenantFactoryTest {
         PaymentWithCartLike paymentWithCartLike = testHelper.createPaydirektPaymentWithCartLike();
         AuthorizationRequest authorizationRequest = requestFactory.createAuthorizationRequest(paymentWithCartLike);
 
-        assertThat(authorizationRequest).isInstanceOf(BankTransferWithoutIbanBicRequestFactory.class);
+        assertThat(authorizationRequest).isInstanceOf(BankTransferRequest.class);
         Map<String, Object> actual = authorizationRequest.toStringMap(false);
         assertThat(actual.get("request")).isEqualTo("preauthorization");
         assertThat(actual.get("clearingtype")).isEqualTo("sb");

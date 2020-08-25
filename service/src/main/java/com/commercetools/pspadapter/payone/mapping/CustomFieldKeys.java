@@ -52,8 +52,8 @@ public final class CustomFieldKeys {
     public static final String TELEPHONENUMBER_FIELD = "telephonenumber"; // if the value is set - overrides optional value from address.
 
     // iDeal
-    public static final String BANK_GROUP_TYPE = "bankgrouptype";
-    public static final String BANK_COUNTRY = "bankcountry";
+    public static final String BANK_GROUP_TYPE = "bankGroupType";
+    public static final String BANK_COUNTRY = "bankCountry";
 
     private CustomFieldKeys() {
     }
