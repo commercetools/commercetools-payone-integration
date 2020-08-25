@@ -57,7 +57,7 @@ public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFacto
         request.setBankcountry(bankCountry);
 
         Optional.ofNullable(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BANK_GROUP_TYPE))
-                .ifPresent(request::setBankGroupType);
+                .ifPresent(request::setBankgrouptype);
         return request;
     }
 }

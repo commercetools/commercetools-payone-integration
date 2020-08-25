@@ -20,7 +20,7 @@ public class BankTransferRequest extends AuthorizationRequest {
 
     private String bankcountry;
 
-    private String bankGroupType;
+    private String bankgrouptype;
 
     @ClearSecuredValuesSerializer.Apply(true)
     private String iban;
@@ -82,11 +82,11 @@ public class BankTransferRequest extends AuthorizationRequest {
         this.bic = bic;
     }
 
-    public String getBankGroupType() {
-        return bankGroupType;
+    public String getBankgrouptype() {
+        return bankgrouptype;
     }
 
-    public void setBankGroupType(String bankGroupType) {
-        this.bankGroupType = bankGroupType;
+    public void setBankgrouptype(String bankgrouptype) {
+        this.bankgrouptype = bankgrouptype;
     }
 }

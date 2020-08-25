@@ -209,14 +209,15 @@ public class TenantFactoryTest {
     @Test
     public void createRequestFactory_ideal_preauthorization() throws Exception {
         PayoneRequestFactory requestFactory = factory.createRequestFactory(BANK_TRANSFER_IDEAL, tenantConfig);
-        PaymentWithCartLike paymentWithCartLike = testHelper.createPaydirektPaymentWithCartLike();
-        AuthorizationRequest authorizationRequest = requestFactory.createAuthorizationRequest(paymentWithCartLike);
+        PaymentWithCartLike paymentWithCartLike = testHelper.createIDealPaymentWithCartLike();
+        AuthorizationRequest authorizationRequest = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
 
         assertThat(authorizationRequest).isInstanceOf(BankTransferRequest.class);
         Map<String, Object> actual = authorizationRequest.toStringMap(false);
         assertThat(actual.get("request")).isEqualTo("preauthorization");
         assertThat(actual.get("clearingtype")).isEqualTo("sb");
         assertThat(actual.get("onlinebanktransfertype")).isEqualTo("IDL");
+        assertThat(actual.get("bankgrouptype")).isEqualTo("ABN_AMRO_BANK");
     }
 
     @Test

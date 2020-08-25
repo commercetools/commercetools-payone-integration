@@ -118,7 +118,7 @@ public class BankTransferWithoutIbanBicRequestFactoryTest extends BaseTenantProp
         softly.assertThat(result.getShipping_company()).isEqualTo(shippingAddress.getCompany() + " " + shippingAddress.getDepartment());
 
         //iDeal specific
-        softly.assertThat(result.getBankGroupType()).isEqualTo(payment.getCustom().getFieldAsString(CustomFieldKeys.BANK_GROUP_TYPE));
+        softly.assertThat(result.getBankgrouptype()).isEqualTo(payment.getCustom().getFieldAsString(CustomFieldKeys.BANK_GROUP_TYPE));
         softly.assertThat(result.getBankcountry()).isEqualTo(payment.getCustom().getFieldAsString(CustomFieldKeys.BANK_COUNTRY));
 
         softly.assertAll();

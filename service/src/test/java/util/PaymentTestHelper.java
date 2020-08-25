@@ -250,4 +250,7 @@ public class PaymentTestHelper {
     public PaymentWithCartLike createBancontactPaymentWithCartLike() throws Exception {
         return createDummyPaymentWithCartLike(dummyPaymentOneAuthPending20EuroBCT(), dummyCart());
     }
+    public PaymentWithCartLike createIDealPaymentWithCartLike() throws Exception {
+        return createDummyPaymentWithCartLike(dummyPaymentOneAuthPending20EuroIDEAL(), dummyCart());
+    }
 }
