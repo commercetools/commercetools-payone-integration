@@ -16,6 +16,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaAuth
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaPreauthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPreauthorizationRequest;
+import com.commercetools.pspadapter.payone.mapping.BankTransferWithoutIbanBicRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.google.common.cache.LoadingCache;
@@ -202,6 +203,19 @@ public class TenantFactoryTest {
         assertThat(actual.get("request")).isEqualTo("authorization");
         assertThat(actual.get("clearingtype")).isEqualTo("wlt");
         assertThat(actual.get("wallettype")).isEqualTo("PDT");
+    }
+
+    @Test
+    public void createRequestFactory_ideal_preauthorization() throws Exception {
+        PayoneRequestFactory requestFactory = factory.createRequestFactory(BANK_TRANSFER_IDEAL, tenantConfig);
+        PaymentWithCartLike paymentWithCartLike = testHelper.createPaydirektPaymentWithCartLike();
+        AuthorizationRequest authorizationRequest = requestFactory.createAuthorizationRequest(paymentWithCartLike);
+
+        assertThat(authorizationRequest).isInstanceOf(BankTransferWithoutIbanBicRequestFactory.class);
+        Map<String, Object> actual = authorizationRequest.toStringMap(false);
+        assertThat(actual.get("request")).isEqualTo("preauthorization");
+        assertThat(actual.get("clearingtype")).isEqualTo("sb");
+        assertThat(actual.get("onlinebanktransfertype")).isEqualTo("BCT");
     }
 
     @Test
