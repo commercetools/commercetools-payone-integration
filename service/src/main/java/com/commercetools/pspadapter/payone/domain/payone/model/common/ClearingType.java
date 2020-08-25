@@ -19,7 +19,9 @@ public enum ClearingType {
     PAYONE_PFF("BANK_TRANSFER-POSTFINANCE_EFINANCE", "sb", "PFF"),
     PAYONE_VOR("BANK_TRANSFER-ADVANCE", "vor", ""),
     PAYONE_KLV("INVOICE-KLARNA", "fnc", "KLV"),
-    PAYONE_IDL("BANK_TRANSFER-IDEAL", "sb", "IDL");
+    PAYONE_IDL("BANK_TRANSFER-IDEAL", "sb", "IDL"),
+    PAYONE_BCT("BANK_TRANSFER-BANCONTACT", "sb", "BCT"),
+    PAYONE_KLV("INVOICE-KLARNA", "fnc", "KLV");
 
     private final String key;
     /**

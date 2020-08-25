@@ -9,6 +9,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
+import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.BaseRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
@@ -216,6 +217,19 @@ public class TenantFactoryTest {
         assertThat(actual.get("request")).isEqualTo("preauthorization");
         assertThat(actual.get("clearingtype")).isEqualTo("sb");
         assertThat(actual.get("onlinebanktransfertype")).isEqualTo("BCT");
+    }
+
+    @Test
+    public void createRequestFactory_bancontact_preauthorization() throws Exception {
+        PayoneRequestFactory requestFactory = factory.createRequestFactory(BANK_TRANSFER_BANCONTACT, tenantConfig);
+        PaymentWithCartLike paymentWithCartLike = testHelper.createBancontactPaymentWithCartLike();
+        AuthorizationRequest authorizationRequest = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
+
+        assertThat(authorizationRequest).isInstanceOf(BankTransferRequest.class);
+        Map<String, Object> actual = authorizationRequest.toStringMap(false);
+        assertThat(actual.get("onlinebanktransfertype")).isEqualTo("BCT");
+        assertThat(actual.get("request")).isEqualTo("preauthorization");
+        assertThat(actual.get("clearingtype")).isEqualTo("sb");
     }
 
     @Test

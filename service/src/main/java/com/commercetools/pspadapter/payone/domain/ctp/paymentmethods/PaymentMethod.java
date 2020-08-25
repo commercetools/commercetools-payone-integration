@@ -71,7 +71,7 @@ public enum PaymentMethod {
     /**
      * @see MethodKeys#BANK_TRANSFER_BANCONTACT
      */
-//    BANK_TRANSFER_BANCONTACT(MethodKeys.BANK_TRANSFER_BANCONTACT);
+    BANK_TRANSFER_BANCONTACT(MethodKeys.BANK_TRANSFER_BANCONTACT);
 
     /**
      * Set of payment methods supported by the integration service.
