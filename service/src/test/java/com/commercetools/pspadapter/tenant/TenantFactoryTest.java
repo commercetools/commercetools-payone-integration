@@ -216,7 +216,7 @@ public class TenantFactoryTest {
         Map<String, Object> actual = authorizationRequest.toStringMap(false);
         assertThat(actual.get("request")).isEqualTo("preauthorization");
         assertThat(actual.get("clearingtype")).isEqualTo("sb");
-        assertThat(actual.get("onlinebanktransfertype")).isEqualTo("BCT");
+        assertThat(actual.get("onlinebanktransfertype")).isEqualTo("IDL");
     }
 
     @Test
