@@ -25,12 +25,12 @@ import static io.sphere.sdk.http.HttpStatusCode.SERVICE_UNAVAILABLE_503;
 public final class ClientConfigurationUtil {
     private static final long DEFAULT_TIMEOUT = 10;
     private static final TimeUnit DEFAULT_TIMEOUT_TIME_UNIT = TimeUnit.SECONDS;
-    private static final int RETRIES_LIMIT = 5;
+    protected static final int RETRIES_LIMIT = 5;
     private static final int MAX_PARALLEL_REQUESTS = 30;
     private static final long DEFAULT_RETRY_INTERVAL_IN_SECOND = 10;
 
     /**
-     * Creates a {@link BlockingSphereClient} with a custom {@code timeout}  with a custom {@link
+     * Creates a {@link BlockingSphereClient} with a custom {@code timeout} with a custom {@link
      * TimeUnit} as waiting time limit for blocking SphereClient to complete CTP request .
      *
      * @param clientConfig the client configuration for the client.
@@ -38,7 +38,18 @@ public final class ClientConfigurationUtil {
      */
     public static BlockingSphereClient createClient(@Nonnull final SphereClientConfig clientConfig) {
         final SphereClient underlyingClient = SphereClientFactory.of().createClient(clientConfig);
-        final SphereClient retryClient = withRetry(underlyingClient);
+        return decorateSphereClient(underlyingClient);
+    }
+
+    /**
+     * Creates a {@link BlockingSphereClient} with a custom {@code timeout} with a custom {@link
+     * TimeUnit} as waiting time limit for blocking SphereClient to complete CTP request .
+     *
+     * @param sphereClient the HTTP underlying client.
+     * @return the instantiated {@link BlockingSphereClient}.
+     */
+    protected static BlockingSphereClient decorateSphereClient(@Nonnull final SphereClient sphereClient) {
+        final SphereClient retryClient = withRetry(sphereClient);
         final SphereClient limitedClient = withLimitedParallelRequests(retryClient);
         return withBlocking(limitedClient);
     }
@@ -64,8 +75,9 @@ public final class ClientConfigurationUtil {
      * @return a computed variable delay in seconds, which is a random component in addition to a default interval.
      */
     private static Duration calculateVariableDelay() {
-        final long randomNumberInRange = getRandomNumberInRange(1, DEFAULT_RETRY_INTERVAL_IN_SECOND);
-        return Duration.ofSeconds(DEFAULT_RETRY_INTERVAL_IN_SECOND + randomNumberInRange);
+//        final long randomNumberInRange = getRandomNumberInRange(1, DEFAULT_RETRY_INTERVAL_IN_SECOND);
+//        return Duration.ofSeconds(DEFAULT_RETRY_INTERVAL_IN_SECOND + randomNumberInRange);
+        return Duration.ofSeconds(1);
     }
 
     private static long getRandomNumberInRange(final long min, final long max) {
