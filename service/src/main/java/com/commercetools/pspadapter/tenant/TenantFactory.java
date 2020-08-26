@@ -30,6 +30,7 @@ import com.commercetools.service.OrderService;
 import com.commercetools.service.OrderServiceImpl;
 import com.commercetools.service.PaymentService;
 import com.commercetools.service.PaymentServiceImpl;
+import com.commercetools.util.SphereClientConfigurationUtil;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
@@ -166,10 +167,7 @@ public class TenantFactory {
 
     @Nonnull
     protected BlockingSphereClient createBlockingSphereClient(TenantConfig tenantConfig) {
-        SphereClient sphereClient = SphereClientFactory.of().createClient(tenantConfig.getSphereClientConfig());
-        SphereClient sphereClientWithLimitedParallelReq =
-                QueueSphereClientDecorator.of(sphereClient, MAX_PARALLEL_REQUESTS);
-        return BlockingSphereClient.of(sphereClientWithLimitedParallelReq, DEFAULT_CTP_CLIENT_TIMEOUT);
+        return SphereClientConfigurationUtil.createClient(tenantConfig.getSphereClientConfig());
     }
 
     public BlockingSphereClient getBlockingSphereClient() {
