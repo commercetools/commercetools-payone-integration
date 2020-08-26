@@ -75,9 +75,8 @@ public final class ClientConfigurationUtil {
      * @return a computed variable delay in seconds, which is a random component in addition to a default interval.
      */
     private static Duration calculateVariableDelay() {
-//        final long randomNumberInRange = getRandomNumberInRange(1, DEFAULT_RETRY_INTERVAL_IN_SECOND);
-//        return Duration.ofSeconds(DEFAULT_RETRY_INTERVAL_IN_SECOND + randomNumberInRange);
-        return Duration.ofSeconds(1);
+        final long randomNumberInRange = getRandomNumberInRange(1, DEFAULT_RETRY_INTERVAL_IN_SECOND);
+        return Duration.ofSeconds(DEFAULT_RETRY_INTERVAL_IN_SECOND + randomNumberInRange);
     }
 
     private static long getRandomNumberInRange(final long min, final long max) {
