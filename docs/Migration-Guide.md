@@ -146,8 +146,7 @@ You have to change the payment handling URL:
   
   _This section could be skipped if this payment method is not used_
   
-  1. Contact Payone Merchant support and activate `bancontact` and `iDeal` payment method in your account, 
-  supply them required values from Paydirekt Merchant account.
+  1. Contact Payone Merchant support and activate `bancontact` and `iDeal` payment method in your account.
   1. Ensure the following attributes are added to payment type `payment-BANK_TRANSFER`:
      * **`bankCountry`**
      * **`bankGroupType`**
