@@ -245,6 +245,7 @@ All payment methods:
     * `bic`  -> custom `BIC` (CT initial, but overridden by PAYONE)
   * traditional identification:
     * `bankcountry` -> custom field `bankCountry` of Type String on the CT Payment (required for bancontact and iDeal) 
+    * `bankgrouptype` -> custom field `bankGroupType` of Type String on the CT Payment (required for iDeal) 
     * `bankaccount` -> `bankAccount` 
     * `bankcode` ->  `bankCode` 
     * `bankbranchcode` -> `bankBrachCode` (only for FR, ES, FI, IT)
