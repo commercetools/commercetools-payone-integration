@@ -65,7 +65,7 @@ public final class SphereClientConfigurationUtil {
         return RetrySphereClientDecorator.of(sphereClient, retryRules);
     }
 
-    private static BlockingSphereClient withBlocking(final SphereClient sphereClient) {
+    private static BlockingSphereClient withBlocking(@Nonnull final SphereClient sphereClient) {
         return BlockingSphereClient.of(sphereClient, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_TIME_UNIT);
     }
 
@@ -83,7 +83,7 @@ public final class SphereClientConfigurationUtil {
         return new Random().longs(min, (max + 1)).limit(1).findFirst().getAsLong();
     }
 
-    private static SphereClient withLimitedParallelRequests(final SphereClient sphereClient) {
+    private static SphereClient withLimitedParallelRequests(@Nonnull final SphereClient sphereClient) {
         return QueueSphereClientDecorator.of(sphereClient, MAX_PARALLEL_REQUESTS);
     }
 
