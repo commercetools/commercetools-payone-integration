@@ -12,7 +12,7 @@
   - [5. Important notes](#5-important-notes)
 - [To v2.2+ (`Initial` transaction state)](#to-v22-initial-transaction-state)
 - [To v2.3+ (`Paydirekt` payment method)](#to-v23-paydirekt-payment-method)
-- [To use `bancontact` and `iDeal` payment methods](#to-use-bancontact-and-ideal-payment-methods)
+- [To 2.12+ (support for `bancontact` and `iDeal` payment methods)](#to-212-support-for-bancontact-and-ideal-payment-methods)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -142,7 +142,7 @@ You have to change the payment handling URL:
      
      See more in [Field Mapping Guide](/docs/Field-Mapping.md)
 
-## To use `bancontact` and `iDeal` payment methods
+## To 2.12+ (support for `bancontact` and `iDeal` payment methods)
   
   _This section could be skipped if this payment method is not used_
   
