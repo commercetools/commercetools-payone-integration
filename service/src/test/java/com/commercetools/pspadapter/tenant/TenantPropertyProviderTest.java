@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 public class TenantPropertyProviderTest {
 
     @Spy
-    private PropertyProvider propertyProvider;
+    private PropertyProvider propertyProvider = new PropertyProvider();
 
     private TenantPropertyProvider tenantPropertyProvider;
 

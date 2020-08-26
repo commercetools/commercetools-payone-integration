@@ -24,7 +24,7 @@ public class ServiceConfigTest {
     private static final String dummyValue = "123";
 
     @Spy
-    private PropertyProvider propertyProvider;
+    private PropertyProvider propertyProvider = new PropertyProvider();
 
     @Test
     public void getsScheduledJobCronForShortTimeFramePoll() {
