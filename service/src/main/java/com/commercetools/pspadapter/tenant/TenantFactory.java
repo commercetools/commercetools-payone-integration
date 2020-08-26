@@ -51,10 +51,6 @@ import static java.lang.String.format;
 
 public class TenantFactory {
 
-    private static final Duration DEFAULT_CTP_CLIENT_TIMEOUT = Duration.ofSeconds(10);
-
-    private static final int MAX_PARALLEL_REQUESTS = 30;
-
     private final String payoneInterfaceName;
 
     private final String tenantName;
