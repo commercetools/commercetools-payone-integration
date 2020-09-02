@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType.PAYONE_PNT;
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType.AUTHORIZATION;
