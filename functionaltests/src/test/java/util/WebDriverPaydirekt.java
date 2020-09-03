@@ -17,6 +17,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClick
 public class WebDriverPaydirekt extends CustomWebDriver {
 
     private static String LOGIN_FORM_USERNAME_FIELD_ID = "username";
+    private static String LOGIN_FORM_ACCEPT_COOKIES_CLASS_NAME = "rds-button--primary";
     private static String LOGIN_FORM_PASSWORD_FIELD_ID = "password";
     private static String LOGIN_FORM_SUBMIT_BUTTON_NAME = "loginBtn";
     private static String CONFIRM_BUTTON_NAME = "confirmPaymentButton";
@@ -29,6 +30,10 @@ public class WebDriverPaydirekt extends CustomWebDriver {
 
     private boolean doLogin(String userid, String pin) {
         boolean loggedIn = false;
+        final WebElement acceptCookies = findElement(By.className(LOGIN_FORM_ACCEPT_COOKIES_CLASS_NAME));
+        if(acceptCookies != null){
+            acceptCookies.click();
+        }
         final WebElement useridInput = findElement(By.id(LOGIN_FORM_USERNAME_FIELD_ID));
 
         useridInput.clear();

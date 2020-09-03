@@ -9,6 +9,7 @@ import org.apache.http.HttpResponse;
 import org.concordion.api.FullOGNL;
 import org.concordion.api.MultiValueResult;
 import org.concordion.integration.junit4.ConcordionRunner;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import specs.paymentmethods.BaseNotifiablePaymentFixture;
 
@@ -18,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.*;
 import static java.util.Optional.ofNullable;
-
+@Ignore
 @RunWith(ConcordionRunner.class)
 @FullOGNL
 public class KlarnaRequest extends BaseNotifiablePaymentFixture {
