@@ -55,7 +55,7 @@ public class PaymentHandler {
         try {
             for (int i = 0; i < RETRIES_LIMIT; i++) {
                 try {
-                    result = processPayment(paymentId);
+                    return processPayment(paymentId);
                 } catch (final ConcurrentModificationException concurrentModificationException) {
                     if (i == RETRIES_LIMIT - 1) {
                         throw concurrentModificationException;
@@ -73,7 +73,8 @@ public class PaymentHandler {
         } catch (final Exception e) {
             return handleException(e, paymentId);
         }
-        return result;
+        return handleException(paymentId, retryCounter,
+                new Exception("Unknown workflow error in PaymentHandler#handlePayment"));
     }
 
     private PaymentHandleResult processPayment(@Nonnull final String paymentId)

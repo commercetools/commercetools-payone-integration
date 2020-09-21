@@ -131,7 +131,7 @@ public class PaymentHandlerTest
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.ACCEPTED_202);
         assertThat(paymentHandleResult.body())
-            .isEqualTo(format("The payment with id '%s' couldn't be processed after %s retries.", paymentId, 20));
+            .isEqualTo(format("The payment with id '%s' couldn't be processed after %s retries.", paymentId, 5));
     }
 
     @Test
