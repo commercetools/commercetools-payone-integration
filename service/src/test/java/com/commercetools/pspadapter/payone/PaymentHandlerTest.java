@@ -29,6 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -80,6 +82,7 @@ public class PaymentHandlerTest
         final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
 
         // assert
+        verify(paymentDispatcher, times(1)).dispatchPayment(same(paymentWithCartLike));
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
         assertThat(paymentHandleResult.body()).isEmpty();
     }
@@ -131,7 +134,7 @@ public class PaymentHandlerTest
         // assert
         assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.ACCEPTED_202);
         assertThat(paymentHandleResult.body())
-            .isEqualTo(format("The payment with id '%s' couldn't be processed after %s retries.", paymentId, 20));
+            .isEqualTo(format("The payment with id '%s' couldn't be processed after %s retries.", paymentId, 5));
     }
 
     @Test

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.ConcurrentModificationException;
+import java.util.Random;
 
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
 import static io.sphere.sdk.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
@@ -22,7 +23,7 @@ public class PaymentHandler {
     /**
      * How many times to retry if {@link ConcurrentModificationException} happens.
      */
-    private static final int RETRIES_LIMIT = 20;
+    private static final int RETRIES_LIMIT = 5;
     private static final int RETRY_DELAY = 100; // msec
 
     private final String payoneInterfaceName;
@@ -51,29 +52,30 @@ public class PaymentHandler {
      * @return the result of handling the payment
      */
     public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
-        PaymentHandleResult result = null;
+        int retryCounter = 0;
         try {
-            for (int i = 0; i < RETRIES_LIMIT; i++) {
+            for (; retryCounter < RETRIES_LIMIT; retryCounter++) {
                 try {
-                    result = processPayment(paymentId);
+                    return processPayment(paymentId);
                 } catch (final ConcurrentModificationException concurrentModificationException) {
-                    if (i == RETRIES_LIMIT - 1) {
+                    if (retryCounter == RETRIES_LIMIT - 1) {
                         throw concurrentModificationException;
                     } else {
-                        Thread.sleep(RETRY_DELAY);
+                        Thread.sleep(calculateVariableDelay(retryCounter));
                     }
                 }
             }
         } catch (final ConcurrentModificationException concurrentModificationException) {
             return handleConcurrentModificationException(paymentId, concurrentModificationException);
         } catch (final NotFoundException | NoCartLikeFoundException e) {
-            return handleNotFoundException(paymentId, e);
+            return handleNotFoundException(paymentId, retryCounter, e);
         } catch (final ErrorResponseException e) {
-            return errorResponseHandler(e, paymentId);
+            return errorResponseHandler(paymentId, retryCounter, e);
         } catch (final Exception e) {
-            return handleException(e, paymentId);
+            return handleException(paymentId, retryCounter, e);
         }
-        return result;
+        return handleException(paymentId, retryCounter,
+                new Exception("Unknown workflow error in PaymentHandler#handlePayment"));
     }
 
     private PaymentHandleResult processPayment(@Nonnull final String paymentId)
@@ -108,33 +110,49 @@ public class PaymentHandler {
     }
 
     private PaymentHandleResult handleNotFoundException(
-        @Nonnull final String paymentId,
-        @Nonnull final Exception exception ) {
+            @Nonnull final String paymentId,
+            int retriedCount,
+            @Nonnull final Exception exception) {
 
-        final String body = format("Failed to process the commercetools Payment with id [%s], as the payment or the cart could not be found.", paymentId);
+        final String body = format("Failed to process the commercetools Payment with id [%s], as the payment or the cart could not be found after [%d] retries.",
+                paymentId, retriedCount);
         logger.error(tenantNameKeyValue, body, exception);
         return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
     }
 
     private PaymentHandleResult errorResponseHandler(
-        @Nonnull final ErrorResponseException e,
-        @Nonnull final String paymentId) {
+        @Nonnull final String paymentId,
+        int retriedCount,
+        @Nonnull final ErrorResponseException e) {
 
         logger.error(tenantNameKeyValue,
-            format("Failed to process the commercetools Payment with id [%s] due to an error response from the commercetools platform.", paymentId), e);
+            format("Failed to process the commercetools Payment with id [%s] due to an error response from the commercetools platform after [%d] retries.",
+                    paymentId, retriedCount), e);
         return new PaymentHandleResult(e.getStatusCode(),
                 format("Failed to process the commercetools Payment with id [%s], due to an error response from the "
                     + "commercetools platform. Try again later.", paymentId));
     }
 
     private PaymentHandleResult handleException(
-        @Nonnull final Exception exception,
-        @Nonnull final String paymentId) {
+        @Nonnull final String paymentId,
+        int retriedCount,
+        @Nonnull final Exception exception) {
 
         logger.error(tenantNameKeyValue,
-            format("Unexpected error occurred when processing commercetools Payment with id [%s].", paymentId), exception);
+            format("Unexpected error occurred when processing commercetools Payment with id [%s] after [%d] retries.",
+                    paymentId, retriedCount), exception);
         return new PaymentHandleResult(INTERNAL_SERVER_ERROR_500,
                 format("Unexpected error occurred when processing commercetools Payment with id [%s]. "
                     + "See the service logs", paymentId));
+    }
+
+    private static long calculateVariableDelay(final long triedAttempts) {
+        final long randomNumberInRange = getRandomNumberInRange(50, RETRY_DELAY);
+        final long timeoutMultipliedByTriedAttempts = RETRY_DELAY * (triedAttempts+1);
+        return timeoutMultipliedByTriedAttempts + randomNumberInRange;
+    }
+
+    private static long getRandomNumberInRange(final long min, final long max) {
+        return new Random().longs(min, (max + 1)).limit(1).findFirst().getAsLong();
     }
 }
