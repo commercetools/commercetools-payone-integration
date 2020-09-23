@@ -105,13 +105,13 @@ public final class HttpRequestUtil {
                 String value = he.getValue();
                 if (value != null && param.equalsIgnoreCase("timeout")) {
                     try {
-                        return Long.parseLong(value) * 1000;
+                        return Long.parseLong(value) * 500;
                     } catch (NumberFormatException ignore) {
                     }
                 }
             }
-            // Keep alive for 5 seconds only
-            return 5000;
+            // Keep alive for 2.5 seconds only
+            return 2500;
         }
  };
 
