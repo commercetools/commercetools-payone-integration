@@ -110,8 +110,8 @@ public final class HttpRequestUtil {
                     }
                 }
             }
-            // Keep alive for 5 seconds only
-            return 5000;
+            // Keep alive for 2.5 seconds only
+            return 2500;
         }
  };
 
