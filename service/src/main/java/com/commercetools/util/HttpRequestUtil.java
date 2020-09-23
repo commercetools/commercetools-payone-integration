@@ -105,7 +105,7 @@ public final class HttpRequestUtil {
                 String value = he.getValue();
                 if (value != null && param.equalsIgnoreCase("timeout")) {
                     try {
-                        return Long.parseLong(value) * 1000;
+                        return Long.parseLong(value) * 500;
                     } catch (NumberFormatException ignore) {
                     }
                 }
