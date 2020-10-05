@@ -7,9 +7,10 @@ import io.sphere.sdk.client.SphereClient;
 import io.sphere.sdk.client.SphereClientConfig;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.retry.RetryAction;
+import io.sphere.sdk.retry.RetryContext;
 import io.sphere.sdk.retry.RetryPredicate;
 import io.sphere.sdk.retry.RetryRule;
-
+import io.sphere.sdk.http.HttpException;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import static io.sphere.sdk.http.HttpStatusCode.BAD_GATEWAY_502;
 import static io.sphere.sdk.http.HttpStatusCode.GATEWAY_TIMEOUT_504;
@@ -57,11 +59,17 @@ public final class SphereClientConfigurationUtil {
     private static SphereClient withRetry(@Nonnull final SphereClient sphereClient) {
         final RetryAction scheduledRetry =
                 RetryAction.ofScheduledRetry(RETRIES_LIMIT, context -> calculateVariableDelay());
+
+        final RetryPredicate httpErrorMatcher =
+                RetryPredicate.ofMatchingErrors(io.sphere.sdk.http.HttpException.class);
+
         final RetryPredicate http5xxMatcher =
-                RetryPredicate.ofMatchingStatusCodes(
-                        BAD_GATEWAY_502, SERVICE_UNAVAILABLE_503, GATEWAY_TIMEOUT_504);
+                RetryPredicate.ofMatchingStatusCodes(BAD_GATEWAY_502, SERVICE_UNAVAILABLE_503, GATEWAY_TIMEOUT_504);
+
+        final Predicate<RetryContext> retryPredicate = http5xxMatcher.or(httpErrorMatcher);
+
         final List<RetryRule> retryRules =
-                Collections.singletonList(RetryRule.of(http5xxMatcher, scheduledRetry));
+                Collections.singletonList(RetryRule.of(retryPredicate, scheduledRetry));
         return RetrySphereClientDecorator.of(sphereClient, retryRules);
     }
 
