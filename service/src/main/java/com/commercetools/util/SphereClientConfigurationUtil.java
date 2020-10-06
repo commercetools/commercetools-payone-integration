@@ -27,6 +27,7 @@ public final class SphereClientConfigurationUtil {
     protected static final int RETRIES_LIMIT = 5;
     private static final int MAX_PARALLEL_REQUESTS = 30;
     private static final long DEFAULT_RETRY_INTERVAL_IN_SECOND = 10;
+    private static final int MAX_RETRY_RULES = 2;
 
     /**
      * Creates a {@link BlockingSphereClient} with a custom {@code timeout} with a custom {@link
@@ -66,7 +67,7 @@ public final class SphereClientConfigurationUtil {
         final RetryPredicate http5xxMatcher =
                 RetryPredicate.ofMatchingStatusCodes(BAD_GATEWAY_502, SERVICE_UNAVAILABLE_503, GATEWAY_TIMEOUT_504);
 
-        List<RetryRule> retryRules = new ArrayList<>();
+        final List<RetryRule> retryRules = new ArrayList<>(MAX_RETRY_RULES);
         retryRules.add(RetryRule.of(http5xxMatcher, scheduledRetry));
         retryRules.add(RetryRule.of(httpErrorMatcher, immediateRetry));
 
