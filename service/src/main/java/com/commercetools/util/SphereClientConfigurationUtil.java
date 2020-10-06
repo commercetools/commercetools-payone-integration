@@ -7,19 +7,15 @@ import io.sphere.sdk.client.SphereClient;
 import io.sphere.sdk.client.SphereClientConfig;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.retry.RetryAction;
-import io.sphere.sdk.retry.RetryContext;
 import io.sphere.sdk.retry.RetryPredicate;
 import io.sphere.sdk.retry.RetryRule;
-import io.sphere.sdk.http.HttpException;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 
 import static io.sphere.sdk.http.HttpStatusCode.BAD_GATEWAY_502;
 import static io.sphere.sdk.http.HttpStatusCode.GATEWAY_TIMEOUT_504;
