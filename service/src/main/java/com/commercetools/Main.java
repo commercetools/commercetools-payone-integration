@@ -49,7 +49,7 @@ public class Main {
         if (serviceConfig.getLoglevel().isPresent()) {
             ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
             root.setLevel(toLevel(serviceConfig.getLoglevel().get(), Level.INFO));
-            LOG.info(String.format("The Service is running in %s mode.", serviceConfig.getLoglevel().get()));
+            LOG.info(String.format("The Service is running on %s mode.", serviceConfig.getLoglevel().get()));
         }
     }
 
