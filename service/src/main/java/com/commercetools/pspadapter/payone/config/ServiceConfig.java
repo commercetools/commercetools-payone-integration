@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Optional;
 
 import static com.commercetools.pspadapter.payone.config.PropertyProvider.*;
 import static java.lang.String.format;
@@ -22,7 +23,7 @@ public class ServiceConfig {
     private final List<String> tenants;
     private final String applicationName;
     private final String applicationVersion;
-
+    private final Optional<String> loglevel;
     /**
      * Initializes the configuration.
      *
@@ -35,8 +36,12 @@ public class ServiceConfig {
 
         this.applicationName = propertyProvider.getMandatoryNonEmptyProperty(PAYONE_INTEGRATOR_NAME);
         this.applicationVersion = propertyProvider.getMandatoryNonEmptyProperty(PAYONE_INTEGRATOR_VERSION);
+        this.loglevel = propertyProvider.getProperty(LOG_LEVEL);
 
+    }
 
+    public Optional<String>  getLoglevel() {
+        return loglevel;
     }
 
     /**

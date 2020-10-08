@@ -27,6 +27,7 @@ public class PropertyProvider {
     public static final String PAYONE_SOLUTION_VERSION = "PAYONE_SOLUTION_VERSION";
     public static final String PAYONE_INTEGRATOR_NAME = "PAYONE_INTEGRATOR_NAME";
     public static final String PAYONE_INTEGRATOR_VERSION = "PAYONE_INTEGRATOR_VERSION";
+    public static final String LOG_LEVEL = "LOG_LEVEL";
 
     public static final String PAYONE_API_URL = "PAYONE_API_URL";
     public static final String HIDE_CUSTOMER_PERSONAL_DATA = "HIDE_CUSTOMER_PERSONAL_DATA";

@@ -1,15 +1,13 @@
 package com.commercetools;
 
 import ch.qos.logback.access.jetty.RequestLogImpl;
+import ch.qos.logback.classic.Level;
 import com.commercetools.pspadapter.payone.IntegrationService;
-
 import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.util.spark.JettyServerWithRequestLogFactory;
 import com.google.common.io.Resources;
-
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -17,8 +15,7 @@ import spark.embeddedserver.EmbeddedServerFactory;
 import spark.embeddedserver.EmbeddedServers;
 import spark.embeddedserver.jetty.EmbeddedJettyFactory;
 
-
-import static net.logstash.logback.argument.StructuredArguments.value;
+import static ch.qos.logback.classic.Level.toLevel;
 
 
 public class Main {
@@ -37,17 +34,26 @@ public class Main {
      */
     public static void main(String[] args)  {
 
-        bridgeJULToSLF4J();
-        configureAccessLogs();
-
         final PropertyProvider propertyProvider = new PropertyProvider();
         final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
+
+        bridgeJULToSLF4J();
+        configureAccessLogs();
+        configureLogLevel(serviceConfig);
 
         final IntegrationService integrationService = ServiceFactory.createIntegrationService(propertyProvider, serviceConfig);
         integrationService.start();
 
 
 
+    }
+
+    private static void configureLogLevel(ServiceConfig serviceConfig) {
+        if (serviceConfig.getLoglevel().isPresent()) {
+            ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+            root.setLevel(toLevel(serviceConfig.getLoglevel().get(), Level.INFO));
+        }
+        LOG.debug("The Service is running in debug mode. Its recommended to only switch it on when it`s need.");
     }
 
     private static void configureAccessLogs() {
