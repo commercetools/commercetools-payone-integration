@@ -112,6 +112,7 @@ Name | Is tenant specific | Content | Default
 `TENANT1_SECURE_KEY`                  | Yes | if provided and not empty, the value is used as the key for decrypting data from fields "IBAN" and "BIC" for payments with CustomType "PAYMENT_BANK_TRANSFER". The data must be the result of a Blowfish ECB encryption with said key and encoded in HEX. | "" (empty String)
 `TENANT1_UPDATE_ORDER_PAYMENT_STATE`  | Yes | if _true_ - `Order#paymentState` will be updated when payment status notification is received from Payone. By default the order's state remains unchanged. See [Order Payment Status Mapping](/docs/Order-Payment-Status-Mapping.md) for more details. | "false"
 `HIDE_CUSTOMER_PERSONAL_DATA`         | No  | if _true_ - all customer related personal data will be replaced by `<HIDDEN>` placeholder in all logs. If _false_ - all customer related personal data will be visible in logs. | "true"
+`LOG_LEVEL`         | No  | log-level for service logging(https://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/Level.html) | "INFO"
 
 #### Docker run
 
