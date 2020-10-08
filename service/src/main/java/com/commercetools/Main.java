@@ -43,17 +43,14 @@ public class Main {
 
         final IntegrationService integrationService = ServiceFactory.createIntegrationService(propertyProvider, serviceConfig);
         integrationService.start();
-
-
-
     }
 
     private static void configureLogLevel(ServiceConfig serviceConfig) {
         if (serviceConfig.getLoglevel().isPresent()) {
             ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
             root.setLevel(toLevel(serviceConfig.getLoglevel().get(), Level.INFO));
+            LOG.info(String.format("The Service is running in %s mode.", serviceConfig.getLoglevel().get()));
         }
-        LOG.debug("The Service is running in debug mode. Its recommended to only switch it on when it`s need.");
     }
 
     private static void configureAccessLogs() {

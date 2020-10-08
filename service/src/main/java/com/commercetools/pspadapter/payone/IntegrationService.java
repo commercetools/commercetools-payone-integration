@@ -36,6 +36,7 @@ import static java.util.stream.Collectors.toList;
 public class IntegrationService {
 
     public static final Logger LOG = LoggerFactory.getLogger(IntegrationService.class);
+
     static final int SUCCESS_STATUS = HttpStatus.OK_200;
     private static final String STATUS_KEY = "status";
     private static final String APPLICATION_INFO_KEY = "applicationInfo";
@@ -176,7 +177,7 @@ public class IntegrationService {
             return Integer.parseInt(environmentVariable);
         }
 
-        final String systemProperty = System.getProperty(HEROKU_ASSIGNED_PORT, "8080");
+        final String systemProperty = System.getProperty(HEROKU_ASSIGNED_PORT, "8082");
         return Integer.parseInt(systemProperty);
     }
 
