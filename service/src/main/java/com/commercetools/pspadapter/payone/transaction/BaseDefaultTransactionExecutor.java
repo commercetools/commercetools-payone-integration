@@ -87,23 +87,6 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
 
     @Override
     @Nonnull
-    protected PaymentWithCartLike retryLastExecutionAttempt(@Nonnull PaymentWithCartLike paymentWithCartLike,
-                                                            @Nonnull Transaction transaction,
-                                                            @Nonnull CustomFields lastExecutionAttempt) {
-        ZonedDateTime fieldAsDateTime = lastExecutionAttempt.getFieldAsDateTime(CustomFieldKeys.TIMESTAMP_FIELD);
-        if (fieldAsDateTime == null || fieldAsDateTime.isBefore(ZonedDateTime.now().minusMinutes(5))) {
-            return attemptExecution(paymentWithCartLike, transaction);
-        } else {
-            if (fieldAsDateTime.isAfter(ZonedDateTime.now().minusMinutes(1)))
-                throw new ConcurrentModificationException(format(
-                        "A processing of payment with ID \"%s\" started during the last 60 seconds and is likely to be finished soon, no need to retry now.",
-                        paymentWithCartLike.getPayment().getId()));
-        }
-        return paymentWithCartLike;
-    }
-
-    @Override
-    @Nonnull
     protected PaymentWithCartLike attemptExecution(final PaymentWithCartLike paymentWithCartLike,
                                                    final Transaction transaction) {
         final String transactionId = transaction.getId();
