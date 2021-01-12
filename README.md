@@ -127,7 +127,7 @@ docker run \
     -e TENANT1_PAYONE_MODE=test|live \
     -e TENANT1_PAYONE_PORTAL_ID=xxx \
     -e TENANT1_PAYONE_SUBACC_ID=xxx \
-sphereio/commercetools-payone-integration
+commercetools/commercetools-payone-integration
 ```
 
 ## Shop integration guide
