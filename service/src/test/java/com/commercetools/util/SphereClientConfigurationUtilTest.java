@@ -33,7 +33,7 @@ public class SphereClientConfigurationUtilTest {
     }
 
     @Test
-    void createClient_WithConfig_returnsSphereClient() {
+    public void createClient_WithConfig_returnsSphereClient() {
         final SphereClient sphereClient =
             SphereClientConfigurationUtil.createClient(tenantConfig.getSphereClientConfig());
         assertThat(sphereClient.getConfig().getProjectKey()).isEqualTo("test-key");
