@@ -27,7 +27,7 @@ public class SphereClientConfigurationUtilTest {
 
     @Test
     public void createBlockingClient_WithConfig_returnsBlockingSphereClient() {
-        SphereClient sphereClient =
+        final SphereClient sphereClient =
             SphereClientConfigurationUtil.createBlockingClient(tenantConfig.getSphereClientConfig());
         assertThat(sphereClient instanceof BlockingSphereClient).isTrue();
     }
