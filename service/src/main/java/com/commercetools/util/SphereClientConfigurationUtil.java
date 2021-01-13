@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 public final class SphereClientConfigurationUtil {
     private static final long DEFAULT_TIMEOUT = 10;
     private static final TimeUnit DEFAULT_TIMEOUT_TIME_UNIT = TimeUnit.SECONDS;
+    private static final int MAX_PARALLEL_REQUESTS = 30;
 
     /**
      * Creates a {@link SphereClient} with a default {@code timeout} value of 60 seconds.
@@ -26,7 +27,9 @@ public final class SphereClientConfigurationUtil {
     public static SphereClient createClient(@Nonnull final SphereClientConfig clientConfig) {
 
         final HttpClient httpClient = getHttpClient();
-        return RetryableSphereClientBuilder.of(clientConfig, httpClient).build();
+        return RetryableSphereClientBuilder.of(clientConfig, httpClient)
+                                           .withMaxParallelRequests(MAX_PARALLEL_REQUESTS)
+                                           .build();
     }
 
     /**
