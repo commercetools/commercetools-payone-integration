@@ -68,7 +68,7 @@ Every image has the following tags:
 - tag containing the travis build number, e.g. `travis-17`
 - `latest` (if `master` branch) or `wip-branch-name` (if not `master` branch)
 
-https://hub.docker.com/r/sphereio/commercetools-payone-integration/tags/
+https://hub.docker.com/r/commercetools/commercetools-payone-integration/tags/
 
 ### Release Tag
 
