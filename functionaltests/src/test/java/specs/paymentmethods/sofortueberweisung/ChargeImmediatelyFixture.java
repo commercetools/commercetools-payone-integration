@@ -176,6 +176,7 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
             return Optional.ofNullable(payment.getCustom())
                     .map(customFields -> customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD))
                     .map(redirectCustomField -> webDriver.executeSofortueberweisungRedirect(redirectCustomField,
+                            getTestDataSwBankTransferBic(),
                             getTestDataSwBankTransferIban(),
                             getTestDataSwBankTransferPin(),
                             getTestDataSwBankTransferTan())
