@@ -97,7 +97,6 @@ public abstract class BaseFixture {
     protected static final String TEST_DATA_3_DS_PASSWORD = "TEST_DATA_3_DS_PASSWORD";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_BANK_CODE = "TEST_DATA_SW_BANK_TRANSFER_BANK_CODE";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_IBAN = "TEST_DATA_SW_BANK_TRANSFER_IBAN";
-    protected static final String TEST_DATA_SW_BANK_TRANSFER_BIC = "TEST_DATA_SW_BANK_TRANSFER_BIC";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_PIN = "TEST_DATA_SW_BANK_TRANSFER_PIN";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_TAN = "TEST_DATA_SW_BANK_TRANSFER_TAN";
 
