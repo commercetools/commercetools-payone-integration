@@ -87,6 +87,7 @@ public class WebDriverSofortueberweisung extends CustomWebDriver {
      * returns the URL it was redirected to.
      *
      * @param url    the URL to navigate to
+     * @param bic    the bank code / BIC to use
      * @param userid the account id to use
      * @return the URL the browser was redirected to after submitting the {@code password}
      */
