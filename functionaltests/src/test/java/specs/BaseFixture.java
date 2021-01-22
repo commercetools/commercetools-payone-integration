@@ -95,6 +95,7 @@ public abstract class BaseFixture {
     protected static final String TEST_DATA_VISA_CREDIT_CARD_NO_3_DS = "TEST_DATA_VISA_CREDIT_CARD_NO_3DS";
     protected static final String TEST_DATA_VISA_CREDIT_CARD_3_DS = "TEST_DATA_VISA_CREDIT_CARD_3DS";
     protected static final String TEST_DATA_3_DS_PASSWORD = "TEST_DATA_3_DS_PASSWORD";
+    protected static final String TEST_DATA_SW_BANK_TRANSFER_BANK_CODE = "TEST_DATA_SW_BANK_TRANSFER_BANK_CODE";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_IBAN = "TEST_DATA_SW_BANK_TRANSFER_IBAN";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_BIC = "TEST_DATA_SW_BANK_TRANSFER_BIC";
     protected static final String TEST_DATA_SW_BANK_TRANSFER_PIN = "TEST_DATA_SW_BANK_TRANSFER_PIN";
@@ -387,14 +388,13 @@ public abstract class BaseFixture {
         return getConfigurationParameter(TEST_DATA_3_DS_PASSWORD);
     }
 
+    protected static String getTestDataSwBankTransferBankCode() {
+        return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_BANK_CODE);
+    }
+
     protected static String getTestDataSwBankTransferIban() {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_IBAN);
     }
-
-    protected static String getTestDataSwBankTransferBic() {
-        return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_BIC);
-    }
-
 
     protected static String getTestDataSwBankTransferPin() {
         return getConfigurationParameter(TEST_DATA_SW_BANK_TRANSFER_PIN);

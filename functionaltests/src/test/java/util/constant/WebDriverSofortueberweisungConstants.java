@@ -10,6 +10,7 @@ public final class WebDriverSofortueberweisungConstants {
      */
     public static final String SU_LOGIN_NAME_ID = "BackendFormLOGINNAMEUSERID";
 
+    public static final String SU_LOGIN_BANK_CODE_SEARCH = "BankCodeSearch";
     /**
      * Account pin input id
      */

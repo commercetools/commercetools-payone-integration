@@ -5,6 +5,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -24,6 +26,20 @@ public class WebDriverSofortueberweisung extends CustomWebDriver {
 
     }
 
+    @Override
+    protected WebElement findElement(By condition) {
+        WebDriverWait wait = new WebDriverWait(getDriver(), 10);
+        return wait.until(ExpectedConditions.elementToBeClickable(condition));
+    }
+
+    private void selectRegion(final String bankCode) {
+        final WebElement bankCodeSearchInput = findElement(By.id(SU_LOGIN_BANK_CODE_SEARCH));
+        bankCodeSearchInput.clear();
+        bankCodeSearchInput.sendKeys(bankCode);
+
+        final WebElement submitButton = findSubmitButton();
+        submitButton.click();
+    }
     private void doLogin(String userid, String pin) {
         final WebElement useridInput = findElement(By.id(SU_LOGIN_NAME_ID));
 
@@ -31,6 +47,7 @@ public class WebDriverSofortueberweisung extends CustomWebDriver {
         useridInput.sendKeys(userid);
 
         final WebElement pinInput = findElement(By.id(SU_USER_PIN_ID));
+        pinInput.clear();
         pinInput.sendKeys(pin);
 
         final WebElement submitButton = findSubmitButton();
@@ -81,17 +98,17 @@ public class WebDriverSofortueberweisung extends CustomWebDriver {
      * @param userid the account id to use
      * @return the URL the browser was redirected to after submitting the {@code password}
      */
-    public String executeSofortueberweisungRedirect(final String url, final String userid, final String pin, final
-    String tan) {
+    public String executeSofortueberweisungRedirect(final String url, final String bankCode,
+                                                    final String userid, final String pin, final String tan) {
         getDriver().get(url);
+        selectRegion(bankCode);
         doLogin(userid, pin);
         selectAccount();
-
         provideTan(tan);
-        WebDriverWait wait = new WebDriverWait(getDriver(), 10);
+        WebDriverWait wait = new WebDriverWait(getDriver(), 30);
         Boolean waitToSuccess = wait.until(ExpectedConditions.urlContains("-Success"));
         return waitToSuccess ? getUrl() : "";
-}
+    }
 
 
 }
