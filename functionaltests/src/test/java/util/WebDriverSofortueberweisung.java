@@ -89,6 +89,8 @@ public class WebDriverSofortueberweisung extends CustomWebDriver {
      * @param url    the URL to navigate to
      * @param bic    the bank code / BIC to use
      * @param userid the account id to use
+     * @param pin the pin to login
+     * @param tan the tan to use
      * @return the URL the browser was redirected to after submitting the {@code password}
      */
     public String executeSofortueberweisungRedirect(final String url, final String bic, final String userid,
