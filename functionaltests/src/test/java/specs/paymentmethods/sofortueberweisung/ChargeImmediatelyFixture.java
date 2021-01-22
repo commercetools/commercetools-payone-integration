@@ -133,7 +133,7 @@ public class ChargeImmediatelyFixture extends BaseNotifiablePaymentFixture {
                         Optional.ofNullable(customFields.getFieldAsString(CustomFieldKeys.REDIRECT_URL_FIELD)))
                 .orElse(NULL_STRING);
 
-        final int urlTrimAt = responseRedirectUrl.contains("?") ? responseRedirectUrl.indexOf("?") : 0;
+        final int urlTrimAt = responseRedirectUrl.contains("/") ? responseRedirectUrl.lastIndexOf("/") : 0;
 
         final long appointedNotificationCount =
                 getTotalNotificationCountOfAction(payment, "appointed");
