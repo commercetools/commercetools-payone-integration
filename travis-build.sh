@@ -2,7 +2,7 @@
 
 set -e
 
-export REPO="sphereio/commercetools-payone-integration"
+export REPO="commercetools/commercetools-payone-integration"
 export DOCKER_TAG=`if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "latest"; else echo "wip-${TRAVIS_BRANCH//\//-}" ; fi`
 
 echo "Building service jar file including all dependencies."
