@@ -6,11 +6,6 @@ package util.constant;
 public final class WebDriverSofortueberweisungConstants {
 
     /**
-     * BIC input id
-     */
-    public static final String SU_LOGIN_BANK_CODE_SEARCH = "BankCodeSearch";
-
-    /**
      * Account number (IBAN) input id
      */
     public static final String SU_LOGIN_NAME_ID = "BackendFormLOGINNAMEUSERID";
