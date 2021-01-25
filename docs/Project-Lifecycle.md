@@ -182,27 +182,27 @@ The test service run in Heroku expects to have the next values:
 
 <table>
   <tr><th>Name</th><th>Content</th></tr>
-  <tr><td><code>TENANTS</code></td>                                          <td>HEROKU_FIRST_TENANT, HEROKU_SECOND_TENANT</td>
-  <tr><td><code>HEROKU_FIRST_TENANT_CT_CLIENT_ID</code></td>                 <td rowspan="6">Should be adjusted with Travis setup below</td></tr>
-  <tr><td><code>HEROKU_SECOND_TENANT_CT_CLIENT_ID</code></td>                </tr>
-  <tr><td><code>HEROKU_FIRST_TENANT_CT_CLIENT_SECRET</code></td>             </tr>
-  <tr><td><code>HEROKU_SECOND_TENANT_CT_CLIENT_SECRET</code></td>            </tr>
-  <tr><td><code>HEROKU_FIRST_TENANT_CT_PROJECT_KEY</code></td>               </tr>
-  <tr><td><code>HEROKU_SECOND_TENANT_CT_PROJECT_KEY</code></td>              </tr>
-  <tr><td><code>HEROKU_FIRST_TENANT_CT_START_FROM_SCRATCH</code></td>        <td>false</td></tr>
-  <tr><td><code>HEROKU_SECOND_TENANT_CT_START_FROM_SCRATCH</code></td>       <td>false</td></tr>
-  <tr><td><code>HEROKU_FIRST_TENANT_PAYONE_KEY</code></td>                   <td rowspan="8">Should be adjusted with Travis setup below</td></tr>
-  <tr><td><code>HEROKU_SECOND_TENANT_PAYONE_KEY</code></td>                  </tr>
-  <tr><td><code>HEROKU_FIRST_TENANT_PAYONE_MERCHANT_ID</code></td>           </tr>
-  <tr><td><code>HEROKU_SECOND_TENANT_PAYONE_MERCHANT_ID</code></td>          </tr>
-  <tr><td><code>HEROKU_FIRST_TENANT_PAYONE_PORTAL_ID</code></td>             </tr>
-  <tr><td><code>HEROKU_SECOND_TENANT_PAYONE_PORTAL_ID</code></td>            </tr>
-  <tr><td><code>HEROKU_FIRST_TENANT_PAYONE_SUBACC_ID</code></td>             </tr>
-  <tr><td><code>HEROKU_SECOND_TENANT_PAYONE_SUBACC_ID</code></td>            </tr>
-  <tr><td><code>HEROKU_FIRST_TENANT_PAYONE_MODE</code></td>                  <td>test</td></tr>
-  <tr><td><code>HEROKU_SECOND_TENANT_PAYONE_MODE</code></td>                 <td>test</td></tr>
-  <tr><td><code>HEROKU_FIRST_TENANT_UPDATE_ORDER_PAYMENT_STATE</code></td>   <td><b>true</b></td></tr>
-  <tr><td><code>HEROKU_SECOND_TENANT_UPDATE_ORDER_PAYMENT_STATE</code></td>  <td><b>false</b></td></tr>
+  <tr><td><code>TENANTS</code></td>                                          <td>FIRST_TENANT, SECOND_TENANT</td>
+  <tr><td><code>FIRST_TENANT_CT_CLIENT_ID</code></td>                 <td rowspan="6">Should be adjusted with Travis setup below</td></tr>
+  <tr><td><code>SECOND_TENANT_CT_CLIENT_ID</code></td>                </tr>
+  <tr><td><code>FIRST_TENANT_CT_CLIENT_SECRET</code></td>             </tr>
+  <tr><td><code>SECOND_TENANT_CT_CLIENT_SECRET</code></td>            </tr>
+  <tr><td><code>FIRST_TENANT_CT_PROJECT_KEY</code></td>               </tr>
+  <tr><td><code>SECOND_TENANT_CT_PROJECT_KEY</code></td>              </tr>
+  <tr><td><code>FIRST_TENANT_CT_START_FROM_SCRATCH</code></td>        <td>false</td></tr>
+  <tr><td><code>SECOND_TENANT_CT_START_FROM_SCRATCH</code></td>       <td>false</td></tr>
+  <tr><td><code>FIRST_TENANT_PAYONE_KEY</code></td>                   <td rowspan="8">Should be adjusted with Travis setup below</td></tr>
+  <tr><td><code>SECOND_TENANT_PAYONE_KEY</code></td>                  </tr>
+  <tr><td><code>FIRST_TENANT_PAYONE_MERCHANT_ID</code></td>           </tr>
+  <tr><td><code>SECOND_TENANT_PAYONE_MERCHANT_ID</code></td>          </tr>
+  <tr><td><code>FIRST_TENANT_PAYONE_PORTAL_ID</code></td>             </tr>
+  <tr><td><code>SECOND_TENANT_PAYONE_PORTAL_ID</code></td>            </tr>
+  <tr><td><code>FIRST_TENANT_PAYONE_SUBACC_ID</code></td>             </tr>
+  <tr><td><code>SECOND_TENANT_PAYONE_SUBACC_ID</code></td>            </tr>
+  <tr><td><code>FIRST_TENANT_PAYONE_MODE</code></td>                  <td>test</td></tr>
+  <tr><td><code>SECOND_TENANT_PAYONE_MODE</code></td>                 <td>test</td></tr>
+  <tr><td><code>FIRST_TENANT_UPDATE_ORDER_PAYMENT_STATE</code></td>   <td><b>true</b></td></tr>
+  <tr><td><code>SECOND_TENANT_UPDATE_ORDER_PAYMENT_STATE</code></td>  <td><b>false</b></td></tr>
 </table> 
 
 **Note**: 
@@ -230,7 +230,7 @@ The executable specification (using [Concordion](http://concordion.org/)) requir
 <table>
   <tr><th>Name</th><th>Content</th></tr>
   <tr><td><code>TEST_DATA_CT_PAYONE_INTEGRATION_URL</code></td>  <td>the URL of the service instance under test</td></tr>
-  <tr><td><code>TEST_DATA_TENANT_NAME</code></td>                <td>name of the first tenant, `HEROKU_FIRST_TENANT` like in Heroku settings</td></tr>
+  <tr><td><code>TEST_DATA_TENANT_NAME</code></td>                <td>name of the first tenant, `FIRST_TENANT` like in Heroku settings</td></tr>
   <tr><td><code>TEST_DATA_VISA_CREDIT_CARD_NO_3DS</code></td>    <td>test simple VISA credit card number (don't use real credit card)</td></tr>
   <tr><td><code>TEST_DATA_VISA_CREDIT_CARD_3DS</code></td>       <td>test 3-D secured VISA credit card number (dont' use real credit card)</td></tr>
   <tr><td><code>TEST_DATA_3_DS_PASSWORD</code></td>              <td>the 3DS password of the test card. Payone Test Cards use <code>12345</code></td></tr>
@@ -365,7 +365,7 @@ export FIRST_TENANT_CT_START_FROM_SCRATCH=false
 #!/bin/sh
 export TEST_DATA_CT_PAYONE_INTEGRATION_URL=https://ct-payone-integration-staging.herokuapp.com
 
-export TEST_DATA_TENANT_NAME=HEROKU_FIRST_TENANT
+export TEST_DATA_TENANT_NAME=FIRST_TENANT
 export TEST_DATA_VISA_CREDIT_CARD_NO_3DS=
 export TEST_DATA_VISA_CREDIT_CARD_3DS=
 export TEST_DATA_3_DS_PASSWORD=
@@ -382,7 +382,7 @@ export TEST_DATA_CT_PROJECT_KEY=
 export TEST_DATA_CT_CLIENT_ID=
 export TEST_DATA_CT_CLIENT_SECRET=
 
-export TEST_DATA_TENANT_NAME_2=HEROKU_SECOND_TENANT
+export TEST_DATA_TENANT_NAME_2=SECOND_TENANT
 export TEST_DATA_CT_PROJECT_KEY_2=
 export TEST_DATA_CT_CLIENT_ID_2=
 export TEST_DATA_CT_CLIENT_SECRET_2=
@@ -402,29 +402,29 @@ Alternatively you could use common gradle properties file in users directory `~/
 ```
 # service config, like https://dashboard.heroku.com/apps/ct-payone-integration-staging/
 
-TENANTS=HEROKU_FIRST_TENANT
-#TENANTS=HEROKU_FIRST_TENANT, HEROKU_SECOND_TENANT
-HEROKU_FIRST_TENANT_PAYONE_KEY=
-HEROKU_FIRST_TENANT_PAYONE_MERCHANT_ID=
-HEROKU_FIRST_TENANT_PAYONE_PORTAL_ID=
-HEROKU_FIRST_TENANT_PAYONE_SUBACC_ID=
-HEROKU_FIRST_TENANT_PAYONE_MODE=test
-HEROKU_FIRST_TENANT_UPDATE_ORDER_PAYMENT_STATE=true
-HEROKU_FIRST_TENANT_CT_PROJECT_KEY=
-HEROKU_FIRST_TENANT_CT_CLIENT_ID=
-HEROKU_FIRST_TENANT_CT_CLIENT_SECRET=
-HEROKU_FIRST_TENANT_CT_START_FROM_SCRATCH=false
+TENANTS=FIRST_TENANT
+#TENANTS=FIRST_TENANT, SECOND_TENANT
+FIRST_TENANT_PAYONE_KEY=
+FIRST_TENANT_PAYONE_MERCHANT_ID=
+FIRST_TENANT_PAYONE_PORTAL_ID=
+FIRST_TENANT_PAYONE_SUBACC_ID=
+FIRST_TENANT_PAYONE_MODE=test
+FIRST_TENANT_UPDATE_ORDER_PAYMENT_STATE=true
+FIRST_TENANT_CT_PROJECT_KEY=
+FIRST_TENANT_CT_CLIENT_ID=
+FIRST_TENANT_CT_CLIENT_SECRET=
+FIRST_TENANT_CT_START_FROM_SCRATCH=false
 
-HEROKU_SECOND_TENANT_PAYONE_KEY=
-HEROKU_SECOND_TENANT_PAYONE_MERCHANT_ID=
-HEROKU_SECOND_TENANT_PAYONE_PORTAL_ID=
-HEROKU_SECOND_TENANT_PAYONE_SUBACC_ID=
-HEROKU_SECOND_TENANT_PAYONE_MODE=test
-HEROKU_SECOND_TENANT_UPDATE_ORDER_PAYMENT_STATE=false
-HEROKU_SECOND_TENANT_CT_PROJECT_KEY=
-HEROKU_SECOND_TENANT_CT_CLIENT_ID=
-HEROKU_SECOND_TENANT_CT_CLIENT_SECRET=
-HEROKU_SECOND_TENANT_CT_START_FROM_SCRATCH=false
+SECOND_TENANT_PAYONE_KEY=
+SECOND_TENANT_PAYONE_MERCHANT_ID=
+SECOND_TENANT_PAYONE_PORTAL_ID=
+SECOND_TENANT_PAYONE_SUBACC_ID=
+SECOND_TENANT_PAYONE_MODE=test
+SECOND_TENANT_UPDATE_ORDER_PAYMENT_STATE=false
+SECOND_TENANT_CT_PROJECT_KEY=
+SECOND_TENANT_CT_CLIENT_ID=
+SECOND_TENANT_CT_CLIENT_SECRET=
+SECOND_TENANT_CT_START_FROM_SCRATCH=false
 
 # END OF service config, like https://dashboard.heroku.com/apps/ct-payone-integration-staging/
 
@@ -433,7 +433,7 @@ HEROKU_SECOND_TENANT_CT_START_FROM_SCRATCH=false
 TEST_DATA_CT_PAYONE_INTEGRATION_URL=https://ct-payone-integration-staging.herokuapp.com
 #TEST_DATA_CT_PAYONE_INTEGRATION_URL=http://localhost:8080
 
-TEST_DATA_TENANT_NAME=HEROKU_FIRST_TENANT
+TEST_DATA_TENANT_NAME=FIRST_TENANT
 TEST_DATA_VISA_CREDIT_CARD_NO_3DS=
 TEST_DATA_VISA_CREDIT_CARD_3DS=
 TEST_DATA_3_DS_PASSWORD=
@@ -450,7 +450,7 @@ TEST_DATA_CT_PROJECT_KEY=
 TEST_DATA_CT_CLIENT_ID=
 TEST_DATA_CT_CLIENT_SECRET=
 
-TEST_DATA_TENANT_NAME_2=HEROKU_SECOND_TENANT
+TEST_DATA_TENANT_NAME_2=SECOND_TENANT
 TEST_DATA_CT_PROJECT_KEY_2=
 TEST_DATA_CT_CLIENT_ID_2=
 TEST_DATA_CT_CLIENT_SECRET_2=
