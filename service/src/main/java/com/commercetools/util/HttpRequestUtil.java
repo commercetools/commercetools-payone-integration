@@ -37,7 +37,7 @@ import java.util.Objects;
  * <li>reusable, e.g. one instance per application</li>
  * <li>multi-threading</li>
  * <li>socket/request/connect timeouts are 10 sec</li>
- * <li>retries on connections exceptions up to 3 times, if request has not been sent yet
+ * <li>retries on connections exceptions up to 5 times, if request has not been sent yet
  * (see {@link DefaultHttpRequestRetryHandler#isRequestSentRetryEnabled()}
  * and {@link #HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT})</li>
  * <li>connections pool is 200 connections, up to 20 per route (see {@link #CONNECTION_MAX_TOTAL}
@@ -77,7 +77,7 @@ public final class HttpRequestUtil {
      * {@link java.io.InterruptedIOException} and {@link ConnectException} so the client will retry on interruption and
      * socket timeouts.
      * <p>
-     * The implementation will retry 3 times.
+     * The implementation will retry 5 times.
      */
     private static final DefaultHttpRequestRetryHandler HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT =
             new DefaultHttpRequestRetryHandler(RETRY_TIMES, REQUEST_SENT_RETRY_ENABLED, Arrays.asList(
