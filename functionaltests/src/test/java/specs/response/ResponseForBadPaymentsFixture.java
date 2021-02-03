@@ -4,7 +4,8 @@ import org.concordion.api.FullOGNL;
 import org.concordion.integration.junit4.ConcordionRunner;
 import org.junit.runner.RunWith;
 
-import static com.commercetools.util.HttpRequestUtil.executeGetRequest;
+import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
+
 
 /**
  * {@code /${getTenantName()}/commercetools/handle/payments/} URL tests for bad IDs.

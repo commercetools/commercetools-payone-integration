@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.commercetools.util.HttpRequestUtil.executeGetRequest;
-import static com.commercetools.util.HttpRequestUtil.responseToString;
+import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
+import static com.commercetools.util.PayoneHttpClientConfigurationUtil.responseToString;
 import static java.util.Optional.ofNullable;
 
 /**

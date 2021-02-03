@@ -2,13 +2,31 @@ package com.commercetools.pspadapter.payone.domain.payone;
 
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.BaseRequest;
+import com.commercetools.util.PayoneHttpClientConfigurationUtil;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Consts;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
@@ -17,20 +35,57 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.commercetools.util.HttpRequestUtil.executePostRequestToString;
-import static com.commercetools.util.HttpRequestUtil.nameValue;
+import static com.commercetools.util.PayoneHttpClientConfigurationUtil.nameValue;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * <p>
+ * The http client options: <ul>
+ * <li>reusable, e.g. one instance per application</li>
+ * <li>multi-threading</li>
+ * <li>socket/request/connect timeouts are 10 sec</li>
+ * <li>retries on connections exceptions up to 5 times, if request has not been sent yet
+ * (see {@link DefaultHttpRequestRetryHandler#isRequestSentRetryEnabled()}
+ * and {@link PayoneHttpClientConfigurationUtil#httpRequestRetryHandler})</li>
+ * <li>connections pool is 200 connections, up to 20 per route (see {@link PayoneHttpClientConfigurationUtil#CONNECTION_MAX_TOTAL}
+ * and {@link PayoneHttpClientConfigurationUtil#CONNECTION_MAX_PER_ROUTE}). These values are "inherited" from
+ * <a href="https://github.com/Kong/unirest-java/blob/3b461599ad021d0a3f14213c0dbb85bab7244f66/src/main/java/com/mashape/unirest/http/options/Options.java#L23-L24">Unirest</a>
+ * library. It could be changed in the future if we face problems (for example, decrease if we have OutOfMemory
+ * or increase if out of connections from the pool.</li>
+ * </ul>
+ * <p>
+ * This util is intended to replace <i>Unirest</i> and <i>fluent-hc</i> dependencies, which don't propose any flexible
+ * way to implement retry strategy.
+ * <p>
+ * Implementation notes (for developers):<ul>
+ * <li>remember, the responses must be closed, otherwise the connections won't be return to the pool,
+ * no new connections will be available and {@link org.apache.http.conn.ConnectionPoolTimeoutException} will be
+ * thrown. See {@link #executeReadAndCloseRequest(HttpUriRequest)}</li>
+ * <li>{@link UrlEncodedFormEntity} the charset should be explicitly set to UTF-8, otherwise
+ * {@link HTTP#DEF_CONTENT_CHARSET ISO_8859_1} is used, which is not acceptable for German alphabet</li>
+ * </ul>
+ */
+
 public class PayonePostServiceImpl implements PayonePostService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PayonePostServiceImpl.class);
     private static final String ENCODING_UTF8 = "UTF-8";
 
     private String serverAPIURL;
 
-    private int connectionTimeout = 3000;
-
+    private static final CloseableHttpClient PAYONE_HTTP_CLIENT = HttpClientBuilder.create()
+            .setDefaultRequestConfig(RequestConfig.custom()
+                    .setConnectionRequestTimeout(
+                            PayoneHttpClientConfigurationUtil.TIMEOUT_WHEN_CONNECTION_POOL_FULLY_OCCUPIED)
+                    .setSocketTimeout(
+                            PayoneHttpClientConfigurationUtil.TIMEOUT_WHEN_CONTINUOUS_DATA_STREAM_DOES_NOT_REPLY)
+                    .setConnectTimeout(PayoneHttpClientConfigurationUtil.TIMEOUT_TO_ESTABLISH_CONNECTION)
+                    .build())
+            .setRetryHandler(PayoneHttpClientConfigurationUtil.httpRequestRetryHandler)
+            .setServiceUnavailableRetryStrategy(PayoneHttpClientConfigurationUtil.serviceUnavailableRetryStrategy)
+            .setKeepAliveStrategy(PayoneHttpClientConfigurationUtil.keepAliveStrategy)
+            .setConnectionManager(PayoneHttpClientConfigurationUtil.buildDefaultConnectionManager())
+            .build();
 
     private PayonePostServiceImpl(final String serverAPIURL) {
         Preconditions.checkArgument(
@@ -56,7 +111,6 @@ public class PayonePostServiceImpl implements PayonePostService {
         try {
             final List<BasicNameValuePair> mappedListParameters =
                     getNameValuePairsWithExpandedLists(baseRequest.toStringMap(false));
-
             final String serverResponse = executePostRequestToString(this.serverAPIURL, mappedListParameters);
 
             return buildMapFromResultParams(serverResponse);
@@ -66,6 +120,86 @@ public class PayonePostServiceImpl implements PayonePostService {
             final String exceptionMessage = format("Payone POST request with body (%s) failed.", requestBody);
             throw new PayoneException(exceptionMessage, e);
         }
+    }
+
+    /**
+     * Make URL request and return a response string.
+     *
+     * @param url        URL to post/query
+     * @param parameters list of values to send as URL encoded form data. If <b>null</b> - not data is sent, but
+     *                   empty POST request is executed.
+     * @return response string from the request
+     * @throws IOException in case of a problem or the connection was aborted
+     */
+    public static String executePostRequestToString(@Nonnull String url,
+                                                    @Nullable Iterable<? extends NameValuePair> parameters)
+            throws IOException {
+
+        return PayoneHttpClientConfigurationUtil.responseToString(executePostRequest(url, parameters));
+    }
+
+    /**
+     * Execute retryable HTTP POST request with specified {@code timeoutMsec}
+     *
+     * @param url        url to post
+     * @param parameters list of values to send as URL encoded form data. If <b>null</b> - not data is sent, but
+     *                   empty POST request is executed.
+     * @return response from the {@code url}
+     * @throws IOException in case of a problem or the connection was aborted
+     */
+    public static HttpResponse executePostRequest(@Nonnull String url,
+                                                  @Nullable Iterable<? extends NameValuePair> parameters)
+            throws IOException {
+
+        final HttpPost request = new HttpPost(url);
+        if (parameters != null) {
+            request.setEntity(new UrlEncodedFormEntity(parameters, Consts.UTF_8));
+        }
+
+        return executeReadAndCloseRequest(request);
+    }
+
+    /**
+     * By default apache httpclient responses are not closed, thus we should explicitly read the stream and close the
+     * connection.
+     * <p>
+     * The connection will be closed even if read exception occurs.
+     *
+     * @param request GET/POST/other request to execute, read and close
+     * @return read and closed {@link CloseableHttpResponse} instance from
+     * {@link CloseableHttpClient#execute(HttpUriRequest)}
+     * where {@link HttpResponse#getEntity()} is set to read string value.
+     * @throws IOException if reading failed. Note, even in case of exception the {@code response} will be closed.
+     */
+    private static CloseableHttpResponse executeReadAndCloseRequest(@Nonnull final HttpUriRequest request)
+            throws IOException {
+
+        final CloseableHttpResponse response = PAYONE_HTTP_CLIENT.execute(request);
+        try {
+            final HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                final ByteArrayEntity byteArrayEntity = new ByteArrayEntity(EntityUtils.toByteArray(entity));
+                final ContentType contentType = ContentType.getOrDefault(entity);
+                byteArrayEntity.setContentType(contentType.toString());
+                response.setEntity(byteArrayEntity);
+            }
+        } finally {
+            response.close();
+        }
+
+        return response;
+    }
+
+    /**
+     * Execute retryable HTTP GET request with default
+     * {@link PayoneHttpClientConfigurationUtil#TIMEOUT_TO_ESTABLISH_CONNECTION}
+     *
+     * @param url url to get
+     * @return response from the {@code url}
+     * @throws IOException in case of a problem or the connection was aborted
+     */
+    public static HttpResponse executeGetRequest(@Nonnull String url) throws IOException {
+        return executeReadAndCloseRequest(new HttpGet(url));
     }
 
     /**
@@ -129,14 +263,6 @@ public class PayonePostServiceImpl implements PayonePostService {
 
     public void setServerAPIURL(String serverAPIURL) {
         this.serverAPIURL = serverAPIURL;
-    }
-
-    public int getConnectionTimeout() {
-        return connectionTimeout;
-    }
-
-    public void setConnectionTimeout(int connectionTimeout) {
-        this.connectionTimeout = connectionTimeout;
     }
 
 }

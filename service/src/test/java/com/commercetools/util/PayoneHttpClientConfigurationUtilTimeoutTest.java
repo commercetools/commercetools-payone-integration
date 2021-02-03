@@ -17,13 +17,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Random;
 
-import static com.commercetools.util.HttpRequestUtil.*;
+import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
+import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executePostRequest;
+import static com.commercetools.util.PayoneHttpClientConfigurationUtil.*;
 import static java.lang.String.format;
 import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 
-public class HttpRequestUtilTimeoutTest {
+public class PayoneHttpClientConfigurationUtilTimeoutTest {
     /**
      * Url pattern to local mocking http service.
      * <ol>
@@ -33,7 +35,7 @@ public class HttpRequestUtilTimeoutTest {
      */
     private static final String URL_PATTERN = "http://localhost:%d?delay=%d";
 
-    private static Logger LOGGER = LoggerFactory.getLogger(HttpRequestUtilTimeoutTest.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(PayoneHttpClientConfigurationUtilTimeoutTest.class);
 
     private int testRandomPort;
 
@@ -109,7 +111,7 @@ public class HttpRequestUtilTimeoutTest {
     /**
      * Verify normal GET response.
      * This request has response timeout shorter than max request time in
-     * {@link com.commercetools.util.HttpRequestUtil#TIMEOUT_TO_ESTABLISH_CONNECTION} thus should success, opposite to
+     * {@link PayoneHttpClientConfigurationUtil#TIMEOUT_TO_ESTABLISH_CONNECTION} thus should success, opposite to
      * {@link #longGetRequest_shouldFailLong()}
      */
     @Test
@@ -123,7 +125,7 @@ public class HttpRequestUtilTimeoutTest {
     /**
      * Verify that if request timeout is too long - the client will retry 3 times.
      * This request has response timeout larger than max request time in
-     * {@link com.commercetools.util.HttpRequestUtil#TIMEOUT_TO_ESTABLISH_CONNECTION} thus should failure, opposite to
+     * {@link PayoneHttpClientConfigurationUtil#TIMEOUT_TO_ESTABLISH_CONNECTION} thus should failure, opposite to
      * {@link #shortGetRequest_shouldSuccess()}
      */
     @Test
@@ -141,10 +143,10 @@ public class HttpRequestUtilTimeoutTest {
     /**
      * Verify that if POST request timeout is too long - the client will fails with {@link java.io.IOException}, but
      * won't re-try, because the client is not re-sending request arguments once they are sent.
-     * See {@link HttpRequestUtil#REQUEST_SENT_RETRY_ENABLED} for more details.
+     * See {@link PayoneHttpClientConfigurationUtil#REQUEST_SENT_RETRY_ENABLED} for more details.
      * <p>
      * This request has response timeout larger than max request time in
-     * {@link com.commercetools.util.HttpRequestUtil#TIMEOUT_TO_ESTABLISH_CONNECTION} thus should failure, opposite to
+     * {@link PayoneHttpClientConfigurationUtil#TIMEOUT_TO_ESTABLISH_CONNECTION} thus should failure, opposite to
      * {@link #shortGetRequest_shouldSuccess()}
      * <p>
      * This test should be change if we decide the request should be re-send on timeout exceptions.
