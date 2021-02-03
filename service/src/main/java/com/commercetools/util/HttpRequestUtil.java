@@ -1,6 +1,12 @@
 package com.commercetools.util;
 
-import org.apache.http.*;
+import org.apache.http.Consts;
+import org.apache.http.HeaderElement;
+import org.apache.http.HeaderElementIterator;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -19,7 +25,10 @@ import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,6 +39,8 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Objects;
 
+import static java.lang.String.format;
+
 /**
  * Util to make simple retryable HTTP GET/POST requests.
  * <p>
@@ -39,7 +50,7 @@ import java.util.Objects;
  * <li>socket/request/connect timeouts are 10 sec</li>
  * <li>retries on connections exceptions up to 5 times, if request has not been sent yet
  * (see {@link DefaultHttpRequestRetryHandler#isRequestSentRetryEnabled()}
- * and {@link #HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT})</li>
+ * and {@link #httpRequestRetryHandler})</li>
  * <li>connections pool is 200 connections, up to 20 per route (see {@link #CONNECTION_MAX_TOTAL}
  * and {@link #CONNECTION_MAX_PER_ROUTE}). These values are "inherited" from
  * <a href="https://github.com/Kong/unirest-java/blob/3b461599ad021d0a3f14213c0dbb85bab7244f66/src/main/java/com/mashape/unirest/http/options/Options.java#L23-L24">Unirest</a>
@@ -60,13 +71,21 @@ import java.util.Objects;
  */
 public final class HttpRequestUtil {
 
-    static final int REQUEST_TIMEOUT = 30000;
+    static final int TIMEOUT_TO_ESTABLISH_CONNECTION = 10000;
+
+    static final int TIMEOUT_WHEN_CONNECTION_POOL_FULLY_OCCUPIED = 10000;
+
+    static final int TIMEOUT_WHEN_CONTINUOUS_DATA_STREAM_DOES_NOT_REPLY = 8000;
 
     static final int RETRY_TIMES = 5;
 
     static final int CONNECTION_MAX_TOTAL = 200;
 
     static final int CONNECTION_MAX_PER_ROUTE = 20;
+
+    static final int SERVICE_UNAVAILABLE_RETRY_DELAY_MILLIS = 100;
+
+    static final Logger logger = LoggerFactory.getLogger(HttpRequestUtil.class);
 
     /**
      * Don't resend request on connection exception once it has been successfully sent.
@@ -79,49 +98,94 @@ public final class HttpRequestUtil {
      * <p>
      * The implementation will retry 5 times.
      */
-    private static final DefaultHttpRequestRetryHandler HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT =
-            new DefaultHttpRequestRetryHandler(RETRY_TIMES, REQUEST_SENT_RETRY_ENABLED, Arrays.asList(
-                    UnknownHostException.class,
-                    SSLException.class)) {
-                // it is an anonymous class extension, but we don't need the functionality change,
-                // we just need to access protected constructor
-                // DefaultHttpRequestRetryHandler(int, boolean, Collection<Class<? extends IOException>>),
-                // where we could specify reduced nonRetriableClasses list.
-                // Thus the implementation is empty.
+    private static final DefaultHttpRequestRetryHandler httpRequestRetryHandler = new DefaultHttpRequestRetryHandler(
+            RETRY_TIMES, REQUEST_SENT_RETRY_ENABLED, Arrays.asList(
+            UnknownHostException.class,
+            SSLException.class)) {
+
+                // We need additional logging on each failure to payone endpoint and also
+                // everytime we make a retry attempt
+                @Override
+                public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+                    String payoneRequestReference = "Unknown";
+                    if (context instanceof HttpCoreContext){
+                        HttpCoreContext httpCoreContext = (HttpCoreContext) context;
+                        Object objReference = httpCoreContext.getAttribute("reference");
+                        if (objReference instanceof String) {
+                            payoneRequestReference = (String) objReference;
+                        }
+                    }
+
+                    logger.error(
+                            format("Handle payment request with reference [%s] to payone service endpoint failed. " +
+                                            "We have already retried [%d] times. We are going to retry again...",
+                                    payoneRequestReference, executionCount),
+                            exception);
+                    return super.retryRequest(exception, executionCount, context);
+                }
             };
 
+    /**
+     * ServiceUnavailableRetryStrategy represents a strategy determining whether or not the request should be
+     * retried after a while in case of the service being temporarily unavailable
+     */
+    static final ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy = new ServiceUnavailableRetryStrategy() {
+
+        int waitPeriod = SERVICE_UNAVAILABLE_RETRY_DELAY_MILLIS;
+
+        @Override
+        public boolean retryRequest(HttpResponse response, int executionCount, HttpContext context) {
+            waitPeriod *= 2;
+            String payoneRequestReference = "Unknown";
+            if (context instanceof HttpCoreContext){
+                HttpCoreContext httpCoreContext = (HttpCoreContext) context;
+                Object objReference = httpCoreContext.getAttribute("reference");
+                if (objReference instanceof String) {
+                    payoneRequestReference = (String) objReference;
+                }
+            }
+            logger.error(
+                    format("Payone service endpoint is unavailable! Payone reference [%s], Received HTTP Code: [%d]. " +
+                                    "We have already retried [%d] times. We are going to retry again...",
+                            payoneRequestReference, response.getStatusLine().getStatusCode(), executionCount));
+            return executionCount <= RETRY_TIMES;
+        }
+
+        @Override
+        public long getRetryInterval() {
+            return waitPeriod;
+        }
+    };
 
     private static final BasicResponseHandler BASIC_RESPONSE_HANDLER = new BasicResponseHandler();
 
-    private static ConnectionKeepAliveStrategy keepAliveStrategy = new ConnectionKeepAliveStrategy() {
-
-        public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
-            // Honor 'keep-alive' header
-            HeaderElementIterator it = new BasicHeaderElementIterator(
-                    response.headerIterator(HTTP.CONN_KEEP_ALIVE));
-            while (it.hasNext()) {
-                HeaderElement he = it.nextElement();
-                String param = he.getName();
-                String value = he.getValue();
-                if (value != null && param.equalsIgnoreCase("timeout")) {
-                    try {
-                        return Long.parseLong(value) * 500;
-                    } catch (NumberFormatException ignore) {
-                    }
+    private static final ConnectionKeepAliveStrategy keepAliveStrategy = (response, context) -> {
+        // Honor 'keep-alive' header
+        HeaderElementIterator it = new BasicHeaderElementIterator(
+                response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+        while (it.hasNext()) {
+            HeaderElement he = it.nextElement();
+            String param = he.getName();
+            String value = he.getValue();
+            if (value != null && param.equalsIgnoreCase("timeout")) {
+                try {
+                    return Long.parseLong(value) * 500;
+                } catch (NumberFormatException ignore) {
                 }
             }
-            // Keep alive for 2.5 seconds only
-            return 2500;
         }
- };
+        // Keep alive for 2.5 seconds only
+        return 2500;
+    };
 
     private static final CloseableHttpClient CLIENT = HttpClientBuilder.create()
             .setDefaultRequestConfig(RequestConfig.custom()
-                    .setConnectionRequestTimeout(REQUEST_TIMEOUT)
-                    .setSocketTimeout(REQUEST_TIMEOUT)
-                    .setConnectTimeout(REQUEST_TIMEOUT)
+                    .setConnectionRequestTimeout(TIMEOUT_WHEN_CONNECTION_POOL_FULLY_OCCUPIED)
+                    .setSocketTimeout(TIMEOUT_WHEN_CONTINUOUS_DATA_STREAM_DOES_NOT_REPLY)
+                    .setConnectTimeout(TIMEOUT_TO_ESTABLISH_CONNECTION)
                     .build())
-            .setRetryHandler(HTTP_REQUEST_RETRY_ON_SOCKET_TIMEOUT)
+            .setRetryHandler(httpRequestRetryHandler)
+            .setServiceUnavailableRetryStrategy(serviceUnavailableRetryStrategy)
             .setKeepAliveStrategy(keepAliveStrategy)
             .setConnectionManager(buildDefaultConnectionManager())
             .build();
@@ -139,7 +203,7 @@ public final class HttpRequestUtil {
     }
 
     /**
-     * Execute retryable HTTP GET request with default {@link #REQUEST_TIMEOUT}
+     * Execute retryable HTTP GET request with default {@link #TIMEOUT_TO_ESTABLISH_CONNECTION}
      *
      * @param url url to get
      * @return response from the {@code url}

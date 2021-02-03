@@ -109,12 +109,12 @@ public class HttpRequestUtilTimeoutTest {
     /**
      * Verify normal GET response.
      * This request has response timeout shorter than max request time in
-     * {@link com.commercetools.util.HttpRequestUtil#REQUEST_TIMEOUT} thus should success, opposite to
+     * {@link com.commercetools.util.HttpRequestUtil#TIMEOUT_TO_ESTABLISH_CONNECTION} thus should success, opposite to
      * {@link #longGetRequest_shouldFailLong()}
      */
     @Test
     public void shortGetRequest_shouldSuccess() throws Exception {
-        final int timeout = REQUEST_TIMEOUT / 2;
+        final int timeout = TIMEOUT_TO_ESTABLISH_CONNECTION / 2;
         final HttpResponse httpResponse = executeGetRequest(format(URL_PATTERN, testRandomPort, timeout));
 
         assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(HttpStatusCode.OK_200);
@@ -123,13 +123,13 @@ public class HttpRequestUtilTimeoutTest {
     /**
      * Verify that if request timeout is too long - the client will retry 3 times.
      * This request has response timeout larger than max request time in
-     * {@link com.commercetools.util.HttpRequestUtil#REQUEST_TIMEOUT} thus should failure, opposite to
+     * {@link com.commercetools.util.HttpRequestUtil#TIMEOUT_TO_ESTABLISH_CONNECTION} thus should failure, opposite to
      * {@link #shortGetRequest_shouldSuccess()}
      */
     @Test
     public void longGetRequest_shouldFailLong() throws Exception {
-        final int timeout = REQUEST_TIMEOUT * 2;
-        final int minimalFullRequestDuration = REQUEST_TIMEOUT * (RETRY_TIMES + 1);
+        final int timeout = TIMEOUT_TO_ESTABLISH_CONNECTION * 2;
+        final int minimalFullRequestDuration = TIMEOUT_TO_ESTABLISH_CONNECTION * (RETRY_TIMES + 1);
 
         final long start = System.currentTimeMillis();
         assertThatIOException().isThrownBy(() -> executeGetRequest(format(URL_PATTERN, testRandomPort, timeout)));
@@ -144,15 +144,15 @@ public class HttpRequestUtilTimeoutTest {
      * See {@link HttpRequestUtil#REQUEST_SENT_RETRY_ENABLED} for more details.
      * <p>
      * This request has response timeout larger than max request time in
-     * {@link com.commercetools.util.HttpRequestUtil#REQUEST_TIMEOUT} thus should failure, opposite to
+     * {@link com.commercetools.util.HttpRequestUtil#TIMEOUT_TO_ESTABLISH_CONNECTION} thus should failure, opposite to
      * {@link #shortGetRequest_shouldSuccess()}
      * <p>
      * This test should be change if we decide the request should be re-send on timeout exceptions.
      */
     @Test
     public void longPostRequest_shouldFailFast() throws Exception {
-        final int timeout = REQUEST_TIMEOUT * 2;
-        final int maximalFullRequestDuration = (int) (REQUEST_TIMEOUT * 1.5);
+        final int timeout = TIMEOUT_TO_ESTABLISH_CONNECTION * 2;
+        final int maximalFullRequestDuration = (int) (TIMEOUT_TO_ESTABLISH_CONNECTION * 1.5);
 
         final long start = System.currentTimeMillis();
         assertThatIOException().isThrownBy(() -> executePostRequest(format(URL_PATTERN, testRandomPort, timeout), null));

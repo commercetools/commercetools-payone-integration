@@ -136,7 +136,7 @@ public class HttpRequestUtilParallelTest {
 
         // longest expected time of one successful request (even if retried),
         // which may have +RETRY_TIMES attempts additionally to the first (failed) attempt
-        final int longestRequestTimeMsec = REQUEST_TIMEOUT * (1 + RETRY_TIMES);
+        final int longestRequestTimeMsec = TIMEOUT_TO_ESTABLISH_CONNECTION * (1 + RETRY_TIMES);
 
         // await not more than (longestRequestTimeMsec * criticalPathLength) msec with
         // coefficient 1.5 is added to avoid test fails on some lags and threads switching timeouts.
