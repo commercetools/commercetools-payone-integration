@@ -123,15 +123,16 @@ public class PayoneHttpClientConfigurationUtilTimeoutTest {
     }
 
     /**
-     * Verify that if request timeout is too long - the client will retry 3 times.
+     * Verify that if request timeout is too long - the client will retry 5 times
+     * ({@link PayoneHttpClientConfigurationUtil#RETRY_TIMES})
      * This request has response timeout larger than max request time in
      * {@link PayoneHttpClientConfigurationUtil#TIMEOUT_TO_ESTABLISH_CONNECTION} thus should failure, opposite to
      * {@link #shortGetRequest_shouldSuccess()}
      */
     @Test
     public void longGetRequest_shouldFailLong() throws Exception {
-        final int timeout = TIMEOUT_TO_ESTABLISH_CONNECTION * 2;
-        final int minimalFullRequestDuration = TIMEOUT_TO_ESTABLISH_CONNECTION * (RETRY_TIMES + 1);
+        final int timeout = TIMEOUT_WHEN_CONTINUOUS_DATA_STREAM_DOES_NOT_REPLY * 2;
+        final int minimalFullRequestDuration = TIMEOUT_WHEN_CONTINUOUS_DATA_STREAM_DOES_NOT_REPLY * (RETRY_TIMES + 1);
 
         final long start = System.currentTimeMillis();
         assertThatIOException().isThrownBy(() -> executeGetRequest(format(URL_PATTERN, testRandomPort, timeout)));
