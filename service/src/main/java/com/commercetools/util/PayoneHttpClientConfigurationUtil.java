@@ -4,8 +4,6 @@ import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ServiceUnavailableRetryStrategy;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
@@ -14,7 +12,6 @@ import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpCoreContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,18 +68,10 @@ public final class PayoneHttpClientConfigurationUtil {
                 // everytime we make a retry attempt
                 @Override
                 public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
-                    String payoneRequestReference = "Unknown";
-                    if (context instanceof HttpCoreContext){
-                        HttpCoreContext httpCoreContext = (HttpCoreContext) context;
-                        Object objReference = httpCoreContext.getAttribute("reference");
-                        if (objReference instanceof String) {
-                            payoneRequestReference = (String) objReference;
-                        }
-                    }
                     logger.error(
-                            format("Handle payment request with reference [%s] to payone service endpoint failed. " +
+                            format("Handle payment request to payone service endpoint failed. " +
                                             "We have already retried [%d] times. We are going to retry again...",
-                                    payoneRequestReference, executionCount),
+                                    executionCount),
                             exception);
                     return super.retryRequest(exception, executionCount, context);
                 }
@@ -99,20 +88,14 @@ public final class PayoneHttpClientConfigurationUtil {
         @Override
         public boolean retryRequest(HttpResponse response, int executionCount, HttpContext context) {
             waitPeriod *= 2;
-            String payoneRequestReference = "Unknown";
-            if (context instanceof HttpCoreContext){
-                HttpCoreContext httpCoreContext = (HttpCoreContext) context;
-                Object objReference = httpCoreContext.getAttribute("reference");
-                if (objReference instanceof String) {
-                    payoneRequestReference = (String) objReference;
-                }
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode >= 500) {
+                logger.error(
+                        format("Payone service endpoint is unavailable! Received HTTP Code: [%d]. " +
+                                        "We have already retried [%d] times. We are going to retry again...",
+                                statusCode, executionCount));
             }
-            logger.error(
-                    format("Payone service endpoint is unavailable! Payone reference [%s], Received HTTP Code: [%d]. " +
-                                    "We have already retried [%d] times. We are going to retry again...",
-                            payoneRequestReference, response.getStatusLine().getStatusCode(), executionCount));
-            return executionCount <= RETRY_TIMES &&
-                    response.getStatusLine().getStatusCode() >= 500;
+            return executionCount <= RETRY_TIMES && statusCode >= 500;
         }
 
         @Override
