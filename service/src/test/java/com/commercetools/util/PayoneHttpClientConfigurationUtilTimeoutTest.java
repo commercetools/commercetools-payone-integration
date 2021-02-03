@@ -130,7 +130,7 @@ public class PayoneHttpClientConfigurationUtilTimeoutTest {
      * {@link #shortGetRequest_shouldSuccess()}
      */
     @Test
-    public void longGetRequest_shouldFailLong() throws Exception {
+    public void longGetRequest_shouldFailLong() {
         final int timeout = TIMEOUT_WHEN_CONTINUOUS_DATA_STREAM_DOES_NOT_REPLY * 2;
         final int minimalFullRequestDuration = TIMEOUT_WHEN_CONTINUOUS_DATA_STREAM_DOES_NOT_REPLY * (RETRY_TIMES + 1);
 
