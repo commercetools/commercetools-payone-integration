@@ -30,7 +30,7 @@ import static java.lang.String.format;
 /**
  * Util to make simple retryable HTTP GET/POST requests for Payone Http Client.
  */
-public final class PayoneHttpClientConfigurationUtil {
+public final class PayoneHttpClientUtil {
 
     public static final int TIMEOUT_TO_ESTABLISH_CONNECTION = 10000;
 
@@ -46,7 +46,7 @@ public final class PayoneHttpClientConfigurationUtil {
 
     static final int SERVICE_UNAVAILABLE_RETRY_DELAY_MILLIS = 100;
 
-    static final Logger logger = LoggerFactory.getLogger(PayoneHttpClientConfigurationUtil.class);
+    static final Logger logger = LoggerFactory.getLogger(PayoneHttpClientUtil.class);
 
     /**
      * Don't resend request on connection exception once it has been successfully sent.
@@ -125,7 +125,7 @@ public final class PayoneHttpClientConfigurationUtil {
         return 2500;
     };
 
-    private PayoneHttpClientConfigurationUtil() {
+    private PayoneHttpClientUtil() {
     }
 
     public static PoolingHttpClientConnectionManager buildDefaultConnectionManager() {

@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
-import static com.commercetools.util.PayoneHttpClientConfigurationUtil.responseToString;
+import static com.commercetools.util.PayoneHttpClientUtil.responseToString;
 import static java.util.Optional.ofNullable;
 
 /**

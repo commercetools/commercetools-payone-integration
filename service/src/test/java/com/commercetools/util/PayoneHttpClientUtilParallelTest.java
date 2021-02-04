@@ -14,22 +14,22 @@ import java.util.function.Supplier;
 
 import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
 import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executePostRequest;
-import static com.commercetools.util.PayoneHttpClientConfigurationUtil.*;
-import static com.commercetools.util.PayoneHttpClientConfigurationUtilTest.*;
+import static com.commercetools.util.PayoneHttpClientUtil.*;
+import static com.commercetools.util.PayoneHttpClientUtilTest.*;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.apache.http.HttpStatus.SC_REQUEST_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Stress test {@link PayoneHttpClientConfigurationUtil}: make a lot of parallel requests with timeouts + test <i>toString</i> methods.
+ * Stress test {@link PayoneHttpClientUtil}: make a lot of parallel requests with timeouts + test <i>toString</i> methods.
  * <p>
  * <b>Note:</b> These tests are based on request/response from <a href="http://httpbin.org/">http://httpbin.org/</a>,
  * thus they may rarely fail if the service is out of order.
  */
-public class PayoneHttpClientConfigurationUtilParallelTest {
+public class PayoneHttpClientUtilParallelTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PayoneHttpClientConfigurationUtilParallelTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PayoneHttpClientUtilParallelTest.class);
 
     // try to make 200 simultaneous requests in 200 threads
     private final int nThreads = CONNECTION_MAX_TOTAL;

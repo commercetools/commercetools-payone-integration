@@ -2,7 +2,7 @@ package com.commercetools.pspadapter.payone.domain.payone;
 
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.BaseRequest;
-import com.commercetools.util.PayoneHttpClientConfigurationUtil;
+import com.commercetools.util.PayoneHttpClientUtil;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Consts;
@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.commercetools.util.PayoneHttpClientConfigurationUtil.nameValue;
+import static com.commercetools.util.PayoneHttpClientUtil.nameValue;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
@@ -47,9 +47,9 @@ import static java.util.stream.Collectors.toList;
  * <li>socket/request/connect timeouts are 10 sec</li>
  * <li>retries on connections exceptions up to 5 times, if request has not been sent yet
  * (see {@link DefaultHttpRequestRetryHandler#isRequestSentRetryEnabled()}
- * and {@link PayoneHttpClientConfigurationUtil#httpRequestRetryHandler})</li>
- * <li>connections pool is 200 connections, up to 20 per route (see {@link PayoneHttpClientConfigurationUtil#CONNECTION_MAX_TOTAL}
- * and {@link PayoneHttpClientConfigurationUtil#CONNECTION_MAX_PER_ROUTE}). These values are "inherited" from
+ * and {@link PayoneHttpClientUtil#httpRequestRetryHandler})</li>
+ * <li>connections pool is 200 connections, up to 20 per route (see {@link PayoneHttpClientUtil#CONNECTION_MAX_TOTAL}
+ * and {@link PayoneHttpClientUtil#CONNECTION_MAX_PER_ROUTE}). These values are "inherited" from
  * <a href="https://github.com/Kong/unirest-java/blob/3b461599ad021d0a3f14213c0dbb85bab7244f66/src/main/java/com/mashape/unirest/http/options/Options.java#L23-L24">Unirest</a>
  * library. It could be changed in the future if we face problems (for example, decrease if we have OutOfMemory
  * or increase if out of connections from the pool.</li>
@@ -76,15 +76,15 @@ public class PayonePostServiceImpl implements PayonePostService {
     private static final CloseableHttpClient PAYONE_HTTP_CLIENT = HttpClientBuilder.create()
             .setDefaultRequestConfig(RequestConfig.custom()
                     .setConnectionRequestTimeout(
-                            PayoneHttpClientConfigurationUtil.TIMEOUT_WHEN_CONNECTION_POOL_FULLY_OCCUPIED)
+                            PayoneHttpClientUtil.TIMEOUT_WHEN_CONNECTION_POOL_FULLY_OCCUPIED)
                     .setSocketTimeout(
-                            PayoneHttpClientConfigurationUtil.TIMEOUT_WHEN_CONTINUOUS_DATA_STREAM_DOES_NOT_REPLY)
-                    .setConnectTimeout(PayoneHttpClientConfigurationUtil.TIMEOUT_TO_ESTABLISH_CONNECTION)
+                            PayoneHttpClientUtil.TIMEOUT_WHEN_CONTINUOUS_DATA_STREAM_DOES_NOT_REPLY)
+                    .setConnectTimeout(PayoneHttpClientUtil.TIMEOUT_TO_ESTABLISH_CONNECTION)
                     .build())
-            .setRetryHandler(PayoneHttpClientConfigurationUtil.httpRequestRetryHandler)
-            .setServiceUnavailableRetryStrategy(PayoneHttpClientConfigurationUtil.serviceUnavailableRetryStrategy)
-            .setKeepAliveStrategy(PayoneHttpClientConfigurationUtil.keepAliveStrategy)
-            .setConnectionManager(PayoneHttpClientConfigurationUtil.buildDefaultConnectionManager())
+            .setRetryHandler(PayoneHttpClientUtil.httpRequestRetryHandler)
+            .setServiceUnavailableRetryStrategy(PayoneHttpClientUtil.serviceUnavailableRetryStrategy)
+            .setKeepAliveStrategy(PayoneHttpClientUtil.keepAliveStrategy)
+            .setConnectionManager(PayoneHttpClientUtil.buildDefaultConnectionManager())
             .build();
 
     private PayonePostServiceImpl(final String serverAPIURL) {
@@ -135,7 +135,7 @@ public class PayonePostServiceImpl implements PayonePostService {
                                                     @Nullable Iterable<? extends NameValuePair> parameters)
             throws IOException {
 
-        return PayoneHttpClientConfigurationUtil.responseToString(executePostRequest(url, parameters));
+        return PayoneHttpClientUtil.responseToString(executePostRequest(url, parameters));
     }
 
     /**
@@ -192,7 +192,7 @@ public class PayonePostServiceImpl implements PayonePostService {
 
     /**
      * Execute retryable HTTP GET request with default
-     * {@link PayoneHttpClientConfigurationUtil#TIMEOUT_TO_ESTABLISH_CONNECTION}
+     * {@link PayoneHttpClientUtil#TIMEOUT_TO_ESTABLISH_CONNECTION}
      *
      * @param url url to get
      * @return response from the {@code url}

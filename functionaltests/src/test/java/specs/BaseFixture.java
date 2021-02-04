@@ -65,7 +65,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
-import static com.commercetools.util.PayoneHttpClientConfigurationUtil.nameValue;
+import static com.commercetools.util.PayoneHttpClientUtil.nameValue;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
