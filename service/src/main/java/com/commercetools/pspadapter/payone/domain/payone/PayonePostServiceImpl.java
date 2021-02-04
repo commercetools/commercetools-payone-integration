@@ -55,7 +55,7 @@ import static java.util.stream.Collectors.toList;
  * or increase if out of connections from the pool.</li>
  * </ul>
  * <p>
- * This util is intended to replace <i>Unirest</i> and <i>fluent-hc</i> dependencies, which don't propose any flexible
+ * This service is intended to replace <i>Unirest</i> and <i>fluent-hc</i> dependencies, which don't propose any flexible
  * way to implement retry strategy.
  * <p>
  * Implementation notes (for developers):<ul>
