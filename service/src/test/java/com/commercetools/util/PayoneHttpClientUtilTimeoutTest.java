@@ -19,7 +19,9 @@ import java.util.Random;
 
 import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
 import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executePostRequest;
-import static com.commercetools.util.PayoneHttpClientUtil.*;
+import static com.commercetools.util.PayoneHttpClientUtil.RETRY_TIMES;
+import static com.commercetools.util.PayoneHttpClientUtil.TIMEOUT_TO_ESTABLISH_CONNECTION;
+import static com.commercetools.util.PayoneHttpClientUtil.TIMEOUT_WHEN_CONTINUOUS_DATA_STREAM_DOES_NOT_REPLY;
 import static java.lang.String.format;
 import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +37,7 @@ public class PayoneHttpClientUtilTimeoutTest {
      */
     private static final String URL_PATTERN = "http://localhost:%d?delay=%d";
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PayoneHttpClientUtilTimeoutTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PayoneHttpClientUtilTimeoutTest.class);
 
     private int testRandomPort;
 
