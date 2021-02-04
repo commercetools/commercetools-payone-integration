@@ -14,8 +14,14 @@ import java.util.function.Supplier;
 
 import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
 import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executePostRequest;
-import static com.commercetools.util.PayoneHttpClientUtil.*;
-import static com.commercetools.util.PayoneHttpClientUtilTest.*;
+import static com.commercetools.util.PayoneHttpClientUtil.CONNECTION_MAX_TOTAL;
+import static com.commercetools.util.PayoneHttpClientUtil.RETRY_TIMES;
+import static com.commercetools.util.PayoneHttpClientUtil.TIMEOUT_TO_ESTABLISH_CONNECTION;
+import static com.commercetools.util.PayoneHttpClientUtil.nameValue;
+import static com.commercetools.util.PayoneHttpClientUtil.responseToString;
+import static com.commercetools.util.PayoneHttpClientUtilTest.HTTPS_HTTPBIN_ORG;
+import static com.commercetools.util.PayoneHttpClientUtilTest.HTTPS_HTTPBIN_ORG_POST;
+import static com.commercetools.util.PayoneHttpClientUtilTest.HTTP_HTTPBIN_ORG_GET;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.apache.http.HttpStatus.SC_REQUEST_TIMEOUT;
