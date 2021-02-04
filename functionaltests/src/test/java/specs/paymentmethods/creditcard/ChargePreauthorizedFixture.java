@@ -42,7 +42,6 @@ import java.util.concurrent.ExecutionException;
 
 import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
 
-
 /**
  * @author fhaertig
  * @since 10.12.15
