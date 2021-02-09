@@ -36,7 +36,7 @@ public final class PayoneHttpClientUtil {
 
     public static final int TIMEOUT_WHEN_CONNECTION_POOL_FULLY_OCCUPIED = 10000;
 
-    public static final int TIMEOUT_WHEN_CONTINUOUS_DATA_STREAM_DOES_NOT_REPLY = 8000;
+    public static final int TIMEOUT_WHEN_CONTINUOUS_DATA_STREAM_DOES_NOT_REPLY = 5000;
 
     static final int RETRY_TIMES = 5;
 
