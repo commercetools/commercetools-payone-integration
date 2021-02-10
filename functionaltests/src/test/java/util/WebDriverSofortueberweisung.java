@@ -54,6 +54,15 @@ public class WebDriverSofortueberweisung extends CustomWebDriver {
         return elements.get(0);
     }
 
+    private void selectRegion(final String bic) {
+        final WebElement bankCodeSearchInput = findElement(By.id(SU_LOGIN_BANK_CODE_SEARCH));
+        bankCodeSearchInput.clear();
+        bankCodeSearchInput.sendKeys(bic);
+
+        final WebElement submitButton = findSubmitButton();
+        submitButton.click();
+    }
+
 
     private void selectAccount() {
         final WebElement senderAccountInput = findElement(By.id(SU_TEST_ACCOUNT_RADIO_BUTTON));
@@ -77,13 +86,17 @@ public class WebDriverSofortueberweisung extends CustomWebDriver {
      * Submits the given {@code password} at the given {@code url}'s "password" element, waits for a redirect and
      * returns the URL it was redirected to.
      *
-     * @param url    the URL to navigate to
-     * @param userid the account id to use
+     * @param url       the URL to navigate to
+     * @param bic       the bank code / BIC to use
+     * @param userid    the account id to use
+     * @param pin       the pin to login
+     * @param tan       the tan to use
      * @return the URL the browser was redirected to after submitting the {@code password}
      */
-    public String executeSofortueberweisungRedirect(final String url, final String userid, final String pin, final
-    String tan) {
+    public String executeSofortueberweisungRedirect(final String url, final String bic, final String userid,
+                                                    final String pin, final String tan) {
         getDriver().get(url);
+        selectRegion(bic);
         doLogin(userid, pin);
         selectAccount();
 

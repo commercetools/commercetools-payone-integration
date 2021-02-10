@@ -10,14 +10,19 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static com.commercetools.util.HttpRequestUtil.*;
+import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
+import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executePostRequest;
+import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executePostRequestToString;
+import static com.commercetools.util.PayoneHttpClientUtil.executeGetRequestToString;
+import static com.commercetools.util.PayoneHttpClientUtil.nameValue;
+import static com.commercetools.util.PayoneHttpClientUtil.responseToString;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
 
-public class HttpRequestUtilTest {
+public class PayoneHttpClientUtilTest {
 
     static final String HTTPS_HTTPBIN_ORG = "https://httpbin.org/";
     static final String HTTP_HTTPBIN_ORG_GET = HTTPS_HTTPBIN_ORG + "get";
