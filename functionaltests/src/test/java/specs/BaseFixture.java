@@ -3,6 +3,7 @@ package specs;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
+import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.util.PayoneHash;
 import com.google.common.base.Preconditions;
@@ -53,13 +54,18 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.time.Duration;
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.commercetools.util.HttpRequestUtil.*;
+import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
+import static com.commercetools.util.PayoneHttpClientUtil.nameValue;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
@@ -339,7 +345,7 @@ public abstract class BaseFixture {
 
         String cardPanResponse = null;
         try {
-            cardPanResponse = executePostRequestToString("https://api.pay1.de/post-gateway/",
+            cardPanResponse = PayonePostServiceImpl.executePostRequestToString("https://api.pay1.de/post-gateway/",
                     ImmutableList.of(
                             nameValue("request", "3dscheck"),
                             nameValue("mid", mid),

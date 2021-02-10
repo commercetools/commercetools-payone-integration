@@ -1,6 +1,7 @@
 # commercetools <-> PAYONE Integration Service
 
-[![Build Status](https://travis-ci.org/commercetools/commercetools-payone-integration.svg?branch=master)](https://travis-ci.org/commercetools/commercetools-payone-integration)
+[![Build Status](https://travis-ci.com/commercetools/commercetools-payone-integration.svg?branch=master)](https://travis-ci.com/commercetools/commercetools-payone-integration) 
+[![Docker Pulls](https://img.shields.io/docker/pulls/commercetools/commercetools-payone-integration)](https://hub.docker.com/r/commercetools/commercetools-payone-integration)
 
 This software provides an integration between the [commercetools eCommerce platform](http://dev.commercetools.com) API
 and the [PAYONE](http://www.payone.de) payment service provider (server API).
@@ -127,7 +128,7 @@ docker run \
     -e TENANT1_PAYONE_MODE=test|live \
     -e TENANT1_PAYONE_PORTAL_ID=xxx \
     -e TENANT1_PAYONE_SUBACC_ID=xxx \
-sphereio/commercetools-payone-integration
+commercetools/commercetools-payone-integration
 ```
 
 ## Shop integration guide
