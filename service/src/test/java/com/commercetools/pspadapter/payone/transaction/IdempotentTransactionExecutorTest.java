@@ -9,6 +9,7 @@ import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
+import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.types.CustomFields;
@@ -22,13 +23,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import javax.annotation.Nonnull;
+import javax.money.MonetaryAmount;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static util.JvmSdkMockUtil.pagedQueryResultsMock;
 
 /**
@@ -103,6 +105,45 @@ public class IdempotentTransactionExecutorTest {
 
     }
 
+    @Test
+    public void shouldExecuteTransactionWhenThereIsALastExecutionAttempt() throws Exception {
+        Payment payment = testHelper.dummyPaymentTwoTransactionsSuccessPending();
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
+        MyTransaction transaction = new MyTransaction();
+
+        CustomFields customFields = mock(CustomFields.class);
+        IdempotentTransactionExecutor idempotentTransactionExecutor = mock(IdempotentTransactionExecutor.class);
+
+        when(idempotentTransactionExecutor.findLastExecutionAttempt(paymentWithCartLike, transaction))
+                .thenReturn(Optional.of(customFields));
+
+        doCallRealMethod().when(idempotentTransactionExecutor)
+                          .executeTransaction(paymentWithCartLike, transaction);
+
+        PaymentWithCartLike result = idempotentTransactionExecutor.executeTransaction(paymentWithCartLike, transaction);
+
+        assertThat(result).isEqualTo(paymentWithCartLike);
+    }
+
+    @Test
+    public void shouldExecuteTransactionWhenCustomFieldsIsEmpty() throws Exception {
+        Payment payment = testHelper.dummyPaymentTwoTransactionsSuccessPending();
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
+        MyTransaction transaction = new MyTransaction();
+
+        IdempotentTransactionExecutor idempotentTransactionExecutor = mock(IdempotentTransactionExecutor.class);
+
+        when(idempotentTransactionExecutor.findLastExecutionAttempt(paymentWithCartLike, transaction))
+                .thenReturn(Optional.empty());
+
+        doCallRealMethod().when(idempotentTransactionExecutor)
+                          .executeTransaction(paymentWithCartLike, transaction);
+
+        idempotentTransactionExecutor.executeTransaction(paymentWithCartLike, transaction);
+
+        verify(idempotentTransactionExecutor).attemptFirstExecution(paymentWithCartLike, transaction);
+    }
+
     private class TestIdempotentTransactionExecutor extends IdempotentTransactionExecutor {
 
         public TestIdempotentTransactionExecutor(final LoadingCache<String, Type> typeCache) {
@@ -133,13 +174,38 @@ public class IdempotentTransactionExecutorTest {
         protected Optional<CustomFields> findLastExecutionAttempt(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction) {
             return null;
         }
+    }
+
+    private static class MyTransaction implements Transaction {
 
         @Override
-        @Nonnull
-        protected PaymentWithCartLike retryLastExecutionAttempt(@Nonnull final PaymentWithCartLike paymentWithCartLike,
-                                                                @Nonnull final Transaction transaction,
-                                                                @Nonnull final CustomFields lastExecutionAttempt) {
-            return mock(PaymentWithCartLike.class);
+        public ZonedDateTime getTimestamp() {
+            return null;
+        }
+
+        @Override
+        public TransactionType getType() {
+            return null;
+        }
+
+        @Override
+        public MonetaryAmount getAmount() {
+            return null;
+        }
+
+        @Override
+        public String getInteractionId() {
+            return null;
+        }
+
+        @Override
+        public String getId() {
+            return null;
+        }
+
+        @Override
+        public TransactionState getState() {
+            return null;
         }
     }
 

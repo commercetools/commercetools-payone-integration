@@ -56,7 +56,7 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
         }
 
         return findLastExecutionAttempt(paymentWithCartLike, transaction)
-                .map(attempt -> retryLastExecutionAttempt(paymentWithCartLike, transaction, attempt))
+                .map(customFields -> paymentWithCartLike)
                 .orElseGet(() -> attemptFirstExecution(paymentWithCartLike, transaction));
     }
 
@@ -87,19 +87,6 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
      * @return An attempt, or Optional.empty if there was no previous attempt
      */
     protected abstract Optional<CustomFields> findLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction);
-
-    /**
-     * Retries the last execution attempt for the transaction. It does take necessary precautions for idempotency.
-     *
-     * @param paymentWithCartLike
-     * @param transaction
-     * @param lastExecutionAttempt
-     * @return A new version of the PaymentWithCartLike.
-     */
-    @Nonnull
-    protected abstract PaymentWithCartLike retryLastExecutionAttempt(@Nonnull PaymentWithCartLike paymentWithCartLike,
-                                                                     @Nonnull Transaction transaction,
-                                                                     @Nonnull CustomFields lastExecutionAttempt);
 
     /**
      * Determines the next sequence number to use from already received notifications.
