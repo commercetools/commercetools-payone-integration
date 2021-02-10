@@ -103,8 +103,8 @@ public class PaymentHandler {
         @Nonnull final String paymentId,
         @Nonnull final ConcurrentModificationException concurrentModificationException) {
 
-        final String errorMessage = format("The payment with id '%s' couldn't be processed after %s retries.",
-            paymentId, RETRIES_LIMIT);
+        final String errorMessage = format("The payment with id '%s' couldn't be processed after %s retries. " +
+                "One retry iteration here includes multiple payone/ctp service retries.", paymentId, RETRIES_LIMIT);
         logger.error(errorMessage, concurrentModificationException);
         return new PaymentHandleResult(HttpStatusCode.ACCEPTED_202, errorMessage);
     }

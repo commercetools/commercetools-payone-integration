@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
 public final class SphereClientConfigurationUtil {
-    private static final long DEFAULT_TIMEOUT = 10;
+    private static final long CTP_EXECUTE_COMPLETABLE_FUTURE_TIMEOUT = 10;
     private static final TimeUnit DEFAULT_TIMEOUT_TIME_UNIT = TimeUnit.SECONDS;
     private static final int MAX_PARALLEL_REQUESTS = 30;
 
@@ -40,7 +40,8 @@ public final class SphereClientConfigurationUtil {
      */
     public static BlockingSphereClient createBlockingClient(@Nonnull final SphereClientConfig clientConfig) {
 
-        return BlockingSphereClient.of(createClient(clientConfig), DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_TIME_UNIT);
+        return BlockingSphereClient.of(createClient(clientConfig), CTP_EXECUTE_COMPLETABLE_FUTURE_TIMEOUT,
+                DEFAULT_TIMEOUT_TIME_UNIT);
     }
 
     /**
