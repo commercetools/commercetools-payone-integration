@@ -7,9 +7,14 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
+import java.util.Optional;
 
 import static util.constant.WebDriverCommon.CLASS_NAME_PRIMARY;
-import static util.constant.WebDriverSofortueberweisungConstants.*;
+import static util.constant.WebDriverSofortueberweisungConstants.SU_BACKEND_FORM_TAN;
+import static util.constant.WebDriverSofortueberweisungConstants.SU_LOGIN_BANK_CODE_SEARCH;
+import static util.constant.WebDriverSofortueberweisungConstants.SU_LOGIN_NAME_ID;
+import static util.constant.WebDriverSofortueberweisungConstants.SU_TEST_ACCOUNT_RADIO_BUTTON;
+import static util.constant.WebDriverSofortueberweisungConstants.SU_USER_PIN_ID;
 
 /**
  * @author fhaertig
@@ -18,6 +23,9 @@ import static util.constant.WebDriverSofortueberweisungConstants.*;
 public class WebDriverSofortueberweisung extends CustomWebDriver {
 
 
+    private static final String SU_MODAL_CONTENT_CSS_CLASS = "modal-content";
+    private static final String SU_COOKIE_MODAL_BASIC_HTML_ID = "cookie-modal-basic";
+    public static final String SU_ACCEPT_COOKIES_CSS_CLASS = "cookie-modal-accept-all";
 
     public WebDriverSofortueberweisung() {
         super();
@@ -55,6 +63,12 @@ public class WebDriverSofortueberweisung extends CustomWebDriver {
     }
 
     private void selectRegion(final String bic) {
+        Optional.ofNullable(findElement(By.className(SU_MODAL_CONTENT_CSS_CLASS)))
+                .map(modalContentElement -> modalContentElement.findElements(By.id(SU_COOKIE_MODAL_BASIC_HTML_ID)))
+                .map(listOfElements -> listOfElements.get(0))
+                .map(cookieDivElement -> cookieDivElement.findElement(By.className(SU_ACCEPT_COOKIES_CSS_CLASS)))
+                .ifPresent(WebElement::click);
+
         final WebElement bankCodeSearchInput = findElement(By.id(SU_LOGIN_BANK_CODE_SEARCH));
         bankCodeSearchInput.clear();
         bankCodeSearchInput.sendKeys(bic);
