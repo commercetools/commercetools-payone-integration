@@ -63,11 +63,11 @@ public class WebDriverSofortueberweisung extends CustomWebDriver {
     }
 
     private void selectRegion(final String bic) {
-        Optional<WebElement> acceptCookieWebElement = Optional.ofNullable(findElement(By.className(SU_MODAL_CONTENT_CSS_CLASS)))
+        Optional.ofNullable(findElement(By.className(SU_MODAL_CONTENT_CSS_CLASS)))
                 .map(modalContentElement -> modalContentElement.findElements(By.id(SU_COOKIE_MODAL_BASIC_HTML_ID)))
                 .map(listOfElements -> listOfElements.get(0))
-                .map(cookieDivElement -> cookieDivElement.findElement(By.className(SU_ACCEPT_COOKIES_CSS_CLASS)));
-        acceptCookieWebElement.ifPresent(WebElement::click);
+                .map(cookieDivElement -> cookieDivElement.findElement(By.className(SU_ACCEPT_COOKIES_CSS_CLASS)))
+                .ifPresent(WebElement::click);
 
         final WebElement bankCodeSearchInput = findElement(By.id(SU_LOGIN_BANK_CODE_SEARCH));
         bankCodeSearchInput.clear();
