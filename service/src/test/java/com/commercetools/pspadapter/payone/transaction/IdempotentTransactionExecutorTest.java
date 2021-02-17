@@ -125,21 +125,8 @@ public class IdempotentTransactionExecutorTest {
         }
 
         @Override
-        protected PaymentWithCartLike attemptFirstExecution(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction) {
+        protected PaymentWithCartLike executeIdempotent(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction) {
             return null;
-        }
-
-        @Override
-        protected Optional<CustomFields> findLastExecutionAttempt(final PaymentWithCartLike paymentWithCartLike, final Transaction transaction) {
-            return null;
-        }
-
-        @Override
-        @Nonnull
-        protected PaymentWithCartLike retryLastExecutionAttempt(@Nonnull final PaymentWithCartLike paymentWithCartLike,
-                                                                @Nonnull final Transaction transaction,
-                                                                @Nonnull final CustomFields lastExecutionAttempt) {
-            return mock(PaymentWithCartLike.class);
         }
     }
 

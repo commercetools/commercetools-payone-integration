@@ -16,7 +16,13 @@ import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
-import io.sphere.sdk.payments.commands.updateactions.*;
+import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
+import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
+import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionTimestamp;
+import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
+import io.sphere.sdk.payments.commands.updateactions.SetInterfaceId;
+import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
+import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
 import io.sphere.sdk.types.Type;
 
 import javax.annotation.Nonnull;
@@ -25,7 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.CUSTOMER_MESSAGE;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.ERROR_CODE;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.ERROR_MESSAGE;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.STATUS;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.TXID;
 import static com.commercetools.pspadapter.payone.util.PaymentUtil.getTransactionById;
 
 /**
@@ -45,13 +55,13 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
     }
 
     @Override
-    protected PaymentWithCartLike attemptFirstExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        return attemptExecution(paymentWithCartLike, transaction);
+    protected PaymentWithCartLike executeIdempotent(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
+        return execute(paymentWithCartLike, transaction);
     }
 
     @Nonnull
-    abstract protected PaymentWithCartLike attemptExecution(final PaymentWithCartLike paymentWithCartLike,
-                                                            final Transaction transaction);
+    abstract protected PaymentWithCartLike execute(final PaymentWithCartLike paymentWithCartLike,
+                                                   final Transaction transaction);
 
     /**
      * Creates the SetStatusInterfaceCode from the response

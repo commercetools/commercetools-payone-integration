@@ -23,17 +23,14 @@ import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractionId;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
-import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.time.ZonedDateTime;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
 import static java.lang.String.format;
@@ -69,7 +66,7 @@ abstract class BaseBankTransferInAdvanceTransactionExecutor extends TransactionB
 
     /**
      * Create respective authorization or preauthorization request for
-     * {@link #attemptExecution(PaymentWithCartLike, Transaction)} call.
+     * {@link #execute(PaymentWithCartLike, Transaction)} call.
      *
      * @param paymentWithCartLike payment/cart which supply in the request
      * @return
@@ -92,32 +89,9 @@ abstract class BaseBankTransferInAdvanceTransactionExecutor extends TransactionB
     }
 
     @Override
-    public Optional<CustomFields> findLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
-        return getCustomFieldsOfType(paymentWithCartLike, CustomTypeBuilder.PAYONE_INTERACTION_REQUEST)
-                .filter(i -> i.getFieldAsString(CustomFieldKeys.TRANSACTION_ID_FIELD).equals(transaction.getId()))
-                .reduce((previous, current) -> current);
-    }
-
-    @Override
     @Nonnull
-    public PaymentWithCartLike retryLastExecutionAttempt(@Nonnull PaymentWithCartLike paymentWithCartLike,
-                                                         @Nonnull Transaction transaction,
-                                                         @Nonnull CustomFields lastExecutionAttempt) {
-        if (lastExecutionAttempt.getFieldAsDateTime(CustomFieldKeys.TIMESTAMP_FIELD).isBefore(ZonedDateTime.now().minusMinutes(5))) {
-            return attemptExecution(paymentWithCartLike, transaction);
-        } else {
-            if (lastExecutionAttempt.getFieldAsDateTime(CustomFieldKeys.TIMESTAMP_FIELD).isAfter(ZonedDateTime.now().minusMinutes(1)))
-                throw new ConcurrentModificationException(String.format(
-                        "A processing of payment with ID \"%s\" started during the last 60 seconds and is likely to be finished soon, no need to retry now.",
-                        paymentWithCartLike.getPayment().getId()));
-        }
-        return paymentWithCartLike;
-    }
-
-    @Override
-    @Nonnull
-    protected PaymentWithCartLike attemptExecution(final PaymentWithCartLike paymentWithCartLike,
-                                                   final Transaction transaction) {
+    protected PaymentWithCartLike execute(final PaymentWithCartLike paymentWithCartLike,
+                                          final Transaction transaction) {
         final String transactionId = transaction.getId();
         final int sequenceNumber = getNextSequenceNumber(paymentWithCartLike);
 

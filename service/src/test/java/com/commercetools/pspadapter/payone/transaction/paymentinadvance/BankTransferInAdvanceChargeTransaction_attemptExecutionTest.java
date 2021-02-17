@@ -54,7 +54,7 @@ public class BankTransferInAdvanceChargeTransaction_attemptExecutionTest extends
                 PayoneResponseFields.IBAN, "test-mock-IBAN",
                 PayoneResponseFields.ACCOUNT_HOLDER, "test-mock-NAME"
         ));
-        executor.attemptExecution(paymentWithCartLike, transaction);
+        executor.execute(paymentWithCartLike, transaction);
 
         assertRequestInterfaceInteraction(2);
 
@@ -106,7 +106,7 @@ public class BankTransferInAdvanceChargeTransaction_attemptExecutionTest extends
         ));
 
         assertThatExceptionOfType(IllegalStateException.class)
-                .isThrownBy(() -> executor.attemptExecution(paymentWithCartLike, transaction))
+                .isThrownBy(() -> executor.execute(paymentWithCartLike, transaction))
                 .withMessageContaining("Unknown Payone status");
 
         assertRequestInterfaceInteraction(1);
