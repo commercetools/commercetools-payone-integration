@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -55,9 +54,7 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
             return paymentWithCartLike;
         }
 
-        return findLastExecutionAttempt(paymentWithCartLike, transaction)
-                .map(attempt -> retryLastExecutionAttempt(paymentWithCartLike, transaction, attempt))
-                .orElseGet(() -> attemptFirstExecution(paymentWithCartLike, transaction));
+        return executeIdempotent(paymentWithCartLike, transaction);
     }
 
     /**
@@ -77,29 +74,7 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
      * @param transaction
      * @return A new version of the PaymentWithCartLike. If the attempt has concluded, the state of the Transaction is now either Success or Failure.
      */
-    protected abstract PaymentWithCartLike attemptFirstExecution(PaymentWithCartLike paymentWithCartLike, Transaction transaction);
-
-    /**
-     * Finds a previous execution attempt for the transaction. If there are multiple ones, it selects the last one.
-     *
-     * @param paymentWithCartLike
-     * @param transaction
-     * @return An attempt, or Optional.empty if there was no previous attempt
-     */
-    protected abstract Optional<CustomFields> findLastExecutionAttempt(PaymentWithCartLike paymentWithCartLike, Transaction transaction);
-
-    /**
-     * Retries the last execution attempt for the transaction. It does take necessary precautions for idempotency.
-     *
-     * @param paymentWithCartLike
-     * @param transaction
-     * @param lastExecutionAttempt
-     * @return A new version of the PaymentWithCartLike.
-     */
-    @Nonnull
-    protected abstract PaymentWithCartLike retryLastExecutionAttempt(@Nonnull PaymentWithCartLike paymentWithCartLike,
-                                                                     @Nonnull Transaction transaction,
-                                                                     @Nonnull CustomFields lastExecutionAttempt);
+    protected abstract PaymentWithCartLike executeIdempotent(PaymentWithCartLike paymentWithCartLike, Transaction transaction);
 
     /**
      * Determines the next sequence number to use from already received notifications.

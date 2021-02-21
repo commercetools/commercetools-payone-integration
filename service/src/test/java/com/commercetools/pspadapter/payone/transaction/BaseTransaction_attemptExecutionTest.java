@@ -106,7 +106,7 @@ public class BaseTransaction_attemptExecutionTest {
                 PayoneResponseFields.REDIRECT_URL, "http://mock-redirect.url",
                 PayoneResponseFields.TXID, "responseTxid"
         ));
-        executor.attemptExecution(paymentWithCartLike, transaction);
+        executor.execute(paymentWithCartLike, transaction);
 
         assertRequestInterfaceInteraction(2);
         assertRedirectActions(TransactionState.PENDING);
@@ -121,7 +121,7 @@ public class BaseTransaction_attemptExecutionTest {
                 PayoneResponseFields.STATUS, APPROVED.getStateCode(),
                 PayoneResponseFields.TXID, "responseTxid"
         ));
-        executor.attemptExecution(paymentWithCartLike, transaction);
+        executor.execute(paymentWithCartLike, transaction);
 
         assertRequestInterfaceInteraction(2);
         assertChangeTransactionStateActions(TransactionState.SUCCESS);
@@ -138,7 +138,7 @@ public class BaseTransaction_attemptExecutionTest {
                 PayoneResponseFields.STATUS, ERROR.getStateCode(),
                 PayoneResponseFields.TXID, "responseTxid"
         ));
-        executor.attemptExecution(paymentWithCartLike, transaction);
+        executor.execute(paymentWithCartLike, transaction);
 
         assertRequestInterfaceInteraction(2);
         assertChangeTransactionStateActions(TransactionState.FAILURE);
@@ -154,7 +154,7 @@ public class BaseTransaction_attemptExecutionTest {
                 PayoneResponseFields.STATUS, PENDING.getStateCode(),
                 PayoneResponseFields.TXID, "responseTxid"
         ));
-        executor.attemptExecution(paymentWithCartLike, transaction);
+        executor.execute(paymentWithCartLike, transaction);
 
         assertRequestInterfaceInteraction(2);
         assertChangeTransactionStateActions(TransactionState.PENDING);
@@ -169,7 +169,7 @@ public class BaseTransaction_attemptExecutionTest {
                                                                              final TransactionBaseExecutor executor) throws Exception {
         when(payonePostService.executePost(request)).thenThrow(new PayoneException("payone exception message"));
 
-        executor.attemptExecution(paymentWithCartLike, transaction);
+        executor.execute(paymentWithCartLike, transaction);
 
         assertRequestInterfaceInteraction(2);
         assertChangeTransactionStateActions(TransactionState.FAILURE);
@@ -190,7 +190,7 @@ public class BaseTransaction_attemptExecutionTest {
         ));
 
         assertThatExceptionOfType(IllegalStateException.class)
-                .isThrownBy(() -> executor.attemptExecution(paymentWithCartLike, transaction))
+                .isThrownBy(() -> executor.execute(paymentWithCartLike, transaction))
                 .withMessageContaining("Unknown Payone status");
 
         assertRequestInterfaceInteraction(1);
