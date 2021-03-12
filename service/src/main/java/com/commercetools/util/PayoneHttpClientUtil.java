@@ -68,7 +68,7 @@ public final class PayoneHttpClientUtil {
                 // everytime we make a retry attempt
                 @Override
                 public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
-                    logger.error(
+                    logger.debug(
                             format("Handle payment request to payone service endpoint failed. " +
                                             "We have already retried [%d] times. We are going to retry again...",
                                     executionCount),
