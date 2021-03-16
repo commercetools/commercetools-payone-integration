@@ -21,7 +21,7 @@ public class CustomWebDriver {
 
     private static ChromeOptions getChromeOptions() {
         ChromeOptions chromeOptions = new ChromeOptions();
-     //   chromeOptions.addArguments("--headless");
+        chromeOptions.addArguments("--headless");
         return chromeOptions;
     }
 
