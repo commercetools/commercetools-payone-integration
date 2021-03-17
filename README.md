@@ -57,33 +57,46 @@ It is a standalone Microservice that connects the two platforms and provides a s
 The PAYONE Integration Service currently supports the following payment methods:
 
 * Direct debit
-
-* Advance payment
-
-* Creditcards
-    * Visa
-    * MasterCard 
-    * American Express
-    * JCB 
-    * Diners Club
+  Available in: worldwide
+* Advance payment  
+  Available in: Europa
+  
+* [Creditcards](https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+3-D+Secure)
+  Available in: worldwide
     
+  * Visa  
+  * MasterCard   
+  * American Express  
+  * JCB   
+  * Diners Club  
+      
 * E-Wallets
-    * Paypal
-    * paydirekt
-
-* Online transfer
-    * Sofortbanking
-    * giropay
-    * eps (electronic payment standards)
-    * PostFinance E-Finance
-    * PostFinance Card
-    * iDEAL
-    * Bancontact
-    
-* Financing
-    * Klarna
-
-
+  
+  * [Paypal](https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+PayPal) 
+    Available in: over 200 countries 
+  * [paydirekt](https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+paydirekt)  
+    Available in Germany
+  
+* Online transfer  
+  * Sofortbanking
+    Available in: Austria, Belgium, Germany, The Netherlands, Italy, Poland, Spain, Switzerland, United Kingdom
+  * giropay
+    Available in: Germany
+  * eps (electronic payment standards)  
+    Available in: Austria
+  * [PostFinance E-Finance](https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+Postfinance)  
+    Available in: Suisse
+  * [PostFinance Card](https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+Postfinance)  
+    Available in: Suisse
+  * [iDEAL](https://docs.payone.com/display/public/PLATFORM/Special+Remarks+-+Recurring+Transactions+with+iDeal)  
+    Available in: Netherlands
+  * Bancontact  
+    Available in: Belgium 
+      
+* Financing  
+  * [Klarna](https://github.com/commercetools/commercetools-payone-integration/blob/master/docs/Klarna-Activation.md)  
+  	 Available in: Austria, Belgium, Germany, The Netherlands, Italy, Poland, Spain, Switzerland, United Kingdom
+  
 ## Running service and configuration
 ### Required Configuration in the commercetools project
 
