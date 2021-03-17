@@ -41,7 +41,7 @@ The PAYONE Integration Service currently supports the following payment methods:
 * Direct debit
   Available in: worldwide
 * Advance payment  
-  Available in: Europa
+  Available in: Europe
   
 * [Creditcards](https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+3-D+Secure)
   Available in: worldwide
