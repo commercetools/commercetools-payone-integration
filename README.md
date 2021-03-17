@@ -34,24 +34,6 @@ It is a standalone Microservice that connects the two platforms and provides a s
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-- [Running service and configuration](#running-service-and-configuration)
-  - [Required Configuration in the commercetools project](#required-configuration-in-the-commercetools-project)
-    - [Domain Constraints](#domain-constraints)
-  - [Required Configuration in PAYONE](#required-configuration-in-payone)
-  - [Configuration of the Integration Service](#configuration-of-the-integration-service)
-  - [Mandatory common properties](#mandatory-common-properties)
-      - [Mandatory commercetools API client credentials](#mandatory-commercetools-api-client-credentials)
-      - [PAYONE API client credentials](#payone-api-client-credentials)
-      - [Optional service configuration parameters](#optional-service-configuration-parameters)
-    - [Docker run](#docker-run)
-- [Shop integration guide](#shop-integration-guide)
-- [Multitenancy](#multitenancy)
-- [Other resources](#other-resources)
-- [For developers and contributors](#for-developers-and-contributors)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 ## Supported payment methods
 
 The PAYONE Integration Service currently supports the following payment methods:
