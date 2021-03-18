@@ -38,13 +38,13 @@ It is a standalone Microservice that connects the two platforms and provides a s
 
 The PAYONE Integration Service currently supports the following payment methods:
 
-* Direct debit
-  Available in: worldwide
+* Direct debit  
+ Available in: worldwide
 * Advance payment  
-  Available in: Europe
+ Available in: Europe
   
-* [Creditcards](https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+3-D+Secure)
-  Available in: worldwide
+* [Creditcards](https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+3-D+Secure)  
+ Available in: worldwide
     
   * Visa  
   * MasterCard   
@@ -54,16 +54,16 @@ The PAYONE Integration Service currently supports the following payment methods:
       
 * E-Wallets
   
-  * [Paypal](https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+PayPal) 
-    Available in: over 200 countries 
+  * [Paypal](https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+PayPal)  
+ Available in: over 200 countries 
   * [paydirekt](https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+paydirekt)  
     Available in Germany
   
 * Online transfer  
-  * Sofortbanking
-    Available in: Austria, Belgium, Germany, The Netherlands, Italy, Poland, Spain, Switzerland, United Kingdom
-  * giropay
-    Available in: Germany
+  * Sofortbanking  
+ Available in:Austria, Belgium, Germany, The Netherlands, Italy, Poland, Spain, Switzerland, United Kingdom
+  * giropay  
+ Available in: Germany
   * eps (electronic payment standards)  
     Available in: Austria
   * [PostFinance E-Finance](https://docs.payone.com/display/public/PLATFORM/Special+remarks+-+Postfinance)  
