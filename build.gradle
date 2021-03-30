@@ -32,17 +32,7 @@ def depVersions = [
         sparkCore: '2.9.3',
         jUnit: '4.13.1',
         assertJ: '3.19.0',
-        mockito: '3.8.0',
-
-        // : functionaltests
-        concordion: '3.0.1',
-        concordionInputStyleExtension: '0.1',
-        concordionConcordionRunTotalsExtension: '1.2.0',
-        concordionParallelRunExtension: '1.1.0',
-        seleniumJava: '3.141.59',
-        slf4jLog4j: '1.7.30',
-        gson: '2.8.6',
-        webdrivermanager: '4.3.1'
+        mockito: '3.8.0'
 ]
 
 subprojects {
@@ -160,14 +150,10 @@ project(":service") {
  * <p>
  *     Also this function tries to parse {@code TENANTS} property and later maps <b>all</b> available values which have
  *     property name starting string with tenant name.
- * <p>
- *     Opposite to {@link #assertExecutableSpecRequirementsForTests(org.gradle.api.Project, org.gradle.api.tasks.testing.Test)}
- *     this function is used for the service runtime.
  *
  * @param project gradle project from which to take the properties
  * @return a list of java runtime argument in <i>-Dkey=value</i> syntax.
  *
- * @see #assertExecutableSpecRequirementsForTests(org.gradle.api.Project, org.gradle.api.tasks.testing.Test)
  */
 static List<String> getServiceProperties(Project project) {
     def commonProperties = [
@@ -210,149 +196,15 @@ static String findValueByName(Project project, String propertyKey) {
     return project.hasProperty(propertyKey) ? (String) project[propertyKey] : System.getenv(propertyKey)
 }
 
-/**
- * Asserts that system properties and environment variables required for running the executable specification are set.
- * <p>
- *     Opposite to {@link #getServiceProperties(org.gradle.api.Project)} this function is used for
- *     functional tests.
- *
- * @param project the project
- * @param test the test task to assert the configuration for
- *
- * @throws GradleException if any required system property or environment variable is undefined or empty
- * @see #getServiceProperties(org.gradle.api.Project)
- */
-static void assertExecutableSpecRequirementsForTests(Project project, Test test) {
-    test.systemProperties['concordion.extensions'] =
-            'org.concordion.ext.inputstyle.InputStyleExtension,' +
-            'org.concordion.ext.runtotals.RunTotalsExtension,' +
-            'org.concordion.ext.ParallelRunExtension'
-
-    test.systemProperties['concordion.output.dir'] = project.reporting.baseDir.getAbsolutePath() + "/spec"
-
-    // test all "waiting" classes in parallel so we have less shorter critical path of all long lasting blocking tests
-    // See all BaseNotifiablePayment + HttpRequestUtilTimeout fixtures for more details
-    test.systemProperties['concordion.run.threadCount'] = '16'
-
-    def propertiesToMap = ['TEST_DATA_CT_PROJECT_KEY',
-                           'TEST_DATA_CT_CLIENT_ID',
-                           'TEST_DATA_CT_CLIENT_SECRET',
-                           'TEST_DATA_CT_PAYONE_INTEGRATION_URL',
-
-                           'TEST_DATA_TENANT_NAME',
-
-                           'TEST_DATA_VISA_CREDIT_CARD_NO_3DS',
-                           'TEST_DATA_VISA_CREDIT_CARD_3DS',
-                           'TEST_DATA_3_DS_PASSWORD',
-                           'TEST_DATA_SW_BANK_TRANSFER_IBAN',
-                           'TEST_DATA_SW_BANK_TRANSFER_BIC',
-                           'TEST_DATA_SW_BANK_TRANSFER_PIN',
-                           'TEST_DATA_SW_BANK_TRANSFER_TAN',
-
-                           'TEST_DATA_PAYONE_MERCHANT_ID',
-                           'TEST_DATA_PAYONE_SUBACC_ID',
-                           'TEST_DATA_PAYONE_PORTAL_ID',
-                           'TEST_DATA_PAYONE_KEY',
-
-                            // BaseTenant2Fixture uses these values
-                           'TEST_DATA_TENANT_NAME_2',
-                           'TEST_DATA_CT_PROJECT_KEY_2',
-                           'TEST_DATA_CT_CLIENT_ID_2',
-                           'TEST_DATA_CT_CLIENT_SECRET_2',
-                           'TEST_DATA_PAYONE_MERCHANT_ID_2',
-                           'TEST_DATA_PAYONE_SUBACC_ID_2',
-                           'TEST_DATA_PAYONE_PORTAL_ID_2',
-                           'TEST_DATA_PAYONE_KEY_2'
-    ]
-
-    propertiesToMap.each { propertyKey ->
-        test.environment propertyKey, findValueByName(project, propertyKey)
-        assertMapValueIsNotNullOrEmpty(propertyKey, test.getEnvironment())
-    }
-}
-
-project(":functionaltests") {
-    dependencies {
-        testImplementation project(":service")
-
-        testImplementation "io.github.bonigarcia:webdrivermanager:${depVersions.webdrivermanager}"
-        testImplementation "org.concordion:concordion:${depVersions.concordion}"
-        testImplementation "org.concordion:concordion-input-style-extension:${depVersions.concordionInputStyleExtension}"
-        testImplementation "org.concordion:concordion-run-totals-extension:${depVersions.concordionConcordionRunTotalsExtension}"
-        testImplementation ("org.concordion:concordion-parallel-run-extension:${depVersions.concordionParallelRunExtension}") {
-            exclude group: 'com.google.guava', module: 'guava'
-        }
-
-        testImplementation "org.seleniumhq.selenium:selenium-java:${depVersions.seleniumJava}"
-        testImplementation "com.google.code.gson:gson:${depVersions.gson}"
-
-        // the selenium dependency above has default Log4j logger, thus we have to bridge it to our slf4j settings
-        testImplementation "org.slf4j:log4j-over-slf4j:${depVersions.slf4jLog4j}"
-    }
-
-    compileJava.dependsOn ':service:jar'
-
-    test {
-        description 'This task is supposed to run single tests, only.'
-    }
-
-    test.doFirst {
-        assertExecutableSpecRequirementsForTests(project, test)
-    }
-
-    task testSpec(type: Test) {
-        description 'This task tests the executable Concordion specification.'
-
-        filter {
-            includeTestsMatching 'specs.SpecsFixture'
-        }
-    }
-
-    testSpec.doFirst {
-        assertExecutableSpecRequirementsForTests(project, testSpec)
-    }
-}
-
-/**
- * Asserts that the map contains a non-null, non-empty value for the given key.
- * @param key the key of the value to be checked
- * @param map the key-value map
- *
- * @throws GradleException if the value is undefined or empty
- */
-static void assertMapValueIsNotNullOrEmpty(String key, Map<String, Object> map) {
-    assertValueIsNotNullOrEmpty(key, map.get(key))
-}
-
-/**
- * Asserts that the property is non-null and non-empty value.
- * @param key      property name to show in case of exception
- * @param property a property to verify
- *
- * @throws GradleException if the value is undefined or empty
- */
-static String assertValueIsNotNullOrEmpty(String key, String property) {
-    if ((property == null) || property.isEmpty()) {
-        throw new GradleException('Property or environment variable ' + key + ' must not be null or empty.')
-    }
-
-    return property
-}
-
-task stage {
-    description 'This task is run by Heroku and generates the service jar including all dependencies.'
-    dependsOn ':service:shadowJar'
-}
-
 task ciBuild {
-    description 'This task is run by Travis. It builds the service and runs its unit tests. In addition it builds the functionaltests.'
-    dependsOn ':service:test', ':functionaltests:compileTestJava'
+    description 'This task is run by Travis. It builds the service and runs its unit tests.'
+    dependsOn ':service:test'
 }
 
 task clean {
-    description 'By default :clean is executed only for :service and :functionaltests, ' +
-            'thus we add cleaning for root build dir, where :functionaltests git publish results are stored'
-    dependsOn ':service:clean', ':functionaltests:clean'
+    description 'By default :clean is executed only for :service, ' +
+            'thus we add cleaning for root build dir'
+    dependsOn ':service:clean'
     doLast {
         rootProject.buildDir.deleteDir()
     }
