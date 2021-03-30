@@ -5,6 +5,7 @@
   - [Development Notes](#development-notes)
     - [Create a custom version](#create-a-custom-version)
     - [Contribute Improvements](#contribute-improvements)
+  - [Documentation](#documentation)
   - [Docker images](#docker-images)
     - [Tags](#tags)
     - [Release Tag](#release-tag)
@@ -39,6 +40,11 @@ Contributing an Improvement is the better Idea though because you will save main
 
 If you want to add a useful functionality or found a bug please open an issue here to announce and discuss what you
 have in mind. Then fork the project somewhere or in GitHub and create a pull request here once you're done.
+
+## Documentation
+
+The [test definitions and results](http://commercetools.github.io/commercetools-payone-integration/) are the most precise documentation of the behavior. 
+They are automatically generated, updated and published to the `gh_pages` branch of this project by the [TravisCI continuous integration](https://travis-ci.com/commercetools/commercetools-payone-integration) setup.
 
 ## Docker images
 
