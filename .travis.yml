@@ -23,14 +23,6 @@ install: /bin/true
 script:
 - ./gradlew ciBuild || ( ./gradlew gitPublishPush ; travis_terminate 1 )
 deploy:
-  provider: heroku
-  api_key:
-    secure: UMAIfJ95lRYBGDkIKmuT09MPtmlw3+nzt7rX9kUT23dlf6GpGqaTy2OvVnYehQVqt32U5+IdrRgSD/swiahUcVW/njWoUmITlAbgoJ40zv2ipwIjkzEAiowIpNJYGpRSXrOedk2zbWJQuo54W6x4IT/NG5k2Qz6EunWhszKiNRIWkMFsZcKNLKgg7CY6Fm0GU5CulDNbHmzIuL7CDXcSZb7iGcx8Q73kkS7wRBL2aNDMpxG2Zj9veJWxA18LPD4Tf95owRW95rV2w3OheyB4K1ZpJsl4TmTlRzICngs9QcFRPgcY865RxLvCo9gWn3UwQymEDealgAHBVFGgK5/SsZcziss7U2rw+kHA1MawOZkVXvi9LuG19VuFlltCqz7I0G4qmKffIJprJR3KVTUz9TIJk8ckv+kfSYVbtGcigUDP+RpX7ULyonQhjjHW51xEqtOvuihOodckzlzy6H13n8oRltEZelb4A+rGuNyPXWUMqYkdnl/dvvYdWelFZiNEHLFjWqUz8C5NelzWhHyTqdTE0XPfT478h+i/aw+bjLuA35sv0YDROF922DXrXJmr7veiAxbjevQHyPQjbMymzgESW65q3yyCWWZzt/3RsfD33ghWW/CPv7poGhOW09aa92lHhoAmc44meiNfkO5WJTo6G8Mo7VfWdXDwpLjJnUM=
-  app: ct-payone-integration-staging
-  on:
-    repo: commercetools/commercetools-payone-integration
-    all_branches: true
-after_deploy:
 - sleep 10s # wait 10 seconds to run the deployed service completely before starting functional tests
 - echo "Publishing build results to http://commercetools.github.io/commercetools-payone-integration/"
 - ./travis-build.sh || travis_terminate 1
