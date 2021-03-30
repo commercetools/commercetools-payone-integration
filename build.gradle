@@ -196,6 +196,11 @@ static String findValueByName(Project project, String propertyKey) {
     return project.hasProperty(propertyKey) ? (String) project[propertyKey] : System.getenv(propertyKey)
 }
 
+task stage {
+    description 'This task generates the service jar including all dependencies.'
+    dependsOn ':service:shadowJar'
+}
+
 task ciBuild {
     description 'This task is run by Travis. It builds the service and runs its unit tests.'
     dependsOn ':service:test'
