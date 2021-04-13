@@ -3,7 +3,8 @@ package com.commercetools.pspadapter.payone.transaction;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.cache.LoadingCache;
+
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.CustomFields;
@@ -109,7 +110,7 @@ public abstract class IdempotentTransactionExecutor implements TransactionExecut
                 .getInterfaceInteractions()
                 .stream()
                 .filter(i -> Arrays.stream(typeKeys)
-                        .map(t -> getTypeCache().getUnchecked(t).toReference())
+                        .map(t -> getTypeCache().get(t).toReference())
                         .anyMatch(t -> t.getId().equals(i.getType().getId())));
     }
 
