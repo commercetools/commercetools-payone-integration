@@ -19,6 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -59,8 +60,8 @@ public class NotificationProcessorBaseTest extends BaseNotificationProcessorTest
             }
 
             @Override
-            protected ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment aPayment,
-                                                                                final Notification aNotification) {
+            protected List<UpdateAction<Payment>> createPaymentUpdates(final Payment aPayment,
+                                                                       final Notification aNotification) {
                 return (payment == aPayment) && (notification == aNotification) ? updateActions : ImmutableList.of();
             }
         };

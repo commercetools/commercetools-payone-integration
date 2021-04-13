@@ -11,14 +11,25 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMeth
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
-import com.commercetools.pspadapter.payone.mapping.*;
+import com.commercetools.pspadapter.payone.mapping.BankTransferInAdvanceRequestFactory;
+import com.commercetools.pspadapter.payone.mapping.BankTransferWithoutIbanBicRequestFactory;
+import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
+import com.commercetools.pspadapter.payone.mapping.CreditCardRequestFactory;
+import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
+import com.commercetools.pspadapter.payone.mapping.PostFinanceBanktransferRequestFactory;
+import com.commercetools.pspadapter.payone.mapping.SofortBankTransferRequestFactory;
+import com.commercetools.pspadapter.payone.mapping.WalletRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.klarna.KlarnaRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.klarna.PayoneKlarnaCountryToLanguageMapper;
 import com.commercetools.pspadapter.payone.mapping.order.DefaultPaymentToOrderStateMapper;
 import com.commercetools.pspadapter.payone.mapping.order.PaymentToOrderStateMapper;
 import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.payone.notification.NotificationProcessor;
-import com.commercetools.pspadapter.payone.notification.common.*;
+import com.commercetools.pspadapter.payone.notification.common.AppointedNotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.common.CaptureNotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.common.DefaultNotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.common.PaidNotificationProcessor;
+import com.commercetools.pspadapter.payone.notification.common.UnderpaidNotificationProcessor;
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
 import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
 import com.commercetools.pspadapter.payone.transaction.common.AuthorizationTransactionExecutor;
@@ -33,17 +44,14 @@ import com.commercetools.service.PaymentServiceImpl;
 import com.commercetools.util.SphereClientConfigurationUtil;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
-import io.sphere.sdk.client.QueueSphereClientDecorator;
 import io.sphere.sdk.client.SphereClient;
-import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
 
 import javax.annotation.Nonnull;
-import java.time.Duration;
 import java.util.HashMap;
+import java.util.Map;
 
 import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.supportedPaymentMethods;
 import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.supportedTransactionTypes;
@@ -194,13 +202,13 @@ public class TenantFactory {
         final NotificationProcessor defaultNotificationProcessor =
                 new DefaultNotificationProcessor(this, tenantConfig, transactionStateResolver);
 
-        final ImmutableMap.Builder<NotificationAction, NotificationProcessor> builder = ImmutableMap.builder();
-        builder.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(this, tenantConfig, transactionStateResolver));
-        builder.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(this, tenantConfig, transactionStateResolver));
-        builder.put(NotificationAction.PAID, new PaidNotificationProcessor(this, tenantConfig, transactionStateResolver));
-        builder.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(this, tenantConfig, transactionStateResolver));
+        final Map<NotificationAction, NotificationProcessor> processorMap = new HashMap<>();
+        processorMap.put(NotificationAction.APPOINTED, new AppointedNotificationProcessor(this, tenantConfig, transactionStateResolver));
+        processorMap.put(NotificationAction.CAPTURE, new CaptureNotificationProcessor(this, tenantConfig, transactionStateResolver));
+        processorMap.put(NotificationAction.PAID, new PaidNotificationProcessor(this, tenantConfig, transactionStateResolver));
+        processorMap.put(NotificationAction.UNDERPAID, new UnderpaidNotificationProcessor(this, tenantConfig, transactionStateResolver));
 
-        return new NotificationDispatcher(defaultNotificationProcessor, builder.build(), this, tenantConfig.getPayoneConfig());
+        return new NotificationDispatcher(defaultNotificationProcessor, processorMap, this, tenantConfig.getPayoneConfig());
     }
 
     protected PaymentHandler createPaymentHandler(String payoneInterfaceName, String tenantName,
@@ -221,7 +229,7 @@ public class TenantFactory {
 
         for (final PaymentMethod paymentMethod : supportedPaymentMethods) {
             final PayoneRequestFactory requestFactory = createRequestFactory(paymentMethod, tenantConfig);
-            final ImmutableMap.Builder<TransactionType, TransactionExecutor> executors = ImmutableMap.builder();
+            final Map<TransactionType, TransactionExecutor> executors = new HashMap<>();
 
             supportedTransactionTypes
                     .forEach(transactionType ->
@@ -229,7 +237,7 @@ public class TenantFactory {
                                     createTransactionExecutor(transactionType, typeCache, client, requestFactory, payonePostService, paymentMethod)));
 
             methodDispatcherMap.put(paymentMethod,
-                    new PaymentMethodDispatcher(defaultExecutor, executors.build(), transactionStateResolver));
+                    new PaymentMethodDispatcher(defaultExecutor, executors, transactionStateResolver));
         }
         return new PaymentDispatcher(methodDispatcherMap, getPayoneInterfaceName());
     }

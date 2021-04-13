@@ -2,9 +2,6 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.customers.Customer;
@@ -20,9 +17,16 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
 import static com.commercetools.util.ServiceConstants.DEFAULT_LOCALE;
@@ -43,7 +47,7 @@ public class MappingUtil {
      */
     public static final DateTimeFormatter yyyyMMdd = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-    private static final Set<CountryCode> countriesWithStateAllowed = ImmutableSet.of(
+    private static final Set<CountryCode> countriesWithStateAllowed = new HashSet<>(Arrays.asList(
             CountryCode.US,
             CountryCode.CA,
             CountryCode.CN,
@@ -54,13 +58,15 @@ public class MappingUtil {
             CountryCode.ID,
             CountryCode.TH,
             CountryCode.IN
-    );
+    ));
 
     public static void mapBillingAddressToRequest(
             final AuthorizationRequest request,
             final Address billingAddress) {
 
-        Preconditions.checkArgument(billingAddress != null, "Missing billing address details");
+        if(billingAddress == null) {
+            throw new IllegalArgumentException("Missing billing address details");
+        }
 
         //required
         request.setLastname(billingAddress.getLastName());
@@ -71,9 +77,7 @@ public class MappingUtil {
         request.setSalutation(billingAddress.getSalutation());
         request.setFirstname(billingAddress.getFirstName());
         request.setCompany(billingAddress.getCompany());
-        request.setStreet(Joiner.on(" ")
-                .skipNulls()
-                .join(billingAddress.getStreetName(), billingAddress.getStreetNumber()));
+        request.setStreet(joinStringsIgnoringNull(Arrays.asList(billingAddress.getStreetName(), billingAddress.getStreetNumber())));
         request.setAddressaddition(billingAddress.getAdditionalStreetInfo());
         request.setZip(billingAddress.getPostalCode());
         request.setCity(billingAddress.getCity());
@@ -87,10 +91,20 @@ public class MappingUtil {
         }
     }
 
+    @Nonnull
+    private static String joinStringsIgnoringNull(@Nonnull final List<String> stringsToJoin) {
+        return stringsToJoin.stream()
+                     .filter(s -> !StringUtils.isBlank(s))
+                     .collect(Collectors.joining(" "));
+    }
+
     public static void mapCustomerToRequest(@Nonnull final AuthorizationRequest request,
                                             @Nullable final Reference<Customer> customerReference) {
 
-        Preconditions.checkArgument(customerReference != null && customerReference.getObj() != null, "Missing customer object");
+        if(customerReference == null || customerReference.getObj() == null) {
+            throw new IllegalArgumentException("Missing customer object");
+        }
+
         final Customer customer = customerReference.getObj();
 
         request.setVatid(customer.getVatId());
@@ -115,19 +129,19 @@ public class MappingUtil {
 
     public static void mapShippingAddressToRequest(final AuthorizationRequest request, final Address shippingAddress) {
 
-        Preconditions.checkArgument(shippingAddress != null, "Missing shipping address details");
+        if(shippingAddress == null) {
+            throw new IllegalArgumentException("Missing shipping address details");
+        }
 
         request.setShipping_firstname(shippingAddress.getFirstName());
         request.setShipping_lastname(shippingAddress.getLastName());
-        request.setShipping_street(Joiner.on(" ")
-                .skipNulls()
-                .join(shippingAddress.getStreetName(), shippingAddress.getStreetNumber()));
+        request.setShipping_street(joinStringsIgnoringNull(Arrays.asList(shippingAddress.getStreetName(),
+            shippingAddress.getStreetNumber())));
         request.setShipping_zip(shippingAddress.getPostalCode());
         request.setShipping_city(shippingAddress.getCity());
         request.setShipping_country(shippingAddress.getCountry().toLocale().getCountry());
-        request.setShipping_company(Joiner.on(" ")
-                .skipNulls()
-                .join(shippingAddress.getCompany(), shippingAddress.getDepartment()));
+        request.setShipping_company(joinStringsIgnoringNull(Arrays.asList(shippingAddress.getCompany(),
+            shippingAddress.getDepartment())));
 
         if (countriesWithStateAllowed.contains(shippingAddress.getCountry())) {
             request.setShipping_state(shippingAddress.getState());

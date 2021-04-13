@@ -5,9 +5,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
+import org.apache.commons.lang3.StringUtils;
+import spark.utils.CollectionUtils;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author fhaertig
@@ -58,11 +63,28 @@ public class Notification implements Serializable {
 
     public static Notification fromKeyValueString(final String keyValueString, final String separatorPattern) {
 
-        Map<String, String> notificationValues = Splitter.onPattern(separatorPattern).withKeyValueSeparator("=").split(keyValueString);
+        final Map<String, String> notificationValues = Pattern.compile(separatorPattern)
+               .splitAsStream(keyValueString.trim())
+               .map(s -> s.split("="))
+               .collect(Collectors.toMap(a -> a[0], a -> a.length>1? a[1]: ""));
+
+        validateNotificationValues(notificationValues);
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return mapper.convertValue(notificationValues, Notification.class);
+    }
+
+    private static void validateNotificationValues(final Map<String, String> notificationValues) {
+        if(notificationValues == null || notificationValues.isEmpty()) {
+            throw new IllegalArgumentException("The notification string is null or empty.");
+        }
+
+        notificationValues.values()
+                          .stream()
+                          .filter(val -> !StringUtils.isBlank(val))
+                          .findFirst()
+                          .orElseThrow(IllegalArgumentException::new);
     }
 
     @Override

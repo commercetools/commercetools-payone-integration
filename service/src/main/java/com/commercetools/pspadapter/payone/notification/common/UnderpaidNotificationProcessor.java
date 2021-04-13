@@ -6,13 +6,17 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.pspadapter.tenant.TenantFactory;
-import com.google.common.collect.ImmutableList;
 import io.sphere.sdk.commands.UpdateAction;
-import io.sphere.sdk.payments.*;
+import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.Transaction;
+import io.sphere.sdk.payments.TransactionDraftBuilder;
+import io.sphere.sdk.payments.TransactionState;
+import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.utils.MoneyImpl;
 
 import javax.money.MonetaryAmount;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,10 +38,10 @@ public class UnderpaidNotificationProcessor extends NotificationProcessorBase {
     }
 
     @Override
-    protected ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
-                                                                        final Notification notification) {
-        final ImmutableList.Builder<UpdateAction<Payment>> listBuilder = ImmutableList.builder();
-        listBuilder.addAll(super.createPaymentUpdates(payment, notification));
+    protected List<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
+                                                               final Notification notification) {
+        final List<UpdateAction<Payment>> updateActions = new ArrayList<>();
+        updateActions.addAll(super.createPaymentUpdates(payment, notification));
 
         final List<Transaction> transactions = payment.getTransactions();
         final String sequenceNumber = toSequenceNumber(notification.getSequencenumber());
@@ -49,14 +53,14 @@ public class UnderpaidNotificationProcessor extends NotificationProcessorBase {
         if (!matchingTransaction.isPresent()) {
             final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
 
-            listBuilder.add(AddTransaction.of(TransactionDraftBuilder.of(TransactionType.CHARGE, amount)
+            updateActions.add(AddTransaction.of(TransactionDraftBuilder.of(TransactionType.CHARGE, amount)
                     .timestamp(toZonedDateTime(notification))
                     .state(ctTransactionState)
                     .interactionId(sequenceNumber)
                     .build()));
         }
 
-        return listBuilder.build();
+        return updateActions;
     }
 
 }

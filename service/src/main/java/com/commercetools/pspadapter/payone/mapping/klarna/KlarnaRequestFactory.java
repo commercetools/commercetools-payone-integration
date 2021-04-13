@@ -3,8 +3,8 @@ package com.commercetools.pspadapter.payone.mapping.klarna;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequestWithCart;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaPreauthorizationRequest;
 import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
@@ -12,7 +12,6 @@ import com.commercetools.pspadapter.payone.mapping.MappingUtil;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.util.function.TriFunction;
-import com.google.common.base.Preconditions;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.payments.Payment;
@@ -25,7 +24,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.*;
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.BIRTHDAY_FIELD;
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IP_FIELD;
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.TELEPHONENUMBER_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getFirstValueFromAddresses;
 import static java.util.Arrays.asList;
 
@@ -59,7 +60,10 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
     protected <BKR extends AuthorizationRequestWithCart> BKR createRequestInternal(@Nonnull final PaymentWithCartLike paymentWithCartLike,
                                                                                    @Nonnull final TriFunction<PayoneConfig, String, PaymentWithCartLike, BKR> requestConstructor) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
-        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
+
+        if(ctPayment.getCustom() == null) {
+            throw new IllegalArgumentException("Missing custom fields on payment!");
+        }
 
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
 

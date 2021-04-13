@@ -2,8 +2,6 @@ package com.commercetools.pspadapter.payone.domain.ctp;
 
 import com.commercetools.pspadapter.payone.mapping.CreditCardNetwork;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.carts.commands.CartDeleteCommand;
 import io.sphere.sdk.carts.queries.CartQuery;
 import io.sphere.sdk.client.BlockingSphereClient;
@@ -16,13 +14,23 @@ import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
-import io.sphere.sdk.types.*;
+import io.sphere.sdk.types.BooleanFieldType;
+import io.sphere.sdk.types.DateFieldType;
+import io.sphere.sdk.types.EnumFieldType;
+import io.sphere.sdk.types.FieldDefinition;
+import io.sphere.sdk.types.FieldType;
+import io.sphere.sdk.types.StringFieldType;
+import io.sphere.sdk.types.Type;
+import io.sphere.sdk.types.TypeDraftBuilder;
 import io.sphere.sdk.types.commands.TypeCreateCommand;
 import io.sphere.sdk.types.commands.TypeDeleteCommand;
 import io.sphere.sdk.types.queries.TypeQuery;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Jan Wolter
@@ -113,7 +121,7 @@ public class CustomTypeBuilder {
     }
 
     private void createPaymentProviderAgnosticTypes() {
-        createPaymentCustomType(PAYMENT_CREDIT_CARD, ImmutableList.of(
+        createPaymentCustomType(PAYMENT_CREDIT_CARD, Arrays.asList(
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
                 createMultiLineStringFieldDefinition(CustomFieldKeys.REFERENCE_TEXT_FIELD, FieldClassifier.OPTIONAL),
@@ -129,7 +137,7 @@ public class CustomTypeBuilder {
                 createFieldDefinition(EnumFieldType.of(CreditCardNetwork.getValuesAsListOfEnumValue()), CustomFieldKeys.CARD_NETWORK_FIELD, null, FieldClassifier.OPTIONAL)
         ));
 
-        createPaymentCustomType(PAYMENT_WALLET, ImmutableList.of(
+        createPaymentCustomType(PAYMENT_WALLET, Arrays.asList(
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
                 createMultiLineStringFieldDefinition(CustomFieldKeys.REFERENCE_TEXT_FIELD, FieldClassifier.OPTIONAL),
@@ -139,7 +147,7 @@ public class CustomTypeBuilder {
                 createSingleLineStringFieldDefinition(CustomFieldKeys.CANCEL_URL_FIELD, FieldClassifier.OPTIONAL)
         ));
 
-        createPaymentCustomType(PAYMENT_BANK_TRANSFER, ImmutableList.of(
+        createPaymentCustomType(PAYMENT_BANK_TRANSFER, Arrays.asList(
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
                 createMultiLineStringFieldDefinition(CustomFieldKeys.REFERENCE_TEXT_FIELD, FieldClassifier.OPTIONAL),
@@ -153,7 +161,7 @@ public class CustomTypeBuilder {
                 createSingleLineStringFieldDefinition(CustomFieldKeys.BANK_COUNTRY, FieldClassifier.OPTIONAL)
         ));
 
-        createPaymentCustomType(PAYMENT_CASH_ADVANCE, ImmutableList.of(
+        createPaymentCustomType(PAYMENT_CASH_ADVANCE, Arrays.asList(
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.PAID_FROM_NAME_FIELD, FieldClassifier.OPTIONAL),
@@ -167,7 +175,7 @@ public class CustomTypeBuilder {
                 createSingleLineStringFieldDefinition(CustomFieldKeys.PAY_TO_BIC_FIELD, FieldClassifier.OPTIONAL)
         ));
 
-        createPaymentCustomType(PAYMENT_INVOICE_KLARNA, ImmutableList.of(
+        createPaymentCustomType(PAYMENT_INVOICE_KLARNA, Arrays.asList(
                 // TODO: cleanup this comment when pretty tested, good specified and set-up on all depended projects
                 createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
                 createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
@@ -191,20 +199,24 @@ public class CustomTypeBuilder {
     }
 
     private Type createInteractionRequest(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createInterfaceInteractionType(PAYONE_INTERACTION_REQUEST, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(CustomFieldKeys.REQUEST_FIELD,  FieldClassifier.REQUIRED)));
+        return createInterfaceInteractionType(PAYONE_INTERACTION_REQUEST, Arrays.asList(timestampField, transactionIdField,
+            createMultiLineStringFieldDefinition(CustomFieldKeys.REQUEST_FIELD,  FieldClassifier.REQUIRED)));
     }
 
     private Type createInteractionResponse(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createInterfaceInteractionType(PAYONE_INTERACTION_RESPONSE, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(CustomFieldKeys.RESPONSE_FIELD, FieldClassifier.REQUIRED)));
+        return createInterfaceInteractionType(PAYONE_INTERACTION_RESPONSE, Arrays.asList(timestampField, transactionIdField,
+            createMultiLineStringFieldDefinition(CustomFieldKeys.RESPONSE_FIELD, FieldClassifier.REQUIRED)));
     }
 
     private Type createInteractionRedirect(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
         return createInterfaceInteractionType(PAYONE_INTERACTION_REDIRECT,
-                ImmutableList.of(timestampField, transactionIdField, createSingleLineStringFieldDefinition(CustomFieldKeys.REDIRECT_URL_FIELD, FieldClassifier.REQUIRED), createMultiLineStringFieldDefinition(CustomFieldKeys.RESPONSE_FIELD, FieldClassifier.REQUIRED)));
+                Arrays.asList(timestampField, transactionIdField,
+                    createSingleLineStringFieldDefinition(CustomFieldKeys.REDIRECT_URL_FIELD, FieldClassifier.REQUIRED), createMultiLineStringFieldDefinition(CustomFieldKeys.RESPONSE_FIELD, FieldClassifier.REQUIRED)));
     }
 
     private Type createInteractionTemporaryError(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createInterfaceInteractionType(PAYONE_INTERACTION_TEMPORARY_ERROR, ImmutableList.of(timestampField, transactionIdField, createMultiLineStringFieldDefinition(CustomFieldKeys.RESPONSE_FIELD, FieldClassifier.REQUIRED)));
+        return createInterfaceInteractionType(PAYONE_INTERACTION_TEMPORARY_ERROR, Arrays.asList(timestampField,
+            transactionIdField, createMultiLineStringFieldDefinition(CustomFieldKeys.RESPONSE_FIELD, FieldClassifier.REQUIRED)));
     }
 
     private Type createInteractionNotification(final FieldDefinition timestampField) {
@@ -212,22 +224,26 @@ public class CustomTypeBuilder {
         final FieldDefinition txActionField = createSingleLineStringFieldDefinition(CustomFieldKeys.TX_ACTION_FIELD, FieldClassifier.REQUIRED);
         final FieldDefinition notificationField = createMultiLineStringFieldDefinition(CustomFieldKeys.NOTIFICATION_FIELD, FieldClassifier.REQUIRED);
 
-        return createInterfaceInteractionType(PAYONE_INTERACTION_NOTIFICATION, ImmutableList.of(timestampField, sequenceNumberField, txActionField, notificationField));
+        return createInterfaceInteractionType(PAYONE_INTERACTION_NOTIFICATION, Arrays.asList(timestampField,
+            sequenceNumberField,
+            txActionField, notificationField));
     }
 
     private Type createPayoneUnsupportedTransaction(final FieldDefinition timestampField, final FieldDefinition transactionIdField) {
-        return createInterfaceInteractionType(PAYONE_UNSUPPORTED_TRANSACTION, ImmutableList.of(timestampField, transactionIdField, createSingleLineStringFieldDefinition(CustomFieldKeys.MESSAGE_FIELD, FieldClassifier.REQUIRED)));
+        return createInterfaceInteractionType(PAYONE_UNSUPPORTED_TRANSACTION, Arrays.asList(timestampField,
+            transactionIdField,
+            createSingleLineStringFieldDefinition(CustomFieldKeys.MESSAGE_FIELD, FieldClassifier.REQUIRED)));
     }
 
-    private Type createInterfaceInteractionType(final String typeKey, final ImmutableList<FieldDefinition> fieldDefinitions) {
+    private Type createInterfaceInteractionType(final String typeKey, final List<FieldDefinition> fieldDefinitions) {
         return createType(typeKey, fieldDefinitions, AddInterfaceInteraction.resourceTypeId());
     }
 
-    private Type createPaymentCustomType(final String typeKey, final ImmutableList<FieldDefinition> fieldDefinitions) {
+    private Type createPaymentCustomType(final String typeKey, final List<FieldDefinition> fieldDefinitions) {
         return createType(typeKey, fieldDefinitions, Payment.resourceTypeId());
     }
 
-    private Type createType(final String typeKey, final ImmutableList<FieldDefinition> fieldDefinitions, final String resourceTypeId) {
+    private Type createType(final String typeKey, final List<FieldDefinition> fieldDefinitions, final String resourceTypeId) {
         // TODO replace with cache
         final PagedQueryResult<Type> result = ctpClient.executeBlocking(
                 TypeQuery.of()
@@ -238,7 +254,7 @@ public class CustomTypeBuilder {
             return ctpClient.executeBlocking(TypeCreateCommand.of(TypeDraftBuilder.of(
                     typeKey,
                     LocalizedString.ofEnglish(typeKey),
-                    ImmutableSet.of(resourceTypeId))
+                    Collections.singleton(resourceTypeId))
                     .fieldDefinitions(
                             fieldDefinitions)
                     .build()));

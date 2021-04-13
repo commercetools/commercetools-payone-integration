@@ -4,13 +4,17 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
 import com.commercetools.pspadapter.payone.notification.BaseNotificationProcessorTest;
-import com.google.common.collect.ImmutableList;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.orders.PaymentState;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
-import io.sphere.sdk.payments.commands.updateactions.*;
+import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
+import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
+import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractionId;
+import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
+import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
+import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
 import io.sphere.sdk.utils.MoneyImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +35,12 @@ import static io.sphere.sdk.payments.TransactionType.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static util.UpdatePaymentTestHelper.*;
+import static util.UpdatePaymentTestHelper.getAddInterfaceInteraction;
+import static util.UpdatePaymentTestHelper.getAddTransaction;
+import static util.UpdatePaymentTestHelper.getChangeTransactionInteractionId;
+import static util.UpdatePaymentTestHelper.getChangeTransactionState;
+import static util.UpdatePaymentTestHelper.getSetStatusInterfaceCode;
+import static util.UpdatePaymentTestHelper.getSetStatusInterfaceText;
 
 /**
  * @author fhaertig
@@ -391,7 +400,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     @Test
     public void whenAuthTransactionIsInitial_ChangeTransactionStateToSuccessAdded() throws Exception {
         Payment paymentAuthPending = testHelper.dummyPaymentOneAuthInitial20EuroCC();
-        ImmutableList<UpdateAction<Payment>> authPendingUpdates = testee.createPaymentUpdates(paymentAuthPending, notification);
+        List<UpdateAction<Payment>> authPendingUpdates = testee.createPaymentUpdates(paymentAuthPending, notification);
         assertThat(authPendingUpdates).containsOnlyOnce(ChangeTransactionState.of(
                 TransactionState.SUCCESS, paymentAuthPending.getTransactions().get(0).getId()));
 
@@ -401,7 +410,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     @Test
     public void whenAuthTransactionIsPending_ChangeTransactionStateToSuccessAdded() throws Exception {
         Payment paymentAuthPending = testHelper.dummyPaymentOneAuthPending20EuroCC();
-        ImmutableList<UpdateAction<Payment>> authPendingUpdates = testee.createPaymentUpdates(paymentAuthPending, notification);
+        List<UpdateAction<Payment>> authPendingUpdates = testee.createPaymentUpdates(paymentAuthPending, notification);
         assertThat(authPendingUpdates).containsOnlyOnce(ChangeTransactionState.of(
                 TransactionState.SUCCESS, paymentAuthPending.getTransactions().get(0).getId()));
 
@@ -411,7 +420,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     @Test
     public void whenAuthTransactionIsSuccess_ChangeTransactionStateNOTAdded() throws Exception {
         Payment paymentAuthSuccess = testHelper.dummyPaymentAuthSuccess();
-        ImmutableList<UpdateAction<Payment>> authSuccessUpdates = testee.createPaymentUpdates(paymentAuthSuccess, notification);
+        List<UpdateAction<Payment>> authSuccessUpdates = testee.createPaymentUpdates(paymentAuthSuccess, notification);
         assertTransactionOfTypeIsNotAdded(authSuccessUpdates, ChangeTransactionState.class);
 
         verify_isNotCompletedTransaction_called(TransactionState.SUCCESS, AUTHORIZATION);
@@ -420,7 +429,7 @@ public class AppointedNotificationProcessorTest extends BaseNotificationProcesso
     @Test
     public void whenAuthTransactionIsFailure_ChangeTransactionStateNOTAdded() throws Exception {
         Payment paymentAuthFailure = testHelper.dummyPaymentOneAuthFailure20EuroCC();
-        ImmutableList<UpdateAction<Payment>> authFailureUpdates = testee.createPaymentUpdates(paymentAuthFailure, notification);
+        List<UpdateAction<Payment>> authFailureUpdates = testee.createPaymentUpdates(paymentAuthFailure, notification);
         assertTransactionOfTypeIsNotAdded(authFailureUpdates, ChangeTransactionState.class);
 
         verify_isNotCompletedTransaction_called(TransactionState.FAILURE, AUTHORIZATION);

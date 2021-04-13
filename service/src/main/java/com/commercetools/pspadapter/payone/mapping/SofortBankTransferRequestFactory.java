@@ -4,7 +4,6 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferRequest;
 import com.commercetools.pspadapter.payone.util.BlowfishUtil;
 import com.commercetools.pspadapter.tenant.TenantConfig;
-import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
 import org.apache.commons.lang3.StringUtils;
 
@@ -57,7 +56,9 @@ public class SofortBankTransferRequestFactory extends BankTransferWithoutIbanBic
     protected BankTransferRequest wrapSofortBankTransferRequest(@Nonnull final BankTransferRequest bankTransferRequest,
                                                                 @Nonnull final PaymentWithCartLike paymentWithCartLike) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
-        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
+        if(ctPayment.getCustom() == null) {
+            throw new IllegalArgumentException("Missing custom fields on payment!");
+        }
 
         setBankField(ctPayment, IBAN_FIELD, bankTransferRequest::setIban);
         setBankField(ctPayment, BIC_FIELD, bankTransferRequest::setBic);

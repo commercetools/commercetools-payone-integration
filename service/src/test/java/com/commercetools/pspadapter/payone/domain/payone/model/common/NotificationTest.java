@@ -126,12 +126,11 @@ public class NotificationTest {
     @Test
     public void throwExceptionForInvalidNotification() throws IOException {
 
-        String requestBody =
-                "thisIsNotAValidNotificationString";
+        String requestBody = "";
 
         final Throwable noInterface = catchThrowable(() -> Notification.fromKeyValueString(requestBody, "\r?\n?&"));
         assertThat(noInterface).isInstanceOf(IllegalArgumentException.class);
-        assertThat(noInterface).hasMessageEndingWith("is not a valid entry");
+        assertThat(noInterface).hasMessage("The notification string is null or empty.");
     }
 
     @Test
