@@ -63,6 +63,12 @@ public class Notification implements Serializable {
 
     public static Notification fromKeyValueString(final String keyValueString, final String separatorPattern) {
 
+        //This code creates a map from an input string like this:
+        //                "key=123&" +
+        //                "txaction=appointed&" +
+        //                "blabla=23"
+        //while it splits the string using the separatorPattern (in this case its "\r?\n?&") into substrings
+        //which are splitted again at the equality-sign and collected then as key-value pairs into a map
         final Map<String, String> notificationValues = Pattern.compile(separatorPattern)
                .splitAsStream(keyValueString.trim())
                .map(s -> s.split("="))
