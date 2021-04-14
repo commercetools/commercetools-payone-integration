@@ -88,44 +88,43 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
 
         final BaseRequest request = createRequest(paymentWithCartLike);
 
-        final Map<String, Object> fieldsMap1 = new HashMap<>();
-        fieldsMap1.put(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString());
-        fieldsMap1.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
-        fieldsMap1.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+        final Map<String, Object> requestInfo = new HashMap<>();
+        requestInfo.put(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString());
+        requestInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+        requestInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
 
         final Payment updatedPayment = client.executeBlocking(
                 PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
                     Arrays.asList(
                         AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
-                            fieldsMap1),
+                            requestInfo),
                         ChangeTransactionInteractionId.of(sequenceNumber, transactionId)
                     )
                 ));
 
+        final Map<String, Object> responseInfo = new HashMap<>();
         try {
             final Map<String, String> response = payonePostService.executePost(request);
 
             final String status = response.get(PayoneResponseFields.STATUS);
             if (ResponseStatus.REDIRECT.getStateCode().equals(status)) {
-                final Map<String, Object> fieldsMap2 = new HashMap<>();
-                fieldsMap2.put(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response));
-                fieldsMap2.put(CustomFieldKeys.REDIRECT_URL_FIELD, response.get(PayoneResponseFields.REDIRECT_URL));
-                fieldsMap2.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
-                fieldsMap2.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+                responseInfo.put(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response));
+                responseInfo.put(CustomFieldKeys.REDIRECT_URL_FIELD, response.get(PayoneResponseFields.REDIRECT_URL));
+                responseInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+                responseInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
 
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT,
-                        fieldsMap2);
+                        responseInfo);
 
                 return update(paymentWithCartLike, updatedPayment, getRedirectUpdateActions(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
 
             } else {
-                final Map<String, Object> fieldsMap3 = new HashMap<>();
-                fieldsMap3.put(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response));
-                fieldsMap3.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
-                fieldsMap3.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+                responseInfo.put(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response));
+                responseInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+                responseInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
 
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                        fieldsMap3);
+                        responseInfo);
 
                 if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
 
@@ -149,13 +148,13 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
                 format("Request to Payone failed for commercetools Payment with id '%s' and Transaction with id '%s'.",
                     paymentWithCartLike.getPayment().getId(), transactionId), paymentException);
 
-            final Map<String, Object> fieldsMap4 = new HashMap<>();
-            fieldsMap4.put(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(paymentException));
-            fieldsMap4.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
-            fieldsMap4.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+            responseInfo.clear();
+            responseInfo.put(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(paymentException));
+            responseInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+            responseInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
 
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    fieldsMap4);
+                    responseInfo);
 
             final ChangeTransactionState failureTransaction = ChangeTransactionState.of(TransactionState.FAILURE, transactionId);
 

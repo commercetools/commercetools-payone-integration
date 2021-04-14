@@ -100,14 +100,14 @@ abstract class BaseBankTransferInAdvanceTransactionExecutor extends TransactionB
 
         final AuthorizationRequest request = createRequest(paymentWithCartLike);
 
-        final Map<String, Object> fieldsMap1 = new HashMap<>();
-        fieldsMap1.put(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString());
-        fieldsMap1.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
-        fieldsMap1.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+        final Map<String, Object> requestInfo = new HashMap<>();
+        requestInfo.put(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString());
+        requestInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+        requestInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
 
         final AddInterfaceInteraction interfaceInteraction1 =
             AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
-                fieldsMap1);
+                requestInfo);
 
         final Payment updatedPayment = client.executeBlocking(
             PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
@@ -115,18 +115,18 @@ abstract class BaseBankTransferInAdvanceTransactionExecutor extends TransactionB
                     ChangeTransactionInteractionId.of(String.valueOf(sequenceNumber), transactionId))
             ));
 
+        final Map<String, Object> responseInfo = new HashMap<>();
         try {
             final Map<String, String> response = payonePostService.executePost(request);
 
             final String status = response.get(STATUS);
 
-            final Map<String, Object> fieldsMap2 = new HashMap<>();
-            fieldsMap2.put(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response));
-            fieldsMap2.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
-            fieldsMap2.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+            responseInfo.put(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response));
+            responseInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+            responseInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
 
             final AddInterfaceInteraction interfaceInteraction2 = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    fieldsMap2);
+                    responseInfo);
 
             if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
 
@@ -149,14 +149,14 @@ abstract class BaseBankTransferInAdvanceTransactionExecutor extends TransactionB
                     + "Transaction with id '%s'.", paymentWithCartLike.getPayment().getId(), transactionId),
                 paymentException);
 
-            final Map<String, Object> fieldsMap3 = new HashMap<>();
-            fieldsMap3.put(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(paymentException));
-            fieldsMap3.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
-            fieldsMap3.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+            responseInfo.clear();
+            responseInfo.put(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(paymentException));
+            responseInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+            responseInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
 
             final AddInterfaceInteraction interfaceInteraction =
                 AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    fieldsMap3);
+                    responseInfo);
 
             final ChangeTransactionState failureTransaction =
                 ChangeTransactionState.of(TransactionState.FAILURE, transactionId);
