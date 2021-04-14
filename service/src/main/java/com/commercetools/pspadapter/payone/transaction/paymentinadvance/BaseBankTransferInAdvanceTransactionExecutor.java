@@ -9,7 +9,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseSt
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.commercetools.pspadapter.payone.transaction.TransactionBaseExecutor;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.payments.Payment;

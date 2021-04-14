@@ -1,12 +1,12 @@
 package com.commercetools.pspadapter.payone.domain.ctp;
 
-import com.google.common.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.CacheLoader;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.types.Type;
 import io.sphere.sdk.types.queries.TypeQuery;
 
-public class TypeCacheLoader extends CacheLoader<String, Type> {
+public class TypeCacheLoader implements CacheLoader<String, Type> {
     private final BlockingSphereClient client;
 
     public TypeCacheLoader(BlockingSphereClient client) {

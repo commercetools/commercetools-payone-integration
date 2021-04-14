@@ -42,8 +42,9 @@ import com.commercetools.service.OrderServiceImpl;
 import com.commercetools.service.PaymentService;
 import com.commercetools.service.PaymentServiceImpl;
 import com.commercetools.util.SphereClientConfigurationUtil;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.client.SphereClient;
 import io.sphere.sdk.payments.TransactionType;
@@ -313,7 +314,9 @@ public class TenantFactory {
     }
 
     protected LoadingCache<String, Type> createTypeCache(final BlockingSphereClient client) {
-        return CacheBuilder.newBuilder().build(new TypeCacheLoader(client));
+        return Caffeine.newBuilder()
+                       .maximumSize(1000)
+                       .build(new TypeCacheLoader(client));
     }
 
     @Nonnull

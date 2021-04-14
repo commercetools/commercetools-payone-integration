@@ -17,10 +17,9 @@ import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaAuth
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaPreauthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPreauthorizationRequest;
-import com.commercetools.pspadapter.payone.mapping.BankTransferWithoutIbanBicRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.client.BlockingSphereClient;
@@ -44,7 +43,13 @@ import util.PaymentTestHelper;
 import javax.annotation.Nonnull;
 import java.util.Map;
 
-import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.*;
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.BANK_TRANSFER_BANCONTACT;
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.BANK_TRANSFER_IDEAL;
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.INVOICE_KLARNA;
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.WALLET_PAYDIREKT;
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.WALLET_PAYPAL;
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.supportedPaymentMethods;
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.supportedTransactionTypes;
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.STATUS;
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus.APPROVED;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.REFERENCE_FIELD;
@@ -55,7 +60,10 @@ import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TenantFactoryTest {

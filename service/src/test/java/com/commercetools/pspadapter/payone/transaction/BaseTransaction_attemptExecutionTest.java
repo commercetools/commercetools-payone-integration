@@ -11,7 +11,7 @@ import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.client.BlockingSphereClient;

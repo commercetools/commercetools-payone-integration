@@ -5,7 +5,7 @@ import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.BaseRequest;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.commercetools.pspadapter.payone.transaction.BaseDefaultTransactionExecutor;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.types.Type;
