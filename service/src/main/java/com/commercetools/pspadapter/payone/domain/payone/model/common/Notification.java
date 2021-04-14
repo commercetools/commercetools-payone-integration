@@ -89,7 +89,8 @@ public class Notification implements Serializable {
                           .stream()
                           .filter(val -> !StringUtils.isBlank(val))
                           .findFirst()
-                          .orElseThrow(IllegalArgumentException::new);
+                          .orElseThrow(() -> new IllegalArgumentException("The notification string contains elements "
+                              + "with empty value."));
     }
 
     @Override
