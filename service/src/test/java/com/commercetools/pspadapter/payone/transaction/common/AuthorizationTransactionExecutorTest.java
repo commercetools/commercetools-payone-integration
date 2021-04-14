@@ -5,7 +5,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.Payment;
@@ -69,7 +69,7 @@ public class AuthorizationTransactionExecutorTest {
         });
 
         testee = new AuthorizationTransactionExecutor(
-                CacheBuilder.newBuilder().build(new TypeCacheLoader(client)),
+                Caffeine.newBuilder().build(new TypeCacheLoader(client)),
                 requestFactory,
                 postService,
                 client

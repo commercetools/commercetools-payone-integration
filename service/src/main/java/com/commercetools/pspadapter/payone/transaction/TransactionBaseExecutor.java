@@ -5,7 +5,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResp
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseErrorCode;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.sphere.sdk.client.BlockingSphereClient;
