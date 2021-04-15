@@ -20,7 +20,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPrea
 import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.client.SphereClient;
@@ -41,6 +40,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Map;
 
 import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.BANK_TRANSFER_BANCONTACT;
@@ -292,7 +292,8 @@ public class TenantFactoryTest {
                 BlockingSphereClient client = mock(BlockingSphereClient.class);
                 when(client.executeBlocking(any(PaymentUpdateCommand.class))).thenReturn(payment);
                 PayonePostService payonePostService = mock(PayonePostService.class);
-                when(payonePostService.executePost(any(BaseRequest.class))).thenReturn(ImmutableMap.of(STATUS, APPROVED.getStateCode()));
+                when(payonePostService.executePost(any(BaseRequest.class))).thenReturn(Collections.singletonMap(STATUS,
+                    APPROVED.getStateCode()));
 
                 // 5. inject mocked CTP and Payone services to tenant factory
                 TenantFactory factory = mockTenantFactory(tenantConfig, client, payonePostService);

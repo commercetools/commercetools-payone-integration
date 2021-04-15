@@ -2,12 +2,13 @@ package com.commercetools.pspadapter.payone.transaction.common;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.commercetools.pspadapter.payone.transaction.BaseTransaction_attemptExecutionTest;
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.HashMap;
 
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.when;
@@ -27,8 +28,11 @@ public class AuthorizationTransaction_attemptExecutionTest extends BaseTransacti
 
         executor = new AuthorizationTransactionExecutor(typeCache, requestFactory, payonePostService, client);
 
-        when(authorizationRequest.toStringMap(anyBoolean())).thenReturn(ImmutableMap.of("testRequestKey1", "testRequestValue2",
-                "testRequestKey2", "testRequestValue2"));
+        final HashMap<String, Object> responseMap = new HashMap<>();
+        responseMap.put("testRequestKey1", "testRequestValue2");
+        responseMap.put("testRequestKey2", "testRequestValue2");
+
+        when(authorizationRequest.toStringMap(anyBoolean())).thenReturn(responseMap);
         when(requestFactory.createPreauthorizationRequest(paymentWithCartLike)).thenReturn(authorizationRequest);
     }
 

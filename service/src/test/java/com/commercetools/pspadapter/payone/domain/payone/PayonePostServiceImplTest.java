@@ -1,14 +1,15 @@
 package com.commercetools.pspadapter.payone.domain.payone;
 
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -72,26 +73,26 @@ public class PayonePostServiceImplTest {
 
     @Test
     public void getObjectMapWithExpandedLists() {
-        assertThat(payonePostService.getNameValuePairsWithExpandedLists(ImmutableMap.of())).hasSize(0);
+        assertThat(payonePostService.getNameValuePairsWithExpandedLists(Collections.emptyMap())).hasSize(0);
 
-        final List<BasicNameValuePair> simple = payonePostService.getNameValuePairsWithExpandedLists(ImmutableMap.of("foo", "bar"));
+        final List<BasicNameValuePair> simple = payonePostService.getNameValuePairsWithExpandedLists(Collections.singletonMap(
+            "foo", "bar"));
         assertThat(simple).hasSize(1);
         assertThat(simple).contains(new BasicNameValuePair("foo", "bar"));
 
         // for now only string/numeric values are tested
-
-        final List<BasicNameValuePair> withExpandedLists = payonePostService.getNameValuePairsWithExpandedLists(
-                ImmutableMap.<String, Object>builder()
-                        .put("foo", "bar")
-                        .put("woot", "wootValue")
-                        .put("list1", ImmutableList.of(1, 2, 3))
-                        .put("a", 42)
-                        .put("empty", "")
-                        .put("boolTrue", true)
-                        .put("boolFalse", false)
-                        .put("listString", new LinkedList<>(ImmutableList.of("ein", "zwei", "drei")))
-                        .put("listDoubles", asList(3.14, 2.71, 9.81))
-                        .build());
+        final HashMap<String, Object> requestParams = new HashMap<>();
+        requestParams.put("foo", "bar");
+        requestParams.put("woot", "wootValue");
+        requestParams.put("list1", Arrays.asList(1, 2, 3));
+        requestParams.put("a", 42);
+        requestParams.put("empty", "");
+        requestParams.put("boolTrue", true);
+        requestParams.put("boolFalse", false);
+        requestParams.put("listString", new LinkedList<>(Arrays.asList("ein", "zwei", "drei")));
+        requestParams.put("listDoubles", asList(3.14, 2.71, 9.81));
+        final List<BasicNameValuePair> withExpandedLists =
+            payonePostService.getNameValuePairsWithExpandedLists(requestParams);
 
         assertThat(withExpandedLists).containsExactlyInAnyOrder(
                 new BasicNameValuePair("foo", "bar"),
@@ -110,10 +111,11 @@ public class PayonePostServiceImplTest {
                 new BasicNameValuePair("listDoubles[2]", "2.71"),
                 new BasicNameValuePair("listDoubles[3]", "9.81"));
 
-
+        requestParams.clear();
+        requestParams.put("foo", new ArrayList<>());
+        requestParams.put("bar", new LinkedList<>());
         final List<BasicNameValuePair> withEmptyLists = payonePostService.getNameValuePairsWithExpandedLists(
-                ImmutableMap.of("foo", new ArrayList<>(),
-                        "bar", new LinkedList<>()));
+                requestParams);
 
         assertThat(withEmptyLists).containsExactlyInAnyOrder(
                 new BasicNameValuePair("foo[]", ""),

@@ -5,7 +5,6 @@ import com.commercetools.payments.TransactionStateResolverImpl;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod;
 import com.commercetools.pspadapter.payone.transaction.PaymentMethodDispatcher;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import org.junit.Test;
@@ -16,6 +15,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,7 +38,7 @@ public class PaymentDispatcherTest {
 
         public CountingPaymentMethodDispatcher() {
             super((payment, transaction) -> payment,
-                    ImmutableMap.of(),
+                Collections.emptyMap(),
                     transactionStateResolver);
         }
 
