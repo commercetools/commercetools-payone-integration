@@ -7,7 +7,6 @@ import com.commercetools.pspadapter.payone.ServiceFactory;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import com.commercetools.pspadapter.payone.config.ServiceConfig;
 import com.commercetools.util.spark.JettyServerWithRequestLogFactory;
-import com.google.common.io.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -55,7 +54,7 @@ public class Main {
 
     private static void configureAccessLogs() {
         final RequestLogImpl requestLog = new RequestLogImpl();
-        requestLog.setFileName(Resources.getResource("logback-access.xml").getPath());
+        requestLog.setFileName(Main.class.getResource("logback-access.xml").getPath());
         requestLog.start();
         final JettyServerWithRequestLogFactory serverFactory = new JettyServerWithRequestLogFactory(requestLog);
         final EmbeddedServerFactory embeddedServerFactory = new EmbeddedJettyFactory(serverFactory);
@@ -78,4 +77,5 @@ public class Main {
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
     }
+
 }

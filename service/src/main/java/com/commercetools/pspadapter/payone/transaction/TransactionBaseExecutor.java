@@ -6,8 +6,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseEr
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.commands.UpdateActionImpl;
@@ -28,6 +26,7 @@ import io.sphere.sdk.types.Type;
 import javax.annotation.Nonnull;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -122,11 +121,13 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
      * @see #responseToJsonString(Map)
      */
     protected static String exceptionToResponseJsonString(@Nonnull Exception exception) {
-        return responseToJsonString(ImmutableMap.of(
-                STATUS, ResponseStatus.ERROR.getStateCode(),
-                ERROR_CODE, ResponseErrorCode.TRANSACTION_EXCEPTION.getErrorCode(),
-                ERROR_MESSAGE, "Integration Service Exception: " + exception.getMessage(),
-                CUSTOMER_MESSAGE, "Error on payment transaction processing."));
+        final Map<String, String> responseMap = new HashMap<>();
+        responseMap.put(STATUS, ResponseStatus.ERROR.getStateCode());
+        responseMap.put(ERROR_CODE, ResponseErrorCode.TRANSACTION_EXCEPTION.getErrorCode());
+        responseMap.put(ERROR_MESSAGE, "Integration Service Exception: " + exception.getMessage());
+        responseMap.put(CUSTOMER_MESSAGE, "Error on payment transaction processing.");
+
+        return responseToJsonString(responseMap);
     }
 
     /**
@@ -180,11 +181,11 @@ public abstract class TransactionBaseExecutor extends IdempotentTransactionExecu
                                                                       @Nonnull String transactionId,
                                                                       @Nonnull Map<String, String> response,
                                                                       @Nonnull AddInterfaceInteraction interfaceInteraction) {
-        ArrayList<UpdateActionImpl<Payment>> updateActions = Lists.newArrayList(
-                interfaceInteraction,
-                setStatusInterfaceCode(response),
-                setStatusInterfaceText(response),
-                ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId));
+        final ArrayList<UpdateActionImpl<Payment>> updateActions = new ArrayList<>();
+        updateActions.add(interfaceInteraction);
+        updateActions.add(setStatusInterfaceCode(response));
+        updateActions.add(setStatusInterfaceText(response));
+        updateActions.add(ChangeTransactionTimestamp.of(ZonedDateTime.now(), transactionId));
 
         // avoid CTP exception if the transaction already has newState
         getTransactionById(updatedPayment, transactionId)

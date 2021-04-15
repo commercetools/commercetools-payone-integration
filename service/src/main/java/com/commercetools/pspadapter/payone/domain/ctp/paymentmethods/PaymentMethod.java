@@ -1,10 +1,11 @@
 package com.commercetools.pspadapter.payone.domain.ctp.paymentmethods;
 
-import com.google.common.collect.ImmutableSet;
 import io.sphere.sdk.payments.TransactionType;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 
 import static io.sphere.sdk.payments.TransactionType.AUTHORIZATION;
 import static io.sphere.sdk.payments.TransactionType.CHARGE;
@@ -80,7 +81,7 @@ public enum PaymentMethod {
     public static final EnumSet<PaymentMethod> supportedPaymentMethods = EnumSet.allOf(PaymentMethod.class);
 
     /**
-     * Set of supported CTP transaction types.
+     * List of supported CTP transaction types.
      * <p>
      * <b>Note:</b> solving issue
      * <i><a href="https://github.com/commercetools/commercetools-payone-integration/issues/217">
@@ -90,7 +91,7 @@ public enum PaymentMethod {
      * It is a responsibility of payment creator (shop developers).
      * Although, other transaction types (like {@code REFUND} or {@code CANCEL_AUTHORIZATION}) are not supported yet.
      */
-    public static final ImmutableSet<TransactionType> supportedTransactionTypes = ImmutableSet.of(AUTHORIZATION, CHARGE);
+    public static final List<TransactionType> supportedTransactionTypes = Arrays.asList(AUTHORIZATION, CHARGE);
 
     private String key;
 

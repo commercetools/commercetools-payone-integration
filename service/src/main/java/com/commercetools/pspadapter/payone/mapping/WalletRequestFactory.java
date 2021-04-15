@@ -7,7 +7,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingTy
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPreauthorizationRequest;
 import com.commercetools.pspadapter.tenant.TenantConfig;
-import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentMethodInfo;
 
@@ -43,7 +42,9 @@ public class WalletRequestFactory extends PayoneRequestFactory {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
 
-        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
+        if(ctPayment.getCustom() == null) {
+            throw new IllegalArgumentException("Missing custom fields on payment!");
+        }
 
         final ClearingType clearingType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod());
         WR request = requestConstructor.apply(getPayoneConfig(), clearingType);

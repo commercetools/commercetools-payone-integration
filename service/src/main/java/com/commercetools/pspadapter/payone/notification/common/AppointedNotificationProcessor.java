@@ -7,9 +7,12 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Transactio
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.pspadapter.tenant.TenantFactory;
-import com.google.common.collect.ImmutableList;
 import io.sphere.sdk.commands.UpdateAction;
-import io.sphere.sdk.payments.*;
+import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.Transaction;
+import io.sphere.sdk.payments.TransactionDraftBuilder;
+import io.sphere.sdk.payments.TransactionState;
+import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionInteractionId;
 import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
@@ -17,6 +20,7 @@ import io.sphere.sdk.utils.MoneyImpl;
 
 import javax.annotation.Nonnull;
 import javax.money.MonetaryAmount;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,10 +44,10 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
     }
 
     @Override
-    protected ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
-                                                                        final Notification notification) {
-        final ImmutableList.Builder<UpdateAction<Payment>> actionsBuilder = ImmutableList.builder();
-        actionsBuilder.addAll(super.createPaymentUpdates(payment, notification));
+    protected List<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
+                                                               final Notification notification) {
+        final List<UpdateAction<Payment>> updateActions = new ArrayList<>();
+        updateActions.addAll(super.createPaymentUpdates(payment, notification));
 
         final List<Transaction> transactions = payment.getTransactions();
         final String sequenceNumber = toSequenceNumber(notification.getSequencenumber());
@@ -51,14 +55,14 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
         if (findMatchingTransaction(transactions, TransactionType.CHARGE, sequenceNumber).isPresent()) {
             // TODO: https://github.com/commercetools/commercetools-payone-integration/issues/196
             // also: never tested (either unit nor functional)
-            return actionsBuilder.build();
+            return updateActions;
         }
 
         if (sequenceNumber.equals("1")) {
 
-            actionsBuilder.add(matchingChangeInteractionOrChargeTransaction(notification, transactions, sequenceNumber));
+            updateActions.add(matchingChangeInteractionOrChargeTransaction(notification, transactions, sequenceNumber));
 
-            return actionsBuilder.build();
+            return updateActions;
         }
 
         final MonetaryAmount balance = MoneyImpl.of(notification.getBalance(), notification.getCurrency());
@@ -70,21 +74,20 @@ public class AppointedNotificationProcessor extends NotificationProcessorBase {
                         //set transactionState if is still not completed and notification has status "complete"
                         if (isNotCompletedTransaction(transaction) &&
                                 notification.getTransactionStatus().equals(TransactionStatus.COMPLETED)) {
-                            actionsBuilder.add(ChangeTransactionState.of(
+                            updateActions.add(ChangeTransactionState.of(
                                     notification.getTransactionStatus().getCtTransactionState(), transaction.getId()));
                         }
 
-                        return actionsBuilder;
+                        return updateActions;
                     })
                     .orElseGet(() -> {
-                        actionsBuilder.add(addAuthorizationTransaction(notification));
-                        return actionsBuilder;
-                    })
-                    .build();
+                        updateActions.add(addAuthorizationTransaction(notification));
+                        return updateActions;
+                    });
         }
 
-        actionsBuilder.add(addChargePendingTransaction(notification));
-        return actionsBuilder.build();
+        updateActions.add(addChargePendingTransaction(notification));
+        return updateActions;
     }
 
     private UpdateAction<Payment> matchingChangeInteractionOrChargeTransaction(@Nonnull final Notification notification,

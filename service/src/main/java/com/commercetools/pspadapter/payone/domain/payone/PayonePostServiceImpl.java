@@ -3,7 +3,6 @@ package com.commercetools.pspadapter.payone.domain.payone;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.BaseRequest;
 import com.commercetools.util.PayoneHttpClientUtil;
-import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
@@ -88,9 +87,9 @@ public class PayonePostServiceImpl implements PayonePostService {
             .build();
 
     private PayonePostServiceImpl(final String serverAPIURL) {
-        Preconditions.checkArgument(
-                serverAPIURL != null && !serverAPIURL.isEmpty(),
-                "The server api url must not be null or empty.");
+        if(StringUtils.isBlank(serverAPIURL)) {
+            throw new IllegalArgumentException("The server api url must not be null or empty.");
+        }
         this.serverAPIURL = serverAPIURL;
     }
 

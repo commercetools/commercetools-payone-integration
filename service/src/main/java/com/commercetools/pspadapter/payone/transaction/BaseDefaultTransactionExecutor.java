@@ -10,8 +10,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseSt
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
@@ -25,6 +23,8 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -88,35 +88,43 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
 
         final BaseRequest request = createRequest(paymentWithCartLike);
 
+        final Map<String, Object> requestInfo = new HashMap<>();
+        requestInfo.put(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString());
+        requestInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+        requestInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+
         final Payment updatedPayment = client.executeBlocking(
                 PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
-                        ImmutableList.of(
-                                AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
-                                        ImmutableMap.of(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString() /* TODO */,
-                                                CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
-                                                CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */)),
-                                ChangeTransactionInteractionId.of(sequenceNumber, transactionId)
-                        )
+                    Arrays.asList(
+                        AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
+                            requestInfo),
+                        ChangeTransactionInteractionId.of(sequenceNumber, transactionId)
+                    )
                 ));
 
+        final Map<String, Object> responseInfo = new HashMap<>();
         try {
             final Map<String, String> response = payonePostService.executePost(request);
 
             final String status = response.get(PayoneResponseFields.STATUS);
             if (ResponseStatus.REDIRECT.getStateCode().equals(status)) {
+                responseInfo.put(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response));
+                responseInfo.put(CustomFieldKeys.REDIRECT_URL_FIELD, response.get(PayoneResponseFields.REDIRECT_URL));
+                responseInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+                responseInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REDIRECT,
-                        ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
-                                CustomFieldKeys.REDIRECT_URL_FIELD, response.get(PayoneResponseFields.REDIRECT_URL),
-                                CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
-                                CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
+                        responseInfo);
 
                 return update(paymentWithCartLike, updatedPayment, getRedirectUpdateActions(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
 
             } else {
+                responseInfo.put(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response));
+                responseInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+                responseInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+
                 final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                        ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
-                                CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
-                                CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
+                        responseInfo);
 
                 if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
 
@@ -140,14 +148,17 @@ abstract public class BaseDefaultTransactionExecutor extends TransactionBaseExec
                 format("Request to Payone failed for commercetools Payment with id '%s' and Transaction with id '%s'.",
                     paymentWithCartLike.getPayment().getId(), transactionId), paymentException);
 
+            responseInfo.clear();
+            responseInfo.put(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(paymentException));
+            responseInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+            responseInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+
             final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(paymentException),
-                            CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
-                            CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now() /* TODO */));
+                    responseInfo);
 
             final ChangeTransactionState failureTransaction = ChangeTransactionState.of(TransactionState.FAILURE, transactionId);
 
-            return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction, failureTransaction));
+            return update(paymentWithCartLike, updatedPayment, Arrays.asList(interfaceInteraction, failureTransaction));
         }
     }
 }

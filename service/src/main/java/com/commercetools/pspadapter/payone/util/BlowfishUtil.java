@@ -1,7 +1,5 @@
 package com.commercetools.pspadapter.payone.util;
 
-import com.google.common.base.Charsets;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -9,6 +7,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -24,7 +23,7 @@ public class BlowfishUtil {
     private static final String CRYPT_ALGORITHM = "Blowfish";
     private static final String CRYPT_MODE = "ECB";
     private static final String CRYPT_PADDING = "NoPadding";
-    private static final Charset CHARSET_UTF_8 = Charsets.UTF_8;
+    private static final Charset CHARSET_UTF_8 = StandardCharsets.UTF_8;
 
     /**
      * Decrypts a given string encoded in HEX with a given key.
