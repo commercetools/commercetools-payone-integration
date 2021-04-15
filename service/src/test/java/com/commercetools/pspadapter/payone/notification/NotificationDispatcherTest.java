@@ -8,7 +8,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Transactio
 import com.commercetools.pspadapter.payone.util.PayoneHash;
 import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.commercetools.service.PaymentServiceImpl;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import org.junit.Before;
@@ -18,7 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,7 +28,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyObject;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * @author fhaertig
@@ -55,7 +63,7 @@ public class NotificationDispatcherTest extends BaseTenantPropertyTest {
 
     private PayoneConfig config;
 
-    private ImmutableMap<NotificationAction, NotificationProcessor> processors;
+    private Map<NotificationAction, NotificationProcessor> processors;
 
     @Before
     @SuppressWarnings("unchecked")
@@ -96,7 +104,7 @@ public class NotificationDispatcherTest extends BaseTenantPropertyTest {
 
         config = new PayoneConfig(tenantPropertyProvider);
 
-        processors = ImmutableMap.of(NotificationAction.APPOINTED, specificNotificationProcessor);
+        processors = Collections.singletonMap(NotificationAction.APPOINTED, specificNotificationProcessor);
     }
 
     @Test

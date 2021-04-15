@@ -12,7 +12,6 @@ import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateAction;
@@ -31,6 +30,7 @@ import org.mockito.Mock;
 
 import javax.annotation.Nonnull;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -101,11 +101,11 @@ public class BaseTransaction_attemptExecutionTest {
 
     protected void attemptExecution_withRedirectResponse_createsUpdateActions(final BaseRequest request,
                                                                               final TransactionBaseExecutor executor) throws Exception {
-        when(payonePostService.executePost(request)).thenReturn(ImmutableMap.of(
-                PayoneResponseFields.STATUS, REDIRECT.getStateCode(),
-                PayoneResponseFields.REDIRECT_URL, "http://mock-redirect.url",
-                PayoneResponseFields.TXID, "responseTxid"
-        ));
+        final HashMap<String, String> responseMap = new HashMap<>();
+        responseMap.put(PayoneResponseFields.STATUS, REDIRECT.getStateCode());
+        responseMap.put(PayoneResponseFields.REDIRECT_URL, "http://mock-redirect.url");
+        responseMap.put(PayoneResponseFields.TXID, "responseTxid");
+        when(payonePostService.executePost(request)).thenReturn(responseMap);
         executor.execute(paymentWithCartLike, transaction);
 
         assertRequestInterfaceInteraction(2);
@@ -117,10 +117,10 @@ public class BaseTransaction_attemptExecutionTest {
 
     protected void attemptExecution_withApprovedResponse_createsUpdateActions(final BaseRequest request,
                                                                            final TransactionBaseExecutor executor) throws Exception {
-        when(payonePostService.executePost(request)).thenReturn(ImmutableMap.of(
-                PayoneResponseFields.STATUS, APPROVED.getStateCode(),
-                PayoneResponseFields.TXID, "responseTxid"
-        ));
+        final HashMap<String, String> responseMap = new HashMap<>();
+        responseMap.put(PayoneResponseFields.STATUS, APPROVED.getStateCode());
+        responseMap.put(PayoneResponseFields.TXID, "responseTxid");
+        when(payonePostService.executePost(request)).thenReturn(responseMap);
         executor.execute(paymentWithCartLike, transaction);
 
         assertRequestInterfaceInteraction(2);
@@ -134,10 +134,10 @@ public class BaseTransaction_attemptExecutionTest {
      */
     protected void attemptExecution_withErrorResponse_createsUpdateActions(final BaseRequest request,
                                                                            final TransactionBaseExecutor executor) throws Exception {
-        when(payonePostService.executePost(request)).thenReturn(ImmutableMap.of(
-                PayoneResponseFields.STATUS, ERROR.getStateCode(),
-                PayoneResponseFields.TXID, "responseTxid"
-        ));
+        final HashMap<String, String> responseMap = new HashMap<>();
+        responseMap.put(PayoneResponseFields.STATUS, ERROR.getStateCode());
+        responseMap.put(PayoneResponseFields.TXID, "responseTxid");
+        when(payonePostService.executePost(request)).thenReturn(responseMap);
         executor.execute(paymentWithCartLike, transaction);
 
         assertRequestInterfaceInteraction(2);
@@ -150,10 +150,10 @@ public class BaseTransaction_attemptExecutionTest {
      */
     protected void attemptExecution_withPendingResponse_createsUpdateActions(final BaseRequest request,
                                                                              final TransactionBaseExecutor executor) throws Exception {
-        when(payonePostService.executePost(request)).thenReturn(ImmutableMap.of(
-                PayoneResponseFields.STATUS, PENDING.getStateCode(),
-                PayoneResponseFields.TXID, "responseTxid"
-        ));
+        final HashMap<String, String> responseMap = new HashMap<>();
+        responseMap.put(PayoneResponseFields.STATUS, PENDING.getStateCode());
+        responseMap.put(PayoneResponseFields.TXID, "responseTxid");
+        when(payonePostService.executePost(request)).thenReturn(responseMap);
         executor.execute(paymentWithCartLike, transaction);
 
         assertRequestInterfaceInteraction(2);
@@ -184,10 +184,10 @@ public class BaseTransaction_attemptExecutionTest {
      */
     protected void attemptExecution_withUnexpectedResponseStatus_throwsException(final BaseRequest request,
                                                                                  final TransactionBaseExecutor executor) throws Exception {
-        when(payonePostService.executePost(request)).thenReturn(ImmutableMap.of(
-                PayoneResponseFields.STATUS, "OH-NO-DAVID-BLAINE",
-                PayoneResponseFields.TXID, "responseTxid"
-        ));
+        final HashMap<String, String> responseMap = new HashMap<>();
+        responseMap.put(PayoneResponseFields.STATUS, "OH-NO-DAVID-BLAINE");
+        responseMap.put(PayoneResponseFields.TXID, "responseTxid");
+        when(payonePostService.executePost(request)).thenReturn(responseMap);
 
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> executor.execute(paymentWithCartLike, transaction))

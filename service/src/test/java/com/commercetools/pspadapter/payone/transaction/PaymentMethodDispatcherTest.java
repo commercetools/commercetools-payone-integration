@@ -3,7 +3,6 @@ package com.commercetools.pspadapter.payone.transaction;
 import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.payments.TransactionStateResolverImpl;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
@@ -11,6 +10,8 @@ import org.junit.Test;
 import util.PaymentTestHelper;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.concurrent.CompletionException;
 
 import static java.lang.String.format;
@@ -84,7 +85,8 @@ public class PaymentMethodDispatcherTest {
     private void callsDefaultExecutorWithTransactionState(Payment payment) throws Exception {
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, null);
         final CountingTransactionExecutor countingTransactionExecutor = countingTransactionExecutor();
-        final PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(countingTransactionExecutor, ImmutableMap.of(), transactionStateResolver);
+        final PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(countingTransactionExecutor,
+            Collections.emptyMap(), transactionStateResolver);
         dispatcher.dispatchPayment(paymentWithCartLike);
         assertThat(countingTransactionExecutor.getCount()).isEqualTo(1);
     }
@@ -105,11 +107,12 @@ public class PaymentMethodDispatcherTest {
         final CountingTransactionExecutor defaultExecutor = countingTransactionExecutor();
         final CountingTransactionExecutor chargeExecutor = countingTransactionExecutor();
         final CountingTransactionExecutor refundExecutor = countingTransactionExecutor();
+        final HashMap<TransactionType, TransactionExecutor> executors = new HashMap<>();
+        executors.put(TransactionType.CHARGE, chargeExecutor);
+        executors.put(TransactionType.REFUND, refundExecutor);
         final PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(
                 defaultExecutor,
-                ImmutableMap.of(
-                        TransactionType.CHARGE, chargeExecutor,
-                        TransactionType.REFUND, refundExecutor),
+                executors,
                 transactionStateResolver);
 
         dispatcher.dispatchPayment(new PaymentWithCartLike(payment, null));
@@ -136,11 +139,12 @@ public class PaymentMethodDispatcherTest {
         final CountingTransactionExecutor defaultExecutor = countingTransactionExecutor();
         final CountingTransactionExecutor chargeExecutor = returnSuccessTransactionExecutor(2, successfullyExecutedPayment);
         final CountingTransactionExecutor refundExecutor = countingTransactionExecutor();
+        final HashMap<TransactionType, TransactionExecutor> executors = new HashMap<>();
+        executors.put(TransactionType.CHARGE, chargeExecutor);
+        executors.put(TransactionType.REFUND, refundExecutor);
         final PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(
                 defaultExecutor,
-                ImmutableMap.of(
-                        TransactionType.CHARGE, chargeExecutor,
-                        TransactionType.REFUND, refundExecutor),
+                executors,
                 transactionStateResolver);
 
         dispatcher.dispatchPayment(dispatcher.dispatchPayment(dispatcher.dispatchPayment(new PaymentWithCartLike(paymentUnprocessed, null))));
@@ -154,12 +158,12 @@ public class PaymentMethodDispatcherTest {
         final CountingTransactionExecutor defaultExecutor = countingTransactionExecutor();
         final CountingTransactionExecutor chargeExecutor = countingTransactionExecutor();
         final CountingTransactionExecutor refundExecutor = countingTransactionExecutor();
-
+        final HashMap<TransactionType, TransactionExecutor> executors = new HashMap<>();
+        executors.put(TransactionType.CHARGE, chargeExecutor);
+        executors.put(TransactionType.REFUND, refundExecutor);
         final PaymentMethodDispatcher dispatcher = new PaymentMethodDispatcher(
                 defaultExecutor,
-                ImmutableMap.of(
-                        TransactionType.CHARGE, chargeExecutor,
-                        TransactionType.REFUND, refundExecutor),
+                executors,
                 transactionStateResolver);
 
         // if only success/failure transactions in the payment - dispatch should not be called

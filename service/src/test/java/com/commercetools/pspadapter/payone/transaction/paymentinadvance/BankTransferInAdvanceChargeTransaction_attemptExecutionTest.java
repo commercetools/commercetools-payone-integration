@@ -4,7 +4,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResp
 import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvanceRequest;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.transaction.BaseTransaction_attemptExecutionTest;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
@@ -13,6 +12,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.HashMap;
 
 import static com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE;
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus.APPROVED;
@@ -37,23 +38,25 @@ public class BankTransferInAdvanceChargeTransaction_attemptExecutionTest extends
         super.setUp();
         executor = new BankTransferInAdvanceChargeTransactionExecutor(typeCache, requestFactory, payonePostService, client);
 
-        when(bankTransferInAdvanceRequest.toStringMap(anyBoolean())).thenReturn(ImmutableMap.of("testRequestKey1", "testRequestValue2",
-                "testRequestKey2", "testRequestValue2"));
+        final HashMap<String, Object> requestMap = new HashMap<>();
+        requestMap.put("testRequestKey1", "testRequestValue2");
+        requestMap.put("testRequestKey2", "testRequestValue2");
+
+        when(bankTransferInAdvanceRequest.toStringMap(anyBoolean())).thenReturn(requestMap);
         when(requestFactory.createPreauthorizationRequest(paymentWithCartLike)).thenReturn(bankTransferInAdvanceRequest);
         when(requestFactory.createAuthorizationRequest(paymentWithCartLike)).thenReturn(bankTransferInAdvanceRequest);
     }
 
     @Test
     public void attemptExecution_withApprovedResponse_createsUpdateActions() throws Exception {
-        when(payonePostService.executePost(bankTransferInAdvanceRequest)).thenReturn(ImmutableMap.of(
-                PayoneResponseFields.STATUS, APPROVED.getStateCode(),
-                PayoneResponseFields.TXID, "responseTxid",
-
-                // bank transfer related custom field values
-                PayoneResponseFields.BIC, "test-mock-BIC",
-                PayoneResponseFields.IBAN, "test-mock-IBAN",
-                PayoneResponseFields.ACCOUNT_HOLDER, "test-mock-NAME"
-        ));
+        final HashMap<String, String> responseMap = new HashMap<>();
+        responseMap.put(PayoneResponseFields.STATUS, APPROVED.getStateCode());
+        responseMap.put(PayoneResponseFields.TXID, "responseTxid");
+        // bank transfer related custom field values
+        responseMap.put(PayoneResponseFields.BIC, "test-mock-BIC");
+        responseMap.put(PayoneResponseFields.IBAN, "test-mock-IBAN");
+        responseMap.put(PayoneResponseFields.ACCOUNT_HOLDER, "test-mock-NAME");
+        when(payonePostService.executePost(bankTransferInAdvanceRequest)).thenReturn(responseMap);
         executor.execute(paymentWithCartLike, transaction);
 
         assertRequestInterfaceInteraction(2);
@@ -99,11 +102,11 @@ public class BankTransferInAdvanceChargeTransaction_attemptExecutionTest extends
      */
     @Test
     public void attemptExecution_withRedirectResponse_throwsException() throws Exception {
-        when(payonePostService.executePost(bankTransferInAdvanceRequest)).thenReturn(ImmutableMap.of(
-                PayoneResponseFields.STATUS, REDIRECT.getStateCode(),
-                PayoneResponseFields.REDIRECT_URL, "http://mock-redirect.url",
-                PayoneResponseFields.TXID, "responseTxid"
-        ));
+        final HashMap<String, String> responseMap = new HashMap<>();
+        responseMap.put(PayoneResponseFields.STATUS, REDIRECT.getStateCode());
+        responseMap.put(PayoneResponseFields.REDIRECT_URL, "http://mock-redirect.url");
+        responseMap.put(PayoneResponseFields.TXID, "responseTxid");
+        when(payonePostService.executePost(bankTransferInAdvanceRequest)).thenReturn(responseMap);
 
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> executor.execute(paymentWithCartLike, transaction))

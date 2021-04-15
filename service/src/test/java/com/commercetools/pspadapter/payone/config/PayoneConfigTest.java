@@ -2,8 +2,6 @@ package com.commercetools.pspadapter.payone.config;
 
 import com.commercetools.pspadapter.payone.util.PayoneHash;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

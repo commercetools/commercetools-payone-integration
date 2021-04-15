@@ -2,8 +2,6 @@ package com.commercetools.pspadapter.payone.notification;
 
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import io.sphere.sdk.client.ConcurrentModificationException;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
@@ -17,7 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,7 +49,7 @@ public class NotificationProcessorBaseTest extends BaseNotificationProcessorTest
         final Notification notification = new Notification();
         notification.setTxaction(txAction);
 
-        final ImmutableList<UpdateAction<Payment>> updateActions = ImmutableList.of(SetCustomer.of(null));
+        final List<UpdateAction<Payment>> updateActions = Arrays.asList(SetCustomer.of(null));
 
         final NotificationProcessorBase testee = new NotificationProcessorBase(tenantFactory, tenantConfig, transactionStateResolver) {
             @Override
@@ -62,7 +60,7 @@ public class NotificationProcessorBaseTest extends BaseNotificationProcessorTest
             @Override
             protected List<UpdateAction<Payment>> createPaymentUpdates(final Payment aPayment,
                                                                        final Notification aNotification) {
-                return (payment == aPayment) && (notification == aNotification) ? updateActions : ImmutableList.of();
+                return (payment == aPayment) && (notification == aNotification) ? updateActions : Collections.emptyList();
             }
         };
 
@@ -107,7 +105,7 @@ public class NotificationProcessorBaseTest extends BaseNotificationProcessorTest
     }
 
     private static NotificationAction randomTxAction() {
-        final ArrayList<NotificationAction> txActions = Lists.newArrayList(NotificationAction.values());
+        final List<NotificationAction> txActions = Arrays.asList(NotificationAction.values());
         Collections.shuffle(txActions);
         return txActions.get(0);
     }

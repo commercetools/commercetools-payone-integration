@@ -2,12 +2,12 @@ package com.commercetools.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import io.sphere.sdk.http.HttpStatusCode;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
@@ -58,12 +58,12 @@ public class PayoneHttpClientUtilTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shortPostRequestWithArguments_shouldSuccess() throws Exception {
-        final HttpResponse httpResponse = executePostRequest(HTTPS_HTTPBIN_ORG_POST, ImmutableList.of(
-                nameValue("a", "b"),
-                nameValue("hello", 22),
-                nameValue("Fußgängerübergänge", "Пішохідні переходи"),
-                nameValue("Їжачок", "قنفذ"),
-                nameValue("инь-янь", "陰陽")));
+        final HttpResponse httpResponse = executePostRequest(HTTPS_HTTPBIN_ORG_POST, Arrays.asList(
+            nameValue("a", "b"),
+            nameValue("hello", 22),
+            nameValue("Fußgängerübergänge", "Пішохідні переходи"),
+            nameValue("Їжачок", "قنفذ"),
+            nameValue("инь-янь", "陰陽")));
 
         assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(HttpStatusCode.OK_200);
 

@@ -10,9 +10,9 @@ import spark.utils.IOUtils;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 
 import static com.commercetools.pspadapter.payone.IntegrationService.SUCCESS_STATUS;
-import static com.google.common.collect.ImmutableList.of;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -64,9 +64,9 @@ public class IntegrationServiceTest {
 
     @Test
     public void createHealthResponse_WithoutPrettyOutputQuery_shouldReturnOkStatus() {
-        integrationService = new IntegrationService(serviceConfig, of(
-                createMockTenantFactory(TENANTNAME1),
-                createMockTenantFactory(TENANTNAME2)));
+        integrationService = new IntegrationService(serviceConfig, Arrays.asList(
+            createMockTenantFactory(TENANTNAME1),
+            createMockTenantFactory(TENANTNAME2)));
 
         integrationService.start();
 
@@ -80,7 +80,7 @@ public class IntegrationServiceTest {
 
     @Test
     public void createHealthResponse_WithPrettyOutputQuery_shouldReturnOkStatus() {
-        integrationService = new IntegrationService(serviceConfig, of(
+        integrationService = new IntegrationService(serviceConfig, Arrays.asList(
                 createMockTenantFactory(TENANTNAME1),
                 createMockTenantFactory(TENANTNAME2)));
 
