@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -88,7 +87,7 @@ public class DefaultNotificationProcessorTest extends BaseNotificationProcessorT
     }
 
     private static NotificationAction randomTxAction() {
-        final ArrayList<NotificationAction> txActions = new ArrayList<>(Arrays.asList(NotificationAction.values()));
+        final List<NotificationAction> txActions = Arrays.asList(NotificationAction.values());
         Collections.shuffle(txActions);
         return txActions.get(0);
     }

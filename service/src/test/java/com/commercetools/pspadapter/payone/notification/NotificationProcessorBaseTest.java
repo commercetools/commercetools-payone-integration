@@ -15,7 +15,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -106,7 +105,7 @@ public class NotificationProcessorBaseTest extends BaseNotificationProcessorTest
     }
 
     private static NotificationAction randomTxAction() {
-        final ArrayList<NotificationAction> txActions = new ArrayList<>(Arrays.asList(NotificationAction.values()));
+        final List<NotificationAction> txActions = Arrays.asList(NotificationAction.values());
         Collections.shuffle(txActions);
         return txActions.get(0);
     }
