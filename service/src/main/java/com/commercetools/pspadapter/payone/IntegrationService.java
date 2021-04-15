@@ -8,8 +8,6 @@ import com.commercetools.pspadapter.payone.notification.NotificationDispatcher;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.eclipse.jetty.http.HttpStatus;
@@ -21,7 +19,9 @@ import spark.utils.CollectionUtils;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.commercetools.pspadapter.payone.util.PayoneConstants.PAYONE;
 import static com.commercetools.util.CorrelationIdUtil.attachFromRequestOrGenerateNew;
@@ -143,7 +143,7 @@ public class IntegrationService {
         Spark.port(port());
         injectCorrelationIdIntoContext();
 
-        final ImmutableMap<String, Object> healthResponse = createHealthResponse(serviceConfig, tenantFactories);
+        final Map<String, Object> healthResponse = createHealthResponse(serviceConfig);
         final String healthRequestContent = toJsonString(healthResponse);
         final String healthRequestPrettyContent = toPrettyJsonString(healthResponse);
 
@@ -172,7 +172,7 @@ public class IntegrationService {
 
     public int port() {
         final String environmentVariable = System.getenv(HEROKU_ASSIGNED_PORT);
-        if (!Strings.isNullOrEmpty(environmentVariable)) {
+        if (!StringUtils.isBlank(environmentVariable)) {
             return Integer.parseInt(environmentVariable);
         }
 
@@ -180,14 +180,15 @@ public class IntegrationService {
         return Integer.parseInt(systemProperty);
     }
 
-    private ImmutableMap<String, Object> createHealthResponse(@Nonnull final ServiceConfig serviceConfig,
-                                                              List<TenantFactory> tenants) {
-        final ImmutableMap<String, String> applicationInfo = ImmutableMap.of(
-                "version", serviceConfig.getApplicationVersion(),
-                "title", serviceConfig.getApplicationName());
+    private Map<String, Object> createHealthResponse(@Nonnull final ServiceConfig serviceConfig) {
+        final Map<String, String> applicationInfo = new LinkedHashMap<>();
+        applicationInfo.put("version", serviceConfig.getApplicationVersion());
+        applicationInfo.put("title", serviceConfig.getApplicationName());
 
-        return ImmutableMap.of(
-                STATUS_KEY, SUCCESS_STATUS,
-                APPLICATION_INFO_KEY, applicationInfo);
+        final Map<String, Object> healthResponse = new LinkedHashMap<>();
+        healthResponse.put(STATUS_KEY, SUCCESS_STATUS);
+        healthResponse.put(APPLICATION_INFO_KEY, applicationInfo);
+
+        return healthResponse;
     }
 }

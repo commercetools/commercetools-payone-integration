@@ -5,8 +5,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingTy
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.tenant.TenantFactory;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -17,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.money.MonetaryAmount;
 import java.util.ConcurrentModificationException;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static com.commercetools.pspadapter.payone.util.CompletionUtil.executeBlocking;
@@ -30,13 +29,13 @@ public class NotificationDispatcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationDispatcher.class);
 
     private final NotificationProcessor defaultProcessor;
-    private final ImmutableMap<NotificationAction, NotificationProcessor> processors;
+    private final Map<NotificationAction, NotificationProcessor> processors;
     private final TenantFactory tenantFactory;
     private final PayoneConfig config;
 
     public NotificationDispatcher(
             final NotificationProcessor defaultProcessor,
-            final ImmutableMap<NotificationAction, NotificationProcessor> processors,
+            final Map<NotificationAction, NotificationProcessor> processors,
             final TenantFactory tenantFactory,
             final PayoneConfig config) {
         this.defaultProcessor = defaultProcessor;
@@ -77,14 +76,18 @@ public class NotificationDispatcher {
      * @throws IllegalArgumentException if any argument is null or not matching
      */
     private void validateSecrets(final Notification notification) throws IllegalArgumentException {
-        Preconditions.checkArgument(config.getKeyAsHash().equals(notification.getKey()),
-                "the value for 'key' is not valid for this service instance: " + notification.getKey());
-        Preconditions.checkArgument(config.getPortalId().equals(notification.getPortalid()),
-                "the value for 'portalid' is not valid for this service instance: " + notification.getPortalid());
-        Preconditions.checkArgument(config.getSubAccountId().equals(notification.getAid()),
-                "the value for 'aid' is not valid for this service instance: " + notification.getAid());
-        Preconditions.checkArgument(config.getMode().equals(notification.getMode()),
-                "the value for 'mode' is not valid for this service instance: " + notification.getMode());
+        if(!config.getKeyAsHash().equals(notification.getKey())) {
+            throw new IllegalArgumentException("the value for 'key' is not valid for this service instance: " + notification.getKey());
+        }
+        if(!config.getPortalId().equals(notification.getPortalid())) {
+            throw new IllegalArgumentException("the value for 'portalid' is not valid for this service instance: " + notification.getPortalid());
+        }
+        if(!config.getSubAccountId().equals(notification.getAid())) {
+            throw new IllegalArgumentException("the value for 'aid' is not valid for this service instance: " + notification.getAid());
+        }
+        if(!config.getMode().equals(notification.getMode())) {
+            throw new IllegalArgumentException("the value for 'mode' is not valid for this service instance: " + notification.getMode());
+        }
     }
 
     private NotificationProcessor getNotificationProcessor(final NotificationAction txAction) {

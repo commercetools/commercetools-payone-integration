@@ -2,20 +2,20 @@ package com.commercetools.pspadapter.payone.transaction;
 
 import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 
 public class PaymentMethodDispatcher {
     private final TransactionExecutor defaultExecutor;
-    private final ImmutableMap<TransactionType, TransactionExecutor> executors;
+    private final Map<TransactionType, TransactionExecutor> executors;
     private final TransactionStateResolver transactionStateResolver;
 
     public PaymentMethodDispatcher(
             @Nonnull final TransactionExecutor defaultExecutor,
-            @Nonnull final ImmutableMap<TransactionType, TransactionExecutor> executors,
+            @Nonnull final Map<TransactionType, TransactionExecutor> executors,
             @Nonnull final TransactionStateResolver transactionStateResolver) {
         this.defaultExecutor = defaultExecutor;
         this.executors = executors;

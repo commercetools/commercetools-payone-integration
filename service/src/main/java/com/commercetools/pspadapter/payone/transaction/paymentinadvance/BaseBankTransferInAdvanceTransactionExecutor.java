@@ -9,9 +9,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseSt
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.commercetools.pspadapter.payone.transaction.TransactionBaseExecutor;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.commands.UpdateActionImpl;
 import io.sphere.sdk.payments.Payment;
@@ -29,10 +27,15 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.ACCOUNT_HOLDER;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.BIC;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.IBAN;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.STATUS;
 import static java.lang.String.format;
 
 /**
@@ -97,37 +100,45 @@ abstract class BaseBankTransferInAdvanceTransactionExecutor extends TransactionB
 
         final AuthorizationRequest request = createRequest(paymentWithCartLike);
 
-        final Payment updatedPayment = client.executeBlocking(
-                PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
-                        ImmutableList.of(
-                                AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
-                                        ImmutableMap.of(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString(),
-                                                CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
-                                                CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now())),
-                                ChangeTransactionInteractionId.of(String.valueOf(sequenceNumber), transactionId))
-                ));
+        final Map<String, Object> requestInfo = new HashMap<>();
+        requestInfo.put(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString());
+        requestInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+        requestInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
 
+        final AddInterfaceInteraction interfaceInteraction1 =
+            AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_REQUEST,
+                requestInfo);
+
+        final Payment updatedPayment = client.executeBlocking(
+            PaymentUpdateCommand.of(paymentWithCartLike.getPayment(),
+                Arrays.asList(interfaceInteraction1,
+                    ChangeTransactionInteractionId.of(String.valueOf(sequenceNumber), transactionId))
+            ));
+
+        final Map<String, Object> responseInfo = new HashMap<>();
         try {
             final Map<String, String> response = payonePostService.executePost(request);
 
             final String status = response.get(STATUS);
 
-            final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response),
-                            CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
-                            CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now()));
+            responseInfo.put(CustomFieldKeys.RESPONSE_FIELD, responseToJsonString(response));
+            responseInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+            responseInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+
+            final AddInterfaceInteraction interfaceInteraction2 = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
+                    responseInfo);
 
             if (ResponseStatus.APPROVED.getStateCode().equals(status)) {
 
-                return update(paymentWithCartLike, updatedPayment, getBankTransferAdvancedUpdateActions(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
+                return update(paymentWithCartLike, updatedPayment, getBankTransferAdvancedUpdateActions(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction2));
 
             } else if (ResponseStatus.ERROR.getStateCode().equals(status)) {
 
-                return update(paymentWithCartLike, updatedPayment, getDefaultUpdateActions(TransactionState.FAILURE, updatedPayment, transactionId, response, interfaceInteraction));
+                return update(paymentWithCartLike, updatedPayment, getDefaultUpdateActions(TransactionState.FAILURE, updatedPayment, transactionId, response, interfaceInteraction2));
 
             } else if (ResponseStatus.PENDING.getStateCode().equals(status)) {
 
-                return update(paymentWithCartLike, updatedPayment, getDefaultSuccessUpdateActions(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction));
+                return update(paymentWithCartLike, updatedPayment, getDefaultSuccessUpdateActions(TransactionState.PENDING, updatedPayment, transactionId, response, interfaceInteraction2));
 
             }
 
@@ -138,15 +149,19 @@ abstract class BaseBankTransferInAdvanceTransactionExecutor extends TransactionB
                     + "Transaction with id '%s'.", paymentWithCartLike.getPayment().getId(), transactionId),
                 paymentException);
 
+            responseInfo.clear();
+            responseInfo.put(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(paymentException));
+            responseInfo.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId);
+            responseInfo.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
 
-            final AddInterfaceInteraction interfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
-                    ImmutableMap.of(CustomFieldKeys.RESPONSE_FIELD, exceptionToResponseJsonString(paymentException),
-                            CustomFieldKeys.TRANSACTION_ID_FIELD, transactionId,
-                            CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now()));
+            final AddInterfaceInteraction interfaceInteraction =
+                AddInterfaceInteraction.ofTypeKeyAndObjects(CustomTypeBuilder.PAYONE_INTERACTION_RESPONSE,
+                    responseInfo);
 
-            final ChangeTransactionState failureTransaction = ChangeTransactionState.of(TransactionState.FAILURE, transactionId);
+            final ChangeTransactionState failureTransaction =
+                ChangeTransactionState.of(TransactionState.FAILURE, transactionId);
 
-            return update(paymentWithCartLike, updatedPayment, ImmutableList.of(interfaceInteraction, failureTransaction));
+            return update(paymentWithCartLike, updatedPayment, Arrays.asList(interfaceInteraction, failureTransaction));
         }
     }
 

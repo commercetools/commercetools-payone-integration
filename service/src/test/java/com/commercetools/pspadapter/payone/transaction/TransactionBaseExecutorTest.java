@@ -2,8 +2,9 @@ package com.commercetools.pspadapter.payone.transaction;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
+
+import java.util.HashMap;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneResponseFields.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,11 +16,11 @@ public class TransactionBaseExecutorTest {
      */
     @Test
     public void responseToJsonString() throws Exception {
-        String jsonString = TransactionBaseExecutor.responseToJsonString(ImmutableMap.of(
-                "woot", "hack",
-                "foo", "bar",
-                "errorcode", "00123"
-        ));
+        final HashMap<String, String> responseMap = new HashMap<>();
+        responseMap.put("woot", "hack");
+        responseMap.put("foo", "bar");
+        responseMap.put("errorcode", "00123");
+        String jsonString = TransactionBaseExecutor.responseToJsonString(responseMap);
 
         assertThat(jsonString).isNotBlank();
 

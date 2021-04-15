@@ -1,7 +1,8 @@
 package com.commercetools.pspadapter.payone.util;
 
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
+import org.apache.commons.codec.digest.DigestUtils;
+
+import java.nio.charset.StandardCharsets;
 
 
 public final class PayoneHash {
@@ -17,6 +18,6 @@ public final class PayoneHash {
      */
     @SuppressWarnings("deprecation")
     public static String calculate(String in) {
-        return Hashing.md5().hashString(in, Charsets.UTF_8).toString();
+        return DigestUtils.md5Hex(in);
     }
 }

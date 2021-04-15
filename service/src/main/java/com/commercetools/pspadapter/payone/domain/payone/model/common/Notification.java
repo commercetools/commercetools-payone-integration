@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Splitter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author fhaertig
@@ -58,11 +60,37 @@ public class Notification implements Serializable {
 
     public static Notification fromKeyValueString(final String keyValueString, final String separatorPattern) {
 
-        Map<String, String> notificationValues = Splitter.onPattern(separatorPattern).withKeyValueSeparator("=").split(keyValueString);
+        //This code creates a map from an input string like this:
+        //                "key=123&" +
+        //                "txaction=appointed&" +
+        //                "blabla=23"
+        //while it splits the string using the separatorPattern (in this case its "\r?\n?&") into substrings
+        //which are splitted again at the equality-sign and collected then as key-value pairs into a map
+        //throws IllegalArgumentException on duplicate keys.
+        final Map<String, String> notificationValues = Pattern.compile(separatorPattern)
+               .splitAsStream(keyValueString.trim())
+               .map(s -> s.split("="))
+               .collect(Collectors.toMap(a -> a[0], a -> a.length>1? a[1]: "",
+                   (oldKey, newKey) -> {throw new IllegalArgumentException(oldKey + " is not a valid entry.");}));
+
+        validateNotificationValues(notificationValues);
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return mapper.convertValue(notificationValues, Notification.class);
+    }
+
+    private static void validateNotificationValues(final Map<String, String> notificationValues) {
+        if(notificationValues == null || notificationValues.isEmpty()) {
+            throw new IllegalArgumentException("The notification string is null or empty.");
+        }
+
+        notificationValues.values()
+                          .stream()
+                          .filter(val -> !StringUtils.isBlank(val))
+                          .findFirst()
+                          .orElseThrow(() -> new IllegalArgumentException("The notification string contains elements "
+                              + "with empty value."));
     }
 
     @Override

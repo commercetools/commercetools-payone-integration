@@ -3,7 +3,6 @@ package util;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.Notification;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.TransactionDraftBuilder;
@@ -13,6 +12,7 @@ import io.sphere.sdk.payments.commands.updateactions.*;
 
 import javax.money.MonetaryAmount;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,13 +22,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class UpdatePaymentTestHelper {
     public static AddInterfaceInteraction getAddInterfaceInteraction(final Notification notification, final ZonedDateTime time) {
+        final HashMap<String, Object> fieldsMap = new HashMap<>();
+        fieldsMap.put(CustomFieldKeys.TIMESTAMP_FIELD, time);
+        fieldsMap.put(CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber());
+        fieldsMap.put(CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode());
+        fieldsMap.put(CustomFieldKeys.NOTIFICATION_FIELD, notification.toString());
         return AddInterfaceInteraction.ofTypeKeyAndObjects(
                 CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
-                ImmutableMap.of(
-                        CustomFieldKeys.TIMESTAMP_FIELD, time,
-                        CustomFieldKeys.SEQUENCE_NUMBER_FIELD, notification.getSequencenumber(),
-                        CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
-                        CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
+                fieldsMap);
     }
 
     public static SetStatusInterfaceCode getSetStatusInterfaceCode(final Notification notification){

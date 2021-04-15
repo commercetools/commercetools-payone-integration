@@ -7,11 +7,9 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingTy
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.util.function.TriFunction;
-import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
 
 import javax.annotation.Nonnull;
-
 import java.util.Optional;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType.AUTHORIZATION;
@@ -44,7 +42,9 @@ public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFacto
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
 
-        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
+        if(ctPayment.getCustom() == null) {
+            throw new IllegalArgumentException("Missing custom fields on payment!");
+        }
 
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         final BankTransferRequest request = requestConstructor.apply(requestType, getPayoneConfig(), clearingSubType);

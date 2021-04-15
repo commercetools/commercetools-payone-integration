@@ -7,7 +7,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.notification.NotificationProcessorBase;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.pspadapter.tenant.TenantFactory;
-import com.google.common.collect.ImmutableList;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.*;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
@@ -16,6 +15,7 @@ import io.sphere.sdk.utils.MoneyImpl;
 
 import javax.annotation.Nonnull;
 import javax.money.MonetaryAmount;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,44 +36,45 @@ public class CaptureNotificationProcessor extends NotificationProcessorBase {
     }
 
     @Override
-    protected ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
-                                                                        final Notification notification) {
-        final ImmutableList.Builder<UpdateAction<Payment>> actionsBuilder = ImmutableList.builder();
-        actionsBuilder.addAll(super.createPaymentUpdates(payment, notification));
+    protected List<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
+                                                               final Notification notification) {
+        final List<UpdateAction<Payment>> updateActions = new ArrayList<>();
+        updateActions.addAll(super.createPaymentUpdates(payment, notification));
 
         final List<Transaction> transactions = payment.getTransactions();
         final String sequenceNumber = toSequenceNumber(notification.getSequencenumber());
 
         return findMatchingTransaction(transactions, TransactionType.CHARGE, sequenceNumber)
-                .map(transaction -> updateChargeTransactionState(transaction, notification, actionsBuilder))
-                .orElseGet(() -> createChargeTransaction(notification, actionsBuilder, sequenceNumber))
-                .build();
+                .map(transaction -> updateChargeTransactionState(transaction, notification, updateActions))
+                .orElseGet(() -> createChargeTransaction(notification, updateActions, sequenceNumber));
     }
 
     /**
-     * Add {@link ChangeTransactionState} action to {@code actionsBuilder} if current transaction is still in different
+     * Add {@link ChangeTransactionState} action to {@code updateActions} if current transaction is still in different
      * from state in {@code notification}.
+     * @return
      */
-    protected ImmutableList.Builder<UpdateAction<Payment>> updateChargeTransactionState(
+    protected List<UpdateAction<Payment>> updateChargeTransactionState(
             @Nonnull final Transaction transaction,
             @Nonnull final Notification notification,
-            @Nonnull final ImmutableList.Builder<UpdateAction<Payment>> actionsBuilder) {
+            @Nonnull final List<UpdateAction<Payment>> updateActions) {
         final TransactionState newTransactionState = notification.getTransactionStatus().getCtTransactionState();
         if (transaction.getState() != newTransactionState) {
-            actionsBuilder.add(ChangeTransactionState.of(newTransactionState, transaction.getId()));
+            updateActions.add(ChangeTransactionState.of(newTransactionState, transaction.getId()));
         }
 
-        return actionsBuilder;
+        return updateActions;
     }
 
     /**
      * For payments except {@code BANK_TRANSFER-ADVANCE} ({@link ClearingType#PAYONE_VOR}) add {@link AddTransaction}
      * update action with {@link TransactionType#CHARGE} and state equal to
      * {@link io.sphere.sdk.payments.TransactionState Notification#getTransactionStatus()#getCtTransactionState()}
+     * @return
      */
-    protected ImmutableList.Builder<UpdateAction<Payment>> createChargeTransaction(
+    protected List<UpdateAction<Payment>> createChargeTransaction(
             @Nonnull final Notification notification,
-            @Nonnull final ImmutableList.Builder<UpdateAction<Payment>> actionsBuilder,
+            @Nonnull final List<UpdateAction<Payment>> updateActions,
             @Nonnull final String sequenceNumber) {
         final MonetaryAmount amount = MoneyImpl.of(notification.getPrice(), notification.getCurrency());
 
@@ -81,13 +82,13 @@ public class CaptureNotificationProcessor extends NotificationProcessorBase {
         //we must not create a second charge transaction
         //at the moment that is only "BANK_TRANSFER_ADVANCE"
         if (ClearingType.PAYONE_VOR != ClearingType.getClearingTypeByCode(notification.getClearingtype())) {
-            actionsBuilder.add(AddTransaction.of(TransactionDraftBuilder.of(TransactionType.CHARGE, amount)
-                    .timestamp(toZonedDateTime(notification))
-                    .state(notification.getTransactionStatus().getCtTransactionState())
-                    .interactionId(sequenceNumber)
-                    .build()));
+            updateActions.add(AddTransaction.of(TransactionDraftBuilder.of(TransactionType.CHARGE, amount)
+                                                                       .timestamp(toZonedDateTime(notification))
+                                                                       .state(notification.getTransactionStatus().getCtTransactionState())
+                                                                       .interactionId(sequenceNumber)
+                                                                       .build()));
         }
 
-        return actionsBuilder;
+        return updateActions;
     }
 }

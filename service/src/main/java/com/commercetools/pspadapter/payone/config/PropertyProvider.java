@@ -1,8 +1,8 @@
 package com.commercetools.pspadapter.payone.config;
 
-import com.google.common.collect.ImmutableMap;
-
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,25 +32,27 @@ public class PropertyProvider {
     public static final String PAYONE_API_URL = "PAYONE_API_URL";
     public static final String HIDE_CUSTOMER_PERSONAL_DATA = "HIDE_CUSTOMER_PERSONAL_DATA";
 
-    private final ImmutableMap<String, String> internalProperties;
+    private final Map<String, String> internalProperties;
 
     private final List<Function<String, String>> propertiesGetters;
 
     public PropertyProvider() {
         String implementationTitle = ofNullable(getClass().getPackage().getImplementationTitle()).orElse("DEBUG-TITLE");
-        String implementationVersion = ofNullable(getClass().getPackage().getImplementationVersion()).orElse("DEBUG-VERSION");
-        internalProperties = ImmutableMap.<String, String>builder()
-                .put(PAYONE_API_VERSION, "3.9")
-                .put(PAYONE_REQUEST_ENCODING, "UTF-8")
-                .put(PAYONE_SOLUTION_NAME, "commercetools-platform")
-                .put(PAYONE_SOLUTION_VERSION, "1")
-                .put(PAYONE_INTEGRATOR_NAME, implementationTitle)
-                .put(PAYONE_INTEGRATOR_VERSION, implementationVersion)
-                .build();
+        String implementationVersion =
+            ofNullable(getClass().getPackage().getImplementationVersion()).orElse("DEBUG-VERSION");
+
+        internalProperties = new HashMap<>();
+        internalProperties.put(PAYONE_API_VERSION, "3.9");
+        internalProperties.put(PAYONE_REQUEST_ENCODING, "UTF-8");
+        internalProperties.put(PAYONE_SOLUTION_NAME, "commercetools-platform");
+        internalProperties.put(PAYONE_SOLUTION_VERSION, "1");
+        internalProperties.put(PAYONE_INTEGRATOR_NAME, implementationTitle);
+        internalProperties.put(PAYONE_INTEGRATOR_VERSION, implementationVersion);
+
 
         propertiesGetters = asList(System::getProperty,
-                                   System::getenv,
-                                   internalProperties::get);
+            System::getenv,
+            internalProperties::get);
     }
 
     /**

@@ -4,8 +4,6 @@ import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.transaction.TransactionExecutor;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
@@ -16,6 +14,9 @@ import io.sphere.sdk.payments.commands.updateactions.ChangeTransactionState;
 
 import javax.annotation.Nonnull;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -45,17 +46,18 @@ public class UnsupportedTransactionExecutor implements TransactionExecutor {
                 TransactionState.FAILURE,
                 transaction.getId());
 
+        final Map<String, Object> fieldsMap = new HashMap<>();
+        fieldsMap.put(CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now());
+        fieldsMap.put(CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId());
+        fieldsMap.put(CustomFieldKeys.MESSAGE_FIELD, format("Transaction type [%s] not supported for payment method [%s].",
+            transaction.getType(), payment.getPaymentMethodInfo().getMethod()));
+
         final AddInterfaceInteraction addInterfaceInteraction = AddInterfaceInteraction.ofTypeKeyAndObjects(
-                CustomTypeBuilder.PAYONE_UNSUPPORTED_TRANSACTION,
-                ImmutableMap.of(
-                        CustomFieldKeys.TIMESTAMP_FIELD, ZonedDateTime.now(),
-                        CustomFieldKeys.TRANSACTION_ID_FIELD, transaction.getId(),
-                        CustomFieldKeys.MESSAGE_FIELD, format("Transaction type [%s] not supported for payment method [%s].",
-                                transaction.getType(), payment.getPaymentMethodInfo().getMethod())));
+                CustomTypeBuilder.PAYONE_UNSUPPORTED_TRANSACTION, fieldsMap);
 
         return paymentWithCartLike.withPayment(
             client.executeBlocking(
-                PaymentUpdateCommand.of(payment, ImmutableList.of(changeTransactionState, addInterfaceInteraction))));
+                PaymentUpdateCommand.of(payment, Arrays.asList(changeTransactionState, addInterfaceInteraction))));
     }
 
 }

@@ -1,15 +1,23 @@
 package com.commercetools.pspadapter.payone.mapping.klarna;
 
 import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
-import com.google.common.collect.ImmutableMap;
 import com.neovisionaries.i18n.CountryCode;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.neovisionaries.i18n.CountryCode.*;
+import static com.neovisionaries.i18n.CountryCode.AT;
+import static com.neovisionaries.i18n.CountryCode.DE;
+import static com.neovisionaries.i18n.CountryCode.DK;
+import static com.neovisionaries.i18n.CountryCode.FI;
+import static com.neovisionaries.i18n.CountryCode.NL;
+import static com.neovisionaries.i18n.CountryCode.NO;
+import static com.neovisionaries.i18n.CountryCode.SE;
+import static com.neovisionaries.i18n.CountryCode.SF;
 import static java.util.Locale.GERMAN;
 import static java.util.Optional.ofNullable;
 
@@ -22,17 +30,17 @@ public class PayoneKlarnaCountryToLanguageMapper implements CountryToLanguageMap
     private static final Map<CountryCode, Locale> COUNTRY_LANGUAGE;
 
     static {
-        final Locale finish = new Locale("fi");
-        COUNTRY_LANGUAGE = ImmutableMap.<CountryCode, Locale>builder()
-                .put(SE, new Locale("sv"))
-                .put(NO, new Locale("nb"))
-                .put(FI, finish) // Finland has 2 country codes
-                .put(SF, finish)
-                .put(DK, new Locale("da"))
-                .put(NL, new Locale("nl"))
-                .put(DE, GERMAN)
-                .put(AT, GERMAN)
-                .build();
+        final Locale finnish = new Locale("fi");
+        final Map<CountryCode, Locale> countryMap = new HashMap<>();
+        countryMap.put(SE, new Locale("sv"));
+        countryMap.put(NO, new Locale("nb"));
+        countryMap.put(FI, finnish); // Finland has 2 country codes
+        countryMap.put(SF, finnish);
+        countryMap.put(DK, new Locale("da"));
+        countryMap.put(NL, new Locale("nl"));
+        countryMap.put(DE, GERMAN);
+        countryMap.put(AT, GERMAN);
+        COUNTRY_LANGUAGE = Collections.unmodifiableMap(countryMap);
     }
 
     @Override

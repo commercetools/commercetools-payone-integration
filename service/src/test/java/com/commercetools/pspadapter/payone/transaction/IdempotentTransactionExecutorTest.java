@@ -3,15 +3,14 @@ package com.commercetools.pspadapter.payone.transaction;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.Transaction;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.queries.PagedQueryResult;
-import io.sphere.sdk.types.CustomFields;
 import io.sphere.sdk.types.Type;
 import io.sphere.sdk.types.queries.TypeQuery;
 import org.junit.Before;
@@ -21,13 +20,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import util.PaymentTestHelper;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static util.JvmSdkMockUtil.pagedQueryResultsMock;
 
@@ -64,7 +60,7 @@ public class IdempotentTransactionExecutorTest {
             return PagedQueryResult.empty();
         });
 
-        testee = new TestIdempotentTransactionExecutor(CacheBuilder.newBuilder().build(new TypeCacheLoader(client)));
+        testee = new TestIdempotentTransactionExecutor(Caffeine.newBuilder().build(new TypeCacheLoader(client)));
     }
 
     @Test

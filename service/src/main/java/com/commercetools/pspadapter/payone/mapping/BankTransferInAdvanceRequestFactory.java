@@ -7,7 +7,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestTyp
 import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvanceCaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.paymentinadvance.BankTransferInAdvanceRequest;
 import com.commercetools.pspadapter.tenant.TenantConfig;
-import com.google.common.base.Preconditions;
 import io.sphere.sdk.payments.Payment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +58,9 @@ public class BankTransferInAdvanceRequestFactory extends PayoneRequestFactory {
             @Nonnull final BiFunction<RequestType, PayoneConfig, BankTransferInAdvanceRequest> requestConstructor) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
-        Preconditions.checkArgument(ctPayment.getCustom() != null, "Missing custom fields on payment!");
+        if(ctPayment.getCustom() == null) {
+            throw new IllegalArgumentException("Missing custom fields on payment!");
+        }
         BankTransferInAdvanceRequest request = requestConstructor.apply(requestType, getPayoneConfig());
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
         return request;

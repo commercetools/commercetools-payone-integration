@@ -9,9 +9,6 @@ import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.pspadapter.tenant.TenantFactory;
 import com.commercetools.service.OrderService;
 import com.commercetools.service.PaymentService;
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.orders.Order;
 import io.sphere.sdk.orders.PaymentState;
@@ -21,6 +18,7 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceCode;
 import io.sphere.sdk.payments.commands.updateactions.SetStatusInterfaceText;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +27,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -164,13 +166,14 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
      * @return an immutable list of update actions which will e.g. add an interfaceInteraction to the payment
      * or apply changes to a corresponding transaction in the payment
      */
-    protected ImmutableList<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
-                                                                        final Notification notification) {
-        final ImmutableList.Builder<UpdateAction<Payment>> listBuilder = ImmutableList.builder();
-        listBuilder.add(createNotificationAddAction(notification));
-        listBuilder.add(setStatusInterfaceCode(notification));
-        listBuilder.add(setStatusInterfaceText(notification));
-        return listBuilder.build();
+    protected List<UpdateAction<Payment>> createPaymentUpdates(final Payment payment,
+                                                               final Notification notification) {
+
+        final ArrayList<UpdateAction<Payment>> updateActions = new ArrayList<>();
+        updateActions.add(createNotificationAddAction(notification));
+        updateActions.add(setStatusInterfaceCode(notification));
+        updateActions.add(setStatusInterfaceText(notification));
+        return updateActions;
     }
 
     /**
@@ -181,13 +184,14 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
      * @return the update action
      */
     protected static AddInterfaceInteraction createNotificationAddAction(final Notification notification) {
+        final Map<String, Object> fieldsMap = new HashMap<>();
+        fieldsMap.put(CustomFieldKeys.TIMESTAMP_FIELD, toZonedDateTime(notification));
+        fieldsMap.put(CustomFieldKeys.SEQUENCE_NUMBER_FIELD, toSequenceNumber(notification.getSequencenumber()));
+        fieldsMap.put(CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode());
+        fieldsMap.put(CustomFieldKeys.NOTIFICATION_FIELD, notification.toString());
         return AddInterfaceInteraction.ofTypeKeyAndObjects(
                 CustomTypeBuilder.PAYONE_INTERACTION_NOTIFICATION,
-                ImmutableMap.of(
-                        CustomFieldKeys.TIMESTAMP_FIELD, toZonedDateTime(notification),
-                        CustomFieldKeys.SEQUENCE_NUMBER_FIELD, toSequenceNumber(notification.getSequencenumber()),
-                        CustomFieldKeys.TX_ACTION_FIELD, notification.getTxaction().getTxActionCode(),
-                        CustomFieldKeys.NOTIFICATION_FIELD, notification.toString()));
+                fieldsMap);
     }
 
     /**
@@ -246,7 +250,7 @@ public abstract class NotificationProcessorBase implements NotificationProcessor
      */
     @Nonnull
     protected static String toSequenceNumber(final String sequenceNumber) {
-        return MoreObjects.firstNonNull(sequenceNumber, DEFAULT_SEQUENCE_NUMBER);
+        return StringUtils.isBlank(sequenceNumber) ? DEFAULT_SEQUENCE_NUMBER : sequenceNumber;
     }
 
     protected final PaymentService getPaymentService() {

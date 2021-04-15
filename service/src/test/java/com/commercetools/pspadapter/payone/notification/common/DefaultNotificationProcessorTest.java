@@ -4,7 +4,6 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.Notificati
 import com.commercetools.pspadapter.payone.domain.payone.model.common.NotificationAction;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.TransactionStatus;
 import com.commercetools.pspadapter.payone.notification.BaseNotificationProcessorTest;
-import com.google.common.collect.Lists;
 import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.commands.updateactions.AddInterfaceInteraction;
@@ -20,7 +19,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -88,7 +87,7 @@ public class DefaultNotificationProcessorTest extends BaseNotificationProcessorT
     }
 
     private static NotificationAction randomTxAction() {
-        final ArrayList<NotificationAction> txActions = Lists.newArrayList(NotificationAction.values());
+        final List<NotificationAction> txActions = Arrays.asList(NotificationAction.values());
         Collections.shuffle(txActions);
         return txActions.get(0);
     }
