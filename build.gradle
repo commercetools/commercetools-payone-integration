@@ -34,6 +34,7 @@ def depVersions = [
         mockito: '3.9.0',
         caffeine: '2.9.0',
         jackson: '2.12.1',
+        jetty: '9.4.39.v20210325',
         netty : '4.1.63.Final',
         commons : '2.7',
         commonsCodec : '1.13'
@@ -93,13 +94,14 @@ project(":service") {
     dependencies {
         implementation "com.sparkjava:spark-core:${depVersions.sparkCore}"
         constraints {
+            implementation "org.eclipse.jetty:jetty-io:${depVersions.jetty}"
+            implementation "org.eclipse.jetty:jetty-server:${depVersions.jetty}"
             implementation "org.eclipse.jetty:jetty-webapp:${depVersions.jetty}"
         }
         testImplementation "junit:junit:${depVersions.jUnit}"
         testImplementation "org.assertj:assertj-core:${depVersions.assertJ}"
         testImplementation "org.mockito:mockito-core:${depVersions.mockito}"
         testImplementation "org.mockito:mockito-inline:${depVersions.mockito}"
-
     }
 
     shadowJar {
