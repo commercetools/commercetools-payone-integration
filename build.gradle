@@ -34,7 +34,9 @@ def depVersions = [
         mockito: '3.9.0',
         caffeine: '2.9.0',
         jackson: '2.11.4',
-        jettyIo: '9.4.39.v20210325'
+        jettyIo: '9.4.39.v20210325',
+        nettyCommon : '4.1.59.Final',
+        nettyCodecHttp : '4.1.44.Final'
 ]
 
 subprojects {
@@ -70,6 +72,14 @@ subprojects {
         }
 
         implementation ("org.eclipse.jetty:jetty-io:${depVersions.jettyIo}") {
+            force = true
+        }
+
+        implementation ("io.netty:netty-codec-http:${depVersions.nettyCodecHttp}") {
+            force = true
+        }
+
+        implementation ("io.netty:netty-common:${depVersions.nettyCommon}") {
             force = true
         }
     }
