@@ -63,6 +63,11 @@ subprojects {
     dependencies {
         implementation "com.github.ben-manes.caffeine:caffeine:${depVersions.caffeine}"
         implementation "com.commercetools.sdk.jvm.core:commercetools-java-client:${depVersions.commercetoolsSdkJvm}"
+        constraints {
+            implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.12.1') {
+                because 'version 2.11.0 pulled from jvm-sdk is vulnerable'
+            }
+        }
         implementation "com.commercetools.sdk.jvm.core:commercetools-models:${depVersions.commercetoolsSdkJvm}"
         implementation "com.commercetools.sdk.jvm.core:commercetools-convenience:${depVersions.commercetoolsSdkJvm}"
         implementation "net.logstash.logback:logstash-logback-encoder:${depVersions.logStashLogbackEncoder}"
