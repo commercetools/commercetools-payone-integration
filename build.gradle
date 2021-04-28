@@ -33,7 +33,8 @@ def depVersions = [
         assertJ: '3.19.0',
         mockito: '3.9.0',
         caffeine: '2.9.0',
-        jackson: '2.11.4'
+        jackson: '2.11.4',
+        jettyIo: '9.4.39.v20210325'
 ]
 
 subprojects {
@@ -64,6 +65,13 @@ subprojects {
         implementation "ch.qos.logback:logback-access:${depVersions.logbackClassic}"
         implementation "org.slf4j:jul-to-slf4j:${depVersions.julToSlf4j}"
         implementation "org.apache.httpcomponents:httpclient:${depVersions.apacheHttp}"
+        implementation ("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${depVersions.jackson}") {
+            force = true
+        }
+
+        implementation ("org.eclipse.jetty:jetty-io:${depVersions.jettyIo}") {
+            force = true
+        }
     }
 
 }
@@ -84,7 +92,7 @@ project(":service") {
         testImplementation "org.assertj:assertj-core:${depVersions.assertJ}"
         testImplementation "org.mockito:mockito-core:${depVersions.mockito}"
         testImplementation "org.mockito:mockito-inline:${depVersions.mockito}"
-        testImplementation "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${depVersions.jackson}"
+
     }
 
     shadowJar {
