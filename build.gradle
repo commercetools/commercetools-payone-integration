@@ -34,11 +34,9 @@ def depVersions = [
         mockito: '3.9.0',
         caffeine: '2.9.0',
         jackson: '2.12.1',
-        jetty: '9.4.39.v20210325',
         netty : '4.1.63.Final',
-        testng : '6.14.3',
-        commons : '2.8.0'
-
+        commons : '2.7',
+        commonsCodec : '1.13'
 ]
 
 
@@ -64,14 +62,15 @@ subprojects {
         implementation "com.github.ben-manes.caffeine:caffeine:${depVersions.caffeine}"
         implementation "com.commercetools.sdk.jvm.core:commercetools-java-client:${depVersions.commercetoolsSdkJvm}"
         constraints {
-            implementation ("io.netty:netty-codec-http") {
-                version {
-                    strictly "${depVersions.netty}"
-                }
-            }
+            implementation "io.netty:netty-codec-http:${depVersions.netty}"
+            implementation "io.netty:netty-transport-native-epoll:${depVersions.netty}"
         }
         implementation "com.commercetools.sdk.jvm.core:commercetools-models:${depVersions.commercetoolsSdkJvm}"
         implementation "com.commercetools.sdk.jvm.core:commercetools-convenience:${depVersions.commercetoolsSdkJvm}"
+        constraints {
+            implementation "commons-io:commons-io:${depVersions.commons}"
+            implementation "commons-codec:commons-codec:${depVersions.commonsCodec}"
+        }
         implementation "net.logstash.logback:logstash-logback-encoder:${depVersions.logStashLogbackEncoder}"
         implementation "ch.qos.logback:logback-classic:${depVersions.logbackClassic}"
         implementation "ch.qos.logback:logback-access:${depVersions.logbackClassic}"
