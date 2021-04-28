@@ -33,7 +33,7 @@ def depVersions = [
         assertJ: '3.19.0',
         mockito: '3.9.0',
         caffeine: '2.9.0',
-        jackson: '2.11.4',
+        jackson: '2.12.1',
         jetty: '9.4.39.v20210325',
         netty : '4.1.63.Final',
         testng : '6.14.3',
@@ -64,11 +64,7 @@ subprojects {
         implementation "com.github.ben-manes.caffeine:caffeine:${depVersions.caffeine}"
         implementation "com.commercetools.sdk.jvm.core:commercetools-java-client:${depVersions.commercetoolsSdkJvm}"
         constraints {
-            implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-cbor') {
-               version {
-                   require '2.12.1'
-               }
-            }
+            implementation "io.netty:netty-codec-http:${depVersions.netty}"
         }
         implementation "com.commercetools.sdk.jvm.core:commercetools-models:${depVersions.commercetoolsSdkJvm}"
         implementation "com.commercetools.sdk.jvm.core:commercetools-convenience:${depVersions.commercetoolsSdkJvm}"
@@ -77,6 +73,7 @@ subprojects {
         implementation "ch.qos.logback:logback-access:${depVersions.logbackClassic}"
         implementation "org.slf4j:jul-to-slf4j:${depVersions.julToSlf4j}"
         implementation "org.apache.httpcomponents:httpclient:${depVersions.apacheHttp}"
+        implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${depVersions.jackson}"
     }
 }
 
