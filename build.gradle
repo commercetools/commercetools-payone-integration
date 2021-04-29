@@ -22,18 +22,26 @@ apply from: "$rootDir/gradle-scripts/git-publish.gradle"
 def depVersions = [
         //all
         commercetoolsSdkJvm: '1.62.0',
-        logStashLogbackEncoder: '6.3',
+        logStashLogbackEncoder: '6.6',
         logbackClassic: '1.2.3',
         julToSlf4j: '1.7.30',
         apacheHttp: '4.5.13',
 
         // :service
         sparkCore: '2.9.3',
-        jUnit: '4.13.1',
+        jUnit: '4.13.2',
         assertJ: '3.19.0',
         mockito: '3.9.0',
-        caffeine: '2.9.0'
+        caffeine: '2.9.0',
+        jackson: '2.12.1',
+
+        // version number for underlying dependencies within jvm-sdk to avoid vulnerability
+        jetty: '9.4.39.v20210325',
+        netty : '4.1.63.Final',
+        commons : '2.8.0',
+        commonsCodec : '1.13'
 ]
+
 
 subprojects {
     apply plugin: 'java'
@@ -56,15 +64,23 @@ subprojects {
     dependencies {
         implementation "com.github.ben-manes.caffeine:caffeine:${depVersions.caffeine}"
         implementation "com.commercetools.sdk.jvm.core:commercetools-java-client:${depVersions.commercetoolsSdkJvm}"
+        constraints {
+            implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${depVersions.jackson}"
+            implementation "io.netty:netty-codec-http:${depVersions.netty}"
+            implementation "io.netty:netty-transport-native-epoll:${depVersions.netty}"
+        }
         implementation "com.commercetools.sdk.jvm.core:commercetools-models:${depVersions.commercetoolsSdkJvm}"
         implementation "com.commercetools.sdk.jvm.core:commercetools-convenience:${depVersions.commercetoolsSdkJvm}"
+        constraints {
+            implementation "commons-io:commons-io:${depVersions.commons}"
+            implementation "commons-codec:commons-codec:${depVersions.commonsCodec}"
+        }
         implementation "net.logstash.logback:logstash-logback-encoder:${depVersions.logStashLogbackEncoder}"
         implementation "ch.qos.logback:logback-classic:${depVersions.logbackClassic}"
         implementation "ch.qos.logback:logback-access:${depVersions.logbackClassic}"
         implementation "org.slf4j:jul-to-slf4j:${depVersions.julToSlf4j}"
         implementation "org.apache.httpcomponents:httpclient:${depVersions.apacheHttp}"
     }
-
 }
 
 project(":service") {
@@ -79,6 +95,11 @@ project(":service") {
 
     dependencies {
         implementation "com.sparkjava:spark-core:${depVersions.sparkCore}"
+        constraints {
+            implementation "org.eclipse.jetty:jetty-io:${depVersions.jetty}"
+            implementation "org.eclipse.jetty:jetty-server:${depVersions.jetty}"
+            implementation "org.eclipse.jetty:jetty-webapp:${depVersions.jetty}"
+        }
         testImplementation "junit:junit:${depVersions.jUnit}"
         testImplementation "org.assertj:assertj-core:${depVersions.assertJ}"
         testImplementation "org.mockito:mockito-core:${depVersions.mockito}"
