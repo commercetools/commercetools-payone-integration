@@ -14,6 +14,10 @@ import spark.embeddedserver.EmbeddedServerFactory;
 import spark.embeddedserver.EmbeddedServers;
 import spark.embeddedserver.jetty.EmbeddedJettyFactory;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+
 import static ch.qos.logback.classic.Level.toLevel;
 
 
@@ -31,7 +35,7 @@ public class Main {
      *
      * @param args default command line args (ignored so far)
      */
-    public static void main(String[] args)  {
+    public static void main(String[] args) throws URISyntaxException {
 
         final PropertyProvider propertyProvider = new PropertyProvider();
         final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
@@ -52,9 +56,10 @@ public class Main {
         }
     }
 
-    private static void configureAccessLogs() {
+    static void configureAccessLogs() throws URISyntaxException {
         final RequestLogImpl requestLog = new RequestLogImpl();
-        requestLog.setFileName(Main.class.getResource("logback-access.xml").getPath());
+        URI uri = Main.class.getResource("/logback-access.xml").toURI();
+        requestLog.setFileName(String.valueOf(Paths.get(uri).toFile()));
         requestLog.start();
         final JettyServerWithRequestLogFactory serverFactory = new JettyServerWithRequestLogFactory(requestLog);
         final EmbeddedServerFactory embeddedServerFactory = new EmbeddedJettyFactory(serverFactory);
