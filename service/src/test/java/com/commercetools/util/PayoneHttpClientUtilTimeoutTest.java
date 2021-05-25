@@ -118,7 +118,7 @@ public class PayoneHttpClientUtilTimeoutTest {
      */
     @Test
     public void shortGetRequest_shouldSuccess() throws Exception {
-        final int timeout = TIMEOUT_TO_ESTABLISH_CONNECTION / 2;
+        final int timeout = TIMEOUT_TO_ESTABLISH_CONNECTION / 3;
         final HttpResponse httpResponse = executeGetRequest(format(URL_PATTERN, testRandomPort, timeout));
 
         assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(HttpStatusCode.OK_200);
