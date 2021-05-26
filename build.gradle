@@ -35,11 +35,6 @@ def depVersions = [
         caffeine: '2.9.0',
         jackson: '2.12.1',
 
-        // version number for underlying dependencies within jvm-sdk to avoid vulnerability
-        jetty: '9.4.39.v20210325',
-        netty : '4.1.65.Final',
-        commons : '2.8.0',
-        commonsCodec : '1.13'
 ]
 
 
@@ -64,17 +59,8 @@ subprojects {
     dependencies {
         implementation "com.github.ben-manes.caffeine:caffeine:${depVersions.caffeine}"
         implementation "com.commercetools.sdk.jvm.core:commercetools-java-client:${depVersions.commercetoolsSdkJvm}"
-        constraints {
-            implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${depVersions.jackson}"
-            implementation "io.netty:netty-codec-http:${depVersions.netty}"
-            implementation "io.netty:netty-transport-native-epoll:${depVersions.netty}"
-        }
         implementation "com.commercetools.sdk.jvm.core:commercetools-models:${depVersions.commercetoolsSdkJvm}"
         implementation "com.commercetools.sdk.jvm.core:commercetools-convenience:${depVersions.commercetoolsSdkJvm}"
-        constraints {
-            implementation "commons-io:commons-io:${depVersions.commons}"
-            implementation "commons-codec:commons-codec:${depVersions.commonsCodec}"
-        }
         implementation "net.logstash.logback:logstash-logback-encoder:${depVersions.logStashLogbackEncoder}"
         implementation "ch.qos.logback:logback-classic:${depVersions.logbackClassic}"
         implementation "ch.qos.logback:logback-access:${depVersions.logbackClassic}"
@@ -95,11 +81,6 @@ project(":service") {
 
     dependencies {
         implementation "com.sparkjava:spark-core:${depVersions.sparkCore}"
-        constraints {
-            implementation "org.eclipse.jetty:jetty-io:${depVersions.jetty}"
-            implementation "org.eclipse.jetty:jetty-server:${depVersions.jetty}"
-            implementation "org.eclipse.jetty:jetty-webapp:${depVersions.jetty}"
-        }
         testImplementation "junit:junit:${depVersions.jUnit}"
         testImplementation "org.assertj:assertj-core:${depVersions.assertJ}"
         testImplementation "org.mockito:mockito-core:${depVersions.mockito}"
