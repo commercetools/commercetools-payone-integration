@@ -1,5 +1,6 @@
 package com.commercetools.pspadapter.payone.config;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,9 +51,10 @@ public class PropertyProvider {
         internalProperties.put(PAYONE_INTEGRATOR_VERSION, implementationVersion);
 
 
-        propertiesGetters = asList(System::getProperty,
-            System::getenv,
-            internalProperties::get);
+        propertiesGetters = new ArrayList<>();
+        propertiesGetters.add(System::getProperty);
+        propertiesGetters.add(System::getenv);
+        propertiesGetters.add(internalProperties::get);
     }
 
     /**
@@ -91,5 +93,9 @@ public class PropertyProvider {
 
     private IllegalStateException createIllegalStateException(final String propertyName) {
         return new IllegalStateException("Value of " + propertyName + " is required and can not be empty!");
+    }
+
+    public List<Function<String, String>> getPropertiesGetters() {
+        return propertiesGetters;
     }
 }
