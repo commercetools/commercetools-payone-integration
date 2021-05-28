@@ -20,6 +20,7 @@ import static ch.qos.logback.classic.Level.toLevel;
 public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+    private static final PropertyProvider propertyProvider = new PropertyProvider();
 
     /**
      * It is recommended to run this service using {@code ./gradlew :service:run}
@@ -33,7 +34,6 @@ public class Main {
      */
     public static void main(String[] args) {
 
-        final PropertyProvider propertyProvider = new PropertyProvider();
         final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
 
         bridgeJULToSLF4J();
@@ -71,11 +71,13 @@ public class Main {
      * <p>Some dependencies (e.g. org.javamoney.moneta's DefaultMonetaryContextFactory) log events using the
      * j.u.l. This causes such logs to ignore the logback.xml configuration which is only
      * applied to logs from the SLF4j implementation.
-     *
      */
     static void bridgeJULToSLF4J() {
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
     }
 
+    public static PropertyProvider getPropertyProvider() {
+        return propertyProvider;
+    }
 }

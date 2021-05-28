@@ -1,6 +1,6 @@
 package com.commercetools.main;
 
-import com.commercetools.MainTestRunner;
+import com.commercetools.Main;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import org.apache.http.HttpResponse;
 import org.junit.Before;
@@ -36,12 +36,11 @@ public class BasicPaymentRequestWorkflow {
         testInternalProperties.put("TEST_DATA_PAYONE_PORTAL_ID", "2022125");
         testInternalProperties.put("TEST_DATA_PAYONE_SUBACC_ID", "31281");
 
-        MainTestRunner runner = MainTestRunner.getInstance();
-        PropertyProvider propertyProvider = runner.getPropertyProvider();
+        PropertyProvider propertyProvider = Main.getPropertyProvider();
 
         List<Function<String, String>> propertiesGetters = propertyProvider.getPropertiesGetters();
         propertiesGetters.add(testInternalProperties::get);
-        runner.startPayoneService();
+        Main.main(new String[0]);
     }
 
     //TODO we need to create ctp resources and try to simulate handle payment call
