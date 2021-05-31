@@ -20,6 +20,7 @@ import static ch.qos.logback.classic.Level.toLevel;
 public class Main {
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+    private static final PropertyProvider propertyProvider = new PropertyProvider();
 
     /**
      * It is recommended to run this service using {@code ./gradlew :service:run}
@@ -31,9 +32,8 @@ public class Main {
      *
      * @param args default command line args (ignored so far)
      */
-    public static void main(String[] args)  {
+    public static void main(String[] args) {
 
-        final PropertyProvider propertyProvider = new PropertyProvider();
         final ServiceConfig serviceConfig = new ServiceConfig(propertyProvider);
 
         bridgeJULToSLF4J();
@@ -44,7 +44,7 @@ public class Main {
         integrationService.start();
     }
 
-    private static void configureLogLevel(ServiceConfig serviceConfig) {
+    static void configureLogLevel(ServiceConfig serviceConfig) {
         if (serviceConfig.getLoglevel().isPresent()) {
             ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
             root.setLevel(toLevel(serviceConfig.getLoglevel().get(), Level.INFO));
@@ -52,9 +52,9 @@ public class Main {
         }
     }
 
-    private static void configureAccessLogs() {
+    static void configureAccessLogs() {
         final RequestLogImpl requestLog = new RequestLogImpl();
-        requestLog.setFileName(Main.class.getResource("logback-access.xml").getPath());
+        requestLog.setFileName(Main.class.getResource("/logback-access.xml").getPath());
         requestLog.start();
         final JettyServerWithRequestLogFactory serverFactory = new JettyServerWithRequestLogFactory(requestLog);
         final EmbeddedServerFactory embeddedServerFactory = new EmbeddedJettyFactory(serverFactory);
@@ -71,11 +71,13 @@ public class Main {
      * <p>Some dependencies (e.g. org.javamoney.moneta's DefaultMonetaryContextFactory) log events using the
      * j.u.l. This causes such logs to ignore the logback.xml configuration which is only
      * applied to logs from the SLF4j implementation.
-     *
      */
-    private static void bridgeJULToSLF4J() {
+    static void bridgeJULToSLF4J() {
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
     }
 
+    public static PropertyProvider getPropertyProvider() {
+        return propertyProvider;
+    }
 }

@@ -35,11 +35,11 @@ def depVersions = [
         caffeine: '2.9.0',
         jackson: '2.12.1',
 
-        // version number for underlying dependencies within jvm-sdk to avoid vulnerability
-        jetty: '9.4.39.v20210325',
-        netty : '4.1.65.Final',
+        // to avoid security vulnerabilities for underlying dependencies within jvm-sdk
+        jetty: '9.4.41.v20210516',
         commons : '2.9.0',
         commonsCodec : '1.15'
+
 ]
 
 
@@ -62,19 +62,14 @@ subprojects {
     }
 
     dependencies {
-        implementation "com.github.ben-manes.caffeine:caffeine:${depVersions.caffeine}"
-        implementation "com.commercetools.sdk.jvm.core:commercetools-java-client:${depVersions.commercetoolsSdkJvm}"
-        constraints {
-            implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${depVersions.jackson}"
-            implementation "io.netty:netty-codec-http:${depVersions.netty}"
-            implementation "io.netty:netty-transport-native-epoll:${depVersions.netty}"
-        }
-        implementation "com.commercetools.sdk.jvm.core:commercetools-models:${depVersions.commercetoolsSdkJvm}"
-        implementation "com.commercetools.sdk.jvm.core:commercetools-convenience:${depVersions.commercetoolsSdkJvm}"
         constraints {
             implementation "commons-io:commons-io:${depVersions.commons}"
             implementation "commons-codec:commons-codec:${depVersions.commonsCodec}"
         }
+        implementation "com.github.ben-manes.caffeine:caffeine:${depVersions.caffeine}"
+        implementation "com.commercetools.sdk.jvm.core:commercetools-java-client:${depVersions.commercetoolsSdkJvm}"
+        implementation "com.commercetools.sdk.jvm.core:commercetools-models:${depVersions.commercetoolsSdkJvm}"
+        implementation "com.commercetools.sdk.jvm.core:commercetools-convenience:${depVersions.commercetoolsSdkJvm}"
         implementation "net.logstash.logback:logstash-logback-encoder:${depVersions.logStashLogbackEncoder}"
         implementation "ch.qos.logback:logback-classic:${depVersions.logbackClassic}"
         implementation "ch.qos.logback:logback-access:${depVersions.logbackClassic}"
