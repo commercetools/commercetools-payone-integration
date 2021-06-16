@@ -22,6 +22,10 @@ import static util.PaymentRequestHelperUtil.cleanupData;
 import static util.PaymentRequestHelperUtil.createPayment;
 import static util.PropertiesHelperUtil.getClientId;
 import static util.PropertiesHelperUtil.getClientSecret;
+import static util.PropertiesHelperUtil.getPayoneKey;
+import static util.PropertiesHelperUtil.getPayoneMerchantId;
+import static util.PropertiesHelperUtil.getPayonePortalId;
+import static util.PropertiesHelperUtil.getPayoneSubAccId;
 import static util.PropertiesHelperUtil.getProjectKey;
 import static util.PropertiesHelperUtil.getTenant;
 
@@ -37,10 +41,17 @@ public class BasicPaymentRequestWorkflow {
         testInternalProperties.put("TEST_DATA_CT_PROJECT_KEY", getProjectKey());
         testInternalProperties.put("TEST_DATA_CT_CLIENT_ID", getClientId());
         testInternalProperties.put("TEST_DATA_CT_CLIENT_SECRET", getClientSecret());
-        testInternalProperties.put("TEST_DATA_PAYONE_KEY", "TvIOwFdSzOSVKE3Y");
-        testInternalProperties.put("TEST_DATA_PAYONE_MERCHANT_ID", "31102");
-        testInternalProperties.put("TEST_DATA_PAYONE_PORTAL_ID", "2022125");
-        testInternalProperties.put("TEST_DATA_PAYONE_SUBACC_ID", "31281");
+
+//        testInternalProperties.put("TEST_DATA_PAYONE_KEY", "TvIOwFdSzOSVKE3Y");
+//        testInternalProperties.put("TEST_DATA_PAYONE_MERCHANT_ID", "31102");
+//        testInternalProperties.put("TEST_DATA_PAYONE_PORTAL_ID", "2022125");
+//        testInternalProperties.put("TEST_DATA_PAYONE_SUBACC_ID", "31281");
+
+        testInternalProperties.put("FIRST_TENANT_DATA_PAYONE_KEY", getPayoneKey());
+        testInternalProperties.put("FIRST_TENANT_PAYONE_SUBACC_ID", getPayoneSubAccId());
+        testInternalProperties.put("FIRST_TENANT_PAYONE_MERCHANT_ID", getPayoneMerchantId());
+        testInternalProperties.put("FIRST_TENANT_PAYONE_PORTAL_ID", getPayonePortalId());
+
 
         PropertyProvider propertyProvider = Main.getPropertyProvider();
 
