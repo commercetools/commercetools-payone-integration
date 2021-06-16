@@ -31,23 +31,8 @@ public class PropertiesHelperUtil {
             throw new IllegalStateException("Test internal properties can't be read", exception);
         }
 
-        return loadEnvironmentVariables(ctpCredentialsProperties);
-    }
-
-    private static Properties loadEnvironmentVariables(Properties ctpCredentialsProperties) {
-
-        final Map<String, String> environmentVariables = System.getenv();
-        ctpCredentialsProperties.putAll(environmentVariables);
-//        ctpCredentialsProperties.setProperty(TEST_DATA_CT_CLIENT_ID, environmentVariables.get(TEST_DATA_CT_CLIENT_ID));
-//        ctpCredentialsProperties.setProperty(TEST_DATA_CT_CLIENT_SECRET, environmentVariables.get(TEST_DATA_CT_CLIENT_SECRET));
-//        ctpCredentialsProperties.setProperty(TEST_DATA_CT_PROJECT_KEY, environmentVariables.get(TEST_DATA_CT_PROJECT_KEY));
-//        ctpCredentialsProperties.setProperty(TEST_DATA_PAYONE_MERCHANT_ID, environmentVariables.get(TEST_DATA_PAYONE_MERCHANT_ID));
-//        ctpCredentialsProperties.setProperty(TEST_DATA_PAYONE_SUBACC_ID, environmentVariables.get(TEST_DATA_PAYONE_SUBACC_ID));
-//        ctpCredentialsProperties.setProperty(TEST_DATA_PAYONE_PORTAL_ID, environmentVariables.get(TEST_DATA_PAYONE_PORTAL_ID));
-//        ctpCredentialsProperties.setProperty(TEST_DATA_PAYONE_KEY, environmentVariables.get(TEST_DATA_PAYONE_KEY));
-//        ctpCredentialsProperties.setProperty(TEST_DATA_TENANT_NAME, environmentVariables.get(TEST_DATA_TENANT_NAME));
-//        ctpCredentialsProperties.setProperty(TEST_DATA_VISA_CREDIT_CARD_NO_3DS, environmentVariables.get(TEST_DATA_VISA_CREDIT_CARD_NO_3DS));
-
+        // load from Environment variables
+        ctpCredentialsProperties.putAll(System.getenv());
         return ctpCredentialsProperties;
     }
 
