@@ -3,6 +3,7 @@ package com.commercetools.main;
 import com.commercetools.Main;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,21 +17,25 @@ import java.util.function.Function;
 import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
+import static util.PaymentRequestHelperUtil.URL_HANDLE_PAYMENT;
+import static util.PaymentRequestHelperUtil.cleanupData;
+import static util.PaymentRequestHelperUtil.createPayment;
+import static util.PropertiesHelperUtil.getClientId;
+import static util.PropertiesHelperUtil.getClientSecret;
+import static util.PropertiesHelperUtil.getProjectKey;
 
 public class BasicPaymentRequestWorkflow {
 
-    private final String CT_PROJECT_KEY = "payone-integration-tests-heroku-17";
-    private final String CT_CLIENT_ID = "f4e4AIIfXh0zaC6k7sNkCI4Q";
-    private final String CT_CLIENT_SECRET = "zf_o_F0oknJ4ZOqOlhY4LiSmTOHCfX8h";
+    public static final int DEFAULT_PORT = 8080;
     private final Map<String, String> testInternalProperties = new HashMap<>();
-    private static final String URL_PATTERN = "http://localhost:%d/health";
 
     @Before
     public void setUp() throws URISyntaxException {
+        cleanupData();
         testInternalProperties.put("TENANTS", "TEST_DATA");
-        testInternalProperties.put("TEST_DATA_CT_PROJECT_KEY", CT_PROJECT_KEY);
-        testInternalProperties.put("TEST_DATA_CT_CLIENT_ID", CT_CLIENT_ID);
-        testInternalProperties.put("TEST_DATA_CT_CLIENT_SECRET", CT_CLIENT_SECRET);
+        testInternalProperties.put("TEST_DATA_CT_PROJECT_KEY", getProjectKey());
+        testInternalProperties.put("TEST_DATA_CT_CLIENT_ID", getClientId());
+        testInternalProperties.put("TEST_DATA_CT_CLIENT_SECRET", getClientSecret());
         testInternalProperties.put("TEST_DATA_PAYONE_KEY", "TvIOwFdSzOSVKE3Y");
         testInternalProperties.put("TEST_DATA_PAYONE_MERCHANT_ID", "31102");
         testInternalProperties.put("TEST_DATA_PAYONE_PORTAL_ID", "2022125");
@@ -43,11 +48,11 @@ public class BasicPaymentRequestWorkflow {
         Main.main(new String[0]);
     }
 
-    //TODO we need to create ctp resources and try to simulate handle payment call
-    // to ensure that payone-integration service will work as expected
     @Test
-    public void makeBankTransferPayoneRequest() throws IOException {
-        HttpResponse httpResponse = executeGetRequest(format(URL_PATTERN, 8080));
-        assertThat(httpResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+    public void verifyCreditCardTransferPayoneRequestIsSuccess() throws Exception {
+        final String paymentId = createPayment("CREDIT_CARD", "CHARGE", "40", "EUR");
+
+        HttpResponse httpResponse = executeGetRequest(format(URL_HANDLE_PAYMENT+paymentId, DEFAULT_PORT));
+        assertThat(httpResponse.getStatusLine().getStatusCode()).isIn(HttpStatus.SC_ACCEPTED, HttpStatus.SC_OK);
     }
 }
