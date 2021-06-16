@@ -47,7 +47,7 @@ public class BasicPaymentRequestWorkflow {
 //        testInternalProperties.put("TEST_DATA_PAYONE_PORTAL_ID", "2022125");
 //        testInternalProperties.put("TEST_DATA_PAYONE_SUBACC_ID", "31281");
 
-        testInternalProperties.put("FIRST_TENANT_DATA_PAYONE_KEY", getPayoneKey());
+        testInternalProperties.put("FIRST_TENANT_PAYONE_KEY", getPayoneKey());
         testInternalProperties.put("FIRST_TENANT_PAYONE_SUBACC_ID", getPayoneSubAccId());
         testInternalProperties.put("FIRST_TENANT_PAYONE_MERCHANT_ID", getPayoneMerchantId());
         testInternalProperties.put("FIRST_TENANT_PAYONE_PORTAL_ID", getPayonePortalId());
