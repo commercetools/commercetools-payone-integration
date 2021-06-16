@@ -23,6 +23,7 @@ import static util.PaymentRequestHelperUtil.createPayment;
 import static util.PropertiesHelperUtil.getClientId;
 import static util.PropertiesHelperUtil.getClientSecret;
 import static util.PropertiesHelperUtil.getProjectKey;
+import static util.PropertiesHelperUtil.getTenant;
 
 public class BasicPaymentRequestWorkflow {
 
@@ -32,7 +33,7 @@ public class BasicPaymentRequestWorkflow {
     @Before
     public void setUp() throws URISyntaxException {
         cleanupData();
-        testInternalProperties.put("TENANTS", "TEST_DATA");
+        testInternalProperties.put("TENANTS", getTenant());
         testInternalProperties.put("TEST_DATA_CT_PROJECT_KEY", getProjectKey());
         testInternalProperties.put("TEST_DATA_CT_CLIENT_ID", getClientId());
         testInternalProperties.put("TEST_DATA_CT_CLIENT_SECRET", getClientSecret());
