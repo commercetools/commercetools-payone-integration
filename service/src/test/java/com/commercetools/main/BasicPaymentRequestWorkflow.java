@@ -38,15 +38,18 @@ public class BasicPaymentRequestWorkflow {
     public void setUp() throws URISyntaxException {
         cleanupData();
         testInternalProperties.put("TENANTS", getTenant());
-        testInternalProperties.put("TEST_DATA_CT_PROJECT_KEY", getProjectKey());
-        testInternalProperties.put("TEST_DATA_CT_CLIENT_ID", getClientId());
-        testInternalProperties.put("TEST_DATA_CT_CLIENT_SECRET", getClientSecret());
+//        testInternalProperties.put("TEST_DATA_CT_PROJECT_KEY", getProjectKey());
+//        testInternalProperties.put("TEST_DATA_CT_CLIENT_ID", getClientId());
+//        testInternalProperties.put("TEST_DATA_CT_CLIENT_SECRET", getClientSecret());
 
 //        testInternalProperties.put("TEST_DATA_PAYONE_KEY", "TvIOwFdSzOSVKE3Y");
 //        testInternalProperties.put("TEST_DATA_PAYONE_MERCHANT_ID", "31102");
 //        testInternalProperties.put("TEST_DATA_PAYONE_PORTAL_ID", "2022125");
 //        testInternalProperties.put("TEST_DATA_PAYONE_SUBACC_ID", "31281");
 
+        testInternalProperties.put("FIRST_TENANT_CT_PROJECT_KEY", getProjectKey());
+        testInternalProperties.put("FIRST_TENANT_CT_CLIENT_ID", getClientId());
+        testInternalProperties.put("FIRST_TENANT_CT_CLIENT_SECRET", getClientSecret());
         testInternalProperties.put("FIRST_TENANT_PAYONE_KEY", getPayoneKey());
         testInternalProperties.put("FIRST_TENANT_PAYONE_SUBACC_ID", getPayoneSubAccId());
         testInternalProperties.put("FIRST_TENANT_PAYONE_MERCHANT_ID", getPayoneMerchantId());
