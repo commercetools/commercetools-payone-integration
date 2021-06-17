@@ -67,7 +67,6 @@ import static util.PropertiesHelperUtil.getTenant;
 public class PaymentRequestHelperUtil {
 
     public static final Duration CTP_REQUEST_TIMEOUT = Duration.ofMinutes(2);
-    public static String PSEUDO_CARD_PAN = null;
     public static final BlockingSphereClient CTP_CLIENT = createClient();
     public static final String PAYMENT_KEY = "payment_test";
     public static final String URL_PATTERN = "http://localhost:%d";
@@ -76,6 +75,8 @@ public class PaymentRequestHelperUtil {
     public static final String TRANSACTION_STATUS_SUCCESS = "SUCCESS";
 
     protected static final Random randomSource = new Random();
+
+    private static String pseudoCardPan = null;
 
     @Nonnull
     public static BlockingSphereClient createClient() {
@@ -155,11 +156,11 @@ public class PaymentRequestHelperUtil {
     }
 
     private static String getUnconfirmedVisaPseudoCardPan() {
-        if (PSEUDO_CARD_PAN == null) {
-            PSEUDO_CARD_PAN = fetchPseudoCardPan(
+        if (pseudoCardPan == null) {
+            pseudoCardPan = fetchPseudoCardPan(
                 getCardPan(), getPayoneMerchantId(), getPayoneSubAccId(), getPayonePortalId(), getPayoneKey());
         }
-        return PSEUDO_CARD_PAN;
+        return pseudoCardPan;
     }
 
     /**
