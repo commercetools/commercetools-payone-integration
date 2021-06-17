@@ -140,6 +140,23 @@ Select **Gradle Tests Runner** in the **Run tests using** dropdown and apply the
 
 [Stack Overflow: How to run test not as a JUnit but as a Gradle test](http://stackoverflow.com/a/34333598/980828)
 
+### Test Integration workflow
+
+To run integration workflow and test the payment transactions with Payone, You need to clone `test.internal.properties.skeleton` file, rename it to `test.internal.properties` and fill in the values for the properties, or you can also provide the below environment variables while running the tests. 
+
+```
+TENANTS=FIRST_TENANT
+TEST_DATA_CT_PROJECT_KEY=
+TEST_DATA_CT_CLIENT_ID=
+TEST_DATA_CT_CLIENT_SECRET=
+TEST_DATA_PAYONE_KEY=
+TEST_DATA_PAYONE_MERCHANT_ID=
+TEST_DATA_PAYONE_PORTAL_ID=
+TEST_DATA_PAYONE_SUBACC_ID=
+```
+
+See [test.internal.properties.skeleton](https://github.com/commercetools/commercetools-payone-integration/blob/it-workflow/service/src/test/resources/test.internal.properties.skeleton) for more details. 
+
 ### Development workflow
 
 > TODO document best practice on how to work in day-to-day development, esp. on how local machine, travis and heroku play together.
