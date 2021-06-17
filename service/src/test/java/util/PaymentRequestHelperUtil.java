@@ -4,9 +4,6 @@ import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.util.PayoneHash;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.CartDraft;
 import io.sphere.sdk.carts.CartDraftBuilder;
@@ -28,7 +25,6 @@ import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
-import io.sphere.sdk.payments.queries.PaymentByIdGet;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import io.sphere.sdk.utils.MoneyImpl;
 
@@ -37,7 +33,10 @@ import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -94,6 +93,13 @@ public class PaymentRequestHelperUtil {
     @Nonnull
     private static String preparePaymentWithPreauthorizedAmountAndOrder(@Nonnull final MonetaryAmount monetaryAmount,
                                                                  @Nonnull final String paymentMethod) {
+        final Map<String, Object> customFieldKeysMap = new HashMap<>();
+        customFieldKeysMap.put(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan());
+        customFieldKeysMap.put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage());
+        customFieldKeysMap.put(CustomFieldKeys.REFERENCE_FIELD, getRandomOrderNumber());
+        customFieldKeysMap.put(CustomFieldKeys.SUCCESS_URL_FIELD, "https://example.com/success");
+        customFieldKeysMap.put(CustomFieldKeys.ERROR_URL_FIELD, "https://example.com/error");
+
         final PaymentDraft paymentDraft =
             PaymentDraftBuilder.of(monetaryAmount)
                                .paymentMethodInfo(PaymentMethodInfoBuilder.of()
@@ -101,13 +107,7 @@ public class PaymentRequestHelperUtil {
                                                                           .paymentInterface("PAYONE")
                                                                           .build())
                                .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
-                                   CustomTypeBuilder.PAYMENT_CREDIT_CARD,
-                                   ImmutableMap.of(
-                                       CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD, getUnconfirmedVisaPseudoCardPan(),
-                                       CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage(),
-                                       CustomFieldKeys.REFERENCE_FIELD, getRandomOrderNumber(),
-                                       CustomFieldKeys.SUCCESS_URL_FIELD, "https://example.com/success",
-                                       CustomFieldKeys.ERROR_URL_FIELD, "https://example.com/error")))
+                                   CustomTypeBuilder.PAYMENT_CREDIT_CARD, customFieldKeysMap))
                                .build();
 
         final Payment payment = CTP_CLIENT.executeBlocking(PaymentCreateCommand.of(paymentDraft));
@@ -115,7 +115,7 @@ public class PaymentRequestHelperUtil {
 
         CTP_CLIENT.executeBlocking(CartUpdateCommand.of(
             CTP_CLIENT.executeBlocking(CartCreateCommand.of(cardDraft)),
-            ImmutableList.of(
+            Arrays.asList(
                 AddPayment.of(payment),
                 SetShippingAddress.of(Address.of(CountryCode.DE)),
                 SetBillingAddress.of(Address.of(CountryCode.DE).withLastName("Test Buyer"))
@@ -131,16 +131,6 @@ public class PaymentRequestHelperUtil {
 
     protected static String getRandomOrderNumber() {
         return String.valueOf(randomSource.nextInt() + System.nanoTime());
-    }
-
-    /**
-     * Gets the latest version of the payment via its ID.
-     * @param paymentId unique ID of the payment
-     * @return the payment fetched from the commercetools client, can be null!
-     */
-    private static Payment fetchPaymentById(final String paymentId) {
-        return CTP_CLIENT.executeBlocking(PaymentByIdGet.of(
-            Preconditions.checkNotNull(paymentId, "paymentId must not be null!")));
     }
 
     private static String getUnconfirmedVisaPseudoCardPan() {
@@ -173,8 +163,7 @@ public class PaymentRequestHelperUtil {
         String cardPanResponse = null;
         try {
             cardPanResponse = PayonePostServiceImpl.executePostRequestToString("https://api.pay1.de/post-gateway/",
-                ImmutableList.of(
-                    nameValue("request", "creditcardcheck"),
+                Arrays.asList(nameValue("request", "creditcardcheck"),
                     nameValue("mid", mid),
                     nameValue("aid", aid),
                     nameValue("portalid", pid),
