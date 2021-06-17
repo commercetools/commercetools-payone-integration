@@ -3,6 +3,7 @@ package com.commercetools.main;
 import com.commercetools.Main;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
 import io.sphere.sdk.payments.Payment;
+import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.queries.PaymentQuery;
 import io.sphere.sdk.queries.PagedQueryResult;
 import io.sphere.sdk.queries.QueryPredicate;
@@ -18,11 +19,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static com.commercetools.pspadapter.payone.domain.payone.PayonePostServiceImpl.executeGetRequest;
+import static com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus.APPROVED;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static util.PaymentRequestHelperUtil.CTP_CLIENT;
-import static util.PaymentRequestHelperUtil.PAYMENT_STATUS_APPROVED;
-import static util.PaymentRequestHelperUtil.TRANSACTION_STATUS_SUCCESS;
 import static util.PaymentRequestHelperUtil.URL_HANDLE_PAYMENT;
 import static util.PaymentRequestHelperUtil.cleanupData;
 import static util.PaymentRequestHelperUtil.createPayment;
@@ -87,8 +87,8 @@ public class BasicPaymentRequestWorkflow {
         assertThat(paymentPagedQueryResult.getResults().get(0))
             .satisfies(
                 payment -> {
-                    assertThat(payment.getPaymentStatus().getInterfaceCode()).isEqualTo(PAYMENT_STATUS_APPROVED);
-                    assertThat(payment.getTransactions().get(0).getState()).isEqualTo(TRANSACTION_STATUS_SUCCESS);
+                    assertThat(payment.getPaymentStatus().getInterfaceCode()).isEqualTo(APPROVED.toString());
+                    assertThat(payment.getTransactions().get(0).getState()).isEqualTo(TransactionState.SUCCESS);
                 });
     }
 }

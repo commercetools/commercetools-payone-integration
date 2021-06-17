@@ -66,23 +66,21 @@ import static util.PropertiesHelperUtil.getTenant;
 
 public class PaymentRequestHelperUtil {
 
-    public static final Duration CTP_REQUEST_TIMEOUT = Duration.ofMinutes(2);
     public static final BlockingSphereClient CTP_CLIENT = createClient();
-    public static final String PAYMENT_KEY = "payment_test";
     public static final String URL_PATTERN = "http://localhost:%d";
     public static final String URL_HANDLE_PAYMENT = format("%s/%s/commercetools/handle/payments/", URL_PATTERN, getTenant());
-    public static final String PAYMENT_STATUS_APPROVED = "APPROVED";
-    public static final String TRANSACTION_STATUS_SUCCESS = "SUCCESS";
 
     protected static final Random randomSource = new Random();
 
+    private static final int CTP_REQUEST_TIMEOUT = 2;
+    private static final String PAYMENT_KEY = "payment_test";
     private static String pseudoCardPan = null;
 
     @Nonnull
     public static BlockingSphereClient createClient() {
         return BlockingSphereClient.of(
             SphereClientFactory.of().createClient(getProjectKey(), getClientId(), getClientSecret()),
-            CTP_REQUEST_TIMEOUT
+            Duration.ofMinutes(CTP_REQUEST_TIMEOUT)
         );
     }
 
