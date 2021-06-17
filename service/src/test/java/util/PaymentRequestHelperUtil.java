@@ -72,6 +72,8 @@ public class PaymentRequestHelperUtil {
     public static final String PAYMENT_KEY = "payment_test";
     public static final String URL_PATTERN = "http://localhost:%d";
     public static final String URL_HANDLE_PAYMENT = format("%s/%s/commercetools/handle/payments/", URL_PATTERN, getTenant());
+    public static final String PAYMENT_STATUS_APPROVED = "APPROVED";
+    public static final String TRANSACTION_STATUS_SUCCESS = "SUCCESS";
 
     protected static final Random randomSource = new Random();
 
@@ -86,24 +88,11 @@ public class PaymentRequestHelperUtil {
     @Nonnull
     public static String createPayment(
         @Nonnull final String paymentMethod,
-        @Nonnull final String transactionType,
         @Nonnull final String centAmount,
         @Nonnull final String currencyCode) {
 
         final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
-        final String paymentId = preparePaymentWithPreauthorizedAmountAndOrder(monetaryAmount, paymentMethod);
-
-        //get newest payment and add new charge transaction
-        CTP_CLIENT.executeBlocking(PaymentUpdateCommand.of(fetchPaymentById(paymentId),
-            ImmutableList.of(
-                AddTransaction.of(TransactionDraftBuilder
-                    .of(TransactionType.valueOf(transactionType), monetaryAmount, ZonedDateTime.now())
-                    .state(TransactionState.PENDING)
-                    .build())
-            )
-            )
-        );
-        return paymentId;
+        return preparePaymentWithPreauthorizedAmountAndOrder(monetaryAmount, paymentMethod);
     }
 
     @Nonnull
