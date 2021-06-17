@@ -24,7 +24,6 @@ import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static util.PaymentRequestHelperUtil.CTP_CLIENT;
 import static util.PaymentRequestHelperUtil.URL_HANDLE_PAYMENT;
-import static util.PaymentRequestHelperUtil.cleanupData;
 import static util.PaymentRequestHelperUtil.createPayment;
 import static util.PropertiesHelperUtil.getClientId;
 import static util.PropertiesHelperUtil.getClientSecret;
@@ -42,7 +41,6 @@ public class BasicPaymentRequestWorkflow {
 
     @Before
     public void setUp() throws URISyntaxException {
-        cleanupData();
         testInternalProperties.put("TENANTS", getTenant());
 
         testInternalProperties.put("TEST_DATA_CT_PROJECT_KEY", getProjectKey());

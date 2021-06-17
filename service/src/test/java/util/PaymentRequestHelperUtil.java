@@ -8,20 +8,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.neovisionaries.i18n.CountryCode;
-import io.sphere.sdk.carts.Cart;
 import io.sphere.sdk.carts.CartDraft;
 import io.sphere.sdk.carts.CartDraftBuilder;
 import io.sphere.sdk.carts.commands.CartCreateCommand;
-import io.sphere.sdk.carts.commands.CartDeleteCommand;
 import io.sphere.sdk.carts.commands.CartUpdateCommand;
 import io.sphere.sdk.carts.commands.updateactions.AddPayment;
 import io.sphere.sdk.carts.commands.updateactions.SetBillingAddress;
 import io.sphere.sdk.carts.commands.updateactions.SetShippingAddress;
-import io.sphere.sdk.carts.queries.CartQuery;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.client.SphereClientFactory;
 import io.sphere.sdk.models.Address;
-import io.sphere.sdk.models.Versioned;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentDraft;
 import io.sphere.sdk.payments.PaymentDraftBuilder;
@@ -30,13 +26,9 @@ import io.sphere.sdk.payments.TransactionDraftBuilder;
 import io.sphere.sdk.payments.TransactionState;
 import io.sphere.sdk.payments.TransactionType;
 import io.sphere.sdk.payments.commands.PaymentCreateCommand;
-import io.sphere.sdk.payments.commands.PaymentDeleteCommand;
 import io.sphere.sdk.payments.commands.PaymentUpdateCommand;
 import io.sphere.sdk.payments.commands.updateactions.AddTransaction;
 import io.sphere.sdk.payments.queries.PaymentByIdGet;
-import io.sphere.sdk.payments.queries.PaymentQuery;
-import io.sphere.sdk.queries.PagedQueryResult;
-import io.sphere.sdk.queries.QueryPredicate;
 import io.sphere.sdk.types.CustomFieldsDraft;
 import io.sphere.sdk.utils.MoneyImpl;
 
@@ -73,7 +65,6 @@ public class PaymentRequestHelperUtil {
     protected static final Random randomSource = new Random();
 
     private static final int CTP_REQUEST_TIMEOUT = 2;
-    private static final String PAYMENT_KEY = "payment_test";
     private static String pseudoCardPan = null;
 
     @Nonnull
@@ -105,7 +96,6 @@ public class PaymentRequestHelperUtil {
                                                                  @Nonnull final String paymentMethod) {
         final PaymentDraft paymentDraft =
             PaymentDraftBuilder.of(monetaryAmount)
-                               .key(PAYMENT_KEY)
                                .paymentMethodInfo(PaymentMethodInfoBuilder.of()
                                                                           .method(paymentMethod)
                                                                           .paymentInterface("PAYONE")
@@ -212,32 +202,5 @@ public class PaymentRequestHelperUtil {
         }
 
         return m.group(1);
-    }
-
-    public static void cleanupData() {
-        final PagedQueryResult<Payment> paymentPage =
-            CTP_CLIENT.execute(PaymentQuery.of()
-                                           .withPredicates(QueryPredicate.of(format("key=\"%s\"", PAYMENT_KEY))))
-                      .toCompletableFuture()
-                      .join();
-
-        for(Payment payment: paymentPage.getResults()) {
-            final String paymentId = payment.getId();
-
-            //Delete cart which contains the payment.
-            final PagedQueryResult<Cart> cartPage =
-                CTP_CLIENT.execute(CartQuery.of()
-                                            .withPredicates(m -> m.paymentInfo().payments().id().is(paymentId)))
-                          .toCompletableFuture()
-                          .join();
-
-            for (Cart cart : cartPage.getResults()) {
-                CTP_CLIENT.executeBlocking(
-                    CartDeleteCommand.of(Versioned.of(cart.getId(), cart.getVersion())));
-            }
-
-            CTP_CLIENT.executeBlocking(
-                PaymentDeleteCommand.of(Versioned.of(paymentId, payment.getVersion())));
-        }
     }
 }
