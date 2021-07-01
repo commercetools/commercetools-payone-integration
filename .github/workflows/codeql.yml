@@ -11,8 +11,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          java-version: 8
+      - name: Install dependencies
+        run: |
+          ./gradlew ciBuild
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v1
+        with:
+          languages: java
       - name: Autobuild
         uses: github/codeql-action/autobuild@v1
       - name: Perform CodeQL Analysis
