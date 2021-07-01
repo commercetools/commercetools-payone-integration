@@ -28,7 +28,8 @@ jobs:
         run: ./gradlew stage -x test
       - name: Build and push
         uses: docker/build-push-action@v2
+        run: docker push ${{ env.IMAGE }}:${{ env.GIT_SHA }}
         with:
           context: .
-          push: true
+          load: true
           tags: ${{ steps.vars.outputs.tag }}
