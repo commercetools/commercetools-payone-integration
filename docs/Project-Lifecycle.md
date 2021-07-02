@@ -44,35 +44,22 @@ have in mind. Then fork the project somewhere or in GitHub and create a pull req
 ## Documentation
 
 The [test definitions and results](http://commercetools.github.io/commercetools-payone-integration/) are the most precise documentation of the behavior. 
-They are automatically generated, updated and published to the `gh_pages` branch of this project by the [TravisCI continuous integration](https://travis-ci.com/commercetools/commercetools-payone-integration) setup.
-
-## Docker images
-
-On each push to the remote github repository, a Docker image is build by travis CI.
-See [travis-build.sh](/travis-build.sh)
-
-### Tags
-
-Every image has the following tags:
-- short git commit SHA (first 8 chars), e.g. `11be0178`
-- tag containing the travis build number, e.g. `travis-17`
-- `latest` (if `master` branch) or `wip-branch-name` (if not `master` branch)
-
-https://hub.docker.com/r/commercetools/commercetools-payone-integration/tags/
+They are automatically generated, updated and published to the `gh_pages` branch of this project by the [GitHub Actions continuous integration](https://github.com/commercetools/commercetools-payone-integration/actions?query=workflow%3ACI) setup.
 
 ### Release Tag
 
 To create a release tag for a Docker image, a new git commit tag has to be created manually.
 
-This will trigger a new Docker build by travis CI and will create two additional Docker tags:
+This will make Github actions to trigger the CD build. Check [here](https://github.com/commercetools/commercetools-payone-integration/actions) for Github actions build status.
 - git tag value, e.g. `v1.0.1`
-- `production`
 
 The git release tag can be created via command line or github UI ([Draft new Release](https://github.com/commercetools/commercetools-payone-integration/releases))
 
 ```bash
 git tag -a v1.0.1 -m "Minor text adjustments."
 ```
+
+The new version image has been published to the docker: [commercetools/commercetools-payone-integration](https://hub.docker.com/r/commercetools/commercetools-payone-integration/tags)
  
 ### Build
 
@@ -159,7 +146,7 @@ See [test.internal.properties.skeleton](https://github.com/commercetools/commerc
 
 ### Development workflow
 
-> TODO document best practice on how to work in day-to-day development, esp. on how local machine, travis and heroku play together.
+> TODO document best practice on how to work in day-to-day development, esp. on how local machine, GitHub Actions and heroku play together.
 
 ### Paypal Sandbox Accounts
 
