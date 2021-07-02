@@ -23,7 +23,7 @@ jobs:
       with:
         java-version: 8
     - name: Build with Gradle
-      run: ./gradlew ciBuild gitPublishPush
+      run: ./gradlew clean build gitPublishPush
       env:
         CT_CLIENT_ID: ${{ secrets.CT_CLIENT_ID }}
         CT_CLIENT_SECRET: ${{ secrets.CT_CLIENT_SECRET }}
@@ -52,3 +52,5 @@ jobs:
         TEST_DATA_VISA_CREDIT_CARD_NO_3DS: ${{ secrets.TEST_DATA_VISA_CREDIT_CARD_NO_3DS }}
     - name: Codecov
       uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.GH_TOKEN }}
