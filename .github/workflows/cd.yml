@@ -1,0 +1,63 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Set up JDK 8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - name: Build with Gradle
+        run: ./gradlew stage
+        env:
+          CT_CLIENT_ID: ${{ secrets.CT_CLIENT_ID }}
+          CT_CLIENT_SECRET: ${{ secrets.CT_CLIENT_SECRET }}
+          CT_PROJECT_KEY: payone-integration-tests-heroku-17
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          TEST_DATA_3_DS_PASSWORD: ${{ secrets.TEST_DATA_3_DS_PASSWORD }}
+          TEST_DATA_CT_CLIENT_ID: ${{ secrets.TEST_DATA_CT_CLIENT_ID }}
+          TEST_DATA_CT_CLIENT_ID_2: ${{ secrets.TEST_DATA_CT_CLIENT_ID_2 }}
+          TEST_DATA_CT_CLIENT_SECRET: ${{ secrets.TEST_DATA_CT_CLIENT_SECRET }}
+          TEST_DATA_CT_CLIENT_SECRET_2: ${{ secrets.TEST_DATA_CT_CLIENT_SECRET_2 }}
+          TEST_DATA_CT_PAYONE_INTEGRATION_URL: https://ct-payone-integration-staging.herokuapp.com
+          TEST_DATA_CT_PROJECT_KEY: payone-integration-tests-heroku-17
+          TEST_DATA_CT_PROJECT_KEY_2: payone-integration-tests
+          TEST_DATA_PAYONE_KEY: ${{ secrets.TEST_DATA_PAYONE_KEY }}
+          TEST_DATA_PAYONE_KEY_2: ${{ secrets.TEST_DATA_PAYONE_KEY_2 }}
+          TEST_DATA_PAYONE_MERCHANT_ID: 31102
+          TEST_DATA_PAYONE_MERCHANT_ID_2: 31102
+          TEST_DATA_PAYONE_PORTAL_ID: 2022125
+          TEST_DATA_PAYONE_PORTAL_ID_2: 2026522
+          TEST_DATA_PAYONE_SUBACC_ID: 31281
+          TEST_DATA_PAYONE_SUBACC_ID_2: 31281
+          TEST_DATA_TENANT_NAME: FIRST_TENANT
+          TEST_DATA_TENANT_NAME_2: SECOND_TENANT
+          CT_PAYONE_INTEGRATION_URL: https://ct-payone-integration-staging.herokuapp.com
+          TEST_DATA_VISA_CREDIT_CARD_3DS: ${{ secrets.TEST_DATA_VISA_CREDIT_CARD_3DS }}
+          TEST_DATA_VISA_CREDIT_CARD_NO_3DS: ${{ secrets.TEST_DATA_VISA_CREDIT_CARD_NO_3DS }}
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: commercetools/commercetools-payone-integration:${{ steps.vars.outputs.tag }}
