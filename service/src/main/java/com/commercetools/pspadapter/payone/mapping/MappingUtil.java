@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -73,22 +74,26 @@ public class MappingUtil {
         request.setCountry(billingAddress.getCountry().toLocale().getCountry());
 
         //optional
-        request.setTitle(billingAddress.getTitle());
-        request.setSalutation(billingAddress.getSalutation());
-        request.setFirstname(billingAddress.getFirstName());
-        request.setCompany(billingAddress.getCompany());
-        request.setStreet(joinStringsIgnoringNull(Arrays.asList(billingAddress.getStreetName(), billingAddress.getStreetNumber())));
-        request.setAddressaddition(billingAddress.getAdditionalStreetInfo());
-        request.setZip(billingAddress.getPostalCode());
-        request.setCity(billingAddress.getCity());
-        request.setEmail(billingAddress.getEmail());
-        request.setTelephonenumber(
+        setIfNonEmpty(request::setTitle, billingAddress.getTitle());
+        setIfNonEmpty(request::setSalutation, billingAddress.getSalutation());
+        setIfNonEmpty(request::setFirstname, billingAddress.getFirstName());
+        setIfNonEmpty(request::setCompany, billingAddress.getCompany());
+        setIfNonEmpty(request::setStreet, joinStringsIgnoringNull(Arrays.asList(billingAddress.getStreetName(), billingAddress.getStreetNumber())));
+        setIfNonEmpty(request::setAddressaddition, billingAddress.getAdditionalStreetInfo());
+        setIfNonEmpty(request::setZip, billingAddress.getPostalCode());
+        setIfNonEmpty(request::setCity, billingAddress.getCity());
+        setIfNonEmpty(request::setEmail, billingAddress.getEmail());
+        setIfNonEmpty(request::setTelephonenumber,
                 ofNullable(billingAddress.getPhone())
                         .orElse(billingAddress.getMobile()));
 
         if (countriesWithStateAllowed.contains(billingAddress.getCountry())) {
             request.setState(billingAddress.getState());
         }
+    }
+
+    private static void setIfNonEmpty(Consumer<String> setter, String value) {
+        if (StringUtils.isNotBlank(value)) setter.accept(value);
     }
 
     @Nonnull
@@ -107,7 +112,7 @@ public class MappingUtil {
 
         final Customer customer = customerReference.getObj();
 
-        request.setVatid(customer.getVatId());
+        setIfNonEmpty(request::setVatid, customer.getVatId());
 
         //birthday
         ofNullable(customer.getDateOfBirth())
@@ -133,14 +138,14 @@ public class MappingUtil {
             throw new IllegalArgumentException("Missing shipping address details");
         }
 
-        request.setShipping_firstname(shippingAddress.getFirstName());
-        request.setShipping_lastname(shippingAddress.getLastName());
-        request.setShipping_street(joinStringsIgnoringNull(Arrays.asList(shippingAddress.getStreetName(),
+        setIfNonEmpty(request::setShipping_firstname, shippingAddress.getFirstName());
+        setIfNonEmpty(request::setShipping_lastname, shippingAddress.getLastName());
+        setIfNonEmpty(request::setShipping_street, joinStringsIgnoringNull(Arrays.asList(shippingAddress.getStreetName(),
             shippingAddress.getStreetNumber())));
-        request.setShipping_zip(shippingAddress.getPostalCode());
-        request.setShipping_city(shippingAddress.getCity());
-        request.setShipping_country(shippingAddress.getCountry().toLocale().getCountry());
-        request.setShipping_company(joinStringsIgnoringNull(Arrays.asList(shippingAddress.getCompany(),
+        setIfNonEmpty(request::setShipping_zip, shippingAddress.getPostalCode());
+        setIfNonEmpty(request::setShipping_city, shippingAddress.getCity());
+        setIfNonEmpty(request::setShipping_country, shippingAddress.getCountry().toLocale().getCountry());
+        setIfNonEmpty(request::setShipping_company, joinStringsIgnoringNull(Arrays.asList(shippingAddress.getCompany(),
             shippingAddress.getDepartment())));
 
         if (countriesWithStateAllowed.contains(shippingAddress.getCountry())) {
