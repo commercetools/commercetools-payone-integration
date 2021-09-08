@@ -129,22 +129,30 @@ public class MappingUtil {
 
     public static void mapShippingAddressToRequest(final AuthorizationRequest request, final Address shippingAddress) {
 
-        if(shippingAddress == null) {
-            throw new IllegalArgumentException("Missing shipping address details");
-        }
+        final String shippingCountry = shippingAddress.getCountry().toLocale().getCountry();
+        final String shipping_street = joinStringsIgnoringNull(asList(shippingAddress.getStreetName(),
+            shippingAddress.getStreetNumber()));
 
-        request.setShipping_firstname(shippingAddress.getFirstName());
-        request.setShipping_lastname(shippingAddress.getLastName());
-        request.setShipping_street(joinStringsIgnoringNull(Arrays.asList(shippingAddress.getStreetName(),
-            shippingAddress.getStreetNumber())));
-        request.setShipping_zip(shippingAddress.getPostalCode());
-        request.setShipping_city(shippingAddress.getCity());
-        request.setShipping_country(shippingAddress.getCountry().toLocale().getCountry());
-        request.setShipping_company(joinStringsIgnoringNull(Arrays.asList(shippingAddress.getCompany(),
-            shippingAddress.getDepartment())));
+        if(shippingAddress == null
+            || StringUtils.isBlank(shippingAddress.getPostalCode())
+            || StringUtils.isBlank(shippingCountry)
+            || StringUtils.isBlank(shipping_street)
+            || StringUtils.isBlank(shippingAddress.getCity())
+        ) {
+            request.setNoShipping(1);
+        } else {
+            request.setShipping_firstname(shippingAddress.getFirstName());
+            request.setShipping_lastname(shippingAddress.getLastName());
+            request.setShipping_street(shipping_street);
+            request.setShipping_zip(shippingAddress.getPostalCode());
+            request.setShipping_city(shippingAddress.getCity());
+            request.setShipping_country(shippingCountry);
+            request.setShipping_company(joinStringsIgnoringNull(Arrays.asList(shippingAddress.getCompany(),
+                shippingAddress.getDepartment())));
 
-        if (countriesWithStateAllowed.contains(shippingAddress.getCountry())) {
-            request.setShipping_state(shippingAddress.getState());
+            if (countriesWithStateAllowed.contains(shippingAddress.getCountry())) {
+                request.setShipping_state(shippingAddress.getState());
+            }
         }
     }
 
