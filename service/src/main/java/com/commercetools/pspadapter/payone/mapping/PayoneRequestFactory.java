@@ -101,7 +101,8 @@ public abstract class PayoneRequestFactory {
         }
 
         try {
-            MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress());
+            MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress(),
+                ctPayment.getPaymentMethodInfo().getMethod());
         } catch (final IllegalArgumentException ex) {
             logger.debug(
                 createTenantKeyValue(tenantConfig.getName()),

@@ -7,6 +7,8 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingTy
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPreauthorizationRequest;
 import com.commercetools.pspadapter.tenant.TenantConfig;
+import com.commercetools.util.function.TriFunction;
+import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentMethodInfo;
 
@@ -16,7 +18,8 @@ import java.util.function.BiFunction;
 /**
  * Requests factory for Wallet based payments, like <i>PayPal</i> and <i>Paydirekt</i>.
  * <p>Based on {@link PaymentMethodInfo#getMethod() Payment#paymentMethodInfo#method} value the request will be created
- * with respective {@link WalletAuthorizationRequest#clearingtype} and {@link WalletAuthorizationRequest#wallettype}</p>
+ * with respective {@link WalletAuthorizationRequest#clearingtype}, {@link WalletAuthorizationRequest#wallettype}
+ * and {@link WalletAuthorizationRequest#noShipping}</p>
  */
 public class WalletRequestFactory extends PayoneRequestFactory {
 
@@ -38,16 +41,18 @@ public class WalletRequestFactory extends PayoneRequestFactory {
 
     @Nonnull
     private <WR extends AuthorizationRequest> WR createRequestInternal(@Nonnull final PaymentWithCartLike paymentWithCartLike,
-                                                                       @Nonnull final BiFunction<? super PayoneConfig, ClearingType, WR> requestConstructor) {
+                                                                       @Nonnull final TriFunction<? super PayoneConfig, ClearingType, Integer, WR> requestConstructor) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
+        final CartLike ctCartLike = paymentWithCartLike.getCartLike();
 
         if(ctPayment.getCustom() == null) {
             throw new IllegalArgumentException("Missing custom fields on payment!");
         }
 
+        final int noShippingAddress = MappingUtil.checkForMissingShippingAddress(ctCartLike.getShippingAddress());
         final ClearingType clearingType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod());
-        WR request = requestConstructor.apply(getPayoneConfig(), clearingType);
+        WR request = requestConstructor.apply(getPayoneConfig(), clearingType, noShippingAddress);
 
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
 

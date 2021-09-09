@@ -120,8 +120,6 @@ public class AuthorizationRequest extends BaseRequest {
 
     private String backurl;
 
-    private int noShipping;
-
     protected AuthorizationRequest(final PayoneConfig config, final String requestType, final String clearingtype) {
         super(config, requestType);
 
@@ -436,13 +434,5 @@ public class AuthorizationRequest extends BaseRequest {
 
     public void setBackurl(final String backurl) {
         this.backurl = backurl;
-    }
-
-    public int getNoShipping() {
-        return noShipping;
-    }
-
-    public void setNoShipping(int noShipping) {
-        this.noShipping = noShipping;
     }
 }

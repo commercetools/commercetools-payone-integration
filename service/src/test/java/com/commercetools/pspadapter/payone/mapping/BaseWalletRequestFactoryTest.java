@@ -58,6 +58,7 @@ public class BaseWalletRequestFactoryTest extends BaseTenantPropertyTest {
         //clearing type
         softly.assertThat(result.getClearingtype()).isEqualTo(expectedClearingtype);
         softly.assertThat(result.getWallettype()).isEqualTo(expectedWalletType);
+        softly.assertThat(result.getNoShipping()).isEqualTo(0);
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());
@@ -134,6 +135,7 @@ public class BaseWalletRequestFactoryTest extends BaseTenantPropertyTest {
         //clearing type
         softly.assertThat(result.getClearingtype()).isEqualTo(expectedClearingtype);
         softly.assertThat(result.getWallettype()).isEqualTo(expectedWalletType);
+        softly.assertThat(result.getNoShipping()).isEqualTo(0);
 
         //references
         softly.assertThat(result.getReference()).isEqualTo(paymentWithCartLike.getReference());

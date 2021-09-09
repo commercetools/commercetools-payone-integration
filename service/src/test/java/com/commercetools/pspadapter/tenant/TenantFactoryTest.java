@@ -175,7 +175,7 @@ public class TenantFactoryTest {
     }
 
     @Test
-    public void createRequestFactory_paypal_authorization() throws Exception {
+    public void createRequestFactory_with_NoShippingAddress_paypal_authorization() throws Exception {
         PayoneRequestFactory requestFactory = factory.createRequestFactory(WALLET_PAYPAL, tenantConfig);
         PaymentWithCartLike paymentWithCartLike = testHelper.createPaypalPaymentWithCartLike();
         AuthorizationRequest authorizationRequest = requestFactory.createAuthorizationRequest(paymentWithCartLike);
@@ -185,6 +185,7 @@ public class TenantFactoryTest {
         assertThat(actual.get("request")).isEqualTo("authorization");
         assertThat(actual.get("clearingtype")).isEqualTo("wlt");
         assertThat(actual.get("wallettype")).isEqualTo("PPE");
+        assertThat(actual.get("noShipping")).isEqualTo(1);
     }
 
     @Test

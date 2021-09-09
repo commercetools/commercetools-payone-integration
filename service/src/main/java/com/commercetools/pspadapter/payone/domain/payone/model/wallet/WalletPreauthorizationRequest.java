@@ -13,10 +13,13 @@ public class WalletPreauthorizationRequest extends AuthorizationRequest {
 
     private String wallettype;
 
-    public WalletPreauthorizationRequest(final PayoneConfig config, final ClearingType clearingType) {
+    private int noShipping;
+
+    public WalletPreauthorizationRequest(final PayoneConfig config, final ClearingType clearingType, final int noShipping) {
         super(config, RequestType.PREAUTHORIZATION.getType(), clearingType.getPayoneCode());
 
         this.wallettype = clearingType.getSubType();
+        this.noShipping = noShipping;
     }
 
     //**************************************************************
@@ -27,4 +30,9 @@ public class WalletPreauthorizationRequest extends AuthorizationRequest {
     public String getWallettype() {
         return wallettype;
     }
+
+    public int getNoShipping() {
+        return noShipping;
+    }
+
 }

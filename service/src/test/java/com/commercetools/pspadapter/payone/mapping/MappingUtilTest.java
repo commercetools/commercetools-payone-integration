@@ -26,6 +26,8 @@ import java.time.LocalDate;
 import java.util.Locale;
 import java.util.Optional;
 
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys.CREDIT_CARD;
+import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys.WALLET_PAYPAL;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.GENDER_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.LANGUAGE_CODE_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getPaymentLanguage;
@@ -70,7 +72,7 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
     }
 
     @Test
-    public void testBillingAddressCountryStateMapping() {
+    public void testCountryStateMapping() {
         Address addressDE = Address.of(DE)
                 .withState("AK");
         Address addressUS = Address.of(CountryCode.US)
@@ -84,45 +86,20 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
                         paymentWithCartLike);
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestDE, addressDE);
+        MappingUtil.mapShippingAddressToRequest(authorizationRequestDE, addressDE, CREDIT_CARD);
         MappingUtil.mapBillingAddressToRequest(authorizationRequestUS, addressUS);
+        MappingUtil.mapShippingAddressToRequest(authorizationRequestUS, addressUS, CREDIT_CARD);
 
         softly.assertThat(authorizationRequestDE.getState()).as("DE billing address state").isNullOrEmpty();
-        softly.assertThat(authorizationRequestUS.getState()).as("US billing address state").isEqualTo("AK");
-
-        softly.assertAll();
-    }
-
-    @Test
-    public void testShippingAddressCountryStateMapping() {
-        Address addressDE = Address.of(DE)
-                                   .withCity("City")
-                                   .withPostalCode("123")
-                                   .withStreetNumber("5")
-                                   .withState("AK");
-        Address addressUS = Address.of(CountryCode.US)
-                                   .withCity("City")
-                                   .withPostalCode("123")
-                                   .withStreetName("test Street Name")
-                                   .withState("AK");
-
-        CreditCardAuthorizationRequest authorizationRequestDE =
-            new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
-                paymentWithCartLike);
-        CreditCardAuthorizationRequest authorizationRequestUS =
-            new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
-                paymentWithCartLike);
-
-        MappingUtil.mapShippingAddressToRequest(authorizationRequestDE, addressDE);
-        MappingUtil.mapShippingAddressToRequest(authorizationRequestUS, addressUS);
-
         softly.assertThat(authorizationRequestDE.getShipping_state()).as("DE shipping address state").isNullOrEmpty();
+        softly.assertThat(authorizationRequestUS.getState()).as("US billing address state").isEqualTo("AK");
         softly.assertThat(authorizationRequestUS.getShipping_state()).as("US shipping address state").isEqualTo("AK");
 
         softly.assertAll();
     }
 
     @Test
-    public void billingAddressStreetJoiningFull() {
+    public void streetJoiningFull() {
         Address addressWithNameNumber = Address.of(DE)
                 .withStreetName("Test Street")
                 .withStreetNumber("2");
@@ -132,29 +109,16 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
                         paymentWithCartLike);
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestWithNameNumber, addressWithNameNumber);
+        MappingUtil.mapShippingAddressToRequest(authorizationRequestWithNameNumber, addressWithNameNumber, CREDIT_CARD);
 
-        assertThat(authorizationRequestWithNameNumber.getStreet()).as("billing address state").isEqualTo(addressWithNameNumber.getStreetName() + " " + addressWithNameNumber.getStreetNumber());
+        softly.assertThat(authorizationRequestWithNameNumber.getStreet()).as("billing address state").isEqualTo(addressWithNameNumber.getStreetName() + " " + addressWithNameNumber.getStreetNumber());
+        softly.assertThat(authorizationRequestWithNameNumber.getShipping_street()).as("shipping address state").isEqualTo(addressWithNameNumber.getStreetName() + " " + addressWithNameNumber.getStreetNumber());
+
+        softly.assertAll();
     }
 
     @Test
-    public void ShippingAddressStreetJoiningFull() {
-        Address addressWithNameNumber = Address.of(DE)
-                                               .withPostalCode("123")
-                                               .withCity("City")
-                                               .withStreetName("Test Street")
-                                               .withStreetNumber("2");
-
-        CreditCardAuthorizationRequest authorizationRequestWithNameNumber =
-            new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
-                paymentWithCartLike);
-
-        MappingUtil.mapShippingAddressToRequest(authorizationRequestWithNameNumber, addressWithNameNumber);
-
-        assertThat(authorizationRequestWithNameNumber.getShipping_street()).as("shipping address state").isEqualTo(addressWithNameNumber.getStreetName() + " " + addressWithNameNumber.getStreetNumber());
-    }
-
-    @Test
-    public void billingAddressStreetJoiningNoNumber() {
+    public void streetJoiningNoNumber() {
         Address addressNoNumber = Address.of(DE)
                 .withStreetName("Test Street");
 
@@ -163,28 +127,16 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
                         paymentWithCartLike);
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestNoNumber, addressNoNumber);
+        MappingUtil.mapShippingAddressToRequest(authorizationRequestNoNumber, addressNoNumber, CREDIT_CARD);
 
-        assertThat(authorizationRequestNoNumber.getStreet()).as("billing address state").isEqualTo(addressNoNumber.getStreetName());
+        softly.assertThat(authorizationRequestNoNumber.getStreet()).as("billing address state").isEqualTo(addressNoNumber.getStreetName());
+        softly.assertThat(authorizationRequestNoNumber.getShipping_street()).as("shipping address state").isEqualTo(addressNoNumber.getStreetName());
+
+        softly.assertAll();
     }
 
     @Test
-    public void shippingAddressStreetJoiningNoNumber() {
-        Address addressNoNumber = Address.of(DE)
-                                         .withCity("City")
-                                         .withPostalCode("123")
-                                         .withStreetName("Test Street");
-
-        CreditCardAuthorizationRequest authorizationRequestNoNumber =
-            new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
-                paymentWithCartLike);
-
-        MappingUtil.mapShippingAddressToRequest(authorizationRequestNoNumber, addressNoNumber);
-
-        assertThat(authorizationRequestNoNumber.getShipping_street()).as("shipping address state").isEqualTo(addressNoNumber.getStreetName());
-    }
-
-    @Test
-    public void billingAddressStreetJoiningNoName() {
+    public void streetJoiningNoName() {
         Address addressNoName = Address.of(DE)
                 .withStreetNumber("5");
 
@@ -193,38 +145,58 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
                         paymentWithCartLike);
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestNoName, addressNoName);
+        MappingUtil.mapShippingAddressToRequest(authorizationRequestNoName, addressNoName, CREDIT_CARD);
 
-        assertThat(authorizationRequestNoName.getStreet()).as("DE billing address state").isEqualTo("5");
+        softly.assertThat(authorizationRequestNoName.getStreet()).as("DE billing address state").isEqualTo("5");
+        softly.assertThat(authorizationRequestNoName.getShipping_street()).as("DE shipping address state").isEqualTo(
+                "5");
+
+        softly.assertAll();
     }
 
-    @Test
-    public void shippingAddressStreetJoiningNoName() {
-        Address addressNoName = Address.of(DE)
-                                         .withCity("City")
-                                         .withPostalCode("123")
-                                         .withStreetNumber("5");
-
+    @Test(expected = IllegalArgumentException.class)
+    public void WhenNoShippingAddressThrowException() {
         CreditCardAuthorizationRequest authorizationRequestNoName =
             new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
                 paymentWithCartLike);
 
-        MappingUtil.mapShippingAddressToRequest(authorizationRequestNoName, addressNoName);
-
-        assertThat(authorizationRequestNoName.getShipping_street()).as("DE shipping address state").isEqualTo(
-            "5");
+        MappingUtil.mapShippingAddressToRequest(authorizationRequestNoName, null, CREDIT_CARD);
     }
 
     @Test
-    public void shippingAddressMissingSetNoShippingToOne() {
-        Address addressMissingFields = Address.of(DE);
+    public void WhenShippingAddressIsNullReturnOneToSetValueForNoShipping() {
 
-        CreditCardAuthorizationRequest authorizationRequestMissingAddress =
+        assertThat(MappingUtil.checkForMissingShippingAddress(null)).isEqualTo(1);
+    }
+
+    @Test
+    public void WhenMissingShippingAddressReturnOneToSetValueForNoShipping() {
+        Address missingAddressFields = Address.of(DE)
+                                         .withStreetName("Test Street");
+
+        assertThat(MappingUtil.checkForMissingShippingAddress(missingAddressFields)).isEqualTo(1);
+    }
+
+    @Test
+    public void WhenShippingAddressIsPresentReturnZeroToSetValueForNoShipping() {
+        Address missingAddressFields = Address.of(DE)
+                                              .withPostalCode("123")
+                                              .withStreetNumber("5")
+                                              .withStreetName("Test Street")
+                                              .withCity("Test city");
+
+        assertThat(MappingUtil.checkForMissingShippingAddress(missingAddressFields)).isEqualTo(0);
+    }
+
+    @Test
+    public void WhenWalletPaymentAndNoShippingAddressShouldNotThrowException() {
+        CreditCardAuthorizationRequest authorizationRequest =
             new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
                 paymentWithCartLike);
 
-        MappingUtil.mapShippingAddressToRequest(authorizationRequestMissingAddress, addressMissingFields);
+        MappingUtil.mapShippingAddressToRequest(authorizationRequest, null, WALLET_PAYPAL);
 
-        assertThat(authorizationRequestMissingAddress.getNoShipping()).as("DE shipping address noShipping").isEqualTo(1);
+        assertThat(authorizationRequest.getShipping_country()).isEqualTo(null);
     }
 
     @Test
