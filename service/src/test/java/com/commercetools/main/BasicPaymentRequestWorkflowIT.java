@@ -61,7 +61,7 @@ import static util.PropertiesHelperUtil.getPayoneSubAccId;
 import static util.PropertiesHelperUtil.getProjectKey;
 import static util.PropertiesHelperUtil.getTenant;
 
-public class BasicPaymentRequestWorkflow {
+public class BasicPaymentRequestWorkflowIT {
 
     public static final int DEFAULT_PORT = 8080;
     private static final Map<String, String> testInternalProperties = new HashMap<>();
