@@ -1,6 +1,7 @@
 package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
+import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.CartLike;
@@ -127,25 +128,41 @@ public class MappingUtil {
                 });
     }
 
-    public static void mapShippingAddressToRequest(final AuthorizationRequest request, final Address shippingAddress) {
+    public static void mapShippingAddressToRequest(final AuthorizationRequest request,
+                                                   final Address shippingAddress,
+                                                   final String paymentMethod) {
 
-        if(shippingAddress == null) {
+        if(shippingAddress != null) {
+            request.setShipping_firstname(shippingAddress.getFirstName());
+            request.setShipping_lastname(shippingAddress.getLastName());
+            request.setShipping_street(joinStringsIgnoringNull(Arrays.asList(shippingAddress.getStreetName(),
+                shippingAddress.getStreetNumber())));
+            request.setShipping_zip(shippingAddress.getPostalCode());
+            request.setShipping_city(shippingAddress.getCity());
+            request.setShipping_country(shippingAddress.getCountry().toLocale().getCountry());
+            request.setShipping_company(joinStringsIgnoringNull(Arrays.asList(shippingAddress.getCompany(),
+                shippingAddress.getDepartment())));
+
+            if (countriesWithStateAllowed.contains(shippingAddress.getCountry())) {
+                request.setShipping_state(shippingAddress.getState());
+            }
+        } else if(!MethodKeys.WALLET_PAYPAL.equals(paymentMethod)) {
             throw new IllegalArgumentException("Missing shipping address details");
         }
+    }
 
-        request.setShipping_firstname(shippingAddress.getFirstName());
-        request.setShipping_lastname(shippingAddress.getLastName());
-        request.setShipping_street(joinStringsIgnoringNull(Arrays.asList(shippingAddress.getStreetName(),
-            shippingAddress.getStreetNumber())));
-        request.setShipping_zip(shippingAddress.getPostalCode());
-        request.setShipping_city(shippingAddress.getCity());
-        request.setShipping_country(shippingAddress.getCountry().toLocale().getCountry());
-        request.setShipping_company(joinStringsIgnoringNull(Arrays.asList(shippingAddress.getCompany(),
-            shippingAddress.getDepartment())));
+    public static int checkForMissingShippingAddress(Address shippingAddress) {
 
-        if (countriesWithStateAllowed.contains(shippingAddress.getCountry())) {
-            request.setShipping_state(shippingAddress.getState());
+        if(shippingAddress == null
+            || StringUtils.isBlank(shippingAddress.getPostalCode())
+            || StringUtils.isBlank(shippingAddress.getCity())
+            || StringUtils.isBlank(shippingAddress.getCountry().toLocale().getCountry())
+            || StringUtils.isBlank(joinStringsIgnoringNull(asList(shippingAddress.getStreetName(),
+            shippingAddress.getStreetNumber())))
+        ) {
+            return 1;
         }
+        return 0;
     }
 
     public static void mapCustomFieldsFromPayment(final AuthorizationRequest request, final CustomFields ctPaymentCustomFields) {

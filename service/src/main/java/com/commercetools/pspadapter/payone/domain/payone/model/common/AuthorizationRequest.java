@@ -120,7 +120,6 @@ public class AuthorizationRequest extends BaseRequest {
 
     private String backurl;
 
-
     protected AuthorizationRequest(final PayoneConfig config, final String requestType, final String clearingtype) {
         super(config, requestType);
 
