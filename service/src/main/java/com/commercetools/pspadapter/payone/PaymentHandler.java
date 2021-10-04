@@ -54,17 +54,7 @@ public class PaymentHandler {
     public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
         int retryCounter = 0;
         try {
-            for (; retryCounter < RETRIES_LIMIT; retryCounter++) {
-                try {
-                    return processPayment(paymentId);
-                } catch (final ConcurrentModificationException concurrentModificationException) {
-                    if (retryCounter == RETRIES_LIMIT - 1) {
-                        throw concurrentModificationException;
-                    } else {
-                        Thread.sleep(calculateVariableDelay(retryCounter));
-                    }
-                }
-            }
+            return processPayment(paymentId);
         } catch (final ConcurrentModificationException concurrentModificationException) {
             return handleConcurrentModificationException(paymentId, concurrentModificationException);
         } catch (final NotFoundException | NoCartLikeFoundException e) {
@@ -74,8 +64,6 @@ public class PaymentHandler {
         } catch (final Exception e) {
             return handleException(paymentId, retryCounter, e);
         }
-        return handleException(paymentId, retryCounter,
-                new Exception("Unknown workflow error in PaymentHandler#handlePayment"));
     }
 
     private PaymentHandleResult processPayment(@Nonnull final String paymentId)
