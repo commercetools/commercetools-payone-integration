@@ -50,7 +50,7 @@ See also: [CT Method field convention](https://github.com/nkuehn/payment-integra
 | `WALLET-PAYPAL`                      | `wlt` | `wallettype=PPE`             | [PayPal](https://paypal.com)      | `payment-WALLET`              |
 | `WALLET-PAYDIREKT`                   | `wlt` | `wallettype=PDT`             | [Paydirekt](https://paydirekt.de) | `payment-WALLET`              |
 | `INSTALLMENT-KLARNA`                 | `fnc` | `financingtype=KLS`          |  Consumer Credit / Installment via Klarna | `payment-INVOICE-KLARNA` XXX TODO the fields are the same, but would it be better to differentiate? looks like a bug  |
-| `INVOICE-KLARNA`                     | `fnc` | `financingtype=KLV`          | Klarna Invoice                    | `payment-INVOICE-KLARNA`      |
+| `INVOICE-KLARNA`                     | `fnc` | `financingtype=KIV`          | Klarna Invoice                    | `payment-INVOICE-KLARNA`      |
 
 BillSAFE has been deprecated by PAYONE and is not supported. 
 

@@ -2,8 +2,6 @@ package com.commercetools.pspadapter.payone.domain.payone.model.common;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaConstants;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.PricesAggregator;
 import io.sphere.sdk.cartdiscounts.DiscountedLineItemPrice;
@@ -75,11 +73,11 @@ public abstract class AuthorizationRequestWithCart extends AuthorizationRequest 
 
     /**
      * <ul>
-     * <li><b>KLV</b> - Klarna Invoicing</li>
+     * <li><b>KIV</b> - Klarna Invoicing</li>
      * <li><b>KLS</b> - Klarna Installment</li>
      * </ul>
      *
-     * @return Klarna financing type. For now only KLV is implemented, see {@link ClearingType#PAYONE_KLV}
+     * @return Klarna financing type. For now only KIV is implemented, see {@link ClearingType#PAYONE_KIV}
      */
     public String getFinancingtype() {
         return financingtype;

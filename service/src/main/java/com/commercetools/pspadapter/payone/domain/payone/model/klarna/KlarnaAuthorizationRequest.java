@@ -16,7 +16,7 @@ public class KlarnaAuthorizationRequest extends AuthorizationRequestWithCart {
 
     public KlarnaAuthorizationRequest(final PayoneConfig config, final String financingtype,
                                       final PaymentWithCartLike paymentWithCartLike) {
-        super(config, RequestType.AUTHORIZATION.getType(), financingtype, ClearingType.PAYONE_KLV.getPayoneCode(), paymentWithCartLike);
+        super(config, RequestType.AUTHORIZATION.getType(), financingtype, ClearingType.PAYONE_KIV.getPayoneCode(), paymentWithCartLike);
     }
 
 }

@@ -64,7 +64,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(request.getTelephonenumber()).isEqualTo("01234238746"); // value from payment should override value from address
         softly.assertThat(request.getBirthday()).isEqualTo("19881215");
 
-        softly.assertThat(request.getFinancingtype()).isEqualTo("KLV");
+        softly.assertThat(request.getFinancingtype()).isEqualTo("KIV");
         softly.assertThat(request.getClearingtype()).isEqualTo("fnc");
         softly.assertThat(request.getLanguage()).isEqualTo("de");
         softly.assertThat(request.getAmount()).isEqualTo(59685);
@@ -110,7 +110,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(request.getTelephonenumber()).isEqualTo("099776635674"); // value from payment should override value from address
         softly.assertThat(request.getBirthday()).isEqualTo("19591130");
 
-        softly.assertThat(request.getFinancingtype()).isEqualTo("KLV");
+        softly.assertThat(request.getFinancingtype()).isEqualTo("KIV");
         softly.assertThat(request.getClearingtype()).isEqualTo("fnc");
         softly.assertThat(request.getLanguage()).isEqualTo("de"); // the language for Klarna is mapped from country, even if it is explicitly set in the cart
         softly.assertThat(request.getAmount()).isEqualTo(30900);

@@ -67,12 +67,12 @@ public class PaymentTestHelper {
         return getPaymentFromFile("dummyPaymentOneAuthPending20Euro_CC.json");
     }
 
-    public Payment dummyPaymentForKlarnaCart_KLV() throws Exception {
-        return getPaymentFromFile(KLARNA_DIR + "dummyPaymentForKlarnaCart_KLV.json");
+    public Payment dummyPaymentForKlarnaCart_KIV() throws Exception {
+        return getPaymentFromFile(KLARNA_DIR + "dummyPaymentForKlarnaCart_KIV.json");
     }
 
-    public Payment dummyPaymentForKlarnaCartWithoutDiscounts_KLV() throws Exception {
-        return getPaymentFromFile(KLARNA_DIR + "dummyPaymentForKlarnaCartWithoutDiscounts_KLV.json");
+    public Payment dummyPaymentForKlarnaCartWithoutDiscounts_KIV() throws Exception {
+        return getPaymentFromFile(KLARNA_DIR + "dummyPaymentForKlarnaCartWithoutDiscounts_KIV.json");
     }
 
     public Payment dummyPaymentOneAuthPending20EuroPPE() throws Exception {
@@ -232,11 +232,11 @@ public class PaymentTestHelper {
     }
 
     public PaymentWithCartLike createKlarnaPaymentWithCartLike() throws Exception {
-        return createDummyPaymentWithCartLike(dummyPaymentForKlarnaCart_KLV(), dummyKlarnaCart());
+        return createDummyPaymentWithCartLike(dummyPaymentForKlarnaCart_KIV(), dummyKlarnaCart());
     }
 
     public PaymentWithCartLike createKlarnaPaymentWithCartLikeWithoutDiscount() throws Exception {
-        return createDummyPaymentWithCartLike(dummyPaymentForKlarnaCartWithoutDiscounts_KLV(), dummyKlarnaCartWithoutDiscounts());
+        return createDummyPaymentWithCartLike(dummyPaymentForKlarnaCartWithoutDiscounts_KIV(), dummyKlarnaCartWithoutDiscounts());
     }
 
     public PaymentWithCartLike createPaypalPaymentWithCartLike() throws Exception {
