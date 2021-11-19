@@ -143,7 +143,7 @@ public class TenantFactoryTest {
         Map<String, Object> actual = authorizationRequest.toStringMap(false);
         assertThat(actual.get("request")).isEqualTo("preauthorization");
         assertThat(actual.get("clearingtype")).isEqualTo("fnc");
-        assertThat(actual.get("financingtype")).isEqualTo("KLV");
+        assertThat(actual.get("financingtype")).isEqualTo("KIV");
 
     }
 
@@ -157,7 +157,7 @@ public class TenantFactoryTest {
         Map<String, Object> actual = authorizationRequest.toStringMap(false);
         assertThat(actual.get("request")).isEqualTo("authorization");
         assertThat(actual.get("clearingtype")).isEqualTo("fnc");
-        assertThat(actual.get("financingtype")).isEqualTo("KLV");
+        assertThat(actual.get("financingtype")).isEqualTo("KIV");
     }
 
     @Test

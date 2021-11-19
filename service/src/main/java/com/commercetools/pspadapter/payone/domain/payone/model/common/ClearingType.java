@@ -20,7 +20,7 @@ public enum ClearingType {
     PAYONE_VOR("BANK_TRANSFER-ADVANCE", "vor", ""),
     PAYONE_IDL("BANK_TRANSFER-IDEAL", "sb", "IDL"),
     PAYONE_BCT("BANK_TRANSFER-BANCONTACT", "sb", "BCT"),
-    PAYONE_KLV("INVOICE-KLARNA", "fnc", "KLV");
+    PAYONE_KIV("INVOICE-KLARNA", "fnc", "KIV");
 
     private final String key;
     /**
