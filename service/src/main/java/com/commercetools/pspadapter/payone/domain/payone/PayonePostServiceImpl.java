@@ -3,6 +3,7 @@ package com.commercetools.pspadapter.payone.domain.payone;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.BaseRequest;
 import com.commercetools.util.PayoneHttpClientUtil;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
@@ -28,6 +29,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +49,7 @@ import static java.util.stream.Collectors.toList;
  * <li>retries on connections exceptions up to 5 times, if request has not been sent yet
  * (see {@link DefaultHttpRequestRetryHandler#isRequestSentRetryEnabled()}
  * and {@link PayoneHttpClientUtil#httpRequestRetryHandler})</li>
- * <li>connections pool is 200 connections, up to 20 per route (see {@link PayoneHttpClientUtil#CONNECTION_MAX_TOTAL}
- * and {@link PayoneHttpClientUtil#CONNECTION_MAX_PER_ROUTE}). These values are "inherited" from
+ * <li>connections pool is 200 connections, up to 20 per route . These values are "inherited" from
  * <a href="https://github.com/Kong/unirest-java/blob/3b461599ad021d0a3f14213c0dbb85bab7244f66/src/main/java/com/mashape/unirest/http/options/Options.java#L23-L24">Unirest</a>
  * library. It could be changed in the future if we face problems (for example, decrease if we have OutOfMemory
  * or increase if out of connections from the pool.</li>
@@ -71,6 +72,7 @@ public class PayonePostServiceImpl implements PayonePostService {
     private static final String ENCODING_UTF8 = "UTF-8";
 
     private String serverAPIURL;
+    private static final Map<String,String> KEY_MAPPING = Collections.singletonMap("paymentData", "add_paydata[action]");
 
     private static final CloseableHttpClient PAYONE_HTTP_CLIENT = HttpClientBuilder.create()
             .setDefaultRequestConfig(RequestConfig.custom()
@@ -222,18 +224,19 @@ public class PayonePostServiceImpl implements PayonePostService {
     List<BasicNameValuePair> getNameValuePairsWithExpandedLists(Map<String, Object> parameters) {
         return parameters.entrySet().stream()
                 .flatMap(entry -> {
+                    String key = KEY_MAPPING.getOrDefault(entry.getKey(), entry.getKey());
                     Object value = entry.getValue();
                     if (value instanceof List) {
                         final List list = (List) value;
                         if (list.size() > 0) {
                             return IntStream.range(0, list.size())
-                                    .mapToObj(i -> nameValue(entry.getKey() + "[" + (i + 1) + "]", list.get(i)));
+                                    .mapToObj(i -> nameValue(key + "[" + (i + 1) + "]", list.get(i)));
                         } else {
-                            return Stream.of(nameValue(entry.getKey() + "[]", ""));
+                            return Stream.of(nameValue(key + "[]", ""));
                         }
                     }
 
-                    return Stream.of(nameValue(entry.getKey(), value));
+                    return Stream.of(nameValue(key, value));
 
                 })
                 .collect(toList());

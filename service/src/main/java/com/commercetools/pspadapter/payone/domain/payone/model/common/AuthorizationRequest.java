@@ -120,6 +120,8 @@ public class AuthorizationRequest extends BaseRequest {
 
     private String backurl;
 
+    private String paymentData;
+
     protected AuthorizationRequest(final PayoneConfig config, final String requestType, final String clearingtype) {
         super(config, requestType);
 
@@ -435,4 +437,13 @@ public class AuthorizationRequest extends BaseRequest {
     public void setBackurl(final String backurl) {
         this.backurl = backurl;
     }
+
+    public String getPaymentData() {
+        return paymentData;
+    }
+
+    public void setPaymentData(String paymentData) {
+        this.paymentData = paymentData;
+    }
+
 }

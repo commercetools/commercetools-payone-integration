@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.ADD_PAYDATA_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.BIRTHDAY_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IP_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.TELEPHONENUMBER_FIELD;
@@ -71,7 +72,6 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
 
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
         mapKlarnaMandatoryFields(request, paymentWithCartLike);
-
         //the line items, discounts and shipment cost are counted in the Klarna request constructor
 
         return request;
@@ -116,6 +116,7 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
 
         // override telephone number from billing address, if custom field is specified
         mapCustomFieldIfSignificant(customFields.getFieldAsString(TELEPHONENUMBER_FIELD), request::setTelephonenumber);
+        mapCustomFieldIfSignificant(customFields.getFieldAsString(ADD_PAYDATA_FIELD), request::setPaymentData);
     }
 
     /**
