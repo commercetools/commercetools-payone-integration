@@ -3,7 +3,6 @@ package com.commercetools.pspadapter.payone.domain.payone;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.BaseRequest;
 import com.commercetools.util.PayoneHttpClientUtil;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
