@@ -47,8 +47,7 @@ import static java.util.stream.Collectors.toList;
  * <li>retries on connections exceptions up to 5 times, if request has not been sent yet
  * (see {@link DefaultHttpRequestRetryHandler#isRequestSentRetryEnabled()}
  * and {@link PayoneHttpClientUtil#httpRequestRetryHandler})</li>
- * <li>connections pool is 200 connections, up to 20 per route (see {@link PayoneHttpClientUtil#CONNECTION_MAX_TOTAL}
- * and {@link PayoneHttpClientUtil#CONNECTION_MAX_PER_ROUTE}). These values are "inherited" from
+ * <li>connections pool is 200 connections, up to 20 per route. These values are "inherited" from
  * <a href="https://github.com/Kong/unirest-java/blob/3b461599ad021d0a3f14213c0dbb85bab7244f66/src/main/java/com/mashape/unirest/http/options/Options.java#L23-L24">Unirest</a>
  * library. It could be changed in the future if we face problems (for example, decrease if we have OutOfMemory
  * or increase if out of connections from the pool.</li>
@@ -219,7 +218,7 @@ public class PayonePostServiceImpl implements PayonePostService {
      * Note: the items order in the list is undefined.
      */
     @Nonnull
-    List<BasicNameValuePair> getNameValuePairsWithExpandedLists(Map<String, Object> parameters) {
+    List<BasicNameValuePair>  getNameValuePairsWithExpandedLists(Map<String, Object> parameters) {
         return parameters.entrySet().stream()
                 .flatMap(entry -> {
                     Object value = entry.getValue();
@@ -228,7 +227,12 @@ public class PayonePostServiceImpl implements PayonePostService {
                         if (list.size() > 0) {
                             return IntStream.range(0, list.size())
                                     .mapToObj(i -> nameValue(entry.getKey() + "[" + (i + 1) + "]", list.get(i)));
-                        } else {
+                        } else if (value instanceof Map) {
+                            final Map<String, String> payData = (Map<String, String>) value;
+                            payData.forEach((key, val) -> nameValue("add_paydata["+key+"]", val));
+                        }
+
+                        else {
                             return Stream.of(nameValue(entry.getKey() + "[]", ""));
                         }
                     }

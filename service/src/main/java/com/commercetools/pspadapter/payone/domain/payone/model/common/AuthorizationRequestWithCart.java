@@ -18,8 +18,10 @@ import org.apache.commons.lang3.StringUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,6 +63,8 @@ public abstract class AuthorizationRequestWithCart extends AuthorizationRequest 
 
     private List<Integer> va;
 
+
+
     protected AuthorizationRequestWithCart(@Nonnull final PayoneConfig config,
                                            @Nonnull final String requestType,
                                            @Nullable final String financingtype,
@@ -70,6 +74,7 @@ public abstract class AuthorizationRequestWithCart extends AuthorizationRequest 
         this.financingtype = financingtype;
         mapPropertiesFromPaymentCart(paymentWithCartLike);
     }
+
 
     /**
      * <ul>

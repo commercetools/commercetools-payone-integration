@@ -3,6 +3,9 @@ package com.commercetools.pspadapter.payone.domain.payone.model.common;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.util.ClearSecuredValuesSerializer;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author fhaertig
  * @since 11.12.15
@@ -119,6 +122,8 @@ public class AuthorizationRequest extends BaseRequest {
     private String errorurl;
 
     private String backurl;
+
+    private Map<String, String> payData = new HashMap<String, String>();
 
     protected AuthorizationRequest(final PayoneConfig config, final String requestType, final String clearingtype) {
         super(config, requestType);
@@ -434,5 +439,13 @@ public class AuthorizationRequest extends BaseRequest {
 
     public void setBackurl(final String backurl) {
         this.backurl = backurl;
+    }
+
+    public Map<String, String> getPayData() {
+        return payData;
+    }
+
+    public void setPayData(Map<String, String> payData) {
+        this.payData = payData;
     }
 }
