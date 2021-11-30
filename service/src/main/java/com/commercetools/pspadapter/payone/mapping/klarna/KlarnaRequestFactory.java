@@ -179,7 +179,7 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
     protected static void mapPaymentData(@Nonnull AuthorizationRequest request ,@Nonnull String key,
                                     @Nullable String value) {
        if(StringUtils.isNotBlank(value)){
-        request.getPayData().putAll(Collections.singletonMap(key, value));
+        request.appendPaymentData(Collections.singletonMap(key, value));
        }
     }
 }

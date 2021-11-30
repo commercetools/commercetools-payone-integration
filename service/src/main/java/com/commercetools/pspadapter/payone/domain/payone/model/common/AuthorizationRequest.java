@@ -123,7 +123,7 @@ public class AuthorizationRequest extends BaseRequest {
 
     private String backurl;
 
-    private Map<String, String> payData = new HashMap<String, String>();
+    private Map<String, String> payData;
 
     protected AuthorizationRequest(final PayoneConfig config, final String requestType, final String clearingtype) {
         super(config, requestType);
@@ -447,5 +447,12 @@ public class AuthorizationRequest extends BaseRequest {
 
     public void setPayData(Map<String, String> payData) {
         this.payData = payData;
+    }
+
+    public void appendPaymentData (Map<String, String> payData){
+        if(payData == null){
+            payData = new HashMap<>();
+        }
+        payData.putAll(payData);
     }
 }
