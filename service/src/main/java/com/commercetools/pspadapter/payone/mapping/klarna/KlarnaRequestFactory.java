@@ -122,7 +122,7 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
         // override telephone number from billing address, if custom field is specified
         mapCustomFieldIfSignificant(customFields.getFieldAsString(TELEPHONENUMBER_FIELD), request::setTelephonenumber);
         mapPaymentData(request,KLARNA_ADD_PAYDATA_ACTION_KEY , KLARNA_ADD_PAYDATA_ACTION_VALUE );
-
+        mapPaymentData(request,"authorization_token" , "a7decb9a-0c69-464c-9ad9-0b845c042d30"  );
     }
 
     /**
@@ -179,7 +179,7 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
     protected static void mapPaymentData(@Nonnull AuthorizationRequest request ,@Nonnull String key,
                                     @Nullable String value) {
        if(StringUtils.isNotBlank(value)){
-        request.appendPaymentData(Collections.singletonMap(key, value));
+        request.appendPaymentData(key, value);
        }
     }
 }

@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -218,7 +219,7 @@ public class PayonePostServiceImpl implements PayonePostService {
      * Note: the items order in the list is undefined.
      */
     @Nonnull
-    List<BasicNameValuePair>  getNameValuePairsWithExpandedLists(Map<String, Object> parameters) {
+    List<BasicNameValuePair> getNameValuePairsWithExpandedLists(Map<String, Object> parameters) {
         return parameters.entrySet().stream()
                 .flatMap(entry -> {
                     Object value = entry.getValue();
@@ -227,14 +228,15 @@ public class PayonePostServiceImpl implements PayonePostService {
                         if (list.size() > 0) {
                             return IntStream.range(0, list.size())
                                     .mapToObj(i -> nameValue(entry.getKey() + "[" + (i + 1) + "]", list.get(i)));
-                        } else if (value instanceof Map) {
-                            final Map<String, String> payData = (Map<String, String>) value;
-                            payData.forEach((key, val) -> nameValue("add_paydata["+key+"]", val));
-                        }
-
-                        else {
+                        } else {
                             return Stream.of(nameValue(entry.getKey() + "[]", ""));
                         }
+                    }
+                    else if (value instanceof Map) {
+                        final Map<String, String> payData = (Map<String, String>) value;
+                        Stream.Builder<BasicNameValuePair> streamBuilder = Stream.builder();
+                         payData.forEach((key, val) -> streamBuilder.add(nameValue("add_paydata["+key+"]", val)));
+                         return streamBuilder.build();
                     }
 
                     return Stream.of(nameValue(entry.getKey(), value));
@@ -242,6 +244,9 @@ public class PayonePostServiceImpl implements PayonePostService {
                 })
                 .collect(toList());
     }
+
+
+
 
     Map<String, String> buildMapFromResultParams(final String serverResponse) throws UnsupportedEncodingException {
         Map<String, String> resultMap = new HashMap<>();

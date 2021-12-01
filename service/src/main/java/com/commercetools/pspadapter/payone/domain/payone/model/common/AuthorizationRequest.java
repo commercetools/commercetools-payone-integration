@@ -449,10 +449,10 @@ public class AuthorizationRequest extends BaseRequest {
         this.payData = payData;
     }
 
-    public void appendPaymentData (Map<String, String> payData){
+    public void appendPaymentData (String dataKey, String data){
         if(payData == null){
             payData = new HashMap<>();
         }
-        payData.putAll(payData);
+        payData.put(dataKey, data);
     }
 }
