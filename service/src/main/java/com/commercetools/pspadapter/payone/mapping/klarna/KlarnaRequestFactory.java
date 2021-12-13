@@ -34,8 +34,7 @@ import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getFirstVa
 import static java.util.Arrays.asList;
 
 public class KlarnaRequestFactory extends PayoneRequestFactory {
-    public static final String KLARNA_ADD_PAYDATA_ACTION_VALUE = "start_session";
-    public static final String KLARNA_ADD_PAYDATA_ACTION_KEY = "action";
+
 
     @Nonnull
     private final CountryToLanguageMapper countryToLanguageMapper;
@@ -121,8 +120,7 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
 
         // override telephone number from billing address, if custom field is specified
         mapCustomFieldIfSignificant(customFields.getFieldAsString(TELEPHONENUMBER_FIELD), request::setTelephonenumber);
-        mapPaymentData(request,KLARNA_ADD_PAYDATA_ACTION_KEY , KLARNA_ADD_PAYDATA_ACTION_VALUE );
-        mapPaymentData(request,"authorization_token" , "a7decb9a-0c69-464c-9ad9-0b845c042d30"  );
+
     }
 
     /**
@@ -171,15 +169,5 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
                 .ifPresent(request::setLanguage);
     }
 
-    /**
-     * Add new payment data to the payment data map of the request
-     * @param key key of the action
-     * @param value actual action to add
-     */
-    protected static void mapPaymentData(@Nonnull AuthorizationRequest request ,@Nonnull String key,
-                                    @Nullable String value) {
-       if(StringUtils.isNotBlank(value)){
-        request.appendPaymentData(key, value);
-       }
-    }
+
 }
