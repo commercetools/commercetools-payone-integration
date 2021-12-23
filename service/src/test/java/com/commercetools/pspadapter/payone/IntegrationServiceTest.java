@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import spark.Spark;
 import spark.utils.IOUtils;
 
 import java.net.HttpURLConnection;
@@ -51,6 +52,9 @@ public class IntegrationServiceTest {
 
     @Before
     public void setUp() throws Exception {
+        // we cannot be sure that the spark server is stopped before executing this test, so the spark-server has to
+        // be stopped explicitly here.
+        Spark.stop();
         serviceConfig = Mockito.mock(ServiceConfig.class);
         when(serviceConfig.getApplicationName()).thenReturn(APPLICATION_TITLE);
         when(serviceConfig.getApplicationVersion()).thenReturn(APPLICATION_VERSION);
