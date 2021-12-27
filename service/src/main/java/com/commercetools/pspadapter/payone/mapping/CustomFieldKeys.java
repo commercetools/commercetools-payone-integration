@@ -46,10 +46,25 @@ public final class CustomFieldKeys {
     public static final String PAY_TO_BIC_FIELD = "paidToBIC";
 
     // Klarna
-    public static final String GENDER_FIELD = "gender"; // KlarnaConstants.Gender
-    public static final String IP_FIELD = "ip"; // IP_FIELD address, IPv4 or IPv6
-    public static final String BIRTHDAY_FIELD = "birthday"; // Date of birth (YYYYMMDD), Mandatory for DE, NE and AT
-    public static final String TELEPHONENUMBER_FIELD = "telephonenumber"; // if the value is set - overrides optional value from address.
+    // KlarnaConstants.Gender
+    public static final String GENDER_FIELD = "gender";
+    // IP_FIELD address, IPv4 or IPv6
+    public static final String IP_FIELD = "ip";
+    // Date of birth (YYYYMMDD), Mandatory for DE, NE and AT
+    public static final String BIRTHDAY_FIELD = "birthday";
+    // if the value is set - overrides optional value from address.
+    public static final String TELEPHONENUMBER_FIELD = "telephonenumber";
+    // Response from start_Session request to Klarna as JSON String
+    public static final String START_SESSION_RESPONSE = "startSessionResponse";
+    // this token is needed to load klarna widget
+    public static final String CLIENT_TOKEN = "clientToken";
+    // This token is needed to send authorization request from Klarna widget to Klarna
+    public static final String AUTHORIZATION_TOKEN = "authorizationToken";
+    //URL for "Back" or "Cancel"
+    public static final String BACK_URL_FIELD = "backUrl";
+    // Klarna responds with redirectUrl on pre-authorization request
+    public static final String KLARNA_REDIRECT_URL_FIELD = "redirectUrl";
+
 
     // iDeal
     public static final String BANK_GROUP_TYPE = "bankGroupType";
