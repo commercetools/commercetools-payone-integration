@@ -2,8 +2,9 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.CaptureRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.StartSessionRequestWithCart;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.payments.Payment;
@@ -43,12 +44,17 @@ public abstract class PayoneRequestFactory {
     }
 
     @Nonnull
-    public AuthorizationRequest createPreauthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
+    public PayoneRequest createPreauthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
         throw new UnsupportedOperationException("this request type is not supported by this payment method.");
     }
 
     @Nonnull
-    public AuthorizationRequest createAuthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
+    public PayoneRequest createAuthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
+        throw new UnsupportedOperationException("this request type is not supported by this payment method.");
+    }
+
+    @Nonnull
+    public StartSessionRequestWithCart createStartSessionRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
         throw new UnsupportedOperationException("this request type is not supported by this payment method.");
     }
 
@@ -66,10 +72,10 @@ public abstract class PayoneRequestFactory {
      *     <li>language</li>
      * </ul>
      *
-     * @param request             {@link AuthorizationRequest} instance to which set the values
+     * @param request             {@link PayoneRequest} instance to which set the values
      * @param paymentWithCartLike cart/order info from which read the values
      */
-    protected void mapFormPaymentWithCartLike(final AuthorizationRequest request,
+    protected void mapFormPaymentWithCartLike(final PayoneRequest request,
                                               final PaymentWithCartLike paymentWithCartLike) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();

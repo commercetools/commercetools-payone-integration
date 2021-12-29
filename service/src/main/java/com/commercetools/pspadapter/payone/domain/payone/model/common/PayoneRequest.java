@@ -7,7 +7,7 @@ import com.commercetools.pspadapter.payone.util.ClearSecuredValuesSerializer;
  * @author fhaertig
  * @since 11.12.15
  */
-public class AuthorizationRequest extends BaseRequest {
+public class PayoneRequest extends BaseRequest {
 
     /**
      * ID of the sub account
@@ -120,7 +120,7 @@ public class AuthorizationRequest extends BaseRequest {
 
     private String backurl;
 
-    protected AuthorizationRequest(final PayoneConfig config, final String requestType, final String clearingtype) {
+    protected PayoneRequest(final PayoneConfig config, final String requestType, final String clearingtype) {
         super(config, requestType);
 
         this.aid = config.getSubAccountId();

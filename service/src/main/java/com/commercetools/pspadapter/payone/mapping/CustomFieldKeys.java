@@ -46,6 +46,10 @@ public final class CustomFieldKeys {
     public static final String PAY_TO_BIC_FIELD = "paidToBIC";
 
     // Klarna
+    // Response from start_Session request to Klarna as JSON String
+    public static final String START_SESSION_RESPONSE = "startSessionResponse";
+    // this token is needed to load klarna widget
+    public static final String CLIENT_TOKEN = "clientToken";
     public static final String GENDER_FIELD = "gender"; // KlarnaConstants.Gender
     public static final String IP_FIELD = "ip"; // IP_FIELD address, IPv4 or IPv6
     public static final String BIRTHDAY_FIELD = "birthday"; // Date of birth (YYYYMMDD), Mandatory for DE, NE and AT

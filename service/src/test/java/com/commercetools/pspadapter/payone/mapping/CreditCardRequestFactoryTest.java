@@ -4,7 +4,7 @@ import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
-import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardAuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPayoneRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardCaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
 import io.sphere.sdk.customers.Customer;
@@ -127,7 +127,7 @@ public class CreditCardRequestFactoryTest extends BaseTenantPropertyTest {
         Order order = payments.dummyOrderMapToPayoneRequest();
         Customer customer = payment.getCustomer().getObj();
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, order);
-        CreditCardAuthorizationRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
+        CreditCardPayoneRequest result = factory.createAuthorizationRequest(paymentWithCartLike);
         SoftAssertions softly = new SoftAssertions();
 
         //base values

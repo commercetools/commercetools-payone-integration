@@ -2,11 +2,13 @@ package com.commercetools.pspadapter.payone.mapping.klarna;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequestWithCart;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequestWithCart;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.StartSessionRequestWithCart;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaPreauthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaStartSessionRequest;
 import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
 import com.commercetools.pspadapter.payone.mapping.MappingUtil;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
@@ -21,6 +23,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -47,6 +50,10 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
         return createRequestInternal(paymentWithCartLike, KlarnaPreauthorizationRequest::new);
     }
 
+    @Nonnull
+    public StartSessionRequestWithCart createStartSessionRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
+        return createRequestInternal(paymentWithCartLike, KlarnaStartSessionRequest::new);
+    }
     /**
      * @see KlarnaAuthorizationRequest
      */
@@ -55,10 +62,19 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
     public KlarnaAuthorizationRequest createAuthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
         return createRequestInternal(paymentWithCartLike, KlarnaAuthorizationRequest::new);
     }
+    @Nonnull
+    protected <BKR extends PayoneRequestWithCart> BKR createRequestInternal(@Nonnull final PaymentWithCartLike paymentWithCartLike,
+                                                                            @Nonnull final BiFunction<PayoneConfig,
+                                                                            PaymentWithCartLike, BKR> requestConstructor) {
+        final Payment ctPayment = paymentWithCartLike.getPayment();
+           final BKR request = requestConstructor.apply(getPayoneConfig(), paymentWithCartLike);
+        return createRequest(paymentWithCartLike,request);
+    }
+
 
     @Nonnull
-    protected <BKR extends AuthorizationRequestWithCart> BKR createRequestInternal(@Nonnull final PaymentWithCartLike paymentWithCartLike,
-                                                                                   @Nonnull final TriFunction<PayoneConfig, String, PaymentWithCartLike, BKR> requestConstructor) {
+    protected <BKR extends PayoneRequestWithCart> BKR createRequestInternal(@Nonnull final PaymentWithCartLike paymentWithCartLike,
+                                                                            @Nonnull final TriFunction<PayoneConfig, String, PaymentWithCartLike, BKR> requestConstructor) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
 
         if(ctPayment.getCustom() == null) {
@@ -68,6 +84,12 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
 
         final BKR request = requestConstructor.apply(getPayoneConfig(), clearingSubType, paymentWithCartLike);
+         return createRequest(paymentWithCartLike,request);
+    }
+
+
+    @Nonnull
+    protected <BKR extends PayoneRequestWithCart> BKR createRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike, BKR request) {
 
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
         mapKlarnaMandatoryFields(request, paymentWithCartLike);
@@ -76,7 +98,6 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
 
         return request;
     }
-
     /**
      * 1. Map {@code ip}, {@code birthday} {@code telephonenumber} from custom fields, if specified.
      * <p>
@@ -92,8 +113,8 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
      * @param paymentWithCartLike {@link PaymentWithCartLike} from which read the values
      * @return same {@code request} instance.
      */
-    protected AuthorizationRequest mapKlarnaMandatoryFields(@Nonnull AuthorizationRequest request,
-                                                            @Nonnull PaymentWithCartLike paymentWithCartLike) {
+    protected PayoneRequest mapKlarnaMandatoryFields(@Nonnull PayoneRequest request,
+                                                     @Nonnull PaymentWithCartLike paymentWithCartLike) {
         // fistsname, lastname, street, zip, city, country, email - must be mapped in mapBillingAddressToRequest
         // gender - in mapCustomerToRequest
         // language, amount, currency in mapFormPaymentWithCartLike
@@ -108,7 +129,7 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
         return request;
     }
 
-    private static void mapKlarnaCustomFields(@Nonnull AuthorizationRequest request, @Nonnull CustomFields customFields) {
+    private static void mapKlarnaCustomFields(@Nonnull PayoneRequest request, @Nonnull CustomFields customFields) {
         mapCustomFieldIfSignificant(customFields.getFieldAsString(IP_FIELD), request::setIp);
 
         mapCustomFieldIfSignificant(customFields.getFieldAsDate(BIRTHDAY_FIELD), request::setBirthday,
@@ -149,11 +170,11 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
     /**
      * Map country code from billing/shipping address to respective language if it is set and the mapping exists.
      * If country not set in the addresses, or {@link #countryToLanguageMapper} doesn't have respective mapping -
-     * don't alter {@link AuthorizationRequest#setLanguage(String)}
-     * @param request {@link AuthorizationRequest} where update the language
+     * don't alter {@link PayoneRequest#setLanguage(String)}
+     * @param request {@link PayoneRequest} where update the language
      * @param cartLike {@link CartLike} from which to read the addresses/language settings.
      */
-    protected void mapLanguageFromCountry(@Nonnull AuthorizationRequest request, @Nonnull CartLike<?> cartLike) {
+    protected void mapLanguageFromCountry(@Nonnull PayoneRequest request, @Nonnull CartLike<?> cartLike) {
         countryToLanguageMapper.mapCountryToLanguage(request.getCountry()) // try to take country-locale from the request
                 .map(Optional::of)
                 .orElseGet(() -> // otherwise try to get country-locale from the cart

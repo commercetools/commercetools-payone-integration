@@ -10,12 +10,12 @@ import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMeth
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.banktransfer.BankTransferRequest;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.BaseRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaPreauthorizationRequest;
-import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletAuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPayoneRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.wallet.WalletPreauthorizationRequest;
 import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
@@ -137,10 +137,10 @@ public class TenantFactoryTest {
     public void createRequestFactory_klarna_preauthorization() throws Exception {
         PayoneRequestFactory requestFactory = factory.createRequestFactory(INVOICE_KLARNA, tenantConfig);
         PaymentWithCartLike paymentWithCartLike = testHelper.createKlarnaPaymentWithCartLike();
-        AuthorizationRequest authorizationRequest = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        PayoneRequest payoneRequest = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
 
-        assertThat(authorizationRequest).isInstanceOf(KlarnaPreauthorizationRequest.class);
-        Map<String, Object> actual = authorizationRequest.toStringMap(false);
+        assertThat(payoneRequest).isInstanceOf(KlarnaPreauthorizationRequest.class);
+        Map<String, Object> actual = payoneRequest.toStringMap(false);
         assertThat(actual.get("request")).isEqualTo("preauthorization");
         assertThat(actual.get("clearingtype")).isEqualTo("fnc");
         assertThat(actual.get("financingtype")).isEqualTo("KIV");
@@ -151,10 +151,10 @@ public class TenantFactoryTest {
     public void createRequestFactory_klarna_authorization() throws Exception {
         PayoneRequestFactory requestFactory = factory.createRequestFactory(INVOICE_KLARNA, tenantConfig);
         PaymentWithCartLike paymentWithCartLike = testHelper.createKlarnaPaymentWithCartLike();
-        AuthorizationRequest authorizationRequest = requestFactory.createAuthorizationRequest(paymentWithCartLike);
+        PayoneRequest payoneRequest = requestFactory.createAuthorizationRequest(paymentWithCartLike);
 
-        assertThat(authorizationRequest).isInstanceOf(KlarnaAuthorizationRequest.class);
-        Map<String, Object> actual = authorizationRequest.toStringMap(false);
+        assertThat(payoneRequest).isInstanceOf(KlarnaAuthorizationRequest.class);
+        Map<String, Object> actual = payoneRequest.toStringMap(false);
         assertThat(actual.get("request")).isEqualTo("authorization");
         assertThat(actual.get("clearingtype")).isEqualTo("fnc");
         assertThat(actual.get("financingtype")).isEqualTo("KIV");
@@ -164,10 +164,10 @@ public class TenantFactoryTest {
     public void createRequestFactory_paypal_preauthorization() throws Exception {
         PayoneRequestFactory requestFactory = factory.createRequestFactory(WALLET_PAYPAL, tenantConfig);
         PaymentWithCartLike paymentWithCartLike = testHelper.createPaypalPaymentWithCartLike();
-        AuthorizationRequest authorizationRequest = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        PayoneRequest payoneRequest = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
 
-        assertThat(authorizationRequest).isInstanceOf(WalletPreauthorizationRequest.class);
-        Map<String, Object> actual = authorizationRequest.toStringMap(false);
+        assertThat(payoneRequest).isInstanceOf(WalletPreauthorizationRequest.class);
+        Map<String, Object> actual = payoneRequest.toStringMap(false);
         assertThat(actual.get("request")).isEqualTo("preauthorization");
         assertThat(actual.get("clearingtype")).isEqualTo("wlt");
         assertThat(actual.get("wallettype")).isEqualTo("PPE");
@@ -178,10 +178,10 @@ public class TenantFactoryTest {
     public void createRequestFactory_with_NoShippingAddress_paypal_authorization() throws Exception {
         PayoneRequestFactory requestFactory = factory.createRequestFactory(WALLET_PAYPAL, tenantConfig);
         PaymentWithCartLike paymentWithCartLike = testHelper.createPaypalPaymentWithCartLike();
-        AuthorizationRequest authorizationRequest = requestFactory.createAuthorizationRequest(paymentWithCartLike);
+        PayoneRequest payoneRequest = requestFactory.createAuthorizationRequest(paymentWithCartLike);
 
-        assertThat(authorizationRequest).isInstanceOf(WalletAuthorizationRequest.class);
-        Map<String, Object> actual = authorizationRequest.toStringMap(false);
+        assertThat(payoneRequest).isInstanceOf(WalletPayoneRequest.class);
+        Map<String, Object> actual = payoneRequest.toStringMap(false);
         assertThat(actual.get("request")).isEqualTo("authorization");
         assertThat(actual.get("clearingtype")).isEqualTo("wlt");
         assertThat(actual.get("wallettype")).isEqualTo("PPE");
@@ -192,10 +192,10 @@ public class TenantFactoryTest {
     public void createRequestFactory_paydirekt_preauthorization() throws Exception {
         PayoneRequestFactory requestFactory = factory.createRequestFactory(WALLET_PAYDIREKT, tenantConfig);
         PaymentWithCartLike paymentWithCartLike = testHelper.createPaydirektPaymentWithCartLike();
-        AuthorizationRequest authorizationRequest = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        PayoneRequest payoneRequest = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
 
-        assertThat(authorizationRequest).isInstanceOf(WalletPreauthorizationRequest.class);
-        Map<String, Object> actual = authorizationRequest.toStringMap(false);
+        assertThat(payoneRequest).isInstanceOf(WalletPreauthorizationRequest.class);
+        Map<String, Object> actual = payoneRequest.toStringMap(false);
         assertThat(actual.get("request")).isEqualTo("preauthorization");
         assertThat(actual.get("clearingtype")).isEqualTo("wlt");
         assertThat(actual.get("wallettype")).isEqualTo("PDT");
@@ -206,10 +206,10 @@ public class TenantFactoryTest {
     public void createRequestFactory_paydirekt_authorization() throws Exception {
         PayoneRequestFactory requestFactory = factory.createRequestFactory(WALLET_PAYDIREKT, tenantConfig);
         PaymentWithCartLike paymentWithCartLike = testHelper.createPaydirektPaymentWithCartLike();
-        AuthorizationRequest authorizationRequest = requestFactory.createAuthorizationRequest(paymentWithCartLike);
+        PayoneRequest payoneRequest = requestFactory.createAuthorizationRequest(paymentWithCartLike);
 
-        assertThat(authorizationRequest).isInstanceOf(WalletAuthorizationRequest.class);
-        Map<String, Object> actual = authorizationRequest.toStringMap(false);
+        assertThat(payoneRequest).isInstanceOf(WalletPayoneRequest.class);
+        Map<String, Object> actual = payoneRequest.toStringMap(false);
         assertThat(actual.get("request")).isEqualTo("authorization");
         assertThat(actual.get("clearingtype")).isEqualTo("wlt");
         assertThat(actual.get("wallettype")).isEqualTo("PDT");
@@ -219,10 +219,10 @@ public class TenantFactoryTest {
     public void createRequestFactory_ideal_preauthorization() throws Exception {
         PayoneRequestFactory requestFactory = factory.createRequestFactory(BANK_TRANSFER_IDEAL, tenantConfig);
         PaymentWithCartLike paymentWithCartLike = testHelper.createIDealPaymentWithCartLike();
-        AuthorizationRequest authorizationRequest = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        PayoneRequest payoneRequest = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
 
-        assertThat(authorizationRequest).isInstanceOf(BankTransferRequest.class);
-        Map<String, Object> actual = authorizationRequest.toStringMap(false);
+        assertThat(payoneRequest).isInstanceOf(BankTransferRequest.class);
+        Map<String, Object> actual = payoneRequest.toStringMap(false);
         assertThat(actual.get("request")).isEqualTo("preauthorization");
         assertThat(actual.get("clearingtype")).isEqualTo("sb");
         assertThat(actual.get("onlinebanktransfertype")).isEqualTo("IDL");
@@ -233,10 +233,10 @@ public class TenantFactoryTest {
     public void createRequestFactory_bancontact_preauthorization() throws Exception {
         PayoneRequestFactory requestFactory = factory.createRequestFactory(BANK_TRANSFER_BANCONTACT, tenantConfig);
         PaymentWithCartLike paymentWithCartLike = testHelper.createBancontactPaymentWithCartLike();
-        AuthorizationRequest authorizationRequest = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        PayoneRequest payoneRequest = requestFactory.createPreauthorizationRequest(paymentWithCartLike);
 
-        assertThat(authorizationRequest).isInstanceOf(BankTransferRequest.class);
-        Map<String, Object> actual = authorizationRequest.toStringMap(false);
+        assertThat(payoneRequest).isInstanceOf(BankTransferRequest.class);
+        Map<String, Object> actual = payoneRequest.toStringMap(false);
         assertThat(actual.get("onlinebanktransfertype")).isEqualTo("BCT");
         assertThat(actual.get("request")).isEqualTo("preauthorization");
         assertThat(actual.get("clearingtype")).isEqualTo("sb");
@@ -306,8 +306,8 @@ public class TenantFactoryTest {
                 // "preauthorization" or "authorization" Payone request type
                 ArgumentCaptor<BaseRequest> payoneRequestCaptor = ArgumentCaptor.forClass(BaseRequest.class);
                 verify(payonePostService, times(1)).executePost(payoneRequestCaptor.capture());
-                assertThat(payoneRequestCaptor.getValue()).isInstanceOf(AuthorizationRequest.class);
-                AuthorizationRequest request = (AuthorizationRequest) payoneRequestCaptor.getValue();
+                assertThat(payoneRequestCaptor.getValue()).isInstanceOf(PayoneRequest.class);
+                PayoneRequest request = (PayoneRequest) payoneRequestCaptor.getValue();
                 String expectedPayoneRequestType = mapCtpTransactionToPayoneRequestType(supportedTransactionType);
                 String actualPayoneRequestType = request.getRequest();
                 assertThat(actualPayoneRequestType)

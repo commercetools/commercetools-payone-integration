@@ -232,6 +232,13 @@ public class PayonePostServiceImpl implements PayonePostService {
                             return Stream.of(nameValue(entry.getKey() + "[]", ""));
                         }
                     }
+                    else if (value instanceof Map) {
+                        final Map<String, String> payData = (Map<String, String>) value;
+                        Stream.Builder<BasicNameValuePair> streamBuilder = Stream.builder();
+                        payData.forEach((key, val) -> streamBuilder.add(nameValue("add_paydata["+key+"]", val)));
+                        return streamBuilder.build();
+                    }
+
 
                     return Stream.of(nameValue(entry.getKey(), value));
 

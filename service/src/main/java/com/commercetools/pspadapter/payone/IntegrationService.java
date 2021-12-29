@@ -84,16 +84,33 @@ public class IntegrationService {
         if (StringUtils.isNotEmpty(paymentHandlerUrl)) {
             LOG.info("Register payment handler URL {}", paymentHandlerUrl);
             Spark.get(paymentHandlerUrl, (req, res) -> {
-                    final PaymentHandleResult paymentHandleResult = paymentHandler.handlePayment(req.params("id"));
-                    if (!paymentHandleResult.body().isEmpty()) {
+                    final PayoneResult payoneResult = paymentHandler.handlePayment(req.params("id"));
+                    if (!payoneResult.body().isEmpty()) {
                         LOG.debug("--> Result body of ${getTenantName()}/commercetools/handle/payments/{}: {}",
-                            req.params("id"), paymentHandleResult.body());
+                            req.params("id"), payoneResult.body());
                     }
-                    res.status(paymentHandleResult.statusCode());
+                    res.status(payoneResult.statusCode());
                     return res;
                 },
                 new HandlePaymentResponseTransformer());
         }
+        // register start Session URL
+        String startSessionUrl = tenantFactory.getPayoneStartSessionUrl();
+        if (StringUtils.isNotEmpty(startSessionUrl)) {
+            LOG.info("Register start session URL {}", startSessionUrl);
+            SessionHandler sessionHandler= tenantFactory.getSessionHandler();
+            Spark.get(startSessionUrl, (req, res) -> {
+                        final PayoneResult payoneResult = sessionHandler.start(req.params("id"));
+                        if (!payoneResult.body().isEmpty()) {
+                            LOG.debug("--> Result body of ${getTenantName()}/commercetools/start/session/{}: {}",
+                                    req.params("id"), payoneResult.body());
+                        }
+                        res.status(payoneResult.statusCode());
+                        return res;
+                    },
+                    new HandlePaymentResponseTransformer());
+        }
+
         // register Payone notifications URL
         String payoneNotificationUrl = tenantFactory.getPayoneNotificationUrl();
         if (StringUtils.isNotEmpty(payoneNotificationUrl)) {

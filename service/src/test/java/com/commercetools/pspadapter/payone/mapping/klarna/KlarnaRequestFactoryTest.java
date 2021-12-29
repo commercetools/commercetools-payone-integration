@@ -3,7 +3,7 @@ package com.commercetools.pspadapter.payone.mapping.klarna;
 import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequestWithCart;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequestWithCart;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaAuthorizationRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaPreauthorizationRequest;
 import com.commercetools.pspadapter.payone.mapping.CountryToLanguageMapper;
@@ -143,7 +143,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         Payment payment = paymentsTestHelper.dummyPaymentNoTransaction20EuroPlanned();
         CartLike cartLike = mock(CartLike.class);
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, cartLike);
-        AuthorizationRequestWithCart request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        PayoneRequestWithCart request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
 
         softly.assertThat(request.getCountry()).isNull();
         softly.assertThat(request.getLanguage()).isNull();
@@ -207,7 +207,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         Payment payment = paymentsTestHelper.dummyPaymentNoTransaction20EuroPlanned();
         CartLike cartLike = mock(CartLike.class);
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, cartLike);
-        AuthorizationRequestWithCart request;
+        PayoneRequestWithCart request;
 
         when(cartLike.getShippingAddress()).thenReturn(Address.of(DE));
         request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
@@ -232,7 +232,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         Payment payment = paymentsTestHelper.dummyPaymentNoTransaction20EuroPlanned();
         CartLike cartLike = mock(CartLike.class);
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, cartLike);
-        AuthorizationRequestWithCart request;
+        PayoneRequestWithCart request;
 
         when(cartLike.getBillingAddress()).thenReturn(Address.of(AT));
         when(cartLike.getShippingAddress()).thenReturn(Address.of(NL));
@@ -253,7 +253,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         Payment payment = paymentsTestHelper.dummyPaymentNoTransaction20EuroPlanned();
         CartLike cartLike = mock(CartLike.class);
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, cartLike);
-        AuthorizationRequestWithCart request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
+        PayoneRequestWithCart request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
 
         assertThat(request.getBirthday()).isEqualTo("19891203"); // from customer.obj.dateOfBirth
     }

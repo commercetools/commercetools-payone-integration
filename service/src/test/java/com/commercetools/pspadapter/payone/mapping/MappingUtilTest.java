@@ -3,8 +3,8 @@ package com.commercetools.pspadapter.payone.mapping;
 import com.commercetools.pspadapter.BaseTenantPropertyTest;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
-import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardAuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPayoneRequest;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.customers.Customer;
@@ -78,11 +78,11 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         Address addressUS = Address.of(CountryCode.US)
                 .withState("AK");
 
-        CreditCardAuthorizationRequest authorizationRequestDE =
-                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+        CreditCardPayoneRequest authorizationRequestDE =
+                new CreditCardPayoneRequest(new PayoneConfig(tenantPropertyProvider), "000123",
                         paymentWithCartLike);
-        CreditCardAuthorizationRequest authorizationRequestUS =
-                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+        CreditCardPayoneRequest authorizationRequestUS =
+                new CreditCardPayoneRequest(new PayoneConfig(tenantPropertyProvider), "000123",
                         paymentWithCartLike);
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestDE, addressDE);
@@ -104,8 +104,8 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
                 .withStreetName("Test Street")
                 .withStreetNumber("2");
 
-        CreditCardAuthorizationRequest authorizationRequestWithNameNumber =
-                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+        CreditCardPayoneRequest authorizationRequestWithNameNumber =
+                new CreditCardPayoneRequest(new PayoneConfig(tenantPropertyProvider), "000123",
                         paymentWithCartLike);
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestWithNameNumber, addressWithNameNumber);
@@ -122,8 +122,8 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         Address addressNoNumber = Address.of(DE)
                 .withStreetName("Test Street");
 
-        CreditCardAuthorizationRequest authorizationRequestNoNumber =
-                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+        CreditCardPayoneRequest authorizationRequestNoNumber =
+                new CreditCardPayoneRequest(new PayoneConfig(tenantPropertyProvider), "000123",
                         paymentWithCartLike);
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestNoNumber, addressNoNumber);
@@ -140,8 +140,8 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         Address addressNoName = Address.of(DE)
                 .withStreetNumber("5");
 
-        CreditCardAuthorizationRequest authorizationRequestNoName =
-                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+        CreditCardPayoneRequest authorizationRequestNoName =
+                new CreditCardPayoneRequest(new PayoneConfig(tenantPropertyProvider), "000123",
                         paymentWithCartLike);
 
         MappingUtil.mapBillingAddressToRequest(authorizationRequestNoName, addressNoName);
@@ -156,8 +156,8 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void WhenNoShippingAddressThrowException() {
-        CreditCardAuthorizationRequest authorizationRequestNoName =
-            new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+        CreditCardPayoneRequest authorizationRequestNoName =
+            new CreditCardPayoneRequest(new PayoneConfig(tenantPropertyProvider), "000123",
                 paymentWithCartLike);
 
         MappingUtil.mapShippingAddressToRequest(authorizationRequestNoName, null, CREDIT_CARD);
@@ -190,8 +190,8 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     @Test
     public void WhenWalletPaymentAndNoShippingAddressShouldNotThrowException() {
-        CreditCardAuthorizationRequest authorizationRequest =
-            new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+        CreditCardPayoneRequest authorizationRequest =
+            new CreditCardPayoneRequest(new PayoneConfig(tenantPropertyProvider), "000123",
                 paymentWithCartLike);
 
         MappingUtil.mapShippingAddressToRequest(authorizationRequest, null, WALLET_PAYPAL);
@@ -204,8 +204,8 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         when(customer.getCustomerNumber()).thenReturn("01234567890123456789");
         Reference<Customer> customerReference = Reference.of(Customer.referenceTypeId(), customer);
 
-        CreditCardAuthorizationRequest authorizationRequest =
-                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+        CreditCardPayoneRequest authorizationRequest =
+                new CreditCardPayoneRequest(new PayoneConfig(tenantPropertyProvider), "000123",
                         paymentWithCartLike);
 
         MappingUtil.mapCustomerToRequest(authorizationRequest, customerReference);
@@ -219,8 +219,8 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
         when(customer.getId()).thenReturn("276829bd-6fa3-450f-9e2a-9a8715a9a104");
         Reference<Customer> customerReference = Reference.of(Customer.referenceTypeId(), customer);
 
-        CreditCardAuthorizationRequest authorizationRequest =
-                new CreditCardAuthorizationRequest(new PayoneConfig(tenantPropertyProvider), "000123",
+        CreditCardPayoneRequest authorizationRequest =
+                new CreditCardPayoneRequest(new PayoneConfig(tenantPropertyProvider), "000123",
                         paymentWithCartLike);
 
         MappingUtil.mapCustomerToRequest(authorizationRequest, customerReference);
@@ -311,7 +311,7 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     @Test
     public void mapAmountPlannedFromPayment_withoutPrice() throws Exception {
-        AuthorizationRequest request = new AuthorizationRequestImplTest(new PayoneConfig(tenantPropertyProvider),
+        PayoneRequest request = new PayoneRequestImplTest(new PayoneConfig(tenantPropertyProvider),
                 "testReqType", "testClearType");
 
         when(payment.getAmountPlanned()).thenReturn(null);
@@ -323,7 +323,7 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
 
     @Test
     public void mapAmountPlannedFromPayment_withPrice() throws Exception {
-        AuthorizationRequest request = new AuthorizationRequestImplTest(new PayoneConfig(tenantPropertyProvider),
+        PayoneRequest request = new PayoneRequestImplTest(new PayoneConfig(tenantPropertyProvider),
                 "testReqType", "testClearType");
 
         when(payment.getAmountPlanned()).thenReturn(Money.of(18, "EUR"));
@@ -418,8 +418,8 @@ public class MappingUtilTest extends BaseTenantPropertyTest {
     /**
      * Simple implementation for tests.
      */
-    private class AuthorizationRequestImplTest extends AuthorizationRequest {
-        protected AuthorizationRequestImplTest(PayoneConfig config, String requestType, String clearingtype) {
+    private class PayoneRequestImplTest extends PayoneRequest {
+        protected PayoneRequestImplTest(PayoneConfig config, String requestType, String clearingtype) {
             super(config, requestType, clearingtype);
         }
     }

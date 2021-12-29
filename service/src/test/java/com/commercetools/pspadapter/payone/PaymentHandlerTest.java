@@ -79,12 +79,12 @@ public class PaymentHandlerTest
         when(paymentDispatcher.dispatchPayment(same(paymentWithCartLike))).thenReturn(processedPaymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+        final PayoneResult payoneResult = testee.handlePayment(paymentId);
 
         // assert
         verify(paymentDispatcher, times(1)).dispatchPayment(same(paymentWithCartLike));
-        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
-        assertThat(paymentHandleResult.body()).isEmpty();
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
+        assertThat(payoneResult.body()).isEmpty();
     }
 
     @Test
@@ -109,11 +109,11 @@ public class PaymentHandlerTest
                 .thenReturn(paymentWithCartLike, paymentWithCartLike, paymentWithCartLike, modifiedPaymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+        final PayoneResult payoneResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
-        assertThat(paymentHandleResult.body()).isEmpty();
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
+        assertThat(payoneResult.body()).isEmpty();
     }
 
     @Test
@@ -129,11 +129,11 @@ public class PaymentHandlerTest
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+        final PayoneResult payoneResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.ACCEPTED_202);
-        assertThat(paymentHandleResult.body())
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.ACCEPTED_202);
+        assertThat(payoneResult.body())
             .isEqualTo(format("The payment with id '%s' couldn't be processed after %s retries. " +
                     "One retry iteration here includes multiple payone/ctp service retries.", paymentId, 5));
     }
@@ -153,11 +153,11 @@ public class PaymentHandlerTest
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+        final PayoneResult payoneResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
-        assertThat(paymentHandleResult.body()).isEmpty();
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
+        assertThat(payoneResult.body()).isEmpty();
     }
 
     @Test
@@ -175,11 +175,11 @@ public class PaymentHandlerTest
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+        final PayoneResult payoneResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
-        assertThat(paymentHandleResult.body()).contains(format("Failed to process the commercetools Payment with id "
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
+        assertThat(payoneResult.body()).contains(format("Failed to process the commercetools Payment with id "
             + "[%s], as the payment or the cart could not be found", paymentId));
     }
 
@@ -199,11 +199,11 @@ public class PaymentHandlerTest
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+        final PayoneResult payoneResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.BAD_GATEWAY_502);
-        assertThat(paymentHandleResult.body()).contains(format("Failed to process the commercetools Payment with id "
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.BAD_GATEWAY_502);
+        assertThat(payoneResult.body()).contains(format("Failed to process the commercetools Payment with id "
             + "[%s], due to an error response from the commercetools platform. Try again later.", paymentId));
     }
 
@@ -217,11 +217,11 @@ public class PaymentHandlerTest
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenThrow(notFoundException);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+        final PayoneResult payoneResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
-        assertThat(paymentHandleResult.body()).contains(format("Failed to process the commercetools Payment with id "
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
+        assertThat(payoneResult.body()).contains(format("Failed to process the commercetools Payment with id "
             + "[%s], as the payment or the cart could not be found", paymentId));
     }
 
@@ -235,11 +235,11 @@ public class PaymentHandlerTest
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenThrow(noCartLikeFoundException);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+        final PayoneResult payoneResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
-        assertThat(paymentHandleResult.body()).contains(format("Failed to process the commercetools Payment with id "
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
+        assertThat(payoneResult.body()).contains(format("Failed to process the commercetools Payment with id "
             + "[%s], as the payment or the cart could not be found", paymentId));
     }
 
@@ -254,11 +254,11 @@ public class PaymentHandlerTest
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+        final PayoneResult payoneResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST_400);
-        assertThat(paymentHandleResult.body()).contains(format("Wrong payment interface name: expected '%s', found '%s'"
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST_400);
+        assertThat(payoneResult.body()).contains(format("Wrong payment interface name: expected '%s', found '%s'"
                 + " for the commercetools Payment with id '%s'.",
             payonePaymentMethodInfo.getPaymentInterface(),
             paymentMethodInfo.getPaymentInterface(),
@@ -276,11 +276,11 @@ public class PaymentHandlerTest
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenThrow(exception);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+        final PayoneResult payoneResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
-        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing commercetools Payment with id [%s]. See the service logs", paymentId));
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
+        assertThat(payoneResult.body()).contains(format("Unexpected error occurred when processing commercetools Payment with id [%s]. See the service logs", paymentId));
     }
 
     @Test
@@ -295,11 +295,11 @@ public class PaymentHandlerTest
                 .thenThrow(runtimeException);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+        final PayoneResult payoneResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
-        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing commercetools"
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
+        assertThat(payoneResult.body()).contains(format("Unexpected error occurred when processing commercetools"
             + " Payment with id [%s]. See the service logs", paymentId));
     }
 
@@ -317,11 +317,11 @@ public class PaymentHandlerTest
         when(paymentDispatcher.dispatchPayment(same(paymentWithCartLike))).thenThrow(exception);
 
         // act
-        final PaymentHandleResult paymentHandleResult = testee.handlePayment(paymentId);
+        final PayoneResult payoneResult = testee.handlePayment(paymentId);
 
         // assert
-        assertThat(paymentHandleResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
-        assertThat(paymentHandleResult.body()).contains(format("Unexpected error occurred when processing commercetools"
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
+        assertThat(payoneResult.body()).contains(format("Unexpected error occurred when processing commercetools"
             + " Payment with id [%s]. See the service logs", paymentId));
     }
 

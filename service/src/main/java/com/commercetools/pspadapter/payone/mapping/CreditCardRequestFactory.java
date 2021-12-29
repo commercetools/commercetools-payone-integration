@@ -1,7 +1,7 @@
 package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
-import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardAuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPayoneRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardCaptureRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.creditcard.CreditCardPreauthorizationRequest;
 import com.commercetools.pspadapter.tenant.TenantConfig;
@@ -43,7 +43,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
 
     @Override
     @Nonnull
-    public CreditCardAuthorizationRequest createAuthorizationRequest(
+    public CreditCardPayoneRequest createAuthorizationRequest(
             @Nonnull final PaymentWithCartLike paymentWithCartLike) {
 
         final Payment ctPayment = paymentWithCartLike.getPayment();
@@ -52,7 +52,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
             throw new IllegalArgumentException("Missing custom fields on payment!");
         }
         final String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
-        CreditCardAuthorizationRequest request = new CreditCardAuthorizationRequest(getPayoneConfig(), pseudocardpan, paymentWithCartLike);
+        CreditCardPayoneRequest request = new CreditCardPayoneRequest(getPayoneConfig(), pseudocardpan, paymentWithCartLike);
 
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
 

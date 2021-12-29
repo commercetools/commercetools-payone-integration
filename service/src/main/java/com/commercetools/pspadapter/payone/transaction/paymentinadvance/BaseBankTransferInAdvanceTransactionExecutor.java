@@ -4,7 +4,7 @@ import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ResponseStatus;
 import com.commercetools.pspadapter.payone.mapping.CustomFieldKeys;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
@@ -75,7 +75,7 @@ abstract class BaseBankTransferInAdvanceTransactionExecutor extends TransactionB
      * @return
      */
     @Nonnull
-    protected abstract AuthorizationRequest createRequest(@Nonnull PaymentWithCartLike paymentWithCartLike);
+    protected abstract PayoneRequest createRequest(@Nonnull PaymentWithCartLike paymentWithCartLike);
 
     @Override
     protected boolean wasExecuted(PaymentWithCartLike paymentWithCartLike, Transaction transaction) {
@@ -98,7 +98,7 @@ abstract class BaseBankTransferInAdvanceTransactionExecutor extends TransactionB
         final String transactionId = transaction.getId();
         final int sequenceNumber = getNextSequenceNumber(paymentWithCartLike);
 
-        final AuthorizationRequest request = createRequest(paymentWithCartLike);
+        final PayoneRequest request = createRequest(paymentWithCartLike);
 
         final Map<String, Object> requestInfo = new HashMap<>();
         requestInfo.put(CustomFieldKeys.REQUEST_FIELD, request.toStringMap(true).toString());

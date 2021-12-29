@@ -1,7 +1,7 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.banktransfer;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.util.ClearSecuredValuesSerializer;
@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
  * @author fhaertig
  * @since 22.01.16
  */
-public class BankTransferRequest extends AuthorizationRequest {
+public class BankTransferRequest extends PayoneRequest {
 
     private String onlinebanktransfertype;
 
