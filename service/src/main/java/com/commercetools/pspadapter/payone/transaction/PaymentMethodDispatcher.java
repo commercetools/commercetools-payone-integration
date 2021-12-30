@@ -22,7 +22,7 @@ public class PaymentMethodDispatcher {
         this.transactionStateResolver = transactionStateResolver;
     }
 
-    public PaymentWithCartLike dispatchPayment(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
+    public PaymentWithCartLike  dispatchPayment(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
         // Execute the first uncompleted transaction
         return paymentWithCartLike.getPayment()
             .getTransactions()

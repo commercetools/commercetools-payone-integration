@@ -116,7 +116,7 @@ public class TenantFactory {
 
         this.customTypeBuilder = createCustomTypeBuilder(blockingSphereClient, tenantConfig.getStartFromScratch());
         this.sessionHandler = createSessionHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor,
-                tenantConfig, payonePostService);
+                tenantConfig, payonePostService, paymentService);
 
     }
 
@@ -231,8 +231,10 @@ public class TenantFactory {
 
     protected SessionHandler createSessionHandler(String payoneInterfaceName, String tenantName,
                                                   CommercetoolsQueryExecutor commercetoolsQueryExecutor,
-                                                  TenantConfig tenantConfig,PayonePostService postService) {
-        return new SessionHandler(payoneInterfaceName,tenantName,commercetoolsQueryExecutor,tenantConfig,postService);
+                                                  TenantConfig tenantConfig, PayonePostService postService,
+                                                  PaymentService paymentService) {
+        return new SessionHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor, tenantConfig, postService,
+                paymentService);
     }
     protected PaymentDispatcher createPaymentDispatcher(final TenantConfig tenantConfig,
                                                         final LoadingCache<String, Type> typeCache,

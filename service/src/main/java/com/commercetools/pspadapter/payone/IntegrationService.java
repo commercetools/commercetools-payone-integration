@@ -106,6 +106,7 @@ public class IntegrationService {
                                     req.params("id"), payoneResult.body());
                         }
                         res.status(payoneResult.statusCode());
+                        res.body(payoneResult.body());
                         return res;
                     },
                     new HandlePaymentResponseTransformer());

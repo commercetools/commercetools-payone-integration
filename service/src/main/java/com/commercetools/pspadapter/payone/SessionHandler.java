@@ -9,19 +9,24 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.StartSessi
 import com.commercetools.pspadapter.payone.mapping.klarna.KlarnaRequestFactory;
 import com.commercetools.pspadapter.payone.mapping.klarna.PayoneKlarnaCountryToLanguageMapper;
 import com.commercetools.pspadapter.tenant.TenantConfig;
+import com.commercetools.service.PaymentService;
 import io.sphere.sdk.client.ErrorResponseException;
 import io.sphere.sdk.client.NotFoundException;
+import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.http.HttpStatusCode;
 import io.sphere.sdk.json.SphereJsonUtils;
+import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.payments.PaymentMethodInfo;
+import io.sphere.sdk.payments.commands.updateactions.SetCustomField;
 import net.logstash.logback.marker.LogstashMarker;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -29,7 +34,9 @@ import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.Paym
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.CLIENT_TOKEN;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.START_SESSION_RESPONSE;
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
+import static io.sphere.sdk.http.HttpStatusCode.BAD_REQUEST_400;
 import static io.sphere.sdk.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
+import static io.sphere.sdk.http.HttpStatusCode.OK_200;
 import static java.lang.String.format;
 
 public class SessionHandler {
@@ -39,10 +46,11 @@ public class SessionHandler {
      */
     private static final int RETRIES_LIMIT = 5;
     private static final int RETRY_DELAY = 100; // msec
+    public static final String ADD_PAYDATA_CLIENT_TOKEN = "add_paydata[client_token]";
     private final TenantConfig tenantConfig;
     private final String payoneInterfaceName;
     private final LogstashMarker tenantNameKeyValue;
-
+    private final PaymentService paymentService;
 
     private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
 
@@ -51,7 +59,7 @@ public class SessionHandler {
 
     public SessionHandler(String payoneInterfaceName, String tenantName,
                           CommercetoolsQueryExecutor commercetoolsQueryExecutor, TenantConfig tenantConfig,
-                          PayonePostService postService) {
+                          PayonePostService postService, PaymentService paymentService) {
         this.payoneInterfaceName = payoneInterfaceName;
 
         this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
@@ -61,6 +69,7 @@ public class SessionHandler {
         tenantNameKeyValue = createTenantKeyValue(tenantName);
         this.tenantConfig = tenantConfig;
         this.payonePostService = postService;
+        this.paymentService = paymentService;
     }
 
     /**
@@ -110,37 +119,42 @@ public class SessionHandler {
         if (!payoneInterfaceName.equals(paymentInterface)) {
             final String errorMessage = format("Wrong payment interface name: expected '%s', found '%s' for the "
                     + "commercetools Payment with id '%s'.", payoneInterfaceName, paymentInterface, paymentId);
-            return new PayoneResult(HttpStatusCode.BAD_REQUEST_400, errorMessage);
+            return new PayoneResult(BAD_REQUEST_400, errorMessage);
         }
         final PaymentMethodInfo paymentMethodInfo = paymentWithCartLike.getPayment().getPaymentMethodInfo();
         if (!StringUtils.equals(paymentMethodInfo.getMethod(), INVOICE_KLARNA.getKey())) {
             final String errorMessage = format("The session can only be started for the payment method '%s'",
                     INVOICE_KLARNA.getKey());
-            return new PayoneResult(HttpStatusCode.BAD_REQUEST_400, errorMessage);
+            return new PayoneResult(BAD_REQUEST_400, errorMessage);
         }
-        if (paymentWithCartLike.getPayment().getCustom() != null && StringUtils.isNotBlank(paymentWithCartLike.getPayment().getCustom().getFieldAsString(START_SESSION_RESPONSE))) {
-            final String errorMessage = format("The session was already started for the payment '%s'", paymentId);
-            return new PayoneResult(HttpStatusCode.BAD_REQUEST_400, errorMessage);
+        if (paymentWithCartLike.getPayment().getCustom() != null &&
+                StringUtils.isNotBlank(paymentWithCartLike.getPayment().getCustom().getFieldAsString(CLIENT_TOKEN))) {
+            return new PayoneResult(OK_200, paymentWithCartLike.getPayment().getCustom().getFieldAsString(START_SESSION_RESPONSE));
         }
         KlarnaRequestFactory requestFactory = new KlarnaRequestFactory(tenantConfig, new PayoneKlarnaCountryToLanguageMapper());
         StartSessionRequestWithCart startSessionRequest = requestFactory.createStartSessionRequest(paymentWithCartLike);
-        final Map<String, Object> responseInfo = new HashMap<>();
+
+        List<UpdateAction<Payment>> updateActions = new ArrayList<UpdateAction<Payment>>();
         final Map<String, String> response;
         try {
-
             response = payonePostService.executePost(startSessionRequest);
         } catch (PayoneException paymentException) {
             final String errorMessage = format("The 'startSession' Request to Payone failed for commercetools Payment" +
                     " with id '%s'.", paymentWithCartLike.getPayment().getId());
             logger.error(errorMessage, paymentException);
-            return new PayoneResult(HttpStatusCode.BAD_REQUEST_400, errorMessage);
+            return new PayoneResult(BAD_REQUEST_400, errorMessage);
         }
-        String requestClientTokenName = "add_paydata[client_token]";
-        if (response.containsKey(requestClientTokenName)) {
-            responseInfo.put(CLIENT_TOKEN, response.get(requestClientTokenName));
+
+        String responseBody = SphereJsonUtils.toJsonString(response);
+        updateActions.add(SetCustomField.ofObject(START_SESSION_RESPONSE, responseBody));
+
+        String clientToken = null;
+        if (response.containsKey(ADD_PAYDATA_CLIENT_TOKEN)) {
+            clientToken = response.get(ADD_PAYDATA_CLIENT_TOKEN);
+            updateActions.add(SetCustomField.ofObject(CLIENT_TOKEN, clientToken));
         }
-        responseInfo.put(START_SESSION_RESPONSE, SphereJsonUtils.toJsonString(response));
-        return new PayoneResult(HttpStatusCode.OK_200);
+        paymentService.updatePayment(paymentWithCartLike.getPayment(), updateActions);
+        return new PayoneResult(StringUtils.isNotBlank(clientToken) ? OK_200 : BAD_REQUEST_400, responseBody);
     }
 
     private PayoneResult handleConcurrentModificationException(
