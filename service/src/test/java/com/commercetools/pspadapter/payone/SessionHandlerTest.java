@@ -8,6 +8,7 @@ import com.commercetools.pspadapter.payone.mapping.klarna.KlarnaRequestFactory;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.service.PaymentService;
 import io.sphere.sdk.carts.Cart;
+import io.sphere.sdk.commands.UpdateAction;
 import io.sphere.sdk.http.HttpStatusCode;
 import io.sphere.sdk.json.SphereJsonUtils;
 import io.sphere.sdk.payments.Payment;
@@ -15,12 +16,15 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -28,6 +32,7 @@ import static com.commercetools.pspadapter.payone.SessionHandler.ADD_PAYDATA_CLI
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -45,6 +50,9 @@ public class SessionHandlerTest {
     @Mock
     private CommercetoolsQueryExecutor commercetoolsQueryExecutor;
 
+    @Captor
+    protected ArgumentCaptor<List<UpdateAction<Payment>>> paymentRequestUpdatesCaptor
+            ;
     @Mock
     KlarnaRequestFactory requestFactory;
 
@@ -79,6 +87,10 @@ public class SessionHandlerTest {
         resultMap.put("add_paydata[session_id]", sessionId);
         when(postService.executePost(eq(startSessionRequest))).thenReturn(resultMap);
         PayoneResult payoneResult = testee.start(paymentId);
+          verify(paymentService).updatePayment(eq(payment),paymentRequestUpdatesCaptor.capture());
+        List<UpdateAction<Payment>> updateActions = paymentRequestUpdatesCaptor.getValue();
+        assertThat(updateActions.get(0).getAction()).isEqualTo("setCustomField");
+        assertThat(updateActions.get(1).getAction()).isEqualTo("setCustomField");
         assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
         assertThat(payoneResult.body()).isEqualTo("{\"add_paydata[session_id]\":\""+sessionId+"\",\"add_paydata[client_token" +
                 "]\":\"anyCustomerToken\"}");
