@@ -59,13 +59,16 @@ public abstract class PayoneRequestWithCart extends PayoneRequest {
     private List<String> de;
 
     private List<Integer> va;
+    private String financingtype;
 
     protected PayoneRequestWithCart(@Nonnull final PayoneConfig config,
                                     @Nonnull final String requestType,
+                                    @Nullable final String financingtype,
                                     @Nonnull final String clearingType,
                                     @Nonnull final PaymentWithCartLike paymentWithCartLike) {
         super(config, requestType, clearingType);
         mapPropertiesFromPaymentCart(paymentWithCartLike);
+        this.financingtype= financingtype;
     }
 
 
@@ -328,4 +331,17 @@ public abstract class PayoneRequestWithCart extends PayoneRequest {
     private static String validateId(@Nullable String id) {
         return ofNullable(StringUtils.left(id, ID_MAX_LENGTH)).orElse("");
     }
+
+    /**
+     * <ul>
+     * <li><b>KIV</b> - Klarna Invoicing</li>
+     * <li><b>KLS</b> - Klarna Installment</li>
+     * </ul>
+     *
+     * @return Klarna financing type. For now only KIV is implemented, see {@link ClearingType#PAYONE_KIV}
+     */
+    public String getFinancingtype() {
+        return financingtype;
+    }
+
 }

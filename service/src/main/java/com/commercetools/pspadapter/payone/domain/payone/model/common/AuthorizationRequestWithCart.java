@@ -49,8 +49,6 @@ import static java.util.Optional.ofNullable;
  */
 public abstract class AuthorizationRequestWithCart extends PayoneRequestWithCart {
 
-    private String financingtype;
-
 
 
     protected AuthorizationRequestWithCart(@Nonnull final PayoneConfig config,
@@ -58,21 +56,9 @@ public abstract class AuthorizationRequestWithCart extends PayoneRequestWithCart
                                            @Nullable final String financingtype,
                                            @Nonnull final String clearingType,
                                            @Nonnull final PaymentWithCartLike paymentWithCartLike) {
-        super(config, requestType, clearingType, paymentWithCartLike);
-        this.financingtype = financingtype;
+        super(config, requestType,financingtype, clearingType, paymentWithCartLike);
 
-    }
 
-    /**
-     * <ul>
-     * <li><b>KIV</b> - Klarna Invoicing</li>
-     * <li><b>KLS</b> - Klarna Installment</li>
-     * </ul>
-     *
-     * @return Klarna financing type. For now only KIV is implemented, see {@link ClearingType#PAYONE_KIV}
-     */
-    public String getFinancingtype() {
-        return financingtype;
     }
 
 

@@ -62,19 +62,10 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
     public KlarnaAuthorizationRequest createAuthorizationRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
         return createRequestInternal(paymentWithCartLike, KlarnaAuthorizationRequest::new);
     }
-    @Nonnull
-    protected <BKR extends PayoneRequestWithCart> BKR createRequestInternal(@Nonnull final PaymentWithCartLike paymentWithCartLike,
-                                                                            @Nonnull final BiFunction<PayoneConfig,
-                                                                            PaymentWithCartLike, BKR> requestConstructor) {
-        final Payment ctPayment = paymentWithCartLike.getPayment();
-           final BKR request = requestConstructor.apply(getPayoneConfig(), paymentWithCartLike);
-        return createRequest(paymentWithCartLike,request);
-    }
-
 
     @Nonnull
     protected <BKR extends PayoneRequestWithCart> BKR createRequestInternal(@Nonnull final PaymentWithCartLike paymentWithCartLike,
-                                                                            @Nonnull final TriFunction<PayoneConfig, String, PaymentWithCartLike, BKR> requestConstructor) {
+                                                                                   @Nonnull final TriFunction<PayoneConfig, String, PaymentWithCartLike, BKR> requestConstructor) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
 
         if(ctPayment.getCustom() == null) {
@@ -84,12 +75,6 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
 
         final BKR request = requestConstructor.apply(getPayoneConfig(), clearingSubType, paymentWithCartLike);
-         return createRequest(paymentWithCartLike,request);
-    }
-
-
-    @Nonnull
-    protected <BKR extends PayoneRequestWithCart> BKR createRequest(@Nonnull final PaymentWithCartLike paymentWithCartLike, BKR request) {
 
         mapFormPaymentWithCartLike(request, paymentWithCartLike);
         mapKlarnaMandatoryFields(request, paymentWithCartLike);

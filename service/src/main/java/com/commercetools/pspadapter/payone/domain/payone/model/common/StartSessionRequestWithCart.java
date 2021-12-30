@@ -29,11 +29,12 @@ public abstract class StartSessionRequestWithCart extends PayoneRequestWithCart 
 
     public StartSessionRequestWithCart(@Nonnull final PayoneConfig config,
                                        @Nonnull final String requestType,
+                                       @Nullable final String financingtype,
                                        @Nonnull final String clearingType,
                                        @Nonnull final PaymentWithCartLike paymentWithCartLike,
                                        @Nullable Map<String, String> payDataMap) {
 
-        super(config, requestType, clearingType, paymentWithCartLike);
+        super(config, requestType, financingtype, clearingType, paymentWithCartLike);
         this.payData = new HashMap<>();
         payData.put(ACTION_KEY, ACTION_VALUE);
         if(payDataMap!=null) {
