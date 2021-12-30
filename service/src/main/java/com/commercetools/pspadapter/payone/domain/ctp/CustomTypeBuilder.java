@@ -176,13 +176,19 @@ public class CustomTypeBuilder {
         ));
 
         createPaymentCustomType(PAYMENT_INVOICE_KLARNA, Arrays.asList(
-                // TODO: cleanup this comment when pretty tested, good specified and set-up on all depended projects
-                createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.GENDER_FIELD, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.IP_FIELD, FieldClassifier.REQUIRED),
-                createDateFieldDefinition(CustomFieldKeys.BIRTHDAY_FIELD, FieldClassifier.REQUIRED),
-                createSingleLineStringFieldDefinition(CustomFieldKeys.TELEPHONENUMBER_FIELD, FieldClassifier.REQUIRED)
+            createSingleLineStringFieldDefinition(CustomFieldKeys.LANGUAGE_CODE_FIELD, FieldClassifier.OPTIONAL),
+            createSingleLineStringFieldDefinition(CustomFieldKeys.REFERENCE_FIELD, FieldClassifier.OPTIONAL),
+            createSingleLineStringFieldDefinition(CustomFieldKeys.GENDER_FIELD, FieldClassifier.OPTIONAL),
+            createSingleLineStringFieldDefinition(CustomFieldKeys.IP_FIELD, FieldClassifier.OPTIONAL),
+            createDateFieldDefinition(CustomFieldKeys.BIRTHDAY_FIELD, FieldClassifier.OPTIONAL),
+            createSingleLineStringFieldDefinition(CustomFieldKeys.TELEPHONENUMBER_FIELD, FieldClassifier.OPTIONAL),
+            createMultiLineStringFieldDefinition(CustomFieldKeys.START_SESSION_RESPONSE, FieldClassifier.OPTIONAL),
+            createSingleLineStringFieldDefinition(CustomFieldKeys.CLIENT_TOKEN, FieldClassifier.OPTIONAL),
+            createSingleLineStringFieldDefinition(CustomFieldKeys.AUTHORIZATION_TOKEN, FieldClassifier.OPTIONAL),
+            createSingleLineStringFieldDefinition(CustomFieldKeys.KLARNA_REDIRECT_URL_FIELD, FieldClassifier.OPTIONAL),
+            createSingleLineStringFieldDefinition(CustomFieldKeys.SUCCESS_URL_FIELD, FieldClassifier.OPTIONAL),
+            createSingleLineStringFieldDefinition(CustomFieldKeys.ERROR_URL_FIELD, FieldClassifier.OPTIONAL),
+            createSingleLineStringFieldDefinition(CustomFieldKeys.BACK_URL_FIELD, FieldClassifier.OPTIONAL)
         ));
     }
 
