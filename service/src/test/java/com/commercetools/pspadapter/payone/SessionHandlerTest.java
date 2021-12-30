@@ -48,22 +48,18 @@ public class SessionHandlerTest {
     @Mock
     KlarnaRequestFactory requestFactory;
 
-    private SessionHandler testee;
-    @Mock
-    private TenantConfig tenantConfig;
-
     @Mock
     private PayonePostService postService;
 
     @Mock
     private PaymentService paymentService;
 
+    private SessionHandler testee;
+
     @Before
     public void setUp() {
         // the last argument in the constructor is a String, that's why we can't use @InjectMocks for this instantiation
-        testee = new SessionHandler("TestIntegrationServicePaymentMethodName", "testTenantName",
-
-                commercetoolsQueryExecutor, tenantConfig, postService, paymentService);
+        testee = new SessionHandler("PAYONE", "testTenantName",  commercetoolsQueryExecutor, postService, paymentService, requestFactory);
 
 
     }
@@ -84,7 +80,8 @@ public class SessionHandlerTest {
         when(postService.executePost(eq(startSessionRequest))).thenReturn(resultMap);
         PayoneResult payoneResult = testee.start(paymentId);
         assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
-        assertThat(payoneResult.body()).isEmpty();
+        assertThat(payoneResult.body()).isEqualTo("{\"add_paydata[session_id]\":\""+sessionId+"\",\"add_paydata[client_token" +
+                "]\":\"anyCustomerToken\"}");
     }
 
 

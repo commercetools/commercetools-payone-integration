@@ -7,7 +7,6 @@ import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
 import com.commercetools.pspadapter.payone.domain.payone.exceptions.PayoneException;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.StartSessionRequestWithCart;
 import com.commercetools.pspadapter.payone.mapping.klarna.KlarnaRequestFactory;
-import com.commercetools.pspadapter.payone.mapping.klarna.PayoneKlarnaCountryToLanguageMapper;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.service.PaymentService;
 import io.sphere.sdk.client.ErrorResponseException;
@@ -47,19 +46,21 @@ public class SessionHandler {
     private static final int RETRIES_LIMIT = 5;
     private static final int RETRY_DELAY = 100; // msec
     public static final String ADD_PAYDATA_CLIENT_TOKEN = "add_paydata[client_token]";
-    private final TenantConfig tenantConfig;
     private final String payoneInterfaceName;
     private final LogstashMarker tenantNameKeyValue;
     private final PaymentService paymentService;
-
+    private final KlarnaRequestFactory klarnaRequestFactory;
     private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
 
     private final Logger logger;
     private PayonePostService payonePostService;
 
-    public SessionHandler(String payoneInterfaceName, String tenantName,
-                          CommercetoolsQueryExecutor commercetoolsQueryExecutor, TenantConfig tenantConfig,
-                          PayonePostService postService, PaymentService paymentService) {
+    public SessionHandler(String payoneInterfaceName,
+                          String tenantName,
+                          CommercetoolsQueryExecutor commercetoolsQueryExecutor,
+                          PayonePostService postService,
+                          PaymentService paymentService,
+                          KlarnaRequestFactory factory) {
         this.payoneInterfaceName = payoneInterfaceName;
 
         this.commercetoolsQueryExecutor = commercetoolsQueryExecutor;
@@ -67,9 +68,9 @@ public class SessionHandler {
 
         this.logger = LoggerFactory.getLogger(this.getClass());
         tenantNameKeyValue = createTenantKeyValue(tenantName);
-        this.tenantConfig = tenantConfig;
         this.payonePostService = postService;
         this.paymentService = paymentService;
+        this.klarnaRequestFactory = factory;
     }
 
     /**
@@ -131,8 +132,8 @@ public class SessionHandler {
                 StringUtils.isNotBlank(paymentWithCartLike.getPayment().getCustom().getFieldAsString(CLIENT_TOKEN))) {
             return new PayoneResult(OK_200, paymentWithCartLike.getPayment().getCustom().getFieldAsString(START_SESSION_RESPONSE));
         }
-        KlarnaRequestFactory requestFactory = new KlarnaRequestFactory(tenantConfig, new PayoneKlarnaCountryToLanguageMapper());
-        StartSessionRequestWithCart startSessionRequest = requestFactory.createStartSessionRequest(paymentWithCartLike);
+
+        StartSessionRequestWithCart startSessionRequest = klarnaRequestFactory.createStartSessionRequest(paymentWithCartLike);
 
         List<UpdateAction<Payment>> updateActions = new ArrayList<UpdateAction<Payment>>();
         final Map<String, String> response;
