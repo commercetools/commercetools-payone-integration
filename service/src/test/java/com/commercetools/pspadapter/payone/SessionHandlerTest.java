@@ -32,6 +32,7 @@ import static com.commercetools.pspadapter.payone.SessionHandler.ADD_PAYDATA_CLI
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -77,7 +78,7 @@ public class SessionHandlerTest {
         String customerToken = "anyCustomerToken";
         String sessionId = randomString();
         String paymentId = randomString();
-        Payment payment = mockPayment(paymentId);
+        Payment payment = mockPayment(paymentId, "PAYONE", "INVOICE-KLARNA", "emptyKlarnaPayment.json");
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
         StartSessionRequestWithCart startSessionRequest = mock(StartSessionRequestWithCart.class);
@@ -95,13 +96,54 @@ public class SessionHandlerTest {
         assertThat(payoneResult.body()).isEqualTo("{\"add_paydata[session_id]\":\""+sessionId+"\",\"add_paydata[client_token" +
                 "]\":\"anyCustomerToken\"}");
     }
+    @Test
+    public void start_clientTokenAlreadyProvided_shouldReturn200() throws Exception {
+        String customerToken = "anyCustomerToken";
+        String sessionId = randomString();
+        String paymentId = randomString();
+        Payment payment = mockPayment(paymentId, "PAYONE", "INVOICE-KLARNA", "notEmptyKlarnaPayment.json");
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
+        StartSessionRequestWithCart startSessionRequest = mock(StartSessionRequestWithCart.class);
+        when(requestFactory.createStartSessionRequest(eq(paymentWithCartLike))).thenReturn(startSessionRequest);
+        PayoneResult payoneResult = testee.start(paymentId);
+        verify(paymentService, times(0)).updatePayment(eq(payment),paymentRequestUpdatesCaptor.capture());
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
+        assertThat(payoneResult.body()).isEqualTo("existingResponse");
+    }
+    @Test
+    public void start_wrongPaymentInterfaceWasProvided_shouldReturn400() throws Exception {
+        String paymentId = randomString();
+        Payment payment = mockPayment(paymentId, "WRONG_INTERFACE", "INVOICE-KLARNA", "emptyKlarnaPayment.json");
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
 
+        PayoneResult payoneResult = testee.start(paymentId);
+        verify(paymentService,times(0)).updatePayment(eq(payment),paymentRequestUpdatesCaptor.capture());
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST_400);
 
-    private Payment mockPayment(String paymentID) {
+    }
+
+    @Test
+    public void start_wrongPaymentMethodeWasProvided_shouldReturn400() throws Exception {
+        String paymentId = randomString();
+        Payment payment = mockPayment(paymentId, "PAYONE", "WRONG-PAYMENT", "emptyKlarnaPayment.json");
+        PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
+
+        PayoneResult payoneResult = testee.start(paymentId);
+        verify(paymentService,times(0)).updatePayment(eq(payment),paymentRequestUpdatesCaptor.capture());
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST_400);
+
+    }
+
+    private Payment mockPayment(String paymentID,String paymentInterface, String method,String sourcePath) {
         String jsonString = null;
         try {
-            jsonString = stringFromResource("emptyKlarnaPayment.json");
+            jsonString = stringFromResource(sourcePath);
             jsonString = jsonString.replaceAll("###paymentID###", paymentID);
+            jsonString = jsonString.replaceAll("###paymentInterface###", paymentInterface);
+            jsonString = jsonString.replaceAll("###method###", method);
         } catch (Exception e) {
             e.printStackTrace();
         }
