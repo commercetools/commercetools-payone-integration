@@ -182,6 +182,7 @@ public class CustomTypeBuilder {
             createSingleLineStringFieldDefinition(CustomFieldKeys.IP_FIELD, FieldClassifier.OPTIONAL),
             createDateFieldDefinition(CustomFieldKeys.BIRTHDAY_FIELD, FieldClassifier.OPTIONAL),
             createSingleLineStringFieldDefinition(CustomFieldKeys.TELEPHONENUMBER_FIELD, FieldClassifier.OPTIONAL),
+            createMultiLineStringFieldDefinition(CustomFieldKeys.START_SESSION_REQUEST, FieldClassifier.OPTIONAL),
             createMultiLineStringFieldDefinition(CustomFieldKeys.START_SESSION_RESPONSE, FieldClassifier.OPTIONAL),
             createSingleLineStringFieldDefinition(CustomFieldKeys.CLIENT_TOKEN, FieldClassifier.OPTIONAL),
             createSingleLineStringFieldDefinition(CustomFieldKeys.AUTHORIZATION_TOKEN, FieldClassifier.OPTIONAL),

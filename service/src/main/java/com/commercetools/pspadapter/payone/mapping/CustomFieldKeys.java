@@ -57,6 +57,8 @@ public final class CustomFieldKeys {
     public static final String TELEPHONENUMBER_FIELD = "telephonenumber";
     // Response from start_Session request to Klarna as JSON String
     public static final String START_SESSION_RESPONSE = "startSessionResponse";
+    // start_Session request to Klarna as JSON String
+    public static final String START_SESSION_REQUEST = "startSessionRequest";
     // this token is needed to load klarna widget
     public static final String CLIENT_TOKEN = "clientToken";
     // This token is needed to send authorization request from Klarna widget to Klarna

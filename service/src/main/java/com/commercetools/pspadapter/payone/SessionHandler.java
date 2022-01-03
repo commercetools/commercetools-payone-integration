@@ -31,6 +31,7 @@ import java.util.Random;
 
 import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.PaymentMethod.INVOICE_KLARNA;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.CLIENT_TOKEN;
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.START_SESSION_REQUEST;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.START_SESSION_RESPONSE;
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
 import static io.sphere.sdk.http.HttpStatusCode.BAD_REQUEST_400;
@@ -151,7 +152,8 @@ public class SessionHandler {
             logger.error(errorMessage, paymentException);
             return new PayoneResult(BAD_REQUEST_400, errorMessage);
         }
-
+        String requestBody = SphereJsonUtils.toJsonString(startSessionRequest);
+        updateActions.add(SetCustomField.ofObject(START_SESSION_REQUEST, requestBody));
         String responseBody = SphereJsonUtils.toJsonString(response);
         updateActions.add(SetCustomField.ofObject(START_SESSION_RESPONSE, responseBody));
 
@@ -160,7 +162,7 @@ public class SessionHandler {
             clientToken = response.get(ADD_PAYDATA_CLIENT_TOKEN);
             updateActions.add(SetCustomField.ofObject(CLIENT_TOKEN, clientToken));
         }
-        paymentService.updatePayment(paymentWithCartLike.getPayment(), updateActions);
+        paymentService.updatePayment(paymentWithCartLike.getPayment(), updateActions).toCompletableFuture().join();
         return new PayoneResult(StringUtils.isNotBlank(clientToken) ? OK_200 : BAD_REQUEST_400, responseBody);
     }
 
