@@ -78,7 +78,7 @@ public class SessionHandler {
      * @param paymentId identifies the payment to be processed
      * @return the result of handling the payment
      */
-    public PayoneResult start(@Nonnull final String paymentId) {
+    public PayoneResult startSession(@Nonnull final String paymentId) {
         int retryCounter = 0;
         try {
             for (; retryCounter < RETRIES_LIMIT; retryCounter++) {
