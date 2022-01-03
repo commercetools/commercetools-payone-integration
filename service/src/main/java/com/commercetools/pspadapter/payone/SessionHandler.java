@@ -112,6 +112,12 @@ public class SessionHandler {
         final PaymentWithCartLike paymentWithCartLike =
                 commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
 
+        if (paymentWithCartLike == null) {
+            final String errorMessage = format("The payment with id '%s' cannot be found.",
+                    paymentId);
+            return new PayoneResult(BAD_REQUEST_400, errorMessage);
+        }
+
         final String paymentInterface = paymentWithCartLike
                 .getPayment()
                 .getPaymentMethodInfo()

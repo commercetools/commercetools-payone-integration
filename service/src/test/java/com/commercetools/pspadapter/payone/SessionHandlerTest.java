@@ -98,8 +98,7 @@ public class SessionHandlerTest {
     }
     @Test
     public void start_clientTokenAlreadyProvided_shouldReturn200() throws Exception {
-        String customerToken = "anyCustomerToken";
-        String sessionId = randomString();
+
         String paymentId = randomString();
         Payment payment = mockPayment(paymentId, "PAYONE", "INVOICE-KLARNA", "notEmptyKlarnaPayment.json");
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, UNUSED_CART);
@@ -110,6 +109,16 @@ public class SessionHandlerTest {
         verify(paymentService, times(0)).updatePayment(eq(payment),paymentRequestUpdatesCaptor.capture());
         assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
         assertThat(payoneResult.body()).isEqualTo("existingResponse");
+    }
+
+    @Test
+    public void start_paymentCannotBeFound_shouldReturn400() throws Exception {
+        String paymentId ="633060207";
+        PaymentWithCartLike paymentWithCartLike =null;
+        when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
+        PayoneResult payoneResult = testee.start(paymentId);
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST_400);
+        assertThat(payoneResult.body()).isEqualTo("The payment with id '633060207' cannot be found.");
     }
     @Test
     public void start_wrongPaymentInterfaceWasProvided_shouldReturn400() throws Exception {
