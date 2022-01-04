@@ -102,7 +102,7 @@ public class SessionHandler {
             return handleException(paymentId, retryCounter, e);
         }
         return handleException(paymentId, retryCounter,
-                new Exception("Unknown workflow error in PaymentHandler#handlePayment"));
+                new Exception("Unknown workflow error in SessionHandler#startSession"));
     }
 
     private PayoneResult start(@Nonnull final String paymentId)
