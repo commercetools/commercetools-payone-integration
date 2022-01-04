@@ -105,7 +105,7 @@ public class SessionHandler {
                 new Exception("Unknown workflow error in PaymentHandler#handlePayment"));
     }
 
-    private PayoneResult startSession(@Nonnull final String paymentId)
+    private PayoneResult start(@Nonnull final String paymentId)
             throws ConcurrentModificationException {
 
         final PaymentWithCartLike paymentWithCartLike =
@@ -149,10 +149,14 @@ public class SessionHandler {
         updateActions.add(SetCustomField.ofObject(START_SESSION_RESPONSE, responseBody));
 
         String clientToken = null;
-        if (response.containsKey(ADD_PAYDATA_CLIENT_TOKEN)) {
-            clientToken = response.get(ADD_PAYDATA_CLIENT_TOKEN);
-            updateActions.add(SetCustomField.ofObject(CLIENT_TOKEN, clientToken));
+        if (!response.containsKey(ADD_PAYDATA_CLIENT_TOKEN)) {
+            final String errorMessage = format("The client token was not found in the payone response of the " +
+                    "Startsession request for payment '%s'", paymentId);
+            return new PayoneResult(BAD_REQUEST_400, errorMessage);
         }
+        clientToken = response.get(ADD_PAYDATA_CLIENT_TOKEN);
+        updateActions.add(SetCustomField.ofObject(CLIENT_TOKEN, clientToken));
+
         paymentService.updatePayment(paymentWithCartLike.getPayment(), updateActions);
         return new PayoneResult(StringUtils.isNotBlank(clientToken) ? OK_200 : BAD_REQUEST_400, responseBody);
     }
