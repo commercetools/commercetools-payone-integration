@@ -203,7 +203,9 @@ public class PayonePostServiceImpl implements PayonePostService {
 
     /**
      * Expand entries with list values to key-value pairs where the keys are transformed to set of {@code key[i]} with
-     * respective values from the list. Non-list arguments remain the same.
+     * respective values from the list. Entries with map values are mapped to 'paydata', like add_paydata[key] =
+     * mapped value.
+     * All other arguments remain the same.
      * <p>
      * The indices origin is <b>1</b>.
      * <p>
