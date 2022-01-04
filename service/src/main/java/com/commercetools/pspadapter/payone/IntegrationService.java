@@ -100,7 +100,7 @@ public class IntegrationService {
             LOG.info("Register start session URL {}", startSessionUrl);
             SessionHandler sessionHandler= tenantFactory.getSessionHandler();
             Spark.get(startSessionUrl, (req, res) -> {
-                        final PayoneResult payoneResult = sessionHandler.start(req.params("id"));
+                        final PayoneResult payoneResult = sessionHandler.startSession(req.params("id"));
                         if (!payoneResult.body().isEmpty()) {
                             LOG.debug("--> Result body of ${getTenantName()}/commercetools/start/session/{}: {}",
                                     req.params("id"), payoneResult.body());
