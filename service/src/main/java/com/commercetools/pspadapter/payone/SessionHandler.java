@@ -92,8 +92,7 @@ public class SessionHandler {
         }
     }
 
-    private PayoneResult startSession(@Nonnull final PaymentWithCartLike paymentWithCartLike)
-            throws ConcurrentModificationException {
+    private PayoneResult startSession(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
         String paymentId =paymentWithCartLike.getPayment().getId();
         final String paymentInterface = paymentWithCartLike
                 .getPayment()
