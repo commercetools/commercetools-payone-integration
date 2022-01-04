@@ -93,7 +93,7 @@ public class SessionHandler {
     }
 
     private PayoneResult startSession(@Nonnull final PaymentWithCartLike paymentWithCartLike) {
-        String paymentId =paymentWithCartLike.getPayment().getId();
+        String paymentId = paymentWithCartLike.getPayment().getId();
         final String paymentInterface = paymentWithCartLike
                 .getPayment()
                 .getPaymentMethodInfo()
@@ -171,7 +171,7 @@ public class SessionHandler {
                         "commercetools platform.",
                 paymentId);
         logger.error(tenantNameKeyValue, message, e);
-        return new PayoneResult(e.getStatusCode(),message);
+        return new PayoneResult(e.getStatusCode(), message);
     }
 
     private PayoneResult handleException(
