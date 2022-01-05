@@ -5,7 +5,6 @@ import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.StartSessionRequestWithCart;
 import com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaStartSessionRequest;
 import com.commercetools.pspadapter.payone.mapping.klarna.KlarnaRequestFactory;
@@ -35,7 +34,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
-import static com.commercetools.pspadapter.payone.SessionHandler.ADD_PAYDATA_CLIENT_TOKEN;
+import static com.commercetools.pspadapter.payone.KlarnaStartSessionHandler.ADD_PAYDATA_CLIENT_TOKEN;
+
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType.GENERICPAYMEMT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Jan Wolter
  */
-public class SessionHandlerTest extends BaseTenantPropertyTest {
+public class KlarnaStartSessionHandlerTest extends BaseTenantPropertyTest {
 
 
     private static final Random random = new Random();
@@ -67,7 +67,7 @@ public class SessionHandlerTest extends BaseTenantPropertyTest {
     @Mock
     private PaymentService paymentService;
 
-    private SessionHandler testee;
+    private KlarnaStartSessionHandler testee;
 
     private static String randomString() {
         return Integer.toString(random.nextInt(0x7FFFFFFF));
@@ -84,14 +84,14 @@ public class SessionHandlerTest extends BaseTenantPropertyTest {
     @Before
     public void setUp() throws Exception {
         // the last argument in the constructor is a String, that's why we can't use @InjectMocks for this instantiation
-        testee = new SessionHandler("PAYONE", "testTenantName", commercetoolsQueryExecutor, postService, paymentService, requestFactory);
+        testee = new KlarnaStartSessionHandler("PAYONE", "testTenantName", commercetoolsQueryExecutor, postService, paymentService, requestFactory);
         PaymentTestHelper testHelper = new PaymentTestHelper();
         cart = testHelper.dummyKlarnaCart();
 
     }
 
     @Test
-    public void start_startSessioCallWasSuccessFull_shouldReturn200() throws Exception {
+    public void startSession_startSessionCallWasSuccessFull_shouldReturn200() throws Exception {
         String customerToken = "anyCustomerToken";
         String sessionId = randomString();
         String paymentId = randomString();
@@ -111,7 +111,7 @@ public class SessionHandlerTest extends BaseTenantPropertyTest {
         resultMap.put(ADD_PAYDATA_CLIENT_TOKEN, customerToken);
         resultMap.put("add_paydata[session_id]", sessionId);
         when(postService.executePost(eq(startSessionRequest))).thenReturn(resultMap);
-        PayoneResult payoneResult = testee.start(paymentId);
+        PayoneResult payoneResult = testee.startSession(paymentId);
         verify(paymentService).updatePayment(eq(payment), paymentRequestUpdatesCaptor.capture());
         List<UpdateAction<Payment>> updateActions = paymentRequestUpdatesCaptor.getValue();
         assertThat(updateActions.get(0).getAction()).isEqualTo("setCustomField");
@@ -123,7 +123,7 @@ public class SessionHandlerTest extends BaseTenantPropertyTest {
     }
 
     @Test
-    public void start_clientTokenAlreadyProvided_shouldReturn200() throws Exception {
+    public void startSession_clientTokenAlreadyProvided_shouldReturn200() throws Exception {
 
         String paymentId = randomString();
         Payment payment = mockPayment(paymentId, "PAYONE", "INVOICE-KLARNA", "notEmptyKlarnaPayment.json");
@@ -131,43 +131,43 @@ public class SessionHandlerTest extends BaseTenantPropertyTest {
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
         StartSessionRequestWithCart startSessionRequest = mock(StartSessionRequestWithCart.class);
         when(requestFactory.createStartSessionRequest(eq(paymentWithCartLike))).thenReturn(startSessionRequest);
-        PayoneResult payoneResult = testee.start(paymentId);
+        PayoneResult payoneResult = testee.startSession(paymentId);
         verify(paymentService, times(0)).updatePayment(eq(payment), paymentRequestUpdatesCaptor.capture());
         assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
         assertThat(payoneResult.body()).isEqualTo("existingResponse");
     }
 
     @Test
-    public void start_paymentCannotBeFound_shouldReturn400() throws Exception {
+    public void startSession_paymentCannotBeFound_shouldReturn400() throws Exception {
         String paymentId = "633060207";
         PaymentWithCartLike paymentWithCartLike = null;
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
-        PayoneResult payoneResult = testee.start(paymentId);
-        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST_400);
+        PayoneResult payoneResult = testee.startSession(paymentId);
+        assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.NOT_FOUND_404);
         assertThat(payoneResult.body()).isEqualTo("The payment with id '633060207' cannot be found.");
     }
 
     @Test
-    public void start_wrongPaymentInterfaceWasProvided_shouldReturn400() throws Exception {
+    public void startSession_wrongPaymentInterfaceWasProvided_shouldReturn400() throws Exception {
         String paymentId = randomString();
         Payment payment = mockPayment(paymentId, "WRONG_INTERFACE", "INVOICE-KLARNA", "emptyKlarnaPayment.json");
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, cart);
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
 
-        PayoneResult payoneResult = testee.start(paymentId);
+        PayoneResult payoneResult = testee.startSession(paymentId);
         verify(paymentService, times(0)).updatePayment(eq(payment), paymentRequestUpdatesCaptor.capture());
         assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST_400);
 
     }
 
     @Test
-    public void start_wrongPaymentMethodeWasProvided_shouldReturn400() throws Exception {
+    public void startSession_wrongPaymentMethodeWasProvided_shouldReturn400() throws Exception {
         String paymentId = randomString();
         Payment payment = mockPayment(paymentId, "PAYONE", "WRONG-PAYMENT", "emptyKlarnaPayment.json");
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, cart);
         when(commercetoolsQueryExecutor.getPaymentWithCartLike(eq(paymentId))).thenReturn(paymentWithCartLike);
 
-        PayoneResult payoneResult = testee.start(paymentId);
+        PayoneResult payoneResult = testee.startSession(paymentId);
         verify(paymentService, times(0)).updatePayment(eq(payment), paymentRequestUpdatesCaptor.capture());
         assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.BAD_REQUEST_400);
 
