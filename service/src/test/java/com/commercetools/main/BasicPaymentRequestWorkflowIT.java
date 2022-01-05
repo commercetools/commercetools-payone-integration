@@ -51,6 +51,8 @@ import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static util.PaymentRequestHelperUtil.CTP_CLIENT;
 import static util.PaymentRequestHelperUtil.URL_HANDLE_PAYMENT;
+import static util.PaymentRequestHelperUtil.URL_START_SESSION;
+import static util.PaymentRequestHelperUtil.createKlarnaPayment;
 import static util.PaymentRequestHelperUtil.createPayment;
 import static util.PropertiesHelperUtil.getClientId;
 import static util.PropertiesHelperUtil.getClientSecret;
@@ -99,22 +101,22 @@ public class BasicPaymentRequestWorkflowIT {
         final String paymentId = createPayment("CREDIT_CARD", "40", "EUR");
 
         // Test
-        final HttpResponse httpResponse = executeGetRequest(format(URL_HANDLE_PAYMENT+paymentId, DEFAULT_PORT));
+        final HttpResponse httpResponse = executeGetRequest(format(URL_HANDLE_PAYMENT + paymentId, DEFAULT_PORT));
 
         // Assert
         assertThat(httpResponse.getStatusLine().getStatusCode()).isIn(HttpStatus.SC_ACCEPTED, HttpStatus.SC_OK);
 
         final PagedQueryResult<Payment> paymentPagedQueryResult =
-            CTP_CLIENT.execute(PaymentQuery.of()
-                                           .withPredicates(QueryPredicate.of(format("id=\"%s\"", paymentId))))
-                      .toCompletableFuture().join();
+                CTP_CLIENT.execute(PaymentQuery.of()
+                                .withPredicates(QueryPredicate.of(format("id=\"%s\"", paymentId))))
+                        .toCompletableFuture().join();
 
         assertThat(paymentPagedQueryResult.getResults().get(0))
-            .satisfies(
-                payment -> {
-                    assertThat(payment.getPaymentStatus().getInterfaceCode()).isEqualTo(APPROVED.toString());
-                    assertThat(payment.getTransactions().get(0).getState()).isEqualTo(TransactionState.SUCCESS);
-                });
+                .satisfies(
+                        payment -> {
+                            assertThat(payment.getPaymentStatus().getInterfaceCode()).isEqualTo(APPROVED.toString());
+                            assertThat(payment.getTransactions().get(0).getState()).isEqualTo(TransactionState.SUCCESS);
+                        });
     }
 
     @Test
@@ -123,21 +125,21 @@ public class BasicPaymentRequestWorkflowIT {
         final String paymentId = preparePaymentWithAuthorizedAmountAndOrder();
 
         // Test
-        final HttpResponse httpResponse = executeGetRequest(format(URL_HANDLE_PAYMENT+paymentId, DEFAULT_PORT));
+        final HttpResponse httpResponse = executeGetRequest(format(URL_HANDLE_PAYMENT + paymentId, DEFAULT_PORT));
 
         // Assert
         assertThat(httpResponse.getStatusLine().getStatusCode()).isIn(HttpStatus.SC_ACCEPTED, HttpStatus.SC_OK);
 
         final PagedQueryResult<Payment> paymentPagedQueryResult =
-            CTP_CLIENT.execute(PaymentQuery.of()
-                                           .withPredicates(QueryPredicate.of(format("id=\"%s\"", paymentId))))
-                      .toCompletableFuture().join();
+                CTP_CLIENT.execute(PaymentQuery.of()
+                                .withPredicates(QueryPredicate.of(format("id=\"%s\"", paymentId))))
+                        .toCompletableFuture().join();
 
         assertThat(paymentPagedQueryResult.getResults().get(0))
-            .satisfies(
-                payment -> {
-                    assertThat(payment.getPaymentStatus().getInterfaceCode()).isEqualTo(REDIRECT.toString());
-                });
+                .satisfies(
+                        payment -> {
+                            assertThat(payment.getPaymentStatus().getInterfaceCode()).isEqualTo(REDIRECT.toString());
+                        });
     }
 
     @Nonnull
@@ -152,31 +154,58 @@ public class BasicPaymentRequestWorkflowIT {
 
         final MonetaryAmount monetaryAmount = MoneyImpl.ofCents(4000, "EUR");
         final PaymentDraft paymentDraft =
-            PaymentDraftBuilder.of(monetaryAmount)
-                               .paymentMethodInfo(PaymentMethodInfoBuilder.of()
-                                                                          .method("WALLET-PAYPAL")
-                                                                          .paymentInterface("PAYONE")
-                                                                          .build())
-                               .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
-                                   CustomTypeBuilder.PAYMENT_WALLET, customFieldKeysMap))
-                               .build();
+                PaymentDraftBuilder.of(monetaryAmount)
+                        .paymentMethodInfo(PaymentMethodInfoBuilder.of()
+                                .method("WALLET-PAYPAL")
+                                .paymentInterface("PAYONE")
+                                .build())
+                        .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
+                                CustomTypeBuilder.PAYMENT_WALLET, customFieldKeysMap))
+                        .build();
 
         final Payment payment = CTP_CLIENT.executeBlocking(PaymentCreateCommand.of(paymentDraft));
         final CartDraft cartDraft = CartDraftBuilder.of(Monetary.getCurrency("EUR")).build();
 
         CTP_CLIENT.executeBlocking(CartUpdateCommand.of(
-            CTP_CLIENT.executeBlocking(CartCreateCommand.of(cartDraft)),
-            Arrays.asList(
-                AddPayment.of(payment),
-                SetShippingAddress.of(Address.of(CountryCode.DE)),
-                SetBillingAddress.of(Address.of(CountryCode.DE).withLastName("Test Buyer"))
-            )));
+                CTP_CLIENT.executeBlocking(CartCreateCommand.of(cartDraft)),
+                Arrays.asList(
+                        AddPayment.of(payment),
+                        SetShippingAddress.of(Address.of(CountryCode.DE)),
+                        SetBillingAddress.of(Address.of(CountryCode.DE).withLastName("Test Buyer"))
+                )));
 
         CTP_CLIENT.executeBlocking(PaymentUpdateCommand.of(payment, AddTransaction.of(TransactionDraftBuilder
-            .of(TransactionType.AUTHORIZATION, monetaryAmount, ZonedDateTime.now())
-            .state(TransactionState.PENDING)
-            .build())));
+                .of(TransactionType.AUTHORIZATION, monetaryAmount, ZonedDateTime.now())
+                .state(TransactionState.PENDING)
+                .build())));
 
         return payment.getId();
     }
+
+
+    @Test
+    public void verifyKlarnaStartSesssionRequestIsSuccess() throws Exception {
+        // Prepare
+        final String paymentId = createKlarnaPayment("INVOICE-KLARNA", "40", "EUR");
+
+        // Test
+        final HttpResponse httpResponse = executeGetRequest(format(URL_START_SESSION + paymentId, DEFAULT_PORT));
+
+        // Assert
+        //  assertThat(httpResponse.getStatusLine().getStatusCode()).isIn(HttpStatus.SC_OK);
+
+        final PagedQueryResult<Payment> paymentPagedQueryResult =
+                CTP_CLIENT.execute(PaymentQuery.of()
+                                .withPredicates(QueryPredicate.of(format("id=\"%s\"", paymentId))))
+                        .toCompletableFuture().join();
+
+        // assertThat(paymentPagedQueryResult.getResults().get(0))
+        //       .satisfies(
+        //             payment -> {
+        //               assertThat(payment.getPaymentStatus().getInterfaceCode()).isEqualTo(APPROVED.toString());
+        //             assertThat(payment.getTransactions().get(0).getState()).isEqualTo(TransactionState
+        //             .SUCCESS);
+        //       });
+    }
+
 }

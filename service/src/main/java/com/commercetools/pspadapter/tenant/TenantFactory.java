@@ -2,9 +2,9 @@ package com.commercetools.pspadapter.tenant;
 
 import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.payments.TransactionStateResolverImpl;
+import com.commercetools.pspadapter.payone.KlarnaStartSessionHandler;
 import com.commercetools.pspadapter.payone.PaymentDispatcher;
 import com.commercetools.pspadapter.payone.PaymentHandler;
-import com.commercetools.pspadapter.payone.KlarnaStartSessionHandler;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
@@ -115,8 +115,11 @@ public class TenantFactory {
         this.paymentHandler = createPaymentHandler(payoneInterfaceName, tenantConfig.getName(), commercetoolsQueryExecutor, paymentDispatcher);
 
         this.customTypeBuilder = createCustomTypeBuilder(blockingSphereClient, tenantConfig.getStartFromScratch());
-        this.klarnaStartSessionHandler = createSessionHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor,
-                tenantConfig, payonePostService, paymentService);
+
+        this.klarnaStartSessionHandler = createKlarnaStartSessionHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor,
+                payonePostService, paymentService, new KlarnaRequestFactory(tenantConfig,
+                        new PayoneKlarnaCountryToLanguageMapper()));
+
 
     }
 
@@ -229,12 +232,14 @@ public class TenantFactory {
         return new PaymentHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor, paymentDispatcher);
     }
 
-    protected KlarnaStartSessionHandler createSessionHandler(String payoneInterfaceName, String tenantName,
-                                                             CommercetoolsQueryExecutor commercetoolsQueryExecutor,
-                                                             TenantConfig tenantConfig, PayonePostService postService,
-                                                             PaymentService paymentService) {
-        return new KlarnaStartSessionHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor, tenantConfig, postService,
-                paymentService);
+    protected KlarnaStartSessionHandler createKlarnaStartSessionHandler(String payoneInterfaceName, String tenantName,
+                                                                        CommercetoolsQueryExecutor commercetoolsQueryExecutor,
+                                                                        PayonePostService postService,
+                                                                        PaymentService paymentService,
+                                                                        KlarnaRequestFactory factory) {
+        return new KlarnaStartSessionHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor, postService,
+                paymentService, factory);
+
     }
     protected PaymentDispatcher createPaymentDispatcher(final TenantConfig tenantConfig,
                                                         final LoadingCache<String, Type> typeCache,

@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 
 public class KlarnaStartSessionRequest extends StartSessionRequestWithCart {
 
-    public static final String GENERICPAYMENT = "genericpayment";
 
     public KlarnaStartSessionRequest(final PayoneConfig config,
                                      @Nullable final String financingtype,

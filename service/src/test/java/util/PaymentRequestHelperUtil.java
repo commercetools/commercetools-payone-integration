@@ -59,6 +59,8 @@ public class PaymentRequestHelperUtil {
 
     public static final BlockingSphereClient CTP_CLIENT = createClient();
     public static final String URL_PATTERN = "http://localhost:%d";
+    public static final String URL_START_SESSION = format("%s/%s/commercetools/start/session/", URL_PATTERN,
+            getTenant());
     public static final String URL_HANDLE_PAYMENT = format("%s/%s/commercetools/handle/payments/", URL_PATTERN, getTenant());
 
     protected static final Random randomSource = new Random();
@@ -129,6 +131,43 @@ public class PaymentRequestHelperUtil {
         return payment.getId();
     }
 
+
+    @Nonnull
+    public static String createKlarnaPayment(
+            @Nonnull final String paymentMethod,
+            @Nonnull final String centAmount,
+            @Nonnull final String currencyCode) {
+
+        final MonetaryAmount monetaryAmount = createMonetaryAmountFromCent(Long.valueOf(centAmount), currencyCode);
+        final Map<String, Object> customFieldKeysMap = new HashMap<>();
+
+        customFieldKeysMap.put(CustomFieldKeys.LANGUAGE_CODE_FIELD, Locale.ENGLISH.getLanguage());
+        customFieldKeysMap.put(CustomFieldKeys.REFERENCE_FIELD, getRandomOrderNumber());
+        customFieldKeysMap.put(CustomFieldKeys.SUCCESS_URL_FIELD, "https://example.com/success");
+        customFieldKeysMap.put(CustomFieldKeys.ERROR_URL_FIELD, "https://example.com/error");
+
+        final PaymentDraft paymentDraft =
+                PaymentDraftBuilder.of(monetaryAmount)
+                        .paymentMethodInfo(PaymentMethodInfoBuilder.of()
+                                .method(paymentMethod)
+                                .paymentInterface("PAYONE")
+                                .build())
+                        .custom(CustomFieldsDraft.ofTypeKeyAndObjects(
+                                CustomTypeBuilder.PAYMENT_INVOICE_KLARNA, customFieldKeysMap))
+                        .build();
+
+        final Payment payment = CTP_CLIENT.executeBlocking(PaymentCreateCommand.of(paymentDraft));
+        final CartDraft cardDraft = CartDraftBuilder.of(Monetary.getCurrency("EUR")).build();
+
+        CTP_CLIENT.executeBlocking(CartUpdateCommand.of(
+                CTP_CLIENT.executeBlocking(CartCreateCommand.of(cardDraft)),
+                Arrays.asList(
+                        AddPayment.of(payment),
+                        SetShippingAddress.of(Address.of(CountryCode.DE)),
+                        SetBillingAddress.of(Address.of(CountryCode.DE).withLastName("Test Buyer"))
+                )));
+        return payment.getId();
+    }
     protected static String getRandomOrderNumber() {
         return String.valueOf(randomSource.nextInt() + System.nanoTime());
     }
