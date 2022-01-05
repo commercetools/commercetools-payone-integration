@@ -35,7 +35,6 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 import static com.commercetools.pspadapter.payone.KlarnaStartSessionHandler.ADD_PAYDATA_CLIENT_TOKEN;
-
 import static com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType.GENERICPAYMEMT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

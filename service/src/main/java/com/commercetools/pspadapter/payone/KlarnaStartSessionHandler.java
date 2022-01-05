@@ -73,7 +73,7 @@ public class KlarnaStartSessionHandler {
      * @param paymentId identifies the payment to be processed
      * @return the result of handling the payment
      */
-    public PayoneResult  startSession(@Nonnull final String paymentId) {
+    public PayoneResult startSession(@Nonnull final String paymentId) {
         try {
             final PaymentWithCartLike paymentWithCartLike =
                     commercetoolsQueryExecutor.getPaymentWithCartLike(paymentId);
