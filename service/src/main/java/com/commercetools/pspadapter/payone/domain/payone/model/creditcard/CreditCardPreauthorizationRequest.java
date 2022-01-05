@@ -3,14 +3,14 @@ package com.commercetools.pspadapter.payone.domain.payone.model.creditcard;
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequestWithCart;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequestWithCart;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 
 /**
  * @author fhaertig
  * @since 11.12.15
  */
-public class CreditCardPreauthorizationRequest extends AuthorizationRequestWithCart {
+public class CreditCardPreauthorizationRequest extends PayoneRequestWithCart {
 
     /**
      * pseudo card number

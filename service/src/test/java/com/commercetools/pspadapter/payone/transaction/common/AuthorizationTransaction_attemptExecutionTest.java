@@ -1,6 +1,6 @@
 package com.commercetools.pspadapter.payone.transaction.common;
 
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequest;
 import com.commercetools.pspadapter.payone.transaction.BaseTransaction_attemptExecutionTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +19,7 @@ public class AuthorizationTransaction_attemptExecutionTest extends BaseTransacti
     private AuthorizationTransactionExecutor executor;
 
     @Mock
-    protected AuthorizationRequest authorizationRequest;
+    protected PayoneRequest payoneRequest;
 
     @Override
     @Before
@@ -32,37 +32,37 @@ public class AuthorizationTransaction_attemptExecutionTest extends BaseTransacti
         responseMap.put("testRequestKey1", "testRequestValue2");
         responseMap.put("testRequestKey2", "testRequestValue2");
 
-        when(authorizationRequest.toStringMap(anyBoolean())).thenReturn(responseMap);
-        when(requestFactory.createPreauthorizationRequest(paymentWithCartLike)).thenReturn(authorizationRequest);
+        when(payoneRequest.toStringMap(anyBoolean())).thenReturn(responseMap);
+        when(requestFactory.createPreauthorizationRequest(paymentWithCartLike)).thenReturn(payoneRequest);
     }
 
     @Test
     public void attemptExecution_withRedirectResponse_createsUpdateActions() throws Exception {
-        super.attemptExecution_withRedirectResponse_createsUpdateActions(authorizationRequest, executor);
+        super.attemptExecution_withRedirectResponse_createsUpdateActions(payoneRequest, executor);
     }
 
     @Test
     public void attemptExecution_withApprovedResponse_createsUpdateActions() throws Exception {
-        super.attemptExecution_withApprovedResponse_createsUpdateActions(authorizationRequest, executor);
+        super.attemptExecution_withApprovedResponse_createsUpdateActions(payoneRequest, executor);
     }
 
     @Test
     public void attemptExecution_withErrorResponse_createsUpdateActions() throws Exception {
-        super.attemptExecution_withErrorResponse_createsUpdateActions(authorizationRequest, executor);
+        super.attemptExecution_withErrorResponse_createsUpdateActions(payoneRequest, executor);
     }
 
     @Test
     public void attemptExecution_withPendingResponse_createsUpdateActions() throws Exception {
-        super.attemptExecution_withPendingResponse_createsUpdateActions(authorizationRequest, executor);
+        super.attemptExecution_withPendingResponse_createsUpdateActions(payoneRequest, executor);
     }
 
     @Test
     public void attemptExecution_withPayoneException_createsUpdateActions() throws Exception {
-        super.attemptExecution_withPayoneException_createsUpdateActions(authorizationRequest, executor);
+        super.attemptExecution_withPayoneException_createsUpdateActions(payoneRequest, executor);
     }
 
     @Test
     public void attemptExecution_withUnexpectedResponseStatus_throwsException() throws Exception {
-        super.attemptExecution_withUnexpectedResponseStatus_throwsException(authorizationRequest, executor);
+        super.attemptExecution_withUnexpectedResponseStatus_throwsException(payoneRequest, executor);
     }
 }

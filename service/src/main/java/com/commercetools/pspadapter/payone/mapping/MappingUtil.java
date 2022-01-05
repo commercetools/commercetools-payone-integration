@@ -2,7 +2,7 @@ package com.commercetools.pspadapter.payone.mapping;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.MethodKeys;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequest;
 import com.neovisionaries.i18n.CountryCode;
 import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.customers.Customer;
@@ -62,7 +62,7 @@ public class MappingUtil {
     ));
 
     public static void mapBillingAddressToRequest(
-            final AuthorizationRequest request,
+            final PayoneRequest request,
             final Address billingAddress) {
 
         if(billingAddress == null) {
@@ -99,7 +99,7 @@ public class MappingUtil {
                      .collect(Collectors.joining(" "));
     }
 
-    public static void mapCustomerToRequest(@Nonnull final AuthorizationRequest request,
+    public static void mapCustomerToRequest(@Nonnull final PayoneRequest request,
                                             @Nullable final Reference<Customer> customerReference) {
 
         if(customerReference == null || customerReference.getObj() == null) {
@@ -128,7 +128,7 @@ public class MappingUtil {
                 });
     }
 
-    public static void mapShippingAddressToRequest(final AuthorizationRequest request,
+    public static void mapShippingAddressToRequest(final PayoneRequest request,
                                                    final Address shippingAddress,
                                                    final String paymentMethod) {
 
@@ -165,7 +165,7 @@ public class MappingUtil {
         return 0;
     }
 
-    public static void mapCustomFieldsFromPayment(final AuthorizationRequest request, final CustomFields ctPaymentCustomFields) {
+    public static void mapCustomFieldsFromPayment(final PayoneRequest request, final CustomFields ctPaymentCustomFields) {
 
         request.setNarrative_text(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.REFERENCE_TEXT_FIELD));
         request.setUserid(ctPaymentCustomFields.getFieldAsString(CustomFieldKeys.USER_ID_FIELD));
@@ -179,10 +179,10 @@ public class MappingUtil {
      * Map planned major unit (EUR, USD) amount value and currency to minor (cents) unit
      * from {@code payment} to {@code request}.
      *
-     * @param request {@link AuthorizationRequest} to which set the values
+     * @param request {@link PayoneRequest} to which set the values
      * @param payment {@link Payment} from which read amount planned.
      */
-    public static void mapAmountPlannedFromPayment(final AuthorizationRequest request, final Payment payment) {
+    public static void mapAmountPlannedFromPayment(final PayoneRequest request, final Payment payment) {
         ofNullable(payment.getAmountPlanned())
                 .ifPresent(amount -> {
                     request.setCurrency(amount.getCurrency().getCurrencyCode());

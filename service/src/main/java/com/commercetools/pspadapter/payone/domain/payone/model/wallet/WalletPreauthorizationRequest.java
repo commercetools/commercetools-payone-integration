@@ -1,7 +1,7 @@
 package com.commercetools.pspadapter.payone.domain.payone.model.wallet;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequest;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.ClearingType;
 import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestType;
 
@@ -9,7 +9,7 @@ import com.commercetools.pspadapter.payone.domain.payone.model.common.RequestTyp
  * @author fhaertig
  * @since 20.01.16
  */
-public class WalletPreauthorizationRequest extends AuthorizationRequest {
+public class WalletPreauthorizationRequest extends PayoneRequest {
 
     private String wallettype;
 

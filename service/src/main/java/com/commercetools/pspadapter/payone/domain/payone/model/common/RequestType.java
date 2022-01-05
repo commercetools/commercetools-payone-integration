@@ -19,7 +19,9 @@ public enum RequestType {
     BANKACCOUNTCHECK("bankaccountcheck"),
     _3DSCHECK("3dscheck"),
     ADDRESSCHECK("addresscheck"),
-    CONSUMERSCORE("consumerscore");
+    CONSUMERSCORE("consumerscore"),
+    GENERICPAYMEMT("genericpayment");
+
 
     private final String type;
 

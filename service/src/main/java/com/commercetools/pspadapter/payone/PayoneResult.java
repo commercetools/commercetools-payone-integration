@@ -5,7 +5,7 @@ package com.commercetools.pspadapter.payone;
  *
  * @author Jan Wolter
  */
-public class PaymentHandleResult {
+public class PayoneResult {
     private final int statusCode;
 
     private final String body;
@@ -15,7 +15,7 @@ public class PaymentHandleResult {
      * @param statusCode the server status code
      * @param body the response body
      */
-    public PaymentHandleResult(final int statusCode, final String body) {
+    public PayoneResult(final int statusCode, final String body) {
         this.statusCode = statusCode;
         this.body = body;
     }
@@ -24,7 +24,7 @@ public class PaymentHandleResult {
      * Initializes a new instance with an empty response body.
      * @param statusCode the server status code
      */
-    public PaymentHandleResult(final int statusCode) {
+    public PayoneResult(final int statusCode) {
         this(statusCode, "");
     }
 

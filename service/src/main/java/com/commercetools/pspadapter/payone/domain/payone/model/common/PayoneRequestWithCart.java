@@ -45,9 +45,8 @@ import static java.util.Optional.ofNullable;
  * <i>PAYONE_Platform_Klarna_Addon_EN</i>   for more details.
  * The latest implemented API version is from <b>2016-11-30</b>.
  */
-public abstract class AuthorizationRequestWithCart extends AuthorizationRequest {
+public abstract class PayoneRequestWithCart extends PayoneRequest {
 
-    private String financingtype;
 
     private List<String> it;
 
@@ -60,28 +59,18 @@ public abstract class AuthorizationRequestWithCart extends AuthorizationRequest 
     private List<String> de;
 
     private List<Integer> va;
+    private String financingtype;
 
-    protected AuthorizationRequestWithCart(@Nonnull final PayoneConfig config,
-                                           @Nonnull final String requestType,
-                                           @Nullable final String financingtype,
-                                           @Nonnull final String clearingType,
-                                           @Nonnull final PaymentWithCartLike paymentWithCartLike) {
+    protected PayoneRequestWithCart(@Nonnull final PayoneConfig config,
+                                    @Nonnull final String requestType,
+                                    @Nullable final String financingtype,
+                                    @Nonnull final String clearingType,
+                                    @Nonnull final PaymentWithCartLike paymentWithCartLike) {
         super(config, requestType, clearingType);
-        this.financingtype = financingtype;
         mapPropertiesFromPaymentCart(paymentWithCartLike);
+        this.financingtype= financingtype;
     }
 
-    /**
-     * <ul>
-     * <li><b>KIV</b> - Klarna Invoicing</li>
-     * <li><b>KLS</b> - Klarna Installment</li>
-     * </ul>
-     *
-     * @return Klarna financing type. For now only KIV is implemented, see {@link ClearingType#PAYONE_KIV}
-     */
-    public String getFinancingtype() {
-        return financingtype;
-    }
 
     /**
      * Item types list:<ul>
@@ -342,4 +331,17 @@ public abstract class AuthorizationRequestWithCart extends AuthorizationRequest 
     private static String validateId(@Nullable String id) {
         return ofNullable(StringUtils.left(id, ID_MAX_LENGTH)).orElse("");
     }
+
+    /**
+     * <ul>
+     * <li><b>KIV</b> - Klarna Invoicing</li>
+     * <li><b>KLS</b> - Klarna Installment</li>
+     * </ul>
+     *
+     * @return Klarna financing type. For now only KIV is implemented, see {@link ClearingType#PAYONE_KIV}
+     */
+    public String getFinancingtype() {
+        return financingtype;
+    }
+
 }

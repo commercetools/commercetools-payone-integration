@@ -4,6 +4,7 @@ import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.payments.TransactionStateResolverImpl;
 import com.commercetools.pspadapter.payone.PaymentDispatcher;
 import com.commercetools.pspadapter.payone.PaymentHandler;
+import com.commercetools.pspadapter.payone.KlarnaStartSessionHandler;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
@@ -43,7 +44,6 @@ import com.commercetools.service.PaymentService;
 import com.commercetools.service.PaymentServiceImpl;
 import com.commercetools.util.SphereClientConfigurationUtil;
 import com.github.benmanes.caffeine.cache.Caffeine;
-
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.sphere.sdk.client.BlockingSphereClient;
 import io.sphere.sdk.client.SphereClient;
@@ -71,6 +71,8 @@ public class TenantFactory {
     private final PayonePostService payonePostService;
 
     private final PaymentHandler paymentHandler;
+
+    private final KlarnaStartSessionHandler klarnaStartSessionHandler;
     private final PaymentDispatcher paymentDispatcher;
     private final NotificationDispatcher notificationDispatcher;
 
@@ -82,6 +84,8 @@ public class TenantFactory {
     private final CommercetoolsQueryExecutor commercetoolsQueryExecutor;
 
     private final TransactionStateResolver transactionStateResolver;
+
+
 
 
     public TenantFactory(String payoneInterfaceName, TenantConfig tenantConfig) {
@@ -111,6 +115,9 @@ public class TenantFactory {
         this.paymentHandler = createPaymentHandler(payoneInterfaceName, tenantConfig.getName(), commercetoolsQueryExecutor, paymentDispatcher);
 
         this.customTypeBuilder = createCustomTypeBuilder(blockingSphereClient, tenantConfig.getStartFromScratch());
+        this.klarnaStartSessionHandler = createSessionHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor,
+                tenantConfig, payonePostService, paymentService);
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,6 +138,10 @@ public class TenantFactory {
 
     public String getPayoneNotificationUrl() {
         return urlPrefix + "/payone/notification";
+    }
+
+    public String getPayoneStartSessionUrl() {
+        return urlPrefix + "/commercetools/start/session/:id";
     }
 
     public PaymentService getPaymentService() {
@@ -218,6 +229,13 @@ public class TenantFactory {
         return new PaymentHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor, paymentDispatcher);
     }
 
+    protected KlarnaStartSessionHandler createSessionHandler(String payoneInterfaceName, String tenantName,
+                                                             CommercetoolsQueryExecutor commercetoolsQueryExecutor,
+                                                             TenantConfig tenantConfig, PayonePostService postService,
+                                                             PaymentService paymentService) {
+        return new KlarnaStartSessionHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor, tenantConfig, postService,
+                paymentService);
+    }
     protected PaymentDispatcher createPaymentDispatcher(final TenantConfig tenantConfig,
                                                         final LoadingCache<String, Type> typeCache,
                                                         final BlockingSphereClient client,
@@ -278,7 +296,7 @@ public class TenantFactory {
      * @return new instance of {@link PayoneRequestFactory}.
      */
     @Nonnull
-    protected PayoneRequestFactory createRequestFactory(@Nonnull PaymentMethod method, @Nonnull TenantConfig tenantConfig) {
+    public PayoneRequestFactory createRequestFactory(@Nonnull PaymentMethod method, @Nonnull TenantConfig tenantConfig) {
         switch (method) {
             case CREDIT_CARD:
                 return new CreditCardRequestFactory(tenantConfig);
@@ -318,7 +336,9 @@ public class TenantFactory {
                        .maximumSize(1000)
                        .build(new TypeCacheLoader(client));
     }
-
+    public KlarnaStartSessionHandler getSessionHandler() {
+        return klarnaStartSessionHandler;
+    }
     @Nonnull
     protected CountryToLanguageMapper createCountryToLanguageMapper() {
         return new PayoneKlarnaCountryToLanguageMapper();

@@ -2,7 +2,7 @@ package com.commercetools.pspadapter;
 
 import com.commercetools.pspadapter.payone.config.PayoneConfig;
 import com.commercetools.pspadapter.payone.config.PropertyProvider;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequest;
 import com.commercetools.pspadapter.tenant.TenantConfig;
 import com.commercetools.pspadapter.tenant.TenantPropertyProvider;
 import org.assertj.core.api.SoftAssertions;
@@ -51,7 +51,7 @@ public class BaseTenantPropertyTest {
         when(tenantConfig.getPayoneConfig()).thenReturn(payoneConfig);
     }
 
-    protected void validateBaseRequestValues(AuthorizationRequest request, String requestType) {
+    protected void validateBaseRequestValues(PayoneRequest request, String requestType) {
 
         SoftAssertions softly = new SoftAssertions();
 

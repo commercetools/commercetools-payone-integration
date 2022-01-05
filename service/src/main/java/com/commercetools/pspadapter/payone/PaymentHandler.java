@@ -51,7 +51,7 @@ public class PaymentHandler {
      * @param paymentId identifies the payment to be processed
      * @return the result of handling the payment
      */
-    public PaymentHandleResult handlePayment(@Nonnull final String paymentId) {
+    public PayoneResult handlePayment(@Nonnull final String paymentId) {
         int retryCounter = 0;
         try {
             for (; retryCounter < RETRIES_LIMIT; retryCounter++) {
@@ -78,7 +78,7 @@ public class PaymentHandler {
                 new Exception("Unknown workflow error in PaymentHandler#handlePayment"));
     }
 
-    private PaymentHandleResult processPayment(@Nonnull final String paymentId)
+    private PayoneResult processPayment(@Nonnull final String paymentId)
         throws ConcurrentModificationException {
 
         final PaymentWithCartLike paymentWithCartLike =
@@ -92,24 +92,24 @@ public class PaymentHandler {
         if (!payoneInterfaceName.equals(paymentInterface)) {
             final String errorMessage = format("Wrong payment interface name: expected '%s', found '%s' for the "
                 + "commercetools Payment with id '%s'.", payoneInterfaceName, paymentInterface, paymentId);
-            return new PaymentHandleResult(HttpStatusCode.BAD_REQUEST_400, errorMessage);
+            return new PayoneResult(HttpStatusCode.BAD_REQUEST_400, errorMessage);
         }
 
         paymentDispatcher.dispatchPayment(paymentWithCartLike);
-        return new PaymentHandleResult(HttpStatusCode.OK_200);
+        return new PayoneResult(HttpStatusCode.OK_200);
     }
 
-    private PaymentHandleResult handleConcurrentModificationException(
+    private PayoneResult handleConcurrentModificationException(
         @Nonnull final String paymentId,
         @Nonnull final ConcurrentModificationException concurrentModificationException) {
 
         final String errorMessage = format("The payment with id '%s' couldn't be processed after %s retries. " +
                 "One retry iteration here includes multiple payone/ctp service retries.", paymentId, RETRIES_LIMIT);
         logger.error(errorMessage, concurrentModificationException);
-        return new PaymentHandleResult(HttpStatusCode.ACCEPTED_202, errorMessage);
+        return new PayoneResult(HttpStatusCode.ACCEPTED_202, errorMessage);
     }
 
-    private PaymentHandleResult handleNotFoundException(
+    private PayoneResult handleNotFoundException(
             @Nonnull final String paymentId,
             int retriedCount,
             @Nonnull final Exception exception) {
@@ -117,10 +117,10 @@ public class PaymentHandler {
         final String body = format("Failed to process the commercetools Payment with id [%s], as the payment or the cart could not be found after [%d] retries.",
                 paymentId, retriedCount);
         logger.error(tenantNameKeyValue, body, exception);
-        return new PaymentHandleResult(HttpStatusCode.NOT_FOUND_404, body);
+        return new PayoneResult(HttpStatusCode.NOT_FOUND_404, body);
     }
 
-    private PaymentHandleResult errorResponseHandler(
+    private PayoneResult errorResponseHandler(
         @Nonnull final String paymentId,
         int retriedCount,
         @Nonnull final ErrorResponseException e) {
@@ -128,12 +128,12 @@ public class PaymentHandler {
         logger.error(tenantNameKeyValue,
             format("Failed to process the commercetools Payment with id [%s] due to an error response from the commercetools platform after [%d] retries.",
                     paymentId, retriedCount), e);
-        return new PaymentHandleResult(e.getStatusCode(),
+        return new PayoneResult(e.getStatusCode(),
                 format("Failed to process the commercetools Payment with id [%s], due to an error response from the "
                     + "commercetools platform. Try again later.", paymentId));
     }
 
-    private PaymentHandleResult handleException(
+    private PayoneResult handleException(
         @Nonnull final String paymentId,
         int retriedCount,
         @Nonnull final Exception exception) {
@@ -141,7 +141,7 @@ public class PaymentHandler {
         logger.error(tenantNameKeyValue,
             format("Unexpected error occurred when processing commercetools Payment with id [%s] after [%d] retries.",
                     paymentId, retriedCount), exception);
-        return new PaymentHandleResult(INTERNAL_SERVER_ERROR_500,
+        return new PayoneResult(INTERNAL_SERVER_ERROR_500,
                 format("Unexpected error occurred when processing commercetools Payment with id [%s]. "
                     + "See the service logs", paymentId));
     }

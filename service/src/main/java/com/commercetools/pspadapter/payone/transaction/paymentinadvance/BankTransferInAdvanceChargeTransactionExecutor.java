@@ -2,7 +2,7 @@ package com.commercetools.pspadapter.payone.transaction.paymentinadvance;
 
 import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 import com.commercetools.pspadapter.payone.domain.payone.PayonePostService;
-import com.commercetools.pspadapter.payone.domain.payone.model.common.AuthorizationRequest;
+import com.commercetools.pspadapter.payone.domain.payone.model.common.PayoneRequest;
 import com.commercetools.pspadapter.payone.mapping.PayoneRequestFactory;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.sphere.sdk.client.BlockingSphereClient;
@@ -34,7 +34,7 @@ public class BankTransferInAdvanceChargeTransactionExecutor extends BaseBankTran
 
     @Nonnull
     @Override
-    protected AuthorizationRequest createRequest(@Nonnull PaymentWithCartLike paymentWithCartLike) {
+    protected PayoneRequest createRequest(@Nonnull PaymentWithCartLike paymentWithCartLike) {
         return requestFactory.createAuthorizationRequest(paymentWithCartLike);
     }
 }

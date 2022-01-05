@@ -76,6 +76,7 @@ public class BaseRequest implements Serializable {
     /**
      * Defines request type (preauthorization, authorization, ...)
      */
+    @JsonProperty("request")
     private String request;
 
     public Map<String, Object> toStringMap(final boolean shouldClearSecurityValues) {
@@ -127,9 +128,6 @@ public class BaseRequest implements Serializable {
         return mode;
     }
 
-    public String getRequest() {
-        return request;
-    }
 
     public String getApiVersion() {
         return apiVersion;
@@ -153,6 +151,10 @@ public class BaseRequest implements Serializable {
 
     public String getIntegratorVersion() {
         return integratorVersion;
+    }
+
+    public String getRequest() {
+        return request;
     }
 
     //**************************************************************

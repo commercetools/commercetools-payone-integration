@@ -15,7 +15,7 @@ import static org.assertj.core.data.MapEntry.entry;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AuthorizationRequestTest {
+public class PayoneRequestTest {
     private static final String requestType = "some-request";
     private static final String clearingType = "some-clearing";
     private static final String merchantId = "merchant X";
@@ -64,7 +64,7 @@ public class AuthorizationRequestTest {
     @Mock
     private PayoneConfig payoneConfig;
 
-    private AuthorizationRequest request;
+    private PayoneRequest request;
 
     @Before
     public void setUp() {
@@ -73,7 +73,7 @@ public class AuthorizationRequestTest {
         when(payoneConfig.getKeyAsHash()).thenReturn(keyHash);
         when(payoneConfig.getMode()).thenReturn(mode);
         when(payoneConfig.getApiVersion()).thenReturn(apiVersion);
-        request = new AuthorizationRequest(payoneConfig, requestType, clearingType);
+        request = new PayoneRequest(payoneConfig, requestType, clearingType);
         request.setAddressaddition(addressAddition);
         request.setAmount(amount);
         request.setBackurl(backUrl);

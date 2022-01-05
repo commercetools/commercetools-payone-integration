@@ -46,6 +46,7 @@ public final class CustomFieldKeys {
     public static final String PAY_TO_BIC_FIELD = "paidToBIC";
 
     // Klarna
+
     // KlarnaConstants.Gender
     public static final String GENDER_FIELD = "gender";
     // IP_FIELD address, IPv4 or IPv6
@@ -64,7 +65,6 @@ public final class CustomFieldKeys {
     public static final String BACK_URL_FIELD = "backUrl";
     // Klarna responds with redirectUrl on pre-authorization request
     public static final String KLARNA_REDIRECT_URL_FIELD = "redirectUrl";
-
 
     // iDeal
     public static final String BANK_GROUP_TYPE = "bankGroupType";

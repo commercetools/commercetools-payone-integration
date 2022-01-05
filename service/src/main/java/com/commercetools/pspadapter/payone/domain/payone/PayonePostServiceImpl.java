@@ -203,7 +203,9 @@ public class PayonePostServiceImpl implements PayonePostService {
 
     /**
      * Expand entries with list values to key-value pairs where the keys are transformed to set of {@code key[i]} with
-     * respective values from the list. Non-list arguments remain the same.
+     * respective values from the list. Entries with map values are mapped to 'paydata', like add_paydata[key] =
+     * mapped value.
+     * All other arguments remain the same.
      * <p>
      * The indices origin is <b>1</b>.
      * <p>
@@ -232,6 +234,13 @@ public class PayonePostServiceImpl implements PayonePostService {
                             return Stream.of(nameValue(entry.getKey() + "[]", ""));
                         }
                     }
+                    else if (value instanceof Map) {
+                        final Map<String, String> payData = (Map<String, String>) value;
+                        Stream.Builder<BasicNameValuePair> streamBuilder = Stream.builder();
+                        payData.forEach((key, val) -> streamBuilder.add(nameValue("add_paydata["+key+"]", val)));
+                        return streamBuilder.build();
+                    }
+
 
                     return Stream.of(nameValue(entry.getKey(), value));
 
