@@ -125,7 +125,7 @@ public class KlarnaStartSessionHandler {
             response = payonePostService.executePost(startSessionRequest);
             this.updatePayment(startSessionRequest, response, paymentWithCartLike);
         } catch (PayoneException paymentException) {
-            this.updatePayment(startSessionRequest, response, paymentWithCartLike);
+            this.updatePayment(startSessionRequest, null, paymentWithCartLike);
             final String errorMessage = format("The 'startSession' Request to Payone failed for commercetools Payment" +
                     " with id '%s'.", paymentWithCartLike.getPayment().getId());
             logger.error(errorMessage, paymentException);
