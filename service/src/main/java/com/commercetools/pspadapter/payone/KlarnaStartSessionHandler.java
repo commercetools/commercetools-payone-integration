@@ -131,7 +131,7 @@ public class KlarnaStartSessionHandler {
             logger.error(errorMessage, paymentException);
             return new PayoneResult(BAD_REQUEST_400, errorMessage);
         }
-        String responseBody = toJsonString(response);
+        String responseJsonString = toJsonString(response);
         String clientToken = null;
         if (!response.containsKey(ADD_PAYDATA_CLIENT_TOKEN)) {
             final String errorMessage = format("The client token was not found in the payone response of the " +
@@ -139,7 +139,7 @@ public class KlarnaStartSessionHandler {
             return new PayoneResult(BAD_REQUEST_400, errorMessage);
         }
         clientToken = response.get(ADD_PAYDATA_CLIENT_TOKEN);
-        return new PayoneResult(StringUtils.isNotBlank(clientToken) ? OK_200 : BAD_REQUEST_400, responseBody);
+        return new PayoneResult(StringUtils.isNotBlank(clientToken) ? OK_200 : BAD_REQUEST_400, responseJsonString);
     }
 
     private PayoneResult handleConcurrentModificationException(
