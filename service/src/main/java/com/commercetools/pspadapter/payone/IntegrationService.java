@@ -98,9 +98,9 @@ public class IntegrationService {
         String startSessionUrl = tenantFactory.getPayoneStartSessionUrl();
         if (StringUtils.isNotEmpty(startSessionUrl)) {
             LOG.info("Register start session URL {}", startSessionUrl);
-            SessionHandler sessionHandler= tenantFactory.getSessionHandler();
+            KlarnaStartSessionHandler klarnaStartSessionHandler = tenantFactory.getSessionHandler();
             Spark.get(startSessionUrl, (req, res) -> {
-                        final PayoneResult payoneResult = sessionHandler.startSession(req.params("id"));
+                        final PayoneResult payoneResult = klarnaStartSessionHandler.startSession(req.params("id"));
                         if (!payoneResult.body().isEmpty()) {
                             LOG.debug("--> Result body of ${getTenantName()}/commercetools/start/session/{}: {}",
                                     req.params("id"), payoneResult.body());

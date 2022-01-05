@@ -38,7 +38,7 @@ import static io.sphere.sdk.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
 import static io.sphere.sdk.http.HttpStatusCode.OK_200;
 import static java.lang.String.format;
 
-public class SessionHandler {
+public class KlarnaStartSessionHandler {
 
 
     public static final String ADD_PAYDATA_CLIENT_TOKEN = "add_paydata[client_token]";
@@ -52,9 +52,9 @@ public class SessionHandler {
     private final Logger logger;
     private PayonePostService payonePostService;
 
-    public SessionHandler(String payoneInterfaceName, String tenantName,
-                          CommercetoolsQueryExecutor commercetoolsQueryExecutor, TenantConfig tenantConfig,
-                          PayonePostService postService, PaymentService paymentService) {
+    public KlarnaStartSessionHandler(String payoneInterfaceName, String tenantName,
+                                     CommercetoolsQueryExecutor commercetoolsQueryExecutor, TenantConfig tenantConfig,
+                                     PayonePostService postService, PaymentService paymentService) {
         this.logger = LoggerFactory.getLogger(this.getClass());
 
         this.payoneInterfaceName = payoneInterfaceName;

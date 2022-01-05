@@ -4,7 +4,7 @@ import com.commercetools.payments.TransactionStateResolver;
 import com.commercetools.payments.TransactionStateResolverImpl;
 import com.commercetools.pspadapter.payone.PaymentDispatcher;
 import com.commercetools.pspadapter.payone.PaymentHandler;
-import com.commercetools.pspadapter.payone.SessionHandler;
+import com.commercetools.pspadapter.payone.KlarnaStartSessionHandler;
 import com.commercetools.pspadapter.payone.domain.ctp.CommercetoolsQueryExecutor;
 import com.commercetools.pspadapter.payone.domain.ctp.CustomTypeBuilder;
 import com.commercetools.pspadapter.payone.domain.ctp.TypeCacheLoader;
@@ -72,7 +72,7 @@ public class TenantFactory {
 
     private final PaymentHandler paymentHandler;
 
-    private final SessionHandler sessionHandler;
+    private final KlarnaStartSessionHandler klarnaStartSessionHandler;
     private final PaymentDispatcher paymentDispatcher;
     private final NotificationDispatcher notificationDispatcher;
 
@@ -115,7 +115,7 @@ public class TenantFactory {
         this.paymentHandler = createPaymentHandler(payoneInterfaceName, tenantConfig.getName(), commercetoolsQueryExecutor, paymentDispatcher);
 
         this.customTypeBuilder = createCustomTypeBuilder(blockingSphereClient, tenantConfig.getStartFromScratch());
-        this.sessionHandler = createSessionHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor,
+        this.klarnaStartSessionHandler = createSessionHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor,
                 tenantConfig, payonePostService, paymentService);
 
     }
@@ -229,11 +229,11 @@ public class TenantFactory {
         return new PaymentHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor, paymentDispatcher);
     }
 
-    protected SessionHandler createSessionHandler(String payoneInterfaceName, String tenantName,
-                                                  CommercetoolsQueryExecutor commercetoolsQueryExecutor,
-                                                  TenantConfig tenantConfig, PayonePostService postService,
-                                                  PaymentService paymentService) {
-        return new SessionHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor, tenantConfig, postService,
+    protected KlarnaStartSessionHandler createSessionHandler(String payoneInterfaceName, String tenantName,
+                                                             CommercetoolsQueryExecutor commercetoolsQueryExecutor,
+                                                             TenantConfig tenantConfig, PayonePostService postService,
+                                                             PaymentService paymentService) {
+        return new KlarnaStartSessionHandler(payoneInterfaceName, tenantName, commercetoolsQueryExecutor, tenantConfig, postService,
                 paymentService);
     }
     protected PaymentDispatcher createPaymentDispatcher(final TenantConfig tenantConfig,
@@ -336,8 +336,8 @@ public class TenantFactory {
                        .maximumSize(1000)
                        .build(new TypeCacheLoader(client));
     }
-    public SessionHandler getSessionHandler() {
-        return sessionHandler;
+    public KlarnaStartSessionHandler getSessionHandler() {
+        return klarnaStartSessionHandler;
     }
     @Nonnull
     protected CountryToLanguageMapper createCountryToLanguageMapper() {
