@@ -132,13 +132,12 @@ public class KlarnaStartSessionHandler {
             return new PayoneResult(BAD_REQUEST_400, errorMessage);
         }
         String responseJsonString = toJsonString(response);
-        String clientToken = null;
         if (!response.containsKey(ADD_PAYDATA_CLIENT_TOKEN)) {
             final String errorMessage = format("The client token was not found in the payone response of the " +
                     "Startsession request for payment '%s'", paymentId);
             return new PayoneResult(BAD_REQUEST_400, errorMessage);
         }
-        clientToken = response.get(ADD_PAYDATA_CLIENT_TOKEN);
+        String clientToken = response.get(ADD_PAYDATA_CLIENT_TOKEN);
         return new PayoneResult(StringUtils.isNotBlank(clientToken) ? OK_200 : BAD_REQUEST_400, responseJsonString);
     }
 
