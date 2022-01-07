@@ -18,8 +18,10 @@ import org.apache.commons.lang3.StringUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -59,7 +61,10 @@ public abstract class PayoneRequestWithCart extends PayoneRequest {
     private List<String> de;
 
     private List<Integer> va;
+
     private String financingtype;
+
+    private Map<String, String> payData;
 
     protected PayoneRequestWithCart(@Nonnull final PayoneConfig config,
                                     @Nonnull final String requestType,
@@ -344,4 +349,18 @@ public abstract class PayoneRequestWithCart extends PayoneRequest {
         return financingtype;
     }
 
+    public Map<String, String> getPayData() {
+        return payData;
+    }
+
+    public void setPayData(Map<String, String> payData) {
+        this.payData = payData;
+    }
+
+    public void appendPaymentData (String dataKey, String data){
+        if(payData == null){
+            payData = new HashMap<>();
+        }
+        payData.put(dataKey, data);
+    }
 }

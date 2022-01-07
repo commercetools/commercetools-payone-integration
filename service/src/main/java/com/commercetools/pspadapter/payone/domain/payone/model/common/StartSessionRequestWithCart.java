@@ -5,7 +5,6 @@ import com.commercetools.pspadapter.payone.domain.ctp.PaymentWithCartLike;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -22,7 +21,7 @@ import java.util.Map;
 public abstract class StartSessionRequestWithCart extends PayoneRequestWithCart {
 
 
-    private Map<String, String> payData;
+
 
     public static final String ACTION_KEY = "action";
     public static final String ACTION_VALUE = "start_session";
@@ -35,25 +34,9 @@ public abstract class StartSessionRequestWithCart extends PayoneRequestWithCart 
                                        @Nullable Map<String, String> payDataMap) {
 
         super(config, requestType, financingtype, clearingType, paymentWithCartLike);
-        this.payData = new HashMap<>();
-        payData.put(ACTION_KEY, ACTION_VALUE);
-        if(payDataMap!=null) {
-            payData.putAll(payDataMap);
+        appendPaymentData(ACTION_KEY, ACTION_VALUE);
+        if (payDataMap != null) {
+            super.getPayData().putAll(payDataMap);
         }
-    }
-
-    public Map<String, String> getPayData() {
-        return payData;
-    }
-
-    public void setPayData(Map<String, String> payData) {
-        this.payData = payData;
-    }
-
-    public void appendPaymentData(String dataKey, String data) {
-        if (payData == null) {
-            payData = new HashMap<>();
-        }
-        payData.put(dataKey, data);
     }
 }
