@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.AUTHORIZATION_TOKEN;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.BIRTHDAY_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IP_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.TELEPHONENUMBER_FIELD;
@@ -34,7 +35,7 @@ import static java.util.Arrays.asList;
 
 public class KlarnaRequestFactory extends PayoneRequestFactory {
 
-    public static final String AUTHORIZATION_TOKEN = "authorization_token";
+    public static final String KLARNA_AUTHORIZATION_TOKEN = "authorization_token";
     @Nonnull
     private final CountryToLanguageMapper countryToLanguageMapper;
 
@@ -118,7 +119,7 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
 
         // Add authorisation token to paydata
         mapCustomFieldIfSignificant(customFields.getFieldAsString(AUTHORIZATION_TOKEN),
-                token -> request.appendPaymentData(AUTHORIZATION_TOKEN, token));
+                token -> request.appendPaymentData(KLARNA_AUTHORIZATION_TOKEN, token));
 
         mapCustomFieldIfSignificant(customFields.getFieldAsString(IP_FIELD), request::setIp);
 

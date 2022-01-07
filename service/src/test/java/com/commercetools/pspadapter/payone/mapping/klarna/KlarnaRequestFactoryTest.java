@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.stream.IntStream;
 
 import static com.commercetools.pspadapter.payone.domain.payone.model.klarna.KlarnaItemTypeEnum.*;
+import static com.commercetools.pspadapter.payone.mapping.klarna.KlarnaRequestFactory.KLARNA_AUTHORIZATION_TOKEN;
 import static com.neovisionaries.i18n.CountryCode.*;
 import static io.sphere.sdk.utils.MoneyImpl.centAmountOf;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,6 +53,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         validateBaseRequestValues(request, RequestType.PREAUTHORIZATION.getType());
 
         // mandatory Klarna fields tested below
+        softly.assertThat(request.getPayData().get(KLARNA_AUTHORIZATION_TOKEN)).isEqualTo("testAuthorizationToken");
         softly.assertThat(request.getFirstname()).isEqualTo("Testperson-de");
         softly.assertThat(request.getLastname()).isEqualTo("Approved");
         softly.assertThat(request.getStreet()).isEqualTo("Hellersbergstraße 14");
@@ -98,6 +100,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         validateBaseRequestValues(request, RequestType.AUTHORIZATION.getType());
 
         // mandatory Klarna fields tested below
+        softly.assertThat(request.getPayData().get(KLARNA_AUTHORIZATION_TOKEN)).isEqualTo("testAuthorizationToken");
         softly.assertThat(request.getFirstname()).isEqualTo("John");
         softly.assertThat(request.getLastname()).isEqualTo("Doe");
         softly.assertThat(request.getStreet()).isEqualTo("Hervamstr 666");
