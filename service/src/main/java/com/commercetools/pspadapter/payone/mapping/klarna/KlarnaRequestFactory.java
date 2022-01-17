@@ -30,6 +30,7 @@ import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.AUTHOR
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.BIRTHDAY_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IP_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.TELEPHONENUMBER_FIELD;
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.WORK_ORDER_ID_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getFirstValueFromAddresses;
 import static java.util.Arrays.asList;
 
@@ -122,7 +123,7 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
                 token -> request.appendPaymentData(KLARNA_AUTHORIZATION_TOKEN, token));
 
         mapCustomFieldIfSignificant(customFields.getFieldAsString(IP_FIELD), request::setIp);
-
+        mapCustomFieldIfSignificant(customFields.getFieldAsString(WORK_ORDER_ID_FIELD), request::setWorkorderid);
         mapCustomFieldIfSignificant(customFields.getFieldAsDate(BIRTHDAY_FIELD), request::setBirthday,
                 MappingUtil::dateToBirthdayString);
 

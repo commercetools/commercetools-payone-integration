@@ -67,7 +67,8 @@ public final class CustomFieldKeys {
     public static final String BACK_URL_FIELD = "backUrl";
     // Klarna responds with redirectUrl on pre-authorization request
     public static final String KLARNA_REDIRECT_URL_FIELD = "redirectUrl";
-
+    //The workorderid is a technical id returned from the PAYONE platform to identify a workorder
+    public static final String WORK_ORDER_ID_FIELD = "workorderid";
     // iDeal
     public static final String BANK_GROUP_TYPE = "bankGroupType";
     public static final String BANK_COUNTRY = "bankCountry";

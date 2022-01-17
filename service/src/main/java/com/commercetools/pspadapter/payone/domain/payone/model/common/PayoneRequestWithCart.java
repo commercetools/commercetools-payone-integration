@@ -64,6 +64,8 @@ public abstract class PayoneRequestWithCart extends PayoneRequest {
 
     private String financingtype;
 
+    private String workorderid;
+
     private Map<String, String> payData;
 
     protected PayoneRequestWithCart(@Nonnull final PayoneConfig config,
@@ -363,4 +365,13 @@ public abstract class PayoneRequestWithCart extends PayoneRequest {
         }
         payData.put(dataKey, data);
     }
+
+    public String getWorkorderid() {
+        return workorderid;
+    }
+
+    public void setWorkorderid(String workorderid) {
+        this.workorderid = workorderid;
+    }
+
 }

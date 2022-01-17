@@ -92,8 +92,9 @@ public class KlarnaStartSessionHandlerTest extends BaseTenantPropertyTest {
     @Test
     public void startSession_startSessionCallWasSuccessFull_shouldReturn200() throws Exception {
         String customerToken = "anyCustomerToken";
-        String sessionId = randomString();
-        String paymentId = randomString();
+        String sessionId = "123";
+        String workerId = "456";
+        String paymentId = "789";
         Payment payment = mockPayment(paymentId, "PAYONE", "INVOICE-KLARNA", "emptyKlarnaPayment.json");
 
         PaymentWithCartLike paymentWithCartLike = new PaymentWithCartLike(payment, cart);
@@ -109,16 +110,18 @@ public class KlarnaStartSessionHandlerTest extends BaseTenantPropertyTest {
         Map<String, String> resultMap = new HashMap<>();
         resultMap.put(ADD_PAYDATA_CLIENT_TOKEN, customerToken);
         resultMap.put("add_paydata[session_id]", sessionId);
+        resultMap.put("workorderid", workerId);
         when(postService.executePost(eq(startSessionRequest))).thenReturn(resultMap);
         PayoneResult payoneResult = testee.startSession(paymentId);
         verify(paymentService).updatePayment(eq(payment), paymentRequestUpdatesCaptor.capture());
         List<UpdateAction<Payment>> updateActions = paymentRequestUpdatesCaptor.getValue();
+        assertThat(updateActions.size()).isEqualTo(4);
         assertThat(updateActions.get(0).getAction()).isEqualTo("setCustomField");
         assertThat(updateActions.get(1).getAction()).isEqualTo("setCustomField");
         assertThat(updateActions.get(2).getAction()).isEqualTo("setCustomField");
+        assertThat(updateActions.get(3).getAction()).isEqualTo("setCustomField");
         assertThat(payoneResult.statusCode()).isEqualTo(HttpStatusCode.OK_200);
-        assertThat(payoneResult.body()).isEqualTo("{\"add_paydata[session_id]\":\"" + sessionId + "\",\"add_paydata[client_token" +
-                "]\":\"anyCustomerToken\"}");
+        assertThat(payoneResult.body()).isEqualTo("{\"workorderid\":\"456\",\"add_paydata[session_id]\":\"123\",\"add_paydata[client_token]\":\"anyCustomerToken\"}");
     }
 
     @Test

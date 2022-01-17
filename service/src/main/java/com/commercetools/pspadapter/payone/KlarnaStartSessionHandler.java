@@ -31,6 +31,7 @@ import static com.commercetools.pspadapter.payone.domain.ctp.paymentmethods.Paym
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.CLIENT_TOKEN;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.START_SESSION_REQUEST;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.START_SESSION_RESPONSE;
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.WORK_ORDER_ID_FIELD;
 import static com.commercetools.pspadapter.tenant.TenantLoggerUtil.createTenantKeyValue;
 import static io.sphere.sdk.http.HttpStatusCode.BAD_REQUEST_400;
 import static io.sphere.sdk.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
@@ -42,6 +43,7 @@ public class KlarnaStartSessionHandler {
 
 
     public static final String ADD_PAYDATA_CLIENT_TOKEN = "add_paydata[client_token]";
+    public static final String START_SESSION_WORKORDER_ID = "workorderid";
     private final String payoneInterfaceName;
     private final LogstashMarker tenantNameKeyValue;
     private final PaymentService paymentService;
@@ -137,6 +139,11 @@ public class KlarnaStartSessionHandler {
                     "Startsession request for payment '%s'", paymentId);
             return new PayoneResult(BAD_REQUEST_400, errorMessage);
         }
+        if (!response.containsKey(START_SESSION_WORKORDER_ID)) {
+            final String errorMessage = format("The work order id was not found in the payone response of the " +
+                    "Startsession request for payment '%s'", paymentId);
+            return new PayoneResult(BAD_REQUEST_400, errorMessage);
+        }
         String clientToken = response.get(ADD_PAYDATA_CLIENT_TOKEN);
         return new PayoneResult(StringUtils.isNotBlank(clientToken) ? OK_200 : BAD_REQUEST_400, responseJsonString);
     }
@@ -161,6 +168,11 @@ public class KlarnaStartSessionHandler {
             if (response.containsKey(ADD_PAYDATA_CLIENT_TOKEN)) {
                 updateActions.add(SetCustomField.ofObject(CLIENT_TOKEN, response.get(ADD_PAYDATA_CLIENT_TOKEN)));
             }
+            if (response.containsKey(START_SESSION_WORKORDER_ID)) {
+                updateActions.add(SetCustomField.ofObject(WORK_ORDER_ID_FIELD, response.get(START_SESSION_WORKORDER_ID)));
+            }
+
+
         }
         paymentService.updatePayment(paymentWithCartLike.getPayment(), updateActions).toCompletableFuture().join();
     }
