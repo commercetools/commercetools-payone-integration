@@ -18,6 +18,7 @@ import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.types.CustomFields;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -111,9 +112,10 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
         Optional.of(paymentWithCartLike.getPayment())
                 .map(Payment::getCustom)
                 .ifPresent(customFields -> mapKlarnaCustomFields(request, customFields));
-
-        mapLanguageFromCountry(request, paymentWithCartLike.getCartLike());
-
+        // Get language from the address, if it is not already set to the request
+        if(StringUtils.isEmpty(request.getLanguage())) {
+            mapLanguageFromCountry(request, paymentWithCartLike.getCartLike());
+        }
     }
 
     private static void mapKlarnaCustomFields(@Nonnull PayoneRequestWithCart request, @Nonnull CustomFields customFields) {

@@ -120,8 +120,6 @@ public class KlarnaStartSessionHandler {
         }
 
         StartSessionRequestWithCart startSessionRequest = klarnaRequestFactory.createStartSessionRequest(paymentWithCartLike);
-
-
         Map<String, String> response = null;
         try {
             response = payonePostService.executePost(startSessionRequest);

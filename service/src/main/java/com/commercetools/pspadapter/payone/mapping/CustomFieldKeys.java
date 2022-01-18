@@ -51,6 +51,7 @@ public final class CustomFieldKeys {
     public static final String GENDER_FIELD = "gender";
     // IP_FIELD address, IPv4 or IPv6
     public static final String IP_FIELD = "ip";
+
     // Date of birth (YYYYMMDD), Mandatory for DE, NE and AT
     public static final String BIRTHDAY_FIELD = "birthday";
     // if the value is set - overrides optional value from address.
