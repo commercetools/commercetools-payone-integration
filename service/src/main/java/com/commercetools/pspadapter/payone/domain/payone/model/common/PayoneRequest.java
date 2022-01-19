@@ -97,9 +97,6 @@ public class PayoneRequest extends BaseRequest {
     private String shipping_lastname;
 
     @ClearSecuredValuesSerializer.Apply
-    private String shipping_email;
-
-    @ClearSecuredValuesSerializer.Apply
     private String shipping_company;
 
     @ClearSecuredValuesSerializer.Apply
@@ -439,13 +436,6 @@ public class PayoneRequest extends BaseRequest {
         this.backurl = backurl;
     }
 
-    public String getShipping_email() {
-        return shipping_email;
-    }
-
-    public void setShipping_email(String shipping_email) {
-        this.shipping_email = shipping_email;
-    }
 
 
 }

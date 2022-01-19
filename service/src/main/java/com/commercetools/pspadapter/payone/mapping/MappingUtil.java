@@ -142,9 +142,6 @@ public class MappingUtil {
             request.setShipping_country(shippingAddress.getCountry().toLocale().getCountry());
             request.setShipping_company(joinStringsIgnoringNull(Arrays.asList(shippingAddress.getCompany(),
                 shippingAddress.getDepartment())));
-            if(StringUtils.isNotBlank(shippingAddress.getEmail())) {
-                request.setShipping_email(shippingAddress.getEmail());
-            }
             if (countriesWithStateAllowed.contains(shippingAddress.getCountry())) {
                 request.setShipping_state(shippingAddress.getState());
             }
