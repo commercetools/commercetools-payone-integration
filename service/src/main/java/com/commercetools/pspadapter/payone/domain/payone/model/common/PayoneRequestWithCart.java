@@ -68,7 +68,7 @@ public abstract class PayoneRequestWithCart extends PayoneRequest {
 
     private Map<String, String> payData;
 
-    protected   PayoneRequestWithCart(@Nonnull final PayoneConfig config,
+    protected PayoneRequestWithCart(@Nonnull final PayoneConfig config,
                                     @Nonnull final String requestType,
                                     @Nullable final String financingtype,
                                     @Nonnull final String clearingType,
