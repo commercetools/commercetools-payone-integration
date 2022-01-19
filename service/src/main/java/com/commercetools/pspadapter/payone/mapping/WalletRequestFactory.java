@@ -52,8 +52,8 @@ public class WalletRequestFactory extends PayoneRequestFactory {
         final int noShippingAddress = MappingUtil.checkForMissingShippingAddress(ctCartLike.getShippingAddress());
         final ClearingType clearingType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod());
         WR request = requestConstructor.apply(getPayoneConfig(), clearingType, noShippingAddress);
-
-        mapFormPaymentWithCartLike(request, paymentWithCartLike, false);
+        boolean ignoreShippingAddress = false;
+        mapFormPaymentWithCartLike(request, paymentWithCartLike, ignoreShippingAddress);
 
         return request;
     }

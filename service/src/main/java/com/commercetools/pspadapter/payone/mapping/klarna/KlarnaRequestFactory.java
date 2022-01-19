@@ -78,8 +78,8 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
 
         final BKR request = requestConstructor.apply(getPayoneConfig(), clearingSubType, paymentWithCartLike);
-
-        mapFormPaymentWithCartLike(request, paymentWithCartLike, true);
+        boolean ignoreShippingAddress = true;
+        mapFormPaymentWithCartLike(request, paymentWithCartLike, ignoreShippingAddress);
         mapKlarnaMandatoryFields(request, paymentWithCartLike);
 
         //the line items, discounts and shipment cost are counted in the Klarna request constructor
