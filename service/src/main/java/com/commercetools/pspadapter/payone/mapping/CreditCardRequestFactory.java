@@ -36,7 +36,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         final String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
         CreditCardPreauthorizationRequest request = new CreditCardPreauthorizationRequest(getPayoneConfig(), pseudocardpan, paymentWithCartLike);
 
-        mapFormPaymentWithCartLike(request, paymentWithCartLike);
+        mapFormPaymentWithCartLike(request, paymentWithCartLike, false);
 
         return request;
     }
@@ -54,7 +54,7 @@ public class CreditCardRequestFactory extends PayoneRequestFactory {
         final String pseudocardpan = ctPayment.getCustom().getFieldAsString(CustomFieldKeys.CARD_DATA_PLACEHOLDER_FIELD);
         CreditCardPayoneRequest request = new CreditCardPayoneRequest(getPayoneConfig(), pseudocardpan, paymentWithCartLike);
 
-        mapFormPaymentWithCartLike(request, paymentWithCartLike);
+        mapFormPaymentWithCartLike(request, paymentWithCartLike, false);
 
         return request;
     }

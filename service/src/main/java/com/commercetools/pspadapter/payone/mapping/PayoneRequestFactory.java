@@ -74,9 +74,11 @@ public abstract class PayoneRequestFactory {
      *
      * @param request             {@link PayoneRequest} instance to which set the values
      * @param paymentWithCartLike cart/order info from which read the values
+     * @param ignoreShippingAddress       if true, the shipping address is not added to the payone request
      */
     protected void mapFormPaymentWithCartLike(final PayoneRequest request,
-                                              final PaymentWithCartLike paymentWithCartLike) {
+                                              final PaymentWithCartLike paymentWithCartLike,
+                                              boolean ignoreShippingAddress) {
         final Payment ctPayment = paymentWithCartLike.getPayment();
         final CartLike ctCartLike = paymentWithCartLike.getCartLike();
 
@@ -105,18 +107,17 @@ public abstract class PayoneRequestFactory {
                     paymentWithCartLike.getPayment().getId()),
                 ex);
         }
-
-        try {
-            MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress(),
-                ctPayment.getPaymentMethodInfo().getMethod());
-        } catch (final IllegalArgumentException ex) {
-            logger.debug(
-                createTenantKeyValue(tenantConfig.getName()),
-                format("Could not fully map shipping address in payment with id '%s'",
-                    paymentWithCartLike.getPayment().getId()),
-                ex);
+        if(!ignoreShippingAddress) {
+            try {
+                MappingUtil.mapShippingAddressToRequest(request, ctCartLike.getShippingAddress(), ctPayment.getPaymentMethodInfo().getMethod());
+            } catch (final IllegalArgumentException ex) {
+                logger.debug(
+                        createTenantKeyValue(tenantConfig.getName()),
+                        format("Could not fully map shipping address in payment with id '%s'",
+                                paymentWithCartLike.getPayment().getId()),
+                        ex);
+            }
         }
-
         //customer's locale, if set in custom field or cartLike
         getPaymentLanguage(paymentWithCartLike).ifPresent(request::setLanguage);
 

@@ -53,7 +53,7 @@ public class WalletRequestFactory extends PayoneRequestFactory {
         final ClearingType clearingType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod());
         WR request = requestConstructor.apply(getPayoneConfig(), clearingType, noShippingAddress);
 
-        mapFormPaymentWithCartLike(request, paymentWithCartLike);
+        mapFormPaymentWithCartLike(request, paymentWithCartLike, false);
 
         return request;
     }

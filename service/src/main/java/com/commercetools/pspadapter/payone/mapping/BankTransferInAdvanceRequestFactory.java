@@ -62,7 +62,7 @@ public class BankTransferInAdvanceRequestFactory extends PayoneRequestFactory {
             throw new IllegalArgumentException("Missing custom fields on payment!");
         }
         BankTransferInAdvanceRequest request = requestConstructor.apply(requestType, getPayoneConfig());
-        mapFormPaymentWithCartLike(request, paymentWithCartLike);
+        mapFormPaymentWithCartLike(request, paymentWithCartLike, false);
         return request;
     }
 
