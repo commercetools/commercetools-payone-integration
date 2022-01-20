@@ -18,6 +18,7 @@ import io.sphere.sdk.carts.CartLike;
 import io.sphere.sdk.models.Address;
 import io.sphere.sdk.payments.Payment;
 import io.sphere.sdk.types.CustomFields;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,6 +31,7 @@ import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.AUTHOR
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.BIRTHDAY_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.IP_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.TELEPHONENUMBER_FIELD;
+import static com.commercetools.pspadapter.payone.mapping.CustomFieldKeys.WORK_ORDER_ID_FIELD;
 import static com.commercetools.pspadapter.payone.mapping.MappingUtil.getFirstValueFromAddresses;
 import static java.util.Arrays.asList;
 
@@ -76,8 +78,8 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
 
         final BKR request = requestConstructor.apply(getPayoneConfig(), clearingSubType, paymentWithCartLike);
-
-        mapFormPaymentWithCartLike(request, paymentWithCartLike);
+        boolean ignoreShippingAddress = true;
+        mapFormPaymentWithCartLike(request, paymentWithCartLike, ignoreShippingAddress);
         mapKlarnaMandatoryFields(request, paymentWithCartLike);
 
         //the line items, discounts and shipment cost are counted in the Klarna request constructor
@@ -110,9 +112,10 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
         Optional.of(paymentWithCartLike.getPayment())
                 .map(Payment::getCustom)
                 .ifPresent(customFields -> mapKlarnaCustomFields(request, customFields));
-
-        mapLanguageFromCountry(request, paymentWithCartLike.getCartLike());
-
+        // Get language from the address, if it is not already set to the request
+        if(StringUtils.isEmpty(request.getLanguage())) {
+            mapLanguageFromCountry(request, paymentWithCartLike.getCartLike());
+        }
     }
 
     private static void mapKlarnaCustomFields(@Nonnull PayoneRequestWithCart request, @Nonnull CustomFields customFields) {
@@ -122,7 +125,7 @@ public class KlarnaRequestFactory extends PayoneRequestFactory {
                 token -> request.appendPaymentData(KLARNA_AUTHORIZATION_TOKEN, token));
 
         mapCustomFieldIfSignificant(customFields.getFieldAsString(IP_FIELD), request::setIp);
-
+        mapCustomFieldIfSignificant(customFields.getFieldAsString(WORK_ORDER_ID_FIELD), request::setWorkorderid);
         mapCustomFieldIfSignificant(customFields.getFieldAsDate(BIRTHDAY_FIELD), request::setBirthday,
                 MappingUtil::dateToBirthdayString);
 

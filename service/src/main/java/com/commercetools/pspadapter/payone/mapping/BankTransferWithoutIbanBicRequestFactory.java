@@ -48,8 +48,8 @@ public class BankTransferWithoutIbanBicRequestFactory extends PayoneRequestFacto
 
         final String clearingSubType = ClearingType.getClearingTypeByKey(ctPayment.getPaymentMethodInfo().getMethod()).getSubType();
         final BankTransferRequest request = requestConstructor.apply(requestType, getPayoneConfig(), clearingSubType);
-
-        mapFormPaymentWithCartLike(request, paymentWithCartLike);
+        boolean ignoreShippingAddress = false;
+        mapFormPaymentWithCartLike(request, paymentWithCartLike, ignoreShippingAddress);
 
         //Despite declared as optional in PayOne Server API documentation. the Bankcountry is required
         String bankCountry = Optional.ofNullable(ctPayment.getCustom().getFieldAsString(CustomFieldKeys.BANK_COUNTRY))

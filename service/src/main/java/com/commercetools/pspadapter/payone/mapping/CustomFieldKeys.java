@@ -51,6 +51,7 @@ public final class CustomFieldKeys {
     public static final String GENDER_FIELD = "gender";
     // IP_FIELD address, IPv4 or IPv6
     public static final String IP_FIELD = "ip";
+
     // Date of birth (YYYYMMDD), Mandatory for DE, NE and AT
     public static final String BIRTHDAY_FIELD = "birthday";
     // if the value is set - overrides optional value from address.
@@ -67,7 +68,8 @@ public final class CustomFieldKeys {
     public static final String BACK_URL_FIELD = "backUrl";
     // Klarna responds with redirectUrl on pre-authorization request
     public static final String KLARNA_REDIRECT_URL_FIELD = "redirectUrl";
-
+    //The workorderid is a technical id returned from the PAYONE platform to identify a workorder
+    public static final String WORK_ORDER_ID_FIELD = "workorderid";
     // iDeal
     public static final String BANK_GROUP_TYPE = "bankGroupType";
     public static final String BANK_COUNTRY = "bankCountry";

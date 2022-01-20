@@ -115,7 +115,7 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
 
         softly.assertThat(request.getFinancingtype()).isEqualTo("KIV");
         softly.assertThat(request.getClearingtype()).isEqualTo("fnc");
-        softly.assertThat(request.getLanguage()).isEqualTo("de"); // the language for Klarna is mapped from country, even if it is explicitly set in the cart
+        softly.assertThat(request.getLanguage()).isEqualTo("en");
         softly.assertThat(request.getAmount()).isEqualTo(30900);
         softly.assertThat(request.getCurrency()).isEqualTo("EUR");
 
@@ -187,13 +187,16 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         softly.assertThat(request.getLanguage()).isNull();
 
         // language from country has precedence for Klarna: locale is fi, but Austria mapped to de
+        request.setLanguage(null);
         when(cartLike.getBillingAddress()).thenReturn(Address.of(AT));
         when(cartLike.getLocale()).thenReturn(new Locale("fi"));
         request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
         softly.assertThat(request.getCountry()).isEqualTo("AT");
-        softly.assertThat(request.getLanguage()).isEqualTo("de");
+        softly.assertThat(request.getLanguage()).isEqualTo("fi");
 
-        // if country language is not mappable in Klarna - locale from cart is used
+        // if language is not set to the payment and if country language is not mappable in Klarna - locale from cart
+        // is used
+        request.setLanguage(null);
         when(cartLike.getBillingAddress()).thenReturn(Address.of(UA));
         when(cartLike.getLocale()).thenReturn(new Locale("fi"));
         request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
@@ -238,12 +241,10 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         PayoneRequestWithCart request;
 
         when(cartLike.getBillingAddress()).thenReturn(Address.of(AT));
-        when(cartLike.getShippingAddress()).thenReturn(Address.of(NL));
         request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
         softly.assertThat(request.getLanguage()).isEqualTo("de");
-
-        when(cartLike.getBillingAddress()).thenReturn(Address.of(NL));
-        when(cartLike.getShippingAddress()).thenReturn(Address.of(AT));
+        when(cartLike.getBillingAddress()).thenReturn(null);
+        when(cartLike.getShippingAddress()).thenReturn(Address.of(NL));
         request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
         softly.assertThat(request.getLanguage()).isEqualTo("nl");
 

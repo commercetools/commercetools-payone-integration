@@ -189,7 +189,8 @@ public class CustomTypeBuilder {
             createSingleLineStringFieldDefinition(CustomFieldKeys.KLARNA_REDIRECT_URL_FIELD, FieldClassifier.OPTIONAL),
             createSingleLineStringFieldDefinition(CustomFieldKeys.SUCCESS_URL_FIELD, FieldClassifier.OPTIONAL),
             createSingleLineStringFieldDefinition(CustomFieldKeys.ERROR_URL_FIELD, FieldClassifier.OPTIONAL),
-            createSingleLineStringFieldDefinition(CustomFieldKeys.BACK_URL_FIELD, FieldClassifier.OPTIONAL)
+            createSingleLineStringFieldDefinition(CustomFieldKeys.BACK_URL_FIELD, FieldClassifier.OPTIONAL),
+            createSingleLineStringFieldDefinition(CustomFieldKeys.WORK_ORDER_ID_FIELD, FieldClassifier.OPTIONAL)
         ));
     }
 
