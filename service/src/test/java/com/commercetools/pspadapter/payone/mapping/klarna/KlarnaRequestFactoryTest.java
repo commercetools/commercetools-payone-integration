@@ -241,12 +241,10 @@ public class KlarnaRequestFactoryTest extends BaseTenantPropertyTest {
         PayoneRequestWithCart request;
 
         when(cartLike.getBillingAddress()).thenReturn(Address.of(AT));
-        when(cartLike.getShippingAddress()).thenReturn(Address.of(NL));
         request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
         softly.assertThat(request.getLanguage()).isEqualTo("de");
-
-        when(cartLike.getBillingAddress()).thenReturn(Address.of(NL));
-        when(cartLike.getShippingAddress()).thenReturn(Address.of(AT));
+        when(cartLike.getBillingAddress()).thenReturn(null);
+        when(cartLike.getShippingAddress()).thenReturn(Address.of(NL));
         request = klarnaRequestFactory.createPreauthorizationRequest(paymentWithCartLike);
         softly.assertThat(request.getLanguage()).isEqualTo("nl");
 
