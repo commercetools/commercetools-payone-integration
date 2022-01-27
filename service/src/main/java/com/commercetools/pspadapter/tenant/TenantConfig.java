@@ -27,7 +27,9 @@ public class TenantConfig {
         this.sphereClientConfig = SphereClientConfig.of(
                 tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(CT_PROJECT_KEY),
                 tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(CT_CLIENT_ID),
-                tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(CT_CLIENT_SECRET));
+                tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(CT_CLIENT_SECRET),
+                tenantPropertyProvider.getTenantProperty(CT_AUTH_URL).orElse("https://auth.europe-west1.gcp.commercetools.com"),
+                tenantPropertyProvider.getTenantProperty(CT_API_URL).orElse("https://api.europe-west1.gcp.commercetools.com"));
 
         this.payoneConfig = payoneConfig;
 

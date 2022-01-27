@@ -16,6 +16,8 @@ public class TenantPropertyProvider {
     public static final String CT_PROJECT_KEY = "CT_PROJECT_KEY";
     public static final String CT_CLIENT_ID = "CT_CLIENT_ID";
     public static final String CT_CLIENT_SECRET = "CT_CLIENT_SECRET";
+    public static final String CT_API_URL = "CT_API_URL";
+    public static final String CT_AUTH_URL = "CT_AUTH_URL";
 
     public static final String CT_START_FROM_SCRATCH = "CT_START_FROM_SCRATCH";
 
