@@ -98,7 +98,7 @@ In order to get an overview of the relationship and interaction on your checkout
 The first step is to set up a new checkout session by sending a genericpayment-request to Payone. This step is a 
 pre-condition for loading the Klarna widget, which is required in front-end for authorization. A session remains valid for 48 hours after the last update.
 
-For creating this request, the payment-adapter offers the endpoint "/commercetools/start/session/", which expects 
+For creating this request, the payment-adapter offers the endpoint "/commercetools/start/session/{paymentId}", which expects 
 the Id of the payment object, for which the payment process should be started. When the session was started 
 successfully,  the "client token", which is needed to load the klarna-widget, is saved to the given payment object. 
 Additionally, the startsession-request to payone and the response are also populated to the payment object
