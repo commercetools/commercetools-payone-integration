@@ -33,10 +33,9 @@
    </tr>
    <tr>
       <td><b><code>ip</code></b></td>
-      <td rowspan="9"><i>String</i></td>
+      <td rowspan="10"><i>String</i></td>
       <td rowspan="4"><b>true</b></td>
-      <td 
-         rowspan="9"><i>SingleLine</i></td>
+      <td rowspan="10"><i>SingleLine</i></td>
       <td></td>
    </tr>
    <tr>
@@ -56,7 +55,7 @@
    </tr>
    <tr>
       <td><b><code>startSessionRequest</code></b></td>
-      <td rowspan="5"><b>false</b></td>
+      <td rowspan="6"><b>false</b></td>
       <td>Start_Session request to Klarna as JSON String
       </td>
    </tr>
@@ -76,6 +75,10 @@
       <td><b><code>workorderid</code></b></td>
       <td>The workorderid is a technical id returned from the PAYONE platform to identify a work order</td>
    </tr>
+  <tr>
+      <td><b><code>redirectUrl</code></b></td>
+      <td>Klarna responds with redirectUrl on pre-authorization request</td>
+   </tr>
 </table>
      
   4. In the shop's frontend:
@@ -92,6 +95,7 @@
 
 Enabling your customers to pay via Klarna requires you to integrate the Klarna payment method into your checkout process.
 In order to get an overview of the relationship and interaction on your checkout please see the following diagram:
+
 ![](klarna-checkout-diagramm.png)
 ## Start session request
 
