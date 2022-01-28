@@ -118,8 +118,18 @@ the widget in your shop and authorize the payment against "Klarna".
 ## Authorize payment within payone.
 
 After the Klarna widget was loaded and the payment authorization against klarna was successfully done, the 
-"authorization token", which is provided within response of the klarna authorization, must be added to the payment object. Then the 
-payment-handler of the payment adapter, which expects the ID of the payment to handle, must be called. This payment 
+"authorization token", which is provided within response of the klarna authorization, must be added to the payment 
+object. This can be done in the following way:
+
+```
+public Payment updatePayment(@Nonnull Payment payment, @Nonnull String authorizationToken) {
+    UpdateAction<Payment> updateAction = SetCustomField.ofObject("authorizationToken", authorizationToken);
+    payment = getSphereClient().executeBlocking(PaymentUpdateCommand.of(payment, updateAction));
+return payment;
+}
+```
+
+Then the payment-handler of the payment adapter, which expects the ID of the payment to handle, must be called. This payment 
 handler will then authorize the payment against payone and finalize the payment process. Please make sure, that the 
 cart-amounts (totals, delivery-cost and discounts) matches to the amounts, which was authorized by klarna, otherwise 
 the payone authorization will fail. After the authorization was done successfully, the payone adapter will populate 
