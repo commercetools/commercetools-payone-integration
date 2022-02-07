@@ -12,9 +12,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.Optional;
 
 import static com.commercetools.pspadapter.tenant.TenantPropertyProvider.*;
+import static com.commercetools.util.ServiceConstants.DEFAULT_API_URL;
+import static com.commercetools.util.ServiceConstants.DEFAULT_AUTH_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -72,7 +74,7 @@ public class TenantConfigTest {
         assertThat(sphereClientConfig.getClientId()).isEqualTo("testCtId");
         assertThat(sphereClientConfig.getClientSecret()).isEqualTo("testCtSecret");
         assertThat(sphereClientConfig.getAuthUrl()).isEqualTo("customAuthURL");
-        assertThat(sphereClientConfig.getApiUrl()).isEqualTo("https://api.europe-west1.gcp.commercetools.com");
+        assertThat(sphereClientConfig.getApiUrl()).isEqualTo(DEFAULT_API_URL);
     }
 
     @Test
@@ -108,7 +110,7 @@ public class TenantConfigTest {
         // Fallback
         when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.CT_AUTH_URL)).thenReturn(Optional.empty());
         assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getSphereClientConfig().getAuthUrl())
-            .isEqualTo("https://auth.europe-west1.gcp.commercetools.com");
+            .isEqualTo(DEFAULT_AUTH_URL);
     }
 
     @Test
@@ -119,7 +121,7 @@ public class TenantConfigTest {
         // Fallback
         when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.CT_API_URL)).thenReturn(Optional.empty());
         assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getSphereClientConfig().getApiUrl())
-            .isEqualTo("https://api.europe-west1.gcp.commercetools.com");
+            .isEqualTo(DEFAULT_API_URL);
     }
 
     @Test
