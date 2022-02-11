@@ -6,6 +6,8 @@ import io.sphere.sdk.client.SphereClientConfig;
 import javax.annotation.Nonnull;
 
 import static com.commercetools.pspadapter.tenant.TenantPropertyProvider.*;
+import static com.commercetools.util.ServiceConstants.DEFAULT_API_URL;
+import static com.commercetools.util.ServiceConstants.DEFAULT_AUTH_URL;
 
 public class TenantConfig {
 
@@ -27,7 +29,9 @@ public class TenantConfig {
         this.sphereClientConfig = SphereClientConfig.of(
                 tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(CT_PROJECT_KEY),
                 tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(CT_CLIENT_ID),
-                tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(CT_CLIENT_SECRET));
+                tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(CT_CLIENT_SECRET),
+                tenantPropertyProvider.getTenantProperty(CT_AUTH_URL).orElse(DEFAULT_AUTH_URL),
+                tenantPropertyProvider.getTenantProperty(CT_API_URL).orElse(DEFAULT_API_URL));
 
         this.payoneConfig = payoneConfig;
 

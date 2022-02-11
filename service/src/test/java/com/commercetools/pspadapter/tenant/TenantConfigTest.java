@@ -12,9 +12,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.Optional;
 
 import static com.commercetools.pspadapter.tenant.TenantPropertyProvider.*;
+import static com.commercetools.util.ServiceConstants.DEFAULT_API_URL;
+import static com.commercetools.util.ServiceConstants.DEFAULT_AUTH_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -59,16 +61,20 @@ public class TenantConfigTest {
     }
 
     @Test
-    public void getsSphereClientConfig() throws Exception {
+    public void getsSphereClientConfig() {
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(CT_PROJECT_KEY)).thenReturn("testCtKey");
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(CT_CLIENT_ID)).thenReturn("testCtId");
         when(tenantPropertyProvider.getTenantMandatoryNonEmptyProperty(CT_CLIENT_SECRET)).thenReturn("testCtSecret");
+        when(tenantPropertyProvider.getTenantProperty(CT_AUTH_URL)).thenReturn(Optional.of("customAuthURL"));
+        when(tenantPropertyProvider.getTenantProperty(CT_API_URL)).thenReturn(Optional.empty());
 
         final SphereClientConfig sphereClientConfig = new TenantConfig(tenantPropertyProvider, payoneConfig).getSphereClientConfig();
 
         assertThat(sphereClientConfig.getProjectKey()).isEqualTo("testCtKey");
         assertThat(sphereClientConfig.getClientId()).isEqualTo("testCtId");
         assertThat(sphereClientConfig.getClientSecret()).isEqualTo("testCtSecret");
+        assertThat(sphereClientConfig.getAuthUrl()).isEqualTo("customAuthURL");
+        assertThat(sphereClientConfig.getApiUrl()).isEqualTo(DEFAULT_API_URL);
     }
 
     @Test
@@ -94,6 +100,28 @@ public class TenantConfigTest {
         assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getSphereClientConfig().getClientSecret()).isEqualTo("secret X");
 
         assertThatThrowsInCaseOfMissingOrEmptyProperty(TenantPropertyProvider.CT_CLIENT_SECRET);
+    }
+
+    @Test
+    public void getsCtAuthURL() {
+        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.CT_AUTH_URL)).thenReturn(Optional.of("auth url X"));
+        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getSphereClientConfig().getAuthUrl()).isEqualTo("auth url X");
+
+        // Fallback
+        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.CT_AUTH_URL)).thenReturn(Optional.empty());
+        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getSphereClientConfig().getAuthUrl())
+            .isEqualTo(DEFAULT_AUTH_URL);
+    }
+
+    @Test
+    public void getsCtAPIURL() {
+        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.CT_API_URL)).thenReturn(Optional.of("api url X"));
+        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getSphereClientConfig().getApiUrl()).isEqualTo("api url X");
+
+        // Fallback
+        when(tenantPropertyProvider.getTenantProperty(TenantPropertyProvider.CT_API_URL)).thenReturn(Optional.empty());
+        assertThat(new TenantConfig(tenantPropertyProvider, payoneConfig).getSphereClientConfig().getApiUrl())
+            .isEqualTo(DEFAULT_API_URL);
     }
 
     @Test
